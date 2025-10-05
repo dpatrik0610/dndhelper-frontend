@@ -66,7 +66,23 @@
   transition: all 0.2s ease;
 }
 
-.sidebar-button:hover {
-  background: rgba(65, 0, 0, 0.1);
+.home-button
+{
+  background: rgba(49, 148, 241, 0.05);
+  margin-bottom: 0.5rem;
+}
+
+.logout-button
+{
+  background: rgba(241, 49, 49, 0.05);
+}
+
+.logout-button:hover {
+  background: rgba(116, 0, 0, 0.1);
   box-shadow: 0 0 10px rgba(175, 0, 0, 0.527);
+}
+
+.home-button:hover {
+  background: rgba(0, 0, 151, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 175, 0.527);
 }

@@ -1,6 +1,6 @@
 import { Container } from '@mantine/core'
 import LoginCard from './LoginCard'
-import '../../styles/Login.css'
+import './Login.css'
 
 export default function Login() {
   return (

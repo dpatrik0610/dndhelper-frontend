@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { TextInput, PasswordInput, Button, Title, Text, Group } from '@mantine/core'
+import {  useState } from 'react'
+import { TextInput, PasswordInput, Button, Title, Text } from '@mantine/core'
 import type { LoginRequest } from '../../types/auth'
 import { loginUser } from '../../api/auth'
 import { useAuthStore } from '../../store/useAuthStore'
@@ -13,7 +13,7 @@ export default function LoginForm() {
   const setAuth = useAuthStore((state) => state.setToken)
   const token = useAuthStore((state) => state.token)
   const navigate = useNavigate()
-  
+
   if (token) {
     return <>
         <Text>You are already logged in.</Text>
@@ -25,6 +25,9 @@ export default function LoginForm() {
         }}>Logout</Button>
     </>
   }
+    function timeout(delay: number) {
+        return new Promise( res => setTimeout(res, delay) );
+    }
 
   const handleLogin = async () => {
     console.log('Login attempt', { username, password })
@@ -34,6 +37,7 @@ export default function LoginForm() {
 
     const payload: LoginRequest = {username, password}
     try {
+        await timeout(500);
         const response = await loginUser(payload)
         setAuth(response.token, username)
 
@@ -54,9 +58,11 @@ export default function LoginForm() {
 
   return (
     <>
-    <Group align="center" mb="md">
-        <Title order={2}>🌠 D&D Login</Title>
-    </Group>
+
+    <Title ta='center' order={2}>🌠 D&D Login</Title>
+    <Text size="sm" c="dimmed" ta="center" mb="md">
+        {loading ? 'Logging in...' : 'Please enter your credentials to log in.'}
+    </Text>
 
     {error && <Text color="red" mb="sm">{error}</Text>}
     <TextInput
@@ -78,7 +84,7 @@ export default function LoginForm() {
     </Button>
 
     <Text size="sm" mt="md" c="dimmed" ta="center">
-        Don't have an account? <Text component="span" color="blue">Sign up</Text>
+        Don't have an account? <Text component="span" color="blue"><a href='/register'>Sign up</a></Text>
     </Text>
     </>
   )

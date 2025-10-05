@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Text, SegmentedControl } from '@mantine/core'
 import { useNavigate } from 'react-router-dom'
-import { IconLogout } from '@tabler/icons-react'
+import { IconHome, IconLogout } from '@tabler/icons-react'
 import { useAuthStore } from '../../store/useAuthStore'
 import SidebarLink from './SidebarLink'
 import { tabs, type Section } from './SidebarTabs'
@@ -37,6 +37,13 @@ export default function Sidebar() {
           {username?.toUpperCase() ?? 'NOT LOGGED IN'}
         </Text>
 
+        <button className="sidebar-button home-button" onClick={() => {
+          navigate('/')
+          setActive('Home')
+        }}>
+            <IconHome className='sidebar-link-icon'/><span>Home</span>
+        </button>
+
         <SegmentedControl
           value={section}
           onChange={(value) => setSection(value as Section)}
@@ -49,7 +56,7 @@ export default function Sidebar() {
       <div className="sidebar-main">{links}</div>
 
       <div className="sidebar-footer">
-        <button className="sidebar-button" onClick={handleLogout}>
+        <button className="sidebar-button logout-button" onClick={handleLogout}>
           <IconLogout className="sidebar-link-icon" stroke={1.5} />
           <span>Logout</span>
         </button>

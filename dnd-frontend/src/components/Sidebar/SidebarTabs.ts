@@ -1,4 +1,4 @@
-import { IconLogout, IconSword, IconShield, IconMap, IconUsers, IconAdjustmentsAlt } from '@tabler/icons-react'
+import { IconSword, IconShield, IconMap, IconUsers, IconAdjustmentsAlt } from '@tabler/icons-react'
 
 export type Section = 'character' | 'world' | 'admin'
 
