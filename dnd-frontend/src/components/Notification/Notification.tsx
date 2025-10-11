@@ -39,10 +39,51 @@ export const showNotification = ({
   autoClose = 3000,
   radius,
   className,
-  style,
+  style = {'backgroundColor': 'rgba(0, 0, 0, 0.27)', 'color': 'white', 'backdropFilter': 'blur(10px)', 'border': '1px solid rgba(255, 255, 255, 0.18)', marginBottom: '10px'} as CSSProperties,
   loading,
 }: ShowNotificationOptions) => {
   notifications.show({
+    id,
+    title,
+    message,
+    color,
+    icon,
+    position,
+    withBorder,
+    withCloseButton,
+    onClose,
+    onOpen,
+    autoClose,
+    radius,
+    className,
+    style,
+    loading,
+  });
+};
+
+export const updateNotification = ({
+  id,
+  title,
+  message,
+  color,
+  icon,
+  position,
+  withBorder,
+  withCloseButton,
+  onClose,
+  onOpen,
+  autoClose,
+  radius,
+  className,
+  style,
+  loading,
+}: ShowNotificationOptions) => {
+  if (!id) {
+    console.warn('updateNotification called without an id');
+    return;
+  }
+
+  notifications.update({
     id,
     title,
     message,

@@ -1,17 +1,31 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
 interface AuthState {
-  token: string | null
-  username: string | null
-  roles?: string[]
-  setToken: (token: string, username: string) => void
-  clearToken: () => void
+  token: string | null;
+  id: string | null;
+  username: string | null;
+  roles: string[];
+
+  // actions
+  setAuthData: (data: {
+    token: string;
+    id: string;
+    username: string;
+    roles?: string[];
+  }) => void;
+
+  clearAuthData: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set: (state: Partial<AuthState> | ((state: AuthState) => Partial<AuthState>)) => void) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   token: null,
+  id: null,
   username: null,
   roles: [],
-  setToken: (token: string, username: string) => set({ token, username }),
-  clearToken: () => set({ token: null, username: null }),
-}))
+
+  setAuthData: ({ token, id, username, roles = [] }) =>
+    set({ token, id, username, roles }),
+
+  clearAuthData: () =>
+    set({ token: null, id: null, username: null, roles: [] }),
+}));

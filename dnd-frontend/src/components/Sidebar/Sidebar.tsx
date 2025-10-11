@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Text, SegmentedControl } from '@mantine/core'
 import { useNavigate } from 'react-router-dom'
 import { IconHome, IconLogout } from '@tabler/icons-react'
@@ -9,8 +9,8 @@ import './Sidebar.css'
 
 export default function Sidebar() {
   const [section, setSection] = useState<Section>('character')
-  const [active, setActive] = useState('Members')
-  const clearAuth = useAuthStore((state) => state.clearToken)
+  const [active, setActive] = useState('Home')
+  const clearAuth = useAuthStore((state) => state.clearAuthData)
   const username = useAuthStore().username
   const roles = useAuthStore().roles || [] // assuming your token parsing sets this
   const navigate = useNavigate()
@@ -24,11 +24,15 @@ export default function Sidebar() {
 
   // Build links dynamically
   const sectionTabs: Section[] = ['character', 'world']
-  if (roles.includes('admin')) sectionTabs.push('admin')
+  if (roles.includes('Admin')) sectionTabs.push('admin')
 
   const links = tabs[section].map((item) => (
     <SidebarLink key={item.label} item={item} active={active} setActive={setActive} />
   ))
+
+  useEffect(() => {
+    setActive(tabs[section][0]?.label ?? '')
+  }, [section])
 
   return (
     <nav className="sidebar">
@@ -58,7 +62,7 @@ export default function Sidebar() {
       <div className="sidebar-footer">
         <button className="sidebar-button logout-button" onClick={handleLogout}>
           <IconLogout className="sidebar-link-icon" stroke={1.5} />
-          <span>Logout</span>
+          <Text ta={'center'}>Logout</Text>
         </button>
       </div>
     </nav>

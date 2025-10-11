@@ -14,7 +14,7 @@
   inset: 0; /* full size of the card */
   padding: 2px; /* thickness of the border */
   border-radius: 12px;
-  background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet, red);
+  background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet, red );
   background-size: 300% 300%;
   -webkit-mask: 
     linear-gradient(#fff 0 0) content-box, 
@@ -22,16 +22,17 @@
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   mask: 
-    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
-  animation: border-shift 5s linear infinite;
+  animation: border-shift 5s infinite;
+  animation-fill-mode: forwards;
+  transition: ease-in-out;
   z-index: -1;
 }
 
 @keyframes border-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 50% 100%; }
-  100% { background-position: 100% 0%; }
+  from { background-position: 0% 100%; }
+  to { background-position: 100% 0%; }
 }
 
 .login-card-inner {
