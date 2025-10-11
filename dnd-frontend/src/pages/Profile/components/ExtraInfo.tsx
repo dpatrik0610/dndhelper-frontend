@@ -13,8 +13,18 @@ export function ExtraInfo({character}: {character: Character}) {
       color="teal"
       transparent
       defaultOpen={false}
+      style={{
+        background: "linear-gradient(135deg, rgba(56, 27, 0, 0.36), rgba(0, 29, 66, 0.45))",
+        boxShadow: "0 0 10px rgba(100, 0, 158, 0.38), inset 0 0 6px rgba(199, 119, 15, 0.15)",
+        borderColor: "rgba(36, 158, 158, 0.23)",
+        borderRadius: "5px",
+        transition: "all 0.90s ease-in-out",
+      }}
     >
       <Stack gap="sm">
+        {character.background ? <StatBox label="Background" value={character.background} color="gray" size="sm"/> : null}
+      </Stack>
+      <Stack gap="xs" mt="sm">
         <Title order={4}>Physical Description</Title>
         <StatBox label="Eyes" value={character.eyes ?? null} color="gray" size="sm"/>
         <StatBox label="Hair" value={character.hair ?? null} color="gray" size="sm"/>

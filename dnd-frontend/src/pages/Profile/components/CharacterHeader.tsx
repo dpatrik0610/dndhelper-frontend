@@ -12,7 +12,7 @@ export function CharacterHeader({
   character
 }: CharacterHeaderProps) {
   return (
-    <Paper p="xl" withBorder mb="md" style={{ background: "linear-gradient(135deg, #667eea48 0%, #764ba23b 100%)", }} >
+    <Paper p="xl" withBorder mb="md" style={{ background: "linear-gradient(175deg, #0009336b 0%, rgba(48, 0, 0, 0.37) 100%)", }} >
       <Title order={1} c="white" mb="xs">
         {`${character.name} `}             
         {character.isDead ? (
@@ -43,7 +43,6 @@ export function CharacterHeader({
         {/* RIGHT HALF — Level & XP */}
         <Grid.Col span={{ base: 12, sm: 6 }}>
           <Group justify="flex-end" gap="md">
-            <StatBox label="Background" value={character.background} size="xs" background="dark" color={"cyan"}/>
             <StatBox label="Inspirations" value={character.inspiration} size="xs" background="dark" color="green"/>
             <StatBox label="Level" value={character.level} size="xs" background="dark" color="white"/>
             <StatBox label="Experience" value={character.experience} size="xs" background="dark" color="red"/>

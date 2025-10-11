@@ -1,5 +1,5 @@
 import { Paper, Group, Text } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactNode, CSSProperties } from "react";
 
 interface StatBoxProps {
   label: string;
@@ -8,6 +8,9 @@ interface StatBoxProps {
   icon?: ReactNode;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   background?: "transparent" | "solid" | "gradient" | "dark";
+  children?: ReactNode;
+  style?: CSSProperties;
+  hoverEffect?: boolean; // 👈 new prop
 }
 
 export function StatBox({
@@ -17,9 +20,10 @@ export function StatBox({
   icon,
   size = "md",
   background = "transparent",
+  children,
+  style,
+  hoverEffect = true,
 }: StatBoxProps) {
-
-  // 🎚️ size configuration
   const sizeMap = {
     xs: { padding: "xs", labelSize: "xs", valueSize: "sm", gap: "xs" },
     sm: { padding: "sm", labelSize: "sm", valueSize: "md", gap: "xs" },
@@ -30,7 +34,6 @@ export function StatBox({
 
   const s = sizeMap[size];
 
-  // 🎨 background styles
   const backgroundMap: Record<typeof background, React.CSSProperties> = {
     transparent: { backgroundColor: "rgba(0,0,0,0.02)" },
     solid: { backgroundColor: `var(--mantine-color-${color}-1)` },
@@ -47,22 +50,44 @@ export function StatBox({
       style={{
         textAlign: "center",
         minWidth: "90px",
+        transition: "all 0.2s ease",
+        transformOrigin: "center",
         ...backgroundMap[background],
+        ...(hoverEffect
+          ? {
+              cursor: "pointer",
+            }
+          : {}),
+        ...style,
+      }}
+      onMouseEnter={(e) => {
+        if (!hoverEffect) return;
+        e.currentTarget.style.transform = "scale(1.02)";
+        e.currentTarget.style.boxShadow = `0 0 5px var(--mantine-color-${color}-5)`;
+      }}
+      onMouseLeave={(e) => {
+        if (!hoverEffect) return;
+        e.currentTarget.style.transform = "scale(1)";
+        e.currentTarget.style.boxShadow = "none";
       }}
     >
       <Group gap={s.gap} justify="center" mb="xs">
         {icon}
-        <Text size={s.labelSize} c={background === "dark" ? "gray.1" : "dimmed"} fw={600} tt="uppercase">
+        <Text
+          size={s.labelSize}
+          c={background === "dark" ? "gray.1" : "dimmed"}
+          fw={600}
+          tt="uppercase"
+        >
           {label}
         </Text>
       </Group>
-      <Text
-        size={s.valueSize}
-        fw={700}
-        c={color}
-      >
+
+      <Text size={s.valueSize} fw={700} c={color}>
         {value}
       </Text>
+
+      {children && <div style={{ marginTop: "0.5rem" }}>{children}</div>}
     </Paper>
   );
 }

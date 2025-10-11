@@ -45,6 +45,13 @@ export function AbilityScores({
       defaultOpen
       transparent={true}
       icon={<span style={{ fontSize: "1.2rem" }}>💪</span>}
+      style={{
+        background: "linear-gradient(135deg, rgba(36, 0, 33, 0.23), rgba(56, 27, 0, 0.36))",
+        boxShadow: "0 0 10px rgba(51, 0, 73, 0.2), inset 0 0 6px rgba(51, 17, 82, 0.56)",
+        borderColor: "rgba(185, 30, 216, 0.34)",
+        borderRadius: "10px",
+        transition: "all 0.25s ease-in-out",
+      }}
     >
       <Grid
         gutter="md"
@@ -53,33 +60,33 @@ export function AbilityScores({
       >
         <Grid.Col span={{ base: 6, sm: 4 }}>
           <AbilityScore name="STRENGTH" score={strength} />
-          <StatBox label={`STR Save`} value={wisSave >= 0 ? `+${strSave}` : wisSave} size="xs" color="yellow" background="dark" />
+          <StatBox label={`STR Save`} value={wisSave >= 0 ? `+${strSave}` : wisSave} size="xs" color="yellow" />
         </Grid.Col>
 
         <Grid.Col span={{ base: 6, sm: 4 }}>
           <AbilityScore name="DEXTERITY" score={dexterity} />
-          <StatBox label={`DEX Save`} value={wisSave >= 0 ? `+${dexSave}` : wisSave} size="xs" color="yellow" background="dark" />
+          <StatBox label={`DEX Save`} value={wisSave >= 0 ? `+${dexSave}` : wisSave} size="xs" color="yellow" />
         </Grid.Col>
 
         <Grid.Col span={{ base: 6, sm: 4 }}>
           <AbilityScore name="CONSTITUTION" score={constitution} />
-          <StatBox label={`CON Save`} value={wisSave >= 0 ? `+${conSave}` : wisSave} size="xs" color="yellow" background="dark" />
+          <StatBox label={`CON Save`} value={wisSave >= 0 ? `+${conSave}` : wisSave} size="xs" color="yellow" />
         </Grid.Col>
 
         <Grid.Col span={{ base: 6, sm: 4 }}>
           <AbilityScore name="INTELLIGENCE" score={intelligence} />
-          <StatBox label={`INT Save`} value={wisSave >= 0 ? `+${intSave}` : wisSave} size="xs" color="yellow" background="dark" />
+          <StatBox label={`INT Save`} value={wisSave >= 0 ? `+${intSave}` : wisSave} size="xs" color="yellow" />
         </Grid.Col>
 
         <Grid.Col span={{ base: 6, sm: 4 }}>
           <AbilityScore name="WISDOM" score={wisdom} />
-          <StatBox label={`WIS Save`} value={wisSave >= 0 ? `+${wisSave}` : wisSave} size="xs" color="yellow" background="dark" />
+          <StatBox label={`WIS Save`} value={wisSave >= 0 ? `+${wisSave}` : wisSave} size="xs" color="yellow" />
           
         </Grid.Col>
 
         <Grid.Col span={{ base: 6, sm: 4 }}>
           <AbilityScore name="CHARISMA" score={charisma} />
-          <StatBox label={`CHA Save`} value={wisSave >= 0 ? `+${chaSave}` : wisSave} size="xs" color="yellow" background="dark" />
+          <StatBox label={`CHA Save`} value={wisSave >= 0 ? `+${chaSave}` : wisSave} size="xs" color="yellow" />
         </Grid.Col>
       </Grid>
       <Button fullWidth mt="md" variant="light" color="violet" onClick={() => setOpened(!opened)}>
