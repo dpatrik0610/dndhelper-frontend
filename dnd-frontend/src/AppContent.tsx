@@ -57,8 +57,6 @@ export default function AppContent() {
     }
 }, [location.pathname, showSidebar]);
 
-  const characterIdFromStore = characters[0]?.id; // TODO: Replace with character selector
-
   return (
     <AppShell
       padding="md"
@@ -90,12 +88,7 @@ export default function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path='/equipment' element={<Equipment/>} />
-            {characterIdFromStore && (
-              <Route
-                path="/profile"
-                element={<CharacterProfile />}
-              />
-            )}
+            <Route path="/profile" element={<CharacterProfile />} />
           </Route>
 
           <Route path="/login" element={<Login />} />

@@ -4,16 +4,15 @@ import type { LoginRequest } from '../../types/auth'
 import { loginUser } from '../../api/auth'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useNavigate } from 'react-router-dom'
-import { decodeToken } from '../../utils/decodeToken'
+import { processToken } from '../../utils/processToken'
 import { useLoadingNotification } from '../../components/Notification/LoadingNotification'
 import AlreadyLoggedIn from './AlreadyLoggedIn'
 
 export default function LoginForm() {
-    const localAuthToken = localStorage.getItem("authToken");
-
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const {token, setAuthData} = useAuthStore();
+    const {token} = useAuthStore();
+    
     const navigate = useNavigate()
     const toggleNotification = useLoadingNotification({
         title: 'Logging in...',
@@ -28,12 +27,6 @@ export default function LoginForm() {
     function timeout(delay: number) {
         return new Promise(res => setTimeout(res, delay))
     }
-
-    useEffect(()=> {
-        if(localAuthToken) {
-            processToken(localAuthToken);
-        }
-    }, [localAuthToken])
 
     const handleLogin = async () => {
         const credentials: LoginRequest = { username, password };
@@ -54,30 +47,6 @@ export default function LoginForm() {
             toggleNotification(false, false); // failure
         }
     };
-
-    const processToken = (token: string) =>{
-        const decoded = decodeToken(token);
-
-        if (!decoded) throw new Error("Failed to decode token");
-        try{
-            setAuthData({
-                token: token,
-                id: decoded.id || "",
-                username: decoded.username || "",
-                roles: decoded.roles || [],
-            });
-            console.log(`Auth data stored in store: \n 
-                UserID: ${useAuthStore.getState().id}\n
-                Token: ${useAuthStore.getState().token}\n
-                Username: ${useAuthStore.getState().username}\n
-                Roles: ${useAuthStore.getState().roles}\n
-                `)
-        }
-        catch(ex) {
-            console.log(`Error setting auth data: ${ex}`)
-            throw Error(`${ex}`);
-        }
-    }
 
     if (token) {
         return <AlreadyLoggedIn />
