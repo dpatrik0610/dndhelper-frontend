@@ -17,26 +17,23 @@ export function useLoadingNotification(options?: UseLoadingNotificationOptions) 
   const notificationId = useRef(options?.id || 'loading-notification');
   const isActive = useRef(false);
 
-  const toggle = (loading: boolean, success = true) => {
+  const toggle = (loading: boolean, success = true, customMessage?: string) => {
     if (loading) {
-      // show persistent loading notification
       showNotification({
         id: notificationId.current,
         title: options?.title || 'Loading...',
-        message: options?.message || 'Please wait',
+        message: customMessage || options?.message || 'Please wait',
         color: 'blue',
         icon: <IconLoader size={18} className="spin" />,
         autoClose: false,
         loading: true,
       });
       isActive.current = true;
-    } 
-    else if (isActive.current) {
-      // update notification to success/failure and close after timeout
+    } else if (isActive.current) {
       updateNotification({
         id: notificationId.current,
         title: success ? options?.successTitle || 'Success' : options?.errorTitle || 'Error',
-        message: success ? options?.successMessage || 'Operation completed!' : options?.errorMessage || 'Something went wrong',
+        message: customMessage || (success ? options?.successMessage || 'Operation completed!' : options?.errorMessage || 'Something went wrong'),
         color: success ? 'green' : 'red',
         icon: success ? <IconCheck size={18} /> : <IconX size={18} />,
         loading: false,
@@ -45,6 +42,7 @@ export function useLoadingNotification(options?: UseLoadingNotificationOptions) 
       isActive.current = false;
     }
   };
+
 
   return toggle;
 }

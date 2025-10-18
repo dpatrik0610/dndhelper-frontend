@@ -1,9 +1,9 @@
-export interface LoginRequest {
+export interface AuthRequest {
   username: string
   password: string
 }
 
-export interface LoginResponse {
+export interface AuthResponse {
   token: string
 }
 

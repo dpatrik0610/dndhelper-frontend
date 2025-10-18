@@ -1,7 +1,7 @@
-import {  useEffect, useState } from 'react'
+import {  useState } from 'react'
 import { TextInput, PasswordInput, Button, Title, Text } from '@mantine/core'
-import type { LoginRequest } from '../../types/auth'
-import { loginUser } from '../../api/auth'
+import type { AuthRequest } from '../../types/AuthTypes'
+import { loginUser } from '../../services/authService'
 import { useAuthStore } from '../../store/useAuthStore'
 import { useNavigate } from 'react-router-dom'
 import { processToken } from '../../utils/processToken'
@@ -29,7 +29,7 @@ export default function LoginForm() {
     }
 
     const handleLogin = async () => {
-        const credentials: LoginRequest = { username, password };
+        const credentials: AuthRequest = { username, password };
 
         toggleNotification(true); // show loading
 
@@ -74,7 +74,7 @@ export default function LoginForm() {
         </Button>
 
         <Text size="sm" mt="md" c="dimmed" ta="center">
-            Don't have an account? <Text component="span" color="blue"><a href='/register'>Sign up</a></Text>
+            Don't have an account? <Text component="span" c="blue"><a href='/register'>Sign up</a></Text>
         </Text>
         </>
     )

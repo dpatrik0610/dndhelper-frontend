@@ -1,6 +1,6 @@
 import { Button, Text } from '@mantine/core';
-import { useAuthStore } from '../../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
+import { handleLogout } from '../../utils/handleLogout';
 
 export default function AlreadyLoggedIn() {
   const navigate = useNavigate();
@@ -12,10 +12,7 @@ export default function AlreadyLoggedIn() {
         mt="md"
         fullWidth
         onClick={() => {
-          useAuthStore.getState().clearAuthData();
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('username');
-          navigate('/login');
+          handleLogout(navigate)
         }}
       >
         Logout
