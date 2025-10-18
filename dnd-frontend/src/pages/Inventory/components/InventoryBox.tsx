@@ -1,7 +1,7 @@
 import type { Inventory } from "../../../types/Inventory/Inventory";
 import { useEffect, useState } from "react";
 import { RemoveItemModal } from "../../../types/Inventory/components/RemoveItemModal";
-import { Stack, Text, Loader, Center, Tooltip, ActionIcon } from "@mantine/core";
+import { Stack, Text, Loader, Center} from "@mantine/core";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useInventoryStore } from "../../../store/useInventorystore";
@@ -10,8 +10,8 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import { CurrencyBox } from "./CurrencyBox";
 import { decrementItemQuantity as apiDecreaseQuantity, moveItem, type ModifyEquipmentAmount, type MoveItemRequest } from "../../../services/inventoryService";
 import { showNotification } from "../../../components/Notification/Notification";
-import { IconCheck, IconRefresh } from "@tabler/icons-react";
-import { loadInventories, loadInventoryById } from "../../../utils/loadinventory";
+import { IconCheck } from "@tabler/icons-react";
+import { loadInventories } from "../../../utils/loadinventory";
 import { MoveItemModal } from "./MoveItemModal";
 
 interface InventoryBoxProps {
@@ -108,23 +108,6 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
     }
   };
 
-  const handleReload = async (id: string) => {
-    if (!token) return;
-
-    setLoading(true);
-
-    await loadInventoryById(id, token);
-
-    setLoading(false);
-    showNotification({
-      id: "inventory-reload",
-      title: "Inventory reloaded!",
-      color: SectionColor.Blue,
-      icon: <IconCheck />,
-      message: "",
-    });
-  };
-
   // 🌀 Graceful loading or empty state
   if (loading)
     return (
@@ -173,18 +156,6 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
             : SectionColor.Grape
         }
       >
-      <Tooltip label="Reload inventory" position="right" withArrow>
-          <ActionIcon
-            variant="light"
-            color="blue"
-            size="sm"
-            onClick={() => handleReload(currentInventory.id!)}
-            loading={loading}
-            style={{ alignSelf: "flex-end" }}
-          >
-            <IconRefresh size={16} />
-          </ActionIcon>
-      </Tooltip>
 
       <Stack gap="xs" mt={"xs"}>
         {currentInventory.items?.length ? (

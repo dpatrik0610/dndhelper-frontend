@@ -4,7 +4,7 @@ import { getInventoriesByCharacter } from "../../services/inventoryService";
 import { useCharacterStore } from "../../store/useCharacterStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { notifications } from '@mantine/notifications';
-import { Box, Title, Button, Group, Grid } from '@mantine/core';
+import { Box, Title, Button, Group, Grid, Tooltip } from '@mantine/core';
 import { IconBuildingWarehouse, IconError404, IconArrowLeft, IconReload } from '@tabler/icons-react';
 import InventoryBox from './components/InventoryBox';
 import { useNavigate } from 'react-router-dom';
@@ -61,7 +61,7 @@ export function Inventory() {
 
   return (
     <Box
-      maw={isMobile ? "100%" : 900}
+      maw={isMobile ? "100%" : 1200}
       p={isMobile ? undefined : "md"}
       m={isMobile ? undefined : "0 auto"}
     >
@@ -77,25 +77,27 @@ export function Inventory() {
       {/* Buttons on the right */}
       <Grid.Col span={isMobile ? 12 : 6} style={{ display: 'flex', justifyContent: isMobile ? 'flex-start' : 'flex-end' }}>
         <Group lts="md">
-          <Button
-            variant="gradient"
-            gradient={{ from: 'violet', to: 'cyan', deg: 45 }}
-            size="sm"
-            radius="md"
-            onClick={() => loadInventories(token)}
-          >
-            <IconReload size={16} />
-          </Button>
+          <Tooltip label="Reload inventory" position="right" withArrow>
+            <Button
+              variant="gradient"
+              gradient={{ from: 'violet', to: 'cyan', deg: 45 }}
+              size="sm"
+              radius="md"
+              onClick={() => loadInventories(token)}
+            >
+              <IconReload size={16} />
+            </Button>
+          </Tooltip>
 
           <Button
-            leftSection={<IconArrowLeft size={16} />}
+            leftSection={ !isMobile && <IconArrowLeft size={16} />}
             variant="gradient"
             gradient={{ from: 'violet', to: 'cyan', deg: 45 }}
             size="sm"
             radius="md"
             onClick={() => navigate("/profile")}
           >
-            Back to Profile
+            {isMobile ? <IconArrowLeft size={16} /> : "Back to Profile"}
           </Button>
         </Group>
       </Grid.Col>
