@@ -1,4 +1,4 @@
-import { ExpandableSection } from "./ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpendableSection";
 import { StatBox } from "./StatBox";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { Stack, Title } from "@mantine/core";

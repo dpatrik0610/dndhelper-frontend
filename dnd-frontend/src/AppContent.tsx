@@ -15,6 +15,7 @@ import { loadCharacters } from './utils/loadCharacter';
 import Equipment from './pages/Equipment/Equipment';
 import { ActionIcon } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
+import { Inventory } from './pages/Inventory/Inventory';
 
 export default function AppContent() {
   let token = useAuthStore((s) => s.token);
@@ -23,7 +24,7 @@ export default function AppContent() {
   const location = useLocation();
 
   // ✅ Define pages where the sidebar should be visible
-  const showSidebarOn = ['/', '/home', '/profile', '/equipment'];
+  const showSidebarOn = ['/', '/home', '/profile', '/equipment', '/inventory'];
   const showSidebar = showSidebarOn.includes(location.pathname);
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function AppContent() {
   useEffect(() => {
     const fetchCharacters = async () => {
       if (token && characters.length === 0) {
-        console.log(`Characters: ${0}\nLoading Characters...\n`)
+        console.log(`Loading Characters...`)
         await loadCharacters(token);
       }
     };
@@ -88,6 +89,7 @@ export default function AppContent() {
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path='/equipment' element={<Equipment/>} />
+            <Route path='/inventory' element={<Inventory/>} />
             <Route path="/profile" element={<CharacterProfile />} />
           </Route>
 

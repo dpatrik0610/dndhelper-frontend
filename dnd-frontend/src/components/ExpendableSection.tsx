@@ -1,12 +1,13 @@
 import { useState, type ReactNode, type CSSProperties } from "react";
 import { Paper, Group, Text, ActionIcon, Collapse } from "@mantine/core";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
+import { SectionColor } from "../types/SectionColor";
 
 interface ExpandableSectionProps {
   title: string;
   children: ReactNode;
   icon?: ReactNode;
-  color?: string;
+  color?: SectionColor;
   defaultOpen?: boolean;
   transparent?: boolean;
   style?: CSSProperties;
@@ -16,7 +17,7 @@ export function ExpandableSection({
   title,
   children,
   icon,
-  color = "blue",
+  color = SectionColor.Blue,
   defaultOpen = false,
   transparent = true,
   style = {},

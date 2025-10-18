@@ -1,6 +1,6 @@
 import { IconSword, IconShield, IconMap, IconUsers, IconAdjustmentsAlt } from '@tabler/icons-react'
 
-export type Section = 'character' | 'world' | 'admin'
+export type Section = 'character' | 'campaign' | 'admin'
 
 export interface TabItem {
   link: string
@@ -11,16 +11,22 @@ export interface TabItem {
 export const tabs: Record<Section, TabItem[]> = {
   character: [
     { link: '/profile', label: 'Profile', icon: IconUsers },
-    { link: '/members', label: 'Members', icon: IconUsers },
-    { link: '/quests', label: 'Quests', icon: IconMap },
     { link: '/inventory', label: 'Inventory', icon: IconSword },
     { link: '/equipment', label: 'Equipment', icon: IconShield },
   ],
-  world: [
+  campaign: [
     { link: '/map', label: 'World Map', icon: IconMap },
+    { link: '/quests', label: 'Quests', icon: IconMap },
+    { link: '/members', label: 'Members', icon: IconUsers },
     { link: '/explorers', label: 'Explorers', icon: IconUsers },
   ],
   admin: [
-    { link: '/admin', label: 'Admin Panel', icon: IconAdjustmentsAlt },
+    { link: '/questmanager', label: 'Quest Manager', icon: IconAdjustmentsAlt },
+    { link: '/usermanager', label: 'User Manager', icon: IconUsers },
+    { link: '/campaignmanager', label: 'Campaign Manager', icon: IconMap },
+    { link: '/itemmanager', label: 'Item Manager', icon: IconSword },
+    { link: '/equipmentmanager', label: 'Equipment Manager', icon: IconShield },
+    { link: '/charactermanager', label: 'Character Manager', icon: IconUsers },
+    { link: '/notifyuser', label: 'Notify User', icon: IconUsers },
   ],
 }

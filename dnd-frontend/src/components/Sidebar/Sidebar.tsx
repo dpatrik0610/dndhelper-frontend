@@ -6,24 +6,16 @@ import { useAuthStore } from '../../store/useAuthStore'
 import SidebarLink from './SidebarLink'
 import { tabs, type Section } from './SidebarTabs'
 import './Sidebar.css'
-
+import { handleLogout } from '../../utils/handleLogout'
 export default function Sidebar() {
   const [section, setSection] = useState<Section>('character')
   const [active, setActive] = useState('Home')
-  const clearAuth = useAuthStore((state) => state.clearAuthData)
   const username = useAuthStore().username
-  const roles = useAuthStore().roles || [] // assuming your token parsing sets this
+  const roles = useAuthStore().roles || []
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    clearAuth()
-    localStorage.removeItem('authToken')
-    localStorage.removeItem('username')
-    navigate('/login')
-  }
-
   // Build links dynamically
-  const sectionTabs: Section[] = ['character', 'world']
+  const sectionTabs: Section[] = ['character', 'campaign']
   if (roles.includes('Admin')) sectionTabs.push('admin')
 
   const links = tabs[section].map((item) => (
@@ -60,7 +52,7 @@ export default function Sidebar() {
       <div className="sidebar-main">{links}</div>
 
       <div className="sidebar-footer">
-        <button className="sidebar-button logout-button" onClick={handleLogout}>
+        <button className="sidebar-button logout-button" onClick={() => handleLogout(navigate)}>
           <IconLogout className="sidebar-link-icon" stroke={1.5} />
           <Text ta={'center'}>Logout</Text>
         </button>

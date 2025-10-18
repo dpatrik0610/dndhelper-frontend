@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { Character } from "../types/Character/Character";
 
 interface CharacterState {
@@ -12,18 +13,29 @@ interface CharacterState {
   clearCharacter: () => void;
 }
 
-export const useCharacterStore = create<CharacterState>((set, get) => ({
-  character: null,
-  characters: [],
+export const useCharacterStore = create<CharacterState>()(
+  persist(
+    (set, get) => ({
+      character: null,
+      characters: [],
 
-  setCharacter: (character) => set({ character }),
-  setCharacters: (characters) => set({ characters }),
+      setCharacter: (character) => set({ character }),
+      setCharacters: (characters) => set({ characters }),
 
-  updateCharacter: (updated) => {
-    const current = get().character;
-    if (!current) return;
-    set({ character: { ...current, ...updated } });
-  },
+      updateCharacter: (updated) => {
+        const current = get().character;
+        if (!current) return;
+        set({ character: { ...current, ...updated } });
+      },
 
-  clearCharacter: () => set({ character: null }),
-}));
+      clearCharacter: () => set({ character: null, characters: [] }),
+    }),
+    {
+      name: "character-storage", // localStorage key
+      partialize: (state) => ({
+        character: state.character,
+        characters: state.characters,
+      }),
+    }
+  )
+);

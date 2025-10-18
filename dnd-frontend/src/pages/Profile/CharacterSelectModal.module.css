@@ -1,0 +1,26 @@
+.content {
+  background: radial-gradient(
+    circle at bottom,
+    rgba(20, 30, 22, 0.8),
+    rgba(3, 11, 44, 0.84)
+  );
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(8px);
+  color: white;
+}
+
+.header {
+  background-color: transparent!important;
+  margin-bottom: 0.5rem;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.close {
+  color: white;
+}

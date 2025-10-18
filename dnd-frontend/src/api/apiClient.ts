@@ -1,5 +1,5 @@
 export interface ApiOptions {
-  method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   body?: any
   token?: string
 }

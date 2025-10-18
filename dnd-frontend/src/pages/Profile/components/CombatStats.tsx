@@ -1,10 +1,12 @@
 import { Title, Grid } from "@mantine/core";
 import { IconShield, IconHeart, IconTarget, IconRun, IconSword, IconArrowUp } from "@tabler/icons-react";
 import { StatBox } from "./StatBox";
-import { ExpandableSection } from "./ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpendableSection";
 import type { Character } from "../../../types/Character/Character";
+import { useMediaQuery } from "@mantine/hooks";
 
 export function CombatStats({character}: { character: Character }) {
+  const isMobile = useMediaQuery('(max-width: 768px)');
   return (
       <ExpandableSection
         title="Combat Statistics"
@@ -35,7 +37,7 @@ export function CombatStats({character}: { character: Character }) {
           <Grid.Col
             key={stat.label}
             span={6} // 2 per row on small screens by default
-            style={{ minWidth: 160 }} // ensures wrapping on mobile
+            style={{ minWidth: 140 }} // ensures wrapping on mobile
           >
             <StatBox
               size="xs"

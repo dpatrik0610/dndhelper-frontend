@@ -1,6 +1,6 @@
 import { Grid } from "@mantine/core";
 import type { Character } from "../../../types/Character/Character";
-import { ExpandableSection } from "./ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpendableSection";
 import { StatBox } from "./StatBox";
 import { IconWand } from "@tabler/icons-react";
 

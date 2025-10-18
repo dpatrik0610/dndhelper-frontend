@@ -13,6 +13,7 @@ import {
 import { IconStar, IconUserCheck } from "@tabler/icons-react";
 import { useState } from "react";
 import type { Character } from "../../types/Character/Character";
+import classes from "./CharacterSelectModal.module.css";
 
 interface CharacterSelectModalProps {
   opened: boolean;
@@ -100,46 +101,31 @@ export function CharacterSelectModal({
       centered
       size="xl"
       title={
-        <Group>
+        <Group gap={10}>
           <Badge color="cyan" variant="light" size="lg">
             <IconStar size={12} />
           </Badge>
-          <Title order={3} c="white">
+          <Title order={3} c="white" bg="transparent">
             Choose Your Character
           </Title>
         </Group>
       }
       overlayProps={{ blur: 6, backgroundOpacity: 0.55 }}
-      styles={{
-        content: {
-          background:
-            "radial-gradient(circle at bottom, rgba(20, 30, 22, 0.98), rgba(3, 11, 44, 0.95))",
-          border: "1px solid rgba(0, 0, 0, 0.1)",
-          backdropFilter: "blur(8px)",
-          color: "white",
-        },
-        header: {
-          borderBottom: "1px solid rgba(255,255,255,0.1)",
-          marginBottom: "0.5rem",
-        },
-        title: { display: "flex", alignItems: "center", gap: 10 },
-        close: { color: "white" },
+      classNames={{
+        content: classes.content,
+        header: classes.header,
+        title: classes.title,
+        close: classes.close,
       }}
     >
       <ScrollArea h={400}>
         <Table.ScrollContainer minWidth={600}>
-          <Table verticalSpacing="sm" highlightOnHover>
+          <Table verticalSpacing="md">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th style={{ color: "rgba(255,255,255,0.6)" }}>
-                  Name
-                </Table.Th>
-                <Table.Th style={{ color: "rgba(255,255,255,0.6)" }}>
-                  Level
-                </Table.Th>
-                <Table.Th style={{ color: "rgba(255,255,255,0.6)" }}>
-                  Race
-                </Table.Th>
+                <Table.Th style={{ color: "rgba(255,255,255,0.6)" }}>Name</Table.Th>
+                <Table.Th style={{ color: "rgba(255,255,255,0.6)" }}>Level</Table.Th>
+                <Table.Th style={{ color: "rgba(255,255,255,0.6)" }}>Race</Table.Th>
                 <Table.Th />
               </Table.Tr>
             </Table.Thead>

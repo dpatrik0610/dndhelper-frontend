@@ -1,6 +1,6 @@
 import { Button, Collapse, Grid } from "@mantine/core";
 import { AbilityScore } from "./AbilityScore";
-import { ExpandableSection } from "./ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpendableSection";
 import { RadarChart } from "@mantine/charts";
 import AbilityScoreTooltip from "./AbilityScoreToolTip";
 import { useState } from "react";
@@ -95,42 +95,48 @@ export function AbilityScores({
       {/* Radar Chart */}
 
       <Collapse in={opened} transitionDuration={300}>
-      <RadarChart
-        h={"35vh"}
-        w={"100%"}
-        data={strength && dexterity && constitution && intelligence && wisdom && charisma ? [
-          { ability: 'STR', score: strength },
-          { ability: 'DEX', score: dexterity },
-          { ability: 'CON', score: constitution },
-          { ability: 'INT', score: intelligence },
-          { ability: 'WIS', score: wisdom },
-          { ability: 'CHA', score: charisma },
-        ] : [{ ability: 'No Data', score: 0 }]}
-
-        dataKey="ability"
-        series={[
-          { name: "score", color: "cyan.6", opacity: 0 },
-        ]}
-        withDots
-        textColor="white.0"
-        withTooltip
-        tooltipProps={{ content: <AbilityScoreTooltip /> }}
-        radarProps={{
-          stroke: 'cyan',
-          fill: 'linear-gradient(135deg, rgba(0,255,255,0.2), rgba(0,128,128,0.4))',
-          filter: 'drop-shadow(0 0 6px rgba(0, 255, 255, 0.26))',
-          strokeWidth: 2,
-        }}
-        dotProps={{
-          r: 6,
-          stroke: 'white',
-          strokeWidth: 2,
-          fill: 'cyan',
-        }}
-        gridColor="gray.5"
-        withPolarAngleAxis
-      />
+        {opened && (
+          <div style={{ minHeight: '35vh', width: '100%' }}>
+            <RadarChart
+              h="35vh"
+              w="100%"
+              data={
+                strength && dexterity && constitution && intelligence && wisdom && charisma
+                  ? [
+                      { ability: 'STR', score: strength },
+                      { ability: 'DEX', score: dexterity },
+                      { ability: 'CON', score: constitution },
+                      { ability: 'INT', score: intelligence },
+                      { ability: 'WIS', score: wisdom },
+                      { ability: 'CHA', score: charisma },
+                    ]
+                  : [{ ability: 'No Data', score: 0 }]
+              }
+              dataKey="ability"
+              series={[{ name: 'score', color: 'cyan.6', opacity: 0 }]}
+              withDots
+              textColor="white.0"
+              withTooltip
+              tooltipProps={{ content: <AbilityScoreTooltip /> }}
+              radarProps={{
+                stroke: 'cyan',
+                fill: 'linear-gradient(135deg, rgba(0,255,255,0.2), rgba(0,128,128,0.4))',
+                filter: 'drop-shadow(0 0 6px rgba(0, 255, 255, 0.26))',
+                strokeWidth: 2,
+              }}
+              dotProps={{
+                r: 6,
+                stroke: 'white',
+                strokeWidth: 2,
+                fill: 'cyan',
+              }}
+              gridColor="gray.5"
+              withPolarAngleAxis
+            />
+          </div>
+        )}
       </Collapse>
+
     </ExpandableSection> 
   );
 }
