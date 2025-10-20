@@ -2,16 +2,19 @@ import { Title, Grid } from "@mantine/core";
 import { IconShield, IconHeart, IconTarget, IconRun, IconSword, IconArrowUp } from "@tabler/icons-react";
 import { StatBox } from "./StatBox";
 import { ExpandableSection } from "../../../components/ExpendableSection";
-import type { Character } from "../../../types/Character/Character";
 import { useMediaQuery } from "@mantine/hooks";
+import { useCharacterStore } from "../../../store/useCharacterStore";
+import { SectionColor } from "../../../types/SectionColor";
 
-export function CombatStats({character}: { character: Character }) {
+export function CombatStats() {
+  const character = useCharacterStore((state) => state.character)!;
   const isMobile = useMediaQuery('(max-width: 768px)');
+  
   return (
       <ExpandableSection
         title="Combat Statistics"
         icon={<span style={{ fontSize: "1.2rem" }}>⚔️</span>}
-        color="red"
+        color= {SectionColor.Red}
         transparent
         defaultOpen
         style={{
@@ -36,16 +39,16 @@ export function CombatStats({character}: { character: Character }) {
         ].map((stat) => (
           <Grid.Col
             key={stat.label}
-            span={6} // 2 per row on small screens by default
-            style={{ minWidth: 140 }} // ensures wrapping on mobile
+            span={ 6 } // 2 per row on small screens by default
           >
             <StatBox
-              size="xs"
-              label={stat.label}
-              value={stat.value}
-              color={stat.color}
-              icon={stat.icon}
-              background="transparent"
+              size = "xs"
+              label = {stat.label}
+              value = {stat.value}
+              color = {stat.color}
+              icon = {stat.icon}
+              background = "transparent"
+              fullWidth = { true }
             />
           </Grid.Col>
         ))}

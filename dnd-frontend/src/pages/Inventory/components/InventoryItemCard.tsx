@@ -1,8 +1,10 @@
-import { Card, Grid, Text, Tooltip, ActionIcon, Group } from "@mantine/core";
+import { Card, Grid, Text, Tooltip, ActionIcon, Group} from "@mantine/core";
 import type { InventoryItem } from "../../../types/Inventory/InventoryItem";
 import CustomBadge from "../../../components/common/CustomBadge";
 import { SectionColor } from "../../../types/SectionColor";
-import { IconTrash, IconArrowsRightLeft } from "@tabler/icons-react";
+import { IconTrash, IconArrowsRightLeft, IconZoom } from "@tabler/icons-react";
+import { useState } from "react";
+import { EquipmentModal } from "../../../components/EquipmentModal";
 
 interface InventoryItemCardProps {
   item: InventoryItem;
@@ -11,8 +13,9 @@ interface InventoryItemCardProps {
 }
 
 export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardProps) {
+  const [modalOpened, setModalOpened] = useState(false);
+
   return (
-    <Tooltip label={item.note || "No additional notes"} position="top-start" withArrow>
       <Card
         shadow="sm"
         padding="md"
@@ -23,6 +26,11 @@ export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardP
           border: "1px solid rgba(255,255,255,0.05)",
         }}
       >
+        <EquipmentModal
+          opened={modalOpened}
+          onClose={() => setModalOpened(false)}
+          equipmentId={item.equipmentId!}
+        />
         <Grid align="center" gutter="sm">
           {/* Item Name */}
           <Grid.Col span={6}>
@@ -39,8 +47,13 @@ export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardP
           </Grid.Col>
 
           {/* Actions */}
+
           <Grid.Col span={6}>
             <Group justify="end" gap="xs">
+            <ActionIcon variant="subtle" onClick={() => setModalOpened(true)} title="View Details">
+              <IconZoom size={16}/>
+            </ActionIcon>
+
               {onMove && (
                 <ActionIcon
                   color="blue"
@@ -75,6 +88,5 @@ export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardP
           )}
         </Grid>
       </Card>
-    </Tooltip>
   );
 }

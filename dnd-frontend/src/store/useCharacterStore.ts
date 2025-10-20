@@ -22,10 +22,18 @@ export const useCharacterStore = create<CharacterState>()(
       setCharacter: (character) => set({ character }),
       setCharacters: (characters) => set({ characters }),
 
-      updateCharacter: (updated) => {
+      updateCharacter: (updated: Partial<Character>) => {
         const current = get().character;
         if (!current) return;
-        set({ character: { ...current, ...updated } });
+
+        const newCharacter = { ...current, ...updated };
+        set({ character: newCharacter });
+
+        set((state) => ({
+          characters: state.characters.map((c) =>
+            c.id === newCharacter.id ? newCharacter : c
+          ),
+        }));
       },
 
       clearCharacter: () => set({ character: null, characters: [] }),

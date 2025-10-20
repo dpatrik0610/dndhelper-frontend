@@ -12,19 +12,20 @@ import CharacterProfile from './pages/Profile/CharacterProfile';
 import { useEffect } from 'react';
 import { useCharacterStore } from './store/useCharacterStore';
 import { loadCharacters } from './utils/loadCharacter';
-import Equipment from './pages/Equipment/Equipment';
 import { ActionIcon } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
 import { Inventory } from './pages/Inventory/Inventory';
+import SpellPage from './pages/Spells/SpellPage';
+import { DashboardSection } from './pages/Admin/components/Sections/DashboardSection';
 
 export default function AppContent() {
   let token = useAuthStore((s) => s.token);
   const [opened, handlers] = useDisclosure(true);
   const { characters } = useCharacterStore();
   const location = useLocation();
-
-  // ✅ Define pages where the sidebar should be visible
-  const showSidebarOn = ['/', '/home', '/profile', '/equipment', '/inventory'];
+  const isAdmin = useAuthStore.getState().roles.includes("Admin");
+  // Pages where the sidebar should be visible
+  const showSidebarOn = ['/', '/home', '/profile', '/equipment', '/inventory', "/spells"];
   const showSidebar = showSidebarOn.includes(location.pathname);
 
   useEffect(() => {
@@ -88,9 +89,13 @@ export default function AppContent() {
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
-            <Route path='/equipment' element={<Equipment/>} />
+            {/* <Route path='/equipment' element={<Equipment/>} /> */}
             <Route path='/inventory' element={<Inventory/>} />
             <Route path="/profile" element={<CharacterProfile />} />
+            <Route path='/spells' element={<SpellPage/>} />
+            {isAdmin &&
+            <Route path='/dashboard' element = {<DashboardSection />}/>
+            }
           </Route>
 
           <Route path="/login" element={<Login />} />

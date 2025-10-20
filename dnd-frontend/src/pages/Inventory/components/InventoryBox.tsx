@@ -146,7 +146,7 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
         itemId={moveItemId}
         onConfirm={(targetInventoryId, amount) => handleConfirmMove(targetInventoryId, amount)}
       />
-
+      
       <ExpandableSection
         title={currentInventory.name || "Undefined Inventory"}
         defaultOpen={false}

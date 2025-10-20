@@ -3,6 +3,7 @@ import type { Currency } from "../Currency";
 import type { AbilityScores } from "./AbilityScores";
 import { HeightLabel } from "./HeightLabel";
 import type { SpellSlot } from "./SpellSlot";
+import type { Skill } from "./Skill";
 
 export interface Character {
   // METADATA
@@ -19,16 +20,17 @@ export interface Character {
   race: string; // ✅
   characterClass: string; // ✅
   background: string; // ✅
-  level: number;
-  armorClass: number;
-  hitPoints: number;
-  maxHitPoints: number;
-  temporaryHitPoints: number;
-  speed: number;
-  initiative: number;
-  alignment: string;
-  proficiencyBonus: number;
+  level: number; // ✅
+  armorClass: number; // ✅
+  hitPoints: number; // ✅
+  maxHitPoints: number; // ✅
+  temporaryHitPoints: number; // ✅
+  speed: number; // ✅
+  initiative: number; // ✅
+  alignment: string; // ✅
+  proficiencyBonus: number; // ✅
 
+   // ❌ These are all missing # TODO
   proficiencies: string[];
   languages: string[];
   conditions: string[];
@@ -44,7 +46,7 @@ export interface Character {
   abilityScores: AbilityScores;
   savingThrows: SavingThrows;
   inspiration: number;
-  skills: Record<string, number>;
+  skills: Skill[]
   spellSaveDc: number;
   spellAttackBonus: number;
   spellSlots: SpellSlot[];

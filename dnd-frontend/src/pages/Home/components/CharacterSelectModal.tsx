@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { IconStar, IconUserCheck } from "@tabler/icons-react";
 import { useState } from "react";
-import type { Character } from "../../types/Character/Character";
+import type { Character } from "../../../types/Character/Character";
 import classes from "./CharacterSelectModal.module.css";
 
 interface CharacterSelectModalProps {

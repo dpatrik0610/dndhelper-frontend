@@ -23,16 +23,7 @@ export async function apiClient<T>(endpoint: string, options: ApiOptions = {}): 
     const err = await res.json().catch(() => ({ message: res.statusText }))
     console.log("API Request failed at apiClient.ts.")
     throw new Error(err.message || 'API request failed')
-  }
-
-  const resClone = res.clone();
-  const resText = await resClone.text();
-  try{
-    JSON.parse(resText);
-  }
-  catch {
-    console.log("Error at parsing JSON. Text: " + resText)
-  }
+  }  
   
   return res.json()
 }

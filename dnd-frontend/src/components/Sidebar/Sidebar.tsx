@@ -7,16 +7,19 @@ import SidebarLink from './SidebarLink'
 import { tabs, type Section } from './SidebarTabs'
 import './Sidebar.css'
 import { handleLogout } from '../../utils/handleLogout'
+import { useMediaQuery } from '@mantine/hooks'
 export default function Sidebar() {
   const [section, setSection] = useState<Section>('character')
   const [active, setActive] = useState('Home')
   const username = useAuthStore().username
   const roles = useAuthStore().roles || []
   const navigate = useNavigate()
-
+  const isAdmin = roles.includes('Admin');
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  
   // Build links dynamically
   const sectionTabs: Section[] = ['character', 'campaign']
-  if (roles.includes('Admin')) sectionTabs.push('admin')
+  if (isAdmin) sectionTabs.push("admin");
 
   const links = tabs[section].map((item) => (
     <SidebarLink key={item.label} item={item} active={active} setActive={setActive} />
@@ -27,7 +30,7 @@ export default function Sidebar() {
   }, [section])
 
   return (
-    <nav className="sidebar">
+    <nav className="sidebar" style={{width: isMobile? "100%": "250px"}}>
       <div className="sidebar-header">
         <Text fw={650} size="sm" c="dimmed" mb="xs" ta="center">
           {username?.toUpperCase() ?? 'NOT LOGGED IN'}

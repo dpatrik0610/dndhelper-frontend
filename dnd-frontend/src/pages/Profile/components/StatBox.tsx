@@ -10,7 +10,8 @@ interface StatBoxProps {
   background?: "transparent" | "solid" | "gradient" | "dark";
   children?: ReactNode;
   style?: CSSProperties;
-  hoverEffect?: boolean; // 👈 new prop
+  hoverEffect?: boolean;
+  fullWidth?: boolean;
 }
 
 export function StatBox({
@@ -23,6 +24,7 @@ export function StatBox({
   children,
   style,
   hoverEffect = true,
+  fullWidth = false,
 }: StatBoxProps) {
   const sizeMap = {
     xs: { padding: "xs", labelSize: "xs", valueSize: "sm", gap: "xs" },
@@ -45,11 +47,13 @@ export function StatBox({
 
   return (
     <Paper
+      w={fullWidth? "100%" : undefined}
+      maw={fullWidth? "100%" : undefined}
+      miw={fullWidth? undefined : "100px"}
       p={s.padding}
       withBorder
       style={{
         textAlign: "center",
-        minWidth: "90px",
         transition: "all 0.2s ease",
         transformOrigin: "center",
         ...backgroundMap[background],

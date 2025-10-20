@@ -5,43 +5,17 @@ import { RadarChart } from "@mantine/charts";
 import AbilityScoreTooltip from "./AbilityScoreToolTip";
 import { useState } from "react";
 import { StatBox } from "./StatBox";
+import { useCharacterStore } from "../../../store/useCharacterStore";
+import { SectionColor } from "../../../types/SectionColor";
 
-export interface AbilityScoresProps {
-  strength: number;
-  dexterity: number;
-  constitution: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-
-  strSave?: number;
-  dexSave?: number;
-  conSave?: number;
-  intSave?: number;
-  wisSave?: number;
-  chaSave?: number;
-}
-
-export function AbilityScores({
-  strength,
-  dexterity,
-  constitution,
-  intelligence,
-  wisdom,
-  charisma,
-  strSave = 0,
-  dexSave = 0,
-  conSave = 0,
-  intSave = 0,
-  wisSave = 0,
-  chaSave = 0,
-}: AbilityScoresProps) {
+export function AbilityScores() {
+  const character = useCharacterStore((state) => state.character)!;
   const [opened, setOpened] = useState(false);
 
   return (
     <ExpandableSection
       title="Ability Scores"
-      color="violet"
+      color= {SectionColor.Violet}
       defaultOpen
       transparent={true}
       icon={<span style={{ fontSize: "1.2rem" }}>💪</span>}
@@ -53,43 +27,85 @@ export function AbilityScores({
         transition: "all 0.25s ease-in-out",
       }}
     >
-      <Grid
-        gutter="md"
-        justify="space-between"
-        align="center"
-      >
-        <Grid.Col span={{ base: 6, sm: 4 }}>
-          <AbilityScore name="STRENGTH" score={strength} />
-          <StatBox label={`STR Save`} value={wisSave >= 0 ? `+${strSave}` : wisSave} size="xs" color="yellow" />
-        </Grid.Col>
+    <Grid
+      gutter="md"
+      justify="space-between"
+      align="center"
+    >
+      <Grid.Col span={{ base: 6, sm: 4 }}>
+        <AbilityScore name="STRENGTH" score={character.abilityScores.str} />
+        <StatBox
+          label="STR Save"
+          value={character.savingThrows.strength >= 0
+            ? `+${character.savingThrows.strength}`
+            : `${character.savingThrows.strength}`}
+          size="xs"
+          color="yellow"
+        />
+      </Grid.Col>
 
-        <Grid.Col span={{ base: 6, sm: 4 }}>
-          <AbilityScore name="DEXTERITY" score={dexterity} />
-          <StatBox label={`DEX Save`} value={wisSave >= 0 ? `+${dexSave}` : wisSave} size="xs" color="yellow" />
-        </Grid.Col>
+      <Grid.Col span={{ base: 6, sm: 4 }}>
+        <AbilityScore name="DEXTERITY" score={character.abilityScores.dex} />
+        <StatBox
+          label="DEX Save"
+          value={character.savingThrows.dexterity >= 0
+            ? `+${character.savingThrows.dexterity}`
+            : `${character.savingThrows.dexterity}`}
+          size="xs"
+          color="yellow"
+        />
+      </Grid.Col>
 
-        <Grid.Col span={{ base: 6, sm: 4 }}>
-          <AbilityScore name="CONSTITUTION" score={constitution} />
-          <StatBox label={`CON Save`} value={wisSave >= 0 ? `+${conSave}` : wisSave} size="xs" color="yellow" />
-        </Grid.Col>
+      <Grid.Col span={{ base: 6, sm: 4 }}>
+        <AbilityScore name="CONSTITUTION" score={character.abilityScores.con} />
+        <StatBox
+          label="CON Save"
+          value={character.savingThrows.constitution >= 0
+            ? `+${character.savingThrows.constitution}`
+            : `${character.savingThrows.constitution}`}
+          size="xs"
+          color="yellow"
+        />
+      </Grid.Col>
 
-        <Grid.Col span={{ base: 6, sm: 4 }}>
-          <AbilityScore name="INTELLIGENCE" score={intelligence} />
-          <StatBox label={`INT Save`} value={wisSave >= 0 ? `+${intSave}` : wisSave} size="xs" color="yellow" />
-        </Grid.Col>
+      <Grid.Col span={{ base: 6, sm: 4 }}>
+        <AbilityScore name="INTELLIGENCE" score={character.abilityScores.int} />
+        <StatBox
+          label="INT Save"
+          value={character.savingThrows.intelligence >= 0
+            ? `+${character.savingThrows.intelligence}`
+            : `${character.savingThrows.intelligence}`}
+          size="xs"
+          color="yellow"
+        />
+      </Grid.Col>
 
-        <Grid.Col span={{ base: 6, sm: 4 }}>
-          <AbilityScore name="WISDOM" score={wisdom} />
-          <StatBox label={`WIS Save`} value={wisSave >= 0 ? `+${wisSave}` : wisSave} size="xs" color="yellow" />
-          
-        </Grid.Col>
+      <Grid.Col span={{ base: 6, sm: 4 }}>
+        <AbilityScore name="WISDOM" score={character.abilityScores.wis} />
+        <StatBox
+          label="WIS Save"
+          value={character.savingThrows.wisdom >= 0
+            ? `+${character.savingThrows.wisdom}`
+            : `${character.savingThrows.wisdom}`}
+          size="xs"
+          color="yellow"
+        />
+      </Grid.Col>
 
-        <Grid.Col span={{ base: 6, sm: 4 }}>
-          <AbilityScore name="CHARISMA" score={charisma} />
-          <StatBox label={`CHA Save`} value={wisSave >= 0 ? `+${chaSave}` : wisSave} size="xs" color="yellow" />
-        </Grid.Col>
-      </Grid>
-      <Button fullWidth mt="md" variant="light" color="violet" onClick={() => setOpened(!opened)}>
+      <Grid.Col span={{ base: 6, sm: 4 }}>
+        <AbilityScore name="CHARISMA" score={character.abilityScores.cha} />
+        <StatBox
+          label="CHA Save"
+          value={character.savingThrows.charisma >= 0
+            ? `+${character.savingThrows.charisma}`
+            : `${character.savingThrows.charisma}`}
+          size="xs"
+          color="yellow"
+        />
+      </Grid.Col>
+    </Grid>
+
+      <Button fullWidth mt="md" variant="light" color={SectionColor.Cyan} onClick={() => setOpened(!opened)}>
         {opened ? "Hide Chart" : "Show Chart"}
       </Button>
       {/* Radar Chart */}
@@ -101,14 +117,19 @@ export function AbilityScores({
               h="35vh"
               w="100%"
               data={
-                strength && dexterity && constitution && intelligence && wisdom && charisma
+                character.abilityScores.str 
+                && character.abilityScores.dex 
+                && character.abilityScores.con 
+                && character.abilityScores.int 
+                && character.abilityScores.wis 
+                && character.abilityScores.cha
                   ? [
-                      { ability: 'STR', score: strength },
-                      { ability: 'DEX', score: dexterity },
-                      { ability: 'CON', score: constitution },
-                      { ability: 'INT', score: intelligence },
-                      { ability: 'WIS', score: wisdom },
-                      { ability: 'CHA', score: charisma },
+                      { ability: 'STR', score: character.abilityScores.str },
+                      { ability: 'DEX', score: character.abilityScores.dex },
+                      { ability: 'CON', score: character.abilityScores.con },
+                      { ability: 'INT', score: character.abilityScores.int },
+                      { ability: 'WIS', score: character.abilityScores.wis },
+                      { ability: 'CHA', score: character.abilityScores.cha },
                     ]
                   : [{ ability: 'No Data', score: 0 }]
               }

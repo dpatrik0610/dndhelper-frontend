@@ -1,4 +1,4 @@
-import { IconSword, IconShield, IconMap, IconUsers, IconAdjustmentsAlt } from '@tabler/icons-react'
+import { IconSword, IconShield, IconMap, IconUsers, IconAdjustmentsAlt, IconDashboard } from '@tabler/icons-react'
 
 export type Section = 'character' | 'campaign' | 'admin'
 
@@ -12,7 +12,7 @@ export const tabs: Record<Section, TabItem[]> = {
   character: [
     { link: '/profile', label: 'Profile', icon: IconUsers },
     { link: '/inventory', label: 'Inventory', icon: IconSword },
-    { link: '/equipment', label: 'Equipment', icon: IconShield },
+    // { link: '/equipment', label: 'Equipment', icon: IconShield },
   ],
   campaign: [
     { link: '/map', label: 'World Map', icon: IconMap },
@@ -21,6 +21,7 @@ export const tabs: Record<Section, TabItem[]> = {
     { link: '/explorers', label: 'Explorers', icon: IconUsers },
   ],
   admin: [
+    { link: '/dashboard', label: 'Dashboard', icon: IconDashboard },
     { link: '/questmanager', label: 'Quest Manager', icon: IconAdjustmentsAlt },
     { link: '/usermanager', label: 'User Manager', icon: IconUsers },
     { link: '/campaignmanager', label: 'Campaign Manager', icon: IconMap },

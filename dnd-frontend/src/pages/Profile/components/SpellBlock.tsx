@@ -1,10 +1,16 @@
-import { Grid } from "@mantine/core";
-import type { Character } from "../../../types/Character/Character";
+import { Divider, Grid } from "@mantine/core";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { StatBox } from "./StatBox";
 import { IconWand } from "@tabler/icons-react";
+import { useCharacterStore } from "../../../store/useCharacterStore";
+import { SectionColor } from "../../../types/SectionColor";
+import { useMediaQuery } from "@mantine/hooks";
+import { DividerWithLabel } from "../../../components/common/DividerWithLabel";
 
-export function SpellBlock({character}:  {character?: Character}) {
+export function SpellBlock() {
+    const character = useCharacterStore((state) => state.character)!;
+    const isMobile = useMediaQuery("(max-width: 768px)");
+
     function generateSpellSlots() {
         if (!character?.spellSlots) return [];
         return character.spellSlots.map((slot, index) => (
@@ -26,7 +32,7 @@ export function SpellBlock({character}:  {character?: Character}) {
         title="Spellcasting"
         defaultOpen
         icon={<IconWand size={18} />}
-        color="red"
+        color= {SectionColor.Red}
         transparent
         style={{
             background: "linear-gradient(180deg, rgba(29, 0, 66, 0.45), rgba(36, 0, 33, 0.23))",
@@ -37,15 +43,13 @@ export function SpellBlock({character}:  {character?: Character}) {
         }}
     >
         <Grid mt="md" mb="md" grow justify="flex-start" align="center" >
-        <Grid.Col span={6}> <StatBox label="Spell Save DC" value={character?.spellSaveDc || "-"} size="xs" color="red" background="dark"/> </Grid.Col>
-        <Grid.Col span={6}> <StatBox label="Spell Attack Bonus" value={character?.spellAttackBonus ? `+${character.spellAttackBonus}` : "-"} size="xs" color="red" background="dark"/> </Grid.Col>
+        <Grid.Col span={isMobile? 12 : 6}> <StatBox fullWidth={isMobile? true : false} label="Spell Save DC" value={character?.spellSaveDc || "-"} size="xs" color="red" background="dark" /> </Grid.Col>
+        <Grid.Col span={isMobile? 12 : 6}> <StatBox fullWidth={isMobile? true : false} label="Spell Attack Bonus" value={character?.spellAttackBonus ? `+${character.spellAttackBonus}` : "-"} size="xs" color="red" background="dark"/> </Grid.Col>
         <Grid.Col span={12}>
-                <hr style={{
-                    border: "none",
-                    height: "1px",
-                    background: "linear-gradient(90deg, transparent, rgba(119, 0, 255, 0.52), transparent)"
-                }} />
-            </Grid.Col>
+
+        <DividerWithLabel label={"Spell Slots"} thickness="2px" color={SectionColor.Pink}/>
+        
+        </Grid.Col>
         { generateSpellSlots() }
         </Grid>
     </ExpandableSection>
