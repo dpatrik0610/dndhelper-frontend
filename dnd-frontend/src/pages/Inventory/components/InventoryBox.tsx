@@ -7,19 +7,21 @@ import { SectionColor } from "../../../types/SectionColor";
 import { useInventoryStore } from "../../../store/useInventorystore";
 import { InventoryItemCard } from "./InventoryItemCard";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { CurrencyBox } from "./CurrencyBox";
 import { decrementItemQuantity as apiDecreaseQuantity, moveItem, type ModifyEquipmentAmount, type MoveItemRequest } from "../../../services/inventoryService";
 import { showNotification } from "../../../components/Notification/Notification";
 import { IconCheck } from "@tabler/icons-react";
 import { loadInventories } from "../../../utils/loadinventory";
 import { MoveItemModal } from "./MoveItemModal";
+import { InventoryCurrencyClaim } from "./InventoryCurrencyClaim";
 
 interface InventoryBoxProps {
   inventory: Inventory;
 }
 
 export default function InventoryBox({ inventory }: InventoryBoxProps) {
-  const { decrementItemQuantity, inventories } = useInventoryStore();
+  const inventories = useInventoryStore((state) => state.inventories);
+
+  const { decrementItemQuantity } = useInventoryStore();
   const token = useAuthStore.getState().token;
   const [removeModalOpened, setRemoveModalOpened] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
@@ -27,8 +29,7 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
 
   const [moveItemId, setMoveItemId] = useState<string | null>(null);
   const [moveModalOpened, setMoveModalOpened] = useState(false);
-
-  const currentInventory = inventories.find((x) => x.id === inventory.id);
+  const [currentInventory, setCurrentInventory] = useState<Inventory | null>();
 
   // Try loading the inventory if not found
   useEffect(() => {
@@ -42,11 +43,21 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
     fetchIfMissing();
   }, [currentInventory, token]);
 
+  // Reload inventory when change happens.
+  useEffect(() => {
+    if (!inventories) return;
+
+    setCurrentInventory(inventories.find((x) => x.id === inventory.id));
+    console.log("Change happened.")
+  }, [inventories]);
+
+  // Item removal
   const handleRemoveClick = (equipmentId: string) => {
     setSelectedItem(equipmentId);
     setRemoveModalOpened(true);
   };
 
+  // Item move
   const handleMoveClick = (equipmentId: string) => {
       setMoveItemId(equipmentId);
       setMoveModalOpened(true);
@@ -78,7 +89,6 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
     if (!moveItemId || !currentInventory?.id || !token) return;
 
     try {
-      // Call the backend service
       const request : MoveItemRequest = {
         targetInventoryId,
         amount,
@@ -108,7 +118,6 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
     }
   };
 
-  // 🌀 Graceful loading or empty state
   if (loading)
     return (
       <Center py="md">
@@ -172,7 +181,8 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
             No items in this inventory.
           </Text>
         )}
-        <CurrencyBox currencies={currentInventory.currencies || {}} />
+
+        <InventoryCurrencyClaim inventoryId={inventory.id!}/>
       </Stack>
 
       </ExpandableSection>

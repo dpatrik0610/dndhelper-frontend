@@ -4,14 +4,16 @@ import { useSpellStore } from "../../store/useSpellStore";
 import { useEffect } from "react";
 import { loadSpells } from "../../utils/loadSpells";
 import { SpellSelect } from "./components/SpellSelect";
-import { SpellCard } from "../../components/SpellCard";
+import { SpellCard } from "./components/SpellCard";
 import { IconDatabase } from "@tabler/icons-react";
+import { useMediaQuery } from "@mantine/hooks";
 
 export default function SpellPage () {
     const token = useAuthStore.getState().token;
     const spellList = useSpellStore((state) => state.spellNames)
     const currentSpell = useSpellStore((state) => state.currentSpell)
-
+    const isMobile = useMediaQuery("(max-width: 768px)");
+    
     useEffect(() => {
         const fetchSpells = async () => {
             if (!spellList || spellList.length === 0) {
@@ -24,10 +26,11 @@ export default function SpellPage () {
 
 
     return (
-    <Box p="md" m={"0 auto"} maw={900} >
+    <Box m={ isMobile? 0 : "0 auto"} maw={isMobile? "100%" : 900} w={isMobile ? "100%" : undefined} >
         <Group bg={"transparent"} justify="space-between" mb={"md"}>
             <Title order={2}> <IconDatabase size={18}/> Spell Database </Title>
             <SpellSelect/>
+
             {!currentSpell && 
             <Container
             mih={150}
@@ -45,7 +48,12 @@ export default function SpellPage () {
                 <Text> Please search for a spell via the Box above. </Text>
                 <Text>You can also filter them by their spell level.</Text>
             </Container>}
-            {currentSpell && <SpellCard/>}
+
+            {currentSpell && 
+            <Box miw={"100%"} flex={1}>
+                <SpellCard/>
+            </Box>
+            }
         </Group>
     </Box>
     )

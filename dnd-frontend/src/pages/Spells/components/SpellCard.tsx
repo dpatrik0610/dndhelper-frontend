@@ -5,17 +5,21 @@ import {
   Text,
   Divider,
   useMantineTheme,
+  Table,
+  Box,
 } from "@mantine/core";
-import { useSpellStore } from "../store/useSpellStore";
-import CustomBadge from "./common/CustomBadge";
-import DisplayText from "./common/DisplayText";
-import { ExpandableSection } from "./ExpendableSection";
+import { useSpellStore } from "../../../store/useSpellStore";
+import CustomBadge from "../../../components/common/CustomBadge";
+import DisplayText from "../../../components/common/DisplayText";
+import { ExpandableSection } from "../../../components/ExpendableSection";
 import { IconWand, IconFlame, IconBook, IconSparkles } from "@tabler/icons-react";
-import { SectionColor } from "../types/SectionColor";
-import { DividerWithLabel } from "./common/DividerWithLabel";
-import { getDamageInfo } from "../utils/getDamageInfo";
+import { SectionColor } from "../../../types/SectionColor";
+import { DividerWithLabel } from "../../../components/common/DividerWithLabel";
+import { getDamageInfo } from "../../../utils/getDamageInfo";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-export function SpellCard() {
+export function SpellCard() {  
   const currentSpell = useSpellStore((state) => state.currentSpell);
 
   if (!currentSpell)
@@ -48,17 +52,47 @@ export function SpellCard() {
     }
   }
 
+  function processDescription(descArray: string[]) {
+    const result = [];
+    let currentTable: string[] = [];
+    
+    for (let i = 0; i < descArray.length; i++) {
+      const line = descArray[i];
+      
+      // Check if this line starts a table or is part of a table
+      if (line.startsWith('|') || (line.includes('#####') && descArray[i + 1]?.startsWith('|'))) {
+        currentTable.push(line);
+      } else {
+        // If we were building a table, push it first
+        if (currentTable.length > 0) {
+          result.push(currentTable.join('\n'));
+          currentTable = [];
+        }
+        result.push(line);
+      }
+    }
+    
+    // Don't forget the last table
+    if (currentTable.length > 0) {
+      result.push(currentTable.join('\n'));
+    }
+    
+    return result;
+  }
+
   return (
-    <Card p="md" withBorder mb="md" style={{ background: "linear-gradient(175deg, #0009336b 0%, rgba(48, 0, 0, 0.37) 100%)" }}>
+    <Card 
+    p="md" 
+    withBorder 
+    mb="md" 
+    style={{ 
+      background: "linear-gradient(175deg, #0009336b 0%, rgba(48, 0, 0, 0.37) 100%)", 
+      }}>
       {/* Header */}
-      <Group justify="space-between" mb="sm">
+      <Group justify="" mb="sm">
+
         <Text size="xl" fw={700} tt="uppercase">
             {currentSpell.name}
-            {currentSpell.material && (
-            <Text size="sm" c="dimmed" fs="italic">
-            ({currentSpell.material})
-            </Text>
-        )}
         </Text>
 
         {/* Magic School */}
@@ -70,6 +104,12 @@ export function SpellCard() {
           icon={<IconBook size={16} />}
         />
       </Group>
+
+        {currentSpell.material && (
+        <Text component="span" size="sm" c="dimmed" fs="italic">
+          ({currentSpell.material})
+        </Text>
+        )}
 
       <DividerWithLabel label="Spell Details" color={SectionColor.Violet} />
 
@@ -109,18 +149,64 @@ export function SpellCard() {
 
       {/* Description */}
       <ExpandableSection title="Description" color={SectionColor.Blue} defaultOpen>
-        <Stack gap="xs">
-          {currentSpell.description?.map((paragraph, i) => (
-            <Text key={i} size="sm">
-              {paragraph}
-            </Text>
-          ))}
+        <Stack gap="xs">  
+          {
+            processDescription(currentSpell.description).map((content, i) => (
+              <ReactMarkdown 
+                key={i} 
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({node, ...props}) => <Text size="md" {...props} style={{ margin: 0, lineHeight: 1.3 }} />,
+                  // Reduce header margins
+                  h1: ({node, ...props}) => <Text component="h1" size="xl" fw={800} tt={"uppercase"} {...props} style={{ margin: '4px 0', lineHeight: 1.2 }} />,
+                  h2: ({node, ...props}) => <Text component="h2" size="lg" fw={700} tt={"uppercase"} {...props} style={{ margin: '4px 0', lineHeight: 1.2 }} />,
+                  h3: ({node, ...props}) => <Text component="h3" size="md" fw={700} tt={"uppercase"} {...props} style={{ margin: '4px 0', lineHeight: 1.2 }} />,
+                  h4: ({node, ...props}) => <Text component="h4" size="md" fw={700} tt={"uppercase"} {...props} style={{ margin: '4px 0', lineHeight: 1.2 }} />,
+                  h5: ({node, ...props}) => <Text component="h5" size="sm" fw={700} tt={"uppercase"} {...props} style={{ margin: '4px 0', lineHeight: 1.2 }} />,
+                  h6: ({node, ...props}) => <Text component="h6" size="sm" fw={700} tt={"uppercase"} {...props} style={{ margin: '4px 0', lineHeight: 1.2 }} />,
+                  table: ({node, ...props}) => (
+                    <Table 
+                      striped 
+                      highlightOnHover 
+                      withTableBorder 
+                      withColumnBorders
+                      style={{ margin: '8px 0' }} // Reduced margin
+                      {...props}
+                    />
+                  ),
+                  th: ({node, ...props}) => (
+                    <Table.Th 
+                      style={{ 
+                        textAlign: 'left',
+                        padding: '5px', // Slightly reduced padding
+                        fontWeight: 600 
+                      }} 
+                      {...props} 
+                    />
+                  ),
+                  td: ({node, ...props}) => (
+                    <Table.Td 
+                      style={{ 
+                        textAlign: 'left',
+                        padding: '5px' // Slightly reduced padding
+                      }} 
+                      {...props} 
+                    />
+                  ),
+                }}
+              >
+                {content}
+              </ReactMarkdown>
+            ))
+          }
+
           {currentSpell.higherLevel?.length > 0 && (
             <>
               <Divider my="xs" color="rgba(255,255,255,0.1)" />
-              <Text fw={600}>At Higher Levels:</Text>
+              <Text fw={600} style={{ marginBottom: 4 }}>At Higher Levels:</Text> {/* Reduced bottom margin */}
+
               {currentSpell.higherLevel.map((hl, i) => (
-                <Text key={i} size="sm">
+                <Text key={i} size="sm" style={{ margin: 0, lineHeight: 1.4 }}>
                   {hl}
                 </Text>
               ))}

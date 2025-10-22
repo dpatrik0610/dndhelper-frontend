@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Inventory } from "../types/Inventory/Inventory";
 import type { InventoryItem } from "../types/Inventory/InventoryItem";
+import type { Currency } from "../types/Currency";
 
 interface InventoryState {
   inventories: Inventory[];
@@ -14,6 +15,7 @@ interface InventoryState {
   removeInventory: (id: string) => void;
   selectInventory: (inventory: Inventory | null) => void;
   moveItem: (sourceInventoryId: string, targetInventoryId: string, equipmentId: string, amount: number) => void;
+  updateInventoryCurrencies: (id: string, newCurrencies: Currency[]) => void;
 
   // item actions
   addItem: (inventoryId: string, item: InventoryItem) => void;
@@ -88,6 +90,7 @@ export const useInventoryStore = create<InventoryState>()(
               : inv
           ),
         })),
+
       updateItem: (inventoryId, equipmentId, updated) =>
         set((state) => ({
           inventories: state.inventories.map((inv) =>
@@ -101,6 +104,7 @@ export const useInventoryStore = create<InventoryState>()(
               : inv
           ),
         })),
+
       removeItem: (inventoryId, equipmentId) =>
         set((state) => ({
           inventories: state.inventories.map((inv) =>
@@ -109,6 +113,7 @@ export const useInventoryStore = create<InventoryState>()(
               : inv
           ),
         })),
+
       incrementItemQuantity: (inventoryId, equipmentId, amount = 1) =>
         set((state) => ({
           inventories: state.inventories.map((inv) =>
@@ -124,6 +129,7 @@ export const useInventoryStore = create<InventoryState>()(
               : inv
           ),
         })),
+
       decrementItemQuantity: (inventoryId, equipmentId, amount = 1) =>
         set((state) => ({
           inventories: state.inventories.map((inv) =>
@@ -139,6 +145,16 @@ export const useInventoryStore = create<InventoryState>()(
               : inv
           ),
         })),
+
+      updateInventoryCurrencies: (id: string, newCurrencies: Currency[]) =>
+        set((state) => {
+          return {
+            inventories: state.inventories.map((inv) =>
+              inv.id === id ? { ...inv, currencies: newCurrencies } : inv
+            ),
+          };
+        }),
+
     }),
     {
       name: "inventory-storage",

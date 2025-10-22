@@ -4,15 +4,18 @@ import { useCharacterStore } from "../store/useCharacterStore";
 
 export async function loadInventories(token: string) {
   const character = useCharacterStore.getState().character;
-
   if (!character?.id) {
     console.warn("⚠️ No character selected — skipping inventory load.");
     return [];
   }
 
+  const {inventories, setInventories} = useInventoryStore.getState();
+
   try {
-    const inventories = await getInventoriesByCharacter(character.id, token);
-    useInventoryStore.getState().setInventories(inventories);
+    const response = await getInventoriesByCharacter(character.id, token);
+
+    setInventories(response);
+
     console.log(`✅ Loaded ${inventories.length} inventories.`);
     return inventories;
   } catch (error) {

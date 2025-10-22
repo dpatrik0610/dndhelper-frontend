@@ -11,7 +11,7 @@ import AlreadyLoggedIn from './AlreadyLoggedIn'
 export default function LoginForm() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const {token} = useAuthStore();
+    const token = useAuthStore((state) => state.token);
     
     const navigate = useNavigate()
     const toggleNotification = useLoadingNotification({

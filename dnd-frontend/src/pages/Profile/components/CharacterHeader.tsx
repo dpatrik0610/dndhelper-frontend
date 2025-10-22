@@ -1,10 +1,11 @@
-import { Paper, Title, Group, Badge, Grid, Text, Stack} from "@mantine/core";
-import { IconSkull, IconSword } from "@tabler/icons-react";
+import { Paper, Title, Group, Badge, Grid, Text, Stack, Flex} from "@mantine/core";
+import { IconSkull } from "@tabler/icons-react";
 import { StatBox } from "./StatBox";
 import ReloadButton from "./ReloadButton";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useMediaQuery } from "@mantine/hooks";
 import { SectionColor } from "../../../types/SectionColor";
+import { CharacterCurrencyArea } from "../../../components/CharacterCurrencyArea";
 
 export function CharacterHeader() {
   const character = useCharacterStore((state) => state.character)!;
@@ -23,12 +24,20 @@ export function CharacterHeader() {
     <Grid.Col span={{ base: 12, sm: 6 }}>
       <Stack lts="xs">
         <Title order={1} c="white">{character.name} {character.isDead && <Badge size="md" color="red" leftSection={<IconSkull size={16} />}>Deceased</Badge>}</Title>
+        
         <Text c="white">ID: {character.id}</Text>
-        <Group gap="sm">
-          <Badge size="lg" w={isMobile? "100%" : undefined} color="blue"variant="gradient" gradient={{from: SectionColor.Yellow, to: SectionColor.Dark, deg: 45}}>{character.characterClass}</Badge>
-          <Badge size="lg" w={isMobile? "100%" : undefined} color="teal" variant="gradient" gradient={{from: SectionColor.Grape, to: SectionColor.Dark, deg: 45}}>{character.race}</Badge>
-          <Badge size="lg" w={isMobile? "100%" : undefined} color="orange" variant="outline" style={{ borderColor: "white", color: "white" }}>{character.alignment}</Badge>
-        </Group>
+        
+        <Flex gap="sm" lts="xs" align="center" justify={isMobile ? "center" : "flex-start"} direction={isMobile ? "column" : "row"}>
+          <Badge size="lg" w={isMobile ? "100%" : undefined} color="blue" variant="gradient" gradient={{from: SectionColor.Yellow, to: SectionColor.Dark, deg: 45}}>{character.characterClass}</Badge>
+          <Badge size="lg" w={isMobile ? "100%" : undefined} color="teal" variant="gradient" gradient={{from: SectionColor.Grape, to: SectionColor.Dark, deg: 45}}>{character.race}</Badge>
+          <Badge size="lg" w={isMobile ? "100%" : undefined} color="orange" variant="outline" style={{ borderColor: "white", color: "white" }}>{character.alignment}</Badge>
+        </Flex>
+
+        <Stack mt={15}>
+          {character.currencies && 
+          <CharacterCurrencyArea />
+          }
+        </Stack>
       </Stack>
     </Grid.Col>
 

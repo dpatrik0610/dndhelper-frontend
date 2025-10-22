@@ -26,18 +26,24 @@ export function MoveItemModal({ opened, onClose, inventories, currentInventoryId
   }, [itemId, currentInventoryId, inventories]);
 
   const otherInventories = inventories
-    .filter(i => i.id !== currentInventoryId)
-    .map(i => ({ value: i.id!, label: i.name! }));
+    .filter((i) => i.id && i.id !== currentInventoryId)
+    .map((i) => ({
+      value: i.id!,
+      label: i.name || "Unnamed Inventory",
+      key: i.id!,
+    }));
+
 
   return (
     <Modal opened={opened} onClose={onClose} title="Move Item">
       <Stack>
         <Select
+          key={otherInventories.map((inv) => inv.key).join("-")}
           label="Target Inventory"
           placeholder="Select inventory"
           data={otherInventories}
           value={targetInventory}
-          onChange={setTargetInventory}
+          onChange={ setTargetInventory }
         />
         <NumberInput
           label="Amount to move"
