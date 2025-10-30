@@ -5,6 +5,9 @@ import { useInventoryStore } from "../store/useInventorystore";
 import { useSpellStore } from "../store/useSpellStore";
 
 export const handleLogout = (navigate: NavigateFunction) => {
+
+  localStorage.clear();
+  
   // Clear auth
   useAuthStore.getState().clearAuthData();
   useAuthStore.persist.clearStorage();

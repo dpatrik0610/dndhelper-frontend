@@ -70,13 +70,13 @@ export default function Home() {
   useEffect(() => {
     getRecentEvents()
       .then((data: Event[]) => setEvents(data))
-      .catch(() =>
-        notifications.show({
-          title: "Error",
-          message: "Failed to load recent events.",
-          color: "red",
-        })
-      )
+      // .catch(() =>
+      //   notifications.show({
+      //     title: "Error",
+      //     message: "Failed to load recent events.",
+      //     color: "red",
+      //   })
+      // )
       .finally(() => setLoading(false));
   }, []);
 

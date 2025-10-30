@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, redirect, useNavigate } from 'react-router-dom';
 import { AppShell, ActionIcon } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuthStore } from './store/useAuthStore';
@@ -16,8 +16,11 @@ import { IconChevronRight } from '@tabler/icons-react';
 import { Inventory } from './pages/Inventory/Inventory';
 import SpellPage from './pages/Spells/SpellPage';
 import { DashboardSection } from './pages/Admin/components/Sections/DashboardSection';
+import { decodeToken } from './utils/decodeToken';
+import { handleLogout } from './utils/handleLogout';
 
 export default function AppContent() {
+  const navigate = useNavigate();
   let token = useAuthStore((s) => s.token);
   const [opened, handlers] = useDisclosure(false);
   const { characters } = useCharacterStore();
@@ -26,9 +29,27 @@ export default function AppContent() {
 
   const showSidebarOn = ['/', '/home', '/profile', '/inventory', "/spells", "/dashboard"];
   const showSidebar = showSidebarOn.includes(location.pathname);
+  let lstoken = localStorage.getItem("authToken");
+
+  function isTokenExpired(token : string) : boolean {
+    if (!token || token == "") return true;
+
+    // This will be in Seconds
+    const expiry = decodeToken(token)?.exp; 
+    if (!expiry) return true;
+
+    const now = Date.now() / 1000; // In seconds
+    const isExpired = expiry < now;
+    console.log(isExpired ? "Token expired." : "Token is not expired.");
+
+    return isExpired;
+    }
 
   useEffect(() => {
-    const lstoken = localStorage.getItem("authToken");
+    if (isTokenExpired(lstoken ?? "") || isTokenExpired(token ?? "") ) {
+    handleLogout(navigate);
+    }
+
     if (!token && lstoken) {
         token = lstoken;
     }

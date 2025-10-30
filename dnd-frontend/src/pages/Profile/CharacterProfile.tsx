@@ -9,6 +9,7 @@ import { SpellBlock } from "./components/SpellBlock";
 import { useNavigate } from "react-router-dom";
 import { ActionBar } from "./components/ActionsBar";
 import { SectionColor } from "../../types/SectionColor";
+import { SkillsPanel } from "./components/SkillsPanel";
 
 export default function CharacterProfile() {
   const character  = useCharacterStore((state) => state.character);
@@ -59,6 +60,7 @@ export default function CharacterProfile() {
       <CharacterHeader/>
       <ActionBar/>
       <CombatStats/>
+      <SkillsPanel />
       <SpellBlock/>
       <AbilityScores/>
       <ExtraInfo/>
