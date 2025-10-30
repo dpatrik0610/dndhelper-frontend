@@ -34,6 +34,7 @@ export function useCharacterForm(editMode: boolean) {
       hitPoints: 10,
       maxHitPoints: 10,
       temporaryHitPoints: 0,
+      hitDice: "",
       speed: 30,
       initiative: 0,
       proficiencyBonus: 2,
@@ -41,6 +42,22 @@ export function useCharacterForm(editMode: boolean) {
       isNPC: false,
       experience: 0,
       description: "",
+      abilityScores: {
+        str: 10,
+        dex: 10,
+        con: 10,
+        int: 10,
+        wis: 10,
+        cha: 10,
+      },
+      savingThrows: {
+        strength: 0,
+        dexterity: 0,
+        constitution: 0,
+        intelligence: 0,
+        wisdom: 0,
+        charisma: 0,
+      },
     },
     validate: {
       name: (value) =>
@@ -52,7 +69,6 @@ export function useCharacterForm(editMode: boolean) {
     },
   });
 
-  // ✏️ When editing, prefill the form with existing character data
   useEffect(() => {
     if (editMode && character) form.setValues(character);
   }, [editMode, character]);

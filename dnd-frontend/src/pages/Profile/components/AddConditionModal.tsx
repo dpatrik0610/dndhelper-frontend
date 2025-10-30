@@ -12,6 +12,9 @@ import { getConditions } from "../../../services/conditionService";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { notifications } from "@mantine/notifications";
 import { IconPlus } from "@tabler/icons-react";
+import { updateCharacter } from "../../../services/characterService";
+import { useAuthStore } from "../../../store/useAuthStore";
+import { loadCharacters } from "../../../utils/loadCharacter";
 
 interface AddConditionModalProps {
   opened: boolean;
@@ -19,10 +22,11 @@ interface AddConditionModalProps {
 }
 
 export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
-  const { character, updateCharacter } = useCharacterStore();
+  const character = useCharacterStore((state) => state.character);
   const [conditions, setConditions] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const token = useAuthStore.getState().token!;
 
   useEffect(() => {
     async function loadConditions() {
@@ -34,7 +38,7 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     if (opened) loadConditions();
   }, [opened]);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!selected || !character) return;
     if (character.conditions.includes(selected)) {
       notifications.show({
@@ -44,10 +48,12 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
       });
       return;
     }
+    character.conditions = [...character.conditions, selected];
+    console.log("Current conditions in the store: ", character.conditions);
 
-    updateCharacter({
-      conditions: [...character.conditions, selected],
-    });
+    const apiResponse = await updateCharacter(character, token);
+    if (apiResponse) console.log("Condition added to the API: " + apiResponse.conditions)
+    loadCharacters(token)
 
     notifications.show({
       title: "Condition Added",

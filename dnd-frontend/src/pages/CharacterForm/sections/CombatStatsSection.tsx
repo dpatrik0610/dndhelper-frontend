@@ -1,4 +1,4 @@
-import { Group, NumberInput, Stack } from "@mantine/core";
+import { Group, NumberInput, Stack, TextInput } from "@mantine/core";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { IconSword } from "@tabler/icons-react";
@@ -26,6 +26,7 @@ export function CombatStatsSection({ form }: CombatStatsProps) {
         <Group grow>
           <NumberInput label="Initiative" {...form.getInputProps("initiative")} />
           <NumberInput label="Experience" {...form.getInputProps("experience")} />
+          <TextInput label="Hit dice" {...form.getInputProps("hitDice")} />
         </Group>
       </Stack>
     </ExpandableSection>

@@ -30,6 +30,7 @@ export interface Character {
   initiative: number; // ✅
   alignment: string; // ✅
   proficiencyBonus: number; // ✅
+  hitDice: string; // ❌
 
    // ❌ These are all missing # TODO
   proficiencies: string[];

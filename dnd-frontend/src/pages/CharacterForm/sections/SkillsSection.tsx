@@ -11,80 +11,91 @@ import {
 } from "@mantine/core";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
-import { IconAutomaticGearbox, IconTrash, IconPlus } from "@tabler/icons-react";
+import {
+  IconAutomaticGearbox,
+  IconTrash,
+  IconPlus,
+  IconStarFilled,
+  IconX,
+} from "@tabler/icons-react";
+import { useState, useEffect, useMemo } from "react";
+import { useMediaQuery } from "@mantine/hooks";
 import type { UseFormReturnType } from "@mantine/form";
-import { useState, useEffect } from "react";
+import CustomBadge from "../../../components/common/CustomBadge";
 
-// 🧠 Default D&D 5e skills + associated ability
-const DEFAULT_SKILLS: { name: string; ability: string; description: string }[] = [
-  { name: "Acrobatics", ability: "Dexterity", description: "Perform flips, rolls, and balance-related stunts." },
-  { name: "Animal Handling", ability: "Wisdom", description: "Calm or control animals and mounts." },
-  { name: "Arcana", ability: "Intelligence", description: "Knowledge of magic, spells, and magical history." },
-  { name: "Athletics", ability: "Strength", description: "Climbing, jumping, and physical feats of strength." },
-  { name: "Deception", ability: "Charisma", description: "Lying, disguises, and misleading others." },
-  { name: "History", ability: "Intelligence", description: "Knowledge of historical events and lore." },
-  { name: "Insight", ability: "Wisdom", description: "Read emotions, intentions, and motives of others." },
-  { name: "Intimidation", ability: "Charisma", description: "Use fear or presence to influence others." },
-  { name: "Investigation", ability: "Intelligence", description: "Deduce clues, details, and hidden objects." },
-  { name: "Medicine", ability: "Wisdom", description: "Stabilize creatures and diagnose injuries." },
-  { name: "Nature", ability: "Intelligence", description: "Knowledge of terrain, plants, and wildlife." },
-  { name: "Perception", ability: "Wisdom", description: "Spotting traps, ambushes, and hidden things." },
-  { name: "Performance", ability: "Charisma", description: "Musical or theatrical expression and skill." },
-  { name: "Persuasion", ability: "Charisma", description: "Convincing, negotiating, or diplomacy." },
-  { name: "Religion", ability: "Intelligence", description: "Knowledge of deities, rites, and divine lore." },
-  { name: "Sleight of Hand", ability: "Dexterity", description: "Pickpocketing and manual dexterity tricks." },
-  { name: "Stealth", ability: "Dexterity", description: "Sneaking, hiding, and moving unseen." },
-  { name: "Survival", ability: "Wisdom", description: "Tracking, foraging, and surviving harsh terrain." },
-];
-
-interface SkillsSectionProps {
-  form: UseFormReturnType<any>;
+interface AbilityScores {
+  str: number; dex: number; con: number; int: number; wis: number; cha: number;
 }
+
+const DEFAULT_SKILLS = [
+  { name: "Acrobatics", ability: "dex", desc: "Perform flips and balance-related stunts." },
+  { name: "Animal Handling", ability: "wis", desc: "Calm or control animals and mounts." },
+  { name: "Arcana", ability: "int", desc: "Knowledge of magic and magical history." },
+  { name: "Athletics", ability: "str", desc: "Climbing, jumping, and physical feats of strength." },
+  { name: "Deception", ability: "cha", desc: "Lying, disguises, and misleading others." },
+  { name: "History", ability: "int", desc: "Knowledge of historical events and lore." },
+  { name: "Insight", ability: "wis", desc: "Read emotions and intentions." },
+  { name: "Intimidation", ability: "cha", desc: "Use fear or presence to influence others." },
+  { name: "Investigation", ability: "int", desc: "Deduce clues and hidden details." },
+  { name: "Medicine", ability: "wis", desc: "Diagnose and stabilize injuries." },
+  { name: "Nature", ability: "int", desc: "Knowledge of terrain, plants, and wildlife." },
+  { name: "Perception", ability: "wis", desc: "Spot traps, ambushes, or hidden things." },
+  { name: "Performance", ability: "cha", desc: "Musical or theatrical skill." },
+  { name: "Persuasion", ability: "cha", desc: "Convince, negotiate, or charm others." },
+  { name: "Religion", ability: "int", desc: "Knowledge of deities and divine rites." },
+  { name: "Sleight of Hand", ability: "dex", desc: "Pickpocketing and manual tricks." },
+  { name: "Stealth", ability: "dex", desc: "Sneaking and hiding unseen." },
+  { name: "Survival", ability: "wis", desc: "Tracking, foraging, and enduring the wilds." },
+] as const;
+
+interface SkillsSectionProps { form: UseFormReturnType<any>; }
 
 export function SkillsSection({ form }: SkillsSectionProps) {
   const [newSkill, setNewSkill] = useState("");
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const scores = form.values.abilityScores ?? {};
 
-  // 🧩 Preload default skills if none exist
+  // 🎲 Calculate ability modifiers
+  const mods = useMemo(() => {
+    const calc = (v: number) => Math.floor((v - 10) / 2);
+    return {
+      str: calc(scores.str), dex: calc(scores.dex), con: calc(scores.con),
+      int: calc(scores.int), wis: calc(scores.wis), cha: calc(scores.cha),
+    };
+  }, [scores]);
+
+  // 🧮 Get base (min) skill value = ability mod + proficiency (if any)
+  const getBase = (s: any) => {
+    const base = DEFAULT_SKILLS.find(d => d.name === s.name);
+    const mod = base ? mods[base.ability as keyof AbilityScores] : 0;
+    const prof = s.proficient ? (form.values.proficiencyBonus ?? 0) : 0;
+    return mod + prof;
+  };
+
+  // 🧩 Initialize default skills
   useEffect(() => {
-    if (!form.values.skills || form.values.skills.length === 0) {
-      const preloaded = DEFAULT_SKILLS.map((s) => ({
-        name: s.name,
-        value: 0,
-        proficient: false,
-      }));
-      form.setFieldValue("skills", preloaded);
+    if (!form.values.skills?.length) {
+      form.setFieldValue("skills", DEFAULT_SKILLS.map(s => ({ name: s.name, value: 0, proficient: false })));
     }
   }, [form.values.skills]);
 
+  // ➕ Add new skill
   const addSkill = () => {
-    if (!newSkill.trim()) return;
-    const exists = form.values.skills.some(
-      (s: any) => s.name.toLowerCase() === newSkill.trim().toLowerCase()
-    );
-    if (exists) return;
-
-    const updated = [
-      ...form.values.skills,
-      { name: newSkill.trim(), value: 0, proficient: false },
-    ];
-    form.setFieldValue("skills", updated);
+    const name = newSkill.trim();
+    if (!name || form.values.skills.some((s: any) => s.name.toLowerCase() === name.toLowerCase())) return;
+    form.setFieldValue("skills", [...form.values.skills, { name, value: 0, proficient: false }]);
     setNewSkill("");
   };
 
-  const removeSkill = (name: string) => {
-    // ❌ Prevent removing default skills
-    if (DEFAULT_SKILLS.some((s) => s.name === name)) return;
-    const updated = form.values.skills.filter((s: any) => s.name !== name);
-    form.setFieldValue("skills", updated);
-  };
+  // ❌ Remove skill
+  const removeSkill = (name: string) =>
+    !DEFAULT_SKILLS.some(s => s.name === name) &&
+    form.setFieldValue("skills", form.values.skills.filter((s: any) => s.name !== name));
+
+  const skills = form.values.skills ?? [];
 
   return (
-    <ExpandableSection
-      title="Skills"
-      icon={<IconAutomaticGearbox />}
-      color={SectionColor.White}
-      defaultOpen
-    >
+    <ExpandableSection title="Skills" icon={<IconAutomaticGearbox />} color={SectionColor.White} defaultOpen>
       <Stack>
         <Group>
           <TextInput
@@ -93,91 +104,66 @@ export function SkillsSection({ form }: SkillsSectionProps) {
             onChange={(e) => setNewSkill(e.currentTarget.value)}
             style={{ flexGrow: 1 }}
           />
-          <ActionIcon color="teal" variant="filled" onClick={addSkill}>
-            <IconPlus size={16} />
-          </ActionIcon>
+          <ActionIcon color="teal" variant="filled" onClick={addSkill}><IconPlus size={16} /></ActionIcon>
         </Group>
 
-        {(!form.values.skills || form.values.skills.length === 0) ? (
-          <Text c="dimmed" size="sm">
-            No skills yet.
-          </Text>
+        {skills.length === 0 ? (
+          <Text c="dimmed" size="sm">No skills yet.</Text>
         ) : (
-          <SimpleGrid cols={3} spacing="xs">
-            {form.values.skills.map((skill: any) => {
-              const base = DEFAULT_SKILLS.find((s) => s.name === skill.name);
+          <SimpleGrid cols={isMobile ? 1 : 2} spacing="xs">
+            {skills.map((s: any) => {
+              const def = DEFAULT_SKILLS.find(d => d.name === s.name);
+              const base = getBase(s);
               return (
                 <Tooltip
-                  key={skill.name}
-                  label={base ? `${base.name} (${base.ability}) — ${base.description}` : "Custom skill"}
-                  multiline
-                  maw={250}
-                  withArrow
-                  color="dark"
-                  transitionProps={{ transition: "fade", duration: 150 }}
+                  key={s.name}
+                  label={def ? `${def.name} (${def.ability.toUpperCase()}) — ${def.desc}` : "Custom skill"}
+                  withArrow color="dark" maw={250}
                 >
                   <Group
-                    align="center"
                     gap="xs"
+                    align="center"
                     style={{
-                      background: "rgba(255,255,255,0.04)",
+                      background: "rgba(255,255,255,0.05)",
                       borderRadius: 6,
-                      padding: "4px 6px",
+                      padding: "6px 8px",
                       transition: "background 0.2s ease",
                     }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.08)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.04)")
-                    }
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
                   >
-                    <TextInput
-                      value={skill.name}
-                      onChange={(e) => {
-                        const updated = form.values.skills.map((s: any) =>
-                          s.name === skill.name
-                            ? { ...s, name: e.currentTarget.value }
-                            : s
-                        );
-                        form.setFieldValue("skills", updated);
-                      }}
-                      style={{ flex: 1 }}
-                      readOnly={!!base} // 🧱 Default skills can’t be renamed
-                    />
+                    <CustomBadge label={s.name} style={{ flex: 1 }} c={SectionColor.Teal} variant="transparent" fullWidth />
+
                     <NumberInput
-                      value={skill.value}
-                      onChange={(val) => {
-                        const updated = form.values.skills.map((s: any) =>
-                          s.name === skill.name
-                            ? { ...s, value: val ?? 0 }
-                            : s
-                        );
-                        form.setFieldValue("skills", updated);
+                      value={s.value || base}
+                      min={base}
+                      onChange={(v) => {
+                        const val = Math.max(Number(v) || base, base);
+                        form.setFieldValue("skills", skills.map((x: any) =>
+                          x.name === s.name ? { ...x, value: val } : x
+                        ));
                       }}
                       style={{ width: 70 }}
+                      size={isMobile ? "xs" : "sm"}
                     />
+
                     <Switch
-                      size="xs"
-                      checked={skill.proficient}
+                      size="md"
+                      checked={s.proficient}
                       onChange={(e) => {
-                        const updated = form.values.skills.map((s: any) =>
-                          s.name === skill.name
-                            ? { ...s, proficient: e.currentTarget.checked }
-                            : s
-                        );
-                        form.setFieldValue("skills", updated);
+                        form.setFieldValue("skills", skills.map((x: any) =>
+                          x.name === s.name ? { ...x, proficient: e.currentTarget.checked } : x
+                        ));
                       }}
-                      title="Proficient"
+                      thumbIcon={
+                        s.proficient
+                          ? <IconStarFilled size={16} color="var(--mantine-color-yellow-6)" />
+                          : <IconX size={16} color="var(--mantine-color-red-6)" />
+                      }
                     />
-                    {!base && (
-                      <ActionIcon
-                        color="red"
-                        variant="light"
-                        onClick={() => removeSkill(skill.name)}
-                      >
+
+                    {!def && (
+                      <ActionIcon color="red" variant="light" onClick={() => removeSkill(s.name)}>
                         <IconTrash size={16} />
                       </ActionIcon>
                     )}
