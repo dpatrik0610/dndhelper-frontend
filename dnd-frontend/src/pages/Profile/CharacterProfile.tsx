@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { ActionBar } from "./components/ActionsBar";
 import { SectionColor } from "../../types/SectionColor";
 import { SkillsPanel } from "./components/SkillsPanel";
+import { ConditionsPanel } from "./components/ConditionsPanel";
 
 export default function CharacterProfile() {
   const character  = useCharacterStore((state) => state.character);
@@ -57,12 +58,13 @@ export default function CharacterProfile() {
         )}
       </Group>
 
-      <CharacterHeader/>
       <ActionBar/>
-      <CombatStats/>
-      <SkillsPanel />
-      <SpellBlock/>
+      <CharacterHeader/>
+      <ConditionsPanel />
       <AbilityScores/>
+      <SkillsPanel />
+      <CombatStats/>
+      <SpellBlock/>
       <ExtraInfo/>
     </Box>
   );

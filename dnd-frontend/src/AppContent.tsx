@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation, redirect, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AppShell, ActionIcon } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useAuthStore } from './store/useAuthStore';
@@ -20,6 +20,7 @@ import { decodeToken } from './utils/decodeToken';
 import { handleLogout } from './utils/handleLogout';
 import { showNotification } from './components/Notification/Notification';
 import { SectionColor } from './types/SectionColor';
+import { CharacterFormPage } from './pages/CharacterForm/CharacterFormPage';
 
 export default function AppContent() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function AppContent() {
   const location = useLocation();
   const isAdmin = useAuthStore.getState().roles.includes("Admin");
 
-  const showSidebarOn = ['/', '/home', '/profile', '/inventory', "/spells", "/dashboard"];
+  const showSidebarOn = ['/', '/home', '/profile', '/inventory', "/spells", "/dashboard", "/newCharacter", "/editCharacter"];
   const showSidebar = showSidebarOn.includes(location.pathname);
   let lstoken = localStorage.getItem("authToken");
 
@@ -48,6 +49,8 @@ export default function AppContent() {
 
   useEffect(() => {
     if (isTokenExpired(lstoken ?? "") && isTokenExpired(token ?? "") ) {
+      if (location.pathname == "/register") return;
+      
       showNotification({
         id: "expiredToken",
         title: "Token expired",
@@ -55,7 +58,10 @@ export default function AppContent() {
         color: SectionColor.Red,
         withBorder: true,
       })
-    handleLogout(navigate);
+
+      handleLogout();
+      console.log(`✅ User logged out, redirecting to login page.`);
+      navigate("/login");
     }
 
     if (!token && lstoken) {
@@ -99,6 +105,8 @@ export default function AppContent() {
             <Route path='/inventory' element={<Inventory/>} />
             <Route path="/profile" element={<CharacterProfile />} />
             <Route path='/spells' element={<SpellPage/>} />
+            <Route path='/newCharacter' element={<CharacterFormPage/>} />
+            <Route path='/editCharacter' element={<CharacterFormPage editMode = {true}/>} />
             {isAdmin &&
               <Route path='/dashboard' element={<DashboardSection />}/>
             }

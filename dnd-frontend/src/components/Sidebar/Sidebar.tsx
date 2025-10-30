@@ -8,7 +8,6 @@ import {
   UnstyledButton,
   ThemeIcon,
   useMantineTheme,
-  Divider,
   Box,
   Collapse,
 } from '@mantine/core';
@@ -196,7 +195,7 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
         </Stack>
         {/* Logout Button */}
         <UnstyledButton
-          onClick={() => handleLogout(navigate)}
+          onClick={() => handleLogout()}
           style={{
             display: 'flex',
             alignItems: 'center',

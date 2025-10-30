@@ -5,6 +5,7 @@ import { HeightLabel } from "./HeightLabel";
 import type { SpellSlot } from "./SpellSlot";
 import type { Skill } from "./Skill";
 
+// ❌ means it is still now shown in the character profile
 export interface Character {
   // METADATA
   id?: string;
@@ -43,23 +44,23 @@ export interface Character {
   currencies: Currency[];
 
   // STATBLOCK
-  abilityScores: AbilityScores;
-  savingThrows: SavingThrows;
-  inspiration: number;
-  skills: Skill[]
-  spellSaveDc: number;
-  spellAttackBonus: number;
-  spellSlots: SpellSlot[];
-  deathSavesSuccesses: number;
-  deathSavesFailures: number;
-  passivePerception: number;
-  passiveInvestigation: number;
-  passiveInsight: number;
-  experience: number;
-  carryingCapacity: number;
-  currentEncumbrance: number;
+  abilityScores: AbilityScores; // ✅
+  savingThrows: SavingThrows; // ✅
+  inspiration: number; // ✅
+  skills: Skill[] // ✅
+  spellSaveDc: number; // ✅
+  spellAttackBonus: number; // ✅
+  spellSlots: SpellSlot[]; // ✅
+  deathSavesSuccesses: number; // ✅
+  deathSavesFailures: number; // ✅
+  passivePerception: number; // ❌
+  passiveInvestigation: number; // ❌
+  passiveInsight: number; // ❌
+  experience: number; // ✅
+  carryingCapacity: number; // ❌
+  currentEncumbrance: number; // ❌
 
-  // FILLER
+  // FILLER //  All ✅
   backstory: string[];
   size: HeightLabel;
   age: number;

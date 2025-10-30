@@ -1,10 +1,9 @@
-import type { NavigateFunction } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCharacterStore } from "../store/useCharacterStore";
 import { useInventoryStore } from "../store/useInventorystore";
 import { useSpellStore } from "../store/useSpellStore";
 
-export const handleLogout = (navigate: NavigateFunction) => {
+export const handleLogout = () => {
 
   localStorage.clear();
   
@@ -23,7 +22,4 @@ export const handleLogout = (navigate: NavigateFunction) => {
   // Clear spells
   useSpellStore.getState().clearCurrentSpell();
   useSpellStore.persist.clearStorage();
-
-  console.log(`✅ User logged out, redirecting to login page.`);
-  navigate("/login");
 };

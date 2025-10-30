@@ -50,6 +50,7 @@ export function StatBox({
       w={fullWidth? "100%" : undefined}
       maw={fullWidth? "100%" : undefined}
       miw={fullWidth? undefined : "100px"}
+      mih={"72px"}
       p={s.padding}
       withBorder
       style={{

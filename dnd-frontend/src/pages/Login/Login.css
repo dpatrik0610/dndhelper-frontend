@@ -2,7 +2,7 @@
   position: relative;
   width: 360px;
   border-radius: 12px;
-  padding: 2px; /* space for border */
+  padding: 3px; /* space for border */
   background: rgba(0, 0, 0, 0.88);
   z-index: 0;
   overflow: hidden;
@@ -11,28 +11,37 @@
 .login-card::before {
   content: '';
   position: absolute;
-  inset: 0; /* full size of the card */
-  padding: 2px; /* thickness of the border */
+  inset: 0;
+  padding: 2px;
   border-radius: 12px;
-  background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet, red );
-  background-size: 300% 300%;
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
+  background: linear-gradient(
+    45deg,
+    red,
+    orange,
+    yellow,
+    green,
+    blue,
+    indigo,
+    violet,
+    red
+  );
+  background-size: 400% 400%;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  mask: 
+  mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
-  animation: border-shift 5s infinite;
-  animation-fill-mode: forwards;
-  transition: ease-in-out;
+  animation: border-shift 8s linear infinite alternate;
   z-index: -1;
 }
 
 @keyframes border-shift {
-  from { background-position: 0% 100%; }
-  to { background-position: 100% 0%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .login-card-inner {
@@ -41,5 +50,5 @@
   border-radius: 10px;
   background: rgb(0, 0, 0);
   padding: 2rem;
-  box-shadow: 0 0 15px rgba(255,255,255,0.2);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
 }

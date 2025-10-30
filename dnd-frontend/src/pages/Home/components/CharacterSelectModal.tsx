@@ -9,11 +9,13 @@ import {
   ActionIcon,
   Tooltip,
   Title,
+  Button,
 } from "@mantine/core";
 import { IconStar, IconUserCheck } from "@tabler/icons-react";
 import { useState } from "react";
 import type { Character } from "../../../types/Character/Character";
 import classes from "./CharacterSelectModal.module.css";
+import { useNavigate } from "react-router-dom";
 
 interface CharacterSelectModalProps {
   opened: boolean;
@@ -29,7 +31,7 @@ export function CharacterSelectModal({
   onSelect,
 }: CharacterSelectModalProps) {
   const [selected, setSelected] = useState<string | null>(null);
-
+  const navigate = useNavigate();
   const rows = characters.map((char) => (
     <Table.Tr
       key={char.id}
@@ -133,6 +135,7 @@ export function CharacterSelectModal({
           </Table>
         </Table.ScrollContainer>
       </ScrollArea>
+      <Button onClick={() => navigate("/newCharacter")}>New Character</Button>
     </Modal>
   );
 }
