@@ -8,7 +8,7 @@ import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNavigate } from "react-router-dom";
 import { SectionColor } from "../../../types/SectionColor";
 import type { MouseEventHandler } from "react";
-import { useMediaQuery } from "@mantine/hooks";
+import { randomId, useMediaQuery } from "@mantine/hooks";
 
 export interface ActionButtonProps{
     label: string
@@ -53,6 +53,7 @@ export function ActionBar() {
         <Group>
         {actions.map((action) => 
             <Button 
+            key={randomId(action.label)}
             leftSection={action.icon} 
             variant="gradient" 
             gradient={{ from: SectionColor.Violet, to: SectionColor.Cyan, deg: 180 }}

@@ -18,6 +18,8 @@ import SpellPage from './pages/Spells/SpellPage';
 import { DashboardSection } from './pages/Admin/components/Sections/DashboardSection';
 import { decodeToken } from './utils/decodeToken';
 import { handleLogout } from './utils/handleLogout';
+import { showNotification } from './components/Notification/Notification';
+import { SectionColor } from './types/SectionColor';
 
 export default function AppContent() {
   const navigate = useNavigate();
@@ -40,13 +42,19 @@ export default function AppContent() {
 
     const now = Date.now() / 1000; // In seconds
     const isExpired = expiry < now;
-    console.log(isExpired ? "Token expired." : "Token is not expired.");
 
     return isExpired;
     }
 
   useEffect(() => {
-    if (isTokenExpired(lstoken ?? "") || isTokenExpired(token ?? "") ) {
+    if (isTokenExpired(lstoken ?? "") && isTokenExpired(token ?? "") ) {
+      showNotification({
+        id: "expiredToken",
+        title: "Token expired",
+        message: "Your login token expired, now logging out.",
+        color: SectionColor.Red,
+        withBorder: true,
+      })
     handleLogout(navigate);
     }
 
