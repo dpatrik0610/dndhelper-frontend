@@ -4,6 +4,7 @@ import { useState } from "react";
 import { loadCharacters } from "../../../utils/loadCharacter";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { showNotification } from "../../../components/Notification/Notification";
+import { loadInventories } from "../../../utils/loadinventory";
 
 export default function ReloadButton() {
   const [loading, setLoading] = useState(false);
@@ -13,6 +14,7 @@ export default function ReloadButton() {
     try {
       const token = useAuthStore.getState().token;
       await loadCharacters(token!);
+      await loadInventories(token!);
 
       showNotification({
         id: 'profile-reload-success',

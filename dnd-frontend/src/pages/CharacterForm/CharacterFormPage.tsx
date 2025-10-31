@@ -21,6 +21,7 @@ import { DeleteCharacterSection } from "./sections/DeleteCharacterSection";
 import { SectionColor } from "../../types/SectionColor";
 import { useMediaQuery } from "@mantine/hooks";
 import { SpellSlotsSection } from "./sections/SpellSlotsSection";
+import { SpellsSection } from "./sections/SpellsSection";
 
 interface CharacterFormPageProps {
   editMode?: boolean;
@@ -77,6 +78,7 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
             <AbilitiesSection />
             <SkillsSection />
             <SpellSlotsSection />
+            <SpellsSection />
             <LoreSection />
             <CollectionsSection />
             {isAdmin && <AdminSection />}

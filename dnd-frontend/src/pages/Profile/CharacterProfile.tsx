@@ -26,11 +26,11 @@ import { AbilityScores } from "./components/AbilityScores";
 import { ExtraInfo } from "./components/ExtraInfo";
 import { SpellCastingBlock } from "./components/SpellBlock";
 import { ActionBar } from "./components/ActionsBar";
-import { SectionColor } from "../../types/SectionColor";
 import { SkillsPanel } from "./components/SkillsPanel";
 import { ConditionsPanel } from "./components/ConditionsPanel";
 import { SpellsPanel } from "./components/SpellsPanel";
 import { useMediaQuery } from "@mantine/hooks";
+import { Inventory } from "../Inventory/Inventory";
 
 export default function CharacterProfile() {
   const character = useCharacterStore((state) => state.character);
@@ -59,7 +59,7 @@ export default function CharacterProfile() {
           </Badge>
         </Title>
 
-        <Button
+        {/* <Button
           leftSection={<IconBackpack size={20} />}
           onClick={() => navigate("/inventory")}
           variant="gradient"
@@ -68,7 +68,7 @@ export default function CharacterProfile() {
           radius="md"
         >
           Inventories
-        </Button>
+        </Button> */}
       </Group>
 
       <ActionBar />
@@ -82,11 +82,11 @@ export default function CharacterProfile() {
         radius="md"
         styles={{
           list: {
-            background: "rgba(0, 30, 32, 0.25)",
+            background: "rgba(61, 20, 4, 0.56)",
             backdropFilter: "blur(6px)",
             borderRadius: rem(3),
             padding: rem(10),
-            border: "1px solid rgba(255,255,255,0.15)",
+            border: "1px solid rgba(133, 42, 6, 0.79)",
           },
           tab: {
             fontWeight: 500,
@@ -94,16 +94,17 @@ export default function CharacterProfile() {
             "&[data-active]": {
               background: "linear-gradient(135deg, #ffb34733, #ffcc334d)",
               color: "#fff",
-              boxShadow: "0 0 8px rgba(255,200,100,0.3)",
+              boxShadow: "1 1 10px rgba(155, 97, 50, 0.3)",
             },
           },
         }}
       >
         <Tabs.List>
-          <Tabs.Tab value="overview" leftSection={<IconUser size={16} />}>Overview</Tabs.Tab>
+          <Tabs.Tab value="overview" leftSection={<IconUser size={16} />}>Skills</Tabs.Tab>
           <Tabs.Tab value="stats" leftSection={<IconSword size={16} />}>Stats</Tabs.Tab>
           <Tabs.Tab value="magic" leftSection={<IconSparkles size={16} />}>Magic</Tabs.Tab>
           <Tabs.Tab value="extras" leftSection={<IconInfoCircle size={16} />}>Extras</Tabs.Tab>
+          <Tabs.Tab value="inventories" leftSection={<IconInfoCircle size={16} />}>Inventories</Tabs.Tab>
         </Tabs.List>
 
         {/* Animated Panels */}
@@ -158,6 +159,19 @@ export default function CharacterProfile() {
               <ExtraInfo />
             </motion.div>
           )}
+
+          {activeTab === "inventories" && (
+            <motion.div
+              key="inventories"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+            >
+              <Inventory />
+            </motion.div>
+          )}
+
         </AnimatePresence>
       </Tabs>
     </Box>
