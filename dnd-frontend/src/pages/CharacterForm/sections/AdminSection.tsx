@@ -2,18 +2,24 @@ import { Group, Switch } from "@mantine/core";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { IconLock } from "@tabler/icons-react";
-import type { UseFormReturnType } from "@mantine/form";
+import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 
-interface AdminProps {
-  form: UseFormReturnType<any>;
-}
+export function AdminSection() {
+  const { characterForm, setCharacterForm } = useCharacterFormStore();
 
-export function AdminSection({ form }: AdminProps) {
   return (
-    <ExpandableSection title="Admin Options" icon={<IconLock />} color={SectionColor.Orange}>
+    <ExpandableSection title="Admin Options" icon={<IconLock />} color={SectionColor.Orange} defaultOpen>
       <Group grow>
-        <Switch label="Is Dead" {...form.getInputProps("isDead", { type: "checkbox" })} />
-        <Switch label="Is NPC" {...form.getInputProps("isNPC", { type: "checkbox" })} />
+        <Switch
+          label="Is Dead"
+          checked={characterForm.isDead}
+          onChange={(e) => setCharacterForm({ isDead: e.currentTarget.checked })}
+        />
+        <Switch
+          label="Is NPC"
+          checked={characterForm.isNPC}
+          onChange={(e) => setCharacterForm({ isNPC: e.currentTarget.checked })}
+        />
       </Group>
     </ExpandableSection>
   );

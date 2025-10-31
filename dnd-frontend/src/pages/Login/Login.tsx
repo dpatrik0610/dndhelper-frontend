@@ -7,11 +7,11 @@ export default function Login() {
     <Container
       fluid
       style={{
-        height: '100vh',
+        height: '95vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)',
+        background: 'transparent',
       }}
     >
       <LoginCard />

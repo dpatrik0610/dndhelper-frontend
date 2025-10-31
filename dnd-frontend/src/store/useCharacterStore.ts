@@ -9,13 +9,15 @@ interface CharacterState {
   // actions
   setCharacter: (character: Character) => void;
   setCharacters: (characters: Character[]) => void;
+
   updateCharacter: (updated: Partial<Character>) => void;
-  clearCharacter: () => void;
+  clearStore: () => void;
 }
 
 export const useCharacterStore = create<CharacterState>()(
   persist(
     (set, get) => ({
+      characterForm: null,
       character: null,
       characters: [],
 
@@ -35,8 +37,8 @@ export const useCharacterStore = create<CharacterState>()(
           ),
         }));
       },
-
-      clearCharacter: () => set({ character: null, characters: [] }),
+      
+      clearStore: () => set({ character: null, characters: []}),
     }),
     {
       name: "character-storage", // localStorage key

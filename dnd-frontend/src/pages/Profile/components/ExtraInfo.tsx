@@ -1,7 +1,7 @@
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { StatBox } from "./StatBox";
 import { IconInfoCircle } from "@tabler/icons-react";
-import { Group, Paper, Stack, Text } from "@mantine/core";
+import { Group, Stack, Text } from "@mantine/core";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { DividerWithLabel } from "../../../components/common/DividerWithLabel";
@@ -15,7 +15,7 @@ export function ExtraInfo() {
       icon={<IconInfoCircle size={18} />}
       color= {SectionColor.Teal}
       transparent
-      defaultOpen={false}
+      defaultOpen={true}
       style={{
         background: "linear-gradient(135deg, rgba(56, 27, 0, 0.36), rgba(0, 29, 66, 0.45))",
         boxShadow: "0 0 10px rgba(100, 0, 158, 0.38), inset 0 0 6px rgba(199, 119, 15, 0.15)",

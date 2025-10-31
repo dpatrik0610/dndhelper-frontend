@@ -3,20 +3,24 @@ import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { IconBook2 } from "@tabler/icons-react";
 import { ListEditor } from "../components/ListEditor";
-import type { UseFormReturnType } from "@mantine/form";
+import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 
-interface CollectionsProps {
-  form: UseFormReturnType<any>;
-}
+export function CollectionsSection() {
+  const { characterForm, setCharacterForm } = useCharacterFormStore();
 
-export function CollectionsSection({ form }: CollectionsProps) {
+  // ✅ Create a fake Mantine-like form adapter
+  const formAdapter = {
+    values: characterForm,
+    setFieldValue: (field: string, value: unknown) => setCharacterForm({ [field]: value }),
+  };
+
   return (
-    <ExpandableSection title="Collections" icon={<IconBook2 />} color={SectionColor.Blue}>
+    <ExpandableSection title="Collections" icon={<IconBook2 />} color={SectionColor.Blue} defaultOpen>
       <Stack>
-        <ListEditor form={form} label="Languages" field="languages" placeholder="Add language..." />
-        <ListEditor form={form} label="Proficiencies" field="proficiencies" placeholder="Add proficiency..." />
-        <ListEditor form={form} label="Features" field="features" placeholder="Add feature..." />
-        <ListEditor form={form} label="Spells" field="spells" placeholder="Add spell..." />
+        <ListEditor form={formAdapter} field="languages" label="Languages" placeholder="Add language..." />
+        <ListEditor form={formAdapter} field="proficiencies" label="Proficiencies" placeholder="Add proficiency..." />
+        <ListEditor form={formAdapter} field="features" label="Features" placeholder="Add feature..." />
+        <ListEditor form={formAdapter} field="spells" label="Spells" placeholder="Add spell..." />
       </Stack>
     </ExpandableSection>
   );

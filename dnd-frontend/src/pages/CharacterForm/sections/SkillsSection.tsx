@@ -1,31 +1,18 @@
 import {
-  Group,
-  NumberInput,
-  Stack,
-  TextInput,
-  ActionIcon,
-  Text,
-  SimpleGrid,
-  Switch,
-  Tooltip,
+  Group, NumberInput, Stack, TextInput, ActionIcon, Text, SimpleGrid, Switch, Tooltip,
 } from "@mantine/core";
-import { ExpandableSection } from "../../../components/ExpendableSection";
-import { SectionColor } from "../../../types/SectionColor";
-import {
-  IconAutomaticGearbox,
-  IconTrash,
-  IconPlus,
-  IconStarFilled,
-  IconX,
-} from "@tabler/icons-react";
 import { useState, useEffect, useMemo } from "react";
 import { useMediaQuery } from "@mantine/hooks";
-import type { UseFormReturnType } from "@mantine/form";
+import {
+  IconAutomaticGearbox, IconTrash, IconPlus, IconStarFilled, IconX,
+} from "@tabler/icons-react";
+import { ExpandableSection } from "../../../components/ExpendableSection";
+import { SectionColor } from "../../../types/SectionColor";
 import CustomBadge from "../../../components/common/CustomBadge";
+import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
+import "../styles/glassyInput.css";
 
-interface AbilityScores {
-  str: number; dex: number; con: number; int: number; wis: number; cha: number;
-}
+type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 
 const DEFAULT_SKILLS = [
   { name: "Acrobatics", ability: "dex", desc: "Perform flips and balance-related stunts." },
@@ -48,14 +35,15 @@ const DEFAULT_SKILLS = [
   { name: "Survival", ability: "wis", desc: "Tracking, foraging, and enduring the wilds." },
 ] as const;
 
-interface SkillsSectionProps { form: UseFormReturnType<any>; }
-
-export function SkillsSection({ form }: SkillsSectionProps) {
+export function SkillsSection() {
+  const { characterForm, setCharacterForm } = useCharacterFormStore();
   const [newSkill, setNewSkill] = useState("");
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const scores = form.values.abilityScores ?? {};
 
-  // 🎲 Calculate ability modifiers
+  const skills = characterForm.skills ?? [];
+  const scores = characterForm.abilityScores ?? {};
+
+  // 🧮 ability modifiers
   const mods = useMemo(() => {
     const calc = (v: number) => Math.floor((v - 10) / 2);
     return {
@@ -64,104 +52,128 @@ export function SkillsSection({ form }: SkillsSectionProps) {
     };
   }, [scores]);
 
-  // 🧮 Get base (min) skill value = ability mod + proficiency (if any)
-  const getBase = (s: any) => {
-    const base = DEFAULT_SKILLS.find(d => d.name === s.name);
-    const mod = base ? mods[base.ability as keyof AbilityScores] : 0;
-    const prof = s.proficient ? (form.values.proficiencyBonus ?? 0) : 0;
+  // 🎲 base = ability mod + proficiency (if proficient)
+  const getBase = (s: { name: string; proficient?: boolean }) => {
+    const def = DEFAULT_SKILLS.find(d => d.name === s.name);
+    const mod = def ? mods[def.ability as AbilityKey] : 0;
+    const prof = s.proficient ? (characterForm.proficiencyBonus ?? 0) : 0;
     return mod + prof;
   };
 
-  // 🧩 Initialize default skills
+  // 🧩 init if empty
   useEffect(() => {
-    if (!form.values.skills?.length) {
-      form.setFieldValue("skills", DEFAULT_SKILLS.map(s => ({ name: s.name, value: 0, proficient: false })));
+    if (!skills.length) {
+      const seeded = DEFAULT_SKILLS.map(ds => {
+        const base = getBase({ name: ds.name, proficient: false });
+        return { name: ds.name, value: base, lastBase: base, proficient: false };
+      });
+      setCharacterForm({ skills: seeded });
     }
-  }, [form.values.skills]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once
 
-  // ➕ Add new skill
+  // ♻️ recalc when ability/proficiency change; update if user hasn't overridden (value === lastBase)
+  useEffect(() => {
+    if (!skills.length) return;
+
+    let changed = false;
+    const updated = skills.map(s => {
+      const newBase = getBase(s);
+      const shouldFollow = (s as any).lastBase === undefined || s.value === (s as any).lastBase;
+      if (shouldFollow) {
+        if (s.value !== newBase || (s as any).lastBase !== newBase) changed = true;
+        return { ...s, value: newBase, lastBase: newBase };
+      } else {
+        if ((s as any).lastBase !== newBase) changed = true;
+        return { ...s, lastBase: newBase };
+      }
+    });
+
+    if (changed) setCharacterForm({ skills: updated });
+  }, [characterForm.abilityScores, characterForm.proficiencyBonus]); // auto-sync on deps
+
+  // ➕ add custom skill (starts as non-proficient with base=0, follows future base only if user hasn't edited)
   const addSkill = () => {
     const name = newSkill.trim();
-    if (!name || form.values.skills.some((s: any) => s.name.toLowerCase() === name.toLowerCase())) return;
-    form.setFieldValue("skills", [...form.values.skills, { name, value: 0, proficient: false }]);
+    if (!name || skills.some(s => s.name.toLowerCase() === name.toLowerCase())) return;
+    const base = 0;
+    setCharacterForm({ skills: [...skills, { name, value: base, lastBase: base, proficient: false }] });
     setNewSkill("");
   };
 
-  // ❌ Remove skill
-  const removeSkill = (name: string) =>
-    !DEFAULT_SKILLS.some(s => s.name === name) &&
-    form.setFieldValue("skills", form.values.skills.filter((s: any) => s.name !== name));
-
-  const skills = form.values.skills ?? [];
+  // ❌ remove custom skill
+  const removeSkill = (name: string) => {
+    if (DEFAULT_SKILLS.some(s => s.name === name)) return; // lock core skills from removal
+    setCharacterForm({ skills: skills.filter(s => s.name !== name) });
+  };
 
   return (
     <ExpandableSection title="Skills" icon={<IconAutomaticGearbox />} color={SectionColor.White} defaultOpen>
       <Stack>
         <Group>
-          <TextInput
-            placeholder="Add new skill..."
-            value={newSkill}
-            onChange={(e) => setNewSkill(e.currentTarget.value)}
-            style={{ flexGrow: 1 }}
-          />
+          <TextInput classNames={{ input: "glassy-input", label: "glassy-label" }} placeholder="Add new skill..." value={newSkill} onChange={(e) => setNewSkill(e.currentTarget.value)} style={{ flexGrow: 1 }} />
           <ActionIcon color="teal" variant="filled" onClick={addSkill}><IconPlus size={16} /></ActionIcon>
         </Group>
 
-        {skills.length === 0 ? (
+        {(!skills || skills.length === 0) ? (
           <Text c="dimmed" size="sm">No skills yet.</Text>
         ) : (
           <SimpleGrid cols={isMobile ? 1 : 2} spacing="xs">
-            {skills.map((s: any) => {
+            {skills.map((s) => {
               const def = DEFAULT_SKILLS.find(d => d.name === s.name);
               const base = getBase(s);
+              const shown = s.value ?? (s as any).lastBase ?? base;
+
               return (
-                <Tooltip
-                  key={s.name}
-                  label={def ? `${def.name} (${def.ability.toUpperCase()}) — ${def.desc}` : "Custom skill"}
-                  withArrow color="dark" maw={250}
-                >
+                <Tooltip key={s.name} label={def ? `${def.name} (${def.ability.toUpperCase()}) — ${def.desc}` : "Custom skill"} withArrow color="dark" maw={250} multiline>
                   <Group
-                    gap="xs"
-                    align="center"
-                    style={{
-                      background: "rgba(255,255,255,0.05)",
-                      borderRadius: 6,
-                      padding: "6px 8px",
-                      transition: "background 0.2s ease",
-                    }}
+                    gap="xs" align="center"
+                    style={{ background: "rgba(255,255,255,0.05)", borderRadius: 6, padding: "6px 8px", transition: "background 0.2s ease" }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.08)")}
                     onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.05)")}
                   >
                     <CustomBadge label={s.name} style={{ flex: 1 }} c={SectionColor.Teal} variant="transparent" fullWidth />
 
+                    {/* Value (manual edits become overrides) */}
                     <NumberInput
-                      value={s.value || base}
-                      min={base}
+                      classNames={{ input: "glassy-input", label: "glassy-label" }}
+                      value={shown} min={base} size={isMobile ? "xs" : "sm"} style={{ width: 70 }}
                       onChange={(v) => {
-                        const val = Math.max(Number(v) || base, base);
-                        form.setFieldValue("skills", skills.map((x: any) =>
-                          x.name === s.name ? { ...x, value: val } : x
-                        ));
+                        const val = typeof v === "number" && !isNaN(v) ? Math.max(v, base) : base;
+                        setCharacterForm({
+                          skills: skills.map(x => x.name === s.name ? { ...x, value: val } : x),
+                        });
                       }}
-                      style={{ width: 70 }}
-                      size={isMobile ? "xs" : "sm"}
                     />
 
+                    {/* Proficiency toggle (recalc base; follow if not overridden) */}
                     <Switch
                       size="md"
                       checked={s.proficient}
                       onChange={(e) => {
-                        form.setFieldValue("skills", skills.map((x: any) =>
-                          x.name === s.name ? { ...x, proficient: e.currentTarget.checked } : x
-                        ));
+                        const nextProficient = e.currentTarget.checked;
+                        const newBase = (() => {
+                          const def = DEFAULT_SKILLS.find(d => d.name === s.name);
+                          const mod = def ? mods[def.ability as AbilityKey] : 0;
+                          const prof = nextProficient ? (characterForm.proficiencyBonus ?? 0) : 0;
+                          return mod + prof;
+                        })();
+
+                        setCharacterForm({
+                          skills: skills.map(x => {
+                            if (x.name !== s.name) return x;
+                            const wasFollowing = (x as any).lastBase === undefined || x.value === (x as any).lastBase;
+                            return wasFollowing
+                              ? { ...x, proficient: nextProficient, lastBase: newBase, value: newBase }
+                              : { ...x, proficient: nextProficient, lastBase: newBase };
+                          }),
+                        });
                       }}
-                      thumbIcon={
-                        s.proficient
-                          ? <IconStarFilled size={16} color="var(--mantine-color-yellow-6)" />
-                          : <IconX size={16} color="var(--mantine-color-red-6)" />
-                      }
+                      classNames={{ root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" }}
+                      thumbIcon={s.proficient ? <IconStarFilled size={14} color="gold" /> : <IconX size={14} color="crimson" />}
                     />
 
+                    {/* Remove (custom only) */}
                     {!def && (
                       <ActionIcon color="red" variant="light" onClick={() => removeSkill(s.name)}>
                         <IconTrash size={16} />

@@ -230,8 +230,7 @@ export default function Home() {
         {[
           { label: "Inventory", icon: <IconBackpack />, path: "/inventory" },
           { label: "Spellbook", icon: <IconBook />, path: "/spells" },
-          { label: "Quests", icon: <IconSword />, path: "/quests" },
-          { label: "Guild Map", icon: <IconMap2 />, path: "/map" },
+          // { label: "Quests", icon: <IconSword />, path: "/quests" },
           { label: "System", icon: <IconDatabase />, path: "/admin" },
         ].map((action) => (
           <Grid.Col key={action.label} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>

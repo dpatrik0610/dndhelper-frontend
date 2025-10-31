@@ -12,7 +12,7 @@ export const handleLogout = () => {
   useAuthStore.persist.clearStorage();
 
   // Clear character
-  useCharacterStore.getState().clearCharacter();
+  useCharacterStore.getState().clearStore();
   useCharacterStore.persist.clearStorage();
 
   // Clear inventory

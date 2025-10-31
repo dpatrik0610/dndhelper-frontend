@@ -37,7 +37,7 @@ const useStyles = createStyles((theme) => ({
     justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
-    background: "linear-gradient(-45deg, #1a1a2e, #16213e, #0f3460, #533483)",
+    background: "transparent",
     backgroundSize: "400% 400%",
     animation: `${gradientShift} 15s ease infinite`,
     color: theme.white,

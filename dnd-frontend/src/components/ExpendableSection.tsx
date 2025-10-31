@@ -32,7 +32,7 @@ export function ExpandableSection({
       mt="sm"
       style={{
         backgroundColor: transparent
-          ? "rgba(0, 0, 0, 0.42)"
+          ? "rgba(0, 0, 0, 0.14)"
           : "var(--mantine-color-body)",
         transition: "background-color 0.2s ease",
         ...style,

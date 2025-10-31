@@ -1,7 +1,7 @@
 import { ActionIcon, Group, Stack, TextInput, Text, Button } from "@mantine/core";
 import { IconTrash, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
-
+import "../styles/glassyInput.css"
 interface ListEditorProps {
   label: string;
   field: string;
@@ -30,6 +30,7 @@ export function ListEditor({ label, field, placeholder, form }: ListEditorProps)
 
       <Group>
         <TextInput
+          classNames={{ input: "glassy-input", label: "glassy-label" }}
           placeholder={placeholder}
           value={newItem}
           onChange={(e) => setNewItem(e.currentTarget.value)}

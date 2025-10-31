@@ -1,4 +1,4 @@
-import { Divider, Grid } from "@mantine/core";
+import { Grid } from "@mantine/core";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { StatBox } from "./StatBox";
 import { IconWand } from "@tabler/icons-react";
@@ -7,7 +7,7 @@ import { SectionColor } from "../../../types/SectionColor";
 import { useMediaQuery } from "@mantine/hooks";
 import { DividerWithLabel } from "../../../components/common/DividerWithLabel";
 
-export function SpellBlock() {
+export function SpellCastingBlock() {
     const character = useCharacterStore((state) => state.character)!;
     const isMobile = useMediaQuery("(max-width: 768px)");
 
