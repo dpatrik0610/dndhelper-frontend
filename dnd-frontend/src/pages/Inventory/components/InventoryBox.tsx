@@ -48,7 +48,6 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
     if (!inventories) return;
 
     setCurrentInventory(inventories.find((x) => x.id === inventory.id));
-    console.log("Change happened.")
   }, [inventories]);
 
   // Item removal
