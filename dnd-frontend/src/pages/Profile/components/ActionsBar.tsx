@@ -62,10 +62,10 @@ export function ActionBar() {
             <Button
               key={randomId(action.label)}
               leftSection={action.icon}
-              variant="gradient"
+              variant="outline"
               gradient={{ from: SectionColor.Violet, to: SectionColor.Cyan, deg: 180 }}
               onClick={action.onClick}
-              size="sm"
+              size="xs"
               radius="md"
               w={isMobile ? "100%" : undefined}
             >
@@ -75,7 +75,6 @@ export function ActionBar() {
         </Group>
       </Paper>
 
-      {/* ⬇️ New modal */}
       <AddConditionModal opened={modalOpened} onClose={() => setModalOpened(false)} />
     </>
   );

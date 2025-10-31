@@ -1,0 +1,26 @@
+.profile-tabs-list {
+  background: rgba(61, 20, 4, 0.56);
+  backdrop-filter: blur(6px);
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid rgba(133, 42, 6, 0.79);
+}
+
+.profile-tab {
+  color: #ddd;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.25s ease;
+}
+
+.profile-tab:hover {
+  background: rgba(182, 112, 27, 0.15);
+}
+
+/* Active state selector — this is the key */
+.profile-tab[data-active] {
+  background: linear-gradient(145deg, #ffae0033, #ff73004d);
+  color: #fff;
+  box-shadow: 0 0 1px rgba(129, 74, 1, 0.4);
+  transform: translateY(-1px);
+}

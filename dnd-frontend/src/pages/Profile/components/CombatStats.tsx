@@ -7,6 +7,7 @@ import {
   IconSword,
   IconArrowUp,
   IconSkull,
+  IconEye,
 } from "@tabler/icons-react";
 import { StatBox } from "./StatBox";
 import { ExpandableSection } from "../../../components/ExpendableSection";
@@ -20,13 +21,17 @@ export function CombatStats() {
 
   const stats = [
     { label: "Armor Class", value: character.armorClass, color: "blue", icon: <IconShield size={18} /> },
-    { label: "Hit Points", value: `${character.hitPoints} / ${character.maxHitPoints}${character.temporaryHitPoints ? ` (+${character.temporaryHitPoints})` : ""}`, color: "red", icon: (character.hitPoints < 0 ? <IconHeart size={18} /> : <IconSkull size={18} />) },
+    { label: "Hit Points", value: `${character.hitPoints} / ${character.maxHitPoints}${character.temporaryHitPoints ? ` (+${character.temporaryHitPoints})` : ""}`, color: "red", icon: (character.hitPoints > 0 ? <IconHeart size={18} /> : <IconSkull size={18} />) },
     { label: "Initiative", value: `+${character.initiative}`, color: "orange", icon: <IconTarget size={18} /> },
     { label: "Speed", value: `${character.speed} ft`, color: "green", icon: <IconRun size={18} /> },
     { label: "Proficiency", value: `+${character.proficiencyBonus}`, color: "grape", icon: <IconSword size={18} /> },
     { label: "Size", value: character.size, color: "gray", icon: <IconArrowUp size={18} /> },
     { label: "Death Saves – Successes", value: `${character.deathSavesSuccesses} / 3`, color: "teal", icon: <IconHeart size={18} /> },
     { label: "Death Saves – Failures", value: `${character.deathSavesFailures} / 3`, color: "red", icon: <IconHeart size={18} /> },
+    { label: "Hit Dice", value: `${character.hitDice}`, color: "teal", icon: <IconHeart size={18} /> },
+    { label: "Passive Perception", value: `${character.passivePerception}`, color: "teal", icon: <IconEye size={18} /> },
+    { label: "Passive Investigation", value: `${character.passiveInvestigation}`, color: "teal", icon: <IconEye size={18} /> },
+    { label: "Passive Insight", value: `${character.passiveInsight}`, color: "teal", icon: <IconEye size={18} /> },
   ];
 
   return (
@@ -44,10 +49,6 @@ export function CombatStats() {
         transition: "all 0.25s ease-in-out",
       }}
     >
-      <Title order={3} size="h3" mb="md" c="gray.1">
-        Combat Statistics
-      </Title>
-
       <Grid gutter="xs" justify="flex-start">
         {stats.map((stat) => (
           <Grid.Col key={stat.label} span={6}>
@@ -57,6 +58,7 @@ export function CombatStats() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                color: "yellow",
                 background: "rgba(255,255,255,0.03)",
                 borderRadius: "6px",
                 transition: "transform 0.2s ease, box-shadow 0.3s ease",

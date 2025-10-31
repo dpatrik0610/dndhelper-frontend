@@ -114,8 +114,8 @@ export default function AppContent() {
             position: "fixed",
             inset: 0,
             zIndex: 1,
-            background: "rgba(0, 0, 0, 0.49)",
-            backdropFilter: "blur(2px) saturate(130%)",
+            background: "rgba(0, 0, 0, 0.62)",
+            backdropFilter: "blur(8px) saturate(130%)",
             WebkitBackdropFilter: "blur(4px) saturate(100%)",
             pointerEvents: "none",
           }}
