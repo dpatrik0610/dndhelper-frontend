@@ -11,7 +11,6 @@ export interface TabItem {
 export const tabs: Record<Section, TabItem[]> = {
   character: [
     { link: '/profile', label: 'Profile', icon: IconUsers },
-    { link: '/inventory', label: 'Inventory', icon: IconSword },
   ],
   campaign: [
     { link: '/map', label: 'World Map', icon: IconMap },

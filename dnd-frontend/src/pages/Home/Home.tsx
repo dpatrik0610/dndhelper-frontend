@@ -18,23 +18,20 @@ import {
 import {
   IconUser,
   IconBook,
-  IconSword,
-  IconBackpack,
-  IconDatabase,
-  IconMap2,
-  IconWand,
 } from "@tabler/icons-react";
 import { useCharacterStore } from "../../store/useCharacterStore";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { useNavigate } from "react-router-dom";
 import { getRecentEvents } from "../../services/eventService";
-import { notifications } from "@mantine/notifications";
 import type { Event } from "../../types/Event";
 import { RecentEventsSection } from "./components/RecentEvents";
 import type { Character } from "../../types/Character/Character";
 import { useMediaQuery } from "@mantine/hooks";
+import { useAuthStore } from "../../store/useAuthStore";
+import { CharacterSelectButton } from "./components/CharacterSelectButton";
 
 export default function Home() {
+  const isAdmin = useAuthStore.getState().roles.includes("Admin");
   const navigate = useNavigate();
   const { characters, setCharacter } = useCharacterStore();
   const character = useCharacterStore((state) => state.character);
@@ -44,6 +41,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [quote, setQuote] = useState("");
   const isMobile = useMediaQuery("(max-width: 768px)");
+
+  const quickNavigations = [
+    { label: "Spellbook", icon: <IconBook />, path: "/spells" },
+    // { label: "Quests", icon: <IconSword />, path: "/quests" },
+  ];
 
   // === Palette ===
   const palette = {
@@ -97,34 +99,7 @@ export default function Home() {
         characters={characters}
         onSelect={handleSelectCharacter}
       />
-
-      {/* === Floating Character Button === */}
-      <Box
-        style={{
-          position: "fixed",
-          bottom: 20,
-          right: 20,
-          zIndex: 999,
-        }}
-      >
-        <Button
-          color="transparent"
-          onClick={() => setModalOpened(true)}
-          size="md"
-          radius="xl"
-          style={{
-            background: "rgba(0,0,0,0.25)",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.47)",
-            border: "1px solid rgba(0,0,0,0.23)",
-            transition: "all 0.3s ease",
-          }}
-        >
-          <Group lts="xs">
-            <IconUser size={20} />
-            <Text fw={500}>Characters</Text>
-          </Group>
-        </Button>
-      </Box>
+      <CharacterSelectButton setModalOpened={setModalOpened}/>
 
       {/* === Header === */}
       <Paper
@@ -227,12 +202,7 @@ export default function Home() {
 
       {/* === Quick Actions === */}
       <Grid mt="lg">
-        {[
-          { label: "Inventory", icon: <IconBackpack />, path: "/inventory" },
-          { label: "Spellbook", icon: <IconBook />, path: "/spells" },
-          // { label: "Quests", icon: <IconSword />, path: "/quests" },
-          { label: "System", icon: <IconDatabase />, path: "/admin" },
-        ].map((action) => (
+        {quickNavigations.map((action) => (
           <Grid.Col key={action.label} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
             <Tooltip label={`Open ${action.label}`} withArrow>
               <Card
