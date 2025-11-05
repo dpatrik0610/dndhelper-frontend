@@ -17,8 +17,8 @@ import {
 import {
   IconTrash,
   IconPlus,
-  IconCheck,
   IconSword,
+  IconReload,
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useAdminInventoryStore } from "../../../../store/admin/useAdminInventoryStore";
@@ -28,8 +28,8 @@ import { SectionColor } from "../../../../types/SectionColor";
 import type { InventoryItem } from "../../../../types/Inventory/InventoryItem";
 
 export function InventoryItemsPanel() {
+  const selected = useAdminInventoryStore((state) => state.selected);
   const {
-    selected,
     loading,
     refreshSelected,
     addItem,
@@ -52,9 +52,7 @@ export function InventoryItemsPanel() {
 
   if (!selected)
     return (
-      <Text c="dimmed" ta="center" mt="lg">
-        Select an inventory to view its contents.
-      </Text>
+      <></>
     );
 
   if (loading)
@@ -77,7 +75,7 @@ export function InventoryItemsPanel() {
         <Group gap="xs">
           <Tooltip label="Refresh" withArrow>
             <ActionIcon color="grape" variant="light" onClick={refreshSelected}>
-              <IconCheck size={18} />
+              <IconReload size={18} />
             </ActionIcon>
           </Tooltip>
           <Tooltip label="Add new item" withArrow>

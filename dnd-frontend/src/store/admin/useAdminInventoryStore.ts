@@ -43,14 +43,8 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     try {
       const data = await getInventoriesByCharacter(characterId, token);
       set({
-        inventories: data.map((i) => ({
-          id: i.id,
-          name: i.name,
-          characterId: i.characterId,
-          currencies: i.currencies,
-          ownerIds: i.ownerIds,
-        })),
-        selected: data[0] ?? null,
+        inventories: data,
+        selected: null,
       });
     } catch (err) {
       showNotification({

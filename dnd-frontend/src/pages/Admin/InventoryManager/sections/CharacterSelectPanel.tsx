@@ -27,8 +27,6 @@ export function CharacterSelectPanel() {
   // --- Load characters for selected campaign ---
   useEffect(() => {
     if (!campaignId) return;
-    console.log(campaignId);
-
     if(!characters || characters.length == 0) loadAllCharacters(campaignId);
 
   }, [characters, campaignId, loadAllCharacters]);
