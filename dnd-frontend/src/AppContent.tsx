@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AppShell, ActionIcon } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import { useAuthStore } from "./store/useAuthStore";
 import PrivateRoute from "./components/PrivateRoute";
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -13,14 +13,13 @@ import { useEffect } from "react";
 import { useCharacterStore } from "./store/useCharacterStore";
 import { loadCharacters } from "./utils/loadCharacter";
 import { IconChevronRight } from "@tabler/icons-react";
-import { Inventory } from "./pages/Inventory/Inventory";
 import SpellPage from "./pages/Spells/SpellPage";
-import { DashboardSection } from "./pages/Admin/components/Sections/DashboardSection";
 import { decodeToken } from "./utils/decodeToken";
 import { handleLogout } from "./utils/handleLogout";
 import { showNotification } from "./components/Notification/Notification";
 import { SectionColor } from "./types/SectionColor";
 import { CharacterFormPage } from "./pages/CharacterForm/CharacterFormPage";
+import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 
 export default function AppContent() {
   const navigate = useNavigate();
@@ -29,9 +28,8 @@ export default function AppContent() {
   const { characters } = useCharacterStore();
   const location = useLocation();
   const isAdmin = useAuthStore.getState().roles.includes("Admin");
-  const isMobile = useMediaQuery("(max-width: 768px)");
 
-  let lstoken = localStorage.getItem("authToken");
+  const lstoken = localStorage.getItem("authToken");
 
   function isTokenExpired(token: string): boolean {
     if (!token || token === "") return true;
@@ -127,13 +125,12 @@ export default function AppContent() {
             <Route element={<PrivateRoute />}>
               <Route path="/" element={<Home />} />
               <Route path="/home" element={<Home />} />
-              <Route path="/inventory" element={<Inventory />} />
               <Route path="/profile" element={<CharacterProfile />} />
               <Route path="/spells" element={<SpellPage />} />
               <Route path="/spells/:spellName" element={<SpellPage />} />
               <Route path="/newCharacter" element={<CharacterFormPage />} />
               <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
-              {isAdmin && <Route path="/dashboard" element={<DashboardSection />} />}
+              {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
             </Route>
 
             <Route path="/login" element={<Login />} />

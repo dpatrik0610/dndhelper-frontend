@@ -3,7 +3,7 @@ import { IconBook } from "@tabler/icons-react";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
-import "../styles/glassyInput.css"
+import "../../../styles/glassyInput.css"
 
 export function LoreSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();

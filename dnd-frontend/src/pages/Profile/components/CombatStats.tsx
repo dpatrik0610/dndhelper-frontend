@@ -1,4 +1,9 @@
-import { Title, Grid } from "@mantine/core";
+import {
+  SimpleGrid,
+  Paper,
+  ThemeIcon,
+  Group,
+} from "@mantine/core";
 import {
   IconShield,
   IconHeart,
@@ -21,14 +26,21 @@ export function CombatStats() {
 
   const stats = [
     { label: "Armor Class", value: character.armorClass, color: "blue", icon: <IconShield size={18} /> },
-    { label: "Hit Points", value: `${character.hitPoints} / ${character.maxHitPoints}${character.temporaryHitPoints ? ` (+${character.temporaryHitPoints})` : ""}`, color: "red", icon: (character.hitPoints > 0 ? <IconHeart size={18} /> : <IconSkull size={18} />) },
+    {
+      label: "Hit Points",
+      value: `${character.hitPoints} / ${character.maxHitPoints}${
+        character.temporaryHitPoints ? ` (+${character.temporaryHitPoints})` : ""
+      }`,
+      color: "red",
+      icon: character.hitPoints > 0 ? <IconHeart size={18} /> : <IconSkull size={18} />,
+    },
     { label: "Initiative", value: `+${character.initiative}`, color: "orange", icon: <IconTarget size={18} /> },
     { label: "Speed", value: `${character.speed} ft`, color: "green", icon: <IconRun size={18} /> },
     { label: "Proficiency", value: `+${character.proficiencyBonus}`, color: "grape", icon: <IconSword size={18} /> },
     { label: "Size", value: character.size, color: "gray", icon: <IconArrowUp size={18} /> },
     { label: "Death Saves – Successes", value: `${character.deathSavesSuccesses} / 3`, color: "teal", icon: <IconHeart size={18} /> },
     { label: "Death Saves – Failures", value: `${character.deathSavesFailures} / 3`, color: "red", icon: <IconHeart size={18} /> },
-    { label: "Hit Dice", value: `${character.hitDice}`, color: "teal", icon: <IconHeart size={18} /> },
+    { label: "Hit Dice", value: `${character.hitDice}`, color: "teal", icon: <IconSword size={18} /> },
     { label: "Passive Perception", value: `${character.passivePerception}`, color: "teal", icon: <IconEye size={18} /> },
     { label: "Passive Investigation", value: `${character.passiveInvestigation}`, color: "teal", icon: <IconEye size={18} /> },
     { label: "Passive Insight", value: `${character.passiveInsight}`, color: "teal", icon: <IconEye size={18} /> },
@@ -39,53 +51,80 @@ export function CombatStats() {
       title="Combat Statistics"
       icon={<span style={{ fontSize: "1.2rem" }}>⚔️</span>}
       color={SectionColor.Red}
-      transparent
       defaultOpen
       style={{
-        background: "linear-gradient(135deg, rgba(48, 0, 0, 0.37), rgba(29, 0, 66, 0.45))",
-        boxShadow: "0 0 10px rgba(255, 60, 60, 0.2), inset 0 0 6px rgba(255, 0, 0, 0.15)",
-        borderColor: "rgba(255, 60, 60, 0.3)",
-        borderRadius: "10px",
-        transition: "all 0.25s ease-in-out",
+        background:
+          "linear-gradient(145deg, rgba(48,0,0,0.35) 0%, rgba(90,0,40,0.4) 50%, rgba(25,0,40,0.4) 100%)",
+        borderRadius: 12,
+        border: "1px solid rgba(255, 70, 70, 0.25)",
+        boxShadow:
+          "inset 0 0 10px rgba(255,0,0,0.15), 0 0 18px rgba(255,70,70,0.2)",
+        transition: "all 0.25s ease",
+        overflow: "hidden",
       }}
     >
-      <Grid gutter="xs" justify="flex-start">
+      <SimpleGrid
+        cols={isMobile ? 2 : 3}
+        spacing="xs"
+        verticalSpacing="xs"
+        style={{
+          padding: isMobile ? "4px" : "8px",
+          position: "relative",
+        }}
+      >
         {stats.map((stat) => (
-          <Grid.Col key={stat.label} span={6}>
-            <div
+          <Paper
+              radius="md"
+              p="xs"
               style={{
-                minHeight: isMobile ? "72px" : "64px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "yellow",
-                background: "rgba(255,255,255,0.03)",
-                borderRadius: "6px",
-                transition: "transform 0.2s ease, box-shadow 0.3s ease",
+                background:
+                  "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,0,0,0.08))",
+                border: "1px solid rgba(255,70,70,0.2)",
+                boxShadow: "inset 0 0 4px rgba(255,80,80,0.15)",
+                transition: "all 0.2s ease",
+                backdropFilter: "blur(8px)",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 0 8px rgba(255, 100, 100, 0.25)";
+                e.currentTarget.style.boxShadow =
+                  "0 0 12px rgba(255,90,90,0.3), inset 0 0 6px rgba(255,90,90,0.25)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.boxShadow =
+                  "inset 0 0 4px rgba(255,80,80,0.15)";
               }}
             >
-              <StatBox
-                size="xs"
-                label={stat.label}
-                value={stat.value}
-                color={stat.color}
-                icon={stat.icon}
-                background="transparent"
-                fullWidth
-                style={{minWidth:"72px"}}
-              />
-            </div>
-          </Grid.Col>
+              <Group gap="xs" justify="center" align="center">
+                <ThemeIcon
+                  size="md"
+                  radius="xl"
+                  variant="gradient"
+                  gradient={{ from: stat.color, to: "pink", deg: 135 }}
+                >
+                  {stat.icon}
+                </ThemeIcon>
+
+                <StatBox
+                  variant="glass"
+                  label={stat.label}
+                  labelColor="#e66a05ff"
+                  value={stat.value}
+                  color={stat.color}
+                  background="transparent"
+                  size="sm"
+                  hoverEffect={false}
+                  fullWidth
+                  style={{
+                    textAlign: "center",
+                    fontWeight: 600,
+                    fontSize: "0.9rem",
+                  }}
+                />
+              </Group>
+          </Paper>
         ))}
-      </Grid>
+      </SimpleGrid>
     </ExpandableSection>
   );
 }

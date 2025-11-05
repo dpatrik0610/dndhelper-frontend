@@ -1,11 +1,11 @@
-import { Group, NumberInput, Stack, Title, Divider, Tooltip, SimpleGrid } from "@mantine/core";
+import { Group, NumberInput, Stack, Title, Divider, Tooltip, SimpleGrid, TextInput } from "@mantine/core";
 import { useMemo } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconBrain } from "@tabler/icons-react";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
-import "../styles/glassyInput.css"
+import "../../../styles/glassyInput.css"
 
 export function AbilitiesSection() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -74,10 +74,15 @@ export function AbilitiesSection() {
               onChange={(v)=>setCharacterForm({spellSaveDc:typeof v==="number"?v:v?Number(v):0})}
               style={{ flex:1, minWidth:isMobile?"100%":0 }}/>
           </Tooltip>
+
           <Tooltip label="Spell Attack Bonus = Proficiency Bonus + Spellcasting Ability Modifier" color="dark" withArrow>
             <NumberInput classNames={{ input: "glassy-input", label: "glassy-label" }} label="Spell Attack Bonus" value={characterForm.spellAttackBonus}
               onChange={(v)=>setCharacterForm({spellAttackBonus:typeof v==="number"?v:v?Number(v):0})}
               style={{ flex:1, minWidth:isMobile?"100%":0 }}/>
+          </Tooltip>
+
+          <Tooltip label="It's determined by your class. ex: Wizard's Spellcasting Ability is Intelligence." color="dark" withArrow>
+          <TextInput classNames={{ input: "glassy-input", label: "glassy-label" }} label="Spellcasting Ability" value={characterForm.spellcastingAbility} onChange={(e)=>setCharacterForm({spellcastingAbility:e.currentTarget.value})}/>
           </Tooltip>
         </Group>
       </Stack>

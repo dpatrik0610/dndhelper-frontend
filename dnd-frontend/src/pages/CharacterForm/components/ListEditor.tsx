@@ -1,7 +1,7 @@
 import { ActionIcon, Group, Stack, TextInput, Text, Button } from "@mantine/core";
 import { IconTrash, IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
-import "../styles/glassyInput.css"
+import "../../../styles/glassyInput.css"
 interface ListEditorProps {
   label: string;
   field: string;

@@ -1,14 +1,9 @@
 import {
   Box,
-  Group,
   Text,
-  Badge,
-  Title,
   Tabs,
-  rem,
 } from "@mantine/core";
 import {
-  IconStar,
   IconUser,
   IconSword,
   IconInfoCircle,
@@ -23,7 +18,7 @@ import { CharacterHeader } from "./components/CharacterHeader";
 import { CombatStats } from "./components/CombatStats";
 import { AbilityScores } from "./components/AbilityScores";
 import { ExtraInfo } from "./components/ExtraInfo";
-import { SpellCastingBlock } from "./components/SpellBlock";
+import { SpellCastingBlock } from "./components/SpellCastingBlock";
 import { ActionBar } from "./components/ActionsBar";
 import { SkillsPanel } from "./components/SkillsPanel";
 import { ConditionsPanel } from "./components/ConditionsPanel";
@@ -50,17 +45,9 @@ export default function CharacterProfile() {
 
   return (
     <Box p={isMobile ? "xs" : "md"} m={isMobile ? "" : "0 auto"} maw={isMobile ? "100%" : 900}>
-      {/* <Group justify="space-between" mb="md">
-        <Title order={2} mb="md" mt="xs">
-          Character Profile
-          <Badge ml="sm" color="yellow" variant="light" leftSection={<IconStar size={12} />}>
-            BETA
-          </Badge>
-        </Title>
-      </Group> */}
-
       <CharacterHeader />
       <ActionBar />
+    <ConditionsPanel />
 
       <Tabs
         value={activeTab}
@@ -84,7 +71,6 @@ export default function CharacterProfile() {
         <AnimatePresence mode="wait">
           {activeTab === "overview" && (
             <motion.div key="overview" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              <ConditionsPanel />
               <SkillsPanel />
             </motion.div>
           )}

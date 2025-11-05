@@ -7,11 +7,12 @@ import { createInventory } from "../../services/inventoryService";
 import { useAuthStore } from "../../store/useAuthStore";
 import type { Inventory } from "../../types/Inventory/Inventory";
 import { loadCharacters } from "../../utils/loadCharacter";
+import { useNavigate } from "react-router-dom";
 
 export function useCharacterForm(editMode: boolean) {
   const token = useAuthStore((s) => s.token);
   const isAdmin = useAuthStore.getState().roles.includes("Admin");
-
+  const navigate = useNavigate()
   const { characterForm, replaceCharacterForm, resetCharacterForm } = useCharacterFormStore();
   const { character, setCharacter, updateCharacter: updateInStore } = useCharacterStore();
 
@@ -57,6 +58,7 @@ export function useCharacterForm(editMode: boolean) {
           });
         }
       }
+      navigate("/profile");
     } catch (err) {
       console.error(err);
       notifications.show({

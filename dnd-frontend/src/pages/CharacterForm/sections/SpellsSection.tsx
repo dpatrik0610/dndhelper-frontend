@@ -1,20 +1,19 @@
-import { ActionIcon, Autocomplete, Button, Group, SimpleGrid, Stack, Text} from "@mantine/core";
-import { useCharacterStore } from "../../../store/useCharacterStore";
+import { ActionIcon, Autocomplete, Button, Group, Stack, Text} from "@mantine/core";
 import { useSpellStore } from "../../../store/useSpellStore";
-import "../styles/glassyInput.css";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { useEffect, useState } from "react";
 import { getSpellNames } from "../../../services/spellService";
 import { useAuthStore } from "../../../store/useAuthStore";
-import { IconPlus, IconTrash, IconWand } from "@tabler/icons-react";
+import {  IconTrash, IconWand } from "@tabler/icons-react";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 import { SectionColor } from "../../../types/SectionColor";
+import "../../../styles/glassyInput.css"
+
 
 export function SpellsSection() {
     const token = useAuthStore.getState().token!;
     const spellNames = useSpellStore((state) => state.spellNames);
     const setSpellNames = useSpellStore.getState().setSpellNames;
-    const characterSpells = useCharacterStore((state) => state.character?.spells);
     const [selectedSpell, setSelectedSpell] = useState<string | null>(null);
     const { characterForm, setCharacterForm } = useCharacterFormStore();
 

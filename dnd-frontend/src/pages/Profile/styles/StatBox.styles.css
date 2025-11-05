@@ -1,0 +1,33 @@
+@keyframes neonPulse {
+  0% {
+    box-shadow: 0 0 6px rgba(0,255,255,0.3), inset 0 0 8px rgba(255,0,255,0.15);
+  }
+  100% {
+    box-shadow: 0 0 14px rgba(0,255,255,0.6), inset 0 0 14px rgba(255,0,255,0.4);
+  }
+}
+
+@keyframes electricPulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(0,255,255,0.2);
+    border-color: rgba(0,255,255,0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0,255,255,0.7);
+    border-color: rgba(0,255,255,0.7);
+  }
+}
+
+@keyframes prismShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes monolithPulse {
+  0%, 100% {
+    background: radial-gradient(circle, #0a0a0a, #000);
+  }
+  50% {
+    background: radial-gradient(circle, #1a1a1a, #000);
+  }
+}

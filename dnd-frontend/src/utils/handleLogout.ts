@@ -1,3 +1,6 @@
+import { useAdminCampaignStore } from "../store/admin/useAdminCampaignStore";
+import { useAdminCharacterStore } from "../store/admin/useAdminCharacterStore";
+import { useAdminInventoryStore } from "../store/admin/useAdminInventoryStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCharacterStore } from "../store/useCharacterStore";
 import { useInventoryStore } from "../store/useInventorystore";
@@ -22,4 +25,14 @@ export const handleLogout = () => {
   // Clear spells
   useSpellStore.getState().clearCurrentSpell();
   useSpellStore.persist.clearStorage();
+
+  // Clear Admin campaign
+  useAdminCampaignStore.getState().reset();
+  useAdminCampaignStore.persist.clearStorage();
+
+  // Clear Admin character
+  useAdminCharacterStore.getState().clearStorage();
+
+  // Clear Admin inventory
+  useAdminInventoryStore.getState().clearStorage();
 };

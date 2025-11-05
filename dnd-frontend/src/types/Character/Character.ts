@@ -33,8 +33,8 @@ export interface Character {
   hitDice: string; // ❌
 
    // ❌ These are all missing # TODO
-  proficiencies: string[];
-  languages: string[];
+  proficiencies: string[]; // ✅
+  languages: string[]; // ✅
   conditions: string[];
   resistances: string[];
   immunities: string[];
@@ -52,11 +52,12 @@ export interface Character {
   spellSaveDc: number; // ✅
   spellAttackBonus: number; // ✅
   spellSlots: SpellSlot[]; // ✅
+  spellcastingAbility: string;
   deathSavesSuccesses: number; // ✅
   deathSavesFailures: number; // ✅
-  passivePerception: number; // ❌
-  passiveInvestigation: number; // ❌
-  passiveInsight: number; // ❌
+  passivePerception: number; // ✅
+  passiveInvestigation: number; // ✅
+  passiveInsight: number; // ✅
   experience: number; // ✅
   carryingCapacity: number; // ❌
   currentEncumbrance: number; // ❌

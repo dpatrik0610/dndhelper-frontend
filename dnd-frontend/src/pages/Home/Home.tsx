@@ -18,6 +18,7 @@ import {
 import {
   IconUser,
   IconBook,
+  IconDashboard,
 } from "@tabler/icons-react";
 import { useCharacterStore } from "../../store/useCharacterStore";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
@@ -44,7 +45,7 @@ export default function Home() {
 
   const quickNavigations = [
     { label: "Spellbook", icon: <IconBook />, path: "/spells" },
-    // { label: "Quests", icon: <IconSword />, path: "/quests" },
+    isAdmin? { label: "Admin Dashboard", icon: <IconDashboard />, path: "/dashboard" } : null,
   ];
 
   // === Palette ===
@@ -203,6 +204,7 @@ export default function Home() {
       {/* === Quick Actions === */}
       <Grid mt="lg">
         {quickNavigations.map((action) => (
+          action?
           <Grid.Col key={action.label} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
             <Tooltip label={`Open ${action.label}`} withArrow>
               <Card
@@ -238,6 +240,7 @@ export default function Home() {
               </Card>
             </Tooltip>
           </Grid.Col>
+        : <></>
         ))}
       </Grid>
       
