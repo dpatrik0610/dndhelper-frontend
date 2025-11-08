@@ -54,10 +54,7 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
               fullWidth={isMobile}
               variant="gradient"
               onClick={() => navigate(editMode ? "/profile" : "/home")}
-              style={{
-                background: "linear-gradient(195deg, #e581e9ff, #44afe0ff)",
-                color: SectionColor.Black,
-              }}
+              gradient={{ from: editMode ? "orange" : "cyan", to: editMode ? "red" : "blue" }}
             >
               Go Back
             </Button>
@@ -66,7 +63,10 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
               type="submit"
               fullWidth={isMobile}
               variant="gradient"
-              gradient={{ from: editMode ? "orange" : "cyan", to: editMode ? "red" : "blue" }}
+              style={{
+                background: "linear-gradient(195deg, #e581e9ff, #44afe0ff)",
+                color: SectionColor.Black,
+              }}
             >
               {editMode ? "Save Changes" : "Create Character"}
             </Button>

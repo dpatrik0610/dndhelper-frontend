@@ -90,9 +90,9 @@ export function SkillsSection() {
     });
 
     if (changed) setCharacterForm({ skills: updated });
-  }, [characterForm.abilityScores, characterForm.proficiencyBonus]); // auto-sync on deps
+  }, [characterForm.abilityScores, characterForm.proficiencyBonus]);
 
-  // ➕ add custom skill (starts as non-proficient with base=0, follows future base only if user hasn't edited)
+
   const addSkill = () => {
     const name = newSkill.trim();
     if (!name || skills.some(s => s.name.toLowerCase() === name.toLowerCase())) return;
@@ -103,7 +103,7 @@ export function SkillsSection() {
 
   // ❌ remove custom skill
   const removeSkill = (name: string) => {
-    if (DEFAULT_SKILLS.some(s => s.name === name)) return; // lock core skills from removal
+    if (DEFAULT_SKILLS.some(s => s.name === name)) return;
     setCharacterForm({ skills: skills.filter(s => s.name !== name) });
   };
 
@@ -137,9 +137,9 @@ export function SkillsSection() {
                     {/* Value (manual edits become overrides) */}
                     <NumberInput
                       classNames={{ input: "glassy-input", label: "glassy-label" }}
-                      value={shown} min={base} size={isMobile ? "xs" : "sm"} style={{ width: 70 }}
+                      value={shown} size={isMobile ? "xs" : "sm"} style={{ width: 70 }}
                       onChange={(v) => {
-                        const val = typeof v === "number" && !isNaN(v) ? Math.max(v, base) : base;
+                        const val = typeof v === "number" && !isNaN(v) ? v : base;
                         setCharacterForm({
                           skills: skills.map(x => x.name === s.name ? { ...x, value: val } : x),
                         });
