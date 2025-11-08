@@ -44,7 +44,7 @@ export function useCharacterForm(editMode: boolean) {
           const newInventory: Inventory = {
             name: "Equipment",
             ownerIds: [newCharacter.ownerId!],
-            characterId: newCharacter.id,
+            characterIds: [newCharacter.id!],
             currencies: [],
             items: [],
           };
