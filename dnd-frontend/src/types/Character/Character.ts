@@ -4,6 +4,7 @@ import type { AbilityScores } from "./AbilityScores";
 import { HeightLabel } from "./HeightLabel";
 import type { SpellSlot } from "./SpellSlot";
 import type { Skill } from "./Skill";
+import type { Feature } from "./Feature";
 
 // ❌ means it is still now shown in the character profile
 export interface Character {
@@ -30,19 +31,18 @@ export interface Character {
   initiative: number; // ✅
   alignment: string; // ✅
   proficiencyBonus: number; // ✅
-  hitDice: string; // ❌
+  hitDice: string; // ✅
 
-   // ❌ These are all missing # TODO
   proficiencies: string[]; // ✅
   languages: string[]; // ✅
-  conditions: string[];
-  resistances: string[];
-  immunities: string[];
+  conditions: string[]; // ✅
+  resistances: string[]; // ❌
+  immunities: string[]; // ❌
   vulnerabilities: string[];
-  features: string[];
-  actions: string[];
-  spells: string[];
-  currencies: Currency[];
+  features: Feature[]; // ✅
+  actions: string[]; // ✅
+  spells: string[]; // ✅
+  currencies: Currency[]; // ✅
 
   // STATBLOCK
   abilityScores: AbilityScores; // ✅

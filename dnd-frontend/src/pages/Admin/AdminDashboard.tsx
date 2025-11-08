@@ -35,42 +35,48 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <>
-      <Box style={{ minHeight: "90vh", position: "relative", overflow: "hidden" }}>
-        {/* 🔒 Hide dashboard content until a campaign is selected */}
-        {!selectedCampaignId ? null : (
-          <>
-            <Transition mounted={isDashboard} transition="slide-right" duration={300} timingFunction="ease">
-              {(styles) => (
-                <Stack align="center" gap="lg" style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
-                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl" mt="md">
-                    {navItems.map((item) => (
-                      <DashboardCard
-                        key={item.key}
-                        icon={<item.icon size={48} />}
-                        title={item.label}
-                        onClick={() => setActiveSection(item.key)}
-                      />
-                    ))}
-                  </SimpleGrid>
-                </Stack>
-              )}
-            </Transition>
+    <Box
+      style={{
+        minHeight: "100vh",
+        position: "relative",
+        overflowX: "hidden",
+      }}
+    >
+    {/* Hide dashboard content until a campaign is selected */}
+    {!selectedCampaignId ? null : (
+      <>
+        <Transition mounted={isDashboard} transition="slide-right" duration={300} timingFunction="ease">
+          {(styles) => (
+            <Stack align="center" gap="lg" style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
+              <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl" mt="md">
+                {navItems.map((item) => (
+                  <DashboardCard
+                    key={item.key}
+                    icon={<item.icon size={48} />}
+                    title={item.label}
+                    onClick={() => setActiveSection(item.key)}
+                  />
+                ))}
+              </SimpleGrid>
+            </Stack>
+          )}
+        </Transition>
 
-            <Transition mounted={!isDashboard} transition="slide-left" duration={300} timingFunction="ease">
-              {(styles) => (
-                <Box style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
-                  {currentItem?.component}
-                </Box>
-              )}
-            </Transition>
+        <Transition mounted={!isDashboard} transition="slide-left" duration={300} timingFunction="ease">
+          {(styles) => (
+            <Box style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
+              {currentItem?.component}
+            </Box>
+          )}
+        </Transition>
 
-            {!isDashboard && <BackToDashboardButton />}
-          </>
-        )}
-      </Box>
+        {!isDashboard && <BackToDashboardButton />}
+      </>
+    )}
+    </Box>
 
-      {/* 🧭 Always render modal */}
-      <SelectCampaignModal opened={campaignModal} onClose={() => setCampaignModal(false)} />
-    </>
+    {/* 🧭 Always render modal */}
+    <SelectCampaignModal opened={campaignModal} onClose={() => setCampaignModal(false)} />
+  </>
   );
 };

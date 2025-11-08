@@ -1,18 +1,22 @@
-// components/Admin/BaseModal.tsx
 import { Modal, Group, Button, Text } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
+import type { ReactNode } from "react";
 
 interface BaseModalProps {
   opened: boolean;
   onClose: () => void;
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   size?: string | number;
   loading?: boolean;
   onSave?: () => void;
   showSaveButton?: boolean;
   saveLabel?: string;
   showCancelButton?: boolean;
+  /** 🆕 Optional Mantine modal behavior props */
+  closeOnClickOutside?: boolean;
+  closeOnEscape?: boolean;
+  withCloseButton?: boolean;
 }
 
 export const BaseModal: React.FC<BaseModalProps> = ({
@@ -26,6 +30,9 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   showSaveButton = true,
   saveLabel = "Save",
   showCancelButton = true,
+  closeOnClickOutside = true,
+  closeOnEscape = true,
+  withCloseButton = true,
 }) => {
   return (
     <Modal
@@ -37,8 +44,9 @@ export const BaseModal: React.FC<BaseModalProps> = ({
         </Text>
       }
       size={size}
-      closeOnClickOutside={!loading}
-      closeOnEscape={!loading}
+      withCloseButton={withCloseButton}
+      closeOnClickOutside={closeOnClickOutside && !loading}
+      closeOnEscape={closeOnEscape && !loading}
       overlayProps={{
         backgroundOpacity: 0.25,
         blur: 4,
@@ -84,6 +92,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
               Cancel
             </Button>
           )}
+
           {showSaveButton && onSave && (
             <Button
               onClick={onSave}

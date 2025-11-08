@@ -1,10 +1,5 @@
 import { apiClient } from "../api/apiClient"
-
-export interface Currency {
-  type: string
-  amount: number
-  currencyCode?: string
-}
+import type { Currency } from "../types/Currency";
 
 const baseUrl = "/currency";
 
@@ -37,4 +32,16 @@ export async function transferCurrenciesToCharacter(characterId: string, currenc
     console.error('API call failed:', error);
     throw error;
   }
+}
+
+export async function transferCurrenciesToInventory(
+  inventoryId: string,
+  currencies: Currency[],
+  token?: string
+): Promise<string> {
+  return apiClient<string>(`${baseUrl}/inventory/${inventoryId}`, {
+    method: "PUT",
+    body: currencies,
+    token,
+  });
 }

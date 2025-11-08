@@ -15,12 +15,11 @@ export function CollectionsSection() {
 
   return (
     <ExpandableSection title="Collections" icon={<IconBook2 />} color={SectionColor.Blue} defaultOpen>
-      <Stack>
-        <ListEditor form={formAdapter} field="languages" label="Languages" placeholder="Add language..." />
-        <ListEditor form={formAdapter} field="proficiencies" label="Proficiencies" placeholder="Add proficiency..." />
-        <ListEditor form={formAdapter} field="features" label="Features" placeholder="Add feature..." />
-        {/* <ListEditor form={formAdapter} field="spells" label="Spells" placeholder="Add spell..." /> */}
-      </Stack>
+    <Stack>
+      <ListEditor form={formAdapter} field="languages" label="Languages" placeholder="Add language..." />
+      <ListEditor form={formAdapter} field="proficiencies" label="Proficiencies" placeholder="Add proficiency..." />
+      <ListEditor form={formAdapter} field="features" label="Features" placeholder="Add feature..." type="feature" />
+    </Stack>
     </ExpandableSection>
   );
 }

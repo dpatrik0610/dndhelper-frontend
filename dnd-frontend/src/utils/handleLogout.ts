@@ -1,5 +1,6 @@
 import { useAdminCampaignStore } from "../store/admin/useAdminCampaignStore";
 import { useAdminCharacterStore } from "../store/admin/useAdminCharacterStore";
+import { useAdminCurrencyStore } from "../store/admin/useAdminCurrencyStore";
 import { useAdminInventoryStore } from "../store/admin/useAdminInventoryStore";
 import { useAuthStore } from "../store/useAuthStore";
 import { useCharacterStore } from "../store/useCharacterStore";
@@ -32,7 +33,10 @@ export const handleLogout = () => {
 
   // Clear Admin character
   useAdminCharacterStore.getState().clearStorage();
-
   // Clear Admin inventory
   useAdminInventoryStore.getState().clearStorage();
+
+  // Clear Admin Currencies
+  useAdminCurrencyStore.getState().clearStorage();
+  useAdminCurrencyStore.persist.clearStorage()
 };

@@ -4,7 +4,6 @@ import {
   Text,
   Divider,
   Badge,
-  SimpleGrid,
   ThemeIcon,
 } from "@mantine/core";
 import { IconLanguage, IconSword } from "@tabler/icons-react";

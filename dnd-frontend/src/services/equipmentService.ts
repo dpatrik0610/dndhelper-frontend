@@ -38,7 +38,7 @@ export async function createEquipment(equipment: Equipment, token: string): Prom
   return apiClient(baseUrl, {
     method: "POST",
     token,
-    body: JSON.stringify(equipment),
+    body: equipment,
   });
 }
 
@@ -46,10 +46,11 @@ export async function createEquipment(equipment: Equipment, token: string): Prom
  * Update an equipment item by ID.
  */
 export async function updateEquipmentById(id: string, equipment: Equipment, token: string): Promise<Equipment> {
+  console.log(equipment);
   return apiClient(`${baseUrl}/${id}`, {
     method: "PUT",
     token,
-    body: JSON.stringify(equipment),
+    body: equipment,
   });
 }
 
@@ -60,7 +61,7 @@ export async function updateEquipmentByIndex(index: string, equipment: Equipment
   return apiClient(`${baseUrl}/index/${index}`, {
     method: "PUT",
     token,
-    body: JSON.stringify(equipment),
+    body: equipment,
   });
 }
 

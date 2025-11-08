@@ -27,6 +27,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { Inventory } from "../Inventory/Inventory";
 import { ProficienciesPanel } from "./components/ProficienciesPanel";
 import "./styles/CharacterProfile.styles.css"
+import { FeaturesPanel } from "./components/FeaturesPanel";
 
 export default function CharacterProfile() {
   const character = useCharacterStore((state) => state.character);
@@ -64,6 +65,7 @@ export default function CharacterProfile() {
           <Tabs.Tab value="stats" leftSection={<IconSword size={16} />}>Stats</Tabs.Tab>
           <Tabs.Tab value="magic" leftSection={<IconSparkles size={16} />}>Magic</Tabs.Tab>
           <Tabs.Tab value="proficiencies" leftSection={<IconMedal size={16} />}>Proficiencies</Tabs.Tab>
+          <Tabs.Tab value="features" leftSection={<IconSword size={16} />}>Features</Tabs.Tab>
           <Tabs.Tab value="extras" leftSection={<IconInfoCircle size={16} />}>Extras</Tabs.Tab>
           <Tabs.Tab value="inventories" leftSection={<IconBox size={16} />}>Inventories</Tabs.Tab>
         </Tabs.List>
@@ -98,6 +100,12 @@ export default function CharacterProfile() {
           {activeTab === "extras" && (
             <motion.div key="extras" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
               <ExtraInfo />
+            </motion.div>
+          )}
+
+          {activeTab === "features" && (
+            <motion.div key="features" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+              <FeaturesPanel />
             </motion.div>
           )}
 

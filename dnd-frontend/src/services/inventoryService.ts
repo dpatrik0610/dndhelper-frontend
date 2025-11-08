@@ -53,7 +53,7 @@ export async function getItem(inventoryId: string, equipmentIndex: string, token
 }
 
 export async function addOrIncrementExisting(inventoryId: string, request: ModifyEquipmentAmount, token: string): Promise<InventoryItem> {
-  return apiClient(`${baseUrl}/${inventoryId}/additem`, { method: "POST", body: {request}, token });
+  return apiClient(`${baseUrl}/${inventoryId}/additem`, { method: "POST", body: request, token });
 }
 
 export async function addNewItem(inventoryId: string, equipment: Equipment, token: string): Promise<InventoryItem> {
@@ -64,8 +64,8 @@ export async function updateItem(inventoryId: string, equipmentId: string, item:
   await apiClient(`${baseUrl}/${inventoryId}/items/${equipmentId}`, { method: "PUT", body: item, token });
 }
 
-export async function deleteItem(inventoryId: string, equipmentId: string, token: string): Promise<void> {
-  await apiClient(`${baseUrl}/${inventoryId}/items/${equipmentId}`, { method: "DELETE", token });
+export async function deleteItem(inventoryId: string, equipmentId: string, token?: string) {
+  await apiClient(`${baseUrl}/${inventoryId}/items/${equipmentId}`, {method: "DELETE", token});
 }
 
 export async function decrementItemQuantity(inventoryId: string, request: ModifyEquipmentAmount, token: string): Promise<void> {

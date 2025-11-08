@@ -8,154 +8,258 @@ import {
   updateInventory,
   deleteInventory,
   addNewItem,
-  deleteItem,
-  updateItem,
+  deleteItem as deleteItemService,
+  updateItem as updateItemService,
+  moveItem as moveItemService,
+  addOrIncrementExisting,
+  type MoveItemRequest,
+  type ModifyEquipmentAmount,
 } from "../../services/inventoryService";
 import { useAuthStore } from "../../store/useAuthStore";
 import { showNotification } from "../../components/Notification/Notification";
 import { SectionColor } from "../../types/SectionColor";
 import type { Equipment } from "../../types/Equipment/Equipment";
+import { updateEquipmentById } from "../../services/equipmentService";
 
 interface AdminInventoryStore {
   inventories: Inventory[];
   selected: Inventory | null;
   loading: boolean;
+
   loadByCharacter: (characterId: string) => Promise<void>;
-  select: (id: string | null) => void;
+  refreshInventories: (characterId?: string) => Promise<void>;
   refreshSelected: () => Promise<void>;
-  create: (characterId: string, name: string) => Promise<void>;
+  select: (id: string | null) => void;
+
+  create: (characterIds: string[] | null, name: string) => Promise<void>;
   rename: (id: string, name: string) => Promise<void>;
   remove: (id: string) => Promise<void>;
   addItem: (equipment: Equipment) => Promise<void>;
+  addExisting: (equipmentId: string, amount: number) => Promise<void>;
   updateItem: (item: InventoryItem) => Promise<void>;
   deleteItem: (item: InventoryItem) => Promise<void>;
+  moveItem: (equipmentId: string, targetInventoryId: string, amount: number) => Promise<void>;
+  incrementItemQuantity: (equipmentId: string) => Promise<void>;
+  decrementItemQuantity: (equipmentId: string) => Promise<void>;
+
+  updateEquipment: (equipment: Equipment) => Promise<Equipment>;
   clearStorage: () => void;
 }
 
-export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => ({
-  inventories: [],
-  selected: null,
-  loading: false,
+export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => {
+  const getToken = () => useAuthStore.getState().token!;
 
-  loadByCharacter: async (characterId) => {
-    const token = useAuthStore.getState().token!;
-    set({ loading: true });
-    try {
-      const data = await getInventoriesByCharacter(characterId, token);
-      set({
-        inventories: data,
-        selected: null,
-      });
-    } catch (err) {
+  return {
+    inventories: [],
+    selected: null,
+    loading: false,
+
+    // === LOAD ALL INVENTORIES FOR ONE CHARACTER ===
+    loadByCharacter: async (characterId) => {
+      if (!characterId) return;
+      set({ loading: true });
+      try {
+        const data = await getInventoriesByCharacter(characterId, getToken());
+        const owned = data.filter(i => i.characterIds?.includes(characterId));
+        set({ inventories: owned, selected: owned[0] ?? null });
+      } catch (err) {
+        showNotification({
+          title: "Error loading inventories",
+          message: String(err),
+          color: SectionColor.Red,
+        });
+      } finally {
+        set({ loading: false });
+      }
+    },
+
+    // === MANUALLY SELECT AN INVENTORY ===
+    select: (id) => {
+      const { inventories } = get();
+      set({ selected: inventories.find((i) => i.id === id) ?? null });
+    },
+
+    // === REFRESH INVENTORY LIST ===
+    refreshInventories: async (characterId?: string) => {
+      const charId =
+        characterId ||
+        get().selected?.characterIds?.[0] ||
+        get().inventories[0]?.characterIds?.[0];
+
+      if (!charId) return;
+      try {
+        const refreshed = await getInventoriesByCharacter(charId, getToken());
+        const owned = refreshed.filter(i => i.characterIds?.includes(charId));
+        const sel = get().selected;
+        set({
+          inventories: owned,
+          selected: sel ? owned.find((i) => i.id === sel.id) ?? sel : null,
+        });
+      } catch (err) {
+        showNotification({
+          title: "Error refreshing inventories",
+          message: String(err),
+          color: SectionColor.Red,
+        });
+      }
+    },
+
+    // === REFRESH THE CURRENTLY SELECTED INVENTORY ===
+    refreshSelected: async () => {
+      const sel = get().selected;
+      if (!sel?.id) return;
+      try {
+        const updated = await getInventory(sel.id, getToken());
+        set({ selected: updated });
+      } catch (err) {
+        showNotification({
+          title: "Error refreshing inventory",
+          message: String(err),
+          color: SectionColor.Red,
+        });
+      }
+    },
+
+    // === CREATE NEW INVENTORY ===
+    create: async (characterIds, name) => {
+      characterIds = characterIds ?? [];
+      if (characterIds.length === 0) return;
+
+      await createInventory(
+        { name, characterIds, ownerIds: [], currencies: [] },
+        getToken()
+      );
+
+      await get().refreshInventories(characterIds[0]);
       showNotification({
-        title: "Error loading inventories",
-        message: String(err),
+        title: "Inventory created",
+        message: `${name} added successfully.`,
+        color: SectionColor.Green,
+      });
+    },
+
+    rename: async (id, name) => {
+      const { selected } = get();
+      if (!selected) return;
+      await updateInventory(id, { ...selected, name }, getToken());
+      await get().refreshInventories();
+      showNotification({
+        title: "Renamed",
+        message: `Inventory renamed to ${name}.`,
+        color: SectionColor.Green,
+      });
+    },
+
+    remove: async (id) => {
+      await deleteInventory(id, getToken());
+      await get().refreshInventories();
+      showNotification({
+        title: "Inventory deleted",
+        message: "Inventory removed successfully.",
         color: SectionColor.Red,
       });
-    } finally {
-      set({ loading: false });
-    }
-  },
+    },
 
-  select: (id) => {
-    const { inventories } = get();
-    set({ selected: inventories.find((i) => i.id === id) ?? null });
-  },
-
-  refreshSelected: async () => {
-    const token = useAuthStore.getState().token!;
-    const sel = get().selected;
-    if (!sel?.id) return;
-    try {
-      const updated = await getInventory(sel.id, token);
-      set({ selected: updated });
-    } catch (err) {
+    // === ITEM OPERATIONS ===
+    addItem: async (equipment) => {
+      const sel = get().selected;
+      if (!sel?.id) return;
+      await addNewItem(sel.id, equipment, getToken());
+      await get().refreshInventories();
       showNotification({
-        title: "Error refreshing inventory",
-        message: String(err),
+        title: "Item added",
+        message: `${equipment.name} added to ${sel.name}.`,
+        color: SectionColor.Green,
+      });
+    },
+
+    addExisting: async (equipmentId, amount) => {
+      const sel = get().selected;
+      if (!sel?.id) return;
+      const token = getToken();
+      const request: ModifyEquipmentAmount = { equipmentId, amount };
+
+      try {
+        await addOrIncrementExisting(sel.id, request, token);
+        await get().refreshInventories();
+        showNotification({
+          title: "Item added",
+          message: `Added ${amount}× item to ${sel.name}.`,
+          color: SectionColor.Green,
+        });
+      } catch (err) {
+        showNotification({
+          title: "Error adding item",
+          message: String(err),
+          color: SectionColor.Red,
+        });
+      }
+    },
+
+    updateItem: async (item) => {
+      const sel = get().selected;
+      if (!sel?.id || !item.equipmentId) return;
+      await updateItemService(sel.id, item.equipmentId, item, getToken());
+      await get().refreshInventories();
+      showNotification({
+        title: "Item updated",
+        message: `${item.equipmentName} updated successfully.`,
+        color: SectionColor.Green,
+      });
+    },
+
+    deleteItem: async (item) => {
+      const sel = get().selected;
+      if (!sel?.id || !item.equipmentId) return;
+      await deleteItemService(sel.id, item.equipmentId, getToken());
+      await get().refreshInventories();
+      showNotification({
+        title: "Item removed",
+        message: `${item.equipmentName} deleted.`,
         color: SectionColor.Red,
       });
-    }
-  },
+    },
 
-  create: async (characterId, name) => {
-    const token = useAuthStore.getState().token!;
-    const inv = await createInventory({ name, characterId, ownerIds: [], currencies: [] }, token);
-    set((s) => ({ inventories: [...s.inventories, inv], selected: inv }));
-    showNotification({
-      title: "Inventory created",
-      message: `${name} added successfully.`,
-      color: SectionColor.Green,
-    });
-  },
+    moveItem: async (equipmentId, targetInventoryId, amount) => {
+      const sel = get().selected;
+      if (!sel?.id) return;
+      const token = getToken();
+      const request: MoveItemRequest = { targetInventoryId, amount };
+      await moveItemService(sel.id, equipmentId, request, token);
+      await get().refreshInventories();
+      showNotification({
+        title: "Item moved",
+        message: `Moved ${amount}× item from ${sel.name} to target inventory.`,
+        color: SectionColor.Blue,
+      });
+    },
 
-  rename: async (id, name) => {
-    const token = useAuthStore.getState().token!;
-    const { selected } = get();
-    const updated = await updateInventory(id, { ...selected, name } as Inventory, token);
-    set((s) => ({
-      inventories: s.inventories.map((i) => (i.id === id ? updated : i)),
-      selected: updated,
-    }));
-    showNotification({
-      title: "Renamed",
-      message: `Inventory renamed to ${name}.`,
-      color: SectionColor.Green,
-    });
-  },
+    updateEquipment: async (equipment) => {
+      const updated = await updateEquipmentById(equipment.id!, equipment, getToken());
+      await get().refreshInventories();
+      return updated;
+    },
 
-  remove: async (id) => {
-    const token = useAuthStore.getState().token!;
-    await deleteInventory(id, token);
-    set((s) => ({
-      inventories: s.inventories.filter((i) => i.id !== id),
-      selected: s.inventories.find((i) => i.id !== id) ?? null,
-    }));
-    showNotification({
-      title: "Inventory deleted",
-      message: "Inventory removed successfully.",
-      color: SectionColor.Red,
-    });
-  },
+    incrementItemQuantity: async (equipmentId) => {
+      const sel = get().selected;
+      if (!sel?.id) return;
+      const item = sel.items?.find(i => i.equipmentId === equipmentId);
+      if (!item) return;
+      const updated = { ...item, quantity: (item.quantity ?? 0) + 1 };
+      await updateItemService(sel.id, equipmentId, updated, getToken());
+      await get().refreshInventories();
+    },
 
-  addItem: async (equipment) => {
-    const token = useAuthStore.getState().token!;
-    const sel = get().selected;
-    if (!sel?.id) return;
-    await addNewItem(sel.id, equipment, token);
-    await get().refreshSelected();
-    showNotification({
-      title: "Item added",
-      message: `${equipment.name} added to ${sel.name}.`,
-      color: SectionColor.Green,
-    });
-  },
+    decrementItemQuantity: async (equipmentId) => {
+      const sel = get().selected;
+      if (!sel?.id) return;
+      const item = sel.items?.find(i => i.equipmentId === equipmentId);
+      if (!item || item.quantity! <= 1) return;
+      const updated = { ...item, quantity: item.quantity! - 1 };
+      await updateItemService(sel.id, equipmentId, updated, getToken());
+      await get().refreshInventories();
+    },
 
-  updateItem: async (item) => {
-    const token = useAuthStore.getState().token!;
-    const sel = get().selected;
-    if (!sel?.id || !item.equipmentId) return;
-    await updateItem(sel.id, item.equipmentId, item, token);
-    await get().refreshSelected();
-    showNotification({
-      title: "Item updated",
-      message: `${item.equipmentName} updated successfully.`,
-      color: SectionColor.Green,
-    });
-  },
-
-  deleteItem: async (item) => {
-    const token = useAuthStore.getState().token!;
-    const sel = get().selected;
-    if (!sel?.id || !item.equipmentId) return;
-    await deleteItem(sel.id, item.equipmentId, token);
-    await get().refreshSelected();
-    showNotification({
-      title: "Item removed",
-      message: `${item.equipmentName} deleted.`,
-      color: SectionColor.Red,
-    });
-  },
-
-  clearStorage: () => set({ inventories: [], selected: null, loading: false }),
-}));
+    clearStorage: () => set({ inventories: [], selected: null, loading: false }),
+  };
+});
