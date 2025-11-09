@@ -7,6 +7,7 @@ import { InventoryManager } from "./InventoryManager/InventoryManager";
 import { useEffect, useState, type JSX } from "react";
 import { SelectCampaignModal } from "./components/SelectCampaignModal";
 import { useAdminCampaignStore } from "../../store/admin/useAdminCampaignStore";
+import { CampaignManager } from "./CampaignManager/CampaignManager";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -27,7 +28,7 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconBox, label: "Inventory Manager", key: "InventoryManager", component: <InventoryManager /> },
     { icon: IconUsers, label: "User Manager", key: "UserManager", component: <Box ta="center">👤 User Manager (coming soon)</Box> },
     { icon: IconCategory, label: "Item Manager", key: "ItemManager", component: <Box ta="center">📦 Item Manager (coming soon)</Box> },
-    { icon: IconSettings, label: "Campaign Manager", key: "CampaignManager", component: <Box ta="center">🎯 Campaign Manager (coming soon)</Box> },
+    { icon: IconSettings, label: "Campaign Manager", key: "CampaignManager", component: <CampaignManager /> },
   ];
 
   const currentItem = navItems.find((n) => n.key === activeSection);

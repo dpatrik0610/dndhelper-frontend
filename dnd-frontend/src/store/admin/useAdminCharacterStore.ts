@@ -6,7 +6,7 @@ import { SectionColor } from "../../types/SectionColor";
 import type { Character } from "../../types/Character/Character";
 
 interface AdminCharacterStore {
-  characters: Pick<Character, "id" | "name" | "ownerId" | "inventoryIds">[];
+  characters: Pick<Character, "id" | "name" | "ownerId" | "inventoryIds" | "characterClass" | "level">[];
   selectedId: string | null;
   loading: boolean;
   loadAll: (campaignId: string) => Promise<void>;
@@ -29,7 +29,9 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set) => ({
           id: c.id!,
           name: c.name,
           ownerId: c.ownerId,
-          inventoryIds: c.inventoryIds
+          inventoryIds: c.inventoryIds,
+          characterClass: c.characterClass,
+          level: c.level
         })),
       });
     } catch (err) {
