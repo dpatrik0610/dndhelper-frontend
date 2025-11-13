@@ -77,7 +77,7 @@ export interface Character {
   ideals: string;
   bonds: string;
   flaws: string;
-  notes: string;
+  noteIds: string[];
   description: string;
 
   // COLLECTIONS

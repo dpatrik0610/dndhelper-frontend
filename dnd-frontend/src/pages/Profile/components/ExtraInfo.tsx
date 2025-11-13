@@ -45,7 +45,6 @@ export function ExtraInfo() {
         <StatBox label="Ideals" value={character.ideals ?? null} color="gray" size="sm"/>
         <StatBox label="Bonds" value={character.bonds ?? null} color="gray" size="sm"/>
         <StatBox label="Flaws" value={character.flaws ?? null} color="gray" size="sm"/>
-        <StatBox label="Additional Notes" value={character.notes ?? null} color="gray" size="sm"/>
       </Stack>
 
       <DividerWithLabel label={"Backstory"} thickness="2px" color={SectionColor.Orange}/>

@@ -27,7 +27,6 @@ export function LoreSection() {
         <Textarea classNames={{ input: "glassy-input", label: "glassy-label" }} label="Bonds" autosize value={characterForm.bonds} onChange={(e)=>setCharacterForm({bonds:e.currentTarget.value})}/>
         <Textarea classNames={{ input: "glassy-input", label: "glassy-label" }} label="Flaws" autosize value={characterForm.flaws} onChange={(e)=>setCharacterForm({flaws:e.currentTarget.value})}/>
         <Textarea classNames={{ input: "glassy-input", label: "glassy-label" }} label="Backstory" autosize value={characterForm.backstory.join("\n")} onChange={(e)=>setCharacterForm({backstory:e.currentTarget.value.split("\n")})}/>
-        <Textarea classNames={{ input: "glassy-input", label: "glassy-label" }} label="Notes" autosize value={characterForm.notes} onChange={(e)=>setCharacterForm({notes:e.currentTarget.value})}/>
       </Stack>
     </ExpandableSection>
   );

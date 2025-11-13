@@ -28,6 +28,7 @@ import { Inventory } from "../Inventory/Inventory";
 import { ProficienciesPanel } from "./components/ProficienciesPanel";
 import "./styles/CharacterProfile.styles.css"
 import { FeaturesPanel } from "./components/FeaturesPanel";
+import { CharacterNotesPanel } from "./components/CharacterNotesPanel";
 
 export default function CharacterProfile() {
   const character = useCharacterStore((state) => state.character);
@@ -68,6 +69,7 @@ export default function CharacterProfile() {
           <Tabs.Tab value="features" leftSection={<IconSword size={16} />}>Features</Tabs.Tab>
           <Tabs.Tab value="extras" leftSection={<IconInfoCircle size={16} />}>Extras</Tabs.Tab>
           <Tabs.Tab value="inventories" leftSection={<IconBox size={16} />}>Inventories</Tabs.Tab>
+          <Tabs.Tab value="notes" leftSection={<IconInfoCircle size={16} />}>Notes</Tabs.Tab>
         </Tabs.List>
 
         <AnimatePresence mode="wait">
@@ -112,6 +114,11 @@ export default function CharacterProfile() {
           {activeTab === "inventories" && (
             <motion.div key="inventories" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
               <Inventory />
+            </motion.div>
+          )}
+          {activeTab === "notes" && (
+            <motion.div key="notes" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+              <CharacterNotesPanel />
             </motion.div>
           )}
         </AnimatePresence>
