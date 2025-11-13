@@ -2,17 +2,19 @@ import { Button, Group, Paper, Title } from "@mantine/core";
 import { longrest } from "../../../services/characterService";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { showNotification } from "../../../components/Notification/Notification";
-import { IconEdit, IconMoon, IconPlus } from "@tabler/icons-react";
+import { IconDroplet, IconEdit, IconMoon, IconPlus } from "@tabler/icons-react";
 import { loadCharacters } from "../../../utils/loadCharacter";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNavigate } from "react-router-dom";
 import { SectionColor } from "../../../types/SectionColor";
 import { useState, type MouseEventHandler } from "react";
-import { randomId, useMediaQuery } from "@mantine/hooks";
+import { useMediaQuery } from "@mantine/hooks";
 import { AddConditionModal } from "./AddConditionModal";
+import { DamageModal } from "./DamageModal";
 
 export interface ActionButtonProps{
     label: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     icon: any
     onClick: MouseEventHandler
 }
@@ -20,15 +22,20 @@ export interface ActionButtonProps{
 
 export function ActionBar() {
   const [modalOpened, setModalOpened] = useState(false);
-  const token = useAuthStore.getState().token;
-  if (!token) return;
+  const [damageModalOpened, setDamageModalOpened] = useState(false);
 
+  const token = useAuthStore.getState().token;
   const navigate = useNavigate();
-  const character = useCharacterStore((state) => state.character)!;
+  const character = useCharacterStore((state) => state.character);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+
+  if (!token || !character || !character.id) {
+    return null;
+  }
+
   async function handleLongrest() {
-    await longrest(character.id!, token!);
+    await longrest(character!.id!, token!);
     await loadCharacters(token!);
     showNotification({
       id: "longrest-successs",
@@ -39,9 +46,10 @@ export function ActionBar() {
   }
 
   const actions: ActionButtonProps[] = [
-    { label: "Long Rest", icon: <IconMoon />, onClick: () => handleLongrest() },
+    { label: "Long Rest", icon: <IconMoon />, onClick: handleLongrest },
     { label: "Edit Character", icon: <IconEdit />, onClick: () => navigate("/editCharacter") },
     { label: "Add Condition", icon: <IconPlus />, onClick: () => setModalOpened(true) },
+    { label: "Damage", icon: <IconDroplet size={16} />, onClick: () => setDamageModalOpened(true) },
   ];
 
   return (
@@ -57,10 +65,11 @@ export function ActionBar() {
         <Title order={3} mb="md">
           Action Bar
         </Title>
+
         <Group>
           {actions.map((action) => (
             <Button
-              key={randomId(action.label)}
+              key={action.label} // ❗ randomId removed, also fixes key warnings
               leftSection={action.icon}
               variant="outline"
               gradient={{ from: SectionColor.Violet, to: SectionColor.Cyan, deg: 180 }}
@@ -76,6 +85,7 @@ export function ActionBar() {
       </Paper>
 
       <AddConditionModal opened={modalOpened} onClose={() => setModalOpened(false)} />
+      <DamageModal opened={damageModalOpened} onClose={() => setDamageModalOpened(false)} />
     </>
   );
 }
