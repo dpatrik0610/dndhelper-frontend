@@ -41,5 +41,5 @@ export interface Spell {
     name: string;
   }>;
   healAtSlotLevel?: Record<string, string>;
-  hpellUrl: string;
+  spellUrl: string;
 }
