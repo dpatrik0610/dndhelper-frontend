@@ -30,9 +30,15 @@ export async function getCondition(name: string): Promise<string[]> {
     if (!res.ok) throw new Error(`Condition "${name}" not found`);
 
     const data = await res.json();
-    return data.desc ?? [];
+
+    if (Array.isArray(data.desc)) return data.desc;
+    if (typeof data.desc === "string") return [data.desc];
+    if (data.desc?.value) return [data.desc.value];
+
+    return [];
   } catch (error) {
     console.error(`Error fetching condition "${name}":`, error);
     return [];
   }
 }
+

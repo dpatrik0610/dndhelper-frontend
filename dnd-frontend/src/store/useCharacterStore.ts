@@ -6,18 +6,20 @@ interface CharacterState {
   character: Character | null;
   characters: Character[];
 
-  // actions
   setCharacter: (character: Character) => void;
   setCharacters: (characters: Character[]) => void;
 
   updateCharacter: (updated: Partial<Character>) => void;
+
+  removeCondition: (condition: string) => void;
+  addCondition: (condition: string) => void;
+
   clearStore: () => void;
 }
 
 export const useCharacterStore = create<CharacterState>()(
   persist(
     (set, get) => ({
-      characterForm: null,
       character: null,
       characters: [],
 
@@ -37,11 +39,49 @@ export const useCharacterStore = create<CharacterState>()(
           ),
         }));
       },
-      
-      clearStore: () => set({ character: null, characters: []}),
+
+      removeCondition: (condition: string) => {
+        const current = get().character;
+        if (!current) return;
+
+        const updated = {
+          ...current,
+          conditions: current.conditions.filter((c) => c !== condition),
+        };
+
+        set({ character: updated });
+
+        set((state) => ({
+          characters: state.characters.map((c) =>
+            c.id === updated.id ? updated : c
+          ),
+        }));
+      },
+
+      addCondition: (condition: string) => {
+        const current = get().character;
+        if (!current) return;
+
+        if (current.conditions.includes(condition)) return;
+
+        const updated = {
+          ...current,
+          conditions: [...current.conditions, condition],
+        };
+
+        set({ character: updated });
+
+        set((state) => ({
+          characters: state.characters.map((c) =>
+            c.id === updated.id ? updated : c
+          ),
+        }));
+      },
+
+      clearStore: () => set({ character: null, characters: [] }),
     }),
     {
-      name: "character-storage", // localStorage key
+      name: "character-storage",
       partialize: (state) => ({
         character: state.character,
         characters: state.characters,
