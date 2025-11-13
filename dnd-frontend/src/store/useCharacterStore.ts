@@ -14,6 +14,8 @@ interface CharacterState {
   removeCondition: (condition: string) => void;
   addCondition: (condition: string) => void;
 
+  removeCurrency: (currencyType: string, amount: number) => void;
+
   clearStore: () => void;
 }
 
@@ -61,7 +63,6 @@ export const useCharacterStore = create<CharacterState>()(
       addCondition: (condition: string) => {
         const current = get().character;
         if (!current) return;
-
         if (current.conditions.includes(condition)) return;
 
         const updated = {
@@ -78,7 +79,38 @@ export const useCharacterStore = create<CharacterState>()(
         }));
       },
 
+      removeCurrency: (currencyType: string, amount: number) => {
+        const current = get().character;
+        if (!current) return;
+
+        const existing = current.currencies?.find((c) => c.type === currencyType);
+        if (!existing) return;
+
+        const newAmount = existing.amount - amount;
+
+        const updatedCurrencies =
+          newAmount > 0
+            ? current.currencies.map((c) =>
+                c.type === currencyType ? { ...c, amount: newAmount } : c
+              )
+            : current.currencies.filter((c) => c.type !== currencyType);
+
+        const updated = {
+          ...current,
+          currencies: updatedCurrencies,
+        };
+
+        set({ character: updated });
+
+        set((state) => ({
+          characters: state.characters.map((c) =>
+            c.id === updated.id ? updated : c
+          ),
+        }));
+      },
+
       clearStore: () => set({ character: null, characters: [] }),
+
     }),
     {
       name: "character-storage",

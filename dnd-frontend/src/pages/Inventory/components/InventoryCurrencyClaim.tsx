@@ -31,11 +31,11 @@ export function InventoryCurrencyClaim({
     setLoading(true);
 
     try {
-      await transferCurrenciesToCharacter(characterId!, inventory?.currencies!, token);
+      await transferCurrenciesToCharacter(characterId!, inventory.currencies!, token);
 
       // Remove currencies from inventory in store
       updateInventoryCurrencies(inventoryId, []);
-      var updated = useInventoryStore.getState().inventories.find(x => x.id == inventory.id);
+      const updated = useInventoryStore.getState().inventories.find(x => x.id == inventory.id);
 
       // Reload character.
       loadCharacters(token);
@@ -47,7 +47,6 @@ export function InventoryCurrencyClaim({
         color: "green",
       });
 
-      console.log("Currencies in inventory after claiming: " + inventory?.currencies);
       setClaimed(true);
 
     } catch (error) {

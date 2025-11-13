@@ -2,7 +2,7 @@ import { Button, Group, Paper, Title } from "@mantine/core";
 import { longrest } from "../../../services/characterService";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { showNotification } from "../../../components/Notification/Notification";
-import { IconDroplet, IconEdit, IconMoon, IconPlus } from "@tabler/icons-react";
+import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus } from "@tabler/icons-react";
 import { loadCharacters } from "../../../utils/loadCharacter";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ import { useState, type MouseEventHandler } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { AddConditionModal } from "./AddConditionModal";
 import { DamageModal } from "./DamageModal";
+import { RemoveCurrencyModal } from "./RemoveCurrencyModal";
 
 export interface ActionButtonProps{
     label: string
@@ -23,6 +24,7 @@ export interface ActionButtonProps{
 export function ActionBar() {
   const [modalOpened, setModalOpened] = useState(false);
   const [damageModalOpened, setDamageModalOpened] = useState(false);
+  const [removeCurrencyModalOpened, setRemoveCurrencyModalOpened] = useState(false);
 
   const token = useAuthStore.getState().token;
   const navigate = useNavigate();
@@ -50,6 +52,7 @@ export function ActionBar() {
     { label: "Edit Character", icon: <IconEdit />, onClick: () => navigate("/editCharacter") },
     { label: "Add Condition", icon: <IconPlus />, onClick: () => setModalOpened(true) },
     { label: "Damage", icon: <IconDroplet size={16} />, onClick: () => setDamageModalOpened(true) },
+    { label: "Remove Currency", icon: <IconCoin size={16} />, onClick: () => setRemoveCurrencyModalOpened(true)  },
   ];
 
   return (
@@ -86,6 +89,7 @@ export function ActionBar() {
 
       <AddConditionModal opened={modalOpened} onClose={() => setModalOpened(false)} />
       <DamageModal opened={damageModalOpened} onClose={() => setDamageModalOpened(false)} />
+      <RemoveCurrencyModal opened={removeCurrencyModalOpened} onClose={() => setRemoveCurrencyModalOpened(false)} />
     </>
   );
 }
