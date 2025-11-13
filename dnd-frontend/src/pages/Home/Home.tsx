@@ -23,13 +23,12 @@ import {
 import { useCharacterStore } from "../../store/useCharacterStore";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { useNavigate } from "react-router-dom";
-import { getRecentEvents } from "../../services/eventService";
-import type { Event } from "../../types/Event";
-import { RecentEventsSection } from "./components/RecentEvents";
 import type { Character } from "../../types/Character/Character";
 import { useMediaQuery } from "@mantine/hooks";
 import { useAuthStore } from "../../store/useAuthStore";
 import { CharacterSelectButton } from "./components/CharacterSelectButton";
+import { SectionColor } from "../../types/SectionColor";
+import CustomBadge from "../../components/common/CustomBadge";
 
 export default function Home() {
   const isAdmin = useAuthStore.getState().roles.includes("Admin");
@@ -38,8 +37,6 @@ export default function Home() {
   const character = useCharacterStore((state) => state.character);
 
   const [modalOpened, setModalOpened] = useState(false);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
   const [quote, setQuote] = useState("");
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -69,19 +66,6 @@ export default function Home() {
   ];
 
   useEffect(() => setQuote(quotes[Math.floor(Math.random() * quotes.length)]), []);
-
-  useEffect(() => {
-    getRecentEvents()
-      .then((data: Event[]) => setEvents(data))
-      // .catch(() =>
-      //   notifications.show({
-      //     title: "Error",
-      //     message: "Failed to load recent events.",
-      //     color: "red",
-      //   })
-      // )
-      .finally(() => setLoading(false));
-  }, []);
 
   const handleSelectCharacter = (char: Character) => {
     setCharacter(char);
@@ -172,37 +156,11 @@ export default function Home() {
               View Profile
             </Button>
           </Group>
-
-          <Divider my="md" color={palette.border} />
-
-          <Group grow>
-            <Box>
-              <Text size="xs" c={palette.textDim}>
-                Experience
-              </Text>
-              <Progress
-                value={(character.experience ?? 0) % 100}
-                color="violet"
-                radius="md"
-              />
-            </Box>
-
-            <Box>
-              <Text size="xs" c={palette.textDim}>
-                Health
-              </Text>
-              <Progress
-                value={(character.hitPoints / character.maxHitPoints) * 100}
-                color="red"
-                radius="md"
-              />
-            </Box>
-          </Group>
         </Card>
       )}
 
       {/* === Quick Actions === */}
-      <Grid mt="lg">
+      <Grid mt="md" gutter="md">
         {quickNavigations.map((action) => (
           action?
           <Grid.Col key={action.label} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
@@ -226,26 +184,13 @@ export default function Home() {
                   (e.currentTarget.style.backgroundColor = palette.cardBg)
                 }
               >
-                <Group>
-                  <Badge
-                    color="violet"
-                    radius="sm"
-                    variant="light"
-                    style={{ backgroundColor: "rgba(150, 120, 255, 0.15)" }}
-                  >
-                    {action.icon}
-                  </Badge>
-                  <Text fw={500}>{action.label}</Text>
-                </Group>
+              <CustomBadge label={action.label} icon={action.icon} variant="transparent" size="xl" />
               </Card>
             </Tooltip>
           </Grid.Col>
         : <></>
         ))}
       </Grid>
-      
-      {/* === Recent Events === */}
-      <RecentEventsSection events={events} loading={loading} />
-    </Stack>
+      </Stack>
   );
 }
