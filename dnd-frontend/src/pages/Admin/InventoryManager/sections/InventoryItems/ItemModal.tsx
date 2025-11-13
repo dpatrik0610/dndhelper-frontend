@@ -7,16 +7,18 @@ import {
   Divider,
   Loader,
   Center,
+  Select,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { BaseModal } from "../../../../../components/BaseModal";
 import { showNotification } from "../../../../../components/Notification/Notification";
 import { SectionColor } from "../../../../../types/SectionColor";
-import type { Equipment } from "../../../../../types/Equipment/Equipment";
+import { EQUIPMENT_TIERS, type Equipment } from "../../../../../types/Equipment/Equipment";
 import { getEquipmentById } from "../../../../../services/equipmentService";
 import { useAuthStore } from "../../../../../store/useAuthStore";
 import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInventoryStore";
 import "../../../../../styles/glassyInput.css";
+import { TagsInput } from "./TagsInput";
 
 interface ItemModalProps {
   opened: boolean;
@@ -257,6 +259,40 @@ export function ItemModal({
             }
           />
         </Group>
+        <Divider label="DM Description" labelPosition="center" my="sm" />
+
+        <Textarea
+          classNames={{ input: "glassy-input", label: "glassy-label" }}
+          label="DM Description"
+          description="Private notes visible only to the DM/admin."
+          autosize
+          minRows={2}
+          value={equipment.dmDescription?.join("\n") ?? ""}
+          onChange={(e) =>
+            handleChange(
+              "dmDescription",
+              e.currentTarget.value.split("\n")
+            )
+          }
+        />
+
+        <Divider label="Tier" labelPosition="center" my="sm" />
+
+        <Select
+          classNames={{ input: "glassy-input", label: "glassy-label" }}
+          label="Tier"
+          placeholder="Select tier..."
+          value={equipment.tier ?? ""}
+          onChange={(val) => handleChange("tier", val ?? "Unspecified")}
+          searchable
+          data={EQUIPMENT_TIERS.map((t) => ({ label: t, value: t }))}
+          nothingFoundMessage="No tiers"
+          allowDeselect
+        />
+
+        <Divider label="Tags" labelPosition="center" my="sm" />
+
+        <TagsInput equipment={equipment} handleChange={handleChange} />
       </Stack>
     </BaseModal>
   );

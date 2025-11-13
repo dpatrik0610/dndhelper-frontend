@@ -16,6 +16,7 @@ import {
   IconCoin,
   IconWeight,
   IconEdit,
+  IconSearch,
 } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInventoryStore";
@@ -25,6 +26,7 @@ import { useAuthStore } from "../../../../../store/useAuthStore";
 import type { Equipment } from "../../../../../types/Equipment/Equipment";
 import { MoveItemModal } from "./MoveItemModal";
 import "../../../../../styles/itemCard.css";
+import { EquipmentModal } from "../../../../../components/EquipmentModal";
 
 interface ItemCardProps {
   itemId: string;
@@ -33,6 +35,7 @@ interface ItemCardProps {
 export function ItemCard({ itemId }: ItemCardProps) {
   const { selected, deleteItem, incrementItemQuantity, decrementItemQuantity } = useAdminInventoryStore();
   const [editOpen, setEditOpen] = useState(false);
+  const [inspectOpen, setInspectOpen] = useState(false);
   const [moveModal, setMoveModal] = useState(false);
   const [equipment, setEquipment] = useState<Equipment | null>(null);
   const token = useAuthStore.getState().token!;
@@ -103,6 +106,17 @@ export function ItemCard({ itemId }: ItemCardProps) {
                 </Text>
 
                 <Group gap={4} wrap="nowrap">
+                  <Tooltip label="Inspect item">
+                  <ActionIcon
+                    size="sm"
+                    variant="light"
+                    color="teal"
+                    onClick={() => setInspectOpen(true)}
+                  >
+                    <IconSearch size={14} />
+                  </ActionIcon>
+                </Tooltip>
+
                   <Tooltip label="Move item">
                     <ActionIcon
                       size="sm"
@@ -186,18 +200,10 @@ export function ItemCard({ itemId }: ItemCardProps) {
         )}
       </Transition>
 
-      <ItemModal
-        opened={editOpen}
-        onClose={() => setEditOpen(false)}
-        equipmentId={itemId}
-        editMode
-      />
-
-      <MoveItemModal
-        opened={moveModal}
-        onClose={() => setMoveModal(false)}
-        itemId={itemId}
-      />
+      <ItemModal opened={editOpen} onClose={() => setEditOpen(false)} equipmentId={itemId} editMode />
+      <MoveItemModal opened={moveModal} onClose={() => setMoveModal(false)} itemId={itemId} />
+      <EquipmentModal opened={inspectOpen} onClose={() => setInspectOpen(false)} equipmentId={itemId} />
+        
     </>
   );
 }

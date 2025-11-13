@@ -3,6 +3,7 @@ export interface Equipment {
   index: string;
   name: string;
   description?: string[];
+  dmDescription?: string[];
   cost?: Cost;
   damage?: Damage;
   range?: Range;
@@ -11,6 +12,8 @@ export interface Equipment {
   createdAt?: string;
   updatedAt?: string;
   isDeleted: boolean;
+  tags?: string[];
+  tier?: string;
 }
 
 export interface Cost {
@@ -31,3 +34,14 @@ export interface Range {
   normal: number;
   long: number;
 }
+
+export const EQUIPMENT_TIERS = [
+  "Common",
+  "Uncommon",
+  "Rare",
+  "Very Rare",
+  "Legendary",
+  "Artifact",
+] as const;
+
+export type EquipmentTier = (typeof EQUIPMENT_TIERS)[number];

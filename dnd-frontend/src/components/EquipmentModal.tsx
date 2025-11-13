@@ -10,8 +10,16 @@ import {
   ThemeIcon,
   Tooltip,
   useMantineTheme,
+  Badge,
 } from "@mantine/core";
-import { IconSwords, IconCoins, IconRulerMeasure, IconWeight } from "@tabler/icons-react";
+import {
+  IconSwords,
+  IconCoins,
+  IconRulerMeasure,
+  IconWeight,
+  IconTags,
+  IconCategory,
+} from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { getEquipmentById } from "../services/equipmentService";
 import type { Equipment } from "../types/Equipment/Equipment";
@@ -30,27 +38,33 @@ interface EquipmentModalProps {
 export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalProps) {
   const theme = useMantineTheme();
   const token = useAuthStore.getState().token;
+  const roles = useAuthStore.getState().roles;
+  const isAdmin = roles.includes("Admin");
+
   const [equipment, setEquipment] = useState<Equipment | null>(null);
   const [loading, setLoading] = useState(false);
-  const isAdmin = useAuthStore.getState().roles.includes("Admin");
 
   useEffect(() => {
-    if (opened && equipmentId) {
-      setLoading(true);
-      getEquipmentById(equipmentId, token!)
-        .then((data: Equipment) => setEquipment(data))
-        .catch((err: any) => console.error("Failed to load equipment", err))
-        .finally(() => setLoading(false));
-    }
+    if (!opened || !equipmentId) return;
+
+    setLoading(true);
+    getEquipmentById(equipmentId, token!)
+      .then((data: Equipment) => setEquipment(data))
+      .catch((err: any) => console.error("Failed to load equipment", err))
+      .finally(() => setLoading(false));
   }, [opened, equipmentId, token]);
 
   return (
     <Modal
+      opened={opened}
+      onClose={onClose}
+      centered
+      size="xl"
       title={
         equipment && (
           <Group justify="center" align="center" gap="sm">
             <Text fw={700} fz={24} tt="uppercase" style={{ letterSpacing: 1 }}>
-              {equipment.name ?? "Unknown Item"}
+              {equipment.name}
             </Text>
             <CustomBadge
               label={equipment.isCustom ? "Custom" : "Official"}
@@ -61,26 +75,18 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
           </Group>
         )
       }
-      opened={opened}
-      onClose={onClose}
-      centered
-      size="xl"
-      overlayProps={{
-        backgroundOpacity: 0.55,
-        blur: 3,
-      }}
+      overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
       styles={{
         content: {
           background: "linear-gradient(175deg, #0a0a2f 0%, #180016 100%)",
           border: "1px solid rgba(255,255,255,0.08)",
           boxShadow: "0 0 25px rgba(153, 0, 255, 0.15)",
           borderRadius: theme.radius.md,
-          transition: "all 0.25s ease",
         },
         header: {
           background: "transparent",
           borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-          marginBottom: 25
+          marginBottom: 25,
         },
       }}
     >
@@ -88,8 +94,14 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
         <Center py="xl">
           <Loader color="violet" />
         </Center>
-      ) : equipment ? (
+      ) : !equipment ? (
+        <Text c="dimmed" ta="center">
+          No equipment data available.
+        </Text>
+      ) : (
         <Stack gap="md">
+
+          {/* ======== BASIC STATS ======== */}
           <Paper
             p="md"
             radius="md"
@@ -99,9 +111,10 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
               border: "1px solid rgba(255,255,255,0.07)",
               transition: "0.3s ease",
             }}
-            className="equipment-info"
           >
             <Stack gap="xs">
+
+              {/* Weight */}
               <Group gap="xs">
                 <ThemeIcon size="sm" variant="light" color="violet">
                   <IconWeight size={16} />
@@ -112,6 +125,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 />
               </Group>
 
+              {/* Cost (Admin only) */}
               {equipment.cost && isAdmin && (
                 <Group gap="xs">
                   <ThemeIcon size="sm" variant="light" color="yellow">
@@ -124,6 +138,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 </Group>
               )}
 
+              {/* Damage */}
               {equipment.damage && (
                 <Group gap="xs">
                   <ThemeIcon size="sm" variant="light" color="red">
@@ -136,6 +151,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 </Group>
               )}
 
+              {/* Range */}
               {equipment.range && (
                 <Group gap="xs">
                   <ThemeIcon size="sm" variant="light" color="cyan">
@@ -147,39 +163,81 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                   />
                 </Group>
               )}
+
+              {/* Tier */}
+              {equipment.tier && (
+                <Group gap="xs">
+                  <ThemeIcon size="sm" variant="light" color="grape">
+                    <IconCategory size={16} />
+                  </ThemeIcon>
+                  <DisplayText displayLabel="Tier" displayData={equipment.tier} />
+                </Group>
+              )}
+
+              {/* Tags */}
+              {equipment.tags && equipment.tags.length > 0 && (
+                <Group gap="xs" align="flex-start">
+                  <ThemeIcon size="sm" variant="light" color="lime">
+                    <IconTags size={16} />
+                  </ThemeIcon>
+                  <Stack gap={4}>
+                    <Group gap={6}>
+                    <Text fw={500} size="sm">
+                      Tags:
+                    </Text>
+                      {equipment.tags.map((t) => (
+                        <Badge key={t} color="lime" variant="light">
+                          {t}
+                        </Badge>
+                      ))}
+                    </Group>
+                  </Stack>
+                </Group>
+              )}
             </Stack>
           </Paper>
 
-          {/* Description */}
+          {/* ======== DESCRIPTION ======== */}
           <ExpandableSection title="Description" color={SectionColor.Violet} defaultOpen>
-            {equipment.description && equipment.description.length > 0 ? (
+            {equipment.description?.length ? (
               <Stack gap={6}>
-                {equipment.description.map((line, index) => (
-                  <Text
-                    key={index}
-                    size="sm"
-                    lh={1.5}
-                    c="gray.1"
-                    style={{
-                      textShadow: "0 0 6px rgba(173, 83, 255, 0.3)",
-                    }}
-                  >
+                {equipment.description.map((line, i) => (
+                  <Text key={i} size="sm" lh={1.5} c="gray.1">
                     {line}
                   </Text>
                 ))}
               </Stack>
             ) : (
               <Text size="sm" c="dimmed">
-                No description available.
+                No description provided.
               </Text>
             )}
           </ExpandableSection>
 
-          {/* Metadata */}
+          {/* ======== DM DESCRIPTION (Admin only) ======== */}
+          {isAdmin && (
+            <ExpandableSection title="DM Notes" color={SectionColor.Red}>
+              {equipment.dmDescription?.length ? (
+                <Stack gap={6}>
+                  {equipment.dmDescription.map((line, i) => (
+                    <Text key={i} size="sm" lh={1.5} c="red.1">
+                      {line}
+                    </Text>
+                  ))}
+                </Stack>
+              ) : (
+                <Text size="sm" c="dimmed">
+                  No DM notes provided.
+                </Text>
+              )}
+            </ExpandableSection>
+          )}
+
+          {/* ======== META ======== */}
           <Divider variant="dashed" my="xs" />
           <Group justify="space-between" c="dimmed" fz="xs">
             <Tooltip label="MongoDB document ID">
-              <Text>Id: {equipment.id ?? "N/A"}</Text>
+              <Text>Id: {equipment.id}</Text>
             </Tooltip>
             <Text>
               Updated:{" "}
@@ -189,10 +247,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
             </Text>
           </Group>
         </Stack>
-      ) : (
-        <Text c="dimmed" ta="center">
-          No equipment data available.
-        </Text>
       )}
     </Modal>
   );
