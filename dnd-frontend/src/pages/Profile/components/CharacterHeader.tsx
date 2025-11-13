@@ -11,6 +11,7 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import { useEffect, useState } from "react";
 
 export function CharacterHeader() {
+  const isAdmin = useAuthStore.getState().roles?.includes("Admin");
   const character = useCharacterStore((state) => state.character)!;
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -43,7 +44,7 @@ export function CharacterHeader() {
   return (
 <Paper p="md" withBorder mb="md" style={{ background: "linear-gradient(175deg, #0009336b 0%, rgba(48, 0, 0, 0.37) 100%)" }}>
   <Text c="dimmed" size="sm"><strong>Character:</strong> {character.id}</Text>
-  <Text c="dimmed" size="sm"><strong>Campaign:</strong> {character.campaignId} ( {useCampaignName(character.campaignId)} )</Text>
+  {isAdmin ?? <Text c="dimmed" size="sm"><strong>Campaign:</strong> {character.campaignId} ( {useCampaignName(character.campaignId)} )</Text>}
   <Grid align="start" justify="space-between">
     {/* LEFT STACK — Profile Info */}
 
