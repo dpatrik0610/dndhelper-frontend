@@ -57,3 +57,29 @@
 .sq-switch input:checked + .sq-switch-track .sq-switch-thumb {
   background: rgba(0, 0, 0, 0) !important;
 }
+
+
+/* Transparent dropdown container */
+.glassy-dropdown {
+  background: rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 80, 80, 0.35) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.25);
+  border-radius: 8px;
+}
+
+/* Default option look */
+.glassy-option {
+  background: transparent !important;
+  color: rgba(255, 200, 200, 0.9) !important;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* Hovered option */
+.glassy-option:hover {
+  background: rgba(255, 0, 0, 0.25) !important;
+  color: white !important;
+  backdrop-filter: blur(6px);
+}

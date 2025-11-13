@@ -12,6 +12,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { AddConditionModal } from "./AddConditionModal";
 import { DamageModal } from "./DamageModal";
 import { RemoveCurrencyModal } from "./RemoveCurrencyModal";
+import { TransferCurrencyModal } from "./TransferCurrencyModal";
 
 export interface ActionButtonProps{
     label: string
@@ -25,6 +26,7 @@ export function ActionBar() {
   const [modalOpened, setModalOpened] = useState(false);
   const [damageModalOpened, setDamageModalOpened] = useState(false);
   const [removeCurrencyModalOpened, setRemoveCurrencyModalOpened] = useState(false);
+  const [transferCurrencyModalOpened, setTransferCurrencyModalOpened] = useState(false);
 
   const token = useAuthStore.getState().token;
   const navigate = useNavigate();
@@ -53,6 +55,7 @@ export function ActionBar() {
     { label: "Add Condition", icon: <IconPlus />, onClick: () => setModalOpened(true) },
     { label: "Damage", icon: <IconDroplet size={16} />, onClick: () => setDamageModalOpened(true) },
     { label: "Remove Currency", icon: <IconCoin size={16} />, onClick: () => setRemoveCurrencyModalOpened(true)  },
+    { label: "Transfer Currency", icon: <IconCoin size={16} />, onClick: () => setTransferCurrencyModalOpened(true) },
   ];
 
   return (
@@ -90,6 +93,7 @@ export function ActionBar() {
       <AddConditionModal opened={modalOpened} onClose={() => setModalOpened(false)} />
       <DamageModal opened={damageModalOpened} onClose={() => setDamageModalOpened(false)} />
       <RemoveCurrencyModal opened={removeCurrencyModalOpened} onClose={() => setRemoveCurrencyModalOpened(false)} />
+      <TransferCurrencyModal opened={transferCurrencyModalOpened} onClose={() => setTransferCurrencyModalOpened(false)} />
     </>
   );
 }

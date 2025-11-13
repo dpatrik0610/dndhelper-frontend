@@ -13,7 +13,6 @@ interface BaseModalProps {
   showSaveButton?: boolean;
   saveLabel?: string;
   showCancelButton?: boolean;
-  /** 🆕 Optional Mantine modal behavior props */
   closeOnClickOutside?: boolean;
   closeOnEscape?: boolean;
   withCloseButton?: boolean;

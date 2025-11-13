@@ -45,3 +45,11 @@ export async function transferCurrenciesToInventory(
     token,
   });
 }
+
+export async function transferBetweenCharacters(fromCharacterId: string, toCharacterId: string, currencies: Currency[], token?: string): Promise<void> {
+  return apiClient<void>(`${baseUrl}/transfer-between/${fromCharacterId}/${toCharacterId}`, {
+    method: "PUT",
+    body: currencies,
+    token,
+  });
+}
