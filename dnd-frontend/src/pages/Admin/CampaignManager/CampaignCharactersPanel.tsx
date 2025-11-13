@@ -28,6 +28,7 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import { showNotification } from "../../../components/Notification/Notification";
 import { SectionColor } from "../../../types/SectionColor";
 import type { Character } from "../../../types/Character/Character";
+import { getCharacterById, updateCharacter } from "../../../services/characterService";
 
 export function CampaignCharactersPanel() {
   const {
@@ -74,11 +75,23 @@ export function CampaignCharactersPanel() {
 
   const handleAdd = async () => {
     if (!campaign?.id || !selectedChar) return;
+
+    // 1) Link in campaign table
     await addCharacterToCampaign(campaign.id, selectedChar, token);
+
+    // 2) Patch character.campaignId in database
+    const charData = await getCharacterById(selectedChar, token);
+    if (charData) {
+      charData.campaignId = campaign.id;
+      await updateCharacter(charData, token);
+    }
+
     await fetchMembers();
     await reload();
+
     setSelectedChar(null);
     setAdding(false);
+
     showNotification({
       title: "Character added",
       message: "Character successfully linked to this campaign.",
@@ -86,19 +99,32 @@ export function CampaignCharactersPanel() {
     });
   };
 
-  const handleRemove = async (charId: string) => {
-    if (!campaign?.id) return;
-    const confirmDel = confirm("Remove this character from the campaign?");
-    if (!confirmDel) return;
-    await removeCharacterFromCampaign(campaign.id, charId, token);
-    await fetchMembers();
-    await reload();
-    showNotification({
-      title: "Character removed",
-      message: "Character unlinked from campaign.",
-      color: SectionColor.Red,
-    });
-  };
+
+const handleRemove = async (charId: string) => {
+  if (!campaign?.id) return;
+
+  const confirmDel = confirm("Remove this character from the campaign?");
+  if (!confirmDel) return;
+
+  // 1) Unlink in campaign table
+  await removeCharacterFromCampaign(campaign.id, charId, token);
+
+  // 2) Patch character.campaignId = null
+  const charData = await getCharacterById(charId, token);
+  if (charData) {
+    charData.campaignId = null;
+    await updateCharacter(charData, token);
+  }
+
+  await fetchMembers();
+  await reload();
+
+  showNotification({
+    title: "Character removed",
+    message: "Character unlinked from campaign.",
+    color: SectionColor.Red,
+  });
+};
 
   return (
     <Paper

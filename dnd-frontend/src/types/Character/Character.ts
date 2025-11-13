@@ -19,6 +19,7 @@ export interface Character {
   name: string; // ✅
   isDead: boolean; // ✅
   isNPC: boolean; 
+  campaignId?: string | null; // ✅
   race: string; // ✅
   characterClass: string; // ✅
   background: string; // ✅
