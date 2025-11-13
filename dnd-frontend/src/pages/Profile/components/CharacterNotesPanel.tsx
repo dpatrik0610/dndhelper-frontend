@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Paper, Stack, Text, ActionIcon, Group } from "@mantine/core";
-import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconPlus, IconTrash, IconRefresh } from "@tabler/icons-react";
 import type { Note } from "../../../types/Note";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNoteStore } from "../../../store/useNoteStore";
@@ -15,14 +15,20 @@ export function CharacterNotesPanel() {
 
   const characterNoteIds = character?.noteIds ?? [];
 
-  // Load notes for the character
+  // Load notes on mount / character change
   useEffect(() => {
     if (characterNoteIds.length > 0) {
       loadForCharacter(characterNoteIds);
     }
   }, [characterNoteIds, loadForCharacter]);
 
-  // Which notes belong to this character
+  // Manually trigger reload
+  async function reloadNotes() {
+    if (characterNoteIds.length > 0) {
+      await loadForCharacter(characterNoteIds);
+    }
+  }
+
   const characterNotes: Note[] = notes.filter((n) =>
     characterNoteIds.includes(n.id!)
   );
@@ -33,13 +39,11 @@ export function CharacterNotesPanel() {
 
   return (
     <>
-      {/* MODAL */}
       <AddNoteModal
         opened={addModalOpened}
         onClose={() => setAddModalOpened(false)}
       />
 
-      {/* PANEL */}
       <Paper
         withBorder
         p="md"
@@ -55,32 +59,60 @@ export function CharacterNotesPanel() {
             Personal Notes
           </Text>
 
-          <ActionIcon
-            size="md"
-            radius="xl"
-            variant="light"
-            onClick={() => setAddModalOpened(true)}
-            style={{
-              background: "rgba(255,0,0,0.35)",
-              border: "1px solid rgba(255,100,100,0.6)",
-              backdropFilter: "blur(6px)",
-              color: "white",
-              boxShadow: "0 0 6px rgba(255,60,60,0.6)",
-              transition: "0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.55)";
-              e.currentTarget.style.boxShadow =
-                "0 0 10px rgba(255,80,80,0.9)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.35)";
-              e.currentTarget.style.boxShadow =
-                "0 0 6px rgba(255,60,60,0.6)";
-            }}
-          >
-            <IconPlus size={16} />
-          </ActionIcon>
+          <Group gap="xs">
+            {/* RELOAD BUTTON */}
+            <ActionIcon
+              size="md"
+              radius="xl"
+              variant="light"
+              onClick={reloadNotes}
+              style={{
+                background: "rgba(255,0,0,0.25)",
+                border: "1px solid rgba(255,100,100,0.5)",
+                backdropFilter: "blur(6px)",
+                color: "rgba(255,200,200,0.9)",
+                transition: "0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,0,0,0.45)";
+                e.currentTarget.style.color = "white";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255,0,0,0.25)";
+                e.currentTarget.style.color = "rgba(255,200,200,0.9)";
+              }}
+            >
+              <IconRefresh size={16} />
+            </ActionIcon>
+
+            {/* ADD BUTTON */}
+            <ActionIcon
+              size="md"
+              radius="xl"
+              variant="light"
+              onClick={() => setAddModalOpened(true)}
+              style={{
+                background: "rgba(255,0,0,0.35)",
+                border: "1px solid rgba(255,100,100,0.6)",
+                backdropFilter: "blur(6px)",
+                color: "white",
+                boxShadow: "0 0 6px rgba(255,60,60,0.6)",
+                transition: "0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,0,0,0.55)";
+                e.currentTarget.style.boxShadow =
+                  "0 0 10px rgba(255,80,80,0.9)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255,0,0,0.35)";
+                e.currentTarget.style.boxShadow =
+                  "0 0 6px rgba(255,60,60,0.6)";
+              }}
+            >
+              <IconPlus size={16} />
+            </ActionIcon>
+          </Group>
         </Group>
 
         {loading && <Text c="dimmed">Loading notes…</Text>}
