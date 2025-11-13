@@ -1,5 +1,5 @@
 import { Box, SimpleGrid, Stack, Transition } from "@mantine/core";
-import { IconUsers, IconSettings, IconCategory, IconBox, type IconProps } from "@tabler/icons-react";
+import { IconUsers, IconSettings, IconCategory, IconBox, type IconProps, IconWand } from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
 import { BackToDashboardButton } from "./components/BackToDashboardButton";
 import { useAdminDashboardStore, type AdminSection } from "../../store/useAdminDashboardStore";
@@ -8,6 +8,7 @@ import { useEffect, useState, type JSX } from "react";
 import { SelectCampaignModal } from "./components/SelectCampaignModal";
 import { useAdminCampaignStore } from "../../store/admin/useAdminCampaignStore";
 import { CampaignManager } from "./CampaignManager/CampaignManager";
+import { SpellForm } from "./SpellManager/SpellForm";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -26,9 +27,10 @@ export const AdminDashboard: React.FC = () => {
     component: JSX.Element;
   }[] = [
     { icon: IconBox, label: "Inventory Manager", key: "InventoryManager", component: <InventoryManager /> },
+    { icon: IconSettings, label: "Campaign Manager", key: "CampaignManager", component: <CampaignManager /> },
+    { icon: IconWand, label: "Spells Manager", key: "SpellsManager", component: <SpellForm /> },
     { icon: IconUsers, label: "User Manager", key: "UserManager", component: <Box ta="center">👤 User Manager (coming soon)</Box> },
     { icon: IconCategory, label: "Item Manager", key: "ItemManager", component: <Box ta="center">📦 Item Manager (coming soon)</Box> },
-    { icon: IconSettings, label: "Campaign Manager", key: "CampaignManager", component: <CampaignManager /> },
   ];
 
   const currentItem = navItems.find((n) => n.key === activeSection);

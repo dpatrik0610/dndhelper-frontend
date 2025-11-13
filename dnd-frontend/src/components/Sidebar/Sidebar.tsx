@@ -31,7 +31,7 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
   const roles = useAuthStore().roles || [];
   const isAdmin = roles.includes('Admin');
 
-  const sectionTabs: Section[] = ['character', 'campaign'];
+  const sectionTabs: Section[] = ['character'];
 
   const [section, setSection] = useState<Section>('character');
   const [active, setActive] = useState(tabs[section][0]?.label ?? '');
@@ -67,20 +67,7 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
             <Text fw={700} size="sm" c="gray.4" ta="center">
               {username.toUpperCase()}
             </Text>
-
-            <UnstyledButton
-              onClick={() => handleNavigate('/', 'Home')}
-              style={{ width: '100%' }}
-            >
-              <Group>
-                <ThemeIcon variant="light" color="violet">
-                  <IconHome size={18} />
-                </ThemeIcon>
-                <Text>Home</Text>
-              </Group>
-            </UnstyledButton>
-
-            <SegmentedControl
+            {/* <SegmentedControl
               value={section}
               onChange={(value) => {
                 setSection(value as Section);
@@ -91,7 +78,7 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
                 label: s.charAt(0).toUpperCase() + s.slice(1),
                 value: s,
               }))}
-            />
+            /> */}
           </Stack>
 
           {/* Links */}
