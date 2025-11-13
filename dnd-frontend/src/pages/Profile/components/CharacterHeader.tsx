@@ -1,4 +1,4 @@
-import { Paper, Title, Group, Badge, Grid, Text, Stack, Flex} from "@mantine/core";
+import { Paper, Title, Badge, Grid, Text, Stack, Flex, Progress, Box} from "@mantine/core";
 import { IconSkull } from "@tabler/icons-react";
 import { StatBox } from "./StatBox";
 import ReloadButton from "./ReloadButton";
@@ -37,6 +37,16 @@ export function CharacterHeader() {
           {character.currencies && 
           <CharacterCurrencyArea />
           }
+          <Box>
+            <Text size="xs" c={SectionColor.Red} mb={4}>
+              Health: {character.hitPoints} / {character.maxHitPoints}
+            </Text>
+            <Progress
+              value={(character.hitPoints / character.maxHitPoints) * 100}
+              color="red"
+              radius="md"
+            />
+          </Box>
         </Stack>
       </Stack>
     </Grid.Col>
