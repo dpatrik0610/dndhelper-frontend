@@ -8,6 +8,7 @@ export type AdminSection =
   | "CampaignManager"
   | "InitiativeTracker"
   | "SpellsManager"
+  | "CacheManager"
   ;
 
 interface AdminDashboardState {

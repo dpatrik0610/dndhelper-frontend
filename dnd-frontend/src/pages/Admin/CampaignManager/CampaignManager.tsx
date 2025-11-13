@@ -5,6 +5,8 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import { CampaignHeader } from "./CampaignHeader";
 import { CampaignSelectPanel } from "./CampaignSelectHeader";
 import { CampaignCharactersPanel } from "./CampaignCharactersPanel";
+import { CampaignSessionsPanel } from "./CampaignSessionsPanel";
+import { CampaignNotesPanel } from "./CampaignNotesPanel";
 
 export function CampaignManager() {
   const { reload, loading, selectedId } = useAdminCampaignStore();
@@ -41,8 +43,10 @@ export function CampaignManager() {
               boxShadow: "0 0 15px rgba(80,50,255,0.15)",
             }}
           >
-            <CampaignHeader />
-            <CampaignCharactersPanel />
+        <CampaignHeader />
+        <CampaignCharactersPanel />
+        <CampaignSessionsPanel />
+        <CampaignNotesPanel />
           </Paper>
         ) : (
           <Text c="dimmed" ta="center">
