@@ -4,9 +4,7 @@ import {
   Stack,
   Text,
   Divider,
-  useMantineTheme,
   Table,
-  Box,
 } from "@mantine/core";
 import { useSpellStore } from "../../../store/useSpellStore";
 import CustomBadge from "../../../components/common/CustomBadge";

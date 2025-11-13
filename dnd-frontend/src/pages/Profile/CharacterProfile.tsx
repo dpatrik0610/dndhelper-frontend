@@ -63,7 +63,7 @@ export default function CharacterProfile() {
         <Tabs.List>
           <Tabs.Tab value="overview" leftSection={<IconUser size={16} />}>Skills</Tabs.Tab>
           <Tabs.Tab value="stats" leftSection={<IconSword size={16} />}>Stats</Tabs.Tab>
-          <Tabs.Tab value="magic" leftSection={<IconSparkles size={16} />}>Magic</Tabs.Tab>
+          <Tabs.Tab value="spellcasting" leftSection={<IconSparkles size={16} />}>Spellcasting</Tabs.Tab>
           <Tabs.Tab value="proficiencies" leftSection={<IconMedal size={16} />}>Proficiencies</Tabs.Tab>
           <Tabs.Tab value="features" leftSection={<IconSword size={16} />}>Features</Tabs.Tab>
           <Tabs.Tab value="extras" leftSection={<IconInfoCircle size={16} />}>Extras</Tabs.Tab>
@@ -84,10 +84,10 @@ export default function CharacterProfile() {
             </motion.div>
           )}
 
-          {activeTab === "magic" && (
-            <motion.div key="magic" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              <SpellCastingBlock />
+          {activeTab === "spellcasting" && (
+            <motion.div key="spellcasting" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
               <SpellsPanel />
+              <SpellCastingBlock />
             </motion.div>
           )}
 
