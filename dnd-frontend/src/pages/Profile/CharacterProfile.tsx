@@ -1,6 +1,5 @@
 import {
   Box,
-  Text,
   Tabs,
 } from "@mantine/core";
 import {
@@ -12,7 +11,7 @@ import {
   IconBox,
 } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCharacterStore } from "../../store/useCharacterStore";
 import { CharacterHeader } from "./components/CharacterHeader";
 import { CombatStats } from "./components/CombatStats";
@@ -29,21 +28,31 @@ import { ProficienciesPanel } from "./components/ProficienciesPanel";
 import "./styles/CharacterProfile.styles.css"
 import { FeaturesPanel } from "./components/FeaturesPanel";
 import { CharacterNotesPanel } from "./components/CharacterNotesPanel";
+import { SectionColor } from "../../types/SectionColor";
+import { showNotification } from "../../components/Notification/Notification";
+import { useNavigate } from "react-router-dom";
 
 export default function CharacterProfile() {
   const character = useCharacterStore((state) => state.character);
   const [activeTab, setActiveTab] = useState<string | null>("overview");
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const navigate = useNavigate();
 
-  if (!character) {
-    return (
-      <Box p="md" m="0 auto" maw={600}>
-        <Text size="lg" c="dimmed">
-          No character selected. Please select a character from the Home page.
-        </Text>
-      </Box>
-    );
-  }
+  useEffect(() => {
+    if (!character) {
+      showNotification({
+        id: "no-character-selected",
+        title: "No Character Selected",
+        message: "Please select a character first.",
+        color: SectionColor.Red,
+        withBorder: true,
+      });
+
+      navigate("/home", { replace: true });
+    }
+  }, [character, navigate]);
+
+  if (!character) return null;
 
   return (
     <Box p={isMobile ? "xs" : "md"} m={isMobile ? "" : "0 auto"} maw={isMobile ? "100%" : 900}>
