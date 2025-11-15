@@ -1,55 +1,121 @@
-import { Group, Select, Stack, TextInput, Tooltip } from "@mantine/core";
+import { Stack, Group, TextInput } from "@mantine/core";
 import { IconUser } from "@tabler/icons-react";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 import { FormNumberInput } from "../../../components/common/FormNumberInput";
+import { WheelPickerInput } from "../../../components/common/WheelPickerInput";
+import { InfoIconPopover } from "../../../components/common/InfoIconPopover";
+import { useEffect } from "react";
 import "../../../styles/glassyInput.css";
+
+const ALIGNMENTS = [
+  "Lawful Good","Neutral Good","Chaotic Good",
+  "Lawful Neutral","True Neutral","Chaotic Neutral",
+  "Lawful Evil","Neutral Evil","Chaotic Evil",
+];
 
 export function BasicInfoSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
-  const input = { input: "glassy-input", label: "glassy-label" };
+  const cls = { input: "glassy-input", label: "glassy-label" };
+
+  // label helper
+  const L = (label: string, info: string | null = null) => (
+    <Group gap={4} align="center" wrap="nowrap">
+      <span>{label}</span>
+      {info && <InfoIconPopover title={label}>{info}</InfoIconPopover>}
+    </Group>
+  );
+
+  // ⭐ Auto-compute proficiency bonus from level
+  useEffect(() => {
+    const pb = Math.floor((characterForm.level - 1) / 4) + 2;
+    if (pb !== characterForm.proficiencyBonus) {
+      setCharacterForm({ proficiencyBonus: pb });
+    }
+  }, [characterForm.level]);
 
   return (
-    <ExpandableSection title="Basic Information" icon={<IconUser />} color={SectionColor.White} defaultOpen>
-      <Stack>
+    <ExpandableSection
+      title="Basic Information"
+      icon={<IconUser />}
+      color={SectionColor.White}
+      defaultOpen
+    >
+      <Stack gap={8}>
 
-        <TextInput classNames={input} label="Name" required value={characterForm.name} onChange={(e) => setCharacterForm({ name: e.currentTarget.value })} />
+        {/* NAME */}
+        <TextInput
+          classNames={cls}
+          label={L("Name", "Your character’s chosen name.")}
+          required
+          value={characterForm.name}
+          onChange={(e) => setCharacterForm({ name: e.currentTarget.value })}
+        />
 
-        <Group grow>
-          <Tooltip label="A character’s species — affects abilities, features, and traits (e.g., Elf, Human, Dragonborn)." color="dark" withArrow multiline maw={260}>
-            <TextInput classNames={input} label="Race" value={characterForm.race} onChange={(e) => setCharacterForm({ race: e.currentTarget.value })} />
-          </Tooltip>
+        {/* RACE + CLASS */}
+        <Group grow gap={8}>
+          <TextInput
+            classNames={cls}
+            label={L("Race", "Determines innate traits and abilities.")}
+            value={characterForm.race}
+            onChange={(e) => setCharacterForm({ race: e.currentTarget.value })}
+          />
 
-          <Tooltip label="Defines your role, abilities, and spellcasting — e.g., Fighter, Rogue, Wizard." color="dark" withArrow multiline maw={260}>
-            <TextInput classNames={input} label="Class" value={characterForm.characterClass} onChange={(e) => setCharacterForm({ characterClass: e.currentTarget.value })} />
-          </Tooltip>
+          <TextInput
+            classNames={cls}
+            label={L("Class", "Defines your combat role and progression.")}
+            value={characterForm.characterClass}
+            onChange={(e) => setCharacterForm({ characterClass: e.currentTarget.value })}
+          />
         </Group>
 
-        <Group grow>
-          <Tooltip label="Your pre-adventuring history — gives extra proficiencies and role-playing flavor." color="dark" withArrow multiline maw={260}>
-            <TextInput classNames={input} label="Background" value={characterForm.background} onChange={(e) => setCharacterForm({ background: e.currentTarget.value })} />
-          </Tooltip>
+        {/* BACKGROUND + INSPIRATION */}
+        <Group grow gap={8}>
+          <TextInput
+            classNames={cls}
+            label={L("Background", "Your life before adventuring.")}
+            value={characterForm.background}
+            onChange={(e) => setCharacterForm({ background: e.currentTarget.value })}
+          />
 
-          <Tooltip label="Shows your moral and ethical stance — affects behavior and certain spells or factions." color="dark" withArrow multiline maw={260}>
-            <Select classNames={input} label="Alignment" placeholder="Select alignment" data={["Lawful Good","Neutral Good","Chaotic Good","Lawful Neutral","True Neutral","Chaotic Neutral","Lawful Evil","Neutral Evil","Chaotic Evil"]} value={characterForm.alignment} onChange={(v) => setCharacterForm({ alignment: v || "" })} />
-          </Tooltip>
+          <FormNumberInput
+            classNames={cls}
+            label={L("Inspiration", "Spend for advantage on a roll.")}
+            value={characterForm.inspiration}
+            onChange={(v) => setCharacterForm({ inspiration: v })}
+          />
         </Group>
 
-        <Group grow>
-          <Tooltip label="Represents your character’s overall power and progression. Max: 20." color="dark" withArrow multiline maw={240}>
-            <FormNumberInput label="Level" min={1} max={20} classNames={input} value={characterForm.level} onChange={(v) => setCharacterForm({ level: v })} />
-          </Tooltip>
+        {/* LEVEL + AUTOMATIC PROF BONUS */}
+        <Group grow gap={8}>
 
-          <Tooltip label="Your general skill bonus for actions you’re proficient in. Usually +2 at level 1, increasing every few levels." color="dark" withArrow multiline maw={260}>
-            <FormNumberInput label="Proficiency Bonus" classNames={input} value={characterForm.proficiencyBonus} onChange={(v) => setCharacterForm({ proficiencyBonus: v })} />
-          </Tooltip>
+          <FormNumberInput
+            classNames={cls}
+            label={L("Level", "Overall character level (1–20).")}
+            min={1}
+            max={20}
+            value={characterForm.level}
+            onChange={(v) => setCharacterForm({ level: v })}
+          />
 
-          <Tooltip label="Inspiration grants advantage on a roll when spent — typically awarded for great roleplay or creativity." color="dark" withArrow multiline maw={260}>
-            <FormNumberInput label="Inspiration" classNames={input} value={characterForm.inspiration} onChange={(v) => setCharacterForm({ inspiration: v })} />
-          </Tooltip>
+          <TextInput
+            classNames={cls}
+            label={L("Proficiency Bonus", "Auto-calculated from level: \n(CharacterLevel - 1) / 4) + 2")}
+            value={`+${characterForm.proficiencyBonus}`}
+            readOnly
+            disabled
+          />
         </Group>
 
+        {/* ALIGNMENT */}
+        <WheelPickerInput
+          items={ALIGNMENTS}
+          label="Alignment"
+          value={characterForm.alignment}
+          onChange={(v) => setCharacterForm({ alignment: v })}
+          height={60}
+        />
       </Stack>
     </ExpandableSection>
   );
