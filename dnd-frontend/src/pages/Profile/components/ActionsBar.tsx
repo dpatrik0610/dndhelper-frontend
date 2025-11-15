@@ -50,8 +50,8 @@ export function ActionBar() {
     { label: "Edit Character", icon: <IconEdit />, onClick: () => navigate("/editCharacter") },
     { label: "Add Condition", icon: <IconPlus />, onClick: () => setModalOpened(true) },
     { label: "Damage", icon: <IconDroplet size={16} />, onClick: () => setDamageModalOpened(true) },
-    { label: "Remove Currency", icon: <IconCoin size={16} />, onClick: () => setRemoveCurrencyModalOpened(true) },
-    { label: "Transfer Currency", icon: <IconCoin size={16} />, onClick: () => setTransferCurrencyModalOpened(true) },
+    { label: "Delete Money", icon: <IconCoin size={16} />, onClick: () => setRemoveCurrencyModalOpened(true) },
+    { label: "Send Money", icon: <IconCoin size={16} />, onClick: () => setTransferCurrencyModalOpened(true) },
   ];
 
   // --------------------------------------------
