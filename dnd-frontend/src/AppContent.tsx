@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AppShell, ActionIcon } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useMediaQuery, useDisclosure } from "@mantine/hooks";
 import { useAuthStore } from "./store/useAuthStore";
 import PrivateRoute from "./components/PrivateRoute";
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -23,6 +23,8 @@ import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 
 export default function AppContent() {
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   let token = useAuthStore((s) => s.token);
   const [opened, handlers] = useDisclosure(false);
   const { characters } = useCharacterStore();
@@ -66,13 +68,13 @@ export default function AppContent() {
     fetchCharacters();
   }, [token, characters.length]);
 
-  // 🧠 Sidebar logic — hide only on Login/Register
+  // Sidebar logic — hide only on Login/Register
   const hideSidebarRoutes = ["/login", "/register"];
   const showSidebar = !hideSidebarRoutes.includes(location.pathname);
 
   return (
     <AppShell
-      padding="md"
+      padding={isMobile ? 0 : "md"}       // ⬅️ MOBILE FULL EDGE
       header={{ height: 0 }}
       styles={{
         root: {
@@ -84,6 +86,7 @@ export default function AppContent() {
           minHeight: "100vh",
           overflow: "hidden",
           background: "transparent",
+          padding: isMobile ? 0 : undefined,  // ⬅️ REMOVE MAIN PADDING ON MOBILE
         },
       }}
     >
@@ -120,7 +123,13 @@ export default function AppContent() {
         />
 
         {/* CONTENT */}
-        <div style={{ position: "relative", zIndex: 2 }}>
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            padding: isMobile ? 0 : "md",     // ⬅️ REMOVE SIDE GAPS ON MOBILE
+          }}
+        >
           <Routes>
             <Route element={<PrivateRoute />}>
               <Route path="/" element={<Home />} />
@@ -148,8 +157,8 @@ export default function AppContent() {
           onClick={handlers.toggle}
           style={{
             position: "fixed",
-            bottom: 10,
-            left: 10,
+            bottom: isMobile ? 14 : 10,   // ⬅️ Adjust spacing on mobile
+            left: isMobile ? 14 : 10,
             zIndex: 999,
             cursor: "pointer",
             padding: 5,

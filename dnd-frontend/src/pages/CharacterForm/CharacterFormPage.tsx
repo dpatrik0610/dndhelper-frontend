@@ -33,59 +33,65 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   return (
-    <Box maw={900} mx="auto" mt={isMobile ? "sm" : "xl"} px={isMobile ? undefined : "xl"} pos="relative" w="100%" >
-      <LoadingOverlay visible={loading} />
+  <Box
+    maw={900}
+    mx={isMobile ? 0 : "auto"}        // no horizontal margin on mobile
+    mt={isMobile ? 0 : "xl"}          // optional: remove top margin if you want true full screen
+    px={isMobile ? 0 : "xl"}          // no side padding on mobile
+    w="100%"
+    pos="relative"
+  >
+    <LoadingOverlay visible={loading} />
 
-      <Paper p={isMobile ? "sm" : "xl"} radius="md" withBorder  
-      style={{
+    <Paper p={isMobile ? "sm" : "xl"} radius="md" withBorder  style={{
       background: "linear-gradient(145deg, #44000033, #1300005e)"
     }}>
-        <Group justify="space-between" mb={isMobile ? "sm" : "md"} align="center" wrap="wrap">
-          <Title order={isMobile ? 3 : 2} c="gray.1">
-            {editMode ? "Edit Character" : "Create New Character"}
-          </Title>
-          {editMode ? <IconEdit size={isMobile ? 20 : 24} /> : <IconUserPlus size={isMobile ? 20 : 24} />}
+      <Group justify="space-between" mb={isMobile ? "sm" : "md"} align="center" wrap="wrap">
+        <Title order={isMobile ? 3 : 2} c="gray.1">
+          {editMode ? "Edit Character" : "Create New Character"}
+        </Title>
+        {editMode ? <IconEdit size={isMobile ? 20 : 24} /> : <IconUserPlus size={isMobile ? 20 : 24} />}
+      </Group>
+
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+        <Group justify="space-between" mt="md" grow={isMobile} gap="sm" align="center" wrap="wrap">
+          <Button
+            type="button"
+            fullWidth={isMobile}
+            variant="gradient"
+            onClick={() => navigate(editMode ? "/profile" : "/home")}
+            gradient={{ from: editMode ? "orange" : "cyan", to: editMode ? "red" : "blue" }}
+          >
+            Go Back
+          </Button>
+
+          <Button
+            type="submit"
+            fullWidth={isMobile}
+            variant="gradient"
+            style={{
+              background: "linear-gradient(195deg, #e581e9ff, #44afe0ff)",
+              color: SectionColor.Black,
+            }}
+          >
+            {editMode ? "Save Changes" : "Create Character"}
+          </Button>
         </Group>
 
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-          <Group justify="space-between" mt="md" grow={isMobile} gap="sm" align="center" wrap="wrap">
-            <Button
-              type="button"
-              fullWidth={isMobile}
-              variant="gradient"
-              onClick={() => navigate(editMode ? "/profile" : "/home")}
-              gradient={{ from: editMode ? "orange" : "cyan", to: editMode ? "red" : "blue" }}
-            >
-              Go Back
-            </Button>
-
-            <Button
-              type="submit"
-              fullWidth={isMobile}
-              variant="gradient"
-              style={{
-                background: "linear-gradient(195deg, #e581e9ff, #44afe0ff)",
-                color: SectionColor.Black,
-              }}
-            >
-              {editMode ? "Save Changes" : "Create Character"}
-            </Button>
-          </Group>
-
-          <Stack gap="md" mt="lg">
-            <BasicInfoSection />
-            <CombatStatsSection />
-            <AbilitiesSection />
-            <SkillsSection />
-            <SpellSlotsSection />
-            <SpellsSection />
-            <LoreSection />
-            <CollectionsSection />
-            {isAdmin && <AdminSection />}
-            <DeleteCharacterSection />
-          </Stack>
-        </form>
-      </Paper>
-    </Box>
+        <Stack gap="md" mt="lg">
+          <BasicInfoSection />
+          <CombatStatsSection />
+          <AbilitiesSection />
+          <SkillsSection />
+          <SpellSlotsSection />
+          <SpellsSection />
+          <LoreSection />
+          <CollectionsSection />
+          {isAdmin && <AdminSection />}
+          <DeleteCharacterSection />
+        </Stack>
+      </form>
+    </Paper>
+  </Box>
   );
 }

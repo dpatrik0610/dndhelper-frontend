@@ -1,0 +1,50 @@
+.wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: rgba(15, 20, 35, 0.75);
+  backdrop-filter: blur(6px);
+}
+
+/* Scroll area */
+.wheel {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+  padding: 0;
+  margin: 0;
+}
+
+.wheel::-webkit-scrollbar {
+  display: none;
+}
+
+/* Each value row */
+.item {
+  height: 40px;          /* MUST match ITEM_HEIGHT */
+  text-align: center;
+  user-select: none;
+}
+
+/* Highlight band in the middle */
+.centerHighlight {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 40px;          /* MUST match ITEM_HEIGHT */
+  transform: translateY(-50%);
+  background: linear-gradient(
+    to right,
+    rgba(120, 200, 255, 0.22),
+    rgba(120, 200, 255, 0.12)
+  );
+  border-top: 1px solid rgba(160, 210, 255, 0.6);
+  border-bottom: 1px solid rgba(160, 210, 255, 0.6);
+  pointer-events: none;
+}
+
+.spacer {
+  height: 40px;
+}

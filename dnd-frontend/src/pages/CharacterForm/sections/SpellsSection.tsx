@@ -40,6 +40,7 @@ export function SpellsSection() {
         let chSpellList = characterForm.spells;
         chSpellList = [...chSpellList, spellId]
         setCharacterForm({spells: chSpellList})
+        setSelectedSpell(null);
     }
 
     const removeCharacterSpell = (spellId: string) => {
@@ -61,7 +62,7 @@ export function SpellsSection() {
         <Autocomplete
             flex={1}
             w="100%"
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
+            classNames={{ input: "glassy-input", label: "glassy-label", dropdown: "glassy-dropdown" }}
             leftSection={<IconWand size={18} />}
             data={spellNames
             .filter(spell => !characterForm.spells?.includes(spell.id))
