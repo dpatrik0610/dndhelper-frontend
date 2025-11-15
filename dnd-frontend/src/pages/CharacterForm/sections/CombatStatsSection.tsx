@@ -6,7 +6,7 @@ import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 import "../../../styles/glassyInput.css";
 
 import { FormNumberInput } from "../../../components/common/FormNumberInput";
-import { WheelPickerInput } from "../../../components/common/WheelPickerInput";
+// import { WheelPickerInput } from "../../../components/common/WheelPickerInput"; // 🔧 Disabled for now
 
 export function CombatStatsSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
@@ -22,41 +22,49 @@ export function CombatStatsSection() {
       <Stack>
 
         {/* ---------------------------------------- */}
-        {/* 🔥 HP + MAX HP → moved to VERY TOP        */}
+        {/* 🔥 HP + MAX HP → NORMAL Number Inputs     */}
         {/* ---------------------------------------- */}
         <Group grow>
-          <WheelPickerInput
-            items={Array.from(
-              { length: characterForm.maxHitPoints + 1 },
-              (_, i) => i
-            )}
+          {/* WheelPickerInput temporarily disabled */}
+          {/* 
+          <WheelPickerInput ... />
+          */}
+          <FormNumberInput
             label="HP"
+            min={0}
+            max={characterForm.maxHitPoints || 999}
+            classNames={input}
             value={characterForm.hitPoints}
             onChange={(v) => setCharacterForm({ hitPoints: v })}
-            height={90}
           />
 
-          <WheelPickerInput
-            items={Array.from({ length: 401 }, (_, i) => i + 1)}
+          {/* WheelPickerInput temporarily disabled */}
+          <FormNumberInput
             label="Max HP"
+            min={1}
+            max={999}
+            classNames={input}
             value={characterForm.maxHitPoints}
             onChange={(v) => setCharacterForm({ maxHitPoints: v })}
-            height={90}
           />
         </Group>
 
         <Group grow>
-          <WheelPickerInput
-            items={Array.from({ length: 201 }, (_, i) => i)}
+          {/* WheelPickerInput temporarily disabled */}
+          <FormNumberInput
             label="Temp HP"
+            min={0}
+            max={200}
+            classNames={input}
             value={characterForm.temporaryHitPoints}
-            onChange={(v) => setCharacterForm({ temporaryHitPoints: v })}
-            height={50}
+            onChange={(v) =>
+              setCharacterForm({ temporaryHitPoints: v })
+            }
           />
         </Group>
 
         {/* ---------------------------------------- */}
-        {/* 🔧 Armor Class + Speed → back to number input */}
+        {/* Armor Class + Speed                      */}
         {/* ---------------------------------------- */}
         <Group grow>
           <FormNumberInput
@@ -77,7 +85,7 @@ export function CombatStatsSection() {
         </Group>
 
         {/* ---------------------------------------- */}
-        {/* Initiative, Experience → Number inputs */}
+        {/* Initiative + XP + Hit Dice               */}
         {/* ---------------------------------------- */}
         <Group grow>
           <FormNumberInput
@@ -101,9 +109,7 @@ export function CombatStatsSection() {
             placeholder="e.g., 1d10"
             classNames={input}
             value={characterForm.hitDice}
-            onChange={(e) =>
-              setCharacterForm({ hitDice: e.currentTarget.value })
-            }
+            onChange={(e) => setCharacterForm({ hitDice: e.currentTarget.value })}
           />
         </Group>
 
