@@ -3,56 +3,58 @@ import { Button, Group, Loader } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { CustomFieldset } from "../../../components/CustomFieldset";
-import { transferCurrenciesToCharacter } from "../../../services/currencyService";
+import { claimFromInventory } from "../../../services/currencyService";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useInventoryStore } from "../../../store/useInventorystore";
-import { updateInventory } from "../../../services/inventoryService";
-import { InventoryCurrencyBox } from "./InventoryCurrencyBox";
+import { loadInventories } from "../../../utils/loadinventory";
 import { loadCharacters } from "../../../utils/loadCharacter";
+import { InventoryCurrencyBox } from "./InventoryCurrencyBox";
 
 interface InventoryCurrencyClaimProps {
   inventoryId: string;
 }
 
-export function InventoryCurrencyClaim({
-  inventoryId,
-}: InventoryCurrencyClaimProps) {
+export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimProps) {
   const [claimed, setClaimed] = useState(false);
   const [loading, setLoading] = useState(false);
-  const token = useAuthStore.getState().token;
 
-  const characterId = useCharacterStore((state) => state.character!.id);
-  const inventory = useInventoryStore((state) => state.inventories.find(x => x.id == inventoryId));
+  const token = useAuthStore.getState().token!;
+  const character = useCharacterStore((s) => s.character)!;
 
-  const { updateInventoryCurrencies } = useInventoryStore.getState();
+  const inventory = useInventoryStore((state) =>
+    state.inventories.find((x) => x.id === inventoryId)
+  );
+
+  const claimCurrencies = useInventoryStore((s) => s.claimCurrencies);
 
   const handleClaim = async () => {
-    if (!token || !inventory) return;
+    if (!token || !inventory || !inventory.currencies?.length) return;
+
     setLoading(true);
 
     try {
-      await transferCurrenciesToCharacter(characterId!, inventory.currencies!, token);
+      // 1) Backend: claim currencies
+      await claimFromInventory(character.id!, inventory.id!, inventory.currencies, token);
 
-      // Remove currencies from inventory in store
-      updateInventoryCurrencies(inventoryId, []);
-      const updated = useInventoryStore.getState().inventories.find(x => x.id == inventory.id);
+      // 2) Store: remove currencies locally
+      claimCurrencies(inventory.id!, inventory.currencies);
 
-      // Reload character.
-      loadCharacters(token);
-      
-      updateInventory(inventory.id!, updated!, token);
+      // 3) Reload global state from backend
+      await loadInventories(token);
+      await loadCharacters(token);
+
       notifications.show({
         title: "Success",
-        message: "Successfully claimed!",
+        message: "Money money money!",
         color: "green",
+        variant: "outlined",
       });
 
       setClaimed(true);
-
-    } catch (error) {
+    } catch (error: any) {
       notifications.show({
         title: "Error",
-        message: "Failed to claim currencies." + error,
+        message: "Failed to claim currencies: " + error?.message,
         color: "red",
       });
     } finally {
@@ -60,7 +62,9 @@ export function InventoryCurrencyClaim({
     }
   };
 
-  if (claimed || !inventory || !inventory.currencies || inventory.currencies.length === 0) return null;
+  // No display if nothing to claim
+  if (claimed || !inventory?.currencies?.length) return null;
+
   return (
     <CustomFieldset label="Available Currency">
       <Group justify="space-between" align="center" mt="xs">

@@ -53,3 +53,12 @@ export async function transferBetweenCharacters(fromCharacterId: string, toChara
     token,
   });
 }
+
+// PUT: /api/currency/claim/{characterId}/{inventoryId}
+export async function claimFromInventory( characterId: string, inventoryId: string, currencies: Currency[], token?: string ): Promise<void> {
+  return apiClient<void>(`${baseUrl}/claim/${characterId}/${inventoryId}`, {
+    method: "PUT",
+    body: currencies,
+    token,
+  });
+}
