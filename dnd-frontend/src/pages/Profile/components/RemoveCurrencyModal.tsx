@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Modal, Button, Stack, NumberInput, Text, Select } from "@mantine/core";
+import { Modal, Button, Stack, Text, Select } from "@mantine/core";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { updateCharacter } from "../../../services/characterService";
 import { useAuthStore } from "../../../store/useAuthStore";
+import { FormNumberInput } from "../../../components/common/FormNumberInput";
+import "../../../styles/glassyInput.css";
 
 interface RemoveCurrencyModalProps {
   opened: boolean;
@@ -26,31 +28,15 @@ export function RemoveCurrencyModal({ opened, onClose }: RemoveCurrencyModalProp
     if (!selected || !amount) return;
 
     removeCurrencyLocal(selected, amount);
-
-    const updated = useCharacterStore.getState().character!;
-    await updateCharacter(updated, token);
+    await updateCharacter(useCharacterStore.getState().character!, token);
 
     setSelected(null);
     setAmount(0);
     onClose();
   }
 
-  function getCurrencyName(curr: string) {
-    switch (curr) {
-        case "gp":
-            return "Gold";
-        case "sp":
-            return "Silver";
-        case "cp":
-            return "Copper";
-        case "pp":
-            return "Platinum";
-        case "ep":
-            return "Electrum";
-        default:
-            return "Unknown";
-    }
-  }
+  const getCurrencyName = (t: string) =>
+    ({ gp: "Gold", sp: "Silver", cp: "Copper", pp: "Platinum", ep: "Electrum" }[t] ?? "Unknown");
 
   return (
     <Modal
@@ -76,7 +62,6 @@ export function RemoveCurrencyModal({ opened, onClose }: RemoveCurrencyModalProp
           <Text ta="center" c="gray.4">No currencies to remove.</Text>
         )}
 
-        {/* SIMPLE SELECT */}
         <Select
           label="Currency"
           placeholder="Choose a currency"
@@ -98,36 +83,23 @@ export function RemoveCurrencyModal({ opened, onClose }: RemoveCurrencyModalProp
               background: "rgba(20,0,0)",
               border: "1px solid rgba(255,90,90,0.25)",
             },
-            option: {
-              "&[data-hovered]": {
-                background: "rgba(255,90,90,0.2)",
-              },
-            },
+            option: { "&[data-hovered]": { background: "rgba(255,90,90,0.2)" } },
           }}
         />
 
-        {/* AMOUNT */}
         {selected && (
-          <NumberInput
-            label={`Amount to remove`}
-            value={amount}
+          <FormNumberInput
+            label="Amount to remove"
             min={1}
             max={selectedCurrency?.amount ?? 1}
-            onChange={(v) => setAmount(Number(v))}
-            styles={{
-              input: {
-                background: "rgba(255,255,255,0.05)",
-                color: "white",
-                border: "1px solid rgba(255,60,60,0.3)",
-                backdropFilter: "blur(6px)",
-              },
-              label: { color: "white" },
-            }}
+            value={amount}
+            onChange={(v) => setAmount(v)}
+            hideControls
+            classNames={{ input: "glassy-input", label: "glassy-label" }}
           />
         )}
 
-        {/* BUTTON */}
-        <Button onClick={handleRemove} disabled={!selected || !amount}>
+        <Button onClick={handleRemove} disabled={!selected || !amount} color="red">
           Remove
         </Button>
       </Stack>

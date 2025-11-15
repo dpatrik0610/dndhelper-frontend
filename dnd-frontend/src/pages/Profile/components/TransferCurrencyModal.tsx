@@ -1,4 +1,4 @@
-import { Select, NumberInput, Stack } from "@mantine/core";
+import { Select, Stack } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { getCampaignCharacters } from "../../../services/campaignService";
 import { transferBetweenCharacters } from "../../../services/currencyService";
@@ -8,6 +8,7 @@ import { showNotification } from "../../../components/Notification/Notification"
 import type { Character } from "../../../types/Character/Character";
 import { loadCharacters } from "../../../utils/loadCharacter";
 import { BaseModal } from "../../../components/BaseModal";
+import { FormNumberInput } from "../../../components/common/FormNumberInput";
 import "../../../styles/glassyInput.css";
 
 interface Props {
@@ -68,10 +69,7 @@ export function TransferCurrencyModal({ opened, onClose }: Props) {
         token
       );
 
-      showNotification({
-        title: "Success",
-        message: "Currency transferred.",
-      });
+      showNotification({ title: "Success", message: "Currency transferred." });
 
       onClose();
       setAmount(0);
@@ -100,47 +98,36 @@ export function TransferCurrencyModal({ opened, onClose }: Props) {
     >
       <Stack>
 
-    <Select
-    classNames={{
-        input: "glassy-input",
-        label: "glassy-label",
-        dropdown: "glassy-dropdown",
-        option: "glassy-option",
-    }}
-    label="Send To"
-    placeholder="Choose character"
-    data={characters.map((c) => ({
-        value: c.id!,
-        label: c.name,
-    }))}
-    value={targetId}
-    onChange={setTargetId}
-    />
+        <Select
+          classNames={{ input: "glassy-input", label: "glassy-label", dropdown: "glassy-dropdown", option: "glassy-option" }}
+          label="Send To"
+          placeholder="Choose character"
+          data={characters.map((c) => ({ value: c.id!, label: c.name }))}
+          value={targetId}
+          onChange={setTargetId}
+        />
 
-    <Select
-    classNames={{
-        input: "glassy-input",
-        label: "glassy-label",
-        dropdown: "glassy-dropdown",
-        option: "glassy-option",
-    }}
-    label="Currency"
-    placeholder="Choose currency"
-    data={[
-        { value: "gp", label: "Gold (gp)" },
-        { value: "sp", label: "Silver (sp)" },
-    ]}
-    value={currencyType}
-    onChange={setCurrencyType}
-    />
+        <Select
+          classNames={{ input: "glassy-input", label: "glassy-label", dropdown: "glassy-dropdown", option: "glassy-option" }}
+          label="Currency"
+          placeholder="Choose currency"
+          data={[
+            { value: "gp", label: "Gold (gp)" },
+            { value: "sp", label: "Silver (sp)" },
+          ]}
+          value={currencyType}
+          onChange={setCurrencyType}
+        />
 
-        <NumberInput
+        <FormNumberInput
           classNames={{ input: "glassy-input", label: "glassy-label" }}
           label="Amount"
           value={amount}
           min={0}
-          onChange={(v) => setAmount(Number(v))}
+          onChange={setAmount}
+          hideControls
         />
+
       </Stack>
     </BaseModal>
   );

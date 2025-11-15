@@ -1,9 +1,10 @@
 // DamageModal.tsx
 import { useState } from "react";
-import { Modal, NumberInput, Button, Stack } from "@mantine/core";
+import { Modal, Button, Stack } from "@mantine/core";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { updateCharacter } from "../../../services/characterService";
+import { FormNumberInput } from "../../../components/common/FormNumberInput";
 
 interface DamageModalProps {
   opened: boolean;
@@ -20,12 +21,8 @@ export function DamageModal({ opened, onClose }: DamageModalProps) {
   const handleDamage = async () => {
     if (!amount || amount <= 0) return;
 
-    const newHP = Math.max(0, character.hitPoints - amount);
-
-    updateCharacterLocal({ hitPoints: newHP });
-
-    const updated = useCharacterStore.getState().character!;
-    await updateCharacter(updated, token);
+    updateCharacterLocal({ hitPoints: Math.max(0, character.hitPoints - amount) });
+    await updateCharacter(useCharacterStore.getState().character!, token);
 
     onClose();
     setAmount(0);
@@ -52,23 +49,21 @@ export function DamageModal({ opened, onClose }: DamageModalProps) {
       }}
     >
       <Stack gap="md">
-        <NumberInput
+        <FormNumberInput
           label="Damage Amount"
-          value={amount}
           min={1}
-          onChange={(v) => setAmount(Number(v))}
-          styles={{
-            input: {
-              background: "rgba(255,255,255,0.06)",
-              color: "white",
-              border: "1px solid rgba(255,80,80,0.25)",
-              backdropFilter: "blur(6px)",
-            },
-            label: { color: "white" },
-          }}
+          value={amount}
+          onChange={(v) => setAmount(v)}
+          classNames={{ input: "glassy-input", label: "glassy-label" }}
+          hideControls
         />
 
-        <Button disabled={!amount} onClick={handleDamage} variant="gradient" gradient={{ from: "red", to: "darkred", deg: 145 }}>
+        <Button
+          disabled={!amount}
+          onClick={handleDamage}
+          variant="gradient"
+          gradient={{ from: "red", to: "darkred", deg: 145 }}
+        >
           Apply Damage
         </Button>
       </Stack>
