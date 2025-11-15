@@ -2,7 +2,7 @@ import { Button, Group, Paper, Title } from "@mantine/core";
 import { longrest } from "../../../services/characterService";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { showNotification } from "../../../components/Notification/Notification";
-import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus } from "@tabler/icons-react";
+import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus, IconSwords } from "@tabler/icons-react";
 import { loadCharacters } from "../../../utils/loadCharacter";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNavigate } from "react-router-dom";
@@ -13,14 +13,13 @@ import { AddConditionModal } from "./AddConditionModal";
 import { DamageModal } from "./DamageModal";
 import { RemoveCurrencyModal } from "./RemoveCurrencyModal";
 import { TransferCurrencyModal } from "./TransferCurrencyModal";
+import { ExpandableSection } from "../../../components/ExpendableSection";
 
-export interface ActionButtonProps{
-    label: string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    icon: any
-    onClick: MouseEventHandler
+export interface ActionButtonProps {
+  label: string;
+  icon: any;
+  onClick: MouseEventHandler;
 }
-
 
 export function ActionBar() {
   const [modalOpened, setModalOpened] = useState(false);
@@ -33,18 +32,15 @@ export function ActionBar() {
   const character = useCharacterStore((state) => state.character);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-
-  if (!token || !character || !character.id) {
-    return null;
-  }
+  if (!token || !character?.id) return null;
 
   async function handleLongrest() {
     await longrest(character!.id!, token!);
     await loadCharacters(token!);
     showNotification({
-      id: "longrest-successs",
+      id: "longrest-success",
       title: "Success",
-      message: "You slept through the night :)",
+      message: "You slept through the night 🙂",
       icon: <IconMoon />,
     });
   }
@@ -54,10 +50,55 @@ export function ActionBar() {
     { label: "Edit Character", icon: <IconEdit />, onClick: () => navigate("/editCharacter") },
     { label: "Add Condition", icon: <IconPlus />, onClick: () => setModalOpened(true) },
     { label: "Damage", icon: <IconDroplet size={16} />, onClick: () => setDamageModalOpened(true) },
-    { label: "Remove Currency", icon: <IconCoin size={16} />, onClick: () => setRemoveCurrencyModalOpened(true)  },
+    { label: "Remove Currency", icon: <IconCoin size={16} />, onClick: () => setRemoveCurrencyModalOpened(true) },
     { label: "Transfer Currency", icon: <IconCoin size={16} />, onClick: () => setTransferCurrencyModalOpened(true) },
   ];
 
+  // --------------------------------------------
+  //      MOBILE VERSION → SAME BUTTONS, NO SHRINKING
+  // --------------------------------------------
+if (isMobile) {
+  return (
+    <>
+      <ExpandableSection
+        title="Actions"
+        icon={<IconSwords />}
+        color={SectionColor.Violet}
+        defaultOpen={false}
+      >
+        <Group gap="xs" wrap="wrap" justify="center">
+          {actions.map((action) => (
+            <Button
+              key={action.label}
+              leftSection={action.icon}
+              variant="outline"
+              gradient={{ from: SectionColor.Violet, to: SectionColor.Cyan, deg: 180 }}
+              onClick={action.onClick}
+              size="xs"
+              radius="md"
+              style={{
+                flex: "1 1 calc(50% - 8px)", // two equal buttons per row
+                minWidth: 140,               // prevents ugly shrinking
+                maxWidth: "48%",             // stays symmetrical
+              }}
+            >
+              {action.label}
+            </Button>
+          ))}
+        </Group>
+      </ExpandableSection>
+
+      <AddConditionModal opened={modalOpened} onClose={() => setModalOpened(false)} />
+      <DamageModal opened={damageModalOpened} onClose={() => setDamageModalOpened(false)} />
+      <RemoveCurrencyModal opened={removeCurrencyModalOpened} onClose={() => setRemoveCurrencyModalOpened(false)} />
+      <TransferCurrencyModal opened={transferCurrencyModalOpened} onClose={() => setTransferCurrencyModalOpened(false)} />
+    </>
+    );
+  }
+
+  // --------------------------------------------
+  //      DESKTOP VERSION → Original Paper
+  // --------------------------------------------
   return (
     <>
       <Paper
@@ -65,7 +106,7 @@ export function ActionBar() {
         withBorder
         mb="md"
         style={{
-          background: "linear-gradient(175deg, #0009336b 0%, rgba(48, 0, 0, 0.37) 100%)",
+          background: "linear-gradient(175deg, #0009336b 0%, rgba(48,0,0,0.37) 100%)",
         }}
       >
         <Title order={3} mb="md">
@@ -75,14 +116,13 @@ export function ActionBar() {
         <Group>
           {actions.map((action) => (
             <Button
-              key={action.label} // ❗ randomId removed, also fixes key warnings
+              key={action.label}
               leftSection={action.icon}
               variant="outline"
               gradient={{ from: SectionColor.Violet, to: SectionColor.Cyan, deg: 180 }}
               onClick={action.onClick}
               size="xs"
               radius="md"
-              w={isMobile ? "100%" : undefined}
             >
               {action.label}
             </Button>

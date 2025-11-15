@@ -1,3 +1,4 @@
+/* Default (desktop) — unchanged */
 .profile-tabs-list {
   background: rgba(61, 20, 4, 0.56);
   backdrop-filter: blur(6px);
@@ -13,11 +14,25 @@
   transition: all 0.25s ease;
 }
 
+/* Mobile-only 2-col tab grid */
+@media (max-width: 768px) {
+  .profile-tabs-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: 100%;
+  }
+
+  .profile-tab {
+    padding: 10px 6px;
+    font-size: 13px;
+  }
+}
+
 .profile-tab:hover {
   background: rgba(182, 112, 27, 0.15);
 }
 
-/* Active state selector — this is the key */
 .profile-tab[data-active] {
   background: linear-gradient(145deg, #ffae0033, #ff73004d);
   color: #fff;

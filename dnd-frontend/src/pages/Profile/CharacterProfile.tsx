@@ -1,6 +1,8 @@
 import {
   Box,
+  Group,
   Tabs,
+  Text,
 } from "@mantine/core";
 import {
   IconUser,
@@ -31,12 +33,35 @@ import { CharacterNotesPanel } from "./components/CharacterNotesPanel";
 import { SectionColor } from "../../types/SectionColor";
 import { showNotification } from "../../components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../store/useAuthStore";
+import { getCampaignById } from "../../services/campaignService";
+
+function useCampaignName(campaignId: string | null | undefined) {
+  const [name, setName] = useState("Loading...");
+  const token = useAuthStore.getState().token!;
+
+  useEffect(() => {
+    if (!campaignId) {
+      setName("No Campaign");
+      return;
+    }
+    (async () => {
+      const data = await getCampaignById(campaignId, token);
+      setName(data?.name ?? "Unknown Campaign");
+    })();
+  }, [campaignId, token]);
+
+  return name;
+}
 
 export default function CharacterProfile() {
   const character = useCharacterStore((state) => state.character);
   const [activeTab, setActiveTab] = useState<string | null>("overview");
   const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
+  
+  const isAdmin = useAuthStore.getState().roles.includes("Admin");
+  const campaignName = useCampaignName(character?.campaignId);
 
   useEffect(() => {
     if (!character) {
@@ -78,7 +103,7 @@ export default function CharacterProfile() {
           <Tabs.Tab value="features" leftSection={<IconSword size={16} />}>Features</Tabs.Tab>
           <Tabs.Tab value="extras" leftSection={<IconInfoCircle size={16} />}>Extras</Tabs.Tab>
           <Tabs.Tab value="inventories" leftSection={<IconBox size={16} />}>Inventories</Tabs.Tab>
-          <Tabs.Tab value="notes" leftSection={<IconInfoCircle size={16} />}>Notes</Tabs.Tab>
+          {/* <Tabs.Tab value="notes" leftSection={<IconInfoCircle size={16} />}>Notes</Tabs.Tab> */}
         </Tabs.List>
 
         <AnimatePresence mode="wait">
@@ -132,6 +157,14 @@ export default function CharacterProfile() {
           )}
         </AnimatePresence>
       </Tabs>
+      {isAdmin && (
+        <Group mb={10} gap={10} align="center" wrap="wrap">
+          <Text size="xs" c="dimmed">ID: {character.id}</Text>
+          <Text size="xs" c="dimmed">
+            Campaign: {character.campaignId} ({campaignName})
+          </Text>
+      </Group>
+      )}
     </Box>
   );
 }

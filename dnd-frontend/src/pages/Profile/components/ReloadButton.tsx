@@ -5,6 +5,7 @@ import { loadCharacters } from "../../../utils/loadCharacter";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { showNotification } from "../../../components/Notification/Notification";
 import { loadInventories } from "../../../utils/loadinventory";
+import { loadSpells } from "../../../utils/loadSpells";
 
 export default function ReloadButton() {
   const [loading, setLoading] = useState(false);
@@ -15,6 +16,8 @@ export default function ReloadButton() {
       const token = useAuthStore.getState().token;
       await loadCharacters(token!);
       await loadInventories(token!);
+      await loadSpells(token!);
+      // await loadNotes(token!);
 
       showNotification({
         id: 'profile-reload-success',
@@ -38,7 +41,7 @@ export default function ReloadButton() {
   return (
     <Button
       leftSection={<IconRefresh size={16} />}
-      size="xs"
+      size="sm"
       variant="light"
       color="white"
       loading={loading}
