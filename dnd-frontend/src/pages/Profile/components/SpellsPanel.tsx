@@ -2,12 +2,19 @@ import { IconSparkles } from "@tabler/icons-react";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { StatBox } from "./StatBox";
-import { SimpleGrid, Loader, Center, Stack, Text} from "@mantine/core";
+import {
+  SimpleGrid,
+  Loader,
+  Center,
+  Stack,
+  Text,
+  Box,
+} from "@mantine/core";
 import { SectionColor } from "../../../types/SectionColor";
 import { getSpellById } from "../../../services/spellService";
 import { useAuthStore } from "../../../store/useAuthStore";
 import type { Spell } from "../../../types/Spell";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSpellStore } from "../../../store/useSpellStore";
 import CustomBadge from "../../../components/common/CustomBadge";
 import { useMediaQuery } from "@mantine/hooks";
@@ -15,61 +22,93 @@ import { SpellModal } from "./SpellModal";
 
 export function SpellsPanel() {
   const token = useAuthStore.getState().token;
-  const character = useCharacterStore((state) => state.character);
-  const chSpells = character?.spells;
-  const [spellData, setSpellData] = useState<Spell[]>([]);
-  const [loading, setLoading] = useState(true);
+  const character = useCharacterStore((s) => s.character);
+  const chSpells = character?.spells ?? [];
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  // Modal state
+  const [loading, setLoading] = useState(true);
   const [modalOpened, setModalOpened] = useState(false);
+  const [spellData, setSpellData] = useState<Spell[]>([]);
   const setCurrentSpell = useSpellStore((s) => s.setCurrentSpell);
 
+  // Load spells
   useEffect(() => {
-    const fetchSpells = async () => {
-      if (!chSpells?.length) {
-        setLoading(false);
-        return;
-      }
+    const load = async () => {
+      if (!chSpells.length) return setLoading(false);
       try {
-        const results = await Promise.all(
-          chSpells.map((id) => getSpellById(id, token!))
-        );
-        setSpellData(results);
-      } catch (err) {
-        console.error("Failed to load spells:", err);
+        setSpellData(await Promise.all(chSpells.map((id) => getSpellById(id, token!))));
       } finally {
         setLoading(false);
       }
     };
-    void fetchSpells();
+    void load();
   }, [chSpells, token]);
 
-  if (!chSpells || chSpells.length === 0)
+  // Group by level
+  const grouped = useMemo(() => {
+    const g: Record<number, Spell[]> = {};
+    for (let lvl = 0; lvl <= 9; lvl++) g[lvl] = [];
+    spellData.forEach((s) => g[s.level].push(s));
+    return g;
+  }, [spellData]);
+
+  // Early returns AFTER hooks
+  if (!chSpells.length)
     return (
-      <ExpandableSection title="Spells" icon={<IconSparkles />} color={SectionColor.Grape} defaultOpen={true}>
+      <ExpandableSection title="Spells" icon={<IconSparkles />} color={SectionColor.Grape}>
         <Center>No spells known.</Center>
       </ExpandableSection>
     );
 
   if (loading)
     return (
-      <ExpandableSection title="Spells" icon={<IconSparkles />} color={SectionColor.Grape} defaultOpen={true}>
-        <Center><Loader color="grape" /></Center>
+      <ExpandableSection title="Spells" icon={<IconSparkles />} color={SectionColor.Grape}>
+        <Center><Loader /></Center>
       </ExpandableSection>
     );
 
   return (
     <>
-      <ExpandableSection title="Spells" icon={<IconSparkles />} color={SectionColor.Grape} defaultOpen={true} style={{ background: "linear-gradient(180deg, #11001a99, #36004faa)" }}>
-        <SimpleGrid cols={isMobile ? 1 : 4}>
-          {spellData.map((spell) => (
+      <ExpandableSection
+        title="Spells"
+        icon={<IconSparkles />}
+        color={SectionColor.Grape}
+        defaultOpen
+        style={{ background: "linear-gradient(180deg, #11001a99, #36004faa)" }}
+      >
+<Stack>
+  {Object.entries(grouped).map(([lvl, spells]) =>
+    spells.length === 0 ? null : (
+      <Stack key={lvl} mb="md" gap="xs">
+
+        {/* Level Header */}
+        <Box
+          px="sm"
+          py={4}
+          style={{
+            borderRadius: 6,
+            background:
+              lvl === "0"
+                ? "linear-gradient(90deg, #6d00b855, #d200ff55)"
+                : "linear-gradient(140deg, #6d00b855, #80286be0)",
+            border: "1px solid rgba(255,255,255,0.15)",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          <Text fw={700} ta="center" c="white" fz="sm">
+            {lvl === "0" ? "✨ Cantrips" : `🪄 Level ${lvl}`}
+          </Text>
+        </Box>
+
+        {/* Spell Grid */}
+        <SimpleGrid cols={isMobile ? 2 : 4}>
+          {spells.map((spell) => (
             <StatBox
-              key={spell.name}
+              key={spell.id}
+              variant="galaxy"
+              size="md"
               label=""
               value=""
-              size="md"
-              variant="galaxy"
               onClick={() => {
                 setCurrentSpell(spell);
                 setModalOpened(true);
@@ -77,11 +116,21 @@ export function SpellsPanel() {
             >
               <Stack ta="center" align="center">
                 <Text>{spell.name}</Text>
-                <CustomBadge label={`Level ${spell.level}`} color={SectionColor.Lime} variant="outline" radius={5} size="lg"/>
+                <CustomBadge
+                  label={spell.level === 0 ? "Cantrip" : `Level ${spell.level}`}
+                  color={spell.level === 0 ? SectionColor.Grape : SectionColor.Lime}
+                  variant="outline"
+                  radius={5}
+                />
               </Stack>
             </StatBox>
           ))}
         </SimpleGrid>
+      </Stack>
+    )
+  )}
+</Stack>
+
       </ExpandableSection>
 
       <SpellModal opened={modalOpened} onClose={() => setModalOpened(false)} />
