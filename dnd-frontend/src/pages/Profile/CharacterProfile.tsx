@@ -21,7 +21,6 @@ import { AbilityScores } from "./components/AbilityScores";
 import { ExtraInfo } from "./components/ExtraInfo";
 import { SpellCastingBlock } from "./components/SpellCastingBlock";
 import { ActionBar } from "./components/ActionsBar";
-import { SkillsPanel } from "./components/SkillsPanel";
 import { ConditionsPanel } from "./components/ConditionsPanel";
 import { SpellsPanel } from "./components/SpellsPanel";
 import { useMediaQuery } from "@mantine/hooks";
@@ -109,13 +108,13 @@ export default function CharacterProfile() {
         <AnimatePresence mode="wait">
           {activeTab === "overview" && (
             <motion.div key="overview" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              <SkillsPanel />
+              <AbilityScores />
             </motion.div>
           )}
 
           {activeTab === "stats" && (
             <motion.div key="stats" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              <AbilityScores />
+              {/* <AbilityScores /> */}
               <CombatStats />
             </motion.div>
           )}
