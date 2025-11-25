@@ -8,26 +8,17 @@ import {
   Button,
   Stack,
   Badge,
-  Divider,
   Avatar,
-  Box,
-  Progress,
   Tooltip,
   Paper,
 } from "@mantine/core";
-import {
-  IconUser,
-  IconBook,
-  IconDashboard,
-} from "@tabler/icons-react";
+import { IconUser, IconBook, IconDashboard } from "@tabler/icons-react";
 import { useCharacterStore } from "../../store/useCharacterStore";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { useNavigate } from "react-router-dom";
 import type { Character } from "../../types/Character/Character";
 import { useMediaQuery } from "@mantine/hooks";
 import { useAuthStore } from "../../store/useAuthStore";
-import { CharacterSelectButton } from "./components/CharacterSelectButton";
-import { SectionColor } from "../../types/SectionColor";
 import CustomBadge from "../../components/common/CustomBadge";
 
 export default function Home() {
@@ -42,10 +33,11 @@ export default function Home() {
 
   const quickNavigations = [
     { label: "Spellbook", icon: <IconBook />, path: "/spells" },
-    isAdmin? { label: "Admin Dashboard", icon: <IconDashboard />, path: "/dashboard" } : null,
+    isAdmin
+      ? { label: "Admin Dashboard", icon: <IconDashboard />, path: "/dashboard" }
+      : null,
   ];
 
-  // === Palette ===
   const palette = {
     accent: "#b197fc",
     border: "rgba(140, 120, 255, 0.3)",
@@ -56,7 +48,6 @@ export default function Home() {
     textDim: "rgba(220, 220, 255, 0.65)",
   };
 
-  // Random flavor quotes
   const quotes = [
     "“Fortune favors the bold... and the prepared.” — Guild Proverb",
     "“Every blade remembers the hand that forged it.”",
@@ -65,7 +56,16 @@ export default function Home() {
     "“Magic is not power — it’s the art of will given form.”",
   ];
 
-  useEffect(() => setQuote(quotes[Math.floor(Math.random() * quotes.length)]), []);
+  useEffect(() => {
+    setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+  }, []);
+
+  // Auto-select single character
+  useEffect(() => {
+    if (!character && characters.length === 1) {
+      setCharacter(characters[0]);
+    }
+  }, [characters, character, setCharacter]);
 
   const handleSelectCharacter = (char: Character) => {
     setCharacter(char);
@@ -73,20 +73,19 @@ export default function Home() {
   };
 
   return (
-    <Stack 
-    w  = {isMobile? "100%" : "75%"} 
-    m  = {isMobile? "0 auto": "20 auto" }
-    p  = {isMobile? "0"  : "md"  }>
-      {/* === Character Selection Modal === */}
+    <Stack
+      w={isMobile ? "100%" : "75%"}
+      m={isMobile ? "0 auto" : "20 auto"}
+      p={isMobile ? "0" : "md"}
+    >
       <CharacterSelectModal
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
         characters={characters}
         onSelect={handleSelectCharacter}
       />
-      <CharacterSelectButton setModalOpened={setModalOpened}/>
 
-      {/* === Header === */}
+      {/* Header */}
       <Paper
         radius="md"
         p="lg"
@@ -118,8 +117,8 @@ export default function Home() {
         </Group>
       </Paper>
 
-      {/* === Character Overview === */}
-      {character && (
+      {/* Character Overview / Selector */}
+      {character ? (
         <Card
           shadow="lg"
           radius="md"
@@ -147,50 +146,147 @@ export default function Home() {
               </div>
             </Group>
 
+            <Group gap="md">
+              <Button
+                variant="outline"
+                onClick={() => setModalOpened(true)}
+                style={{
+                  borderColor: palette.accent,
+                  boxShadow: "0 0 5px rgba(177, 151, 252, 0.9)",
+                  transition: "box-shadow 0.2s ease, transform 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 0 8px rgba(177, 151, 252, 1)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 0 5px rgba(177, 151, 252, 0.9)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                Switch Character
+              </Button>
+
+              <Button
+                leftSection={<IconUser size={16} />}
+                onClick={() => navigate("/profile")}
+                variant="gradient"
+                gradient={{ from: "violet", to: "grape" }}
+                bg="transparent"
+                styles={{
+                  root: {
+                    boxShadow: "0 0 8px rgba(177, 151, 252, 0.8)",
+                  },
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 0 8px rgba(177, 151, 252, 1)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow =
+                    "0 0 5px rgba(177, 151, 252, 0.9)";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }}
+              >
+                View Profile
+              </Button>
+            </Group>
+          </Group>
+        </Card>
+      ) : characters.length > 0 ? (
+        // Fallback card when there are characters but none selected
+        <Card
+          shadow="lg"
+          radius="md"
+          withBorder
+          p="lg"
+          style={{
+            background: palette.cardBg,
+            borderColor: palette.border,
+            color: palette.textMain,
+          }}
+        >
+          <Group justify="space-between" align="center">
+            <div>
+              <Text fw={700} c={palette.textMain}>
+                No character selected
+              </Text>
+              <Text size="sm" c={palette.textDim}>
+                {isAdmin
+                  ? "You have multiple characters available. Select one to manage or play."
+                  : `You have ${characters.length} characters. Choose one to set as active.`}
+              </Text>
+            </div>
+
             <Button
-              leftSection={<IconUser size={16} />}
-              onClick={() => navigate("/profile")}
-              variant="gradient"
-              gradient={{ from: "violet", to: "grape" }}
+              variant="outline"
+              onClick={() => setModalOpened(true)}
+              style={{
+                borderColor: palette.accent,
+                boxShadow: "0 0 5px rgba(177, 151, 252, 0.9)",
+                transition: "box-shadow 0.2s ease, transform 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow =
+                  "0 0 8px rgba(177, 151, 252, 1)";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow =
+                  "0 0 5px rgba(177, 151, 252, 0.9)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
             >
-              View Profile
+              Select Character
             </Button>
           </Group>
         </Card>
-      )}
+      ) : null}
 
-      {/* === Quick Actions === */}
+      {/* Quick Actions */}
       <Grid mt="md" gutter="md">
-        {quickNavigations.map((action) => (
-          action?
-          <Grid.Col key={action.label} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
-            <Tooltip label={`Open ${action.label}`} withArrow>
-              <Card
-                withBorder
-                shadow="xl"
-                radius="lg"
-                onClick={() => navigate(action.path)}
-                style={{
-                  cursor: "pointer",
-                  backgroundColor: palette.cardBg,
-                  borderColor: palette.border,
-                  transition: "transform 0.15s ease, background-color 0.15s ease",
-                  color: palette.textMain,
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = palette.hoverBg)
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = palette.cardBg)
-                }
-              >
-              <CustomBadge label={action.label} icon={action.icon} variant="transparent" size="xl" />
-              </Card>
-            </Tooltip>
-          </Grid.Col>
-        : <></>
-        ))}
+        {quickNavigations.map((action) =>
+          action ? (
+            <Grid.Col
+              key={action.label}
+              span={{ base: 12, sm: 6, md: 4, lg: 3 }}
+            >
+              <Tooltip label={`Open ${action.label}`} withArrow>
+                <Card
+                  withBorder
+                  shadow="xl"
+                  radius="lg"
+                  onClick={() => navigate(action.path)}
+                  style={{
+                    cursor: "pointer",
+                    backgroundColor: palette.cardBg,
+                    borderColor: palette.border,
+                    transition:
+                      "transform 0.15s ease, background-color 0.15s ease",
+                    color: palette.textMain,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = palette.hoverBg;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = palette.cardBg;
+                  }}
+                >
+                  <CustomBadge
+                    label={action.label}
+                    icon={action.icon}
+                    variant="transparent"
+                    size="xl"
+                  />
+                </Card>
+              </Tooltip>
+            </Grid.Col>
+          ) : null
+        )}
       </Grid>
-      </Stack>
+    </Stack>
   );
 }

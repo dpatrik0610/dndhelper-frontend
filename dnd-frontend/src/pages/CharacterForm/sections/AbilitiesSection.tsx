@@ -8,7 +8,7 @@ import {
 } from "@mantine/core";
 import { useMemo, useEffect } from "react";
 import { useMediaQuery } from "@mantine/hooks";
-import { IconBrain, IconStar, IconStarFilled } from "@tabler/icons-react";
+import { IconBrain } from "@tabler/icons-react";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
