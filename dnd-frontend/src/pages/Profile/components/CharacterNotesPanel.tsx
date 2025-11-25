@@ -23,6 +23,7 @@ import type { Note } from "../../../types/Note";
 import { EditNoteModal } from "../EditNoteModal";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 import "../../../styles/glassyInput.css";
 
 export function CharacterNotesPanel() {
@@ -226,7 +227,7 @@ export function CharacterNotesPanel() {
 
                 {/* Markdown-rendered content */}
                 <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
+                  remarkPlugins={[remarkGfm, remarkBreaks]}
                   components={{
                     p: ({ node, ...props }) => (
                       <Text

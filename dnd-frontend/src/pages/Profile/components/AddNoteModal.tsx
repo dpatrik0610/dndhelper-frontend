@@ -66,11 +66,19 @@ export function AddNoteModal({ opened, onClose }: Props) {
 
         <Textarea
           classNames={{ input: "glassy-input", label: "glassy-label" }}
-          label="Lines"
-          minRows={4}
+          label="Details"
+          autosize={false}
+          minRows={1}
           value={lines}
           onChange={(e) => setLines(e.currentTarget.value)}
+          styles={{
+            input: {
+              minHeight: "3rem",
+              resize: "vertical",
+            },
+          }}
         />
+
       </Stack>
     </BaseModal>
   );

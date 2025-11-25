@@ -1,10 +1,10 @@
-// components/EditNoteModal.tsx
 import { useEffect, useState } from "react";
-import { TextInput, Textarea, Stack } from "@mantine/core";
+import { TextInput, Stack } from "@mantine/core";
 import type { Note } from "../../types/Note";
 import { useNoteStore } from "../../store/useNoteStore";
 import { showNotification } from "@mantine/notifications";
 import { BaseModal } from "../../components/BaseModal";
+import { MarkdownTextarea } from "../../components/common/MarkdownTextarea";
 import "../../styles/glassyInput.css";
 
 interface EditNoteModalProps {
@@ -56,12 +56,11 @@ export function EditNoteModal({ opened, note, onClose }: EditNoteModalProps) {
           onChange={(e) => setTitle(e.currentTarget.value)}
         />
 
-        <Textarea
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-          label="Lines"
-          minRows={4}
+        <MarkdownTextarea
+          label="Details"
           value={lines}
-          onChange={(e) => setLines(e.currentTarget.value)}
+          onChange={setLines}
+          minHeightRem={8}
         />
       </Stack>
     </BaseModal>
