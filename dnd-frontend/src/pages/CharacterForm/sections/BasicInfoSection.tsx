@@ -1,10 +1,9 @@
-import { Stack, Group, TextInput } from "@mantine/core";
+import { Stack, Group, TextInput, Select } from "@mantine/core";
 import { IconUser } from "@tabler/icons-react";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 import { FormNumberInput } from "../../../components/common/FormNumberInput";
-import { WheelPickerInput } from "../../../components/common/WheelPickerInput";
 import { InfoIconPopover } from "../../../components/common/InfoIconPopover";
 import { useEffect } from "react";
 import "../../../styles/glassyInput.css";
@@ -109,12 +108,13 @@ export function BasicInfoSection() {
         </Group>
 
         {/* ALIGNMENT */}
-        <WheelPickerInput
-          items={ALIGNMENTS}
-          label="Alignment"
-          value={characterForm.alignment}
-          onChange={(v) => setCharacterForm({ alignment: v })}
-          height={60}
+
+        <Select 
+        data={ALIGNMENTS}
+        label="Alignment"
+        value={characterForm.alignment}
+        onChange={(v) => setCharacterForm({ alignment: v! })}
+        classNames={{...cls, dropdown: "glassy-dropdown", option: "glassy-option"}}
         />
       </Stack>
     </ExpandableSection>
