@@ -1,5 +1,12 @@
-import { Group, Stack, Title, Divider, SimpleGrid, Select } from "@mantine/core";
-import { useMemo } from "react";
+import {
+  Group,
+  Stack,
+  Title,
+  Divider,
+  SimpleGrid,
+  Select,
+} from "@mantine/core";
+import { useMemo, useEffect } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconBrain } from "@tabler/icons-react";
 import { ExpandableSection } from "../../../components/ExpendableSection";
@@ -36,8 +43,8 @@ const saveKeyMap: Record<AbilityLong, keyof SavingThrows> = {
 
 export function AbilitiesSection() {
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const characterForm = useCharacterFormStore(s => s.characterForm);
-  const setCharacterForm = useCharacterFormStore(s => s.setCharacterForm);
+  const characterForm = useCharacterFormStore((s) => s.characterForm);
+  const setCharacterForm = useCharacterFormStore((s) => s.setCharacterForm);
 
   const abilityFields = Object.keys(map) as AbilityLong[];
   const input = { input: "glassy-input", label: "glassy-label" };
@@ -66,6 +73,24 @@ export function AbilitiesSection() {
   const spellSaveDc = spellMod !== null ? 8 + prof + spellMod : 0;
   const spellAttackBonus = spellMod !== null ? prof + spellMod : 0;
 
+  useEffect(() => {
+    if (
+      characterForm.spellSaveDc !== spellSaveDc ||
+      characterForm.spellAttackBonus !== spellAttackBonus
+    ) {
+      setCharacterForm({
+        spellSaveDc,
+        spellAttackBonus,
+      });
+    }
+  }, [
+    spellSaveDc,
+    spellAttackBonus,
+    characterForm.spellSaveDc,
+    characterForm.spellAttackBonus,
+    setCharacterForm,
+  ]);
+
   return (
     <ExpandableSection
       title="Abilities & Spellcasting"
@@ -74,11 +99,12 @@ export function AbilitiesSection() {
       defaultOpen
     >
       <Stack gap={isMobile ? "sm" : "md"}>
-
-        <Title order={isMobile ? 6 : 5} c="gray.2">Ability Scores</Title>
+        <Title order={isMobile ? 6 : 5} c="gray.2">
+          Ability Scores
+        </Title>
 
         <SimpleGrid cols={isMobile ? 1 : 2} spacing={isMobile ? "sm" : "md"}>
-          {abilityFields.map(a => {
+          {abilityFields.map((a) => {
             const short: AbilityShort = map[a];
 
             return (
@@ -94,9 +120,12 @@ export function AbilitiesSection() {
                     max={30}
                     classNames={input}
                     value={characterForm.abilityScores[short]}
-                    onChange={v =>
+                    onChange={(v) =>
                       setCharacterForm({
-                        abilityScores: { ...characterForm.abilityScores, [short]: v },
+                        abilityScores: {
+                          ...characterForm.abilityScores,
+                          [short]: v,
+                        },
                       })
                     }
                     styles={{ input: { textAlign: "center" } }}
@@ -131,14 +160,23 @@ export function AbilitiesSection() {
         <Divider my="sm" label="Saving Throws" labelPosition="center" />
 
         <Stack gap={isMobile ? "sm" : "md"}>
-          {(isMobile ? abilityFields : [abilityFields.slice(0, 3), abilityFields.slice(3)]).map((list, i) => (
+          {(isMobile
+            ? abilityFields
+            : [abilityFields.slice(0, 3), abilityFields.slice(3)]
+          ).map((list, i) => (
             <Group key={i} grow wrap="wrap">
-              {(Array.isArray(list) ? list : [list]).map(a => {
+              {(Array.isArray(list) ? list : [list]).map((a) => {
                 const saveKey = saveKeyMap[a];
 
                 return (
-                  <Stack key={a} gap={4} style={{ width: isMobile ? "100%" : "48%" }}>
-                    <InfoIconPopover title={`${a.charAt(0).toUpperCase() + a.slice(1)} Save`}>
+                  <Stack
+                    key={a}
+                    gap={4}
+                    style={{ width: isMobile ? "100%" : "48%" }}
+                  >
+                    <InfoIconPopover
+                      title={`${a.charAt(0).toUpperCase() + a.slice(1)} Save`}
+                    >
                       {saveTooltips[a]}
                     </InfoIconPopover>
 
@@ -146,9 +184,12 @@ export function AbilitiesSection() {
                       label={`${a.charAt(0).toUpperCase() + a.slice(1)} Save`}
                       classNames={input}
                       value={characterForm.savingThrows[saveKey]}
-                      onChange={v =>
+                      onChange={(v) =>
                         setCharacterForm({
-                          savingThrows: { ...characterForm.savingThrows, [saveKey]: v },
+                          savingThrows: {
+                            ...characterForm.savingThrows,
+                            [saveKey]: v,
+                          },
                         })
                       }
                       styles={{ input: { textAlign: "center" } }}
@@ -163,10 +204,17 @@ export function AbilitiesSection() {
         <Divider my="sm" label="Spellcasting" labelPosition="center" />
 
         <Stack gap={isMobile ? "sm" : "md"}>
-
           <Stack gap={4} style={{ flex: 1 }}>
             <InfoIconPopover title="Spellcasting Ability">
-              Please select the ability that your character uses for spellcasting. It's determined by your class.<br /><br /> For fighters with the Arcane Archer or Eldritch Knight archetypes, select Intelligence (INT).<br /><br /> If your character does not cast spells, select "None".
+              Please select the ability that your character uses for
+              spellcasting. It's determined by your class.
+              <br />
+              <br />
+              For fighters with the Arcane Archer or Eldritch Knight
+              archetypes, select Intelligence (INT).
+              <br />
+              <br />
+              If your character does not cast spells, select "None".
             </InfoIconPopover>
 
             <Select
@@ -182,16 +230,23 @@ export function AbilitiesSection() {
                 { value: "wis", label: "Wisdom (WIS)" },
                 { value: "cha", label: "Charisma (CHA)" },
               ]}
-              onChange={v =>
-                setCharacterForm({ spellcastingAbility: (v ?? "none") as SpellcastingAbility })
+              onChange={(v) =>
+                setCharacterForm({
+                  spellcastingAbility: (v ?? "none") as SpellcastingAbility,
+                })
               }
             />
           </Stack>
 
           <Stack gap={4} style={{ flex: 1 }}>
             <InfoIconPopover title="Spell Save DC">
-              Spell Save DC is the target number a creature must meet or beat on a saving throw to resist your spell’s effect.<br /><br />
-              <strong>Spell Save DC = 8 + Proficiency Bonus + Spellcasting Ability Modifier</strong>
+              Spell Save DC is the target number a creature must meet or beat on
+              a saving throw to resist your spell’s effect.
+              <br />
+              <br />
+              <strong>
+                Spell Save DC = 8 + Proficiency Bonus + Spellcasting Ability Modifier
+              </strong>
             </InfoIconPopover>
             <FormNumberInput
               label="Spell Save DC"
@@ -232,9 +287,7 @@ export function AbilitiesSection() {
               }}
             />
           </Stack>
-
         </Stack>
-
       </Stack>
     </ExpandableSection>
   );
