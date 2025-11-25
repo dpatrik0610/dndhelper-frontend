@@ -14,20 +14,56 @@ import ReloadButton from "./ReloadButton";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useMediaQuery } from "@mantine/hooks";
 import { CharacterCurrencyArea } from "../../../components/CharacterCurrencyArea";
+import CustomBadge from "../../../components/common/CustomBadge";
+import { showNotification } from "../../../components/Notification/Notification";
 
 export function CharacterHeader() {
   const character = useCharacterStore((s) => s.character)!;
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+  const maxHp = Math.max(character.maxHitPoints, 1);
+  const currentHp = Math.max(
+    0,
+    Math.min(character.hitPoints, character.maxHitPoints)
+  );
+  const tempHp = Math.max(character.temporaryHitPoints ?? 0, 0);
+
+  const hpPercent = Math.min(100, (currentHp / maxHp) * 100);
+  const tempPercent = Math.min(100, (tempHp / maxHp) * 100);
+  
+  async function handleUseInspiration() {
+    const current = useCharacterStore.getState().character;
+    if (!current) return;
+    if (!current.inspiration || current.inspiration <= 0) return;
+
+    const confirmed = window.confirm(
+      "Use one point of Inspiration?"
+    );
+    if (!confirmed) return;
+
+    const newInspiration = current.inspiration - 1;
+
+    // 1) local store update
+    useCharacterStore.getState().updateCharacter({inspiration: newInspiration});
+    // 2) persist to API
+    await useCharacterStore.getState().persistCharacter();
+
+    showNotification({
+      title: "Inspiration used",
+      message: "You spent 1 Inspiration point.",
+      color: "blue",
+    });
+  }
 
   return (
     <Paper
-    mb={15}
+      mb={15}
       p="lg"
       radius="sm"
       withBorder
       style={{
-        background: "linear-gradient(165deg, rgba(10,0,30,0.45), rgba(60,0,20,0.40))",
+        background:
+          "linear-gradient(165deg, rgba(10,0,30,0.45), rgba(60,0,20,0.40))",
         border: "1px solid rgba(255,255,255,0.12)",
         backdropFilter: "blur(12px) saturate(130%)",
         boxShadow: "0 0 18px rgba(0,0,0,0.55)",
@@ -35,7 +71,6 @@ export function CharacterHeader() {
         overflow: "hidden",
       }}
     >
-      {/* Arcane Glow Corners */}
       <Box
         style={{
           position: "absolute",
@@ -47,13 +82,10 @@ export function CharacterHeader() {
           pointerEvents: "none",
         }}
       />
-      {/* TOP BAR */}
 
-      <Group justify="space-between" wrap="wrap">
+      <Group justify="space-between" wrap="wrap" />
 
-      </Group>
       <Grid align="stretch">
-
         {/* LEFT: Portrait + Basics */}
         <Grid.Col span={{ base: 12, sm: 7 }}>
           <Group
@@ -62,7 +94,6 @@ export function CharacterHeader() {
             gap={isMobile ? "sm" : "md"}
             dir={isMobile ? "column" : "row"}
           >
-            {/* Identity */}
             <Stack
               gap={6}
               style={{
@@ -71,16 +102,21 @@ export function CharacterHeader() {
                 width: "100%",
               }}
             >
-              <Title order={2} c="white" lh={1.1} style={{ textShadow: "0 0 6px rgba(255,255,255,0.3)" }}>
+              <Title
+                order={2}
+                c="white"
+                lh={1.1}
+                style={{ textShadow: "0 0 6px rgba(255,255,255,0.3)" }}
+              >
                 {character.name}
                 {character.hitPoints <= 0 && (
                   <Badge
-                  size="sm"
-                  color="red"
-                  leftSection={<IconSkull size={12} />}
-                  ml={8}
-                  variant="filled"
-                  radius="sm"
+                    size="sm"
+                    color="red"
+                    leftSection={<IconSkull size={12} />}
+                    ml={8}
+                    variant="filled"
+                    radius="sm"
                   >
                     Dead
                   </Badge>
@@ -94,34 +130,86 @@ export function CharacterHeader() {
                 wrap="wrap"
                 justify={isMobile ? "center" : "flex-start"}
               >
-                <Badge variant="gradient" gradient={{ from: "yellow", to: "grape" }}>
+                <Badge
+                  variant="gradient"
+                  gradient={{ from: "yellow", to: "grape" }}
+                >
                   {character.characterClass}
                 </Badge>
-                <Badge variant="gradient" gradient={{ from: "teal", to: "blue" }}>
+                <Badge
+                  variant="gradient"
+                  gradient={{ from: "teal", to: "blue" }}
+                >
                   {character.race}
                 </Badge>
                 <Badge color="gray" variant="outline">
                   {character.alignment}
                 </Badge>
-                
               </Group>
 
               {/* Currency */}
               {character.currencies && <CharacterCurrencyArea />}
 
+
               {/* HP Bar */}
               <Box>
-                <Text size="xs" c="red.4" mb={4}>
-                  HP: {character.hitPoints} / {character.maxHitPoints}
-                </Text>
-                <Progress
-                  value={(character.hitPoints / character.maxHitPoints) * 100}
-                  color="red"
-                  radius="xl"
-                  size="lg"
-                  striped
-                />
+                <Group c="dimmed" mb={4} gap="xs">
+                  <CustomBadge
+                    size="sm"
+                    color="red"
+                    mb={6}
+                    label={`HP: ${currentHp} / ${maxHp}`}
+                    variant="dot"
+                    bg={"transparent"}
+                  />
+
+                  {tempHp > 0 && (
+                    <CustomBadge
+                      size="sm"
+                      color="yellow"
+                      mb={6}
+                      label={`+${tempHp} temp`}
+                      variant="outline"
+                    />
+                  )}
+                </Group>
+
+                <Box style={{ position: "relative" }}>
+                  {/* Base HP bar (red) */}
+                  <Progress
+                    value={hpPercent}
+                    color="red"
+                    radius="xl"
+                    size="lg"
+                  />
+
+                  {/* Temp HP overlay, right-aligned */}
+                  {tempHp > 0 && tempPercent > 0 && (
+                    <Box
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        pointerEvents: "none",
+                      }}
+                    >
+                      <Box
+                        style={{
+                          position: "absolute",
+                          top: "20%",
+                          bottom: "20%",
+                          right: 0,
+                          width: `${tempPercent}%`,
+                          background: "rgba(0,0,0, 0.2)",
+                          borderRadius: 999,
+                          boxShadow: "1 1 5px rgba(0,0,0, 1)",
+                        }}
+                      />
+                    </Box>
+                  )}
+                </Box>
               </Box>
+
+
             </Stack>
           </Group>
         </Grid.Col>
@@ -134,21 +222,42 @@ export function CharacterHeader() {
             gap={10}
           >
             <RPGStat label="Level" value={character.level} color="#ffe38f" />
-            <RPGStat label="Experience" value={character.experience} color="#ff9191" />
-            <RPGStat label="Inspiration" value={character.inspiration} color="#8fffe0" />
+            <RPGStat
+              label="Experience"
+              value={character.experience}
+              color="#ff9191"
+            />
+            <RPGStat
+              label="Inspiration"
+              value={character.inspiration}
+              color="#8fffe0"
+              onClick={handleUseInspiration}
+            />
             <ReloadButton />
           </Stack>
         </Grid.Col>
-
       </Grid>
     </Paper>
   );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function RPGStat({ label, value, color }: { label: string; value: any; color: string }) {
+function RPGStat({
+  label,
+  value,
+  color,
+  onClick,
+}: {
+  label: string;
+  value: any;
+  color: string;
+  onClick?: () => void;
+}) {
+  const clickable = !!onClick && label === "Inspiration";
+
   return (
     <Box
+      onClick={clickable ? onClick : undefined}
       style={{
         padding: "5px 0px",
         borderRadius: 8,
@@ -157,6 +266,8 @@ function RPGStat({ label, value, color }: { label: string; value: any; color: st
         boxShadow: `0 0 2px ${color}55`,
         textAlign: "center",
         minWidth: 100,
+        cursor: clickable ? "pointer" : "default",
+        transition: "transform 120ms ease, box-shadow 120ms ease",
       }}
     >
       <Text size="xs" c={color} fw={700} tt="uppercase" lts={1}>

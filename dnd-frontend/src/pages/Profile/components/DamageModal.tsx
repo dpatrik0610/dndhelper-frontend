@@ -1,4 +1,3 @@
-// DamageModal.tsx
 import { useState } from "react";
 import { Modal, Button, Stack } from "@mantine/core";
 import { useCharacterStore } from "../../../store/useCharacterStore";
@@ -13,7 +12,6 @@ interface DamageModalProps {
 
 export function DamageModal({ opened, onClose }: DamageModalProps) {
   const token = useAuthStore.getState().token!;
-  const character = useCharacterStore((s) => s.character)!;
   const updateCharacterLocal = useCharacterStore((s) => s.updateCharacter);
 
   const [amount, setAmount] = useState<number>(0);
@@ -21,7 +19,27 @@ export function DamageModal({ opened, onClose }: DamageModalProps) {
   const handleDamage = async () => {
     if (!amount || amount <= 0) return;
 
-    updateCharacterLocal({ hitPoints: Math.max(0, character.hitPoints - amount) });
+    const current = useCharacterStore.getState().character;
+    if (!current) return;
+
+    const tempHp = Math.max(current.temporaryHitPoints ?? 0, 0);
+    const hp = Math.max(current.hitPoints, 0);
+
+    // 1) Temp HP absorbs damage first
+    const damageToTemp = Math.min(amount, tempHp);
+    const remainingDamage = amount - damageToTemp;
+
+    const newTempHp = tempHp - damageToTemp;
+
+    // 2) Any leftover damage comes off real HP
+    const newHp = Math.max(0, hp - remainingDamage);
+
+    updateCharacterLocal({
+      hitPoints: newHp,
+      temporaryHitPoints: newTempHp,
+    });
+
+    // Persist updated character to API
     await updateCharacter(useCharacterStore.getState().character!, token);
 
     onClose();
