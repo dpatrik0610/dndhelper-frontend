@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { Paper, Stack, Text, ActionIcon, Group, Tooltip } from "@mantine/core";
+import {
+  Paper,
+  Stack,
+  Text,
+  ActionIcon,
+  Group,
+  Tooltip,
+  Table,
+} from "@mantine/core";
 import {
   IconPlus,
   IconTrash,
@@ -13,6 +21,8 @@ import { useNoteStore } from "../../../store/useNoteStore";
 import { AddNoteModal } from "./AddNoteModal";
 import type { Note } from "../../../types/Note";
 import { EditNoteModal } from "../EditNoteModal";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import "../../../styles/glassyInput.css";
 
 export function CharacterNotesPanel() {
@@ -36,7 +46,7 @@ export function CharacterNotesPanel() {
 
   const characterNotes = useMemo(() => {
     const filtered = notes.filter((n) => n.id && noteIds.includes(n.id));
-    // optional: favorites first
+    // favorites first
     return filtered.sort(
       (a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0)
     );
@@ -161,70 +171,158 @@ export function CharacterNotesPanel() {
 
         {/* NOTES LIST */}
         <Stack gap="sm">
-          {characterNotes.map((note) => (
-            <Paper
-              key={note.id}
-              withBorder
-              p="sm"
-              style={{
-                background: "rgba(50, 0, 0, 0.25)",
-                border: "1px solid rgba(255,80,80,0.25)",
-                backdropFilter: "blur(6px)",
-              }}
-            >
-              <Group justify="space-between" mb={6}>
-                <Text fw={500} c="red.2">
-                  {note.title ?? "Untitled"}
-                </Text>
+          {characterNotes.map((note) => {
+            const markdownContent = (note.lines ?? []).join("\n");
 
-                <Group gap={4}>
-                  <Tooltip label="Favorite" withArrow>
+            return (
+              <Paper
+                key={note.id}
+                withBorder
+                p="sm"
+                style={{
+                  background: "rgba(50, 0, 0, 0.25)",
+                  border: "1px solid rgba(255,80,80,0.25)",
+                  backdropFilter: "blur(6px)",
+                }}
+              >
+                <Group justify="space-between" mb={6}>
+                  <Text fw={500} c="red.2">
+                    {note.title ?? "Untitled"}
+                  </Text>
+
+                  <Group gap={4}>
+                    <Tooltip label="Favorite" withArrow>
+                      <ActionIcon
+                        size="sm"
+                        variant="subtle"
+                        onClick={() => handleToggleFavorite(note)}
+                      >
+                        {note.isFavorite ? (
+                          <IconStarFilled size={14} color="yellow" />
+                        ) : (
+                          <IconStar size={14} />
+                        )}
+                      </ActionIcon>
+                    </Tooltip>
+
                     <ActionIcon
                       size="sm"
                       variant="subtle"
-                      onClick={() => handleToggleFavorite(note)}
+                      onClick={() => setEditingNote(note)}
                     >
-                      {note.isFavorite ? (
-                        <IconStarFilled size={14}  color="yellow"/>
-                      ) : (
-                        <IconStar size={14} />
-                      )}
+                      <IconPencil size={12} />
                     </ActionIcon>
-                  </Tooltip>
 
-                  <ActionIcon
-                    size="sm"
-                    variant="subtle"
-                    onClick={() => setEditingNote(note)}
-                  >
-                    <IconPencil size={12} />
-                  </ActionIcon>
-
-                  <ActionIcon
-                    size="sm"
-                    variant="subtle"
-                    color="red"
-                    onClick={() => handleDelete(note.id!)}
-                  >
-                    <IconTrash size={12} />
-                  </ActionIcon>
+                    <ActionIcon
+                      size="sm"
+                      variant="subtle"
+                      color="red"
+                      onClick={() => handleDelete(note.id!)}
+                    >
+                      <IconTrash size={12} />
+                    </ActionIcon>
+                  </Group>
                 </Group>
-              </Group>
 
-              <Stack gap={2}>
-                {(note.lines ?? []).map((line, i) => (
-                  <Text
-                    key={i}
-                    size="sm"
-                    c="gray.2"
-                    style={{ whiteSpace: "pre-wrap" }}
-                  >
-                    {line}
-                  </Text>
-                ))}
-              </Stack>
-            </Paper>
-          ))}
+                {/* Markdown-rendered content */}
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ node, ...props }) => (
+                      <Text
+                        size="sm"
+                        c="gray.2"
+                        style={{ margin: 0, lineHeight: 1.4 }}
+                        {...props}
+                      />
+                    ),
+                    h1: ({ node, ...props }) => (
+                      <Text
+                        component="h1"
+                        size="lg"
+                        fw={800}
+                        tt="uppercase"
+                        style={{ margin: "4px 0", lineHeight: 1.2 }}
+                        {...props}
+                      />
+                    ),
+                    h2: ({ node, ...props }) => (
+                      <Text
+                        component="h2"
+                        size="md"
+                        fw={700}
+                        tt="uppercase"
+                        style={{ margin: "4px 0", lineHeight: 1.2 }}
+                        {...props}
+                      />
+                    ),
+                    h3: ({ node, ...props }) => (
+                      <Text
+                        component="h3"
+                        size="sm"
+                        fw={700}
+                        tt="uppercase"
+                        style={{ margin: "4px 0", lineHeight: 1.2 }}
+                        {...props}
+                      />
+                    ),
+                    ul: ({ node, ...props }) => (
+                      <ul
+                        style={{
+                          margin: "4px 0",
+                          paddingLeft: "1.2rem",
+                        }}
+                        {...props}
+                      />
+                    ),
+                    ol: ({ node, ...props }) => (
+                      <ol
+                        style={{
+                          margin: "4px 0",
+                          paddingLeft: "1.2rem",
+                        }}
+                        {...props}
+                      />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li style={{ marginBottom: 2 }} {...props} />
+                    ),
+                    table: ({ node, ...props }) => (
+                      <Table
+                        striped
+                        highlightOnHover
+                        withTableBorder
+                        withColumnBorders
+                        style={{ margin: "8px 0" }}
+                        {...props}
+                      />
+                    ),
+                    th: ({ node, ...props }) => (
+                      <Table.Th
+                        style={{
+                          textAlign: "left",
+                          padding: "5px",
+                          fontWeight: 600,
+                        }}
+                        {...props}
+                      />
+                    ),
+                    td: ({ node, ...props }) => (
+                      <Table.Td
+                        style={{
+                          textAlign: "left",
+                          padding: "5px",
+                        }}
+                        {...props}
+                      />
+                    ),
+                  }}
+                >
+                  {markdownContent}
+                </ReactMarkdown>
+              </Paper>
+            );
+          })}
 
           {!loading && characterNotes.length === 0 && (
             <Text c="dimmed" ta="center">
