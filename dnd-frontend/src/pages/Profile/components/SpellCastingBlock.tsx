@@ -4,7 +4,6 @@ import { StatBox } from "./StatBox";
 import { IconExclamationCircle, IconWand } from "@tabler/icons-react";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { SectionColor } from "../../../types/SectionColor";
-import { useMediaQuery } from "@mantine/hooks";
 import { DividerWithLabel } from "../../../components/common/DividerWithLabel";
 import type { SpellSlot } from "../../../types/Character/SpellSlot";
 import { showNotification } from "../../../components/Notification/Notification";
@@ -14,15 +13,14 @@ import { useAuthStore } from "../../../store/useAuthStore";
 export function SpellCastingBlock() {
     const character = useCharacterStore((state) => state.character)!;
     const { updateCharacter : updateStore } = useCharacterStore();
-    const isMobile = useMediaQuery("(max-width: 768px)");
 
     const updateAPI = async () => {
         await updateCharacter(character, useAuthStore.getState().token!);
     }
     
-    const useSpellSlot = (slot : SpellSlot) => {
+    const spellSlotHandler = (slot : SpellSlot) => {
         const all = character.spellSlots;
-        let found = all.find(x => x.level == slot.level);
+        const found = all.find(x => x.level == slot.level);
 
         if (!found?.current || found?.current <= 0) {
             showNotification({id: "spellslot-used", title:"", message: "Spell Level Depleted.", color: SectionColor.Yellow, icon: <IconExclamationCircle/>})
@@ -45,7 +43,7 @@ export function SpellCastingBlock() {
             size="sm"
             color="grape.5"
             background="transparent"
-            onClick={() => useSpellSlot(slot)}
+            onClick={() => spellSlotHandler(slot)}
         />
         ));
     }
