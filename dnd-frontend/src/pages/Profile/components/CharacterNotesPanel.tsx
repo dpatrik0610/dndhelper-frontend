@@ -321,6 +321,15 @@ export function CharacterNotesPanel() {
                 >
                   {markdownContent}
                 </ReactMarkdown>
+                  <Text c="dimmed" size="xs">
+                    Updated at: {new Date(note.updatedAt!).toLocaleString("en-GB", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }).replace(/\//g, ".")}
+                  </Text>
               </Paper>
             );
           })}
