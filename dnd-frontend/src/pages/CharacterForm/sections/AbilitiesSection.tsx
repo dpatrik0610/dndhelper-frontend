@@ -8,7 +8,7 @@ import {
 } from "@mantine/core";
 import { useMemo, useEffect } from "react";
 import { useMediaQuery } from "@mantine/hooks";
-import { IconBrain } from "@tabler/icons-react";
+import { IconBrain, IconStar, IconStarFilled } from "@tabler/icons-react";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
@@ -73,21 +73,56 @@ export function AbilitiesSection() {
   const spellSaveDc = spellMod !== null ? 8 + prof + spellMod : 0;
   const spellAttackBonus = spellMod !== null ? prof + spellMod : 0;
 
+  // --- Passive Senses: Perception / Insight / Investigation ---
+
+  const skills = characterForm.skills ?? [];
+
+  function hasSkillProficiency(name: string) {
+    return skills.some((s) => s.name === name && s.proficient);
+  }
+
+  const passivePerception =
+    10 +
+    modifiers.wisdom +
+    (hasSkillProficiency("Perception") ? prof : 0);
+
+  const passiveInsight =
+    10 +
+    modifiers.wisdom +
+    (hasSkillProficiency("Insight") ? prof : 0);
+
+  const passiveInvestigation =
+    10 +
+    modifiers.intelligence +
+    (hasSkillProficiency("Investigation") ? prof : 0);
+
   useEffect(() => {
     if (
       characterForm.spellSaveDc !== spellSaveDc ||
-      characterForm.spellAttackBonus !== spellAttackBonus
+      characterForm.spellAttackBonus !== spellAttackBonus ||
+      characterForm.passivePerception !== passivePerception ||
+      characterForm.passiveInsight !== passiveInsight ||
+      characterForm.passiveInvestigation !== passiveInvestigation
     ) {
       setCharacterForm({
         spellSaveDc,
         spellAttackBonus,
+        passivePerception,
+        passiveInsight,
+        passiveInvestigation,
       });
     }
   }, [
     spellSaveDc,
     spellAttackBonus,
+    passivePerception,
+    passiveInsight,
+    passiveInvestigation,
     characterForm.spellSaveDc,
     characterForm.spellAttackBonus,
+    characterForm.passivePerception,
+    characterForm.passiveInsight,
+    characterForm.passiveInvestigation,
     setCharacterForm,
   ]);
 
@@ -201,6 +236,80 @@ export function AbilitiesSection() {
           ))}
         </Stack>
 
+        {/* Passive senses */}
+        <Divider my="sm" label="Passive Senses" labelPosition="center" />
+
+        <Group grow wrap="wrap">
+          <Stack gap={4} style={{ width: isMobile ? "100%" : "32%" }}>
+            <InfoIconPopover title="Passive Perception">
+              10 + Wisdom modifier + proficiency bonus (if proficient in
+              Perception).
+            </InfoIconPopover>
+            <FormNumberInput
+              label={`Passive Perception ${hasSkillProficiency("Perception") ? `⭐` : ""}`}
+              classNames={input}
+              value={passivePerception}
+              disabled
+              hideControls
+              onChange={() => {}}
+              styles={{
+                input: {
+                  textAlign: "center",
+                  border: "1px solid rgba(255,255,150,0.35)",
+                  color: "#fff8c4",
+                  pointerEvents: "none",
+                },
+              }}
+            />
+          </Stack>
+
+          <Stack gap={4} style={{ width: isMobile ? "100%" : "32%" }}>
+            <InfoIconPopover title="Passive Insight">
+              10 + Wisdom modifier + proficiency bonus (if proficient in
+              Insight).
+            </InfoIconPopover>
+            <FormNumberInput
+              label={`Passive Insight ${hasSkillProficiency("Insight") ? `⭐` : ""}`}
+              classNames={input}
+              value={passiveInsight}
+              disabled
+              hideControls
+              onChange={() => {}}
+              styles={{
+                input: {
+                  textAlign: "center",
+                  border: "1px solid rgba(150,255,255,0.35)",
+                  color: "#c4faff",
+                  pointerEvents: "none",
+                },
+              }}
+            />
+          </Stack>
+
+          <Stack gap={4} style={{ width: isMobile ? "100%" : "32%" }}>
+            <InfoIconPopover title="Passive Investigation">
+              10 + Intelligence modifier + proficiency bonus (if proficient in
+              Investigation).
+            </InfoIconPopover>
+            <FormNumberInput
+              label={`Passive Investigation ${hasSkillProficiency("Investigation") ? `⭐` : ""}`}
+              classNames={input}
+              value={passiveInvestigation}
+              disabled
+              hideControls
+              onChange={() => {}}
+              styles={{
+                input: {
+                  textAlign: "center",
+                  border: "1px solid rgba(150,150,255,0.35)",
+                  color: "#c4d4ff",
+                  pointerEvents: "none",
+                },
+              }}
+            />
+          </Stack>
+        </Group>
+
         <Divider my="sm" label="Spellcasting" labelPosition="center" />
 
         <Stack gap={isMobile ? "sm" : "md"}>
@@ -245,7 +354,8 @@ export function AbilitiesSection() {
               <br />
               <br />
               <strong>
-                Spell Save DC = 8 + Proficiency Bonus + Spellcasting Ability Modifier
+                Spell Save DC = 8 + Proficiency Bonus + Spellcasting Ability
+                Modifier
               </strong>
             </InfoIconPopover>
             <FormNumberInput
@@ -268,7 +378,8 @@ export function AbilitiesSection() {
 
           <Stack gap={4} style={{ flex: 1 }}>
             <InfoIconPopover title="Spell Attack Bonus">
-              Spell Attack Bonus = Proficiency Bonus + Spellcasting Ability Modifier
+              Spell Attack Bonus = Proficiency Bonus + Spellcasting Ability
+              Modifier
             </InfoIconPopover>
             <FormNumberInput
               label="Spell Attack Bonus"
