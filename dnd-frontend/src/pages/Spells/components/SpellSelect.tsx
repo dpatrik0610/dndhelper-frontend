@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Autocomplete, Select, Group, Box } from "@mantine/core";
 import { useSpellStore } from "../../../store/useSpellStore";
 import { loadCurrentSpell } from "../../../utils/loadSpells";
@@ -7,7 +7,6 @@ import { IconWand, IconFilter } from "@tabler/icons-react";
 
 export function SpellSelect() {
   const { spellNames } = useSpellStore();
-  const currentSpell = useSpellStore((state) => state.currentSpell);
   const token = useAuthStore.getState().token;
   const [inputValue, setInputValue] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
@@ -37,11 +36,6 @@ export function SpellSelect() {
 
   const handleLevelChange = (value: string | null) => {
     setSelectedLevel(value);
-    setInputValue("");
-  };
-
-  const clearFilters = () => {
-    setSelectedLevel(null);
     setInputValue("");
   };
 
