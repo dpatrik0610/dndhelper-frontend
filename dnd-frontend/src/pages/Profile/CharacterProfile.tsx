@@ -103,7 +103,7 @@ export default function CharacterProfile() {
           <Tabs.Tab value="features" leftSection={<IconSword size={16} />}>Features</Tabs.Tab>
           <Tabs.Tab value="extras" leftSection={<IconInfoCircle size={16} />}>Extras</Tabs.Tab>
           <Tabs.Tab value="inventories" leftSection={<IconBox size={16} />}>Inventories</Tabs.Tab>
-          {/* <Tabs.Tab value="notes" leftSection={<IconInfoCircle size={16} />}>Notes</Tabs.Tab> */}
+          <Tabs.Tab value="notes" leftSection={<IconInfoCircle size={16} />}>Notes</Tabs.Tab>
         </Tabs.List>
 
         <AnimatePresence mode="wait">

@@ -5,4 +5,5 @@ export interface Note {
     isDeleted: boolean;
     title: string | null;
     lines: string[] | null;
+    isFavorite: boolean | null;
 }

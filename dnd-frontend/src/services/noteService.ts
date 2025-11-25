@@ -5,7 +5,7 @@ const baseUrl = "/Note";
 
 export async function getNoteById(id: string, token?: string): Promise<Note> {
   const res = await apiClient<{ data: Note }>(`${baseUrl}/${id}`, { token });
-  return res.data; // unwrap
+  return res.data;
 }
 
 export async function getManyNotes(
@@ -23,7 +23,7 @@ export async function getManyNotes(
     { token }
   );
 
-  return res.data; // unwrap
+  return res.data;
 }
 
 export async function createNote(
@@ -36,7 +36,7 @@ export async function createNote(
     token,
   });
 
-  return res.data; // unwrap
+  return res.data;
 }
 
 export async function updateNote(
@@ -50,7 +50,7 @@ export async function updateNote(
     token,
   });
 
-  return res.data; // unwrap
+  return res.data;
 }
 
 export async function deleteNote(id: string, token?: string): Promise<void> {
@@ -58,31 +58,4 @@ export async function deleteNote(id: string, token?: string): Promise<void> {
     method: "DELETE",
     token,
   });
-}
-
-export async function getNotesForCharacter(
-  noteIds: string[] | null | undefined,
-  token?: string
-): Promise<Note[]> {
-  if (!noteIds || noteIds.length === 0) return [];
-
-  if (!Array.isArray(noteIds)) {
-    console.warn("getNotesForCharacter expected array, got:", noteIds);
-    return [];
-  }
-
-  const results: Note[] = [];
-
-  for (const id of noteIds) {
-    try {
-      const note = await getNoteById(id, token);
-      if (note && !note.isDeleted) {
-        results.push(note);
-      }
-    } catch (err) {
-      console.error(`Error loading note ${id}:`, err);
-    }
-  }
-
-  return results;
 }

@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Character } from "../types/Character/Character";
+import { updateCharacter as updateCharacterApi } from "../services/characterService";
+import { useAuthStore } from "./useAuthStore";
 
 interface CharacterState {
   character: Character | null;
@@ -10,6 +12,7 @@ interface CharacterState {
   setCharacters: (characters: Character[]) => void;
 
   updateCharacter: (updated: Partial<Character>) => void;
+  persistCharacter: () => Promise<Character | null>;
 
   removeCondition: (condition: string) => void;
   addCondition: (condition: string) => void;
@@ -40,6 +43,28 @@ export const useCharacterStore = create<CharacterState>()(
             c.id === newCharacter.id ? newCharacter : c
           ),
         }));
+      },
+
+      // 🌐 persist current character to API and sync back
+      persistCharacter: async () => {
+        const current = get().character;
+        if (!current || !current.id) return null;
+
+        const token = useAuthStore.getState().token;
+        if (!token) throw new Error("No token for character persistence");
+
+        const saved = await updateCharacterApi(current, token);
+        if (!saved) return null;
+
+        set({ character: saved });
+
+        set((state) => ({
+          characters: state.characters.map((c) =>
+            c.id === saved.id ? saved : c
+          ),
+        }));
+
+        return saved;
       },
 
       removeCondition: (condition: string) => {
@@ -110,7 +135,6 @@ export const useCharacterStore = create<CharacterState>()(
       },
 
       clearStore: () => set({ character: null, characters: [] }),
-
     }),
     {
       name: "character-storage",

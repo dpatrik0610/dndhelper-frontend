@@ -1,40 +1,76 @@
-import { useEffect, useState } from "react";
-import { Paper, Stack, Text, ActionIcon, Group } from "@mantine/core";
-import { IconPlus, IconTrash, IconRefresh } from "@tabler/icons-react";
-import type { Note } from "../../../types/Note";
+import { useEffect, useMemo, useState } from "react";
+import { Paper, Stack, Text, ActionIcon, Group, Tooltip } from "@mantine/core";
+import {
+  IconPlus,
+  IconTrash,
+  IconRefresh,
+  IconPencil,
+  IconStar,
+  IconStarFilled,
+} from "@tabler/icons-react";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNoteStore } from "../../../store/useNoteStore";
 import { AddNoteModal } from "./AddNoteModal";
+import type { Note } from "../../../types/Note";
+import { EditNoteModal } from "../EditNoteModal";
 import "../../../styles/glassyInput.css";
 
 export function CharacterNotesPanel() {
   const character = useCharacterStore((s) => s.character);
-  const { notes, loadForCharacter, remove, loading } = useNoteStore();
+  const updateCharacter = useCharacterStore((s) => s.updateCharacter);
+  const persistCharacter = useCharacterStore((s) => s.persistCharacter);
+
+  const notes = useNoteStore((s) => s.notes);
+  const loading = useNoteStore((s) => s.loading);
+  const loadForCharacter = useNoteStore((s) => s.loadForCharacter);
+  const remove = useNoteStore((s) => s.remove);
+  const updateNote = useNoteStore((s) => s.update);
 
   const [addModalOpened, setAddModalOpened] = useState(false);
+  const [editingNote, setEditingNote] = useState<Note | null>(null);
 
-  const characterNoteIds = character?.noteIds ?? [];
+  const characterId = character?.id;
+  const rawNoteIds = character?.noteIds;
 
-  // Load notes on mount / character change
+  const noteIds = useMemo(() => rawNoteIds ?? [], [rawNoteIds]);
+
+  const characterNotes = useMemo(() => {
+    const filtered = notes.filter((n) => n.id && noteIds.includes(n.id));
+    // optional: favorites first
+    return filtered.sort(
+      (a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0)
+    );
+  }, [notes, noteIds]);
+
   useEffect(() => {
-    if (characterNoteIds.length > 0) {
-      loadForCharacter(characterNoteIds);
-    }
-  }, [characterNoteIds, loadForCharacter]);
+    if (!characterId || noteIds.length === 0) return;
+    void loadForCharacter(noteIds);
+  }, [characterId, noteIds, loadForCharacter]);
 
-  // Manually trigger reload
   async function reloadNotes() {
-    if (characterNoteIds.length > 0) {
-      await loadForCharacter(characterNoteIds);
-    }
+    if (!characterId || noteIds.length === 0) return;
+    await loadForCharacter(noteIds);
   }
-
-  const characterNotes: Note[] = notes.filter((n) =>
-    characterNoteIds.includes(n.id!)
-  );
 
   async function handleDelete(id: string) {
     await remove(id);
+
+    if (!character) return;
+
+    const currentIds = character.noteIds ?? [];
+    if (!currentIds.includes(id)) return;
+
+    updateCharacter({
+      noteIds: currentIds.filter((nid) => nid !== id),
+    });
+
+    await persistCharacter();
+  }
+
+  async function handleToggleFavorite(note: Note) {
+    await updateNote(note.id!, {
+      isFavorite: !note.isFavorite,
+    });
   }
 
   return (
@@ -42,6 +78,12 @@ export function CharacterNotesPanel() {
       <AddNoteModal
         opened={addModalOpened}
         onClose={() => setAddModalOpened(false)}
+      />
+
+      <EditNoteModal
+        opened={!!editingNote}
+        note={editingNote}
+        onClose={() => setEditingNote(null)}
       />
 
       <Paper
@@ -135,14 +177,38 @@ export function CharacterNotesPanel() {
                   {note.title ?? "Untitled"}
                 </Text>
 
-                <ActionIcon
-                  size="sm"
-                  variant="subtle"
-                  color="red"
-                  onClick={() => handleDelete(note.id!)}
-                >
-                  <IconTrash size={12} />
-                </ActionIcon>
+                <Group gap={4}>
+                  <Tooltip label="Favorite" withArrow>
+                    <ActionIcon
+                      size="sm"
+                      variant="subtle"
+                      onClick={() => handleToggleFavorite(note)}
+                    >
+                      {note.isFavorite ? (
+                        <IconStarFilled size={14}  color="yellow"/>
+                      ) : (
+                        <IconStar size={14} />
+                      )}
+                    </ActionIcon>
+                  </Tooltip>
+
+                  <ActionIcon
+                    size="sm"
+                    variant="subtle"
+                    onClick={() => setEditingNote(note)}
+                  >
+                    <IconPencil size={12} />
+                  </ActionIcon>
+
+                  <ActionIcon
+                    size="sm"
+                    variant="subtle"
+                    color="red"
+                    onClick={() => handleDelete(note.id!)}
+                  >
+                    <IconTrash size={12} />
+                  </ActionIcon>
+                </Group>
               </Group>
 
               <Stack gap={2}>
