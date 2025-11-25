@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { TextInput, Textarea, Stack } from "@mantine/core";
+import { TextInput, Stack } from "@mantine/core";
 import { BaseModal } from "../../../components/BaseModal";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNoteStore } from "../../../store/useNoteStore";
 import { showNotification } from "../../../components/Notification/Notification";
+import { MarkdownTextarea } from "../../../components/common/MarkdownTextarea";
 import "../../../styles/glassyInput.css";
 
 interface Props {
@@ -64,21 +65,12 @@ export function AddNoteModal({ opened, onClose }: Props) {
           onChange={(e) => setTitle(e.currentTarget.value)}
         />
 
-        <Textarea
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
+        <MarkdownTextarea
           label="Details"
-          autosize={false}
-          minRows={1}
           value={lines}
-          onChange={(e) => setLines(e.currentTarget.value)}
-          styles={{
-            input: {
-              minHeight: "3rem",
-              resize: "vertical",
-            },
-          }}
+          onChange={setLines}
+          minHeightRem={8}
         />
-
       </Stack>
     </BaseModal>
   );
