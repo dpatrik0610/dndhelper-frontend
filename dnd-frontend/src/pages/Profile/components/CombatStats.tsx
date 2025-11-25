@@ -11,7 +11,6 @@ import {
   IconRun,
   IconSword,
   IconArrowUp,
-  IconSkull,
   IconEye,
 } from "@tabler/icons-react";
 import { StatBox } from "./StatBox";
@@ -26,14 +25,6 @@ export function CombatStats() {
 
   const stats = [
     { label: "Armor Class", value: character.armorClass, color: "blue", icon: <IconShield size={18} /> },
-    {
-      label: "Hit Points",
-      value: `${character.hitPoints} / ${character.maxHitPoints}${
-        character.temporaryHitPoints ? ` (+${character.temporaryHitPoints})` : ""
-      }`,
-      color: "red",
-      icon: character.hitPoints > 0 ? <IconHeart size={18} /> : <IconSkull size={18} />,
-    },
     { label: "Initiative", value: `+${character.initiative}`, color: "orange", icon: <IconTarget size={18} /> },
     { label: "Speed", value: `${character.speed} ft`, color: "green", icon: <IconRun size={18} /> },
     { label: "Proficiency", value: `+${character.proficiencyBonus}`, color: "grape", icon: <IconSword size={18} /> },

@@ -5,7 +5,6 @@ import {
   Grid,
   Text,
   Stack,
-  Progress,
   Box,
   Group,
 } from "@mantine/core";
@@ -14,23 +13,13 @@ import ReloadButton from "./ReloadButton";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useMediaQuery } from "@mantine/hooks";
 import { CharacterCurrencyArea } from "../../../components/CharacterCurrencyArea";
-import CustomBadge from "../../../components/common/CustomBadge";
 import { showNotification } from "../../../components/Notification/Notification";
+import { HpRing } from "./HpRing";
 
 export function CharacterHeader() {
   const character = useCharacterStore((s) => s.character)!;
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const maxHp = Math.max(character.maxHitPoints, 1);
-  const currentHp = Math.max(
-    0,
-    Math.min(character.hitPoints, character.maxHitPoints)
-  );
-  const tempHp = Math.max(character.temporaryHitPoints ?? 0, 0);
-
-  const hpPercent = Math.min(100, (currentHp / maxHp) * 100);
-  const tempPercent = Math.min(100, (tempHp / maxHp) * 100);
-  
   async function handleUseInspiration() {
     const current = useCharacterStore.getState().character;
     if (!current) return;
@@ -146,69 +135,15 @@ export function CharacterHeader() {
                   {character.alignment}
                 </Badge>
               </Group>
-
+              <Grid.Col span={{ base: 12, sm: 5 }}>
+                <HpRing
+                  currentHp={character.hitPoints}
+                  maxHp={character.maxHitPoints}
+                  tempHp={character.temporaryHitPoints ?? 0}
+                />
+              </Grid.Col>
               {/* Currency */}
               {character.currencies && <CharacterCurrencyArea />}
-
-
-              {/* HP Bar */}
-              <Box>
-                <Group c="dimmed" mb={4} gap="xs">
-                  <CustomBadge
-                    size="sm"
-                    color="red"
-                    mb={6}
-                    label={`HP: ${currentHp} / ${maxHp}`}
-                    variant="dot"
-                    bg={"transparent"}
-                  />
-
-                  {tempHp > 0 && (
-                    <CustomBadge
-                      size="sm"
-                      color="yellow"
-                      mb={6}
-                      label={`+${tempHp} temp`}
-                      variant="outline"
-                    />
-                  )}
-                </Group>
-
-                <Box style={{ position: "relative" }}>
-                  {/* Base HP bar (red) */}
-                  <Progress
-                    value={hpPercent}
-                    color="red"
-                    radius="xl"
-                    size="lg"
-                  />
-
-                  {/* Temp HP overlay, right-aligned */}
-                  {tempHp > 0 && tempPercent > 0 && (
-                    <Box
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        pointerEvents: "none",
-                      }}
-                    >
-                      <Box
-                        style={{
-                          position: "absolute",
-                          top: "20%",
-                          bottom: "20%",
-                          right: 0,
-                          width: `${tempPercent}%`,
-                          background: "rgba(0,0,0, 0.2)",
-                          borderRadius: 999,
-                          boxShadow: "1 1 5px rgba(0,0,0, 1)",
-                        }}
-                      />
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-
 
             </Stack>
           </Group>
