@@ -13,8 +13,9 @@ It gives my players and me a clean UI where:
 * Spells, items, and stats are always **up-to-date and searchable, also expandable**
 * The system stays consistent between sessions
 * All data is stored centrally and shared in real time
-
-Designed specifically for **our private campaign world**, with custom items, homebrew rules, and admin tools, but useable for other DMs too.
+### Designed specifically for
+- **Mobile and desktop use**.
+- **Our private campaign world**, with custom items, homebrew rules, and admin tools, but useable for other DMs too.
 
 ## 🧰 Tech Highlights
 
