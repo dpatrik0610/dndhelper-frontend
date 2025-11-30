@@ -21,15 +21,10 @@ import { SectionColor } from "./types/SectionColor";
 import { CharacterFormPage } from "./pages/CharacterForm/CharacterFormPage";
 import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 import { Notifications } from "@mantine/notifications";
-import { useSignalR } from "./SignalR/hooks/useSignalR";
-import { SignalRProvider } from "./SignalR/signalRContext";
 
 export default function AppContent() {
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width: 768px)");
-
-  // Initialize SignalR connection globally
-  const { connection, isConnected, connectionId } = useSignalR();
 
   let token = useAuthStore((s) => s.token);
   const [opened, handlers] = useDisclosure(false);
@@ -79,7 +74,6 @@ export default function AppContent() {
   const showSidebar = !hideSidebarRoutes.includes(location.pathname);
 
   return (
-    <SignalRProvider value={{ connection, isConnected, connectionId: connectionId ?? undefined}}>
       <AppShell
         padding={isMobile ? 0 : "md"}
         header={{ height: 0 }}
@@ -189,6 +183,5 @@ export default function AppContent() {
           </ActionIcon>
         )}
       </AppShell>
-    </SignalRProvider>
   );
 }

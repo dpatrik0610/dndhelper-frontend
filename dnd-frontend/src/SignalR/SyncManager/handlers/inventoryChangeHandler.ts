@@ -4,7 +4,7 @@ import { useAdminInventoryStore } from "../../../store/admin/useAdminInventorySt
 import { useInventoryStore } from "../../../store/useInventorystore";
 import { useAdminCurrencyStore } from "../../../store/admin/useAdminCurrencyStore";
 import type { Inventory } from "../../../types/Inventory/Inventory";
-import type { EntityChangeEvent } from "./entitySyncTypes";
+import type { EntityChangeEvent } from "./EntitySyncTypes";
 
 export function handleInventoryChange(event: EntityChangeEvent) {
   const inventoryStore = useInventoryStore.getState();

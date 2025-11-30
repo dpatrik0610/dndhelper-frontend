@@ -1,9 +1,9 @@
 import { Group, Text, Tooltip } from "@mantine/core";
 import CustomBadge from "./common/CustomBadge";
-import { useSignalR } from "../SignalR/hooks/useSignalR";
+import { useSignalRConnection } from "../SignalR/hooks/useSignalRConnection";
 
 export function ConnectionStatus () {
-  const { isConnected, connectionId } = useSignalR();
+  const { connection, isConnected, connectionId } = useSignalRConnection();
 
     return <>
     <Group>

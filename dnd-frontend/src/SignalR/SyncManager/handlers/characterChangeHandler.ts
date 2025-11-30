@@ -1,7 +1,7 @@
 import { showNotification } from "../../../components/Notification/Notification";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import type { Character } from "../../../types/Character/Character";
-import type { EntityChangeEvent } from "./entitySyncTypes";
+import type { EntityChangeEvent } from "./EntitySyncTypes";
 
 export function handleCharacterChange(event: EntityChangeEvent) {
   const characterStore = useCharacterStore.getState();

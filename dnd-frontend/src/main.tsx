@@ -5,12 +5,15 @@ import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
 import '@mantine/notifications/styles.css';
 import '@mantine/core/styles.css'
+import { SignalRProvider } from './SignalR/SignalRProvider.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <MantineProvider defaultColorScheme="dark">
         <Notifications position="bottom-right" />
-      <App />
+        <SignalRProvider>
+          <App />
+        </SignalRProvider>
     </MantineProvider>
   </React.StrictMode>,
 )

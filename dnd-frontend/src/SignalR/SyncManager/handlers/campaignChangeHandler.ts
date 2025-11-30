@@ -1,5 +1,5 @@
 import { showNotification } from "../../../components/Notification/Notification";
-import type { EntityChangeEvent } from "./entitySyncTypes";
+import type { EntityChangeEvent } from "./EntitySyncTypes";
 
 export function handleCampaignChange(event: EntityChangeEvent) {
   console.log("🗺️ Campaign change:", event);
