@@ -12,7 +12,7 @@ import {
   Tooltip,
   Paper,
 } from "@mantine/core";
-import { IconUser, IconBook, IconDashboard } from "@tabler/icons-react";
+import { IconUser, IconBook, IconDashboard, IconUserPlus } from "@tabler/icons-react";
 import { useCharacterStore } from "../../store/useCharacterStore";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { useNavigate } from "react-router-dom";
@@ -144,8 +144,7 @@ export default function Home() {
                   {character.name}
                 </Text>
                 <Text size="sm" c={palette.textDim}>
-                  Level {character.level} {character.race}{" "}
-                  {character.characterClass}
+                  Level {character.level} {character.race} {character.characterClass}
                 </Text>
               </div>
             </Group>
@@ -247,7 +246,55 @@ export default function Home() {
             </Button>
           </Group>
         </Card>
-      ) : null}
+      ) : (
+        <Card
+          shadow="lg"
+          radius="md"
+          withBorder
+          p="lg"
+          style={{
+            background: palette.cardBg,
+            borderColor: palette.border,
+            color: palette.textMain,
+          }}
+        >
+          <Group justify="space-between" align="center">
+            <div>
+              <Text fw={700} c={palette.textMain}>
+                No characters yet
+              </Text>
+              <Text size="sm" c={palette.textDim}>
+                Create your first character to begin your adventure.
+              </Text>
+            </div>
+
+            <Button
+              leftSection={<IconUserPlus size={16} />}
+              variant="gradient"
+              gradient={{ from: "violet", to: "grape" }}
+              bg="transparent"
+              styles={{
+                root: {
+                  boxShadow: "0 0 8px rgba(177, 151, 252, 0.8)",
+                },
+              }}
+              onClick={() => navigate("/characters/create")}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow =
+                  "0 0 8px rgba(177, 151, 252, 1)";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow =
+                  "0 0 5px rgba(177, 151, 252, 0.9)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              Create Character
+            </Button>
+          </Group>
+        </Card>
+      )}
 
       {/* Quick Actions */}
       <Grid mt="md" gutter="md">
