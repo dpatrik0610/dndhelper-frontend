@@ -278,7 +278,7 @@ export default function Home() {
                   boxShadow: "0 0 8px rgba(177, 151, 252, 0.8)",
                 },
               }}
-              onClick={() => navigate("/characters/create")}
+              onClick={() => navigate("/newCharacter")}
               onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow =
                   "0 0 8px rgba(177, 151, 252, 1)";
