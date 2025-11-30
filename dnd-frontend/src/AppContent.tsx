@@ -21,6 +21,7 @@ import { SectionColor } from "./types/SectionColor";
 import { CharacterFormPage } from "./pages/CharacterForm/CharacterFormPage";
 import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 import { Notifications } from "@mantine/notifications";
+import NotesPage from "./pages/Notes/NotesPage";
 
 export default function AppContent() {
   const navigate = useNavigate();
@@ -140,6 +141,7 @@ export default function AppContent() {
                 <Route path="/spells/:spellName" element={<SpellPage />} />
                 <Route path="/newCharacter" element={<CharacterFormPage />} />
                 <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
+                <Route path="/notes" element={<NotesPage />} />
                 {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
               </Route>
 

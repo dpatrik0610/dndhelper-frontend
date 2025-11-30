@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { Paper, Stack, Text } from "@mantine/core";
-import { useCharacterStore } from "../../../../store/useCharacterStore";
-import { useNoteStore } from "../../../../store/useNoteStore";
-import { AddNoteModal } from "../AddNoteModal";
-import { EditNoteModal } from "../../EditNoteModal";
-import type { Note } from "../../../../types/Note";
+import { Divider, Paper, Stack, Text } from "@mantine/core";
 import { NotesHeader } from "./NotesHeader";
 import { NoteCard } from "./NoteCard";
-import "../../../../styles/glassyInput.css"
+import { NotesSearch } from "./NotesSearch";
+import { useCharacterStore } from "../../../store/useCharacterStore";
+import { useNoteStore } from "../../../store/useNoteStore";
+import type { Note } from "../../../types/Note";
+import { AddNoteModal } from "../../Profile/components/AddNoteModal";
+import { EditNoteModal } from "../../Profile/EditNoteModal";
+import "../../../styles/glassyInput.css"
 
 export function NotesPanel() {
   const character = useCharacterStore((s) => s.character);
@@ -19,6 +20,7 @@ export function NotesPanel() {
 
   const [addModalOpened, setAddModalOpened] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [search, setSearch] = useState("");
 
   const characterId = character?.id;
   const noteIds = character?.noteIds ?? [];
@@ -26,8 +28,26 @@ export function NotesPanel() {
   const characterNotes = notes
     .filter((n) => n.id && noteIds.includes(n.id))
     .slice()
-    .sort((a, b) => (b.isFavorite ? 1 : 0) - (a.isFavorite ? 1 : 0))
-    .sort((a, b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.updatedAt ?? 0).getTime() -
+        new Date(a.updatedAt ?? 0).getTime()
+    );
+
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredNotes = normalizedSearch
+    ? characterNotes.filter((note) => {
+        const title = (note.title ?? "").toLowerCase();
+        const content = (note.lines ?? []).join(" ").toLowerCase();
+        return (
+          title.includes(normalizedSearch) || content.includes(normalizedSearch)
+        );
+      })
+    : characterNotes;
+
+  const favoriteNotes = filteredNotes.filter((note) => note.isFavorite);
+  const regularNotes = filteredNotes.filter((note) => !note.isFavorite);
+  const hasAnyNotes = characterNotes.length > 0;
 
   useEffect(() => {
     if (!characterId || noteIds.length === 0) return;
@@ -78,8 +98,36 @@ export function NotesPanel() {
           onAdd={() => setAddModalOpened(true)}
         />
 
-        <Stack gap="sm">
-          {characterNotes.map((note) => (
+        <NotesSearch value={search} onChange={setSearch} />
+
+        <Stack gap="sm" mt="xs">
+          {favoriteNotes.length > 0 && (
+            <>
+              <Text size="sm" fw={600} c="red.2">
+                Favorites
+              </Text>
+              {favoriteNotes.map((note) => (
+                <NoteCard
+                  key={note.id}
+                  note={note}
+                  onToggleFavorite={() => handleToggleFavorite(note)}
+                  onEdit={() => setEditingNote(note)}
+                  onDelete={() => handleDelete(note.id!)}
+                />
+              ))}
+              {regularNotes.length > 0 && (
+                <Divider
+                  variant="dashed"
+                  label="More notes"
+                  labelPosition="center"
+                  color="rgba(255,100,100,0.45)"
+                  style={{ borderColor: "rgba(255,100,100,0.45)" }}
+                />
+              )}
+            </>
+          )}
+
+          {regularNotes.map((note) => (
             <NoteCard
               key={note.id}
               note={note}
@@ -89,9 +137,9 @@ export function NotesPanel() {
             />
           ))}
 
-          {!loading && characterNotes.length === 0 && (
+          {!loading && filteredNotes.length === 0 && (
             <Text c="dimmed" ta="center">
-              No notes yet.
+              {hasAnyNotes ? "No notes match your search." : "No notes yet."}
             </Text>
           )}
         </Stack>

@@ -1,7 +1,7 @@
 import { ActionIcon, Group, Paper, Text } from "@mantine/core";
 import { IconPencil, IconStar, IconStarFilled, IconTrash } from "@tabler/icons-react";
-import { MarkdownRenderer } from "../../../../components/MarkdownRender";
-import type { Note } from "../../../../types/Note";
+import type { Note } from "../../../types/Note";
+import { MarkdownRenderer } from "../../../components/MarkdownRender";
 
 interface NoteCardProps {
   note: Note;
