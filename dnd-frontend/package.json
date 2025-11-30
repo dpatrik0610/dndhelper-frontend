@@ -21,6 +21,7 @@
     "@mantine/hooks": "^8.3.3",
     "@mantine/notifications": "^8.3.3",
     "@mantine/styles": "^6.0.22",
+    "@microsoft/signalr": "^10.0.0",
     "@tabler/icons-react": "^3.35.0",
     "framer-motion": "^12.23.24",
     "jwt-decode": "^4.0.0",

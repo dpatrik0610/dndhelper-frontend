@@ -3,8 +3,6 @@ import {
   Drawer,
   Stack,
   Text,
-  SegmentedControl,
-  Group,
   UnstyledButton,
   ThemeIcon,
   useMantineTheme,
@@ -12,11 +10,12 @@ import {
   Collapse,
 } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { IconChevronDown, IconHome, IconLogout } from '@tabler/icons-react';
+import { IconChevronDown, IconLogout } from '@tabler/icons-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { handleLogout } from '../../utils/handleLogout';
 import { tabs, type Section, type TabItem } from './SidebarTabs';
 import { useMediaQuery } from '@mantine/hooks';
+import { ConnectionStatus } from '../ConnectionStatus';
 
 interface SidebarProps {
   opened: boolean;
@@ -40,7 +39,7 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
   const handleNavigate = (link: string, label: string) => {
     navigate(link);
     setActive(label);
-    onClose(); // close drawer on mobile
+    onClose();
   };
 
   const currentLinks: TabItem[] = tabs[section];
@@ -64,6 +63,7 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
         <Stack gap="xs">
           {/* Header */}
           <Stack gap={4} align="center">
+            <ConnectionStatus />
             <Text fw={700} size="sm" c="gray.4" ta="center">
               {username.toUpperCase()}
             </Text>
@@ -142,7 +142,7 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
               </UnstyledButton>
 
               <Collapse in={adminOpen}>
-                <Stack mt="xs" gap={4}>
+                <Stack gap={4}>
                   {adminLinks.map((item) => {
                     const Icon = item.icon;
                     const isActive = active === item.label;

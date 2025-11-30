@@ -45,7 +45,17 @@ function useCampaignName(campaignId: string | null | undefined) {
       return;
     }
     (async () => {
-      const data = await getCampaignById(campaignId, token);
+      let data = null;
+      try {
+        const campaign = await getCampaignById(campaignId, token);
+        if (campaign) data = campaign;
+      }
+      catch (err)
+      {
+        data = null;
+        console.log(err);
+      }
+
       setName(data?.name ?? "Unknown Campaign");
     })();
   }, [campaignId, token]);
@@ -60,7 +70,7 @@ export default function CharacterProfile() {
   const navigate = useNavigate();
   
   const isAdmin = useAuthStore.getState().roles.includes("Admin");
-  const campaignName = useCampaignName(character?.campaignId);
+  const campaignName = useCampaignName(isAdmin ? character?.campaignId ?? null : null);
 
   useEffect(() => {
     if (!character) {

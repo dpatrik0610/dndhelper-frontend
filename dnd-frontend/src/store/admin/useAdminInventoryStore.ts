@@ -26,6 +26,12 @@ interface AdminInventoryStore {
   selected: Inventory | null;
   loading: boolean;
 
+  // 🔹 SignalR / local helpers
+  setInventories: (inventories: Inventory[]) => void;
+  setSelected: (inventory: Inventory | null) => void;
+  applyInventoryUpdate: (inventory: Inventory) => void;
+  applyInventoryDelete: (id: string) => void;
+
   loadByCharacter: (characterId: string) => Promise<void>;
   refreshInventories: (characterId?: string) => Promise<void>;
   refreshSelected: () => Promise<void>;
@@ -54,13 +60,43 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     selected: null,
     loading: false,
 
+    // --- SignalR / local helpers ---
+    setInventories: (inventories) => set({ inventories }),
+    setSelected: (inventory) => set({ selected: inventory }),
+
+    applyInventoryUpdate: (inventory) =>
+      set((state) => {
+        const exists = state.inventories.some((i) => i.id === inventory.id);
+        const inventories = exists
+          ? state.inventories.map((i) => (i.id === inventory.id ? inventory : i))
+          : [...state.inventories, inventory];
+
+        const selected =
+          state.selected && state.selected.id === inventory.id
+            ? inventory
+            : state.selected;
+
+        return { inventories, selected };
+      }),
+
+    applyInventoryDelete: (id) =>
+      set((state) => {
+        const inventories = state.inventories.filter((i) => i.id !== id);
+        const selected =
+          state.selected && state.selected.id === id
+            ? inventories[0] ?? null
+            : state.selected;
+
+        return { inventories, selected };
+      }),
+
     // === LOAD ALL INVENTORIES FOR ONE CHARACTER ===
     loadByCharacter: async (characterId) => {
       if (!characterId) return;
       set({ loading: true });
       try {
         const data = await getInventoriesByCharacter(characterId, getToken());
-        const owned = data.filter(i => i.characterIds?.includes(characterId));
+        const owned = data.filter((i) => i.characterIds?.includes(characterId));
         set({ inventories: owned, selected: owned[0] ?? null });
       } catch (err) {
         showNotification({
@@ -89,7 +125,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       if (!charId) return;
       try {
         const refreshed = await getInventoriesByCharacter(charId, getToken());
-        const owned = refreshed.filter(i => i.characterIds?.includes(charId));
+        const owned = refreshed.filter((i) => i.characterIds?.includes(charId));
         const sel = get().selected;
         set({
           inventories: owned,
@@ -243,7 +279,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     incrementItemQuantity: async (equipmentId) => {
       const sel = get().selected;
       if (!sel?.id) return;
-      const item = sel.items?.find(i => i.equipmentId === equipmentId);
+      const item = sel.items?.find((i) => i.equipmentId === equipmentId);
       if (!item) return;
       const updated = { ...item, quantity: (item.quantity ?? 0) + 1 };
       await updateItemService(sel.id, equipmentId, updated, getToken());
@@ -253,7 +289,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     decrementItemQuantity: async (equipmentId) => {
       const sel = get().selected;
       if (!sel?.id) return;
-      const item = sel.items?.find(i => i.equipmentId === equipmentId);
+      const item = sel.items?.find((i) => i.equipmentId === equipmentId);
       if (!item || item.quantity! <= 1) return;
       const updated = { ...item, quantity: item.quantity! - 1 };
       await updateItemService(sel.id, equipmentId, updated, getToken());

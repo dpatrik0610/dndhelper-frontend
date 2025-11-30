@@ -8,7 +8,7 @@ interface CharacterState {
   character: Character | null;
   characters: Character[];
 
-  setCharacter: (character: Character) => void;
+  setCharacter: (character: Character | null) => void;
   setCharacters: (characters: Character[]) => void;
 
   updateCharacter: (updated: Partial<Character>) => void;

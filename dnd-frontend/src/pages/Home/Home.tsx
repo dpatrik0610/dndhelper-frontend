@@ -20,6 +20,7 @@ import type { Character } from "../../types/Character/Character";
 import { useMediaQuery } from "@mantine/hooks";
 import { useAuthStore } from "../../store/useAuthStore";
 import CustomBadge from "../../components/common/CustomBadge";
+import { ConnectionStatus } from "../../components/ConnectionStatus";
 
 export default function Home() {
   const isAdmin = useAuthStore.getState().roles.includes("Admin");
@@ -49,11 +50,11 @@ export default function Home() {
   };
 
   const quotes = [
-    "“Fortune favors the bold... and the prepared.” — Guild Proverb",
-    "“Every blade remembers the hand that forged it.”",
-    "“Stars fall not in silence, but to light the path of explorers.”",
-    "“Knowledge is the sharpest weapon of them all.”",
-    "“Magic is not power — it’s the art of will given form.”",
+    "\"Fortune favors the bold... and the prepared.\" — Guild Proverb",
+    "\"Every blade remembers the hand that forged it.\"",
+    "\"Stars fall not in silence, but to light the path of explorers.\"",
+    "\"Knowledge is the sharpest weapon of them all.\"",
+    "\"Magic is not power — it's the art of will given form.\"",
   ];
 
   useEffect(() => {
@@ -85,7 +86,7 @@ export default function Home() {
         onSelect={handleSelectCharacter}
       />
 
-      {/* Header */}
+      {/* Header with SignalR Status */}
       <Paper
         radius="md"
         p="lg"
@@ -107,13 +108,16 @@ export default function Home() {
             </Text>
           </div>
 
-          <Badge
-            variant="gradient"
-            gradient={{ from: "grape", to: "violet" }}
-            size="lg"
-          >
-            {character ? "Active Character" : "No Character Selected"}
-          </Badge>
+          <Stack gap="xs" align="flex-end">
+            <Badge
+              variant="gradient"
+              gradient={{ from: "grape", to: "violet" }}
+              size="lg"
+            >
+              {character ? "Active Character" : "No Character Selected"}
+            </Badge>
+            <ConnectionStatus />
+          </Stack>
         </Group>
       </Paper>
 
@@ -197,7 +201,6 @@ export default function Home() {
           </Group>
         </Card>
       ) : characters.length > 0 ? (
-        // Fallback card when there are characters but none selected
         <Card
           shadow="lg"
           radius="md"
@@ -287,6 +290,18 @@ export default function Home() {
           ) : null
         )}
       </Grid>
+
+      {/* Add CSS for pulse animation */}
+      <style>{`
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+      `}</style>
     </Stack>
   );
 }

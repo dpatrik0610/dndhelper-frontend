@@ -25,6 +25,11 @@ interface AdminCurrencyStore {
   refresh: () => Promise<void>;
   clearStorage: () => void;
 
+  // For SignalR sync
+  setSelectedInventory: (inv: Inventory | null) => void;
+  setCurrencies: (currencies: Currency[]) => void;
+  applyInventoryUpdate: (inv: Inventory) => void;
+
   remove: (characterId: string, currencies: Currency[]) => Promise<void>;
   transfer: (targetId: string, currencies: Currency[]) => Promise<void>;
   addToCharacter: (currencies: Currency[], characterId?: string) => Promise<void>;
@@ -40,6 +45,17 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       selectedInventory: null,
       currencies: [],
       loading: false,
+
+      setSelectedInventory: (inv) => set({ selectedInventory: inv }),
+      setCurrencies: (currencies) => set({ currencies }),
+      
+      applyInventoryUpdate: (inv) =>
+        set((state) => ({
+          selectedInventory:
+            state.selectedInventory?.id === inv.id
+              ? inv
+              : state.selectedInventory,
+        })),
 
       loadCharacterById: async (characterId) => {
         const token = useAuthStore.getState().token!;
