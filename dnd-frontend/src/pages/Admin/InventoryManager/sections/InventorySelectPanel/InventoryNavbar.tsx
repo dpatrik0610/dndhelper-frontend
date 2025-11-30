@@ -11,8 +11,7 @@ import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInven
 import { InventoryTile } from "./InventoryTile";
 
 export function InventoryNavbar({ onCreate }: { onCreate: () => void }) {
-  const { inventories, selected, select, rename, remove, loadByCharacter } =
-    useAdminInventoryStore();
+  const { inventories, selected, select, rename, remove, loadByCharacter } = useAdminInventoryStore();
   const { selectedId: selectedCharId } = useAdminCharacterStore();
 
   return (

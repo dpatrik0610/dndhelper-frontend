@@ -175,10 +175,13 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     },
 
     rename: async (id, name) => {
-      const { selected } = get();
-      if (!selected) return;
-      await updateInventory(id, { ...selected, name }, getToken());
+      const { inventories } = get();
+      const current = inventories.find((i) => i.id === id);
+      if (!current) return;
+
+      await updateInventory(id, { ...current, name }, getToken());
       await get().refreshInventories();
+
       showNotification({
         title: "Renamed",
         message: `Inventory renamed to ${name}.`,

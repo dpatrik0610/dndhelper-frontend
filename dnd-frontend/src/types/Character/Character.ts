@@ -10,7 +10,7 @@ import type { Feature } from "./Feature";
 export interface Character {
   // METADATA
   id?: string;
-  ownerId?: string;
+  ownerIds?: string[];
   imageUrl?: string;
   createdAt?: string;
   updatedAt?: string;

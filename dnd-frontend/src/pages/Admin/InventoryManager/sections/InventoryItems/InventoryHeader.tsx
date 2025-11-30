@@ -1,10 +1,21 @@
 import {
-  Group, Text, ThemeIcon, Tooltip, ActionIcon, Divider,
-  Box, Badge, Stack
+  Group,
+  Text,
+  ThemeIcon,
+  Tooltip,
+  ActionIcon,
+  Divider,
+  Box,
+  Badge,
+  Stack,
 } from "@mantine/core";
 import {
-  IconArchive, IconReload, IconPlus, IconBox,
-  IconUsersGroup, IconUserCog
+  IconArchive,
+  IconReload,
+  IconPlus,
+  IconBox,
+  IconUsersGroup,
+  IconUserCog,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInventoryStore";
@@ -13,7 +24,12 @@ import { useAdminCharacterStore } from "../../../../../store/admin/useAdminChara
 import { ItemModal } from "../InventoryItems/ItemModal";
 import { AddExistingItemModal } from "./AddExistingItemModal";
 import { SelectInventoryOwnersModal } from "./SelectInventoryOwnersModal";
-import type { Character } from "../../../../../types/Character/Character";
+
+interface CharacterOwnerView {
+  id: string;
+  name: string;
+  ownerIds: string[];
+}
 
 export function InventoryHeader() {
   const { selected, refreshSelected } = useAdminInventoryStore();
@@ -25,28 +41,60 @@ export function InventoryHeader() {
   const [ownerModal, setOwnerModal] = useState(false);
 
   const invName = selected?.name || "Unnamed Inventory";
-  const [owners, setOwners] = useState<Pick<Character, "id" | "name" | "ownerId" | "inventoryIds">[] | []>([]);
 
-  
+  // Characters linked to this inventory
+  const [ownerCharacters, setOwnerCharacters] = useState<CharacterOwnerView[]>(
+    []
+  );
+
+  // Player IDs (users) owning those characters
+  const [ownerUserIds, setOwnerUserIds] = useState<string[]>([]);
+
+  // Keep currency store in sync when inventory changes
   useEffect(() => {
-    if (selected?.id) void loadInventoryById(selected.id);
+    if (selected?.id) {
+      void loadInventoryById(selected.id);
+    }
   }, [selected?.id, loadInventoryById]);
-  
-  useEffect(() => {
-    if (!selected) return;
 
-    const filtered = characters.filter(x => selected!.characterIds?.includes(x.id!))
-    setOwners(filtered);
-  }, [selected, setOwners, characters])
+  // Derive characters + player IDs that "own" this inventory
+  useEffect(() => {
+    if (!selected) {
+      setOwnerCharacters([]);
+      setOwnerUserIds([]);
+      return;
+    }
+
+    // Characters that reference this inventory via characterIds
+    const chars = characters.filter((c) =>
+      selected.characterIds?.includes(c.id!)
+    );
+
+    setOwnerCharacters(
+      chars.map((c) => ({
+        id: c.id!,
+        name: c.name,
+        ownerIds: c.ownerIds ?? [],
+      }))
+    );
+
+    // Collect all userIds from those character.ownerIds
+    const userIdSet = new Set<string>();
+    chars.forEach((c) => {
+      (c.ownerIds ?? []).forEach((uid) => userIdSet.add(uid));
+    });
+
+    setOwnerUserIds([...userIdSet]);
+  }, [selected, characters]);
 
   if (!selected) return null;
-
 
   return (
     <>
       <Box mb="md">
         <Group justify="space-between" align="flex-start" wrap="nowrap">
-          <Stack gap={2}>
+          <Stack gap={4}>
+            {/* === Title + Manage Owners === */}
             <Group gap="sm">
               <ThemeIcon
                 variant="gradient"
@@ -73,10 +121,11 @@ export function InventoryHeader() {
               </Tooltip>
             </Group>
 
-            {owners.length > 0 && (
+            {/* === Character owners (characters this inventory belongs to) === */}
+            {ownerCharacters.length > 0 && (
               <Group gap={4} wrap="wrap" align="center">
                 <IconUsersGroup size={14} color="rgba(180,255,255,0.8)" />
-                {owners.map(({ id, name }) => (
+                {ownerCharacters.map(({ id, name }) => (
                   <Badge
                     key={id}
                     color="cyan"
@@ -97,11 +146,45 @@ export function InventoryHeader() {
                 ))}
               </Group>
             )}
+
+            {/* === Player owners (user IDs owning those characters) === */}
+            {ownerUserIds.length > 0 && (
+              <Group gap={4} wrap="wrap" align="center">
+                <IconUserCog size={14} color="rgba(255,230,180,0.9)" />
+                {ownerUserIds.map((userId) => (
+                  <Badge
+                    key={userId}
+                    color="yellow"
+                    variant="light"
+                    radius="sm"
+                    size="sm"
+                    styles={{
+                      root: {
+                        background: "rgba(255,255,200,0.06)",
+                        border: "1px solid rgba(255,255,150,0.35)",
+                        color: "rgba(255,245,200,0.95)",
+                        textTransform: "none",
+                      },
+                    }}
+                  >
+                    {userId.length > 18
+                      ? `${userId.slice(0, 18)}…`
+                      : userId}
+                  </Badge>
+                ))}
+              </Group>
+            )}
           </Stack>
 
+          {/* === Actions === */}
           <Group gap="xs">
             <Tooltip label="Reload Inventory" withArrow>
-              <ActionIcon variant="subtle" color="cyan" radius="xl" onClick={refreshSelected}>
+              <ActionIcon
+                variant="subtle"
+                color="cyan"
+                radius="xl"
+                onClick={refreshSelected}
+              >
                 <IconReload size={18} />
               </ActionIcon>
             </Tooltip>
@@ -130,12 +213,27 @@ export function InventoryHeader() {
           </Group>
         </Group>
 
-        <Divider my="sm" color="rgba(255,255,255,0.1)" style={{ borderTopWidth: 1 }} />
+        <Divider
+          my="sm"
+          color="rgba(255,255,255,0.1)"
+          style={{ borderTopWidth: 1 }}
+        />
       </Box>
 
-      <AddExistingItemModal opened={existingModal} onClose={() => setExistingModal(false)} />
-      <ItemModal opened={addModal} onClose={() => setAddModal(false)} editMode={false} />
-      <SelectInventoryOwnersModal opened={ownerModal} onClose={() => setOwnerModal(false)} />
+      {/* === Modals === */}
+      <AddExistingItemModal
+        opened={existingModal}
+        onClose={() => setExistingModal(false)}
+      />
+      <ItemModal
+        opened={addModal}
+        onClose={() => setAddModal(false)}
+        editMode={false}
+      />
+      <SelectInventoryOwnersModal
+        opened={ownerModal}
+        onClose={() => setOwnerModal(false)}
+      />
     </>
   );
 }
