@@ -12,7 +12,7 @@ import {
   Tooltip,
   Paper,
 } from "@mantine/core";
-import { IconUser, IconBook, IconDashboard, IconUserPlus } from "@tabler/icons-react";
+import { IconUser, IconBook, IconDashboard, IconUserPlus, IconNote } from "@tabler/icons-react";
 import { useCharacterStore } from "../../store/useCharacterStore";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { useNavigate } from "react-router-dom";
@@ -34,6 +34,7 @@ export default function Home() {
 
   const quickNavigations = [
     { label: "Spellbook", icon: <IconBook />, path: "/spells" },
+    { label: "Personal Notes", icon: <IconNote />, path: "/notes" },
     isAdmin
       ? { label: "Admin Dashboard", icon: <IconDashboard />, path: "/dashboard" }
       : null,
