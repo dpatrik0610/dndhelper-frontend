@@ -1,9 +1,13 @@
 import { useEffect, useState, useRef } from "react";
-import { HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import {
+  HubConnection,
+  HubConnectionBuilder,
+  LogLevel,
+} from "@microsoft/signalr";
 import { showNotification } from "../../components/Notification/Notification";
 import { useAuthStore } from "../../store/useAuthStore";
-import type { EntityChangeEvent } from "../EntitySyncManager/handlers/entitySyncTypes";
-import { EntitySyncManager } from "../EntitySyncManager/entitySyncManager";
+import type { EntityChangeEvent } from "../SyncManager/handlers/EntitySyncTypes";
+import { EntitySyncManager } from "../SyncManager/entitySyncManager";
 
 interface SignalRMessage {
   id: string;
@@ -32,7 +36,7 @@ export const useSignalR = () => {
     console.log(`🔌 Creating SignalR connection for userId: ${userId}`);
 
     const newConnection = new HubConnectionBuilder()
-      .withUrl(`${baseUrl}/hubs/notifications?userId=${userId}`, {})
+      .withUrl(`${baseUrl}/hubs/notifications?userId=${userId}`)
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retryContext) => {
           if (retryContext.previousRetryCount === 0) return 0;
@@ -78,14 +82,19 @@ export const useSignalR = () => {
           EntitySyncManager.handleEntityChange(event);
         });
 
-      connection.on("EntityBatchChanged", (batch: { correlationId: string; timestamp: string; changes: EntityChangeEvent[] }) => {
-        console.log("📦 EntityBatchChanged received:", batch);
-
-        batch.changes.forEach((event) => {
-          EntitySyncManager.handleEntityChange(event);
-        });
-      });
-
+        connection.on(
+          "EntityBatchChanged",
+          (batch: {
+            correlationId: string;
+            timestamp: string;
+            changes: EntityChangeEvent[];
+          }) => {
+            console.log("📦 EntityBatchChanged received:", batch);
+            batch.changes.forEach((event) => {
+              EntitySyncManager.handleEntityChange(event);
+            });
+          }
+        );
       } catch (err) {
         console.error("❌ SignalR Connection Error:", err);
         setIsConnected(false);
@@ -94,7 +103,6 @@ export const useSignalR = () => {
 
     startConnection();
 
-    // Reconnection lifecycle
     connection.onreconnecting((error) => {
       console.log("🔄 SignalR Reconnecting...", error);
       setIsConnected(false);
@@ -117,7 +125,6 @@ export const useSignalR = () => {
     });
 
     return () => {
-      // cleanup
       connection.off("ReceiveNotification");
       connection.off("EntityChanged");
       connection.off("EntityBatchChanged");
