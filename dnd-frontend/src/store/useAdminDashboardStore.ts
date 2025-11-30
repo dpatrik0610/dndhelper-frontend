@@ -5,6 +5,7 @@ export type AdminSection =
   | "InventoryManager"
   | "UserManager"
   | "ItemManager"
+  | "MonsterManager"
   | "CampaignManager"
   | "InitiativeTracker"
   | "SpellsManager"
