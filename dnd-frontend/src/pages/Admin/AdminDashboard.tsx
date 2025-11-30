@@ -1,15 +1,24 @@
 import { Box, SimpleGrid, Stack, Transition } from "@mantine/core";
-import { IconUsers, IconSettings, IconCategory, IconBox, type IconProps, IconWand, IconCamera } from "@tabler/icons-react";
+import {
+  IconUsers,
+  IconSettings,
+  IconCategory,
+  IconBox,
+  type IconProps,
+  IconWand,
+  IconCamera,
+} from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
 import { BackToDashboardButton } from "./components/BackToDashboardButton";
 import { useAdminDashboardStore, type AdminSection } from "../../store/useAdminDashboardStore";
 import { InventoryManager } from "./InventoryManager/InventoryManager";
-import { useEffect, useState, type JSX } from "react";
+import { useEffect, useState, type JSX, type ForwardRefExoticComponent } from "react";
 import { SelectCampaignModal } from "./components/SelectCampaignModal";
 import { useAdminCampaignStore } from "../../store/admin/useAdminCampaignStore";
 import { CampaignManager } from "./CampaignManager/CampaignManager";
 import { SpellForm } from "./SpellManager/SpellForm";
 import { CacheManager } from "./CacheManager/CacheManager";
+import { UserManager } from "./UserManager/UserManager";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -22,7 +31,7 @@ export const AdminDashboard: React.FC = () => {
   }, [selectedCampaignId]);
 
   const navItems: {
-    icon: React.ForwardRefExoticComponent<IconProps>;
+    icon: ForwardRefExoticComponent<IconProps>;
     label: string;
     key: AdminSection;
     component: JSX.Element;
@@ -31,8 +40,8 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconSettings, label: "Campaign Manager", key: "CampaignManager", component: <CampaignManager /> },
     { icon: IconWand, label: "Spells Manager", key: "SpellsManager", component: <SpellForm /> },
     { icon: IconCamera, label: "Cache Manager", key: "CacheManager", component: <CacheManager /> },
-    { icon: IconUsers, label: "User Manager", key: "UserManager", component: <Box ta="center">👤 User Manager (coming soon)</Box> },
-    { icon: IconCategory, label: "Item Manager", key: "ItemManager", component: <Box ta="center">📦 Item Manager (coming soon)</Box> },
+    { icon: IconUsers, label: "User Manager", key: "UserManager", component: <UserManager /> },
+    { icon: IconCategory, label: "Item Manager", key: "ItemManager", component: <Box ta="center">Item Manager (coming soon)</Box> },
   ];
 
   const currentItem = navItems.find((n) => n.key === activeSection);
@@ -40,48 +49,48 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <>
-    <Box
-      style={{
-        minHeight: "100vh",
-        position: "relative",
-        overflowX: "hidden",
-      }}
-    >
-    {/* Hide dashboard content until a campaign is selected */}
-    {!selectedCampaignId ? null : (
-      <>
-        <Transition mounted={isDashboard} transition="slide-right" duration={300} timingFunction="ease">
-          {(styles) => (
-            <Stack align="center" gap="lg" style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
-              <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl" mt="md">
-                {navItems.map((item) => (
-                  <DashboardCard
-                    key={item.key}
-                    icon={<item.icon size={48} />}
-                    title={item.label}
-                    onClick={() => setActiveSection(item.key)}
-                  />
-                ))}
-              </SimpleGrid>
-            </Stack>
-          )}
-        </Transition>
+      <Box
+        style={{
+          minHeight: "100vh",
+          position: "relative",
+          overflowX: "hidden",
+        }}
+      >
+        {/* Hide dashboard content until a campaign is selected */}
+        {!selectedCampaignId ? null : (
+          <>
+            <Transition mounted={isDashboard} transition="slide-right" duration={300} timingFunction="ease">
+              {(styles) => (
+                <Stack align="center" gap="lg" style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
+                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl" mt="md">
+                    {navItems.map((item) => (
+                      <DashboardCard
+                        key={item.key}
+                        icon={<item.icon size={48} />}
+                        title={item.label}
+                        onClick={() => setActiveSection(item.key)}
+                      />
+                    ))}
+                  </SimpleGrid>
+                </Stack>
+              )}
+            </Transition>
 
-        <Transition mounted={!isDashboard} transition="slide-left" duration={300} timingFunction="ease">
-          {(styles) => (
-            <Box style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
-              {currentItem?.component}
-            </Box>
-          )}
-        </Transition>
+            <Transition mounted={!isDashboard} transition="slide-left" duration={300} timingFunction="ease">
+              {(styles) => (
+                <Box style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
+                  {currentItem?.component}
+                </Box>
+              )}
+            </Transition>
 
-        {!isDashboard && <BackToDashboardButton />}
-      </>
-    )}
-    </Box>
+            {!isDashboard && <BackToDashboardButton />}
+          </>
+        )}
+      </Box>
 
-    {/* 🧭 Always render modal */}
-    <SelectCampaignModal opened={campaignModal} onClose={() => setCampaignModal(false)} />
-  </>
+      {/* Always render modal */}
+      <SelectCampaignModal opened={campaignModal} onClose={() => setCampaignModal(false)} />
+    </>
   );
 };

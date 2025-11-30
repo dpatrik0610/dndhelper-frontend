@@ -1,21 +1,21 @@
-// services/UserService.ts
 import { apiClient } from "../../api/apiClient"
 import type { User, UserStatus } from "../../types/User"
 
+const BASE_URL = "/user"
 export const UserService = {
   // GET: /api/user
   getAll: async (token?: string): Promise<User[]> => {
-    return apiClient<User[]>("/api/user", { token })
+    return apiClient<User[]>(BASE_URL, { token })
   },
 
   // GET: /api/user/{id}
   getById: async (id: string, token?: string): Promise<User> => {
-    return apiClient<User>(`/api/user/${id}`, { token })
+    return apiClient<User>(`${BASE_URL}/${id}`, { token })
   },
 
   // PUT: /api/user/{id}
   update: async (id: string, user: User, token?: string): Promise<User> => {
-    return apiClient<User>(`/api/user/${id}`, {
+    return apiClient<User>(`${BASE_URL}/${id}`, {
       method: "PUT",
       body: user,
       token,
@@ -28,7 +28,7 @@ export const UserService = {
     status: UserStatus,
     token?: string
   ): Promise<User> => {
-    return apiClient<User>(`/api/user/${id}/status?status=${status}`, {
+    return apiClient<User>(`${BASE_URL}/${id}/status?status=${status}`, {
       method: "PATCH",
       token,
     })
@@ -36,6 +36,6 @@ export const UserService = {
 
   // DELETE: /api/user/{id}
   delete: async (id: string, token?: string): Promise<void> => {
-    await apiClient<void>(`/api/user/${id}`, { method: "DELETE", token })
+    await apiClient<void>(`${BASE_URL}/${id}`, { method: "DELETE", token })
   },
 }
