@@ -10,3 +10,13 @@ export interface AuthResponse {
 export interface ApiError {
   message: string
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
+
+export interface ResetPasswordRequest {
+  username: string
+  newPassword: string
+}

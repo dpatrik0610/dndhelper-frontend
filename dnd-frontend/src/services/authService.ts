@@ -1,5 +1,11 @@
 import { apiClient } from "../api/apiClient";
-import type { AuthRequest, AuthResponse, ApiError} from '../types/AuthTypes';
+import type {
+  AuthRequest,
+  AuthResponse,
+  ApiError,
+  ChangePasswordRequest,
+  ResetPasswordRequest,
+} from '../types/AuthTypes';
 
 export async function registerUser(request: AuthRequest): Promise<AuthResponse> {
     try {
@@ -23,5 +29,21 @@ export async function loginUser(request: AuthRequest): Promise<AuthResponse> {
     return apiClient<AuthResponse>('/Auth/login', {
         method: 'POST',
         body: request,
+    });
+}
+
+export async function changePassword(request: ChangePasswordRequest, token?: string) {
+    return apiClient<{ message: string }>('/Auth/change-password', {
+        method: 'POST',
+        body: request,
+        token,
+    });
+}
+
+export async function resetPassword(request: ResetPasswordRequest, token?: string) {
+    return apiClient<{ message: string }>('/Auth/reset-password', {
+        method: 'POST',
+        body: request,
+        token,
     });
 }

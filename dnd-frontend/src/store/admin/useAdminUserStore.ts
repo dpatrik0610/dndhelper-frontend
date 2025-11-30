@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { useAuthStore } from "../useAuthStore";
 import { UserService } from "../../services/Admin/userService";
+import { registerUser, resetPassword } from "../../services/authService";
 import type { User } from "../../types/User";
 import { showNotification } from "../../components/Notification/Notification";
 import { SectionColor } from "../../types/SectionColor";
@@ -11,9 +12,11 @@ interface AdminUserStore {
   search: string;
   setSearch: (value: string) => void;
   fetchUsers: () => Promise<void>;
+  createUser: (payload: Partial<User> & { password?: string }) => Promise<void>;
   updateUser: (id: string, updates: Partial<User>) => Promise<void>;
   updateStatus: (id: string, status: User["isActive"]) => Promise<void>;
   removeUser: (id: string) => Promise<void>;
+  resetPassword: (username: string, newPassword: string) => Promise<void>;
 }
 
 export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
@@ -51,6 +54,64 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
     }
   },
 
+  createUser: async (payload) => {
+    const token = useAuthStore.getState().token;
+    if (!payload.username || !payload.password) {
+      showNotification({
+        title: "Missing fields",
+        message: "Username and password are required.",
+        color: SectionColor.Red,
+      });
+      return;
+    }
+
+    try {
+      await registerUser({
+        username: payload.username,
+        password: payload.password,
+      });
+      await get().fetchUsers();
+
+      const created = get().users.find((u) => u.username === payload.username);
+
+      if (created && (payload.email || payload.roles || payload.isActive)) {
+        try {
+          const updated = await UserService.update(
+            created.id,
+            {
+              ...created,
+              email: payload.email ?? created.email,
+              roles: payload.roles ?? created.roles,
+              isActive: payload.isActive ?? created.isActive,
+            },
+            token ?? undefined
+          );
+          set((state) => ({
+            users: state.users.map((u) => (u.id === updated.id ? updated : u)),
+          }));
+        } catch (err) {
+          showNotification({
+            title: "User created but update failed",
+            message: String(err),
+            color: SectionColor.Yellow,
+          });
+        }
+      }
+
+      showNotification({
+        title: "User created",
+        message: `${payload.username} added.`,
+        color: SectionColor.Green,
+      });
+    } catch (err) {
+      showNotification({
+        title: "Failed to create user",
+        message: String(err),
+        color: SectionColor.Red,
+      });
+    }
+  },
+
   updateUser: async (id, updates) => {
     const token = useAuthStore.getState().token;
     const user = get().users.find((u) => u.id === id);
@@ -79,9 +140,11 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
   updateStatus: async (id, status) => {
     const token = useAuthStore.getState().token;
     if (!token) return;
+    const user = get().users.find((u) => u.id === id);
+    if (!user) return;
 
     try {
-      const updated = await UserService.updateStatus(id, status, token);
+      const updated = await UserService.update(id, { ...user, isActive: status }, token);
       set((state) => ({
         users: state.users.map((u) => (u.id === id ? updated : u)),
       }));
@@ -114,6 +177,25 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
     } catch (err) {
       showNotification({
         title: "Failed to delete user",
+        message: String(err),
+        color: SectionColor.Red,
+      });
+    }
+  },
+
+  resetPassword: async (username, newPassword) => {
+    const token = useAuthStore.getState().token;
+    if (!token) return;
+    try {
+      await resetPassword({ username, newPassword }, token);
+      showNotification({
+        title: "Password reset",
+        message: `Password reset for ${username}.`,
+        color: SectionColor.Green,
+      });
+    } catch (err) {
+      showNotification({
+        title: "Failed to reset password",
         message: String(err),
         color: SectionColor.Red,
       });

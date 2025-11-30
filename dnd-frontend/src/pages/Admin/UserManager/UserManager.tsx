@@ -1,42 +1,28 @@
 import {
   ActionIcon,
-  Avatar,
-  Badge,
-  Box,
   Button,
   Group,
-  Modal,
-  MultiSelect,
-  Paper,
-  ScrollArea,
-  Select,
-  SimpleGrid,
   Stack,
-  Table,
   Text,
   TextInput,
   Title,
   Tooltip,
 } from "@mantine/core";
 import {
-  IconEdit,
   IconRefresh,
   IconSearch,
-  IconShieldExclamation,
-  IconTrash,
   IconUser,
 } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { useAdminUserStore } from "../../../store/admin/useAdminUserStore";
 import { UserRole, UserStatus } from "../../../types/User";
-
-const statusColor: Record<UserStatus, string> = {
-  [UserStatus.Active]: "green",
-  [UserStatus.Inactive]: "yellow",
-  [UserStatus.Banned]: "red",
-  [UserStatus.LogicDeleted]: "gray",
-};
+import { AddUserModal } from "./components/AddUserModal";
+import { EditUserModal } from "./components/EditUserModal";
+import { DeleteConfirmModal } from "./components/DeleteConfirmModal";
+import { UsersTable } from "./components/UsersTable";
+import { StatsGrid } from "./components/StatsGrid";
+import "../../../styles/glassyInput.css";
 
 export function UserManager() {
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -46,9 +32,11 @@ export function UserManager() {
     search,
     setSearch,
     fetchUsers,
+    createUser,
     updateStatus,
     removeUser,
     updateUser,
+    resetPassword,
   } = useAdminUserStore();
 
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
@@ -58,8 +46,18 @@ export function UserManager() {
   const [editStatus, setEditStatus] = useState<UserStatus>(UserStatus.Active);
 
   const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newUserOpen, setNewUserOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newRoles, setNewRoles] = useState<UserRole[]>([UserRole.User]);
+  const [newStatus, setNewStatus] = useState<UserStatus>(UserStatus.Active);
+  const [newPassword, setNewPassword] = useState("");
   const [statusBusyId, setStatusBusyId] = useState<string | null>(null);
   const [deleteBusyId, setDeleteBusyId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmDeleteName, setConfirmDeleteName] = useState<string>("");
 
   useEffect(() => {
     void fetchUsers();
@@ -103,6 +101,7 @@ export function UserManager() {
     setDeleteBusyId(userId);
     await removeUser(userId);
     setDeleteBusyId(null);
+    setConfirmDeleteId(null);
   };
 
   const handleSave = async () => {
@@ -118,6 +117,32 @@ export function UserManager() {
     setEditingUserId(null);
   };
 
+  const handleResetPassword = async (newPassword: string) => {
+    if (!editName.trim() || !newPassword.trim()) return;
+    setResetting(true);
+    await resetPassword(editName.trim(), newPassword.trim());
+    setResetting(false);
+  };
+
+  const handleCreate = async () => {
+    if (!newName.trim() || !newPassword.trim()) return;
+    setCreating(true);
+    await createUser({
+      username: newName.trim(),
+      email: newEmail.trim() || undefined,
+      roles: newRoles,
+      isActive: newStatus,
+      password: newPassword.trim(),
+    });
+    setCreating(false);
+    setNewUserOpen(false);
+    setNewName("");
+    setNewEmail("");
+    setNewPassword("");
+    setNewRoles([UserRole.User]);
+    setNewStatus(UserStatus.Active);
+  };
+
   return (
     <Stack gap="md">
       <Group justify="space-between" align="flex-start" wrap="wrap">
@@ -131,6 +156,13 @@ export function UserManager() {
         </div>
 
         <Group gap="xs">
+          <Button
+            variant="light"
+            leftSection={<IconUser size={14} />}
+            onClick={() => setNewUserOpen(true)}
+          >
+            Add user
+          </Button>
           <Tooltip label="Reload users">
             <ActionIcon
               size="lg"
@@ -145,49 +177,7 @@ export function UserManager() {
         </Group>
       </Group>
 
-      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
-        <Paper
-          withBorder
-          p="md"
-          style={{
-            background: "rgba(40, 0, 0, 0.35)",
-            border: "1px solid rgba(255, 80, 80, 0.3)",
-          }}
-        >
-          <Text size="sm" c="dimmed">
-            Total users
-          </Text>
-          <Title order={3}>{totals.all}</Title>
-        </Paper>
-
-        <Paper
-          withBorder
-          p="md"
-          style={{
-            background: "rgba(20, 40, 20, 0.35)",
-            border: "1px solid rgba(80, 200, 120, 0.3)",
-          }}
-        >
-          <Text size="sm" c="dimmed">
-            Active
-          </Text>
-          <Title order={3}>{totals.active}</Title>
-        </Paper>
-
-        <Paper
-          withBorder
-          p="md"
-          style={{
-            background: "rgba(60, 0, 0, 0.35)",
-            border: "1px solid rgba(255, 100, 100, 0.3)",
-          }}
-        >
-          <Text size="sm" c="dimmed">
-            Banned
-          </Text>
-          <Title order={3}>{totals.banned}</Title>
-        </Paper>
-      </SimpleGrid>
+      <StatsGrid total={totals.all} active={totals.active} banned={totals.banned} />
 
       <TextInput
         value={search}
@@ -205,185 +195,61 @@ export function UserManager() {
         }}
       />
 
-      <Paper
-        withBorder
-        p="md"
-        style={{
-          background: "rgba(15, 0, 0, 0.25)",
-          border: "1px solid rgba(255, 60, 60, 0.35)",
+      <UsersTable
+        users={filteredUsers}
+        loading={loading}
+        statusBusyId={statusBusyId}
+        deleteBusyId={deleteBusyId}
+        isMobile={isMobile}
+        onEdit={(id) => setEditingUserId(id)}
+        onToggleStatus={(id, status) => void handleStatusToggle(id, status)}
+        onDelete={(id, name) => {
+          setConfirmDeleteId(id);
+          setConfirmDeleteName(name);
         }}
-      >
-        <ScrollArea h={isMobile ? 400 : 520}>
-          <Table verticalSpacing="md" highlightOnHover withColumnBorders>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>User</Table.Th>
-                <Table.Th>Email</Table.Th>
-                <Table.Th>Roles</Table.Th>
-                <Table.Th>Status</Table.Th>
-                <Table.Th>Joined</Table.Th>
-                <Table.Th>Last Login</Table.Th>
-                <Table.Th>Actions</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {filteredUsers.map((user, index) => (
-                <Table.Tr
-                  key={user.id}
-                  bg={
-                    index % 2 === 0
-                      ? "rgba(255, 150, 0, 0.06)"
-                      : "rgba(255, 60, 60, 0.06)"
-                  }
-                  style={{ transition: "background 120ms ease" }}
-                >
-                  <Table.Td>
-                    <Group gap="sm">
-                      <Avatar radius="xl" src={user.profilePictureUrl} color="orange">
-                        <IconUser size={16} />
-                      </Avatar>
-                      <Box>
-                        <Text fw={600}>{user.username}</Text>
-                        <Text size="xs" c="dimmed">
-                          {user.id}
-                        </Text>
-                      </Box>
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm" c={user.email ? undefined : "dimmed"}>
-                      {user.email ?? "-"}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap={6}>
-                      {user.roles?.map((role) => (
-                        <Badge
-                          key={role}
-                          color={role === UserRole.Admin ? "violet" : "gray"}
-                          variant="light"
-                          size="sm"
-                        >
-                          {role}
-                        </Badge>
-                      ))}
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>
-                    <Badge color={statusColor[user.isActive]} variant="dot">
-                      {user.isActive}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">
-                      {user.dateCreated
-                        ? new Date(user.dateCreated).toLocaleDateString()
-                        : "-"}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm" c="dimmed">
-                      {user.lastLogin
-                        ? new Date(user.lastLogin).toLocaleString()
-                        : "-"}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap="xs">
-                      <Tooltip label="Edit user">
-                        <ActionIcon
-                          size="sm"
-                          variant="light"
-                          onClick={() => setEditingUserId(user.id)}
-                        >
-                          <IconEdit size={14} />
-                        </ActionIcon>
-                      </Tooltip>
-                      <Tooltip
-                        label={
-                          user.isActive === UserStatus.Banned ? "Unban user" : "Ban user"
-                        }
-                      >
-                        <ActionIcon
-                          size="sm"
-                          variant="light"
-                          color={user.isActive === UserStatus.Banned ? "green" : "red"}
-                          loading={statusBusyId === user.id}
-                          onClick={() => void handleStatusToggle(user.id, user.isActive)}
-                        >
-                          <IconShieldExclamation size={14} />
-                        </ActionIcon>
-                      </Tooltip>
-                      <Tooltip label="Delete user">
-                        <ActionIcon
-                          size="sm"
-                          variant="light"
-                          color="red"
-                          loading={deleteBusyId === user.id}
-                          onClick={() => void handleDelete(user.id)}
-                        >
-                          <IconTrash size={14} />
-                        </ActionIcon>
-                      </Tooltip>
-                    </Group>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
+      />
 
-              {!loading && filteredUsers.length === 0 && (
-                <Table.Tr>
-                  <Table.Td colSpan={7}>
-                    <Text ta="center" c="dimmed">
-                      No users found.
-                    </Text>
-                  </Table.Td>
-                </Table.Tr>
-              )}
-            </Table.Tbody>
-          </Table>
-        </ScrollArea>
-      </Paper>
+      <DeleteConfirmModal
+        opened={!!confirmDeleteId}
+        username={confirmDeleteName}
+        loading={deleteBusyId === confirmDeleteId}
+        onClose={() => setConfirmDeleteId(null)}
+        onConfirm={() => confirmDeleteId && void handleDelete(confirmDeleteId)}
+      />
 
-      <Modal
+      <AddUserModal
+        opened={newUserOpen}
+        onClose={() => setNewUserOpen(false)}
+        onSubmit={() => void handleCreate()}
+        creating={creating}
+        newName={newName}
+        setNewName={setNewName}
+        newEmail={newEmail}
+        setNewEmail={setNewEmail}
+        newPassword={newPassword}
+        setNewPassword={setNewPassword}
+        newRoles={newRoles}
+        setNewRoles={setNewRoles}
+        newStatus={newStatus}
+        setNewStatus={setNewStatus}
+      />
+
+      <EditUserModal
         opened={!!editingUserId}
         onClose={() => setEditingUserId(null)}
-        title="Edit user"
-        centered
-      >
-        <Stack gap="sm">
-          <TextInput
-            label="Username"
-            value={editName}
-            onChange={(e) => setEditName(e.currentTarget.value)}
-          />
-          <TextInput
-            label="Email"
-            value={editEmail}
-            onChange={(e) => setEditEmail(e.currentTarget.value)}
-          />
-          <MultiSelect
-            label="Roles"
-            data={Object.values(UserRole).map((r) => ({ value: r, label: r }))}
-            value={editRoles}
-            onChange={(values) => setEditRoles(values as UserRole[])}
-          />
-          <Select
-            label="Status"
-            data={Object.values(UserStatus).map((s) => ({ value: s, label: s }))}
-            value={editStatus}
-            onChange={(value) => setEditStatus((value as UserStatus) ?? UserStatus.Active)}
-          />
-
-          <Group justify="flex-end" mt="md">
-            <Button variant="light" onClick={() => setEditingUserId(null)}>
-              Cancel
-            </Button>
-            <Button loading={saving} onClick={() => void handleSave()}>
-              Save
-            </Button>
-          </Group>
-        </Stack>
-      </Modal>
+        onSave={() => void handleSave()}
+        saving={saving}
+        resetting={resetting}
+        onResetPassword={(pwd) => void handleResetPassword(pwd)}
+        editName={editName}
+        setEditName={setEditName}
+        editEmail={editEmail}
+        setEditEmail={setEditEmail}
+        editRoles={editRoles}
+        setEditRoles={setEditRoles}
+        editStatus={editStatus}
+        setEditStatus={setEditStatus}
+      />
     </Stack>
   );
 }

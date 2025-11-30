@@ -2,6 +2,7 @@ import { apiClient } from "../../api/apiClient"
 import type { User, UserStatus } from "../../types/User"
 
 const BASE_URL = "/user"
+
 export const UserService = {
   // GET: /api/user
   getAll: async (token?: string): Promise<User[]> => {
