@@ -1,4 +1,4 @@
-import { Box, Group, Text } from "@mantine/core";
+import { Box } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
