@@ -28,24 +28,30 @@ export default function NotesPage() {
 
   if (!character) return null;
 
-  return (
-    <Box
-      p={isMobile ? "xs" : "md"}
-      m={isMobile ? "" : "0 auto"}
-      maw={isMobile ? "100%" : 900}
-    >
-      <Group justify="space-between" mb="sm">
-        <div>
-          <Text size="xl" fw={700} c="red.2">
-            Notes
-          </Text>
-          <Text size="sm" c="dimmed">
-            {character.name}
-          </Text>
-        </div>
-      </Group>
+return (
+  <Box
+    p={isMobile ? 0 : "md"}
+    m={isMobile ? 0 : "0 auto"}
+    maw={isMobile ? "100%" : 900}
+    w={isMobile ? "100vw" : "100%"}
+    h={isMobile ? "100vh" : "auto"}
+    style={
+      isMobile
+        ? {
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            overflowY: "auto",
+            background: "rgba(0, 0, 0, 0.4)",
+            backdropFilter: "blur(6px)",
+          }
+        : undefined
+    }
+  >
+    <NotesPanel />
+  </Box>
+);
 
-      <NotesPanel />
-    </Box>
-  );
 }
