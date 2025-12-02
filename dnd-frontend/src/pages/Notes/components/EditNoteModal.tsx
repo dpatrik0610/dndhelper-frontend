@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { TextInput, Stack } from "@mantine/core";
-import type { Note } from "../../types/Note";
-import { useNoteStore } from "../../store/useNoteStore";
+import { useMediaQuery } from "@mantine/hooks";
+import type { Note } from "../../../types/Note";
+import { useNoteStore } from "../../../store/useNoteStore";
 import { showNotification } from "@mantine/notifications";
-import { BaseModal } from "../../components/BaseModal";
-import { MarkdownTextarea } from "../../components/common/MarkdownTextarea";
-import "../../styles/glassyInput.css";
+import { BaseModal } from "../../../components/BaseModal";
+import { MarkdownTextarea } from "../../../components/common/MarkdownTextarea";
+import "../../../styles/glassyInput.css"
 
 interface EditNoteModalProps {
   opened: boolean;
@@ -15,6 +16,7 @@ interface EditNoteModalProps {
 
 export function EditNoteModal({ opened, note, onClose }: EditNoteModalProps) {
   const updateNote = useNoteStore((s) => s.update);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const [title, setTitle] = useState(note?.title ?? "");
   const [lines, setLines] = useState((note?.lines ?? []).join("\n"));
@@ -47,6 +49,8 @@ export function EditNoteModal({ opened, note, onClose }: EditNoteModalProps) {
       title="Edit Note"
       onSave={handleSave}
       saveLabel="Save"
+      fullScreen={isMobile}
+      size={isMobile ? "100%" : "lg"}
     >
       <Stack>
         <TextInput
@@ -60,7 +64,7 @@ export function EditNoteModal({ opened, note, onClose }: EditNoteModalProps) {
           label="Details"
           value={lines}
           onChange={setLines}
-          minHeightRem={8}
+          minHeightRem={isMobile ? 30 : 20}
         />
       </Stack>
     </BaseModal>

@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Paper, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Group, Text, Tooltip } from "@mantine/core";
 import {
   IconDownload,
   IconPencil,
@@ -8,6 +8,8 @@ import {
 } from "@tabler/icons-react";
 import type { Note } from "../../../types/Note";
 import { MarkdownRenderer } from "../../../components/MarkdownRender";
+import { ExpandableSection } from "../../../components/ExpendableSection";
+import { SectionColor } from "../../../types/SectionColor";
 
 interface NoteCardProps {
   note: Note;
@@ -64,6 +66,11 @@ export function NoteCard({
 }: NoteCardProps) {
   const markdownContent = (note.lines ?? []).join("\n");
   const title = note.title ?? "Untitled";
+  const titleContent = (
+    <Text fw={600} c="red.3" size="sm" style={{ lineHeight: 1.05 }}>
+      {highlightText(title, searchQuery)}
+    </Text>
+  );
 
   const handleDownload = () => {
     const blob = new Blob([`# ${title}\n\n${markdownContent}`], {
@@ -78,21 +85,22 @@ export function NoteCard({
   };
 
   return (
-    <Paper
-      withBorder
-      p="sm"
+    <ExpandableSection
+      title={title}
+      titleContent={titleContent}
+      color={SectionColor.Red}
+      defaultOpen
+      transparent
+      padding={8}
+      marginTop={4}
+      marginBottom={4}
       style={{
-        background: "rgba(50, 0, 0, 0.25)",
+        background: "rgba(50, 0, 0, 0.2)",
         border: "1px solid rgba(255,80,80,0.25)",
-        backdropFilter: "blur(6px)",
       }}
     >
-      <Group justify="space-between" mb={6}>
-        <Text fw={500} c="red.2">
-          {highlightText(title, searchQuery)}
-        </Text>
-
-        <Group gap={4}>
+      
+        <Group justify="flex-end" mb={6} gap={4}>
           <Tooltip label={note.isFavorite ? "Unfavorite" : "Favorite"}>
             <ActionIcon size="sm" variant="subtle" onClick={onToggleFavorite}>
               {note.isFavorite ? (
@@ -126,24 +134,23 @@ export function NoteCard({
             </ActionIcon>
           </Tooltip>
         </Group>
-      </Group>
 
-      <MarkdownRenderer content={markdownContent} highlightQuery={searchQuery} />
+        <MarkdownRenderer content={markdownContent} highlightQuery={searchQuery} />
 
-      <Text c="dimmed" size="xs" mt={4}>
-        Updated at:{" "}
-        {note.updatedAt
-          ? new Date(note.updatedAt)
-              .toLocaleString("en-GB", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-              .replace(/\//g, ".")
-          : "n/a"}
-      </Text>
-    </Paper>
+        <Text c="dimmed" size="xs" mt={4}>
+          Updated at:{" "}
+          {note.updatedAt
+            ? new Date(note.updatedAt)
+                .toLocaleString("en-GB", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+                .replace(/\//g, ".")
+            : "n/a"}
+        </Text>
+    </ExpandableSection>
   );
 }

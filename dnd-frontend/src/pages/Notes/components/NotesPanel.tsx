@@ -15,7 +15,7 @@ import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNoteStore } from "../../../store/useNoteStore";
 import type { Note } from "../../../types/Note";
 import { AddNoteModal } from "../../Profile/components/AddNoteModal";
-import { EditNoteModal } from "../../Profile/EditNoteModal";
+import { EditNoteModal } from "./EditNoteModal";
 import { showNotification } from "../../../components/Notification/Notification";
 import "../../../styles/glassyInput.css";
 

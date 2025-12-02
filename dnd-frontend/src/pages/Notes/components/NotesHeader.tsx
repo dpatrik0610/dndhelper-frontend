@@ -38,12 +38,12 @@ export function NotesHeader({
   toggleTagFilter,
 }: NotesHeaderProps) {
   return (
-    <Group justify="space-between" mb="sm" align="flex-start">
+    <Group justify="space-between" mb={6} align="flex-start" gap="xs">
       <Box>
-        <Text size="lg" fw={600} c="red.3">
+        <Text size="lg" fw={600} c="red.3" style={{ lineHeight: 1.1 }}>
           Personal Notes{" "}
           {loading && (
-            <Text span c="dimmed" size="sm">
+            <Text span c="dimmed" size="sm" style={{ lineHeight: 1.1 }}>
               (loading...)
             </Text>
           )}
@@ -74,7 +74,6 @@ export function NotesHeader({
                 clearable
                 maxDropdownHeight={160}
                 classNames={{ input: "glassy-input", label: "glassy-label" }}
-                nothingFound="No tags"
               />
             </Box>
           )}

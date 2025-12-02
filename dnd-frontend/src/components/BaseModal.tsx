@@ -16,6 +16,7 @@ interface BaseModalProps {
   closeOnClickOutside?: boolean;
   closeOnEscape?: boolean;
   withCloseButton?: boolean;
+  fullScreen?: boolean;
 }
 
 export const BaseModal: React.FC<BaseModalProps> = ({
@@ -32,17 +33,18 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   closeOnClickOutside = true,
   closeOnEscape = true,
   withCloseButton = true,
+  fullScreen = false,
 }) => {
   return (
     <Modal
       opened={opened}
       onClose={onClose}
       title={
-        <Text fw={600} size="xl" c="red.3" style={{ letterSpacing: 0.5 }}>
+        <Text fw={600} size="lg" c="red.3" style={{ letterSpacing: 0.5 }}>
           {title}
         </Text>
       }
-      size={size}
+      size={fullScreen ? "100%" : size}
       withCloseButton={withCloseButton}
       closeOnClickOutside={closeOnClickOutside && !loading}
       closeOnEscape={closeOnEscape && !loading}
@@ -55,6 +57,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
         duration: 200,
         timingFunction: "ease",
       }}
+      fullScreen={fullScreen}
       styles={{
         content: {
           backdropFilter: "blur(10px)",
@@ -62,17 +65,21 @@ export const BaseModal: React.FC<BaseModalProps> = ({
           border: "1px solid rgba(255, 80, 80, 0.4)",
           boxShadow:
             "0 0 12px rgba(255, 0, 0, 0.25), inset 0 0 6px rgba(255, 0, 0, 0.15)",
-          borderRadius: "10px",
+          borderRadius: fullScreen ? "0" : "10px",
           color: "white",
           transition: "all 0.2s ease-in-out",
+          minHeight: fullScreen ? "100vh" : undefined,
+          margin: fullScreen ? 0 : undefined,
+          padding: fullScreen ? "5px" : undefined,
+          paddingTop: 0
         },
         header: {
           borderBottom: "1px solid rgba(255, 100, 100, 0.2)",
-          marginBottom: "0.5rem",
           background: "transparent",
+          paddingLeft: "1rem",
         },
         body: {
-          paddingTop: "0.75rem",
+          paddingTop: "1rem",
         },
       }}
     >

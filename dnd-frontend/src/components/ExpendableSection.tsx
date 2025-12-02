@@ -6,30 +6,38 @@ import { SectionColor } from "../types/SectionColor";
 interface ExpandableSectionProps {
   title: string;
   children: ReactNode;
+  titleContent?: ReactNode;
   icon?: ReactNode;
   color?: SectionColor;
   defaultOpen?: boolean;
   transparent?: boolean;
   style?: CSSProperties;
+  padding?: number | string;
+  marginTop?: number | string;
+  marginBottom?: number | string;
 }
 
 export function ExpandableSection({
   title,
   children,
+  titleContent,
   icon,
   color = SectionColor.Blue,
   defaultOpen = false,
   transparent = true,
   style = {},
+  padding = "md",
+  marginTop = "sm",
+  marginBottom = "sm",
 }: ExpandableSectionProps) {
   const [opened, setOpened] = useState(defaultOpen);
 
   return (
     <Paper
-      p="md"
+      p={padding}
       withBorder
-      mb="sm"
-      mt="sm"
+      mb={marginBottom}
+      mt={marginTop}
       style={{
         backgroundColor: transparent
           ? "rgba(0, 0, 0, 0.14)"
@@ -45,9 +53,11 @@ export function ExpandableSection({
       >
         <Group gap="xs">
           {icon}
-          <Text fw={600} c={color} size="sm" tt="uppercase">
-            {title}
-          </Text>
+          {titleContent ?? (
+            <Text fw={600} c={color} size="sm" tt="uppercase">
+              {title}
+            </Text>
+          )}
         </Group>
         <ActionIcon color={color} variant="light" size="sm" radius="xl">
           {opened ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
