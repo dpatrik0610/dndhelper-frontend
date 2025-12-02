@@ -28,11 +28,11 @@ export default function NotesPage() {
 
   if (!character) return null;
 
-return (
+  return (
   <Box
     p={isMobile ? 0 : "md"}
     m={isMobile ? 0 : "0 auto"}
-    maw={isMobile ? "100%" : 900}
+    maw={isMobile ? "100%" : 1280}
     w={isMobile ? "100vw" : "100%"}
     h={isMobile ? "100vh" : "auto"}
     style={

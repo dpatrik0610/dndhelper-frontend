@@ -6,6 +6,7 @@ import {
   Skeleton,
   Stack,
   Text,
+  SimpleGrid,
 } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { NotesHeader } from "./NotesHeader";
@@ -257,16 +258,22 @@ export function NotesPanel() {
                   <Text size="sm" fw={600} c="red.2">
                     Favorites
                   </Text>
-                  {favoriteNotes.map((note) => (
-                    <NoteCard
-                      key={note.id}
-                      note={note}
-                      searchQuery={highlightQuery}
-                      onToggleFavorite={() => handleToggleFavorite(note)}
-                      onEdit={() => setEditingNote(note)}
-                      onDelete={() => handleDelete(note.id!)}
-                    />
-                  ))}
+                  <SimpleGrid
+                    cols={isMobile ? 1 : 2}
+                    spacing={isMobile ? "sm" : "md"}
+                    verticalSpacing={isMobile ? "sm" : "md"}
+                  >
+                    {favoriteNotes.map((note) => (
+                      <NoteCard
+                        key={note.id}
+                        note={note}
+                        searchQuery={highlightQuery}
+                        onToggleFavorite={() => handleToggleFavorite(note)}
+                        onEdit={() => setEditingNote(note)}
+                        onDelete={() => handleDelete(note.id!)}
+                      />
+                    ))}
+                  </SimpleGrid>
                   {regularNotes.length > 0 && (
                     <Divider
                       variant="dashed"
@@ -279,16 +286,22 @@ export function NotesPanel() {
                 </>
               )}
 
-              {regularNotes.map((note) => (
-                <NoteCard
-                  key={note.id}
-                  note={note}
-                  searchQuery={highlightQuery}
-                  onToggleFavorite={() => handleToggleFavorite(note)}
-                  onEdit={() => setEditingNote(note)}
-                  onDelete={() => handleDelete(note.id!)}
-                />
-              ))}
+              <SimpleGrid
+                cols={isMobile ? 1 : 2}
+                spacing={isMobile ? "sm" : "md"}
+                verticalSpacing={isMobile ? "sm" : "md"}
+              >
+                {regularNotes.map((note) => (
+                  <NoteCard
+                    key={note.id}
+                    note={note}
+                    searchQuery={highlightQuery}
+                    onToggleFavorite={() => handleToggleFavorite(note)}
+                    onEdit={() => setEditingNote(note)}
+                    onDelete={() => handleDelete(note.id!)}
+                  />
+                ))}
+              </SimpleGrid>
 
               {!loading && filteredNotes.length === 0 && (
                 <Text c="dimmed" ta="center">
