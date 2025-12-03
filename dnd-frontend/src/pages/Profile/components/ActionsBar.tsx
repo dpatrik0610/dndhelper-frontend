@@ -2,7 +2,7 @@ import { Button, Group, Paper, Title } from "@mantine/core";
 import { longrest } from "../../../services/characterService";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { showNotification } from "../../../components/Notification/Notification";
-import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus, IconSwords } from "@tabler/icons-react";
+import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus, IconSwords, IconHeartPlus } from "@tabler/icons-react";
 import { loadCharacters } from "../../../utils/loadCharacter";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,7 @@ import { DamageModal } from "./DamageModal";
 import { RemoveCurrencyModal } from "./RemoveCurrencyModal";
 import { TransferCurrencyModal } from "./TransferCurrencyModal";
 import { ExpandableSection } from "../../../components/ExpendableSection";
+import { HealModal } from "./HealModal";
 
 export interface ActionButtonProps {
   label: string;
@@ -24,6 +25,7 @@ export interface ActionButtonProps {
 export function ActionBar() {
   const [modalOpened, setModalOpened] = useState(false);
   const [damageModalOpened, setDamageModalOpened] = useState(false);
+  const [healModalOpened, setHealModalOpened] = useState(false);
   const [removeCurrencyModalOpened, setRemoveCurrencyModalOpened] = useState(false);
   const [transferCurrencyModalOpened, setTransferCurrencyModalOpened] = useState(false);
 
@@ -50,6 +52,7 @@ export function ActionBar() {
     { label: "Edit Character", icon: <IconEdit />, onClick: () => navigate("/editCharacter") },
     { label: "Add Condition", icon: <IconPlus />, onClick: () => setModalOpened(true) },
     { label: "Damage", icon: <IconDroplet size={16} />, onClick: () => setDamageModalOpened(true) },
+    { label: "Heal", icon: <IconHeartPlus size={16} />, onClick: () => setHealModalOpened(true) },
     { label: "Delete Money", icon: <IconCoin size={16} />, onClick: () => setRemoveCurrencyModalOpened(true) },
     { label: "Send Money", icon: <IconCoin size={16} />, onClick: () => setTransferCurrencyModalOpened(true) },
   ];
@@ -90,6 +93,7 @@ if (isMobile) {
 
       <AddConditionModal opened={modalOpened} onClose={() => setModalOpened(false)} />
       <DamageModal opened={damageModalOpened} onClose={() => setDamageModalOpened(false)} />
+      <HealModal opened={healModalOpened} onClose={() => setHealModalOpened(false)} />
       <RemoveCurrencyModal opened={removeCurrencyModalOpened} onClose={() => setRemoveCurrencyModalOpened(false)} />
       <TransferCurrencyModal opened={transferCurrencyModalOpened} onClose={() => setTransferCurrencyModalOpened(false)} />
     </>
@@ -132,6 +136,7 @@ if (isMobile) {
 
       <AddConditionModal opened={modalOpened} onClose={() => setModalOpened(false)} />
       <DamageModal opened={damageModalOpened} onClose={() => setDamageModalOpened(false)} />
+      <HealModal opened={healModalOpened} onClose={() => setHealModalOpened(false)} />
       <RemoveCurrencyModal opened={removeCurrencyModalOpened} onClose={() => setRemoveCurrencyModalOpened(false)} />
       <TransferCurrencyModal opened={transferCurrencyModalOpened} onClose={() => setTransferCurrencyModalOpened(false)} />
     </>
