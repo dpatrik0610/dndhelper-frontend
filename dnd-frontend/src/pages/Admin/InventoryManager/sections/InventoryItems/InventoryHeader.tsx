@@ -16,11 +16,16 @@ import {
   IconBox,
   IconUsersGroup,
   IconUserCog,
+  IconLink,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInventoryStore";
 import { useAdminCurrencyStore } from "../../../../../store/admin/useAdminCurrencyStore";
 import { useAdminCharacterStore } from "../../../../../store/admin/useAdminCharacterStore";
+import { useAuthStore } from "../../../../../store/useAuthStore";
+import { updateCharacter } from "../../../../../services/characterService";
+import { showNotification } from "../../../../../components/Notification/Notification";
+import { SectionColor } from "../../../../../types/SectionColor";
 import { ItemModal } from "../InventoryItems/ItemModal";
 import { AddExistingItemModal } from "./AddExistingItemModal";
 import { SelectInventoryOwnersModal } from "./SelectInventoryOwnersModal";
@@ -35,10 +40,12 @@ export function InventoryHeader() {
   const { selected, refreshSelected } = useAdminInventoryStore();
   const { loadInventoryById } = useAdminCurrencyStore();
   const { characters } = useAdminCharacterStore();
+  const token = useAuthStore.getState().token!;
 
   const [addModal, setAddModal] = useState(false);
   const [existingModal, setExistingModal] = useState(false);
   const [ownerModal, setOwnerModal] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   const invName = selected?.name || "Unnamed Inventory";
 
@@ -86,6 +93,59 @@ export function InventoryHeader() {
 
     setOwnerUserIds([...userIdSet]);
   }, [selected, characters]);
+
+  const handleSyncLinks = async () => {
+    if (!selected?.id) return;
+    const invId = selected.id;
+    const ownerIds = selected.characterIds ?? [];
+    if (ownerIds.length === 0) {
+      showNotification({
+        title: "No owners to sync",
+        message: "This inventory has no character owners to sync.",
+        color: SectionColor.Yellow,
+      });
+      return;
+    }
+
+    const owners = characters.filter((c) => ownerIds.includes(c.id!));
+    const targets = owners.filter((c) => !(c.inventoryIds ?? []).includes(invId));
+    if (targets.length === 0) {
+      showNotification({
+        title: "Already in sync",
+        message: "All owner characters already reference this inventory.",
+        color: SectionColor.Green,
+      });
+      return;
+    }
+
+    setSyncing(true);
+    try {
+      await Promise.all(
+        targets.map((c) =>
+          updateCharacter(
+            {
+              ...c,
+              inventoryIds: [...(c.inventoryIds ?? []), invId],
+            },
+            token
+          )
+        )
+      );
+      showNotification({
+        title: "Synced",
+        message: `Added inventory to ${targets.length} character(s).`,
+        color: SectionColor.Green,
+      });
+    } catch (err) {
+      showNotification({
+        title: "Sync failed",
+        message: String(err),
+        color: SectionColor.Red,
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   if (!selected) return null;
 
@@ -178,6 +238,18 @@ export function InventoryHeader() {
 
           {/* === Actions === */}
           <Group gap="xs">
+            <Tooltip label="Sync inventory to owner characters" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="teal"
+                radius="xl"
+                onClick={handleSyncLinks}
+                loading={syncing}
+              >
+                <IconLink size={18} />
+              </ActionIcon>
+            </Tooltip>
+
             <Tooltip label="Reload Inventory" withArrow>
               <ActionIcon
                 variant="subtle"

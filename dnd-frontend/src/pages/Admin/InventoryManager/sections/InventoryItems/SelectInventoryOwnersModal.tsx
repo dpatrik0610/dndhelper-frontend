@@ -10,7 +10,10 @@ import {
 import { useAdminCharacterStore } from "../../../../../store/admin/useAdminCharacterStore";
 import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInventoryStore";
 import { useState, useEffect } from "react";
-import { updateInventory } from "../../../../../services/inventoryService";
+import {
+  updateInventory,
+  assignInventoryToCharacter,
+} from "../../../../../services/inventoryService";
 import { useAuthStore } from "../../../../../store/useAuthStore";
 import { showNotification } from "../../../../../components/Notification/Notification";
 import { SectionColor } from "../../../../../types/SectionColor";
@@ -39,16 +42,30 @@ export function SelectInventoryOwnersModal({
 
   const handleSave = async () => {
     if (!selected?.id) return;
+    const currentOwners = selected.characterIds ?? [];
+    const addedOwners = selectedOwners.filter((id) => !currentOwners.includes(id));
+    const targetRefreshCharacter = selectedId || selectedOwners[0] || currentOwners[0];
+
     try {
-        await updateInventory(
-            selected.id,
-            { ...selected, characterIds: selectedOwners },
-            token
+      if (addedOwners.length > 0) {
+        await Promise.all(
+          addedOwners.map((ownerId) =>
+            assignInventoryToCharacter(selected.id!, ownerId, token)
+          )
         );
-        
-        await refreshInventories(selectedId!);
-        
-        showNotification({
+      }
+
+      await updateInventory(
+        selected.id,
+        { ...selected, characterIds: selectedOwners },
+        token
+      );
+
+      if (targetRefreshCharacter) {
+        await refreshInventories(targetRefreshCharacter);
+      }
+
+      showNotification({
         title: "Owners updated",
         message: "Inventory ownership updated successfully.",
         color: SectionColor.Green,

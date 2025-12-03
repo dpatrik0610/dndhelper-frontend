@@ -10,6 +10,7 @@ export type AdminSection =
   | "InitiativeTracker"
   | "SpellsManager"
   | "CacheManager"
+  | "InventoryBrowser"
   ;
 
 interface AdminDashboardState {

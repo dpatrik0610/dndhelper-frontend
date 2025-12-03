@@ -8,6 +8,7 @@ import {
   IconWand,
   IconCamera,
   IconGhost,
+  IconLayoutGrid,
 } from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
 import { BackToDashboardButton } from "./components/BackToDashboardButton";
@@ -21,6 +22,7 @@ import { SpellForm } from "./SpellManager/SpellForm";
 import { CacheManager } from "./CacheManager/CacheManager";
 import { UserManager } from "./UserManager/UserManager";
 import { MonsterManager } from "./MonsterManager/MonsterManager";
+import { InventoryBrowser } from "./InventoryBrowser/InventoryBrowser";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -39,6 +41,7 @@ export const AdminDashboard: React.FC = () => {
     component: JSX.Element;
   }[] = [
     { icon: IconBox, label: "Inventory Manager", key: "InventoryManager", component: <InventoryManager /> },
+    { icon: IconLayoutGrid, label: "Inventory Browser", key: "InventoryBrowser", component: <InventoryBrowser /> },
     { icon: IconSettings, label: "Campaign Manager", key: "CampaignManager", component: <CampaignManager /> },
     { icon: IconWand, label: "Spells Manager", key: "SpellsManager", component: <SpellForm /> },
     { icon: IconCamera, label: "Cache Manager", key: "CacheManager", component: <CacheManager /> },

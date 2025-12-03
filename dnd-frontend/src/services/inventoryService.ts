@@ -14,6 +14,10 @@ export async function getInventoriesByCharacter(characterId: string, token: stri
   return apiClient(`${baseUrl}/character/${characterId}`, { method: "GET", token });
 }
 
+export async function getAllInventories(token: string): Promise<Inventory[]> {
+  return apiClient(`${baseUrl}/all`, { method: "GET", token });
+}
+
 export async function getInventory(id: string, token: string): Promise<Inventory> {
   return apiClient(`${baseUrl}/${id}`, { method: "GET", token });
 }
@@ -30,6 +34,9 @@ export async function deleteInventory(id: string, token: string): Promise<void> 
   await apiClient(`${baseUrl}/${id}`, { method: "DELETE", token });
 }
 
+export async function assignInventoryToCharacter(inventoryId: string, characterId: string, token: string ): Promise<Inventory[]> {
+  return apiClient(`${baseUrl}/${inventoryId}/assign-to/${characterId}`, { method: "PATCH", token });
+}
 // ------------------------
 // Inventory Item Operations
 // ------------------------

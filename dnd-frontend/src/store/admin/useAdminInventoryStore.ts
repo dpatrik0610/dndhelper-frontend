@@ -12,6 +12,7 @@ import {
   updateItem as updateItemService,
   moveItem as moveItemService,
   addOrIncrementExisting,
+  getAllInventories,
   type MoveItemRequest,
   type ModifyEquipmentAmount,
 } from "../../services/inventoryService";
@@ -33,6 +34,7 @@ interface AdminInventoryStore {
   applyInventoryDelete: (id: string) => void;
 
   loadByCharacter: (characterId: string) => Promise<void>;
+  loadAll: () => Promise<void>;
   refreshInventories: (characterId?: string) => Promise<void>;
   refreshSelected: () => Promise<void>;
   select: (id: string | null) => void;
@@ -109,6 +111,23 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       }
     },
 
+    // === LOAD ALL INVENTORIES (ADMIN BROWSE) ===
+    loadAll: async () => {
+      set({ loading: true });
+      try {
+        const data = await getAllInventories(getToken());
+        set({ inventories: data, selected: data[0] ?? null });
+      } catch (err) {
+        showNotification({
+          title: "Error loading inventories",
+          message: String(err),
+          color: SectionColor.Red,
+        });
+      } finally {
+        set({ loading: false });
+      }
+    },
+
     // === MANUALLY SELECT AN INVENTORY ===
     select: (id) => {
       const { inventories } = get();
@@ -122,7 +141,10 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         get().selected?.characterIds?.[0] ||
         get().inventories[0]?.characterIds?.[0];
 
-      if (!charId) return;
+      if (!charId) {
+        await get().loadAll();
+        return;
+      }
       try {
         const refreshed = await getInventoriesByCharacter(charId, getToken());
         const owned = refreshed.filter((i) => i.characterIds?.includes(charId));
