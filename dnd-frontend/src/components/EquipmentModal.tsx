@@ -28,6 +28,7 @@ import CustomBadge from "./common/CustomBadge";
 import DisplayText from "./common/DisplayText";
 import { ExpandableSection } from "./ExpendableSection";
 import { SectionColor } from "../types/SectionColor";
+import { MarkdownRenderer } from "./MarkdownRender";
 
 interface EquipmentModalProps {
   opened: boolean;
@@ -53,6 +54,9 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
       .catch((err: any) => console.error("Failed to load equipment", err))
       .finally(() => setLoading(false));
   }, [opened, equipmentId, token]);
+
+  const descriptionContent = equipment?.description?.join("\n\n") ?? "";
+  const dmDescriptionContent = equipment?.dmDescription?.join("\n\n") ?? "";
 
   return (
     <Modal
@@ -199,14 +203,8 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
 
           {/* ======== DESCRIPTION ======== */}
           <ExpandableSection title="Description" color={SectionColor.Violet} defaultOpen>
-            {equipment.description?.length ? (
-              <Stack gap={6}>
-                {equipment.description.map((line, i) => (
-                  <Text key={i} size="sm" lh={1.5} c="gray.1">
-                    {line}
-                  </Text>
-                ))}
-              </Stack>
+            {descriptionContent ? (
+              <MarkdownRenderer content={descriptionContent} />
             ) : (
               <Text size="sm" c="dimmed">
                 No description provided.
@@ -217,14 +215,11 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
           {/* ======== DM DESCRIPTION (Admin only) ======== */}
           {isAdmin && (
             <ExpandableSection title="DM Notes" color={SectionColor.Red}>
-              {equipment.dmDescription?.length ? (
-                <Stack gap={6}>
-                  {equipment.dmDescription.map((line, i) => (
-                    <Text key={i} size="sm" lh={1.5} c="red.1">
-                      {line}
-                    </Text>
-                  ))}
-                </Stack>
+              {dmDescriptionContent ? (
+                <MarkdownRenderer
+                  content={dmDescriptionContent}
+                  textColor="red.1"
+                />
               ) : (
                 <Text size="sm" c="dimmed">
                   No DM notes provided.

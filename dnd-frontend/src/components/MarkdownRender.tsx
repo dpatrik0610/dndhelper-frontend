@@ -23,6 +23,7 @@ interface MarkdownRendererProps {
   highlightQuery?: string;
   className?: string;
   style?: CSSProperties;
+  textColor?: string;
 }
 
 // --- Config / constants ---
@@ -186,6 +187,7 @@ export function MarkdownRenderer({
   highlightQuery,
   className,
   style,
+  textColor,
 }: MarkdownRendererProps) {
   return (
     <div
@@ -200,7 +202,7 @@ export function MarkdownRenderer({
               <Text
                 span
                 size="sm"
-                c="gray.2"
+                c={textColor ?? "gray.2"}
                 style={{ lineHeight: PARAGRAPH_STYLE.lineHeight }}
               >
                 {transformChildren(children, highlightQuery)}
