@@ -23,7 +23,7 @@ import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInven
 import { useAdminCurrencyStore } from "../../../../../store/admin/useAdminCurrencyStore";
 import { useAdminCharacterStore } from "../../../../../store/admin/useAdminCharacterStore";
 import { useAuthStore } from "../../../../../store/useAuthStore";
-import { updateCharacter } from "../../../../../services/characterService";
+import { getCharacterById, updateCharacter } from "../../../../../services/characterService";
 import { showNotification } from "../../../../../components/Notification/Notification";
 import { SectionColor } from "../../../../../types/SectionColor";
 import { ItemModal } from "../InventoryItems/ItemModal";
@@ -121,15 +121,18 @@ export function InventoryHeader() {
     setSyncing(true);
     try {
       await Promise.all(
-        targets.map((c) =>
-          updateCharacter(
+        targets.map(async (c) => {
+          const fullCharacter = await getCharacterById(c.id!, token);
+          if (!fullCharacter) return;
+          const mergedIds = Array.from(new Set([...(fullCharacter.inventoryIds ?? []), invId]));
+          return updateCharacter(
             {
-              ...c,
-              inventoryIds: [...(c.inventoryIds ?? []), invId],
+              ...fullCharacter,
+              inventoryIds: mergedIds,
             },
             token
-          )
-        )
+          );
+        })
       );
       showNotification({
         title: "Synced",
