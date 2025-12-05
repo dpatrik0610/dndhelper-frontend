@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Text, Tooltip } from "@mantine/core";
+import { Tooltip } from "@mantine/core";
 import { IconArrowsExchange } from "@tabler/icons-react";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useState } from "react";
