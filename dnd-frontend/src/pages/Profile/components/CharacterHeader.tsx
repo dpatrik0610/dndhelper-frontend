@@ -15,6 +15,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { CharacterCurrencyArea } from "../../../components/CharacterCurrencyArea";
 import { showNotification } from "../../../components/Notification/Notification";
 import { HpRing } from "./HpRing";
+import { SwitchCharacterButton } from "./SwitchCharacterButton";
 
 export function CharacterHeader() {
   const character = useCharacterStore((s) => s.character)!;
@@ -72,8 +73,6 @@ export function CharacterHeader() {
         }}
       />
 
-      <Group justify="space-between" wrap="wrap" />
-
       <Grid align="stretch">
         {/* LEFT: Portrait + Basics */}
         <Grid.Col span={{ base: 12, sm: 7 }}>
@@ -91,13 +90,16 @@ export function CharacterHeader() {
                 width: "100%",
               }}
             >
-              <Title
-                order={2}
-                c="white"
-                lh={1.1}
-                style={{ textShadow: "0 0 6px rgba(255,255,255,0.3)" }}
-              >
-                {character.name}
+              <Group align="center" gap="xs" justify={isMobile ? "center" : "flex-start"}>
+                <Title
+                  order={2}
+                  c="white"
+                  lh={1.1}
+                  style={{ textShadow: "0 0 6px rgba(255,255,255,0.3)" }}
+                >
+                  {character.name}
+                </Title>
+                <SwitchCharacterButton />
                 {character.hitPoints <= 0 && (
                   <Badge
                     size="sm"
@@ -110,7 +112,7 @@ export function CharacterHeader() {
                     Dead
                   </Badge>
                 )}
-              </Title>
+              </Group>
 
               <Group
                 gap={10}
