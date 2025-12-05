@@ -1,9 +1,8 @@
-import { Button, Group, Paper, Stack, Table, Text, TextInput, Title, Textarea, ActionIcon, Badge, Switch, Box } from "@mantine/core";
+import { Button, Group, Paper, Stack, Table, Text, TextInput, Title, Textarea, ActionIcon, Badge, Switch } from "@mantine/core";
 import { IconPlus, IconRefresh, IconTrash, IconEye, IconCheck, IconLock } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSessionStore } from "../../../store/session/useSessionStore";
 import { sessionTemplate, type Session } from "../../../types/Session";
-import ReactMarkdown from "react-markdown";
 import { useAdminCampaignStore } from "../../../store/admin/useAdminCampaignStore";
 import "../../../styles/glassyInput.css";
 import { BaseModal } from "../../../components/BaseModal";

@@ -63,12 +63,8 @@ export function CustomDateInput({ label = "Scheduled For", value, onChange }: Cu
                 day: "glassy-date-day",
                 month: "glassy-date-month",
                 weekday: "glassy-date-weekday",
-                year: "glassy-date-year",
-                monthPickerControl: "glassy-date-month",
-                yearPickerControl: "glassy-date-year",
                 calendarHeaderControl: "glassy-date-header",
                 calendarHeaderLevel: "glassy-date-header",
-                dropdown: "glassy-date-dropdown",
               }}
               firstDayOfWeek={1}
             />
