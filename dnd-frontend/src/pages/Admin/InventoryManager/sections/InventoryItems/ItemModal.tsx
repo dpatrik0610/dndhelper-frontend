@@ -1,24 +1,14 @@
-import {
-  Stack,
-  NumberInput,
-  TextInput,
-  Group,
-  Textarea,
-  Divider,
-  Loader,
-  Center,
-  Select,
-} from "@mantine/core";
+import { Modal, Loader, Center } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { BaseModal } from "../../../../../components/BaseModal";
+import { EquipmentFormModal } from "../../../../../components/admin/EquipmentFormModal";
 import { showNotification } from "../../../../../components/Notification/Notification";
 import { SectionColor } from "../../../../../types/SectionColor";
-import { EQUIPMENT_TIERS, type Equipment } from "../../../../../types/Equipment/Equipment";
+import type { Equipment } from "../../../../../types/Equipment/Equipment";
+import { defaultEquipment } from "../../../../../pages/Admin/ItemManager/defaultEquipment";
 import { getEquipmentById } from "../../../../../services/equipmentService";
 import { useAuthStore } from "../../../../../store/useAuthStore";
 import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInventoryStore";
 import "../../../../../styles/glassyInput.css";
-import { TagsInput } from "./TagsInput";
 
 interface ItemModalProps {
   opened: boolean;
@@ -45,19 +35,7 @@ export function ItemModal({
 
       // 🆕 Create mode
       if (!equipmentId && !editMode) {
-        setEquipment({
-          index: "",
-          name: "",
-          description: [],
-          cost: { quantity: 0, unit: "gp" },
-          damage: undefined,
-          range: undefined,
-          weight: 0,
-          isCustom: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          isDeleted: false,
-        });
+        setEquipment(defaultEquipment);
         return;
       }
 
@@ -87,21 +65,22 @@ export function ItemModal({
     value: Equipment[K]
   ) => setEquipment((prev) => (prev ? { ...prev, [key]: value } : prev));
 
-  const handleSave = async () => {
-    if (!equipment) return;
+  const handleSave = async (payload?: Equipment) => {
+    const eq = payload ?? equipment;
+    if (!eq) return;
     try {
       if (editMode && equipmentId) {
-        await updateEquipment(equipment);
+        await updateEquipment(eq);
         showNotification({
           title: "Equipment updated",
-          message: `${equipment.name} saved successfully.`,
+          message: `${eq.name} saved successfully.`,
           color: SectionColor.Green,
         });
       } else {
-        await addItem(equipment);
+        await addItem(eq);
         showNotification({
           title: "Equipment created",
-          message: `${equipment.name} added successfully.`,
+          message: `${eq.name} added successfully.`,
           color: SectionColor.Green,
         });
       }
@@ -115,185 +94,30 @@ export function ItemModal({
     }
   };
 
-  if (loading || !equipment)
-    return (
-      <BaseModal opened={opened} onClose={onClose} title="Loading Equipment...">
-        <Center h={200}>
-          <Loader color="grape" />
-        </Center>
-      </BaseModal>
-    );
-
   return (
-    <BaseModal
-      opened={opened}
-      onClose={onClose}
-      title={
-        editMode && equipmentId
-          ? `Edit Equipment: ${equipment.name}`
-          : "Create New Equipment"
-      }
-      onSave={handleSave}
-      saveLabel={editMode && equipmentId ? "Save Changes" : "Add Item"}
-    >
-      <Stack gap="xs">
-        <TextInput
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-          label="Name"
-          value={equipment.name}
-          onChange={(e) => handleChange("name", e.currentTarget.value)}
+    <>
+      {loading && !equipment && (
+        <Modal opened={opened} onClose={onClose} withCloseButton={false} centered>
+          <Center h={200}>
+            <Loader color="grape" />
+          </Center>
+        </Modal>
+      )}
+
+      {equipment && (
+        <EquipmentFormModal
+          opened={opened}
+          initial={equipment}
+          saving={loading}
+          onClose={onClose}
+          onSubmit={async (item) => {
+            setEquipment(item);
+            await handleSave(item);
+          }}
+          title={editMode && equipmentId ? `Edit Equipment: ${equipment.name}` : "Create New Equipment"}
+          submitLabel={editMode && equipmentId ? "Save changes" : "Add Item"}
         />
-
-        <TextInput
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-          label="Index"
-          value={equipment.index}
-          onChange={(e) => handleChange("index", e.currentTarget.value)}
-        />
-
-        <Textarea
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-          label="Description"
-          autosize
-          minRows={2}
-          value={equipment.description?.join("\n") ?? ""}
-          onChange={(e) =>
-            handleChange("description", e.currentTarget.value.split("\n"))
-          }
-        />
-
-        <Divider label="Cost & Weight" labelPosition="center" my="sm" />
-
-        <Group grow>
-          <NumberInput
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-            label="Cost"
-            min={0}
-            value={equipment.cost?.quantity ?? 0}
-            onChange={(v) =>
-              handleChange("cost", {
-                quantity: Number(v ?? 0),
-                unit: equipment.cost?.unit ?? "gp",
-              })
-            }
-          />
-          <TextInput
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-            label="Unit"
-            value={equipment.cost?.unit ?? "gp"}
-            onChange={(e) =>
-              handleChange("cost", {
-                quantity: equipment.cost?.quantity ?? 0,
-                unit: e.currentTarget.value,
-              })
-            }
-          />
-          <NumberInput
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-            label="Weight (lb)"
-            min={0}
-            value={equipment.weight ?? 0}
-            onChange={(v) => handleChange("weight", Number(v ?? 0))}
-          />
-        </Group>
-
-        <Divider label="Combat" labelPosition="center" my="sm" />
-
-        <Group grow>
-          <TextInput
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-            label="Damage Dice"
-            placeholder="e.g. 1d8"
-            value={equipment.damage?.damageDice ?? ""}
-            onChange={(e) =>
-              handleChange(
-                "damage",
-                e.currentTarget.value
-                  ? {
-                      damageDice: e.currentTarget.value,
-                      damageType: {
-                        name: equipment.damage?.damageType?.name ?? "Physical",
-                      },
-                    }
-                  : undefined
-              )
-            }
-          />
-          <TextInput
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-            label="Damage Type"
-            placeholder="e.g. Slashing"
-            value={equipment.damage?.damageType?.name ?? ""}
-            onChange={(e) =>
-              handleChange("damage", {
-                damageDice: equipment.damage?.damageDice || "",
-                damageType: { name: e.currentTarget.value },
-              })
-            }
-          />
-        </Group>
-
-        <Group grow>
-          <NumberInput
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-            label="Range (normal)"
-            min={0}
-            value={equipment.range?.normal ?? 0}
-            onChange={(v) =>
-              handleChange("range", {
-                normal: Number(v ?? 0),
-                long: equipment.range?.long ?? 0,
-              })
-            }
-          />
-          <NumberInput
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-            label="Range (long)"
-            min={0}
-            value={equipment.range?.long ?? 0}
-            onChange={(v) =>
-              handleChange("range", {
-                normal: equipment.range?.normal ?? 0,
-                long: Number(v ?? 0),
-              })
-            }
-          />
-        </Group>
-        <Divider label="DM Description" labelPosition="center" my="sm" />
-
-        <Textarea
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-          label="DM Description"
-          description="Private notes visible only to the DM/admin."
-          autosize
-          minRows={2}
-          value={equipment.dmDescription?.join("\n") ?? ""}
-          onChange={(e) =>
-            handleChange(
-              "dmDescription",
-              e.currentTarget.value.split("\n")
-            )
-          }
-        />
-
-        <Divider label="Tier" labelPosition="center" my="sm" />
-
-        <Select
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-          label="Tier"
-          placeholder="Select tier..."
-          value={equipment.tier ?? ""}
-          onChange={(val) => handleChange("tier", val ?? "Unspecified")}
-          searchable
-          data={EQUIPMENT_TIERS.map((t) => ({ label: t, value: t }))}
-          nothingFoundMessage="No tiers"
-          allowDeselect
-        />
-
-        <Divider label="Tags" labelPosition="center" my="sm" />
-
-        <TagsInput equipment={equipment} handleChange={handleChange} />
-      </Stack>
-    </BaseModal>
+      )}
+    </>
   );
 }

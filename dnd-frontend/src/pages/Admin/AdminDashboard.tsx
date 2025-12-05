@@ -1,4 +1,4 @@
-import { Box, SimpleGrid, Stack, Transition } from "@mantine/core";
+import { Box, Button, Group, Paper, ScrollArea, SimpleGrid, Stack, Text, ThemeIcon, Transition } from "@mantine/core";
 import {
   IconUsers,
   IconSettings,
@@ -9,9 +9,9 @@ import {
   IconCamera,
   IconGhost,
   IconLayoutGrid,
+  IconRefresh,
 } from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
-import { BackToDashboardButton } from "./components/BackToDashboardButton";
 import { useAdminDashboardStore, type AdminSection } from "../../store/useAdminDashboardStore";
 import { InventoryManager } from "./InventoryManager/InventoryManager";
 import { useEffect, useState, type JSX, type ForwardRefExoticComponent } from "react";
@@ -23,6 +23,7 @@ import { CacheManager } from "./CacheManager/CacheManager";
 import { UserManager } from "./UserManager/UserManager";
 import { MonsterManager } from "./MonsterManager/MonsterManager";
 import { InventoryBrowser } from "./InventoryBrowser/InventoryBrowser";
+import { ItemManager } from "./ItemManager/ItemManager";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -47,7 +48,7 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconCamera, label: "Cache Manager", key: "CacheManager", component: <CacheManager /> },
     { icon: IconUsers, label: "User Manager", key: "UserManager", component: <UserManager /> },
     { icon: IconGhost, label: "Monster Manager", key: "MonsterManager", component: <MonsterManager /> },
-    { icon: IconCategory, label: "Item Manager", key: "ItemManager", component: <Box ta="center">Item Manager (coming soon)</Box> },
+    { icon: IconCategory, label: "Item Manager", key: "ItemManager", component: <ItemManager /> },
   ];
 
   const currentItem = navItems.find((n) => n.key === activeSection);
@@ -56,41 +57,113 @@ export const AdminDashboard: React.FC = () => {
   return (
     <>
       <Box
+        p="md"
         style={{
           minHeight: "100vh",
           position: "relative",
           overflowX: "hidden",
         }}
       >
-        {/* Hide dashboard content until a campaign is selected */}
         {!selectedCampaignId ? null : (
           <>
-            <Transition mounted={isDashboard} transition="slide-right" duration={300} timingFunction="ease">
-              {(styles) => (
-                <Stack align="center" gap="lg" style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
-                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl" mt="md">
-                    {navItems.map((item) => (
-                      <DashboardCard
-                        key={item.key}
-                        icon={<item.icon size={48} />}
-                        title={item.label}
-                        onClick={() => setActiveSection(item.key)}
-                      />
-                    ))}
-                  </SimpleGrid>
+            {!isDashboard && (
+              <Paper
+                shadow="lg"
+                radius="md"
+                withBorder
+                p="sm"
+                style={{
+                  background: "linear-gradient(135deg, rgba(38, 20, 60, 0.85), rgba(24, 12, 40, 0.85))",
+                  borderColor: "rgba(150, 80, 255, 0.4)",
+                  backdropFilter: "blur(10px)",
+                }}
+              >
+                <Stack gap="xs">
+                  <Group justify="space-between" align="center">
+                  <Group gap="xs">
+                    <ThemeIcon size={34} radius="xl" variant="gradient" gradient={{ from: "grape", to: "violet" }}>
+                      <IconLayoutGrid size={16} />
+                    </ThemeIcon>
+                    <Box>
+                      <Text fw={700} size="md">
+                        Admin Dashboard
+                      </Text>
+                      <Text size="xs" c="dimmed">
+                        Quick jump between managers
+                      </Text>
+                    </Box>
+                  </Group>
+                    <Group gap="xs">
+                      <Button
+                        size="xs"
+                        variant="light"
+                        color="grape"
+                        onClick={() => setActiveSection("Dashboard")}
+                      >
+                        Dashboard
+                      </Button>
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        color="grape"
+                        leftSection={<IconRefresh size={14} />}
+                        onClick={() => setCampaignModal(true)}
+                      >
+                        Switch campaign
+                      </Button>
+                    </Group>
+                  </Group>
+
+                  <ScrollArea type="hover" scrollbarSize={6} offsetScrollbars>
+                    <Group gap="xs" wrap="nowrap">
+                      {navItems.map((item) => {
+                        const isActive = item.key === activeSection;
+
+                        return (
+                          <Button
+                            key={item.key}
+                            size="xs"
+                            variant={isActive ? "filled" : "outline"}
+                            color="grape"
+                            leftSection={<item.icon size={16} />}
+                            onClick={() => setActiveSection(item.key)}
+                          >
+                            {item.label}
+                          </Button>
+                        );
+                      })}
+                    </Group>
+                  </ScrollArea>
                 </Stack>
-              )}
-            </Transition>
+              </Paper>
+            )}
 
-            <Transition mounted={!isDashboard} transition="slide-left" duration={300} timingFunction="ease">
-              {(styles) => (
-                <Box style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
-                  {currentItem?.component}
-                </Box>
-              )}
-            </Transition>
+            <Box mt="md" style={{ position: "relative", minHeight: "70vh" }}>
+              <Transition mounted={isDashboard} transition="slide-right" duration={300} timingFunction="ease">
+                {(styles) => (
+                  <Stack align="center" gap="lg" style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
+                    <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl" mt="md">
+                      {navItems.map((item) => (
+                        <DashboardCard
+                          key={item.key}
+                          icon={<item.icon size={48} />}
+                          title={item.label}
+                          onClick={() => setActiveSection(item.key)}
+                        />
+                      ))}
+                    </SimpleGrid>
+                  </Stack>
+                )}
+              </Transition>
 
-            {!isDashboard && <BackToDashboardButton />}
+              <Transition mounted={!isDashboard} transition="slide-left" duration={300} timingFunction="ease">
+                {(styles) => (
+                  <Box style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
+                    {currentItem?.component}
+                  </Box>
+                )}
+              </Transition>
+            </Box>
           </>
         )}
       </Box>

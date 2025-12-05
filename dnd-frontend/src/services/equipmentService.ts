@@ -43,6 +43,17 @@ export async function createEquipment(equipment: Equipment, token: string): Prom
 }
 
 /**
+ * Create many equipment items at once.
+ */
+export async function createManyEquipment(equipments: Equipment[], token: string): Promise<Equipment[]> {
+  return apiClient(`${baseUrl}/many`, {
+    method: "POST",
+    token,
+    body: equipments,
+  });
+}
+
+/**
  * Update an equipment item by ID.
  */
 export async function updateEquipmentById(id: string, equipment: Equipment, token: string): Promise<Equipment> {

@@ -17,6 +17,7 @@ interface BaseModalProps {
   closeOnEscape?: boolean;
   withCloseButton?: boolean;
   fullScreen?: boolean;
+  hideHeader?: boolean;
 }
 
 export const BaseModal: React.FC<BaseModalProps> = ({
@@ -34,18 +35,30 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   closeOnEscape = true,
   withCloseButton = true,
   fullScreen = false,
+  hideHeader = false,
 }) => {
+  const headerVisible = !hideHeader;
+  const headerStyles = hideHeader
+    ? { display: "none" }
+    : {
+        borderBottom: "1px solid rgba(255, 100, 100, 0.2)",
+        background: "transparent",
+        paddingLeft: "1rem",
+      };
+
   return (
     <Modal
       opened={opened}
       onClose={onClose}
       title={
-        <Text fw={600} size="lg" c="red.3" style={{ letterSpacing: 0.5 }}>
-          {title}
-        </Text>
+        headerVisible ? (
+          <Text fw={600} size="lg" c="red.3" style={{ letterSpacing: 0.5 }}>
+            {title}
+          </Text>
+        ) : undefined
       }
       size={fullScreen ? "100%" : size}
-      withCloseButton={withCloseButton}
+      withCloseButton={headerVisible && withCloseButton}
       closeOnClickOutside={closeOnClickOutside && !loading}
       closeOnEscape={closeOnEscape && !loading}
       overlayProps={{
@@ -73,11 +86,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
           padding: fullScreen ? "5px" : undefined,
           paddingTop: 0
         },
-        header: {
-          borderBottom: "1px solid rgba(255, 100, 100, 0.2)",
-          background: "transparent",
-          paddingLeft: "1rem",
-        },
+        header: headerStyles,
         body: {
           paddingTop: "1rem",
         },
