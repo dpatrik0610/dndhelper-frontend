@@ -9,6 +9,7 @@ export interface CustomBadgeProps extends Omit<MantineBadgeProps, 'children'> {
   hoverText?: string;
   lineBreak?: boolean;
   divider?: 'horizontal' | 'vertical' | false;
+  onClick?: () => void;
 }
 
 export default function CustomBadge({
@@ -21,6 +22,7 @@ export default function CustomBadge({
   hoverText,
   lineBreak = false,
   divider = false,
+  onClick,
   ...props
 }: CustomBadgeProps) {
   const badge = (
@@ -29,6 +31,8 @@ export default function CustomBadge({
       variant={variant}
       leftSection={iconPosition === 'left' ? icon : undefined}
       rightSection={iconPosition === 'right' ? icon : undefined}
+      onClick={onClick}
+      style={onClick ? { cursor: "pointer" } : undefined}
       {...props}
     >
       {label}
