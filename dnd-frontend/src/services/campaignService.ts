@@ -11,6 +11,10 @@ export async function getCampaignById(id: string, token: string): Promise<Campai
   return apiClient<Campaign>(`/Campaign/${id}`, { token })
 }
 
+export async function getCampaignBasicById(id: string, token: string): Promise<Pick<Campaign, "id" | "name" | "description" | "isActive" | "currentSessionId" | "sessionIds" | "ownerIds">> {
+  return apiClient(`/Campaign/${id}/basic`, { token });
+}
+
 export async function createCampaign(campaign: Campaign, token: string): Promise<Campaign> {
   return apiClient<Campaign>("/Campaign/create", { method: "POST", body: campaign, token})
 }
