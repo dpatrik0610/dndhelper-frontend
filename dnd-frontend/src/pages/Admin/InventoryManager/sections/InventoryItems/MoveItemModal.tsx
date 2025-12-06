@@ -4,7 +4,6 @@ import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInven
 import { BaseModal } from "../../../../../components/BaseModal";
 import { showNotification } from "../../../../../components/Notification/Notification";
 import { SectionColor } from "../../../../../types/SectionColor";
-import "../../../../../styles/glassyInput.css";
 
 interface MoveItemModalProps {
   opened: boolean;

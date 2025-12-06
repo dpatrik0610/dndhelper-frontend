@@ -3,7 +3,6 @@ import { IconSword } from "@tabler/icons-react";
 import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
-import "../../../styles/glassyInput.css";
 
 import { FormNumberInput } from "../../../components/common/FormNumberInput";
 // import { WheelPickerInput } from "../../../components/common/WheelPickerInput"; // 🔧 Disabled for now

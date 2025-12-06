@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Stack, Select, NumberInput } from "@mantine/core";
 import { BaseModal } from "../../../components/BaseModal";
 import type { Inventory } from "../../../types/Inventory/Inventory";
-import "../../../styles/glassyInput.css"
 
 interface MoveItemModalProps {
   opened: boolean;

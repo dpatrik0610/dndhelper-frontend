@@ -23,7 +23,6 @@ import { EQUIPMENT_TIERS, type Equipment } from "../../../types/Equipment/Equipm
 import { EquipmentFormModal } from "../../../components/admin/EquipmentFormModal";
 import { ImportModal } from "./components/ImportModal";
 import { useItemFilters } from "./components/useItemFilters";
-import "../../../styles/glassyInput.css";
 
 export function ItemManager() {
   const { equipments, loading, loadAll, searchByName, create, update, remove } = useAdminEquipmentStore();

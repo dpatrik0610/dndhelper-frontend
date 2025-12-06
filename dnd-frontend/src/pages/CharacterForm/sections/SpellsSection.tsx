@@ -7,7 +7,6 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import {  IconTrash, IconWand } from "@tabler/icons-react";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 import { SectionColor } from "../../../types/SectionColor";
-import "../../../styles/glassyInput.css"
 
 
 export function SpellsSection() {

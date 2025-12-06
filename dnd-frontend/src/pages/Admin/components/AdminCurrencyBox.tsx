@@ -22,7 +22,6 @@ import { useAdminCurrencyStore } from "../../../store/admin/useAdminCurrencyStor
 import { SectionColor } from "../../../types/SectionColor";
 import type { Currency } from "../../../types/Currency";
 import CustomBadge from "../../../components/common/CustomBadge";
-import "../../../styles/glassyInput.css"
 
 export function AdminCurrencyBox() {
   const {

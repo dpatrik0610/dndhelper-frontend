@@ -6,7 +6,6 @@ import { useNoteStore } from "../../../store/useNoteStore";
 import { showNotification } from "@mantine/notifications";
 import { BaseModal } from "../../../components/BaseModal";
 import { MarkdownTextarea } from "../../../components/common/MarkdownTextarea";
-import "../../../styles/glassyInput.css"
 
 interface EditNoteModalProps {
   opened: boolean;

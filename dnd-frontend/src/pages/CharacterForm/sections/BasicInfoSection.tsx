@@ -6,7 +6,6 @@ import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 import { FormNumberInput } from "../../../components/common/FormNumberInput";
 import { InfoIconPopover } from "../../../components/common/InfoIconPopover";
 import { useEffect } from "react";
-import "../../../styles/glassyInput.css";
 
 const ALIGNMENTS = [
   "Lawful Good","Neutral Good","Chaotic Good",

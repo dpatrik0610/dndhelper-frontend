@@ -4,7 +4,6 @@ import { useCharacterStore } from "../../../store/useCharacterStore";
 import { updateCharacter } from "../../../services/characterService";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { FormNumberInput } from "../../../components/common/FormNumberInput";
-import "../../../styles/glassyInput.css";
 
 interface RemoveCurrencyModalProps {
   opened: boolean;

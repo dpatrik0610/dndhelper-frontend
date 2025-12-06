@@ -17,7 +17,6 @@ import type { Spell } from "../../../types/Spell";
 import { showNotification } from "../../../components/Notification/Notification";
 import { SectionColor } from "../../../types/SectionColor";
 import { createSpell } from "../../../services/spellService";
-import "../../../styles/glassyInput.css";
 
 const DAMAGE_TYPES = [
   "Acid", "Cold", "Fire", "Force", "Lightning", "Necrotic",

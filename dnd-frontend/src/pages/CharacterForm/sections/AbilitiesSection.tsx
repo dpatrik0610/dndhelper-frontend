@@ -15,7 +15,6 @@ import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 import { FormNumberInput } from "../../../components/common/FormNumberInput";
 import type { SavingThrows } from "../../../types/Character/SavingThrows";
 import { InfoIconPopover } from "../../../components/common/InfoIconPopover";
-import "../../../styles/glassyInput.css";
 import { abilityTooltips, saveTooltips } from "../Tooltips/tooltips";
 
 const map = {

@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useSessionStore } from "../../../store/session/useSessionStore";
 import { sessionTemplate, type Session } from "../../../types/Session";
 import { useAdminCampaignStore } from "../../../store/admin/useAdminCampaignStore";
-import "../../../styles/glassyInput.css";
 import { BaseModal } from "../../../components/BaseModal";
 import { CustomDateInput } from "../../../components/common/CustomDateInput";
 import dayjs from "dayjs";

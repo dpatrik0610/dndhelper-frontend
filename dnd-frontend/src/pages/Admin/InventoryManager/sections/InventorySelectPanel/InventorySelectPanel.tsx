@@ -6,7 +6,6 @@ import { InventoryNavbar } from "./InventoryNavbar";
 import { BaseModal } from "../../../../../components/BaseModal";
 import { showNotification } from "../../../../../components/Notification/Notification";
 import { SectionColor } from "../../../../../types/SectionColor";
-import "../../../../../styles/glassyInput.css";
 
 export function InventorySelectPanel() {
   const { loading, loadByCharacter, create } = useAdminInventoryStore();

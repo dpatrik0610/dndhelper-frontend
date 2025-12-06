@@ -5,7 +5,6 @@ import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNoteStore } from "../../../store/useNoteStore";
 import { showNotification } from "../../../components/Notification/Notification";
 import { MarkdownTextarea } from "../../../components/common/MarkdownTextarea";
-import "../../../styles/glassyInput.css";
 
 interface Props {
   opened: boolean;

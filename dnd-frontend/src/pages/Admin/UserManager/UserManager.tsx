@@ -22,7 +22,6 @@ import { EditUserModal } from "./components/EditUserModal";
 import { DeleteConfirmModal } from "./components/DeleteConfirmModal";
 import { UsersTable } from "./components/UsersTable";
 import { StatsGrid } from "./components/StatsGrid";
-import "../../../styles/glassyInput.css";
 
 export function UserManager() {
   const isMobile = useMediaQuery("(max-width: 768px)");

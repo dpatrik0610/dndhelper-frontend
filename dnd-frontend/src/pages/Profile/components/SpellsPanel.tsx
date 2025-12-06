@@ -22,7 +22,6 @@ import { useSpellStore } from "../../../store/useSpellStore";
 import CustomBadge from "../../../components/common/CustomBadge";
 import { useMediaQuery } from "@mantine/hooks";
 import { SpellModal } from "./SpellModal";
-import "../../../styles/glassyInput.css";
 
 export function SpellsPanel() {
   const token = useAuthStore.getState().token;

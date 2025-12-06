@@ -18,7 +18,6 @@ import type { Note } from "../../../types/Note";
 import { AddNoteModal } from "../../Profile/components/AddNoteModal";
 import { EditNoteModal } from "./EditNoteModal";
 import { showNotification } from "../../../components/Notification/Notification";
-import "../../../styles/glassyInput.css";
 
 export function NotesPanel() {
   const character = useCharacterStore((s) => s.character);

@@ -9,7 +9,6 @@ import type { Character } from "../../../types/Character/Character";
 import { loadCharacters } from "../../../utils/loadCharacter";
 import { BaseModal } from "../../../components/BaseModal";
 import { FormNumberInput } from "../../../components/common/FormNumberInput";
-import "../../../styles/glassyInput.css";
 
 interface Props {
   opened: boolean;

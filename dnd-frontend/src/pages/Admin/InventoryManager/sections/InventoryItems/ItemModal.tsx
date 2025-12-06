@@ -8,7 +8,6 @@ import { defaultEquipment } from "../../../../../pages/Admin/ItemManager/default
 import { getEquipmentById } from "../../../../../services/equipmentService";
 import { useAuthStore } from "../../../../../store/useAuthStore";
 import { useAdminInventoryStore } from "../../../../../store/admin/useAdminInventoryStore";
-import "../../../../../styles/glassyInput.css";
 
 interface ItemModalProps {
   opened: boolean;

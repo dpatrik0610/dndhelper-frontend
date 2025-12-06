@@ -4,7 +4,6 @@ import { ExpandableSection } from "../../../components/ExpendableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 import { FormNumberInput } from "../../../components/common/FormNumberInput";
-import "../../../styles/glassyInput.css";
 
 export function LoreSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();

@@ -18,7 +18,6 @@ import {
   useMemo,
   type SyntheticEvent,
 } from "react";
-import "../../styles/glassyInput.css";
 
 interface MarkdownTextareaProps {
   label?: string;

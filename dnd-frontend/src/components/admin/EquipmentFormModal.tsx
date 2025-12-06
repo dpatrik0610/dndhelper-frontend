@@ -13,7 +13,6 @@ import { useEffect, useState } from "react";
 import { EQUIPMENT_TIERS, type Equipment } from "../../types/Equipment/Equipment";
 import { defaultEquipment } from "../../pages/Admin/ItemManager/defaultEquipment";
 import { TagsInput } from "../../pages/Admin/InventoryManager/sections/InventoryItems/TagsInput";
-import "../../styles/glassyInput.css";
 
 interface EquipmentFormModalProps {
   opened: boolean;

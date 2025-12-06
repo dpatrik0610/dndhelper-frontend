@@ -6,7 +6,6 @@ import { updateCharacter } from "../../../services/characterService";
 import { showNotification } from "../../../components/Notification/Notification";
 import { SectionColor } from "../../../types/SectionColor";
 import { BaseModal } from "../../../components/BaseModal";
-import "../../../styles/glassyInput.css";
 
 interface HealModalProps {
   opened: boolean;
