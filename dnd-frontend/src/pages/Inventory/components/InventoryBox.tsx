@@ -159,7 +159,7 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
         title={currentInventory.name || "Undefined Inventory"}
         defaultOpen={false}
         color={
-          currentInventory.name === "Equipment"
+          currentInventory.name?.includes("Equipment")
             ? SectionColor.Yellow
             : SectionColor.Grape
         }
