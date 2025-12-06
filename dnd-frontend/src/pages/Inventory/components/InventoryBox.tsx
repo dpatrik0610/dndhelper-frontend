@@ -14,6 +14,7 @@ import { InventorySection } from "./InventorySection";
 import { InventoryItemsList } from "./InventoryItemsList";
 import { InventoryItemsGrid } from "./InventoryItemsGrid";
 import { useFilteredItems } from "../hooks/useFilteredItems";
+import { BaseTransition } from "../../../components/animations/BaseTransition";
 
 interface InventoryBoxProps {
   inventory: Inventory;
@@ -170,7 +171,7 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
             : SectionColor.Grape
         }
       >
-        {viewMode === "list" ? (
+        <BaseTransition show={viewMode === "list"}>
           <InventoryItemsList
             filteredItems={filteredItems}
             totalItemsCount={currentInventory.items?.length ?? 0}
@@ -178,7 +179,8 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
             onRemove={handleRemoveClick}
             onMove={handleMoveClick}
           />
-        ) : (
+        </BaseTransition>
+        <BaseTransition show={viewMode === "cards"}>
           <InventoryItemsGrid
             filteredItems={filteredItems}
             totalItemsCount={currentInventory.items?.length ?? 0}
@@ -186,7 +188,7 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
             onRemove={handleRemoveClick}
             onMove={handleMoveClick}
           />
-        )}
+        </BaseTransition>
       </InventorySection>
     </>
   );
