@@ -104,6 +104,7 @@ export function AbilityScores() {
         borderRadius: "10px",
         transition: "all 0.25s ease-in-out",
       }}
+      expandable={false}
     >
       <Stack gap="md">
         {abilityConfigs.map((cfg) => {

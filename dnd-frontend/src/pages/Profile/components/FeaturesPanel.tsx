@@ -68,6 +68,7 @@ export function FeaturesPanel() {
         boxShadow: "0 0 12px rgba(170, 90, 255, 0.25)",
         padding: "12px 16px",
       }}
+      expandable={false}
     >
       <Stack gap="md">
         <Group gap="xs" align="center">

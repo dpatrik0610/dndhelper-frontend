@@ -2,6 +2,7 @@ import { useState, type ReactNode, type CSSProperties } from "react";
 import { Paper, Group, Text, ActionIcon, Collapse } from "@mantine/core";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 import { SectionColor } from "../types/SectionColor";
+import { BaseTransition } from "./animations/BaseTransition";
 
 interface ExpandableSectionProps {
   title: string;
@@ -15,6 +16,8 @@ interface ExpandableSectionProps {
   padding?: number | string;
   marginTop?: number | string;
   marginBottom?: number | string;
+  animated?: boolean;
+  expandable?: boolean;
 }
 
 export function ExpandableSection({
@@ -29,6 +32,8 @@ export function ExpandableSection({
   padding = "md",
   marginTop = "sm",
   marginBottom = "sm",
+  animated = false,
+  expandable = true,
 }: ExpandableSectionProps) {
   const [opened, setOpened] = useState(defaultOpen);
 
@@ -48,8 +53,8 @@ export function ExpandableSection({
     >
       <Group
         justify="space-between"
-        onClick={() => setOpened(!opened)}
-        style={{ cursor: "pointer" }}
+        onClick={() => expandable && setOpened(!opened)}
+        style={{ cursor: expandable ? "pointer" : "default" }}
       >
         <Group gap="xs">
           {icon}
@@ -59,14 +64,26 @@ export function ExpandableSection({
             </Text>
           )}
         </Group>
-        <ActionIcon color={color} variant="light" size="sm" radius="xl">
-          {opened ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
-        </ActionIcon>
+        {expandable && (
+          <ActionIcon color={color} variant="light" size="sm" radius="xl">
+            {opened ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
+          </ActionIcon>
+        )}
       </Group>
 
-      <Collapse in={opened} transitionDuration={200}>
+      {expandable ? (
+        <Collapse in={opened} transitionDuration={200}>
+          {animated ? (
+            <BaseTransition show={opened} variant="fade" layout={false}>
+              <div style={{ marginTop: "0.75rem" }}>{children}</div>
+            </BaseTransition>
+          ) : (
+            <div style={{ marginTop: "0.75rem" }}>{children}</div>
+          )}
+        </Collapse>
+      ) : (
         <div style={{ marginTop: "0.75rem" }}>{children}</div>
-      </Collapse>
+      )}
     </Paper>
   );
 }

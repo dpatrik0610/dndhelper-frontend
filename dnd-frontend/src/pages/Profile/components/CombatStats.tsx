@@ -115,6 +115,7 @@ export function CombatStats() {
         transition: "all 0.25s ease",
         overflow: "hidden",
       }}
+      expandable={false}
     >
       {/* Death Saves on top (using StatBox) */}
       <SimpleGrid
