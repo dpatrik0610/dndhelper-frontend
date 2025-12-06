@@ -1,5 +1,5 @@
 import { Stack } from "@mantine/core";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { IconBook2 } from "@tabler/icons-react";
 import { ListEditor } from "../components/ListEditor";

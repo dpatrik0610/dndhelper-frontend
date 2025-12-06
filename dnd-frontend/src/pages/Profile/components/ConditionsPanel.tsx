@@ -6,7 +6,7 @@ import {
   ActionIcon,
 } from "@mantine/core";
 import { IconSearch, IconSparkles } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { getCondition } from "../../../services/conditionService";

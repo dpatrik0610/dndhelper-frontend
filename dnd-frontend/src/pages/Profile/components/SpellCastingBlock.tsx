@@ -1,5 +1,5 @@
 import { SimpleGrid, Tooltip } from "@mantine/core";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { StatBox } from "./StatBox";
 import { IconExclamationCircle, IconWand } from "@tabler/icons-react";
 import { useCharacterStore } from "../../../store/useCharacterStore";

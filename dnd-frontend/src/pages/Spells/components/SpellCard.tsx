@@ -9,7 +9,7 @@ import {
 import { useSpellStore } from "../../../store/useSpellStore";
 import CustomBadge from "../../../components/common/CustomBadge";
 import DisplayText from "../../../components/common/DisplayText";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { IconWand, IconFlame, IconBook, IconSparkles } from "@tabler/icons-react";
 import { SectionColor } from "../../../types/SectionColor";
 import { DividerWithLabel } from "../../../components/common/DividerWithLabel";

@@ -1,5 +1,5 @@
 import { IconAutomaticGearbox, IconStarFilled, IconSearch } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { SectionColor } from "../../../types/SectionColor";
 import {

@@ -6,7 +6,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import {
   IconAutomaticGearbox, IconTrash, IconPlus, IconStarFilled, IconX,
 } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import CustomBadge from "../../../components/common/CustomBadge";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";

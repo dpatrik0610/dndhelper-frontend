@@ -13,7 +13,7 @@ import { AddConditionModal } from "./AddConditionModal";
 import { DamageModal } from "./DamageModal";
 import { RemoveCurrencyModal } from "./RemoveCurrencyModal";
 import { TransferCurrencyModal } from "./TransferCurrencyModal";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { HealModal } from "./HealModal";
 
 export interface ActionButtonProps {

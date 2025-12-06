@@ -1,6 +1,6 @@
 import { useMemo, type ReactNode } from "react";
 import { Badge, Group, Text } from "@mantine/core";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { SectionColor } from "../../../types/SectionColor";
 
 interface InventorySectionProps {

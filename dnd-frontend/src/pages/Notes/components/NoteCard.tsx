@@ -8,7 +8,7 @@ import {
 } from "@tabler/icons-react";
 import type { Note } from "../../../types/Note";
 import { MarkdownRenderer } from "../../../components/MarkdownRender";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { SectionColor } from "../../../types/SectionColor";
 
 interface NoteCardProps {

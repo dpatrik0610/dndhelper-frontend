@@ -10,7 +10,7 @@ import {
   IconEye,
 } from "@tabler/icons-react";
 import { StatBox } from "./StatBox";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { useMediaQuery } from "@mantine/hooks";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { SectionColor } from "../../../types/SectionColor";

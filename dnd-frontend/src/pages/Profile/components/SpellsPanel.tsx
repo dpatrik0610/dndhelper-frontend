@@ -1,5 +1,5 @@
 import { IconSparkles, IconSearch } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { StatBox } from "./StatBox";
 import {

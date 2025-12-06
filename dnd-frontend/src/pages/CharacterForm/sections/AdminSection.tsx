@@ -1,5 +1,5 @@
 import { Group, Switch } from "@mantine/core";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { IconLock } from "@tabler/icons-react";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";

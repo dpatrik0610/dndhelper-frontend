@@ -1,6 +1,6 @@
 import { ActionIcon, Autocomplete, Button, Group, Stack, Text} from "@mantine/core";
 import { useSpellStore } from "../../../store/useSpellStore";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { useEffect, useState } from "react";
 import { getSpellNames } from "../../../services/spellService";
 import { useAuthStore } from "../../../store/useAuthStore";

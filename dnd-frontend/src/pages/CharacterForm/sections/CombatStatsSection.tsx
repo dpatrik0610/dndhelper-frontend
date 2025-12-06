@@ -1,6 +1,6 @@
 import { Group, Stack, TextInput } from "@mantine/core";
 import { IconSword } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
 

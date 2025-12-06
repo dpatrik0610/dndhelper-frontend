@@ -26,7 +26,7 @@ import type { Equipment } from "../types/Equipment/Equipment";
 import { useAuthStore } from "../store/useAuthStore";
 import CustomBadge from "./common/CustomBadge";
 import DisplayText from "./common/DisplayText";
-import { ExpandableSection } from "./ExpendableSection";
+import { ExpandableSection } from "./ExpandableSection";
 import { SectionColor } from "../types/SectionColor";
 import { MarkdownRenderer } from "./MarkdownRender";
 

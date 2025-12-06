@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { useMantineTheme } from "@mantine/core";
 import { RadarChart } from "@mantine/charts";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { ExpandableSection } from "../../../components/ExpandableSection";
 import { SectionColor } from "../../../types/SectionColor";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { AbilityScore } from "./AbilityScore";
