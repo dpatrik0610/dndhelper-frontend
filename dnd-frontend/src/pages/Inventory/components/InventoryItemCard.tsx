@@ -1,4 +1,4 @@
-import { Card, Grid, Text, Tooltip, ActionIcon, Group, Badge} from "@mantine/core";
+import { Card, Grid, Text, ActionIcon, Group, Badge} from "@mantine/core";
 import type { InventoryItem } from "../../../types/Inventory/InventoryItem";
 import CustomBadge from "../../../components/common/CustomBadge";
 import { SectionColor } from "../../../types/SectionColor";

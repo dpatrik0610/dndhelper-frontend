@@ -1,5 +1,5 @@
 import type React from "react";
-import { SimpleGrid, Paper, ThemeIcon, Group } from "@mantine/core";
+import { SimpleGrid, Paper, Group } from "@mantine/core";
 import {
   IconShield,
   IconHeart,

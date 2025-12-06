@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, NumberInput, Stack, Text } from "@mantine/core";
+import { NumberInput, Stack, Text } from "@mantine/core";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { updateCharacter } from "../../../services/characterService";

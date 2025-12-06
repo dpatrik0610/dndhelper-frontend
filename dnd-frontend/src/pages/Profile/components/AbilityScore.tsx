@@ -1,4 +1,4 @@
-import { Badge, Text } from "@mantine/core";
+import { Text } from "@mantine/core";
 import { StatBox } from "./StatBox";
 
 export function AbilityScore({ name, score }: { name: string; score: number }) {
