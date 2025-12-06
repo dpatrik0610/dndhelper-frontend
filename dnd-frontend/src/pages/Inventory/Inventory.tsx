@@ -7,9 +7,9 @@ import { notifications } from '@mantine/notifications';
 import { Box } from '@mantine/core';
 import { IconError404 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-import { InventoryFilters } from './components/InventoryFilters';
-import { InventoryList } from './components/InventoryList';
-import { useInventoryFilters } from './hooks/useInventoryFilters';
+import { InventoryFilters } from '../../features/inventory/components/InventoryFilters';
+import { InventoryList } from '../../features/inventory/components/InventoryList';
+import { useInventoryFilters } from '../../features/inventory/hooks/useInventoryFilters';
 
 export function Inventory() {
 
