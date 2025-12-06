@@ -63,6 +63,7 @@ export default function Home() {
   useEffect(() => {
     const load = async () => {
       if (!character?.campaignId) {
+        console.info("[Home] No campaignId on selected character, skipping session load", { characterId: character?.id });
         setCampaignName(null);
         return;
       }
@@ -72,6 +73,7 @@ export default function Home() {
         const basic = await getCampaignBasicById(character.campaignId, token);
         setCampaignName(basic.name);
       } catch {
+        console.warn("[Home] Failed to load campaign basic", { campaignId: character.campaignId });
         setCampaignName(null);
       }
       void loadByCampaign(character.campaignId);

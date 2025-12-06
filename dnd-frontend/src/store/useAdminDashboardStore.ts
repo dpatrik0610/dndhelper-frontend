@@ -11,6 +11,8 @@ export type AdminSection =
   | "SpellsManager"
   | "CacheManager"
   | "InventoryBrowser"
+  | "SessionManager"
+  | "BackupManager"
   ;
 
 interface AdminDashboardState {

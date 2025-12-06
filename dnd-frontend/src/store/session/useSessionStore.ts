@@ -68,11 +68,13 @@ export const useSessionStore = create<SessionState>()(
         try {
           const token = useAuthStore.getState().token!;
           const data = await getSessionsByCampaign(campaignId, token);
+          console.info("[SessionStore] Loaded sessions by campaign", { campaignId, count: data.length });
           set({
             sessions: data,
             selected: data[0] ?? null,
           });
         } catch (err) {
+          console.error("[SessionStore] Failed to load sessions by campaign", { campaignId, error: err });
           set({ error: String(err) });
           showNotification({
             title: "Failed to load sessions",

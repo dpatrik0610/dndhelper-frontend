@@ -11,6 +11,7 @@ import {
   IconLayoutGrid,
   IconRefresh,
   IconUsersGroup,
+  IconCloudDownload,
 } from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
 import { useAdminDashboardStore, type AdminSection } from "../../store/useAdminDashboardStore";
@@ -26,6 +27,7 @@ import { MonsterManager } from "./MonsterManager/MonsterManager";
 import { InventoryBrowser } from "./InventoryBrowser/InventoryBrowser";
 import { ItemManager } from "./ItemManager/ItemManager";
 import { SessionManager } from "./SessionManager/SessionManager";
+import { BackupManager } from "./BackupManager/BackupManager";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -52,6 +54,7 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconGhost, label: "Monster Manager", key: "MonsterManager", component: <MonsterManager /> },
     { icon: IconCategory, label: "Item Manager", key: "ItemManager", component: <ItemManager /> },
     { icon: IconUsersGroup, label: "Session Manager", key: "SessionManager", component: <SessionManager /> },
+    { icon: IconCloudDownload, label: "Backup Manager", key: "BackupManager", component: <BackupManager /> },
   ];
 
   const currentItem = navItems.find((n) => n.key === activeSection);
