@@ -16,7 +16,7 @@ export function Inventory() {
   const character = useCharacterStore((state) => state.character);
   const token = useAuthStore.getState().token || '';
   const [inventories, setInventories] = useState<Inventory[]>([]);
-  const { searchTerm, setSearchTerm } = useInventoryFilters();
+  const { searchTerm, setSearchTerm, viewMode, setViewMode } = useInventoryFilters();
   const navigate = useNavigate();
 
   // Redirect if no character selected
@@ -66,10 +66,13 @@ export function Inventory() {
       <InventoryFilters
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
       />
       <InventoryList
         inventories={inventories}
         searchTerm={searchTerm}
+        viewMode={viewMode}
       />
     </Box>
   );

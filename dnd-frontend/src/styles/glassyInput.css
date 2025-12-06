@@ -167,3 +167,25 @@
   border-color: rgba(0, 255, 200, 0.35);
   box-shadow: 0 0 12px rgba(0, 255, 200, 0.28);
 }
+
+/* Glassy segmented control */
+.glassy-segmented {
+  background: rgba(0, 0, 0, 0.103) !important;
+  border: 1px solid rgba(95, 95, 95, 0.15) !important;
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 2px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+.glassy-segmented__control {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.8);
+  border-radius: 8px !important;
+  transition: all 0.2s ease;
+}
+
+.glassy-segmented__label {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}

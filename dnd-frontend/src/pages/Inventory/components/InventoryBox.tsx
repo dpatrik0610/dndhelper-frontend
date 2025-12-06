@@ -12,14 +12,16 @@ import { loadInventories } from "../../../utils/loadinventory";
 import { MoveItemModal } from "./MoveItemModal";
 import { InventorySection } from "./InventorySection";
 import { InventoryItemsList } from "./InventoryItemsList";
+import { InventoryItemsGrid } from "./InventoryItemsGrid";
 import { useFilteredItems } from "../hooks/useFilteredItems";
 
 interface InventoryBoxProps {
   inventory: Inventory;
   searchTerm: string;
+  viewMode: "list" | "cards";
 }
 
-export default function InventoryBox({ inventory, searchTerm }: InventoryBoxProps) {
+export default function InventoryBox({ inventory, searchTerm, viewMode }: InventoryBoxProps) {
   const inventories = useInventoryStore((state) => state.inventories);
 
   const { decrementItemQuantity } = useInventoryStore();
@@ -168,13 +170,23 @@ export default function InventoryBox({ inventory, searchTerm }: InventoryBoxProp
             : SectionColor.Grape
         }
       >
-        <InventoryItemsList
-          filteredItems={filteredItems}
-          totalItemsCount={currentInventory.items?.length ?? 0}
-          inventoryId={inventory.id!}
-          onRemove={handleRemoveClick}
-          onMove={handleMoveClick}
-        />
+        {viewMode === "list" ? (
+          <InventoryItemsList
+            filteredItems={filteredItems}
+            totalItemsCount={currentInventory.items?.length ?? 0}
+            inventoryId={inventory.id!}
+            onRemove={handleRemoveClick}
+            onMove={handleMoveClick}
+          />
+        ) : (
+          <InventoryItemsGrid
+            filteredItems={filteredItems}
+            totalItemsCount={currentInventory.items?.length ?? 0}
+            inventoryId={inventory.id!}
+            onRemove={handleRemoveClick}
+            onMove={handleMoveClick}
+          />
+        )}
       </InventorySection>
     </>
   );

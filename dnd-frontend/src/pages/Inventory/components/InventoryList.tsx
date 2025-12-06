@@ -5,9 +5,10 @@ import InventoryBox from "./InventoryBox";
 interface InventoryListProps {
   inventories: Inventory[];
   searchTerm: string;
+  viewMode: "list" | "cards";
 }
 
-export function InventoryList({ inventories, searchTerm }: InventoryListProps) {
+export function InventoryList({ inventories, searchTerm, viewMode }: InventoryListProps) {
   if (!inventories.length)
     return (
       <Title order={4} c="dimmed" ta="center" mt="xl">
@@ -22,6 +23,7 @@ export function InventoryList({ inventories, searchTerm }: InventoryListProps) {
           key={inv.id}
           inventory={inv}
           searchTerm={searchTerm}
+          viewMode={viewMode}
         />
       ))}
     </Stack>
