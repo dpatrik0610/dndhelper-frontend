@@ -24,118 +24,103 @@ interface CharacterState {
 
 export const useCharacterStore = create<CharacterState>()(
   persist(
-    (set, get) => ({
-      character: null,
-      characters: [],
-
-      setCharacter: (character) => set({ character }),
-      setCharacters: (characters) => set({ characters }),
-
-      updateCharacter: (updated: Partial<Character>) => {
-        const current = get().character;
-        if (!current) return;
-
-        const newCharacter = { ...current, ...updated };
-        set({ character: newCharacter });
-
+    (set, get) => {
+      const upsertLocalCharacter = (next: Character) => {
+        set({ character: next });
         set((state) => ({
           characters: state.characters.map((c) =>
-            c.id === newCharacter.id ? newCharacter : c
+            c.id === next.id ? next : c
           ),
         }));
-      },
+      };
 
-      // 🌐 persist current character to API and sync back
-      persistCharacter: async () => {
-        const current = get().character;
-        if (!current || !current.id) return null;
-
+      const persistToApi = async (character: Character) => {
+        if (!character?.id) return null;
         const token = useAuthStore.getState().token;
-        if (!token) throw new Error("No token for character persistence");
+        if (!token) return null;
 
-        const saved = await updateCharacterApi(current, token);
-        if (!saved) return null;
+        try {
+          const saved = await updateCharacterApi(character, token);
+          if (saved) {
+            upsertLocalCharacter(saved);
+          }
+          return saved ?? null;
+        } catch (err) {
+          console.error("Failed to persist character", err);
+          return null;
+        }
+      };
 
-        set({ character: saved });
-
-        set((state) => ({
-          characters: state.characters.map((c) =>
-            c.id === saved.id ? saved : c
-          ),
-        }));
-
-        return saved;
-      },
-
-      removeCondition: (condition: string) => {
+      const applyAndPersist = (updater: (current: Character) => Character | null) => {
         const current = get().character;
         if (!current) return;
 
-        const updated = {
-          ...current,
-          conditions: current.conditions.filter((c) => c !== condition),
-        };
+        const updated = updater(current);
+        if (!updated) return;
 
-        set({ character: updated });
+        upsertLocalCharacter(updated);
+        void persistToApi(updated);
+      };
 
-        set((state) => ({
-          characters: state.characters.map((c) =>
-            c.id === updated.id ? updated : c
-          ),
-        }));
-      },
+      return {
+        character: null,
+        characters: [],
 
-      addCondition: (condition: string) => {
-        const current = get().character;
-        if (!current) return;
-        if (current.conditions.includes(condition)) return;
+        setCharacter: (character) => set({ character }),
+        setCharacters: (characters) => set({ characters }),
 
-        const updated = {
-          ...current,
-          conditions: [...current.conditions, condition],
-        };
+        updateCharacter: (updated: Partial<Character>) => {
+          applyAndPersist((current) => ({ ...current, ...updated }));
+        },
 
-        set({ character: updated });
+        // persist current character to API and sync back
+        persistCharacter: async () => {
+          const current = get().character;
+          if (!current) return null;
+          return await persistToApi(current);
+        },
 
-        set((state) => ({
-          characters: state.characters.map((c) =>
-            c.id === updated.id ? updated : c
-          ),
-        }));
-      },
+        removeCondition: (condition: string) => {
+          applyAndPersist((current) => ({
+            ...current,
+            conditions: current.conditions.filter((c) => c !== condition),
+          }));
+        },
 
-      removeCurrency: (currencyType: string, amount: number) => {
-        const current = get().character;
-        if (!current) return;
+        addCondition: (condition: string) => {
+          applyAndPersist((current) => {
+            if (current.conditions.includes(condition)) return null;
+            return {
+              ...current,
+              conditions: [...current.conditions, condition],
+            };
+          });
+        },
 
-        const existing = current.currencies?.find((c) => c.type === currencyType);
-        if (!existing) return;
+        removeCurrency: (currencyType: string, amount: number) => {
+          applyAndPersist((current) => {
+            const existing = current.currencies?.find((c) => c.type === currencyType);
+            if (!existing) return null;
 
-        const newAmount = existing.amount - amount;
+            const newAmount = existing.amount - amount;
 
-        const updatedCurrencies =
-          newAmount > 0
-            ? current.currencies.map((c) =>
-                c.type === currencyType ? { ...c, amount: newAmount } : c
-              )
-            : current.currencies.filter((c) => c.type !== currencyType);
+            const updatedCurrencies =
+              newAmount > 0
+                ? current.currencies.map((c) =>
+                    c.type === currencyType ? { ...c, amount: newAmount } : c
+                  )
+                : current.currencies.filter((c) => c.type !== currencyType);
 
-        const updated = {
-          ...current,
-          currencies: updatedCurrencies,
-        };
+            return {
+              ...current,
+              currencies: updatedCurrencies,
+            };
+          });
+        },
 
-        set({ character: updated });
-
-        set((state) => ({
-          characters: state.characters.map((c) =>
-            c.id === updated.id ? updated : c
-          ),
-        }));
-      },
-
-      clearStore: () => set({ character: null, characters: [] }),
-    }),
+        clearStore: () => set({ character: null, characters: [] }),
+      };
+    },
     {
       name: "character-storage",
       partialize: (state) => ({
