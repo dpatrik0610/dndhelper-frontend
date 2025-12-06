@@ -14,11 +14,18 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
-import { IconArrowUpRight, IconCloudDownload, IconCloudUpload, IconInfoCircle, IconRefresh } from "@tabler/icons-react";
+import {
+  IconArrowUpRight,
+  IconCloudDownload,
+  IconCloudUpload,
+  IconLock,
+  IconRefresh,
+} from "@tabler/icons-react";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { showNotification } from "../../../components/Notification/Notification";
 import { SectionColor } from "../../../types/SectionColor";
 import { exportCollection, restoreCollection } from "../../../services/backupService";
+import { useMediaQuery } from "@mantine/hooks";
 
 const popularCollections = [
   "Campaigns",
@@ -39,6 +46,7 @@ export function BackupManager() {
   const [uploading, setUploading] = useState(false);
   const downloadLinkRef = useRef<HTMLAnchorElement | null>(null);
   const logPrefix = "[BackupManager]";
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const normalizedCollection = useMemo(() => collectionName.trim(), [collectionName]);
 
@@ -144,16 +152,26 @@ export function BackupManager() {
 
   return (
     <Paper
-      p="xl"
+      p="md"
       radius="md"
       withBorder
       style={{
         background: "linear-gradient(135deg, rgba(20, 10, 40, 0.8), rgba(15, 8, 35, 0.7))",
         border: "1px solid rgba(255, 255, 255, 0.08)",
         backdropFilter: "blur(12px)",
+        width: "100%",
+        maxWidth: isMobile ? "100%" : "100%",
+        marginInline: 0,
       }}
     >
-      <Group justify="space-between" align="flex-start" mb="lg">
+      <Group
+        justify="space-between"
+        align="flex-start"
+        mb="lg"
+        gap="sm"
+        wrap="wrap"
+        style={isMobile ? { flexDirection: "column" } : undefined}
+      >
         <Stack gap={4}>
           <Group gap="xs">
             <IconCloudDownload size={24} color="#b197fc" />
@@ -181,19 +199,23 @@ export function BackupManager() {
 
       <Stack gap="md">
         <TextInput
-          label="Collection name"
-          placeholder="e.g. Campaigns"
+          label="Collection name (locked)"
+          placeholder="Auto-detected or choose below"
           value={collectionName}
-          onChange={(e) => setCollectionName(e.currentTarget.value)}
-          rightSection={<IconInfoCircle size={16} color="#b197fc" />}
+          readOnly
+          rightSection={<IconLock size={16} color="#b197fc" />}
           styles={{
-            input: { background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.12)" },
+            input: {
+              background: "rgba(255,255,255,0.06)",
+              borderColor: "rgba(255,255,255,0.16)",
+              cursor: "not-allowed",
+            },
             label: { color: "white" },
           }}
           description={
             inferredCollectionFromFile
               ? `Detected from file: ${inferredCollectionFromFile}`
-              : "The backup controller expects the collection name used by the server."
+              : "Select a preset or upload a backup to set the collection."
           }
         />
 
@@ -201,10 +223,11 @@ export function BackupManager() {
           {popularCollections.map((c) => (
             <Button
               key={c}
-              size="xs"
+              size={isMobile ? "sm" : "xs"}
               variant={normalizedCollection.toLowerCase() === c.toLowerCase() ? "filled" : "outline"}
               color="grape"
               onClick={() => setCollectionName(c)}
+              fullWidth={isMobile}
               leftSection={<IconArrowUpRight size={14} />}
             >
               {c}
@@ -231,6 +254,7 @@ export function BackupManager() {
                 color="teal"
                 leftSection={<IconCloudDownload size={16} />}
                 loading={downloading}
+                fullWidth={isMobile}
                 onClick={() => void handleDownload()}
               >
                 Download backup
@@ -266,6 +290,7 @@ export function BackupManager() {
                   }
                 }}
                 clearable
+                w="100%"
                 styles={{
                   input: { background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.12)" },
                 }}
@@ -275,6 +300,7 @@ export function BackupManager() {
                 leftSection={<IconCloudUpload size={16} />}
                 loading={uploading}
                 disabled={!file}
+                fullWidth={isMobile}
                 onClick={() => void handleRestore()}
               >
                 Restore backup

@@ -28,7 +28,6 @@ export function SelectCampaignModal({ opened, onClose }: SelectCampaignModalProp
       title="Select Campaign"
       showSaveButton={false}
       showCancelButton={false}
-      size="lg"
       closeOnClickOutside={false}
       closeOnEscape={false}
       withCloseButton={false}

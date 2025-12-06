@@ -18,6 +18,7 @@ import { useAdminDashboardStore, type AdminSection } from "../../store/useAdminD
 import { InventoryManager } from "./InventoryManager/InventoryManager";
 import { useEffect, useState, type JSX, type ForwardRefExoticComponent } from "react";
 import { SelectCampaignModal } from "./components/SelectCampaignModal";
+import { useMediaQuery } from "@mantine/hooks";
 import { useAdminCampaignStore } from "../../store/admin/useAdminCampaignStore";
 import { CampaignManager } from "./CampaignManager/CampaignManager";
 import { SpellForm } from "./SpellManager/SpellForm";
@@ -33,13 +34,15 @@ export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
   const { selectedId: selectedCampaignId } = useAdminCampaignStore();
   const [campaignModal, setCampaignModal] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
+  const mobileButtonHeight = 44;
 
   // --- force modal if no campaign selected ---
   useEffect(() => {
     if (!selectedCampaignId) setCampaignModal(true);
   }, [selectedCampaignId]);
 
-  const navItems: {
+  const baseNavItems: {
     icon: ForwardRefExoticComponent<IconProps>;
     label: string;
     key: AdminSection;
@@ -57,13 +60,33 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconCloudDownload, label: "Backup Manager", key: "BackupManager", component: <BackupManager /> },
   ];
 
-  const currentItem = navItems.find((n) => n.key === activeSection);
+  const currentItem = baseNavItems.find((n) => n.key === activeSection);
   const isDashboard = activeSection === "Dashboard";
+
+  const mobileNavExtras = isMobile
+    ? [
+        {
+          icon: IconLayoutGrid,
+          label: "Dashboard",
+          key: "__dashboard",
+          onClick: () => setActiveSection("Dashboard"),
+          variant: "light" as const,
+        },
+        {
+          icon: IconRefresh,
+          label: "Switch campaign",
+          key: "__switch",
+          onClick: () => setCampaignModal(true),
+          variant: "outline" as const,
+        },
+      ]
+    : [];
+
+  const visibleNavItems = [...mobileNavExtras, ...baseNavItems];
 
   return (
     <>
       <Box
-        p="md"
         style={{
           minHeight: "100vh",
           position: "relative",
@@ -85,7 +108,7 @@ export const AdminDashboard: React.FC = () => {
                 }}
               >
                 <Stack gap="xs">
-                  <Group justify="space-between" align="center">
+                  <Group justify="space-between" align="center" gap="xs" wrap="wrap" style={isMobile ? { alignItems: "flex-start" } : undefined}>
                   <Group gap="xs">
                     <ThemeIcon size={34} radius="xl" variant="gradient" gradient={{ from: "grape", to: "violet" }}>
                       <IconLayoutGrid size={16} />
@@ -99,40 +122,51 @@ export const AdminDashboard: React.FC = () => {
                       </Text>
                     </Box>
                   </Group>
-                    <Group gap="xs">
-                      <Button
-                        size="xs"
-                        variant="light"
-                        color="grape"
-                        onClick={() => setActiveSection("Dashboard")}
-                      >
-                        Dashboard
-                      </Button>
-                      <Button
-                        size="xs"
-                        variant="outline"
-                        color="grape"
-                        leftSection={<IconRefresh size={14} />}
-                        onClick={() => setCampaignModal(true)}
-                      >
-                        Switch campaign
-                      </Button>
-                    </Group>
+                    {!isMobile && (
+                      <Group gap="xs">
+                        <Button
+                          size="xs"
+                          variant="light"
+                          color="grape"
+                          onClick={() => setActiveSection("Dashboard")}
+                        >
+                          Dashboard
+                        </Button>
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          color="grape"
+                          leftSection={<IconRefresh size={14} />}
+                          onClick={() => setCampaignModal(true)}
+                        >
+                          Switch campaign
+                        </Button>
+                      </Group>
+                    )}
                   </Group>
 
-                  <ScrollArea type="hover" scrollbarSize={6} offsetScrollbars>
-                    <Group gap="xs" wrap="nowrap">
-                      {navItems.map((item) => {
-                        const isActive = item.key === activeSection;
+                  <ScrollArea type="hover" scrollbarSize={6} offsetScrollbars style={isMobile ? { width: "100%" } : undefined}>
+                    <Group gap="xs" wrap={isMobile ? "wrap" : "nowrap"}>
+                      {visibleNavItems.map((item) => {
+                        const isSpecial = typeof item.key === "string" && item.key.startsWith("__");
+                        const isActive = !isSpecial && item.key === activeSection;
 
                         return (
                           <Button
                             key={item.key}
-                            size="xs"
-                            variant={isActive ? "filled" : "outline"}
+                            size={isMobile ? "sm" : "xs"}
+                            variant={"variant" in item && item.variant ? item.variant : isActive ? "filled" : "outline"}
                             color="grape"
                             leftSection={<item.icon size={16} />}
-                            onClick={() => setActiveSection(item.key)}
+                            onClick={() => {
+                              if (isSpecial && "onClick" in item && item.onClick) {
+                                item.onClick();
+                              } else {
+                                setActiveSection(item.key as AdminSection);
+                              }
+                            }}
+                            fullWidth={isMobile}
+                            style={isMobile ? { minHeight: mobileButtonHeight, height: mobileButtonHeight } : undefined}
                           >
                             {item.label}
                           </Button>
@@ -149,7 +183,7 @@ export const AdminDashboard: React.FC = () => {
                 {(styles) => (
                   <Stack align="center" gap="lg" style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
                     <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl" mt="md">
-                      {navItems.map((item) => (
+                      {baseNavItems.map((item) => (
                         <DashboardCard
                           key={item.key}
                           icon={<item.icon size={48} />}
@@ -164,7 +198,7 @@ export const AdminDashboard: React.FC = () => {
 
               <Transition mounted={!isDashboard} transition="slide-left" duration={300} timingFunction="ease">
                 {(styles) => (
-                  <Box style={{ ...styles, position: "absolute", width: "100%", padding: "1rem" }}>
+                  <Box  pt={16} style={{ ...styles, position: "absolute", width: "100%" }}>
                     {currentItem?.component}
                   </Box>
                 )}
