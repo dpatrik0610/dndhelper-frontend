@@ -22,7 +22,6 @@ import { showNotification } from "../../../components/Notification/Notification"
 export function NotesPanel() {
   const character = useCharacterStore((s) => s.character);
   const updateCharacter = useCharacterStore((s) => s.updateCharacter);
-  const persistCharacter = useCharacterStore((s) => s.persistCharacter);
 
   const {
     notes,
@@ -114,8 +113,6 @@ export function NotesPanel() {
     updateCharacter({
       noteIds: currentIds.filter((nid) => nid !== id),
     });
-
-    await persistCharacter();
   };
 
   const handleToggleFavorite = async (note: Note) => {

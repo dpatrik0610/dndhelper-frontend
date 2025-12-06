@@ -14,7 +14,6 @@ interface Props {
 export function AddNoteModal({ opened, onClose }: Props) {
   const character = useCharacterStore((s) => s.character);
   const updateCharacter = useCharacterStore((s) => s.updateCharacter);
-  const persistCharacter = useCharacterStore((s) => s.persistCharacter);
   const createNote = useNoteStore((s) => s.create);
 
   const [title, setTitle] = useState("");
@@ -34,9 +33,6 @@ export function AddNoteModal({ opened, onClose }: Props) {
     updateCharacter({
       noteIds: [...currentIds, newNote.id!],
     });
-
-    // 2) persist to API
-    await persistCharacter();
 
     showNotification({
       title: "Success",

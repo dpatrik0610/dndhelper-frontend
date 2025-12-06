@@ -18,7 +18,6 @@ import { SectionColor } from "../../../types/SectionColor";
 export function CombatStats() {
   const character = useCharacterStore((s) => s.character)!;
   const updateCharacter = useCharacterStore((s) => s.updateCharacter);
-  const persist = useCharacterStore((s) => s.persistCharacter);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const stats = [
@@ -52,7 +51,6 @@ export function CombatStats() {
     }
 
     updateCharacter(updated);
-    persist();
   };
 
   const deathSavePaperBase: React.CSSProperties = {

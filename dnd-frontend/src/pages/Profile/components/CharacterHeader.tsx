@@ -33,10 +33,7 @@ export function CharacterHeader() {
 
     const newInspiration = current.inspiration - 1;
 
-    // 1) local store update
     useCharacterStore.getState().updateCharacter({inspiration: newInspiration});
-    // 2) persist to API
-    await useCharacterStore.getState().persistCharacter();
 
     showNotification({
       title: "Inspiration used",
