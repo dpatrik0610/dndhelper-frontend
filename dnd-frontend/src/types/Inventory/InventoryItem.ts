@@ -3,4 +3,5 @@ export interface InventoryItem {
   equipmentName?: string;
   quantity?: number;
   note?: string;
+  tags?: string[];
 }

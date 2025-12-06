@@ -6,6 +6,7 @@ import { Notifications } from '@mantine/notifications'
 import '@mantine/notifications/styles.css';
 import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
+import './styles/glassyInput.css'
 import { SignalRProvider } from './SignalR/SignalRProvider.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

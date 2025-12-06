@@ -1,22 +1,23 @@
 import type { Inventory } from '../../types/Inventory/Inventory';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { getInventoriesByCharacter } from "../../services/inventoryService";
 import { useCharacterStore } from "../../store/useCharacterStore";
 import { useAuthStore } from "../../store/useAuthStore";
 import { notifications } from '@mantine/notifications';
-import { Box, Title } from '@mantine/core';
+import { Box } from '@mantine/core';
 import { IconError404 } from '@tabler/icons-react';
-import InventoryBox from './components/InventoryBox';
 import { useNavigate } from 'react-router-dom';
-import { useMediaQuery } from '@mantine/hooks';
+import { InventoryFilters } from './components/InventoryFilters';
+import { InventoryList } from './components/InventoryList';
+import { useInventoryFilters } from './hooks/useInventoryFilters';
 
 export function Inventory() {
 
   const character = useCharacterStore((state) => state.character);
   const token = useAuthStore.getState().token || '';
   const [inventories, setInventories] = useState<Inventory[]>([]);
+  const { searchTerm, setSearchTerm } = useInventoryFilters();
   const navigate = useNavigate();
-  const isMobile = useMediaQuery('(max-width: 768px)');
 
   // Redirect if no character selected
   useEffect(() => {
@@ -62,13 +63,14 @@ export function Inventory() {
   return (
     
     <Box>
-      {inventories.length ? (
-        inventories.map((inv) => <InventoryBox key={inv.id} inventory={inv} />)
-      ) : (
-        <Title order={4} c="dimmed" ta="center" mt="xl">
-          No inventories found
-        </Title>
-      )}
+      <InventoryFilters
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+      />
+      <InventoryList
+        inventories={inventories}
+        searchTerm={searchTerm}
+      />
     </Box>
   );
 }

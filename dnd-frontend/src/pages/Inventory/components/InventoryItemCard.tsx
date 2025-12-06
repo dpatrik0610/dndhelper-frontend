@@ -1,4 +1,4 @@
-import { Card, Grid, Text, Tooltip, ActionIcon, Group} from "@mantine/core";
+import { Card, Grid, Text, Tooltip, ActionIcon, Group, Badge} from "@mantine/core";
 import type { InventoryItem } from "../../../types/Inventory/InventoryItem";
 import CustomBadge from "../../../components/common/CustomBadge";
 import { SectionColor } from "../../../types/SectionColor";
@@ -84,6 +84,18 @@ export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardP
               <Text size="xs" c="dimmed" lineClamp={1}>
                 {item.note}
               </Text>
+            </Grid.Col>
+          )}
+
+          {(item.tags?.length ?? 0) > 0 && (
+            <Grid.Col span={12}>
+              <Group gap={6} wrap="wrap">
+                {item.tags!.map((tag) => (
+                  <Badge key={tag} size="xs" variant="light" color="grape" radius="sm">
+                    {tag}
+                  </Badge>
+                ))}
+              </Group>
             </Grid.Col>
           )}
         </Grid>

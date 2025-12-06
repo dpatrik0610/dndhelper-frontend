@@ -1,24 +1,25 @@
 import type { Inventory } from "../../../types/Inventory/Inventory";
 import { useEffect, useState } from "react";
 import { RemoveItemModal } from "../../../types/Inventory/components/RemoveItemModal";
-import { Stack, Text, Loader, Center} from "@mantine/core";
-import { ExpandableSection } from "../../../components/ExpendableSection";
+import { Text, Loader, Center } from "@mantine/core";
 import { SectionColor } from "../../../types/SectionColor";
 import { useInventoryStore } from "../../../store/useInventorystore";
-import { InventoryItemCard } from "./InventoryItemCard";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { decrementItemQuantity as apiDecreaseQuantity, moveItem, type ModifyEquipmentAmount, type MoveItemRequest } from "../../../services/inventoryService";
 import { showNotification } from "../../../components/Notification/Notification";
 import { IconCheck } from "@tabler/icons-react";
 import { loadInventories } from "../../../utils/loadinventory";
 import { MoveItemModal } from "./MoveItemModal";
-import { InventoryCurrencyClaim } from "./InventoryCurrencyClaim";
+import { InventorySection } from "./InventorySection";
+import { InventoryItemsList } from "./InventoryItemsList";
+import { useFilteredItems } from "../hooks/useFilteredItems";
 
 interface InventoryBoxProps {
   inventory: Inventory;
+  searchTerm: string;
 }
 
-export default function InventoryBox({ inventory }: InventoryBoxProps) {
+export default function InventoryBox({ inventory, searchTerm }: InventoryBoxProps) {
   const inventories = useInventoryStore((state) => state.inventories);
 
   const { decrementItemQuantity } = useInventoryStore();
@@ -48,7 +49,9 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
     if (!inventories) return;
 
     setCurrentInventory(inventories.find((x) => x.id === inventory.id));
-  }, [inventories]);
+  }, [inventories, inventory.id]);
+
+  const { filteredItems, hasFilters } = useFilteredItems(currentInventory?.items, searchTerm);
 
   // Item removal
   const handleRemoveClick = (equipmentId: string) => {
@@ -155,36 +158,24 @@ export default function InventoryBox({ inventory }: InventoryBoxProps) {
         onConfirm={(targetInventoryId, amount) => handleConfirmMove(targetInventoryId, amount)}
       />
       
-      <ExpandableSection
+      <InventorySection
         title={currentInventory.name || "Undefined Inventory"}
-        defaultOpen={false}
+        matchCount={filteredItems.length}
+        hasFilters={hasFilters}
         color={
           currentInventory.name?.includes("Equipment")
-            ? SectionColor.Yellow
+            ? SectionColor.Orange
             : SectionColor.Grape
         }
       >
-
-      <Stack gap="xs" mt={"xs"}>
-        {currentInventory.items?.length ? (
-          currentInventory.items.map((item) => (
-            <InventoryItemCard
-              key={item.equipmentId}
-              item={item}
-              onRemove={handleRemoveClick}
-              onMove={handleMoveClick}
-            />
-          ))
-        ) : (
-          <Text c="dimmed" size="sm" ta="center">
-            No items in this inventory.
-          </Text>
-        )}
-
-        <InventoryCurrencyClaim inventoryId={inventory.id!}/>
-      </Stack>
-
-      </ExpandableSection>
+        <InventoryItemsList
+          filteredItems={filteredItems}
+          totalItemsCount={currentInventory.items?.length ?? 0}
+          inventoryId={inventory.id!}
+          onRemove={handleRemoveClick}
+          onMove={handleMoveClick}
+        />
+      </InventorySection>
     </>
   );
 }
