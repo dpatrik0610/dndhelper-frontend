@@ -22,9 +22,9 @@ export function InventoryItemsGrid({
     <Box>
       {filteredItems.length ? (
         <SimpleGrid
-          cols={{ base: 1, sm: 2, md: 3 }}
-          spacing="sm"
-          verticalSpacing="sm"
+          cols={{ base: 2, xs: 2, sm: 3 }}
+          spacing={{ base: "xs", sm: "sm" }}
+          verticalSpacing={{ base: "xs", sm: "sm" }}
         >
           {filteredItems.map((item) => (
             <InventoryItemCard

@@ -22,9 +22,10 @@ export function InventorySection({
   const sectionStyle = useMemo(() => {
     const defaultStyle = {
       color,
-      background: "rgba(0, 0, 0, 0.14)",
-      borderColor: "transparent",
+      background: "linear-gradient(20deg, rgba(40, 24, 12, 0.55), rgba(90, 18, 12, 0.45))",
+      borderColor: "rgba(148, 120, 104, 0.25)",
       boxShadow: "none",
+      borderRadius: 12,
     };
 
     if (!hasFilters) return defaultStyle;
@@ -32,9 +33,9 @@ export function InventorySection({
 
     return {
       ...defaultStyle,
-      borderColor: "rgba(34,197,94,0.35)",
-      boxShadow: "0 6px 18px rgba(34,197,94,0.14)",
-      background: "linear-gradient(145deg, rgba(10,40,20,0.2), rgba(10,60,30,0.12))",
+      borderColor: "rgba(94, 234, 212, 0.2)",
+      boxShadow: "0 6px 18px rgba(6, 78, 59, 0.12)",
+      background: "linear-gradient(145deg, rgba(10, 60, 55, 0.35), rgba(4, 47, 40, 0.3))",
     };
   }, [hasFilters, hasMatches, color]);
 
