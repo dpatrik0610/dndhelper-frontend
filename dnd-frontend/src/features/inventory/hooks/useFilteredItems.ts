@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { InventoryItem } from "../../../types/Inventory/InventoryItem";
+import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 
 export function useFilteredItems(items: InventoryItem[] | undefined, searchTerm: string) {
   const trimmed = searchTerm.trim().toLowerCase();
@@ -21,3 +21,4 @@ export function useFilteredItems(items: InventoryItem[] | undefined, searchTerm:
     hasMatches,
   };
 }
+

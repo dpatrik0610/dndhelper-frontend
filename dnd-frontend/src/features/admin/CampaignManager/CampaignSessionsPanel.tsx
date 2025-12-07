@@ -17,8 +17,8 @@ import {
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
-import { SectionColor } from "../../../types/SectionColor";
-import { showNotification } from "../../../components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import { showNotification } from "@components/Notification/Notification";
 
 export function CampaignSessionsPanel() {
   const { selectedCampaign, update } = useAdminCampaignStore();
@@ -159,3 +159,5 @@ export function CampaignSessionsPanel() {
     </Paper>
   );
 }
+
+

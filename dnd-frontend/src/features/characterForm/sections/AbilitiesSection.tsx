@@ -15,7 +15,7 @@ import { useCharacterFormStore } from "@store/useCharacterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import type { SavingThrows } from "@appTypes/Character/SavingThrows";
 import { InfoIconPopover } from "@components/common/InfoIconPopover";
-import { abilityTooltips, saveTooltips } from "../Tooltips/tooltips";
+import { abilityTooltips, saveTooltips } from "@features/characterForm/Tooltips/tooltips";
 
 const map = {
   strength: "str",
@@ -402,3 +402,4 @@ export function AbilitiesSection() {
     </ExpandableSection>
   );
 }
+

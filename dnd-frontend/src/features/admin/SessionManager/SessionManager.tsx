@@ -2,10 +2,10 @@ import { Button, Group, Paper, Stack, Table, Text, TextInput, Title, Textarea, A
 import { IconPlus, IconRefresh, IconTrash, IconEye, IconCheck, IconLock } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSessionStore } from "@store/session/useSessionStore";
-import { sessionTemplate, type Session } from "../../../types/Session";
+import { sessionTemplate, type Session } from "@appTypes/Session";
 import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
-import { BaseModal } from "../../../components/BaseModal";
-import { CustomDateInput } from "../../../components/common/CustomDateInput";
+import { BaseModal } from "@components/BaseModal";
+import { CustomDateInput } from "@components/common/CustomDateInput";
 import dayjs from "dayjs";
 
 export function SessionManager() {
@@ -272,3 +272,5 @@ export function SessionManager() {
     </Stack>
   );
 }
+
+

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Button, Group, Loader } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { CustomFieldset } from "../../../components/CustomFieldset";
-import { claimFromInventory } from "../../../services/currencyService";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { useInventoryStore } from "../../../store/useInventorystore";
-import { loadInventories } from "../../../utils/loadinventory";
-import { loadCharacters } from "../../../utils/loadCharacter";
+import { useAuthStore } from "@store/useAuthStore";
+import { CustomFieldset } from "@components/CustomFieldset";
+import { claimFromInventory } from "@services/currencyService";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { useInventoryStore } from "@store/useInventorystore";
+import { loadInventories } from "@utils/loadinventory";
+import { loadCharacters } from "@utils/loadCharacter";
 import { InventoryCurrencyBox } from "./InventoryCurrencyBox";
 
 interface InventoryCurrencyClaimProps {
@@ -84,3 +84,5 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
     </CustomFieldset>
   );
 }
+
+

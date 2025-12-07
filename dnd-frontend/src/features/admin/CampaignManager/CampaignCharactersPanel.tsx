@@ -25,9 +25,9 @@ import {
 } from "@services/campaignService";
 import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
 import { useAuthStore } from "@store/useAuthStore";
-import { showNotification } from "../../../components/Notification/Notification";
-import { SectionColor } from "../../../types/SectionColor";
-import type { Character } from "../../../types/Character/Character";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import type { Character } from "@appTypes/Character/Character";
 import { getCharacterById, updateCharacter } from "@services/characterService";
 
 export function CampaignCharactersPanel() {
@@ -245,3 +245,5 @@ const handleRemove = async (charId: string) => {
     </Paper>
   );
 }
+
+

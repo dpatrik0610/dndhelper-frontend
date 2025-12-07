@@ -10,7 +10,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import type { Monster } from "../../../../types/Monster";
+import type { Monster } from "@appTypes/Monster";
 
 interface MonsterViewModalProps {
   monster: Monster | null;
@@ -215,3 +215,4 @@ export function MonsterViewModal({ monster, onClose }: MonsterViewModalProps) {
     </Modal>
   );
 }
+

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Stack, Select, NumberInput } from "@mantine/core";
-import { BaseModal } from "../../../components/BaseModal";
-import type { Inventory } from "../../../types/Inventory/Inventory";
+import { BaseModal } from "@components/BaseModal";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
 
 interface MoveItemModalProps {
   opened: boolean;
@@ -73,3 +73,5 @@ export function MoveItemModal({
     </BaseModal>
   );
 }
+
+

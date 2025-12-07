@@ -21,6 +21,7 @@ export default defineConfig({
       '@pages': path.resolve(__dirname, 'src/pages'),
       '@services': path.resolve(__dirname, 'src/services'),
       '@validations': path.resolve(__dirname, 'src/validations'),
+      '@styles': path.resolve(__dirname, 'src/styles'),
       '@': path.resolve(__dirname, 'src'),
     },
   },

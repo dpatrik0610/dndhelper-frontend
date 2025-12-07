@@ -12,7 +12,7 @@ import {
   Box,
 } from "@mantine/core";
 import { IconEye, IconEyeOff, IconLockCheck } from "@tabler/icons-react";
-import { UserRole, UserStatus } from "../../../../types/User";
+import { UserRole, UserStatus } from "@appTypes/User";
 import { useState } from "react";
 
 interface EditUserModalProps {
@@ -158,3 +158,4 @@ export function EditUserModal({
     </Modal>
   );
 }
+

@@ -15,8 +15,8 @@ import {
 } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
-import { showNotification } from "../../../components/Notification/Notification";
-import { SectionColor } from "../../../types/SectionColor";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 export function CampaignSelectPanel() {
   const {
@@ -158,3 +158,5 @@ export function CampaignSelectPanel() {
     </Box>
   );
 }
+
+

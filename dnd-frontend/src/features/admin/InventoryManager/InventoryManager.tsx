@@ -4,7 +4,7 @@ import { InventorySelectPanel } from "./sections/InventorySelectPanel/InventoryS
 import { InventoryHeader } from "./sections/InventoryItems/InventoryHeader";
 import { InventoryItemsPanel } from "./sections/InventoryItems/InventoryItemsPanel";
 import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
-import { AdminCurrencyBox } from "../components/AdminCurrencyBox";
+import { AdminCurrencyBox } from "@features/admin/components/AdminCurrencyBox";
 
 export function InventoryManager() {
   const selectedCharacter = useAdminCharacterStore((state) => state.selectedId);
@@ -39,3 +39,4 @@ export function InventoryManager() {
     </Box>
   );
 }
+

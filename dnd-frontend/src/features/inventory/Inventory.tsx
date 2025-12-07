@@ -1,8 +1,8 @@
-import type { Inventory } from '../../types/Inventory/Inventory';
+import type { Inventory } from '@appTypes/Inventory/Inventory';
 import { useEffect, useState } from 'react';
-import { getInventoriesByCharacter } from "../../services/inventoryService";
-import { useCharacterStore } from "../../store/useCharacterStore";
-import { useAuthStore } from "../../store/useAuthStore";
+import { getInventoriesByCharacter } from "@services/inventoryService";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { useAuthStore } from "@store/useAuthStore";
 import { notifications } from '@mantine/notifications';
 import { Box } from '@mantine/core';
 import { IconError404 } from '@tabler/icons-react';
@@ -77,3 +77,4 @@ export function Inventory() {
     </Box>
   );
 }
+

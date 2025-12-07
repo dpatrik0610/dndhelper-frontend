@@ -13,9 +13,9 @@ import {
 } from "@mantine/core";
 import { useState } from "react";
 import { useAuthStore } from "@store/useAuthStore";
-import type { Spell } from "../../../types/Spell";
-import { showNotification } from "../../../components/Notification/Notification";
-import { SectionColor } from "../../../types/SectionColor";
+import type { Spell } from "@appTypes/Spell";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 import { createSpell } from "@services/spellService";
 
 const DAMAGE_TYPES = [
@@ -311,3 +311,5 @@ export function SpellForm() {
     </Paper>
   );
 }
+
+

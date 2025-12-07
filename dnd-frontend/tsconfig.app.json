@@ -32,7 +32,8 @@
       "@utils/*": ["src/utils/*"],
       "@pages/*": ["src/pages/*"],
       "@services/*": ["src/services/*"],
-      "@validations/*": ["src/validations/*"]
+      "@validations/*": ["src/validations/*"],
+      "@styles/*": ["src/styles/*"]
     }
   },
   "include": ["src"]

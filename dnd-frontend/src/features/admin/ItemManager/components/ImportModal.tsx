@@ -10,9 +10,9 @@ import {
 } from "@mantine/core";
 import { IconInfoCircle, IconUpload, IconX } from "@tabler/icons-react";
 import { useRef } from "react";
-import { BaseModal } from "../../../../components/BaseModal";
-import { showNotification } from "../../../../components/Notification/Notification";
-import { SectionColor } from "../../../../types/SectionColor";
+import { BaseModal } from "@components/BaseModal";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 import { createManyEquipment } from "@services/equipmentService";
 import { useAuthStore } from "@store/useAuthStore";
 import { importSamplePretty } from "./ImportTemplate";
@@ -178,3 +178,4 @@ export function ImportModal({
     </BaseModal>
   );
 }
+

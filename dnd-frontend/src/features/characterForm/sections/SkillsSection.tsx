@@ -11,7 +11,7 @@ import { SectionColor } from "@appTypes/SectionColor";
 import CustomBadge from "@components/common/CustomBadge";
 import { useCharacterFormStore } from "@store/useCharacterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
-import { DEFAULT_SKILLS } from "../Tooltips/tooltips";
+import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
 import { InfoIconPopover } from "@components/common/InfoIconPopover";
 
 type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
@@ -228,3 +228,4 @@ export function SkillsSection() {
     </ExpandableSection>
   );
 }
+

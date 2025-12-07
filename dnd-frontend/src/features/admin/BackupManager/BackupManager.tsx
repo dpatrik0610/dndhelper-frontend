@@ -22,8 +22,8 @@ import {
   IconRefresh,
 } from "@tabler/icons-react";
 import { useAuthStore } from "@store/useAuthStore";
-import { showNotification } from "../../../components/Notification/Notification";
-import { SectionColor } from "../../../types/SectionColor";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 import { exportCollection, restoreCollection } from "@services/backupService";
 import { useMediaQuery } from "@mantine/hooks";
 
@@ -316,3 +316,5 @@ export function BackupManager() {
     </Paper>
   );
 }
+
+

@@ -1,8 +1,8 @@
 import { Group, Text } from "@mantine/core";
-import CustomBadge from "../../../components/common/CustomBadge";
-import { SectionColor } from "../../../types/SectionColor";
+import CustomBadge from "@components/common/CustomBadge";
+import { SectionColor } from "@appTypes/SectionColor";
 import { randomId } from "@mantine/hooks";
-import { useInventoryStore } from "../../../store/useInventorystore";
+import { useInventoryStore } from "@store/useInventorystore";
 
 export interface InventoryCurrencyBoxProps{
     inventoryId: string;
@@ -36,3 +36,4 @@ export function InventoryCurrencyBox({inventoryId} : InventoryCurrencyBoxProps) 
         </Group>
     )
 }
+

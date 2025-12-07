@@ -19,9 +19,9 @@ import {
   IconMinus,
 } from "@tabler/icons-react";
 import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
-import { SectionColor } from "../../../types/SectionColor";
-import type { Currency } from "../../../types/Currency";
-import CustomBadge from "../../../components/common/CustomBadge";
+import { SectionColor } from "@appTypes/SectionColor";
+import type { Currency } from "@appTypes/Currency";
+import CustomBadge from "@components/common/CustomBadge";
 
 export function AdminCurrencyBox() {
   const {
@@ -204,3 +204,5 @@ const handleConfirm = async () => {
     </Stack>
   );
 }
+
+

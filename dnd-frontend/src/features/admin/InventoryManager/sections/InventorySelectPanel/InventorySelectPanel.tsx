@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
 import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
 import { InventoryNavbar } from "./InventoryNavbar";
-import { BaseModal } from "../../../../../components/BaseModal";
-import { showNotification } from "../../../../../components/Notification/Notification";
-import { SectionColor } from "../../../../../types/SectionColor";
+import { BaseModal } from "@components/BaseModal";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 export function InventorySelectPanel() {
   const { loading, loadByCharacter, create } = useAdminInventoryStore();
@@ -80,3 +80,4 @@ export function InventorySelectPanel() {
     </Box>
   );
 }
+

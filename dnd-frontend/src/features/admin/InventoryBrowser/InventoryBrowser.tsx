@@ -13,10 +13,10 @@ import {
 } from "@mantine/core";
 import { IconRefresh, IconSearch } from "@tabler/icons-react";
 import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import { InventoryTile } from "../InventoryManager/sections/InventorySelectPanel/InventoryTile";
-import { InventoryHeader } from "../InventoryManager/sections/InventoryItems/InventoryHeader";
-import { AdminCurrencyBox } from "../components/AdminCurrencyBox";
-import { InventoryItemsPanel } from "../InventoryManager/sections/InventoryItems/InventoryItemsPanel";
+import { InventoryTile } from "@features/admin/InventoryManager/sections/InventorySelectPanel/InventoryTile";
+import { InventoryHeader } from "@features/admin/InventoryManager/sections/InventoryItems/InventoryHeader";
+import { AdminCurrencyBox } from "@features/admin/components/AdminCurrencyBox";
+import { InventoryItemsPanel } from "@features/admin/InventoryManager/sections/InventoryItems/InventoryItemsPanel";
 import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
 import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
 
@@ -170,3 +170,4 @@ export function InventoryBrowser() {
     </Box>
   );
 }
+

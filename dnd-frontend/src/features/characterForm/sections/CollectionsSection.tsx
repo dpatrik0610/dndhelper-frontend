@@ -2,7 +2,7 @@ import { Stack } from "@mantine/core";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { IconBook2 } from "@tabler/icons-react";
-import { ListEditor } from "../components/ListEditor";
+import { ListEditor } from "@features/characterForm/components/ListEditor";
 import { useCharacterFormStore } from "@store/useCharacterFormStore";
 
 export function CollectionsSection() {
@@ -23,3 +23,4 @@ export function CollectionsSection() {
     </ExpandableSection>
   );
 }
+

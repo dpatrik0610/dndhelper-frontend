@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import { Box, Group, Text, Loader, Paper, ScrollArea, SimpleGrid } from "@mantine/core";
 import { IconMapPin, IconCheck } from "@tabler/icons-react";
 import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
-import { BaseModal } from "../../../components/BaseModal";
-import { SectionColor } from "../../../types/SectionColor";
+import { BaseModal } from "@components/BaseModal";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface SelectCampaignModalProps {
   opened: boolean;
@@ -89,3 +89,5 @@ export function SelectCampaignModal({ opened, onClose }: SelectCampaignModalProp
     </BaseModal>
   );
 }
+
+

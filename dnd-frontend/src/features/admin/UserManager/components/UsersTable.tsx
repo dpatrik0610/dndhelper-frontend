@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { IconEdit, IconShieldExclamation, IconTrash, IconUser } from "@tabler/icons-react";
-import { UserRole, UserStatus } from "../../../../types/User";
+import { UserRole, UserStatus } from "@appTypes/User";
 
 const statusColor: Record<UserStatus, string> = {
   [UserStatus.Active]: "green",
@@ -188,3 +188,4 @@ export function UsersTable({
     </Paper>
   );
 }
+

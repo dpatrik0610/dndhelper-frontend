@@ -1,6 +1,6 @@
 import { ActionIcon, Group, Table, Text, Tooltip } from "@mantine/core";
 import { IconEdit, IconEye, IconTrash } from "@tabler/icons-react";
-import type { Monster } from "../../../../types/Monster";
+import type { Monster } from "@appTypes/Monster";
 
 interface MonsterTableProps {
   monsters: Monster[];
@@ -88,3 +88,4 @@ export function MonsterTable({
     </Table>
   );
 }
+

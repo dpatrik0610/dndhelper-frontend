@@ -17,7 +17,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useAdminEquipmentStore } from "@store/admin/useAdminEquipmentStore";
 import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
-import "../../../../../styles/AddExistingItemModal.css";
+import styles from "@styles/AddExistingItemModal.module.css";
 
 export function AddExistingItemModal({
   opened,
@@ -76,9 +76,9 @@ export function AddExistingItemModal({
       radius="md"
       padding={isMobile ? "sm" : "md"}
       classNames={{
-        content: "modal-content",
-        header: "modal-header",
-        title: "modal-title",
+        content: styles.modalContent,
+        header: styles.modalHeader,
+        title: styles.modalTitle,
       }}
     >
       <Stack gap="md" style={{ height: isMobile ? "100%" : "auto" }}>
@@ -88,7 +88,7 @@ export function AddExistingItemModal({
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
           radius="md"
-          className="modal-search"
+          className={styles.modalSearch}
         />
 
         {loading ? (
@@ -117,7 +117,7 @@ export function AddExistingItemModal({
                     p={isMobile ? "sm" : "md"}
                     radius="md"
                     withBorder
-                    className="equipment-card"
+                    className={styles.equipmentCard}
                     onClick={() => handleAdd(eq)}
                   >
                     <Group justify="space-between" wrap="nowrap">
@@ -147,7 +147,7 @@ export function AddExistingItemModal({
                           radius="sm"
                           size="xs"
                           w={60}
-                          className="equipment-qty"
+                          className={styles.equipmentQty}
                           onClick={(e) => e.stopPropagation()}
                         />
                         <Button
@@ -179,3 +179,4 @@ export function AddExistingItemModal({
     </Modal>
   );
 }
+

@@ -1,20 +1,20 @@
-import type { Inventory } from "../../../types/Inventory/Inventory";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { useEffect, useState } from "react";
-import { RemoveItemModal } from "../../../types/Inventory/components/RemoveItemModal";
+import { RemoveItemModal } from "@appTypes/Inventory/components/RemoveItemModal";
 import { Text, Loader, Center } from "@mantine/core";
-import { SectionColor } from "../../../types/SectionColor";
-import { useInventoryStore } from "../../../store/useInventorystore";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { decrementItemQuantity as apiDecreaseQuantity, moveItem, type ModifyEquipmentAmount, type MoveItemRequest } from "../../../services/inventoryService";
-import { showNotification } from "../../../components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import { useInventoryStore } from "@store/useInventorystore";
+import { useAuthStore } from "@store/useAuthStore";
+import { decrementItemQuantity as apiDecreaseQuantity, moveItem, type ModifyEquipmentAmount, type MoveItemRequest } from "@services/inventoryService";
+import { showNotification } from "@components/Notification/Notification";
 import { IconCheck } from "@tabler/icons-react";
-import { loadInventories } from "../../../utils/loadinventory";
+import { loadInventories } from "@utils/loadinventory";
 import { MoveItemModal } from "./MoveItemModal";
 import { InventorySection } from "./InventorySection";
 import { InventoryItemsList } from "./InventoryItemsList";
 import { InventoryItemsGrid } from "./InventoryItemsGrid";
-import { useFilteredItems } from "../hooks/useFilteredItems";
-import { BaseTransition } from "../../../components/animations/BaseTransition";
+import { useFilteredItems } from "@features/inventory/hooks/useFilteredItems";
+import { BaseTransition } from "@components/animations/BaseTransition";
 
 interface InventoryBoxProps {
   inventory: Inventory;
@@ -193,3 +193,5 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
     </>
   );
 }
+
+

@@ -1,10 +1,10 @@
 import { Card, Grid, Text, ActionIcon, Group, Badge} from "@mantine/core";
-import type { InventoryItem } from "../../../types/Inventory/InventoryItem";
-import CustomBadge from "../../../components/common/CustomBadge";
-import { SectionColor } from "../../../types/SectionColor";
+import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
+import CustomBadge from "@components/common/CustomBadge";
+import { SectionColor } from "@appTypes/SectionColor";
 import { IconTrash, IconArrowsRightLeft, IconZoom } from "@tabler/icons-react";
 import { useState } from "react";
-import { EquipmentModal } from "../../../components/EquipmentModal";
+import { EquipmentModal } from "@components/EquipmentModal";
 
 interface InventoryItemCardProps {
   item: InventoryItem;
@@ -102,3 +102,5 @@ export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardP
       </Card>
   );
 }
+
+

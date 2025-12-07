@@ -1,6 +1,6 @@
 import { Paper, Group, Text } from "@mantine/core";
 import type { ReactNode, CSSProperties, MouseEventHandler } from "react";
-import "../styles/StatBox.styles.css"
+import styles from "@features/profile/styles/StatBox.module.css";
 type BackgroundType = "transparent" | "solid" | "gradient" | "dark";
 type VariantType = "default" | "glass" | "glow" | "bordered" | "elevated" | "arcane" | "holographic" | "infernal" | "neon" | "sunset" | "electric" | "frost" | "velvet" | "prism" | "galaxy" | "monolith";
 
@@ -202,6 +202,7 @@ export function StatBox({
 
   return (
     <Paper
+      className={styles.statBox}
       onClick={onClick}
       w={fullWidth ? "100%" : undefined}
       maw={fullWidth ? "100%" : undefined}
@@ -265,3 +266,4 @@ export function StatBox({
     </Paper>
   );
 }
+

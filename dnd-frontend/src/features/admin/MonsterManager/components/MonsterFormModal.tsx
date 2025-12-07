@@ -1,5 +1,5 @@
 import { Button, Group, Modal, NumberInput, Stack, Switch, TextInput } from "@mantine/core";
-import type { Monster } from "../../../../types/Monster";
+import type { Monster } from "@appTypes/Monster";
 
 interface MonsterFormModalProps {
   opened: boolean;
@@ -94,3 +94,4 @@ export function MonsterFormModal({
     </Modal>
   );
 }
+

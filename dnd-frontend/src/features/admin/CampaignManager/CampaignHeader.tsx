@@ -21,8 +21,8 @@ import {
 
 import { useState } from "react";
 import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
-import { showNotification } from "../../../components/Notification/Notification";
-import { SectionColor } from "../../../types/SectionColor";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 export function CampaignHeader() {
   const {
@@ -193,3 +193,5 @@ export function CampaignHeader() {
     </Box>
   );
 }
+
+

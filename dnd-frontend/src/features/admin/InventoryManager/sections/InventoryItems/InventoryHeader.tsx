@@ -24,9 +24,9 @@ import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
 import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
 import { useAuthStore } from "@store/useAuthStore";
 import { getCharacterById, updateCharacter } from "@services/characterService";
-import { showNotification } from "../../../../../components/Notification/Notification";
-import { SectionColor } from "../../../../../types/SectionColor";
-import { ItemModal } from "../InventoryItems/ItemModal";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import { ItemModal } from "@features/admin/InventoryManager/sections/InventoryItems/ItemModal";
 import { AddExistingItemModal } from "./AddExistingItemModal";
 import { SelectInventoryOwnersModal } from "./SelectInventoryOwnersModal";
 
@@ -312,3 +312,4 @@ export function InventoryHeader() {
     </>
   );
 }
+

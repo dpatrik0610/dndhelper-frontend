@@ -16,7 +16,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { useAdminUserStore } from "@store/admin/useAdminUserStore";
-import { UserRole, UserStatus } from "../../../types/User";
+import { UserRole, UserStatus } from "@appTypes/User";
 import { AddUserModal } from "./components/AddUserModal";
 import { EditUserModal } from "./components/EditUserModal";
 import { DeleteConfirmModal } from "./components/DeleteConfirmModal";
@@ -252,3 +252,4 @@ export function UserManager() {
     </Stack>
   );
 }
+

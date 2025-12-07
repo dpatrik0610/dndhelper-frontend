@@ -25,8 +25,8 @@ import { getEquipmentById } from "@services/equipmentService";
 import { useAuthStore } from "@store/useAuthStore";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { MoveItemModal } from "./MoveItemModal";
-import "../../../../../styles/itemCard.css";
-import { EquipmentModal } from "../../../../../components/EquipmentModal";
+import styles from "@styles/ItemCard.module.css";
+import { EquipmentModal } from "@components/EquipmentModal";
 
 interface ItemCardProps {
   itemId: string;
@@ -86,7 +86,7 @@ export function ItemCard({ itemId }: ItemCardProps) {
             radius="md"
             withBorder
             p="md"
-            className="item-card"
+            className={styles.itemCard}
             style={{
               ...styles,
               flex: "1 1 0",
@@ -207,3 +207,4 @@ export function ItemCard({ itemId }: ItemCardProps) {
     </>
   );
 }
+

@@ -1,4 +1,4 @@
-import type { Inventory } from "../../../types/Inventory/Inventory";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { Stack, Title } from "@mantine/core";
 import InventoryBox from "./InventoryBox";
 
@@ -29,3 +29,4 @@ export function InventoryList({ inventories, searchTerm, viewMode }: InventoryLi
     </Stack>
   );
 }
+

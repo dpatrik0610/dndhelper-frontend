@@ -13,9 +13,9 @@ import {
 } from "@mantine/core";
 import { IconTrash, IconDatabaseSearch, IconReload } from "@tabler/icons-react";
 import { useAuthStore } from "@store/useAuthStore";
-import { showNotification } from "../../../components/Notification/Notification";
-import { SectionColor } from "../../../types/SectionColor";
-import type { CacheInfoResponse } from "../../../types/Cache";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import type { CacheInfoResponse } from "@appTypes/Cache";
 import { clearCache, getCacheInfo } from "@services/Admin/cacheService";
 
 export function CacheManager() {
@@ -232,3 +232,5 @@ export function CacheManager() {
     </>
   );
 }
+
+

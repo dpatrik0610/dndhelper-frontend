@@ -1,5 +1,5 @@
 import { Stack, Text } from "@mantine/core";
-import type { InventoryItem } from "../../../types/Inventory/InventoryItem";
+import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import { InventoryItemCard } from "./InventoryItemCard";
 import { InventoryCurrencyClaim } from "./InventoryCurrencyClaim";
 
@@ -39,3 +39,4 @@ export function InventoryItemsList({
     </Stack>
   );
 }
+

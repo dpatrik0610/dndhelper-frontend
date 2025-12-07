@@ -6,7 +6,7 @@ import { registerUser } from '@services/authService';
 import { processToken } from '@utils/processToken';
 import { useLoadingNotification } from '@components/Notification/LoadingNotification';
 import { useAuthStore } from '@store/useAuthStore';
-import AlreadyLoggedIn from '../login/components/AlreadyLoggedIn';
+import AlreadyLoggedIn from '@features/auth/login/components/AlreadyLoggedIn';
 import { notifications } from '@mantine/notifications';
 import { validateRegisterForm } from '@validations/registerValidation';
 import "@features/auth/styles/AuthCard.css"
@@ -98,3 +98,4 @@ export default function Register() {
     </Container>
   );
 }
+

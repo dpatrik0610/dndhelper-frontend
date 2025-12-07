@@ -11,7 +11,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
-import { UserRole, UserStatus } from "../../../../types/User";
+import { UserRole, UserStatus } from "@appTypes/User";
 import { useState } from "react";
 
 interface AddUserModalProps {
@@ -135,3 +135,4 @@ export function AddUserModal({
     </Modal>
   );
 }
+
