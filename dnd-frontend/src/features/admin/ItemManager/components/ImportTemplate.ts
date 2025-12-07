@@ -1,4 +1,4 @@
-import type { Equipment } from "../../../../types/Equipment/Equipment";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
 
 export const equipmentTemplate: Equipment = {
   index: "sword-001",

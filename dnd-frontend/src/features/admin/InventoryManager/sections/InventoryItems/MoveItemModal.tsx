@@ -1,9 +1,9 @@
 import { Stack, Select, NumberInput } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import { BaseModal } from "../../../../../components/BaseModal";
-import { showNotification } from "../../../../../components/Notification/Notification";
-import { SectionColor } from "../../../../../types/SectionColor";
+import { BaseModal } from "@components/BaseModal";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface MoveItemModalProps {
   opened: boolean;

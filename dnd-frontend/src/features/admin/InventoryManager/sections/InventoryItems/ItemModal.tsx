@@ -1,9 +1,9 @@
 import { Modal, Loader, Center } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { EquipmentFormModal } from "../../../../../components/admin/EquipmentFormModal";
-import { showNotification } from "../../../../../components/Notification/Notification";
-import { SectionColor } from "../../../../../types/SectionColor";
-import type { Equipment } from "../../../../../types/Equipment/Equipment";
+import { EquipmentFormModal } from "@components/admin/EquipmentFormModal";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { defaultEquipment } from "@features/admin/ItemManager/defaultEquipment";
 import { getEquipmentById } from "@services/equipmentService";
 import { useAuthStore } from "@store/useAuthStore";

@@ -15,8 +15,8 @@ import {
   assignInventoryToCharacter,
 } from "@services/inventoryService";
 import { useAuthStore } from "@store/useAuthStore";
-import { showNotification } from "../../../../../components/Notification/Notification";
-import { SectionColor } from "../../../../../types/SectionColor";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 export function SelectInventoryOwnersModal({
   opened,

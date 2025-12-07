@@ -16,7 +16,7 @@ import { IconSearch, IconBox } from "@tabler/icons-react";
 import { useEffect, useState, useMemo } from "react";
 import { useAdminEquipmentStore } from "@store/admin/useAdminEquipmentStore";
 import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import type { Equipment } from "../../../../../types/Equipment/Equipment";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
 import "../../../../../styles/AddExistingItemModal.css";
 
 export function AddExistingItemModal({

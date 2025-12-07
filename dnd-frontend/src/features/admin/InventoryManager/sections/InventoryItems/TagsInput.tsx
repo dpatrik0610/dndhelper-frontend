@@ -1,7 +1,7 @@
 import { TextInput, Button, Group, Badge, Stack } from "@mantine/core";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import { useState } from "react";
-import type { Equipment } from "../../../../../types/Equipment/Equipment";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
 
 export function TagsInput({
   equipment,

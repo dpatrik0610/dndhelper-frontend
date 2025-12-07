@@ -19,10 +19,10 @@ import {
 import { IconEdit, IconPlus, IconRefresh, IconSearch, IconTrash, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { useAdminEquipmentStore } from "@store/admin/useAdminEquipmentStore";
-import { EQUIPMENT_TIERS, type Equipment } from "../../../types/Equipment/Equipment";
-import { EquipmentFormModal } from "../../../components/admin/EquipmentFormModal";
+import { EQUIPMENT_TIERS, type Equipment } from "@appTypes/Equipment/Equipment";
+import { EquipmentFormModal } from "@components/admin/EquipmentFormModal";
 import { ImportModal } from "./components/ImportModal";
-import { useItemFilters } from "./components/useItemFilters";
+import { useItemFilters } from "@features/admin/hooks/useItemFilters";
 
 export function ItemManager() {
   const { equipments, loading, loadAll, searchByName, create, update, remove } = useAdminEquipmentStore();

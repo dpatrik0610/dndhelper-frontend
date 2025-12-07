@@ -23,7 +23,7 @@ import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
 import { ItemModal } from "./ItemModal";
 import { getEquipmentById } from "@services/equipmentService";
 import { useAuthStore } from "@store/useAuthStore";
-import type { Equipment } from "../../../../../types/Equipment/Equipment";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { MoveItemModal } from "./MoveItemModal";
 import "../../../../../styles/itemCard.css";
 import { EquipmentModal } from "../../../../../components/EquipmentModal";
