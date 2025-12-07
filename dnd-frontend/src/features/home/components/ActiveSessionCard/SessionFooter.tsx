@@ -1,4 +1,4 @@
-import { Group, Paper, Stack, Text, ThemeIcon, Badge } from "@mantine/core";
+import { Group, Paper, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconMapPin, IconClock } from "@tabler/icons-react";
 
 interface Props {
@@ -43,9 +43,6 @@ export function SessionFooter({ scheduled, location, palette, panelBg }: Props) 
             </Text>
           </Stack>
         </Group>
-        <Badge variant="dot" color="indigo" size="sm">
-          Session overview
-        </Badge>
       </Group>
     </Paper>
   );
