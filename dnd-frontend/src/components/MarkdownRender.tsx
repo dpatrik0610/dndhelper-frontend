@@ -7,6 +7,8 @@ import {
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import {
   Anchor,
   Badge,
@@ -17,6 +19,7 @@ import {
   Table,
   Text,
 } from "@mantine/core";
+import "katex/dist/katex.min.css";
 
 interface MarkdownRendererProps {
   content: string;
@@ -53,11 +56,6 @@ const HEADING_BASE_STYLE: CSSProperties = {
   lineHeight: 1.1,
 };
 
-const LIST_STYLE: CSSProperties = {
-  paddingLeft: "1.1rem",
-  marginTop: 2,
-  marginBottom: 4,
-};
 
 const BLOCKQUOTE_STYLE: CSSProperties = {
   marginTop: 6,
@@ -195,7 +193,8 @@ export function MarkdownRenderer({
       style={{ ...WRAPPER_STYLE, ...style }}
     >
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkBreaks]}
+        remarkPlugins={[remarkGfm, remarkBreaks, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
         components={{
           p: ({ children, ...props }) => (
             <div style={PARAGRAPH_STYLE} {...props}>
