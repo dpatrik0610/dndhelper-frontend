@@ -14,7 +14,7 @@ import {
 } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useCharacterStore } from "../../store/useCharacterStore";
+import { useCharacterStore } from "@store/useCharacterStore";
 import { CharacterHeader } from "./components/CharacterHeader";
 import { CombatStats } from "./components/CombatStats";
 import { AbilityScores } from "./components/AbilityScores";
@@ -24,15 +24,15 @@ import { ActionBar } from "./components/ActionsBar";
 import { ConditionsPanel } from "./components/ConditionsPanel";
 import { SpellsPanel } from "./components/SpellsPanel";
 import { useMediaQuery } from "@mantine/hooks";
-import { Inventory } from "../Inventory/Inventory";
+import { Inventory } from "@pages/Inventory/Inventory";
 import { ProficienciesPanel } from "./components/ProficienciesPanel";
 import "./styles/CharacterProfile.styles.css"
 import { FeaturesPanel } from "./components/FeaturesPanel";
-import { SectionColor } from "../../types/SectionColor";
-import { showNotification } from "../../components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../store/useAuthStore";
-import { getCampaignById } from "../../services/campaignService";
+import { useAuthStore } from "@store/useAuthStore";
+import { getCampaignById } from "@services/campaignService";
 
 function useCampaignName(campaignId: string | null | undefined) {
   const [name, setName] = useState("Loading...");

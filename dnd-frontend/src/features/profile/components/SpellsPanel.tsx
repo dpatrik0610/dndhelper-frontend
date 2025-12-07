@@ -1,6 +1,6 @@
 import { IconSparkles, IconSearch } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { useCharacterStore } from "../../../store/useCharacterStore";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { useCharacterStore } from "@store/useCharacterStore";
 import { StatBox } from "./StatBox";
 import {
   SimpleGrid,
@@ -13,13 +13,13 @@ import {
   Select,
   Group,
 } from "@mantine/core";
-import { SectionColor } from "../../../types/SectionColor";
-import { getSpellById } from "../../../services/spellService";
-import { useAuthStore } from "../../../store/useAuthStore";
-import type { Spell } from "../../../types/Spell";
+import { SectionColor } from "@appTypes/SectionColor";
+import { getSpellById } from "@services/spellService";
+import { useAuthStore } from "@store/useAuthStore";
+import type { Spell } from "@appTypes/Spell";
 import { useEffect, useMemo, useState } from "react";
-import { useSpellStore } from "../../../store/useSpellStore";
-import CustomBadge from "../../../components/common/CustomBadge";
+import { useSpellStore } from "@store/useSpellStore";
+import CustomBadge from "@components/common/CustomBadge";
 import { useMediaQuery } from "@mantine/hooks";
 import { SpellModal } from "./SpellModal";
 

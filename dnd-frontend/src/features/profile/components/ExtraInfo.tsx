@@ -1,10 +1,10 @@
-import { ExpandableSection } from "../../../components/ExpandableSection";
+import { ExpandableSection } from "@components/ExpandableSection";
 import { StatBox } from "./StatBox";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { Group, Stack, Text } from "@mantine/core";
-import { SectionColor } from "../../../types/SectionColor";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { DividerWithLabel } from "../../../components/common/DividerWithLabel";
+import { SectionColor } from "@appTypes/SectionColor";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { DividerWithLabel } from "@components/common/DividerWithLabel";
 
 
 export function ExtraInfo() {

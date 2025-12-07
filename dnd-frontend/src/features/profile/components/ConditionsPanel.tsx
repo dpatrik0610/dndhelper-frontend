@@ -6,12 +6,12 @@ import {
   ActionIcon,
 } from "@mantine/core";
 import { IconSearch, IconSparkles } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { SectionColor } from "../../../types/SectionColor";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { getCondition } from "../../../services/conditionService";
-import { updateCharacter } from "../../../services/characterService";
-import { useAuthStore } from "../../../store/useAuthStore";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { SectionColor } from "@appTypes/SectionColor";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { getCondition } from "@services/conditionService";
+import { updateCharacter } from "@services/characterService";
+import { useAuthStore } from "@store/useAuthStore";
 import { ConditionDetailsModal } from "./ConditionDetailsModal";
 
 const BADGE_STYLES: React.CSSProperties = {

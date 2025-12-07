@@ -10,10 +10,10 @@ import {
   IconEye,
 } from "@tabler/icons-react";
 import { StatBox } from "./StatBox";
-import { ExpandableSection } from "../../../components/ExpandableSection";
+import { ExpandableSection } from "@components/ExpandableSection";
 import { useMediaQuery } from "@mantine/hooks";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { SectionColor } from "../../../types/SectionColor";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { SectionColor } from "@appTypes/SectionColor";
 
 export function CombatStats() {
   const character = useCharacterStore((s) => s.character)!;

@@ -13,6 +13,17 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@features/*": ["src/features/*"],
+      "@components/*": ["src/components/*"],
+      "@appTypes/*": ["src/types/*"],
+      "@store/*": ["src/store/*"],
+      "@utils/*": ["src/utils/*"],
+      "@pages/*": ["src/pages/*"],
+      "@services/*": ["src/services/*"],
+      "@/*": ["src/*"]
+    },
 
     /* Linting */
     "strict": true,

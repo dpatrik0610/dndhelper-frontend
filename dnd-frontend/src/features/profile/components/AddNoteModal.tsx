@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { TextInput, Stack } from "@mantine/core";
-import { BaseModal } from "../../../components/BaseModal";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { useNoteStore } from "../../../store/useNoteStore";
-import { showNotification } from "../../../components/Notification/Notification";
-import { MarkdownTextarea } from "../../../components/common/MarkdownTextarea";
+import { BaseModal } from "@components/BaseModal";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { useNoteStore } from "@store/useNoteStore";
+import { showNotification } from "@components/Notification/Notification";
+import { MarkdownTextarea } from "@components/common/MarkdownTextarea";
 
 interface Props {
   opened: boolean;

@@ -1,7 +1,7 @@
 import { IconAutomaticGearbox, IconStarFilled, IconSearch } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { SectionColor } from "../../../types/SectionColor";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { SectionColor } from "@appTypes/SectionColor";
 import {
   Box,
   Group,
@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { useState, useMemo } from "react";
-import { DividerWithLabel } from "../../../components/common/DividerWithLabel";
+import { DividerWithLabel } from "@components/common/DividerWithLabel";
 
 export function SkillsPanel() {
   const theme = useMantineTheme();

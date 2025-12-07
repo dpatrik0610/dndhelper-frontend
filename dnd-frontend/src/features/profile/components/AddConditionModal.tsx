@@ -2,10 +2,10 @@ import { useEffect, useState, useMemo } from "react";
 import { Modal, Button, Chip, Stack, Loader, TextInput } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
 
-import { getConditions } from "../../../services/conditionService";
-import { updateCharacter as apiUpdateCharacter } from "../../../services/characterService";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { useAuthStore } from "../../../store/useAuthStore";
+import { getConditions } from "@services/conditionService";
+import { updateCharacter as apiUpdateCharacter } from "@services/characterService";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { useAuthStore } from "@store/useAuthStore";
 
 interface AddConditionModalProps {
   opened: boolean;

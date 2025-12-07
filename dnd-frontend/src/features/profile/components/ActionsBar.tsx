@@ -1,19 +1,19 @@
 import { Button, Group, Paper, Title } from "@mantine/core";
-import { longrest } from "../../../services/characterService";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { showNotification } from "../../../components/Notification/Notification";
+import { longrest } from "@services/characterService";
+import { useAuthStore } from "@store/useAuthStore";
+import { showNotification } from "@components/Notification/Notification";
 import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus, IconSwords, IconHeartPlus } from "@tabler/icons-react";
-import { loadCharacters } from "../../../utils/loadCharacter";
-import { useCharacterStore } from "../../../store/useCharacterStore";
+import { loadCharacters } from "@utils/loadCharacter";
+import { useCharacterStore } from "@store/useCharacterStore";
 import { useNavigate } from "react-router-dom";
-import { SectionColor } from "../../../types/SectionColor";
+import { SectionColor } from "@appTypes/SectionColor";
 import { useState, type MouseEventHandler } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { AddConditionModal } from "./AddConditionModal";
 import { DamageModal } from "./DamageModal";
 import { RemoveCurrencyModal } from "./RemoveCurrencyModal";
 import { TransferCurrencyModal } from "./TransferCurrencyModal";
-import { ExpandableSection } from "../../../components/ExpandableSection";
+import { ExpandableSection } from "@components/ExpandableSection";
 import { HealModal } from "./HealModal";
 
 export interface ActionButtonProps {

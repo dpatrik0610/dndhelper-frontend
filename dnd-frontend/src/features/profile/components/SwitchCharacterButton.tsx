@@ -1,11 +1,11 @@
 import { Tooltip } from "@mantine/core";
 import { IconArrowsExchange } from "@tabler/icons-react";
-import { useCharacterStore } from "../../../store/useCharacterStore";
+import { useCharacterStore } from "@store/useCharacterStore";
 import { useState } from "react";
-import { CharacterSelectModal } from "../../Home/components/CharacterSelectModal";
-import type { Character } from "../../../types/Character/Character";
-import { SectionColor } from "../../../types/SectionColor";
-import CustomBadge from "../../../components/common/CustomBadge";
+import { CharacterSelectModal } from "@pages/Home/components/CharacterSelectModal";
+import type { Character } from "@appTypes/Character/Character";
+import { SectionColor } from "@appTypes/SectionColor";
+import CustomBadge from "@components/common/CustomBadge";
 
 export function SwitchCharacterButton() {
   const { characters, setCharacter } = useCharacterStore();

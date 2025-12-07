@@ -6,6 +6,7 @@ import { useNoteStore } from "../../../store/useNoteStore";
 import { showNotification } from "@mantine/notifications";
 import { BaseModal } from "../../../components/BaseModal";
 import { MarkdownTextarea } from "../../../components/common/MarkdownTextarea";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface EditNoteModalProps {
   opened: boolean;
@@ -34,8 +35,12 @@ export function EditNoteModal({ opened, note, onClose }: EditNoteModalProps) {
     });
 
     showNotification({
+      id: "NoteUpdated",
       title: "Success",
       message: "Note updated.",
+      color: SectionColor.Blue,
+      withBorder: true,
+      
     });
 
     onClose();

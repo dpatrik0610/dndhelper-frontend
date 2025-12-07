@@ -1,14 +1,14 @@
 import { Select, Stack } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { getCampaignCharacters } from "../../../services/campaignService";
-import { transferBetweenCharacters } from "../../../services/currencyService";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { showNotification } from "../../../components/Notification/Notification";
-import type { Character } from "../../../types/Character/Character";
-import { loadCharacters } from "../../../utils/loadCharacter";
-import { BaseModal } from "../../../components/BaseModal";
-import { FormNumberInput } from "../../../components/common/FormNumberInput";
+import { getCampaignCharacters } from "@services/campaignService";
+import { transferBetweenCharacters } from "@services/currencyService";
+import { useAuthStore } from "@store/useAuthStore";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { showNotification } from "@components/Notification/Notification";
+import type { Character } from "@appTypes/Character/Character";
+import { loadCharacters } from "@utils/loadCharacter";
+import { BaseModal } from "@components/BaseModal";
+import { FormNumberInput } from "@components/common/FormNumberInput";
 
 interface Props {
   opened: boolean;

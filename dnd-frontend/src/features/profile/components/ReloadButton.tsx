@@ -1,11 +1,11 @@
 import { Button } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 import { useState } from "react";
-import { loadCharacters } from "../../../utils/loadCharacter";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { showNotification } from "../../../components/Notification/Notification";
-import { loadInventories } from "../../../utils/loadinventory";
-import { loadSpells } from "../../../utils/loadSpells";
+import { loadCharacters } from "@utils/loadCharacter";
+import { useAuthStore } from "@store/useAuthStore";
+import { showNotification } from "@components/Notification/Notification";
+import { loadInventories } from "@utils/loadinventory";
+import { loadSpells } from "@utils/loadSpells";
 
 export default function ReloadButton() {
   const [loading, setLoading] = useState(false);

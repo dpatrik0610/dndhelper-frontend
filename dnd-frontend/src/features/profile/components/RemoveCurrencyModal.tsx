@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Modal, Button, Stack, Text, Select } from "@mantine/core";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { updateCharacter } from "../../../services/characterService";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { FormNumberInput } from "../../../components/common/FormNumberInput";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { updateCharacter } from "@services/characterService";
+import { useAuthStore } from "@store/useAuthStore";
+import { FormNumberInput } from "@components/common/FormNumberInput";
 
 interface RemoveCurrencyModalProps {
   opened: boolean;

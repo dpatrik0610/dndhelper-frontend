@@ -1,14 +1,14 @@
 import { SimpleGrid, Tooltip } from "@mantine/core";
-import { ExpandableSection } from "../../../components/ExpandableSection";
+import { ExpandableSection } from "@components/ExpandableSection";
 import { StatBox } from "./StatBox";
 import { IconExclamationCircle, IconWand } from "@tabler/icons-react";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { SectionColor } from "../../../types/SectionColor";
-import { DividerWithLabel } from "../../../components/common/DividerWithLabel";
-import type { SpellSlot } from "../../../types/Character/SpellSlot";
-import { showNotification } from "../../../components/Notification/Notification";
-import { updateCharacter } from "../../../services/characterService";
-import { useAuthStore } from "../../../store/useAuthStore";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { SectionColor } from "@appTypes/SectionColor";
+import { DividerWithLabel } from "@components/common/DividerWithLabel";
+import type { SpellSlot } from "@appTypes/Character/SpellSlot";
+import { showNotification } from "@components/Notification/Notification";
+import { updateCharacter } from "@services/characterService";
+import { useAuthStore } from "@store/useAuthStore";
 
 export function SpellCastingBlock() {
     const character = useCharacterStore((state) => state.character)!;

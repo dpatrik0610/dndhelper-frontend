@@ -15,7 +15,7 @@ import { NotesSearch } from "./NotesSearch";
 import { useCharacterStore } from "../../../store/useCharacterStore";
 import { useNoteStore } from "../../../store/useNoteStore";
 import type { Note } from "../../../types/Note";
-import { AddNoteModal } from "../../Profile/components/AddNoteModal";
+import { AddNoteModal } from "@features/profile/components/AddNoteModal";
 import { EditNoteModal } from "./EditNoteModal";
 import { showNotification } from "../../../components/Notification/Notification";
 
@@ -150,7 +150,6 @@ export function NotesPanel() {
       updateCharacter({
         noteIds: [...currentIds, newNote.id!],
       });
-      await persistCharacter();
 
       showNotification({
         title: "Imported",

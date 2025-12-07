@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Modal, Button, Stack } from "@mantine/core";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { updateCharacter } from "../../../services/characterService";
-import { FormNumberInput } from "../../../components/common/FormNumberInput";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { useAuthStore } from "@store/useAuthStore";
+import { updateCharacter } from "@services/characterService";
+import { FormNumberInput } from "@components/common/FormNumberInput";
 
 interface DamageModalProps {
   opened: boolean;

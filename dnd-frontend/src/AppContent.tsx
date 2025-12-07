@@ -8,7 +8,7 @@ import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import NotFound from "./pages/NotFound/NotFound";
-import CharacterProfile from "./pages/Profile/CharacterProfile";
+import CharacterProfile from "@features/profile/CharacterProfile";
 import { useEffect } from "react";
 import { useCharacterStore } from "./store/useCharacterStore";
 import { loadCharacters } from "./utils/loadCharacter";

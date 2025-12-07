@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { NumberInput, Stack, Text } from "@mantine/core";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { updateCharacter } from "../../../services/characterService";
-import { showNotification } from "../../../components/Notification/Notification";
-import { SectionColor } from "../../../types/SectionColor";
-import { BaseModal } from "../../../components/BaseModal";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { useAuthStore } from "@store/useAuthStore";
+import { updateCharacter } from "@services/characterService";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import { BaseModal } from "@components/BaseModal";
 
 interface HealModalProps {
   opened: boolean;

@@ -10,10 +10,10 @@ import {
 } from "@mantine/core";
 import { IconSkull } from "@tabler/icons-react";
 import ReloadButton from "./ReloadButton";
-import { useCharacterStore } from "../../../store/useCharacterStore";
+import { useCharacterStore } from "@store/useCharacterStore";
 import { useMediaQuery } from "@mantine/hooks";
-import { CharacterCurrencyArea } from "../../../components/CharacterCurrencyArea";
-import { showNotification } from "../../../components/Notification/Notification";
+import { CharacterCurrencyArea } from "@components/CharacterCurrencyArea";
+import { showNotification } from "@components/Notification/Notification";
 import { HpRing } from "./HpRing";
 import { SwitchCharacterButton } from "./SwitchCharacterButton";
 

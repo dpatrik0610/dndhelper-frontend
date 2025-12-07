@@ -27,9 +27,11 @@
     "paths": {
       "@features/*": ["src/features/*"],
       "@components/*": ["src/components/*"],
-      "@types/*": ["src/types/*"],
+      "@appTypes/*": ["src/types/*"],
       "@store/*": ["src/store/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "@pages/*": ["src/pages/*"],
+      "@services/*": ["src/services/*"]
     }
   },
   "include": ["src"]
