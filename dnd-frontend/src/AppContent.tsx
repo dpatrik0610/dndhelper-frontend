@@ -18,7 +18,7 @@ import { decodeToken } from "./utils/decodeToken";
 import { handleLogout } from "./utils/handleLogout";
 import { showNotification } from "./components/Notification/Notification";
 import { SectionColor } from "./types/SectionColor";
-import { CharacterFormPage } from "./pages/CharacterForm/CharacterFormPage";
+import { CharacterFormPage } from "@features/characterForm/CharacterFormPage";
 import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 import { Notifications } from "@mantine/notifications";
 import NotesPage from "./pages/Notes/NotesPage";

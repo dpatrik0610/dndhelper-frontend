@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { notifications } from "@mantine/notifications";
-import { useCharacterFormStore } from "../../store/useCharacterFormStore";
-import { useCharacterStore } from "../../store/useCharacterStore";
-import { createCharacter, updateCharacter } from "../../services/characterService";
-import { createInventory } from "../../services/inventoryService";
-import { useAuthStore } from "../../store/useAuthStore";
-import type { Inventory } from "../../types/Inventory/Inventory";
-import { loadCharacters } from "../../utils/loadCharacter";
+import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { createCharacter, updateCharacter } from "@services/characterService";
+import { createInventory } from "@services/inventoryService";
+import { useAuthStore } from "@store/useAuthStore";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
+import { loadCharacters } from "@utils/loadCharacter";
 import { useNavigate } from "react-router-dom";
 
 export function useCharacterForm(editMode: boolean) {
@@ -43,7 +43,7 @@ export function useCharacterForm(editMode: boolean) {
         if (newCharacter) {
           const newInventory: Inventory = {
             name: "Equipment",
-            ownerIds: [newCharacter.ownerId!],
+            ownerIds: newCharacter.ownerIds ?? [],
             characterIds: [newCharacter.id!],
             currencies: [],
             items: [],

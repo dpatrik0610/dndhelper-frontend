@@ -1,11 +1,11 @@
 import { Group, Stack, TextInput } from "@mantine/core";
 import { IconSword } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { SectionColor } from "../../../types/SectionColor";
-import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { SectionColor } from "@appTypes/SectionColor";
+import { useCharacterFormStore } from "@store/useCharacterFormStore";
 
-import { FormNumberInput } from "../../../components/common/FormNumberInput";
-// import { WheelPickerInput } from "../../../components/common/WheelPickerInput"; // 🔧 Disabled for now
+import { FormNumberInput } from "@components/common/FormNumberInput";
+// import { WheelPickerInput } from "@components/common/WheelPickerInput"; // 🔧 Disabled for now
 
 export function CombatStatsSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();

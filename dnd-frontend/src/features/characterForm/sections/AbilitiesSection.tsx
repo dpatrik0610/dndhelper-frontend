@@ -9,12 +9,12 @@ import {
 import { useMemo, useEffect } from "react";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconBrain } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { SectionColor } from "../../../types/SectionColor";
-import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
-import { FormNumberInput } from "../../../components/common/FormNumberInput";
-import type { SavingThrows } from "../../../types/Character/SavingThrows";
-import { InfoIconPopover } from "../../../components/common/InfoIconPopover";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { SectionColor } from "@appTypes/SectionColor";
+import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { FormNumberInput } from "@components/common/FormNumberInput";
+import type { SavingThrows } from "@appTypes/Character/SavingThrows";
+import { InfoIconPopover } from "@components/common/InfoIconPopover";
 import { abilityTooltips, saveTooltips } from "../Tooltips/tooltips";
 
 const map = {

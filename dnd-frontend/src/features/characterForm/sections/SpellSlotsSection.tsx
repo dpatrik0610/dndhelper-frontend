@@ -1,9 +1,9 @@
 import { Stack, Group, Text, Box } from "@mantine/core";
 import { IconWand } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { SectionColor } from "../../../types/SectionColor";
-import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
-import { FormNumberInput } from "../../../components/common/FormNumberInput";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { SectionColor } from "@appTypes/SectionColor";
+import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { FormNumberInput } from "@components/common/FormNumberInput";
 
 export function SpellSlotsSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();

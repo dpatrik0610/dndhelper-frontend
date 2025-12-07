@@ -1,12 +1,12 @@
 import { ActionIcon, Autocomplete, Button, Group, Stack, Text} from "@mantine/core";
-import { useSpellStore } from "../../../store/useSpellStore";
-import { ExpandableSection } from "../../../components/ExpandableSection";
+import { useSpellStore } from "@store/useSpellStore";
+import { ExpandableSection } from "@components/ExpandableSection";
 import { useEffect, useState } from "react";
-import { getSpellNames } from "../../../services/spellService";
-import { useAuthStore } from "../../../store/useAuthStore";
+import { getSpellNames } from "@services/spellService";
+import { useAuthStore } from "@store/useAuthStore";
 import {  IconTrash, IconWand } from "@tabler/icons-react";
-import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
-import { SectionColor } from "../../../types/SectionColor";
+import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { SectionColor } from "@appTypes/SectionColor";
 
 
 export function SpellsSection() {

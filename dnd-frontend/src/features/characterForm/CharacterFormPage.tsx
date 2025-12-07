@@ -18,7 +18,7 @@ import { AbilitiesSection } from "./sections/AbilitiesSection";
 import { SkillsSection } from "./sections/SkillsSection";
 import { LoreSection } from "./sections/LoreSection";
 import { DeleteCharacterSection } from "./sections/DeleteCharacterSection";
-import { SectionColor } from "../../types/SectionColor";
+import { SectionColor } from "@appTypes/SectionColor";
 import { useMediaQuery } from "@mantine/hooks";
 import { SpellSlotsSection } from "./sections/SpellSlotsSection";
 import { SpellsSection } from "./sections/SpellsSection";

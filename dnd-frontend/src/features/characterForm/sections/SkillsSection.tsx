@@ -6,13 +6,13 @@ import { useMediaQuery } from "@mantine/hooks";
 import {
   IconAutomaticGearbox, IconTrash, IconPlus, IconStarFilled, IconX,
 } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { SectionColor } from "../../../types/SectionColor";
-import CustomBadge from "../../../components/common/CustomBadge";
-import { useCharacterFormStore } from "../../../store/useCharacterFormStore";
-import { FormNumberInput } from "../../../components/common/FormNumberInput";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { SectionColor } from "@appTypes/SectionColor";
+import CustomBadge from "@components/common/CustomBadge";
+import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { FormNumberInput } from "@components/common/FormNumberInput";
 import { DEFAULT_SKILLS } from "../Tooltips/tooltips";
-import { InfoIconPopover } from "../../../components/common/InfoIconPopover";
+import { InfoIconPopover } from "@components/common/InfoIconPopover";
 
 type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 

@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Button, Stack, TextInput, Group, Text, Paper } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconTrash } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { SectionColor } from "../../../types/SectionColor";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { useAuthStore } from "../../../store/useAuthStore";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { SectionColor } from "@appTypes/SectionColor";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { useAuthStore } from "@store/useAuthStore";
 import { useNavigate } from "react-router-dom";
-import { deleteCharacter } from "../../../services/characterService";
-import { loadCharacters } from "../../../utils/loadCharacter";
+import { deleteCharacter } from "@services/characterService";
+import { loadCharacters } from "@utils/loadCharacter";
 
 export function DeleteCharacterSection() {
   const { character, clearStore } = useCharacterStore();
