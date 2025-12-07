@@ -1,7 +1,7 @@
 import { handleCharacterChange } from "./handlers/characterChangeHandler";
 import { handleInventoryChange } from "./handlers/inventoryChangeHandler";
 import { handleCampaignChange } from "./handlers/campaignChangeHandler";
-import type { EntityChangeBatch, EntityChangeEvent } from "./handlers/EntitySyncTypes";
+import type { EntityChangeBatch, EntityChangeEvent } from "./handlers/entitySyncTypes";
 
 export class EntitySyncManager {
   static handleEntityChange(event: EntityChangeEvent) {

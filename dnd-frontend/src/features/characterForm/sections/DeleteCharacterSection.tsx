@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button, Stack, TextInput, Group, Text, Paper } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { IconTrash } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -9,6 +8,7 @@ import { useAuthStore } from "@store/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import { deleteCharacter } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
+import { showNotification } from "@components/Notification/Notification";
 
 export function DeleteCharacterSection() {
   const { character, clearStore } = useCharacterStore();
@@ -22,7 +22,7 @@ export function DeleteCharacterSection() {
 
   const handleDelete = async () => {
     if (confirmText.trim() !== character.name) {
-      notifications.show({
+      showNotification({
         title: "Confirmation Failed",
         message: `Please type "${character.name}" exactly to confirm.`,
         color: "yellow",
@@ -35,7 +35,7 @@ export function DeleteCharacterSection() {
       await deleteCharacter(character.id!, token ?? "");
       clearStore();
 
-      notifications.show({
+      showNotification({
         title: "Character Deleted",
         message: `${character.name} has been permanently removed.`,
         color: "red",
@@ -46,7 +46,7 @@ export function DeleteCharacterSection() {
       navigate("/home");
     } catch (err) {
       console.error("❌ Delete failed:", err);
-      notifications.show({
+      showNotification({
         title: "Error",
         message: "Failed to delete character.",
         color: "red",

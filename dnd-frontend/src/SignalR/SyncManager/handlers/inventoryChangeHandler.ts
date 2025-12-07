@@ -1,10 +1,10 @@
-import { showNotification } from "../../../components/Notification/Notification";
-import { useAdminCharacterStore } from "../../../store/admin/useAdminCharacterStore";
-import { useAdminInventoryStore } from "../../../store/admin/useAdminInventoryStore";
-import { useInventoryStore } from "../../../store/useInventorystore";
-import { useAdminCurrencyStore } from "../../../store/admin/useAdminCurrencyStore";
-import type { Inventory } from "../../../types/Inventory/Inventory";
-import type { EntityChangeEvent } from "./EntitySyncTypes";
+import { showNotification } from "@components/Notification/Notification";
+import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
+import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
+import { useInventoryStore } from "@store/useInventorystore";
+import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
+import type { EntityChangeEvent } from "./entitySyncTypes";
 
 export function handleInventoryChange(event: EntityChangeEvent) {
   const inventoryStore = useInventoryStore.getState();

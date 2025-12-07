@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import { getCampaignCharacters } from "../../services/campaignService";
-import { useAuthStore } from "../useAuthStore";
-import { showNotification } from "../../components/Notification/Notification";
-import { SectionColor } from "../../types/SectionColor";
-import type { Character } from "../../types/Character/Character";
+import { getCampaignCharacters } from "@services/campaignService";
+import { useAuthStore } from "@store/useAuthStore";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import type { Character } from "@appTypes/Character/Character";
 
 interface AdminCharacterStore {
   characters: Pick<Character, "id" | "name" | "ownerIds" | "inventoryIds" | "characterClass" | "level">[];

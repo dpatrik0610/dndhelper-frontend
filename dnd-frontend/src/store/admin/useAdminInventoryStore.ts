@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { Inventory } from "../../types/Inventory/Inventory";
-import type { InventoryItem } from "../../types/Inventory/InventoryItem";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
+import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import {
   getInventoriesByCharacter,
   getInventory,
@@ -15,12 +15,12 @@ import {
   getAllInventories,
   type MoveItemRequest,
   type ModifyEquipmentAmount,
-} from "../../services/inventoryService";
-import { useAuthStore } from "../../store/useAuthStore";
-import { showNotification } from "../../components/Notification/Notification";
-import { SectionColor } from "../../types/SectionColor";
-import type { Equipment } from "../../types/Equipment/Equipment";
-import { updateEquipmentById } from "../../services/equipmentService";
+} from "@services/inventoryService";
+import { useAuthStore } from "@store/useAuthStore";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
+import { updateEquipmentById } from "@services/equipmentService";
 
 interface AdminInventoryStore {
   inventories: Inventory[];

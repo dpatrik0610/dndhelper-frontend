@@ -1,5 +1,5 @@
 import { useCharacterStore } from "@store/useCharacterStore";
-import type { EntityChangeEvent } from "./EntitySyncTypes";
+import type { EntityChangeEvent } from "./entitySyncTypes";
 import type { Character } from "@appTypes/Character/Character";
 import { showNotification } from "@components/Notification/Notification";
 

@@ -23,6 +23,7 @@ export default defineConfig({
       '@validations': path.resolve(__dirname, 'src/validations'),
       '@styles': path.resolve(__dirname, 'src/styles'),
       '@signalr': path.resolve(__dirname, 'src/SignalR'),
+      '@api': path.resolve(__dirname, 'src/api'),
       '@': path.resolve(__dirname, 'src'),
     },
   },

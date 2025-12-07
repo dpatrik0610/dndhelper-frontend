@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Equipment } from "../../types/Equipment/Equipment";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
 import {
   getAllEquipment,
   getEquipmentById,
@@ -9,10 +9,10 @@ import {
   createEquipment,
   updateEquipmentById,
   deleteEquipment,
-} from "../../services/equipmentService";
-import { useAuthStore } from "../useAuthStore";
-import { showNotification } from "../../components/Notification/Notification";
-import { SectionColor } from "../../types/SectionColor";
+} from "@services/equipmentService";
+import { useAuthStore } from "@store/useAuthStore";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface AdminEquipmentStore {
   equipments: Equipment[];

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button, Group, Loader } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
 import { useAuthStore } from "@store/useAuthStore";
 import { CustomFieldset } from "@components/CustomFieldset";
 import { claimFromInventory } from "@services/currencyService";
@@ -9,6 +8,7 @@ import { useInventoryStore } from "@store/useInventorystore";
 import { loadInventories } from "@utils/loadinventory";
 import { loadCharacters } from "@utils/loadCharacter";
 import { InventoryCurrencyBox } from "./InventoryCurrencyBox";
+import { showNotification } from "@components/Notification/Notification";
 
 interface InventoryCurrencyClaimProps {
   inventoryId: string;
@@ -43,16 +43,15 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
       await loadInventories(token);
       await loadCharacters(token);
 
-      notifications.show({
+      showNotification({
         title: "Success",
         message: "Money money money!",
         color: "green",
-        variant: "outlined",
       });
 
       setClaimed(true);
     } catch (error: any) {
-      notifications.show({
+      showNotification({
         title: "Error",
         message: "Failed to claim currencies: " + error?.message,
         color: "red",

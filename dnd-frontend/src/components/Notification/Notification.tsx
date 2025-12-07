@@ -1,7 +1,6 @@
-import { Container, Button, Text, type CSSProperties, Title } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { IconCheck, IconX, IconAlertTriangle, type ReactNode, IconBoomFilled } from '@tabler/icons-react';
-// import './Notification.module.css';
+import { IconBoomFilled } from '@tabler/icons-react';
+import type { CSSProperties, ReactNode } from 'react';
 
 export interface ShowNotificationOptions {
   id?: string;
@@ -22,7 +21,7 @@ export interface ShowNotificationOptions {
 }
 
 /**
- * 🔔 Fully customizable notification utility.
+ * Fully customizable notification utility.
  * Wraps Mantine's `notifications.show()` with strong typing and sane defaults.
  */
 export const showNotification = ({
@@ -39,7 +38,13 @@ export const showNotification = ({
   autoClose = 3000,
   radius,
   className,
-  style = {'backgroundColor': 'rgba(0, 0, 0, 0.27)', 'color': 'white', 'backdropFilter': 'blur(10px)', 'border': '1px solid rgba(255, 255, 255, 0.18)', marginBottom: '10px'} as CSSProperties,
+  style = {
+    backgroundColor: 'rgba(0, 0, 0, 0.27)',
+    color: 'white',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(255, 255, 255, 0.18)',
+    marginBottom: '10px',
+  } as CSSProperties,
   loading,
 }: ShowNotificationOptions) => {
   notifications.show({
@@ -101,57 +106,3 @@ export const updateNotification = ({
     loading,
   });
 };
-
-export default function Notifier() {    
-    return (
-        <Container className={''} style={{ padding: '20px', textAlign: 'center' }}>
-        <div className={'notification-container'}>
-            <div className={'button-group'}>
-            <Button
-                color="teal"
-                onClick={() =>
-                    showNotification({title: 'Success!', message: 'Operation completed successfully.', color: 'teal',})
-                }
-            >
-                Show Success
-            </Button>
-
-            <Button
-                color="red"
-                onClick={() =>
-                    showNotification({title: 'Error!', message: 'Something went wrong :(', color: 'red', icon: <IconX size={18} />})
-                }
-            >
-                Show Success
-            </Button>
-
-            <Button
-                color="yellow"
-                onClick={() =>
-                showNotification({title: 'Warning!', message: 'This is a warning message.', color: 'yellow', icon: <IconAlertTriangle size={18} />})
-                }
-            >
-                Show Warning
-            </Button>
-
-            <Button
-                color="blue"
-                onClick={() =>
-                showNotification({title: 'Info', message: 'This is an informational message.', color: 'blue', icon: <IconCheck size={18} />})
-                }
-            >
-                Show Loading
-            </Button>
-            <Button
-                color="gray"
-                onClick={() =>
-                showNotification({title: 'Loading', message: 'Please wait...', color: 'gray', loading: true, autoClose: false})
-                }
-            >
-                Show Loading
-            </Button>
-            </div>
-        </div>
-        </Container>
-    );
-}

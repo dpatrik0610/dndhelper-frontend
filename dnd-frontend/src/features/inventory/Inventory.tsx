@@ -3,13 +3,13 @@ import { useEffect, useState } from 'react';
 import { getInventoriesByCharacter } from "@services/inventoryService";
 import { useCharacterStore } from "@store/useCharacterStore";
 import { useAuthStore } from "@store/useAuthStore";
-import { notifications } from '@mantine/notifications';
 import { Box } from '@mantine/core';
 import { IconError404 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { InventoryFilters } from '@features/inventory/components/InventoryFilters';
 import { InventoryList } from '@features/inventory/components/InventoryList';
 import { useInventoryFilters } from '@features/inventory/hooks/useInventoryFilters';
+import { showNotification } from '@components/Notification/Notification';
 
 export function Inventory() {
 
@@ -22,7 +22,7 @@ export function Inventory() {
   // Redirect if no character selected
   useEffect(() => {
     if (!character) {
-      notifications.show({
+      showNotification({
         title: 'No Character Selected',
         message: 'Please select a character first.',
         color: 'red',
@@ -38,7 +38,7 @@ export function Inventory() {
     getInventoriesByCharacter(character.id, token)
       .then((data) => {
         if (!data || data.length <= 0) {
-          notifications.show({
+          showNotification({
             title: 'No Inventories',
             message: 'This character has no inventories yet.',
             color: 'yellow',
@@ -49,7 +49,7 @@ export function Inventory() {
         }
       })
       .catch(() => {
-        notifications.show({
+        showNotification({
           title: 'Error',
           message: 'An error occurred while fetching inventories.',
           color: 'red',

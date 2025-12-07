@@ -1,18 +1,18 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Currency } from "../../types/Currency";
+import type { Currency } from "@appTypes/Currency";
 import {
   getCharacterCurrencies,
   removeCurrencies,
   transferCurrenciesToCharacter,
   transferCurrenciesToInventory
-} from "../../services/currencyService";
-import type { Character } from "../../types/Character/Character";
-import type { Inventory } from "../../types/Inventory/Inventory";
-import { useAuthStore } from "../useAuthStore";
-import { showNotification } from "../../components/Notification/Notification";
-import { SectionColor } from "../../types/SectionColor";
-import { getInventory } from "../../services/inventoryService";
+} from "@services/currencyService";
+import type { Character } from "@appTypes/Character/Character";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
+import { useAuthStore } from "@store/useAuthStore";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import { getInventory } from "@services/inventoryService";
 
 interface AdminCurrencyStore {
   selectedCharacter: Character | null;

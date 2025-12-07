@@ -3,10 +3,10 @@ import { TextInput, Stack } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import type { Note } from "@appTypes/Note";
 import { useNoteStore } from "@store/useNoteStore";
-import { showNotification } from "@mantine/notifications";
 import { BaseModal } from "@components/BaseModal";
 import { MarkdownTextarea } from "@components/common/MarkdownTextarea";
 import { SectionColor } from "@appTypes/SectionColor";
+import { showNotification } from "@components/Notification/Notification";
 
 interface EditNoteModalProps {
   opened: boolean;

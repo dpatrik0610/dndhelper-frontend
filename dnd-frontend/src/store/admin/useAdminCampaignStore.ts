@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Campaign } from "../../types/Campaign";
-import type { Character } from "../../types/Character/Character";
-import { useAuthStore } from "../useAuthStore";
-import { apiClient } from "../../api/apiClient";
-import { showNotification } from "../../components/Notification/Notification";
-import { SectionColor } from "../../types/SectionColor";
-import { getCharacters } from "../../services/characterService";
+import type { Campaign } from "@appTypes/Campaign";
+import type { Character } from "@appTypes/Character/Character";
+import { useAuthStore } from "@store/useAuthStore";
+import { apiClient } from "@api/apiClient";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
+import { getCharacters } from "@services/characterService";
 
 export interface AdminCampaignStore {
   campaigns: Campaign[];

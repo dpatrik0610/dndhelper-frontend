@@ -7,9 +7,9 @@ import { processToken } from '@utils/processToken';
 import { useLoadingNotification } from '@components/Notification/LoadingNotification';
 import { useAuthStore } from '@store/useAuthStore';
 import AlreadyLoggedIn from '@features/auth/login/components/AlreadyLoggedIn';
-import { notifications } from '@mantine/notifications';
 import { validateRegisterForm } from '@validations/registerValidation';
 import "@features/auth/styles/AuthCard.css"
+import { showNotification } from '@components/Notification/Notification';
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -35,7 +35,7 @@ export default function Register() {
     setErrors(validationErrors);
 
     if (!valid) {
-      notifications.show({
+      showNotification({
         title: 'Validation Error',
         message: Object.values(validationErrors).join(' | '),
         color: 'red',

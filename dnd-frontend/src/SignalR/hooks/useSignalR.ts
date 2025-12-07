@@ -4,10 +4,10 @@ import {
   HubConnectionBuilder,
   LogLevel,
 } from "@microsoft/signalr";
-import { showNotification } from "../../components/Notification/Notification";
-import { useAuthStore } from "../../store/useAuthStore";
-import type { EntityChangeEvent } from "../SyncManager/handlers/EntitySyncTypes";
-import { EntitySyncManager } from "../SyncManager/entitySyncManager";
+import { showNotification } from "@components/Notification/Notification";
+import { useAuthStore } from "@store/useAuthStore";
+import { EntitySyncManager } from "@signalr/SyncManager/entitySyncManager";
+import type { EntityChangeEvent } from "@signalr/SyncManager/handlers/entitySyncTypes";
 
 interface SignalRMessage {
   id: string;

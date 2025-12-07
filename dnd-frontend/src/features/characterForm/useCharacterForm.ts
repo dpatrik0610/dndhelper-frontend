@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { notifications } from "@mantine/notifications";
 import { useCharacterFormStore } from "@store/useCharacterFormStore";
 import { useCharacterStore } from "@store/useCharacterStore";
 import { createCharacter, updateCharacter } from "@services/characterService";
@@ -8,6 +7,7 @@ import { useAuthStore } from "@store/useAuthStore";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { loadCharacters } from "@utils/loadCharacter";
 import { useNavigate } from "react-router-dom";
+import { showNotification } from "@components/Notification/Notification";
 
 export function useCharacterForm(editMode: boolean) {
   const token = useAuthStore((s) => s.token);
@@ -32,7 +32,7 @@ export function useCharacterForm(editMode: boolean) {
         updateInStore(characterForm);
         await updateCharacter(characterForm, token!);
 
-        notifications.show({
+        showNotification({
           title: "Character Updated",
           message: `${characterForm.name} updated successfully!`,
           color: "teal",
@@ -51,7 +51,7 @@ export function useCharacterForm(editMode: boolean) {
           await createInventory(newInventory, token!);
           setCharacter(newCharacter);
 
-          notifications.show({
+          showNotification({
             title: "Character Created",
             message: `${newCharacter.name} has joined your roster.`,
             color: "cyan",
@@ -61,7 +61,7 @@ export function useCharacterForm(editMode: boolean) {
       navigate("/profile");
     } catch (err) {
       console.error(err);
-      notifications.show({
+      showNotification({
         title: "Error",
         message: "Character creation or update failed.",
         color: "red",
