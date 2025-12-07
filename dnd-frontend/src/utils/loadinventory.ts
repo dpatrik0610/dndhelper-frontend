@@ -1,6 +1,6 @@
-import { getInventoriesByCharacter, getInventory } from "../services/inventoryService";
-import { useInventoryStore } from "../store/useInventorystore";
-import { useCharacterStore } from "../store/useCharacterStore";
+import { getInventoriesByCharacter, getInventory } from "@services/inventoryService";
+import { useInventoryStore } from "@store/useInventorystore";
+import { useCharacterStore } from "@store/useCharacterStore";
 
 export async function loadInventories(token: string) {
   const character = useCharacterStore.getState().character;

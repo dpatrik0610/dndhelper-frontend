@@ -1,5 +1,5 @@
-import { getSpellById, getSpellNames } from "../services/spellService";
-import { useSpellStore } from "../store/useSpellStore";
+import { getSpellById, getSpellNames } from "@services/spellService";
+import { useSpellStore } from "@store/useSpellStore";
 
 // Load all spell names and populate the store
 export async function loadSpells(token: string): Promise<void> {

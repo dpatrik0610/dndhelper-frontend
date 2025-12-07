@@ -1,4 +1,4 @@
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "@store/useAuthStore";
 import { decodeToken } from "./decodeToken";
 
     export const processToken = (token: string) =>{

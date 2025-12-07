@@ -1,4 +1,4 @@
-import type { Spell } from "../types/Spell";
+import type { Spell } from "@appTypes/Spell";
 
   export const getDamageInfo = (damage: Spell['damage']): { label: string; hasValue: boolean } | null => {
     // console.log('getDamageInfo called with:', damage);
