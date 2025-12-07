@@ -4,7 +4,7 @@ import CustomBadge from "@components/common/CustomBadge";
 import { SectionColor } from "@appTypes/SectionColor";
 import { IconTrash, IconArrowsRightLeft, IconZoom } from "@tabler/icons-react";
 import { useState } from "react";
-import { EquipmentModal } from "@components/EquipmentModal";
+import { EquipmentModal } from "./EquipmentModal";
 
 interface InventoryItemCardProps {
   item: InventoryItem;

@@ -1,34 +1,34 @@
+import { useEffect, useState } from "react";
 import {
+  Badge,
   Center,
   Divider,
   Group,
   Loader,
   Modal,
+  Paper,
   Stack,
   Text,
-  Paper,
   ThemeIcon,
   Tooltip,
   useMantineTheme,
-  Badge,
 } from "@mantine/core";
 import {
-  IconSwords,
+  IconCategory,
   IconCoins,
   IconRulerMeasure,
-  IconWeight,
+  IconSwords,
   IconTags,
-  IconCategory,
+  IconWeight,
 } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
-import { getEquipmentById } from "../services/equipmentService";
-import type { Equipment } from "../types/Equipment/Equipment";
-import { useAuthStore } from "../store/useAuthStore";
-import CustomBadge from "./common/CustomBadge";
-import DisplayText from "./common/DisplayText";
-import { ExpandableSection } from "./ExpandableSection";
-import { SectionColor } from "../types/SectionColor";
-import { MarkdownRenderer } from "./MarkdownRender";
+import { getEquipmentById } from "@services/equipmentService";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
+import { useAuthStore } from "@store/useAuthStore";
+import CustomBadge from "@components/common/CustomBadge";
+import DisplayText from "@components/common/DisplayText";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { SectionColor } from "@appTypes/SectionColor";
+import { MarkdownRenderer } from "@components/MarkdownRender";
 
 interface EquipmentModalProps {
   opened: boolean;
@@ -51,7 +51,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
     setLoading(true);
     getEquipmentById(equipmentId, token!)
       .then((data: Equipment) => setEquipment(data))
-      .catch((err: any) => console.error("Failed to load equipment", err))
+      .catch((err: unknown) => console.error("Failed to load equipment", err))
       .finally(() => setLoading(false));
   }, [opened, equipmentId, token]);
 
@@ -104,8 +104,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
         </Text>
       ) : (
         <Stack gap="md">
-
-          {/* ======== BASIC STATS ======== */}
           <Paper
             p="md"
             radius="md"
@@ -117,8 +115,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
             }}
           >
             <Stack gap="xs">
-
-              {/* Weight */}
               <Group gap="xs">
                 <ThemeIcon size="sm" variant="light" color="violet">
                   <IconWeight size={16} />
@@ -129,7 +125,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 />
               </Group>
 
-              {/* Cost (Admin only) */}
               {equipment.cost && isAdmin && (
                 <Group gap="xs">
                   <ThemeIcon size="sm" variant="light" color="yellow">
@@ -142,7 +137,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 </Group>
               )}
 
-              {/* Damage */}
               {equipment.damage && (
                 <Group gap="xs">
                   <ThemeIcon size="sm" variant="light" color="red">
@@ -155,7 +149,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 </Group>
               )}
 
-              {/* Range */}
               {equipment.range && (
                 <Group gap="xs">
                   <ThemeIcon size="sm" variant="light" color="cyan">
@@ -168,7 +161,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 </Group>
               )}
 
-              {/* Tier */}
               {equipment.tier && (
                 <Group gap="xs">
                   <ThemeIcon size="sm" variant="light" color="grape">
@@ -178,7 +170,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 </Group>
               )}
 
-              {/* Tags */}
               {equipment.tags && equipment.tags.length > 0 && (
                 <Group gap="xs" align="flex-start">
                   <ThemeIcon size="sm" variant="light" color="lime">
@@ -186,9 +177,9 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                   </ThemeIcon>
                   <Stack gap={4}>
                     <Group gap={6}>
-                    <Text fw={500} size="sm">
-                      Tags:
-                    </Text>
+                      <Text fw={500} size="sm">
+                        Tags:
+                      </Text>
                       {equipment.tags.map((t) => (
                         <Badge key={t} color="lime" variant="light">
                           {t}
@@ -201,7 +192,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
             </Stack>
           </Paper>
 
-          {/* ======== DESCRIPTION ======== */}
           <ExpandableSection title="Description" color={SectionColor.Violet} defaultOpen>
             {descriptionContent ? (
               <MarkdownRenderer content={descriptionContent} />
@@ -212,14 +202,10 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
             )}
           </ExpandableSection>
 
-          {/* ======== DM DESCRIPTION (Admin only) ======== */}
           {isAdmin && (
             <ExpandableSection title="DM Notes" color={SectionColor.Red}>
               {dmDescriptionContent ? (
-                <MarkdownRenderer
-                  content={dmDescriptionContent}
-                  textColor="red.1"
-                />
+                <MarkdownRenderer content={dmDescriptionContent} textColor="red.1" />
               ) : (
                 <Text size="sm" c="dimmed">
                   No DM notes provided.
@@ -228,7 +214,6 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
             </ExpandableSection>
           )}
 
-          {/* ======== META ======== */}
           <Divider variant="dashed" my="xs" />
           <Group justify="space-between" c="dimmed" fz="xs">
             <Tooltip label="MongoDB document ID">
@@ -236,9 +221,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
             </Tooltip>
             <Text>
               Updated:{" "}
-              {equipment.updatedAt
-                ? new Date(equipment.updatedAt).toLocaleDateString()
-                : "Unknown"}
+              {equipment.updatedAt ? new Date(equipment.updatedAt).toLocaleDateString() : "Unknown"}
             </Text>
           </Group>
         </Stack>
