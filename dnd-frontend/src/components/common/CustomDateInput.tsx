@@ -8,6 +8,7 @@ type CustomDateInputProps = {
   label?: string;
   value: string | null;
   onChange: (value: string | null) => void;
+  disabled?: boolean;
 };
 
 const formatDisplay = (value: string | null) => {
@@ -19,7 +20,7 @@ const formatDisplay = (value: string | null) => {
 /**
  * Glassy date picker that opens from a button and shows the selected date in the label.
  */
-export function CustomDateInput({ label = "Scheduled For", value, onChange }: CustomDateInputProps) {
+export function CustomDateInput({ label = "Scheduled For", value, onChange, disabled = false }: CustomDateInputProps) {
   const [opened, setOpened] = useState(false);
   const parsed = value ? dayjs(value) : null;
   const safeDate = parsed?.isValid() ? parsed.toDate() : null;
@@ -38,7 +39,8 @@ export function CustomDateInput({ label = "Scheduled For", value, onChange }: Cu
               variant="light"
               color="cyan"
               leftSection={<IconCalendar size={14} />}
-              onClick={() => setOpened((o) => !o)}
+              onClick={() => !disabled && setOpened((o) => !o)}
+              disabled={disabled}
             >
               Pick
             </Button>
@@ -59,6 +61,7 @@ export function CustomDateInput({ label = "Scheduled For", value, onChange }: Cu
                 }
                 setOpened(false);
               }}
+              disabled={disabled}
               classNames={{
                 day: "glassy-date-day",
                 month: "glassy-date-month",
