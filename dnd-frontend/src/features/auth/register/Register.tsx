@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Container, Paper, TextInput, Button, Title, Text, Group } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { PasswordStrength } from './PasswordRequirement';
-import './Register.css';
-import { registerUser } from '../../services/authService';
-import { processToken } from '../../utils/processToken';
-import { useLoadingNotification } from '../../components/Notification/LoadingNotification';
-import { useAuthStore } from '../../store/useAuthStore';
-import AlreadyLoggedIn from '../Login/AlreadyLoggedIn';
+import { registerUser } from '@services/authService';
+import { processToken } from '@utils/processToken';
+import { useLoadingNotification } from '@components/Notification/LoadingNotification';
+import { useAuthStore } from '@store/useAuthStore';
+import AlreadyLoggedIn from '../login/components/AlreadyLoggedIn';
 import { notifications } from '@mantine/notifications';
-import { validateRegisterForm } from '../../validations/registerValidation';
+import { validateRegisterForm } from '@validations/registerValidation';
+import "@features/auth/styles/AuthCard.css"
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -60,19 +60,9 @@ export default function Register() {
   if (token) return <AlreadyLoggedIn />;
 
   return (
-    <Container
-      fluid
-      className="register-container"
-      h="100vh"
-      display="flex"
-      style={{
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)',
-      }}
-    >
-      <Paper className="register-card" radius="md" w={400}>
-        <div className="register-card-inner">
+    <Container fluid h="100vh" display="flex" style={{ alignItems: 'center', justifyContent: 'center', background: 'transparent' }}>
+      <Paper className="login-card" radius="md" w={400}>
+        <div className="login-card-inner">
           <Group align="center" mb="md">
             <Title order={2}>🌟 Register</Title>
           </Group>

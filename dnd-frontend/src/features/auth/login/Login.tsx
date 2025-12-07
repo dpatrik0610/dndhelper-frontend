@@ -1,6 +1,7 @@
 import { Container } from '@mantine/core'
-import LoginCard from './LoginCard'
-import './Login.css'
+import { Paper } from '@mantine/core'
+import LoginForm from './LoginForm'
+import "@features/auth/styles/AuthCard.css"
 
 export default function Login() {
   return (
@@ -14,7 +15,11 @@ export default function Login() {
         background: 'transparent',
       }}
     >
-      <LoginCard />
+      <Paper className="login-card" radius="md" style={{ width: 350 }}>
+        <div className="login-card-inner">
+          <LoginForm />
+        </div>
+      </Paper>
     </Container>
   )
 }

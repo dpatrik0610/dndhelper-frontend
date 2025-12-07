@@ -1,12 +1,12 @@
 import {  useState } from 'react'
 import { TextInput, PasswordInput, Button, Title, Text } from '@mantine/core'
-import type { AuthRequest } from '../../types/AuthTypes'
-import { loginUser } from '../../services/authService'
-import { useAuthStore } from '../../store/useAuthStore'
+import type { AuthRequest } from '@appTypes/AuthTypes'
+import { loginUser } from '@services/authService'
+import { useAuthStore } from '@store/useAuthStore'
 import { useNavigate } from 'react-router-dom'
-import { processToken } from '../../utils/processToken'
-import { useLoadingNotification } from '../../components/Notification/LoadingNotification'
-import AlreadyLoggedIn from './AlreadyLoggedIn'
+import { processToken } from '@utils/processToken'
+import { useLoadingNotification } from '@components/Notification/LoadingNotification'
+import AlreadyLoggedIn from './components/AlreadyLoggedIn'
 
 export default function LoginForm() {
     const [username, setUsername] = useState('')

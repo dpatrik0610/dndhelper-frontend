@@ -1,6 +1,6 @@
 import { Button, Text } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { handleLogout } from '../../utils/handleLogout';
+import { handleLogout } from '@utils/handleLogout';
 
 export default function AlreadyLoggedIn() {
   const navigate = useNavigate();

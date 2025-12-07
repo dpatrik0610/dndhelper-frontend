@@ -22,6 +22,7 @@
       "@utils/*": ["src/utils/*"],
       "@pages/*": ["src/pages/*"],
       "@services/*": ["src/services/*"],
+      "@validations/*": ["src/validations/*"],
       "@/*": ["src/*"]
     },
 
