@@ -18,12 +18,12 @@ import { QuickActionBar } from "./components/QuickActionBar";
 
 const palette = {
   accent: "#b197fc",
-  border: "rgba(140, 120, 255, 0.3)",
-  bg: "rgba(30, 30, 60, 0.4)",
-  cardBg: "rgba(45, 35, 85, 0.5)",
+  border: "rgba(140, 120, 255, 0.35)",
+  bg: "rgba(20, 18, 40, 0.55)",
+  cardBg: "rgba(20, 18, 40, 0.65)",
   hoverBg: "rgba(180, 150, 255, 0.08)",
-  textMain: "#f0f0ff",
-  textDim: "rgba(220, 220, 255, 0.65)",
+  textMain: "#f2f2ff",
+  textDim: "rgba(220, 220, 255, 0.7)",
 };
 
 export default function Home() {
@@ -106,7 +106,7 @@ export default function Home() {
       style={isMobile ? { margin: "2px" } : undefined}
     >
       {/* Quick Actions */}
-      <QuickActionBar actions={quickNavigations} palette={{ bg: palette.bg, border: palette.border, textMain: palette.textMain, accent: palette.accent }} />
+      {/* <QuickActionBar actions={quickNavigations} palette={{ bg: palette.cardBg, border: palette.border, textMain: palette.textMain, accent: palette.accent }} /> */}
 
       <HeaderCard
         campaignName={campaignName}
@@ -116,7 +116,7 @@ export default function Home() {
         quote={quote}
         characterSelector={<CharacterSelectModal opened={modalOpened} onClose={() => setModalOpened(false)} characters={characters} onSelect={handleSelectCharacter} />}
         isMobile={isMobile}
-        palette={{ bg: palette.bg, border: palette.border, textMain: palette.textMain, textDim: palette.textDim }}
+        palette={{ bg: palette.cardBg, border: palette.border, textMain: palette.textMain, textDim: palette.textDim }}
       />
 
       {/* Active Session */}
