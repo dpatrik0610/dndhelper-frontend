@@ -19,7 +19,7 @@ import { handleLogout } from "./utils/handleLogout";
 import { showNotification } from "./components/Notification/Notification";
 import { SectionColor } from "./types/SectionColor";
 import { CharacterFormPage } from "@features/characterForm/CharacterFormPage";
-import { AdminDashboard } from "./pages/Admin/AdminDashboard";
+import { AdminDashboard } from "@features/admin/AdminDashboard";
 import { Notifications } from "@mantine/notifications";
 import NotesPage from "@features/notes/NotesPage";
 

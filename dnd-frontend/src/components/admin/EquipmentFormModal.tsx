@@ -11,8 +11,8 @@ import {
 import { IconDeviceFloppy } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { EQUIPMENT_TIERS, type Equipment } from "../../types/Equipment/Equipment";
-import { defaultEquipment } from "../../pages/Admin/ItemManager/defaultEquipment";
-import { TagsInput } from "../../pages/Admin/InventoryManager/sections/InventoryItems/TagsInput";
+import { defaultEquipment } from "@features/admin/ItemManager/defaultEquipment";
+import { TagsInput } from "@features/admin/InventoryManager/sections/InventoryItems/TagsInput";
 
 interface EquipmentFormModalProps {
   opened: boolean;
