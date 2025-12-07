@@ -6,16 +6,18 @@ interface NavLinkButtonProps {
   item: TabItem;
   active: boolean;
   onClick: () => void;
+  disabled?: boolean;
 }
 
-export function NavLinkButton({ item, active, onClick }: NavLinkButtonProps) {
+export function NavLinkButton({ item, active, onClick, disabled }: NavLinkButtonProps) {
   const Icon = item.icon;
 
   return (
     <UnstyledButton
       onClick={onClick}
-      className={`${classes.navButton} ${active ? classes.navButtonActive : classes.navButtonInactive}`}
+      className={`${classes.navButton} ${active ? classes.navButtonActive : classes.navButtonInactive} ${disabled ? classes.navButtonDisabled : ""}`}
       data-active={active}
+      aria-disabled={disabled}
       p={6}
     >
       <ThemeIcon variant={active ? "filled" : "light"} color={active ? "violet" : "gray"} radius="md">

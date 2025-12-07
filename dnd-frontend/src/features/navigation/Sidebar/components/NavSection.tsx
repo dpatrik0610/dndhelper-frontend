@@ -12,9 +12,10 @@ interface NavSectionProps {
   collapsible?: boolean;
   open?: boolean;
   onToggle?: () => void;
+  disabled?: boolean;
 }
 
-export function NavSection({ label, items, activeLabel, onNavigate, collapsible, open = true, onToggle }: NavSectionProps) {
+export function NavSection({ label, items, activeLabel, onNavigate, collapsible, open = true, onToggle, disabled }: NavSectionProps) {
   const sectionBody = (
     <Stack gap={10} className={classes.navGroup}>
       {items.map((item) => (
@@ -23,6 +24,7 @@ export function NavSection({ label, items, activeLabel, onNavigate, collapsible,
           item={item}
           active={activeLabel === item.label}
           onClick={() => onNavigate(item.link)}
+          disabled={disabled}
         />
       ))}
     </Stack>

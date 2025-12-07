@@ -21,11 +21,15 @@ import { AppBackground } from "@components/layout/AppBackground";
 import { SidebarToggle } from "@components/layout/SidebarToggle";
 import { Notifications } from "@mantine/notifications";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
+import SettingsPage from "@features/settings/SettingsPage";
+import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
+import { useUiStore } from "@store/useUiStore";
 
 function AppRoutes() {
   const location = useLocation();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [opened, handlers] = useDisclosure(false);
+  const sidebarTheme = useUiStore((s) => s.sidebarTheme) as SidebarThemeVariant;
 
   const token = useAuthStore((s) => s.token);
   const roles = useAuthStore((s) => s.roles);
@@ -44,10 +48,14 @@ function AppRoutes() {
 
   const hideSidebarRoutes = ["/login", "/register"];
   const showSidebar = !hideSidebarRoutes.includes(location.pathname);
+  const togglePosition = useMemo(
+    () => (isMobile ? { bottom: 20, right: 16 } : { bottom: 12, right: 12 }),
+    [isMobile]
+  );
 
   return (
     <AppShell header={{ height: 0 }} styles={getAppShellStyles(isMobile)} >
-      {showSidebar && <Sidebar opened={opened} onClose={handlers.close} position="right" />}
+      {showSidebar && <Sidebar opened={opened} onClose={handlers.close} position="right" themeVariant={sidebarTheme} />}
 
       <AppShell.Main>
         <AppBackground />
@@ -68,6 +76,7 @@ function AppRoutes() {
               <Route path="/newCharacter" element={<CharacterFormPage />} />
               <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
               <Route path="/notes" element={<NotesPage />} />
+              {isAdmin && <Route path="/settings" element={<SettingsPage />} />}
               {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
             </Route>
 
@@ -84,6 +93,7 @@ function AppRoutes() {
           opened={opened}
           onToggle={handlers.toggle}
           isMobile={isMobile}
+          affixPosition={togglePosition}
         />
       )}
     </AppShell>
