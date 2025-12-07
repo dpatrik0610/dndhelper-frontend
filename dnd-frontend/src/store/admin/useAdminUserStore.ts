@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { useAuthStore } from "../useAuthStore";
-import { UserService } from "../../services/Admin/userService";
-import { registerUser, resetPassword } from "../../services/authService";
-import type { User } from "../../types/User";
-import { showNotification } from "../../components/Notification/Notification";
-import { SectionColor } from "../../types/SectionColor";
+import { useAuthStore } from "@store/useAuthStore";
+import { UserService } from "@services/Admin/userService";
+import { registerUser, resetPassword } from "@services/authService";
+import type { User } from "@appTypes/User";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface AdminUserStore {
   users: User[];
@@ -17,6 +17,7 @@ interface AdminUserStore {
   updateStatus: (id: string, status: User["isActive"]) => Promise<void>;
   removeUser: (id: string) => Promise<void>;
   resetPassword: (username: string, newPassword: string) => Promise<void>;
+  clearStorage: () => void;
 }
 
 export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
@@ -201,4 +202,6 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
       });
     }
   },
+
+  clearStorage: () => set({ users: [], loading: false, search: "" }),
 }));

@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Note } from "../types/Note";
+import type { Note } from "@appTypes/Note";
 import {
   getNoteById,
   getManyNotes,
   createNote,
   updateNote,
   deleteNote,
-} from "../services/noteService";
+} from "@services/noteService";
 import { useAuthStore } from "./useAuthStore";
 
 interface NoteState {
@@ -25,7 +25,7 @@ interface NoteState {
   update: (id: string, note: Partial<Note>) => Promise<Note>;
   remove: (id: string) => Promise<void>;
 
-  clear: () => void;
+  clearStore: () => void;
 }
 
 export const useNoteStore = create<NoteState>()(
@@ -170,7 +170,7 @@ export const useNoteStore = create<NoteState>()(
         }
       },
 
-      clear: () => set({ notes: [] }),
+      clearStore: () => set({ notes: [], loading: false }),
     }),
     {
       name: "note-store",

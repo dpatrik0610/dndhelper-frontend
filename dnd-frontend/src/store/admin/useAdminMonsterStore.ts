@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { monsterService } from "../../services/Admin/monsterService";
-import { useAuthStore } from "../useAuthStore";
-import type { Monster } from "../../types/Monster";
+import { monsterService } from "@services/Admin/monsterService";
+import { useAuthStore } from "@store/useAuthStore";
+import type { Monster } from "@appTypes/Monster";
 
 type NpcFilter = "all" | "npc" | "creature";
 
@@ -32,6 +32,7 @@ interface AdminMonsterStore {
   createMonster: (monster: Monster) => Promise<void>;
   updateMonster: (id: string, monster: Monster) => Promise<void>;
   deleteMonster: (id: string) => Promise<void>;
+  clearStorage: () => void;
 }
 
 const hasAppliedFilters = (filters: MonsterFilters) =>
@@ -164,4 +165,16 @@ export const useAdminMonsterStore = create<AdminMonsterStore>((set, get) => ({
       total: Math.max(0, state.total - 1),
     }));
   },
+
+  clearStorage: () =>
+    set({
+      monsters: [],
+      total: 0,
+      page: 1,
+      pageSize: 10,
+      loading: false,
+      filters: { name: "", type: "", minCR: undefined, maxCR: undefined },
+      appliedFilters: {},
+      npcFilter: "all",
+    }),
 }));
