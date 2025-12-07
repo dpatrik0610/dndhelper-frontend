@@ -1,21 +1,14 @@
-import { useMemo, useState } from 'react';
-import {
-  Drawer,
-  Stack,
-  Text,
-  UnstyledButton,
-  ThemeIcon,
-  useMantineTheme,
-  Box,
-  Collapse,
-} from '@mantine/core';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { IconChevronDown, IconLogout } from '@tabler/icons-react';
-import { useAuthStore } from '@store/useAuthStore';
-import { handleLogout } from '@utils/handleLogout';
-import { tabs, type Section, type TabItem } from './SidebarTabs';
-import { useMediaQuery } from '@mantine/hooks';
-import { ConnectionStatus } from '@components/ConnectionStatus';
+import { useMemo, useState } from "react";
+import { Drawer, Stack, Text, UnstyledButton, ThemeIcon, useMantineTheme, Box, Collapse } from "@mantine/core";
+import { useLocation, useNavigate } from "react-router-dom";
+import { IconChevronDown, IconLogout } from "@tabler/icons-react";
+import { useAuthStore } from "@store/useAuthStore";
+import { handleLogout } from "@utils/handleLogout";
+import { tabs, type Section, type TabItem } from "./SidebarTabs";
+import { useMediaQuery } from "@mantine/hooks";
+import { ConnectionStatus } from "@components/ConnectionStatus";
+import { NavLinkButton } from "./NavLinkButton";
+import classes from "./Sidebar.module.css";
 
 interface SidebarProps {
   opened: boolean;
@@ -31,7 +24,7 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
   const roles = useAuthStore().roles || [];
   const isAdmin = roles.includes('Admin');
 
-  const [section] = useState<Section>('character');
+  const [section] = useState<Section>("character");
   const [adminOpen, setAdminOpen] = useState(true);
 
   const activeLabel = useMemo(() => {
@@ -55,17 +48,16 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
       onClose={onClose}
       position="left"
       padding="md"
-      size= {isMobile? "100%" : "280px"}
+      size={isMobile ? "100%" : "280px"}
       overlayProps={{
         color: theme.colors.dark[9],
         opacity: 0.5,
-        blur: 4
+        blur: 4,
       }}
       withCloseButton={false}
     >
-      <Stack justify="space-between" style={{ height: '100%' }}>
+      <Stack justify="space-between" className={classes.drawerContent}>
         <Stack gap="xs">
-          {/* Header */}
           <Stack gap={4} align="center">
             <ConnectionStatus />
             <Text fw={700} size="sm" c="gray.4" ta="center">
@@ -73,117 +65,49 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
             </Text>
           </Stack>
 
-          {/* Links */}
           <Stack mt="md" gap={4}>
-            {currentLinks.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeLabel === item.label;
-
-              return (
-                <UnstyledButton
-                  key={item.label}
-                  onClick={() => handleNavigate(item.link)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: theme.spacing.sm,
-                    padding: theme.spacing.xs,
-                    borderRadius: theme.radius.sm,
-                    backgroundColor: isActive
-                      ? theme.colors.violet[6]
-                      : 'transparent',
-                    color: isActive ? theme.white : theme.colors.gray[0],
-                  }}
-                >
-                  <ThemeIcon
-                    variant={isActive ? 'filled' : 'light'}
-                    color={isActive ? 'violet' : 'gray'}
-                  >
-                    <Icon size={16} />
-                  </ThemeIcon>
-                  <Text size="sm">{item.label}</Text>
-                </UnstyledButton>
-              );
-            })}
+            {currentLinks.map((item) => (
+              <NavLinkButton
+                key={item.label}
+                item={item}
+                active={activeLabel === item.label}
+                onClick={() => handleNavigate(item.link)}
+              />
+            ))}
           </Stack>
 
-          {/* Admin Section */}
           {isAdmin && (
             <Box mt="md">
-              <UnstyledButton
-                onClick={() => setAdminOpen((o) => !o)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  padding: theme.spacing.xs,
-                  borderRadius: theme.radius.sm,
-                }}
-              >
+              <UnstyledButton className={classes.adminToggle} onClick={() => setAdminOpen((o) => !o)}>
                 <Text size="sm" fw={700} color="gray.4">
                   Admin
                 </Text>
                 <IconChevronDown
                   size={16}
                   style={{
-                    transform: adminOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s ease',
+                    transform: adminOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "transform 0.2s ease",
                   }}
                 />
               </UnstyledButton>
 
               <Collapse in={adminOpen}>
                 <Stack gap={4}>
-                  {adminLinks.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeLabel === item.label;
-
-                    return (
-                      <UnstyledButton
-                        key={item.label}
-                        onClick={() => handleNavigate(item.link)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: theme.spacing.sm,
-                          padding: theme.spacing.xs,
-                          borderRadius: theme.radius.sm,
-                          backgroundColor: isActive
-                            ? theme.colors.violet[6]
-                            : 'transparent',
-                          color: isActive ? theme.white : theme.colors.gray[0],
-                        }}
-                      >
-                        <ThemeIcon
-                          variant={isActive ? 'filled' : 'light'}
-                          color={isActive ? 'violet' : 'gray'}
-                        >
-                          <Icon size={16} />
-                        </ThemeIcon>
-                        <Text size="sm">{item.label}</Text>
-                      </UnstyledButton>
-                    );
-                  })}
+                  {adminLinks.map((item) => (
+                    <NavLinkButton
+                      key={item.label}
+                      item={item}
+                      active={activeLabel === item.label}
+                      onClick={() => handleNavigate(item.link)}
+                    />
+                  ))}
                 </Stack>
               </Collapse>
             </Box>
           )}
-
-
         </Stack>
-        {/* Logout Button */}
-        <UnstyledButton
-          onClick={() => handleLogout()}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: theme.spacing.sm,
-            padding: theme.spacing.xs,
-            borderRadius: theme.radius.sm,
-            color: theme.colors.red[5],
-          }}
-        >
+
+        <UnstyledButton onClick={() => handleLogout()} className={classes.logoutButton}>
           <ThemeIcon variant="light" color="red">
             <IconLogout size={16} />
           </ThemeIcon>
