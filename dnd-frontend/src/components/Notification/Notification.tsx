@@ -1,6 +1,13 @@
 import { notifications } from '@mantine/notifications';
-import { IconBoomFilled } from '@tabler/icons-react';
+import { IconCactus } from '@tabler/icons-react';
 import type { CSSProperties, ReactNode } from 'react';
+
+const defaultNotificationStyle: CSSProperties = {
+  backgroundColor: 'rgba(0, 0, 0, 0.27)',
+  color: 'white',
+  border: '1px solid rgba(255, 255, 255, 0.05)',
+  marginBottom: '10px',
+};
 
 export interface ShowNotificationOptions {
   id?: string;
@@ -29,7 +36,7 @@ export const showNotification = ({
   title,
   message,
   color = 'blue',
-  icon = <IconBoomFilled size={18} />,
+  icon = <IconCactus size={18} />,
   position,
   withBorder,
   withCloseButton = true,
@@ -38,13 +45,7 @@ export const showNotification = ({
   autoClose = 3000,
   radius,
   className,
-  style = {
-    backgroundColor: 'rgba(0, 0, 0, 0.27)',
-    color: 'white',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255, 255, 255, 0.18)',
-    marginBottom: '10px',
-  } as CSSProperties,
+  style = defaultNotificationStyle,
   loading,
 }: ShowNotificationOptions) => {
   notifications.show({
@@ -80,7 +81,7 @@ export const updateNotification = ({
   autoClose,
   radius,
   className,
-  style,
+  style = defaultNotificationStyle,
   loading,
 }: ShowNotificationOptions) => {
   if (!id) {
