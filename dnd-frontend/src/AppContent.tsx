@@ -7,7 +7,7 @@ import Sidebar from "./components/Sidebar/Sidebar";
 import Home from "@features/home/Home";
 import Login from "@features/auth/login/Login";
 import Register from "@features/auth/register/Register";
-import NotFound from "./pages/NotFound/NotFound";
+import NotFound from "@features/notFound/NotFound";
 import CharacterProfile from "@features/profile/CharacterProfile";
 import { useEffect } from "react";
 import { useCharacterStore } from "./store/useCharacterStore";
@@ -76,7 +76,6 @@ export default function AppContent() {
 
   return (
       <AppShell
-        padding={isMobile ? 0 : "md"}
         header={{ height: 0 }}
         styles={{
           root: {
