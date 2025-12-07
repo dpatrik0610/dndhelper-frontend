@@ -1,14 +1,14 @@
 import { Box, Group, Title, Text, Container, ActionIcon } from "@mantine/core";
-import { useAuthStore } from "../../store/useAuthStore";
-import { useSpellStore } from "../../store/useSpellStore";
+import { useAuthStore } from "@store/useAuthStore";
+import { useSpellStore } from "@store/useSpellStore";
 import { useEffect } from "react";
-import { loadSpells } from "../../utils/loadSpells";
+import { loadSpells } from "@utils/loadSpells";
 import { SpellSelect } from "./components/SpellSelect";
 import { SpellCard } from "./components/SpellCard";
 import { IconDatabase, IconRefresh } from "@tabler/icons-react";
 import { useMediaQuery } from "@mantine/hooks";
 import { useParams } from "react-router-dom";
-import { getSpellById } from "../../services/spellService";
+import { getSpellById } from "@services/spellService";
 
 export default function SpellPage() {
   const token = useAuthStore.getState().token;

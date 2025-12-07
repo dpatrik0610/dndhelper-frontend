@@ -13,7 +13,7 @@ import { useEffect } from "react";
 import { useCharacterStore } from "./store/useCharacterStore";
 import { loadCharacters } from "./utils/loadCharacter";
 import { IconChevronRight } from "@tabler/icons-react";
-import SpellPage from "./pages/Spells/SpellPage";
+import SpellPage from "@features/spells/SpellPage";
 import { decodeToken } from "./utils/decodeToken";
 import { handleLogout } from "./utils/handleLogout";
 import { showNotification } from "./components/Notification/Notification";

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Autocomplete, Select, Group, Box } from "@mantine/core";
-import { useSpellStore } from "../../../store/useSpellStore";
-import { loadCurrentSpell } from "../../../utils/loadSpells";
-import { useAuthStore } from "../../../store/useAuthStore";
+import { useSpellStore } from "@store/useSpellStore";
+import { loadCurrentSpell } from "@utils/loadSpells";
+import { useAuthStore } from "@store/useAuthStore";
 import { IconWand, IconFilter } from "@tabler/icons-react";
 
 export function SpellSelect() {

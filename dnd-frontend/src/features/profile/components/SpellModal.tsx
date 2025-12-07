@@ -1,7 +1,7 @@
 import { Modal, ActionIcon, Box } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useMediaQuery } from "@mantine/hooks";
-import { SpellCard } from "@pages/Spells/components/SpellCard";
+import { SpellCard } from "@features/spells/components/SpellCard";
 
 interface SpellModalProps {
   opened: boolean;

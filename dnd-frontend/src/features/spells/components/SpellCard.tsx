@@ -6,14 +6,14 @@ import {
   Divider,
   Table,
 } from "@mantine/core";
-import { useSpellStore } from "../../../store/useSpellStore";
-import CustomBadge from "../../../components/common/CustomBadge";
-import DisplayText from "../../../components/common/DisplayText";
-import { ExpandableSection } from "../../../components/ExpandableSection";
+import { useSpellStore } from "../@store/useSpellStore";
+import CustomBadge from "@components/common/CustomBadge";
+import DisplayText from "@components/common/DisplayText";
+import { ExpandableSection } from "@components/ExpandableSection";
 import { IconWand, IconFlame, IconBook, IconSparkles } from "@tabler/icons-react";
-import { SectionColor } from "../../../types/SectionColor";
-import { DividerWithLabel } from "../../../components/common/DividerWithLabel";
-import { getDamageInfo } from "../../../utils/getDamageInfo";
+import { SectionColor } from "@appTypes/SectionColor";
+import { DividerWithLabel } from "@components/common/DividerWithLabel";
+import { getDamageInfo } from "../@utils/getDamageInfo";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
