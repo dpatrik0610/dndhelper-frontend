@@ -11,7 +11,7 @@ export function getAppShellStyles(isMobile: boolean): AppShellProps["styles"] {
       minHeight: "100vh",
       overflow: "hidden",
       background: "transparent",
-      padding: isMobile ? 0 : undefined,
+      padding: isMobile ? 2 : 10,
     },
   };
 }
