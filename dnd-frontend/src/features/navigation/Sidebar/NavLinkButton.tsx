@@ -15,11 +15,15 @@ export function NavLinkButton({ item, active, onClick }: NavLinkButtonProps) {
     <UnstyledButton
       onClick={onClick}
       className={`${classes.navButton} ${active ? classes.navButtonActive : classes.navButtonInactive}`}
+      data-active={active}
+      p={6}
     >
-      <ThemeIcon variant={active ? "filled" : "light"} color={active ? "violet" : "gray"}>
+      <ThemeIcon variant={active ? "filled" : "light"} color={active ? "violet" : "gray"} radius="md">
         <Icon size={16} />
       </ThemeIcon>
-      <Text size="sm">{item.label}</Text>
+      <Text size="md" fw={600} style={{ letterSpacing: 0.5 }}>
+        {item.label}
+      </Text>
     </UnstyledButton>
   );
 }

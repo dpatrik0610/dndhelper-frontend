@@ -22,6 +22,7 @@ export default defineConfig({
       '@services': path.resolve(__dirname, 'src/services'),
       '@validations': path.resolve(__dirname, 'src/validations'),
       '@styles': path.resolve(__dirname, 'src/styles'),
+      '@signalr': path.resolve(__dirname, 'src/SignalR'),
       '@': path.resolve(__dirname, 'src'),
     },
   },

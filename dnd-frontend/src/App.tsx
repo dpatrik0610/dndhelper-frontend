@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo } from "react";
-import Sidebar from "@components/Sidebar/Sidebar";
+import Sidebar from "@features/navigation/Sidebar/Sidebar";
 import Home from "@features/home/Home";
 import Login from "@features/auth/login/Login";
 import Register from "@features/auth/register/Register";
@@ -47,7 +47,7 @@ function AppRoutes() {
 
   return (
     <AppShell header={{ height: 0 }} styles={getAppShellStyles(isMobile)} >
-      {showSidebar && <Sidebar opened={opened} onClose={handlers.close} />}
+      {showSidebar && <Sidebar opened={opened} onClose={handlers.close} position="right" />}
 
       <AppShell.Main>
         <AppBackground />

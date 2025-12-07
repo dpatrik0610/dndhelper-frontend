@@ -33,7 +33,8 @@
       "@pages/*": ["src/pages/*"],
       "@services/*": ["src/services/*"],
       "@validations/*": ["src/validations/*"],
-      "@styles/*": ["src/styles/*"]
+      "@styles/*": ["src/styles/*"],
+      "@signalr/*": ["src/SignalR/*"]
     }
   },
   "include": ["src"]

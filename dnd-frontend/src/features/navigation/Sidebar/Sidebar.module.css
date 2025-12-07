@@ -1,0 +1,117 @@
+.drawerContent {
+  height: 100%;
+  backdrop-filter: blur(4px);
+  background: linear-gradient(160deg, rgba(23, 20, 45, 0.82), rgba(14, 14, 34, 0.78));
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.drawerInner {
+  height: 100%;
+}
+
+.headerCard {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(103, 65, 217, 0.3), rgba(29, 110, 180, 0.25));
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: var(--mantine-spacing-md);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.userBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: radial-gradient(circle at 30% 30%, #c3fffb, #6b8cff 60%, #8058ff 100%);
+  color: #0d0b1a;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.sectionLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  color: var(--mantine-color-gray-5);
+}
+
+.navGroup {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.navButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: transform 120ms ease, box-shadow 180ms ease, background 180ms ease;
+  border: 1px solid transparent;
+}
+
+.navButton::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 8px;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.navButtonActive {
+  background: linear-gradient(135deg, rgba(106, 76, 255, 0.9), rgba(83, 216, 255, 0.8));
+  color: var(--mantine-color-white);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.navButtonInactive {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--mantine-color-gray-0);
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
+.navButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.navButton:hover::before {
+  opacity: 1;
+}
+
+.adminToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--mantine-spacing-xs);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-xs);
+  border-radius: 10px;
+  color: var(--mantine-color-red-5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+  transition: background 150ms ease, transform 120ms ease;
+}
+
+.logoutButton:hover {
+  background: rgba(255, 95, 109, 0.1);
+  transform: translateY(-1px);
+}
