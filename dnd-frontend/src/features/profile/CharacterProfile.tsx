@@ -24,7 +24,7 @@ import { ActionBar } from "./components/ActionsBar";
 import { ConditionsPanel } from "./components/ConditionsPanel";
 import { SpellsPanel } from "./components/SpellsPanel";
 import { useMediaQuery } from "@mantine/hooks";
-import { Inventory } from "@pages/Inventory/Inventory";
+import { Inventory } from "@features/inventory/Inventory";
 import { ProficienciesPanel } from "./components/ProficienciesPanel";
 import "./styles/CharacterProfile.styles.css"
 import { FeaturesPanel } from "./components/FeaturesPanel";
