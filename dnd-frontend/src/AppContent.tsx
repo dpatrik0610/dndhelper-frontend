@@ -4,7 +4,7 @@ import { useMediaQuery, useDisclosure } from "@mantine/hooks";
 import { useAuthStore } from "./store/useAuthStore";
 import PrivateRoute from "./components/PrivateRoute";
 import Sidebar from "./components/Sidebar/Sidebar";
-import Home from "./pages/Home/Home";
+import Home from "@features/home/Home";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import NotFound from "./pages/NotFound/NotFound";

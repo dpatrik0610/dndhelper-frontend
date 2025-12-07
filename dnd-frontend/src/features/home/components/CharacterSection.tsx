@@ -1,6 +1,6 @@
 import { Button, Card, Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconUser, IconUserPlus } from "@tabler/icons-react";
-import type { Character } from "../../../types/Character/Character";
+import type { Character } from "@appTypes/Character/Character";
 import type { ReactNode } from "react";
 
 interface BaseProps {

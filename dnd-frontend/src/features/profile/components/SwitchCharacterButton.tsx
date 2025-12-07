@@ -2,7 +2,7 @@ import { Tooltip } from "@mantine/core";
 import { IconArrowsExchange } from "@tabler/icons-react";
 import { useCharacterStore } from "@store/useCharacterStore";
 import { useState } from "react";
-import { CharacterSelectModal } from "@pages/Home/components/CharacterSelectModal";
+import { CharacterSelectModal } from "@features/home/components/CharacterSelectModal";
 import type { Character } from "@appTypes/Character/Character";
 import { SectionColor } from "@appTypes/SectionColor";
 import CustomBadge from "@components/common/CustomBadge";

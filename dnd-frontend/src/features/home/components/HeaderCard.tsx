@@ -1,7 +1,7 @@
 import { Button, Group, Paper, Stack, Text, ThemeIcon, Title } from "@mantine/core";
-import { ConnectionStatus } from "../../../components/ConnectionStatus";
+import { ConnectionStatus } from "@components/ConnectionStatus";
 import type { ReactNode } from "react";
-import type { Character } from "../../../types/Character/Character";
+import type { Character } from "@appTypes/Character/Character";
 
 interface Props {
   campaignName: string | null;

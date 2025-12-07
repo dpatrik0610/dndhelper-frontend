@@ -5,11 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
 
-import { useCharacterStore } from "../../store/useCharacterStore";
-import { useAuthStore } from "../../store/useAuthStore";
-import { useSessionStore } from "../../store/session/useSessionStore";
-import { getCampaignBasicById } from "../../services/campaignService";
-import type { Character } from "../../types/Character/Character";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { useAuthStore } from "@store/useAuthStore";
+import { useSessionStore } from "@store/session/useSessionStore";
+import { getCampaignBasicById } from "@services/campaignService";
+import type { Character } from "@appTypes/Character/Character";
 import { quotes } from "./quotes";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { HeaderCard } from "./components/HeaderCard";
@@ -107,7 +107,6 @@ export default function Home() {
     >
       {/* Quick Actions */}
       <QuickActionBar actions={quickNavigations} palette={{ bg: palette.bg, border: palette.border, textMain: palette.textMain, accent: palette.accent }} />
-      {/* <QuickActionsGrid actions={quickNavigations} palette={{ cardBg: palette.cardBg, border: palette.border, hoverBg: palette.hoverBg, textMain: palette.textMain, accent: palette.accent }} /> */}
 
       <HeaderCard
         campaignName={campaignName}

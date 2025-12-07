@@ -13,9 +13,9 @@ import {
 } from "@mantine/core";
 import { IconStar, IconUserCheck } from "@tabler/icons-react";
 import { useState } from "react";
-import type { Character } from "../../../types/Character/Character";
-import classes from "./CharacterSelectModal.module.css";
+import type { Character } from "@appTypes/Character/Character";
 import { useNavigate } from "react-router-dom";
+import classes from "./styles/CharacterSelectModal.module.css";
 
 interface CharacterSelectModalProps {
   opened: boolean;

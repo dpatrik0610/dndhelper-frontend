@@ -1,8 +1,8 @@
 import { ScrollArea, Stack, Paper, Group, Text, Loader } from "@mantine/core";
 import { IconStar } from "@tabler/icons-react";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { SectionColor } from "../../../types/SectionColor";
-import type { Event } from "../../../types/Event";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { SectionColor } from "@appTypes/SectionColor";
+import type { Event } from "@appTypes/Event";
 
 interface RecentEventsSectionProps {
   events: Event[];

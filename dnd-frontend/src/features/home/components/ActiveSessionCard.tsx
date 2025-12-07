@@ -1,6 +1,6 @@
 import { Badge, Card, Group, Stack, Text } from "@mantine/core";
 import dayjs from "dayjs";
-import type { Session } from "../../../types/Session";
+import type { Session } from "@appTypes/Session";
 import ReactMarkdown from "react-markdown";
 
 interface Props {
