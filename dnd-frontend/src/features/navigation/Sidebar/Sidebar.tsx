@@ -85,7 +85,11 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
             username={username}
             roleLabel={isAdmin ? "Administrator" : "Player"}
             initials={initials}
-            onLogout={handleLogout}
+            onLogout={() => {
+              handleLogout();
+              onClose();
+              navigate("/login");
+            }}
           />
 
           <NavSection
