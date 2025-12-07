@@ -78,7 +78,7 @@ export default function Home() {
       void loadByCampaign(character.campaignId);
     };
     void load();
-  }, [character?.campaignId, loadByCampaign]);
+  }, [character?.campaignId, loadByCampaign, character?.id]);
 
   const activeSession = useMemo(() => {
     const live = sessions.find((s) => s.isLive);
