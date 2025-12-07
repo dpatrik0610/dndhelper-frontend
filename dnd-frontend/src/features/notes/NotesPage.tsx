@@ -2,9 +2,9 @@ import { Box } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { showNotification } from "../../components/Notification/Notification";
-import { useCharacterStore } from "../../store/useCharacterStore";
-import { SectionColor } from "../../types/SectionColor";
+import { showNotification } from "@components/Notification/Notification";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { SectionColor } from "@appTypes/SectionColor";
 import { NotesPanel } from "./components/NotesPanel";
 
 export default function NotesPage() {

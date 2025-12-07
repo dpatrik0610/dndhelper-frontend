@@ -6,10 +6,10 @@ import {
   IconStarFilled,
   IconTrash,
 } from "@tabler/icons-react";
-import type { Note } from "../../../types/Note";
-import { MarkdownRenderer } from "../../../components/MarkdownRender";
-import { ExpandableSection } from "../../../components/ExpandableSection";
-import { SectionColor } from "../../../types/SectionColor";
+import type { Note } from "@appTypes/Note";
+import { MarkdownRenderer } from "@components/MarkdownRender";
+import { ExpandableSection } from "@components/ExpandableSection";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface NoteCardProps {
   note: Note;

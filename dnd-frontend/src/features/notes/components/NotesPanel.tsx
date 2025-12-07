@@ -12,12 +12,12 @@ import { useMediaQuery } from "@mantine/hooks";
 import { NotesHeader } from "./NotesHeader";
 import { NoteCard } from "./NoteCard";
 import { NotesSearch } from "./NotesSearch";
-import { useCharacterStore } from "../../../store/useCharacterStore";
-import { useNoteStore } from "../../../store/useNoteStore";
-import type { Note } from "../../../types/Note";
+import { useCharacterStore } from "@store/useCharacterStore";
+import { useNoteStore } from "@store/useNoteStore";
+import type { Note } from "@appTypes/Note";
 import { AddNoteModal } from "@features/profile/components/AddNoteModal";
 import { EditNoteModal } from "./EditNoteModal";
-import { showNotification } from "../../../components/Notification/Notification";
+import { showNotification } from "@components/Notification/Notification";
 
 export function NotesPanel() {
   const character = useCharacterStore((s) => s.character);

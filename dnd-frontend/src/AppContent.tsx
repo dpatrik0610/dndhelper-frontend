@@ -21,7 +21,7 @@ import { SectionColor } from "./types/SectionColor";
 import { CharacterFormPage } from "@features/characterForm/CharacterFormPage";
 import { AdminDashboard } from "./pages/Admin/AdminDashboard";
 import { Notifications } from "@mantine/notifications";
-import NotesPage from "./pages/Notes/NotesPage";
+import NotesPage from "@features/notes/NotesPage";
 
 export default function AppContent() {
   const navigate = useNavigate();
