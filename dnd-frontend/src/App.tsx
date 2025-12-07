@@ -16,6 +16,7 @@ import PrivateRoute from "@components/PrivateRoute";
 import { useAuthStore } from "@store/useAuthStore";
 import { useCharacterStore } from "@store/useCharacterStore";
 import { useTokenExpiryGuard } from "@features/auth/hooks/useTokenExpiryGuard";
+import RulesPage from "@features/rules/RulesPage";
 import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapCharacters";
 import { AppBackground } from "@components/layout/AppBackground";
 import { SidebarToggle } from "@components/layout/SidebarToggle";
@@ -74,6 +75,7 @@ function AppRoutes() {
               <Route path="/spells/:spellName" element={<SpellPage />} />
               <Route path="/newCharacter" element={<CharacterFormPage />} />
               <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
+              <Route path="/rules" element={<RulesPage />} />
               <Route path="/notes" element={<NotesPage />} />
               {isAdmin && <Route path="/settings" element={<SettingsPage />} />}
               {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
