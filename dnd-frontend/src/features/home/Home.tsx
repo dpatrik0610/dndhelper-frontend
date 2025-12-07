@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState, type JSX } from "react";
+import { useEffect, useMemo, useState} from "react";
 import { Stack } from "@mantine/core";
-import { IconBook, IconDashboard, IconNote } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
@@ -14,7 +13,7 @@ import { quotes } from "./quotes";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { HeaderCard } from "./components/HeaderCard";
 import { ActiveSessionCard } from "./components/ActiveSessionCard";
-import { QuickActionBar } from "./components/QuickActionBar";
+// import { QuickActionBar } from "./components/QuickActionBar";
 
 const palette = {
   accent: "#b197fc",
@@ -27,7 +26,7 @@ const palette = {
 };
 
 export default function Home() {
-  const isAdmin = useAuthStore.getState().roles.includes("Admin");
+  // const isAdmin = useAuthStore.getState().roles.includes("Admin");
   const navigate = useNavigate();
   const { characters, setCharacter } = useCharacterStore();
   const character = useCharacterStore((state) => state.character);
@@ -38,11 +37,11 @@ export default function Home() {
   const [campaignName, setCampaignName] = useState<string | null>(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const quickNavigations = [
-    { label: "Spellbook", icon: <IconBook />, path: "/spells" },
-    { label: "Personal Notes", icon: <IconNote />, path: "/notes" },
-    isAdmin ? { label: "Admin Dashboard", icon: <IconDashboard />, path: "/dashboard" } : null,
-  ].filter(Boolean) as { label: string; icon: JSX.Element; path: string }[];
+  // const quickNavigations = [
+  //   { label: "Spellbook", icon: <IconBook />, path: "/spells" },
+  //   { label: "Personal Notes", icon: <IconNote />, path: "/notes" },
+  //   isAdmin ? { label: "Admin Dashboard", icon: <IconDashboard />, path: "/dashboard" } : null,
+  // ].filter(Boolean) as { label: string; icon: JSX.Element; path: string }[];
 
   useEffect(() => {
     if (quotes?.length) {
@@ -105,9 +104,6 @@ export default function Home() {
       p={isMobile ? "0" : "md"}
       style={isMobile ? { margin: "2px" } : undefined}
     >
-      {/* Quick Actions */}
-      {/* <QuickActionBar actions={quickNavigations} palette={{ bg: palette.cardBg, border: palette.border, textMain: palette.textMain, accent: palette.accent }} /> */}
-
       <HeaderCard
         campaignName={campaignName}
         character={character ?? null}
