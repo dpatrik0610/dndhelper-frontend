@@ -24,31 +24,26 @@ export const registerAuthStoreGuards = () => {
 
   useAuthStore.subscribe((next, prev) => {
     if (next.id === prev?.id && next.roles === prev?.roles) return;
-    const userId = next.id ?? null;
 
     // Character store
     useCharacterStore.getState().clearStore();
     useCharacterStore.persist?.clearStorage?.();
-    useCharacterStore.setState({ userId });
 
     // Inventory store
     useInventoryStore.getState().clearInventories();
     useInventoryStore.persist?.clearStorage?.();
-    useInventoryStore.setState({ userId });
 
     // Note store
     useNoteStore.getState().clearStore();
     useNoteStore.persist?.clearStorage?.();
-    useNoteStore.setState({ userId });
 
     // Spell store
     useSpellStore.persist?.clearStorage?.();
-    useSpellStore.setState({ spellNames: [], currentSpell: null, userId });
+    useSpellStore.setState({ spellNames: [], currentSpell: null });
 
     // Session store
     useSessionStore.getState().clear();
     useSessionStore.persist?.clearStorage?.();
-    useSessionStore.setState({ userId });
 
     // Admin stores
     useAdminCampaignStore.getState().reset();
