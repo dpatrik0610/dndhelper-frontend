@@ -10,6 +10,7 @@ import type { Note } from "@appTypes/Note";
 import { MarkdownRenderer } from "@components/MarkdownRender";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
+import { magicGlowTheme } from "@styles/magic/glowTheme";
 
 interface NoteCardProps {
   note: Note;
@@ -17,6 +18,7 @@ interface NoteCardProps {
   onToggleFavorite: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  isMobile?: boolean;
 }
 
 const highlightText = (value: string, query?: string) => {
@@ -63,14 +65,16 @@ export function NoteCard({
   onToggleFavorite,
   onEdit,
   onDelete,
+  isMobile,
 }: NoteCardProps) {
   const markdownContent = (note.lines ?? []).join("\n");
   const title = note.title ?? "Untitled";
   const titleContent = (
-    <Text fw={600} c="red.3" size="sm" style={{ lineHeight: 1.05 }}>
+    <Text fw={600} c={magicGlowTheme.text.color} size="sm" style={{ lineHeight: 1.05 }}>
       {highlightText(title, searchQuery)}
     </Text>
   );
+  const actionSize = isMobile ? "lg" : "md";
 
   const handleDownload = () => {
     const blob = new Blob([`# ${title}\n\n${markdownContent}`], {
@@ -88,69 +92,62 @@ export function NoteCard({
     <ExpandableSection
       title={title}
       titleContent={titleContent}
-      color={SectionColor.Red}
+      color={SectionColor.Blue}
       defaultOpen
       transparent
-      padding={8}
-      marginTop={4}
-      marginBottom={4}
+      padding={14}
+      marginTop={2}
+      marginBottom={2}
       style={{
-        background: "rgba(50, 0, 0, 0.2)",
-        border: "1px solid rgba(255,80,80,0.25)",
+        ...magicGlowTheme.card,
+        background: "rgba(30, 26, 60, 0.72)",
       }}
     >
-      
-        <Group justify="flex-end" mb={6} gap={4}>
+        <Group justify="space-between" mb={8} align="center" gap="xs">
+          <Text c="dimmed" size="xs">
+            Updated:{" "}
+            {note.updatedAt
+              ? new Date(note.updatedAt).toLocaleString("en-GB").replace(/\//g, ".")
+              : "n/a"}
+          </Text>
+          <Group gap={6} wrap="nowrap">
           <Tooltip label={note.isFavorite ? "Unfavorite" : "Favorite"}>
-            <ActionIcon size="sm" variant="subtle" onClick={onToggleFavorite}>
+            <ActionIcon size={actionSize} variant="light" color="yellow" radius="md" onClick={onToggleFavorite}>
               {note.isFavorite ? (
-                <IconStarFilled size={14} color="yellow" />
+                <IconStarFilled size={16} color="gold" />
               ) : (
-                <IconStar size={14} />
+                <IconStar size={16} />
               )}
             </ActionIcon>
           </Tooltip>
 
           <Tooltip label="Edit note">
-            <ActionIcon size="sm" variant="subtle" onClick={onEdit}>
-              <IconPencil size={12} />
+            <ActionIcon size={actionSize} variant="light" color="grape" radius="md" onClick={onEdit}>
+              <IconPencil size={14} />
             </ActionIcon>
           </Tooltip>
 
           <Tooltip label="Download markdown">
-            <ActionIcon size="sm" variant="subtle" onClick={handleDownload}>
-              <IconDownload size={12} />
+            <ActionIcon size={actionSize} variant="light" color="blue" radius="md" onClick={handleDownload}>
+              <IconDownload size={14} />
             </ActionIcon>
           </Tooltip>
 
           <Tooltip label="Delete">
             <ActionIcon
-              size="sm"
-              variant="subtle"
+              size={actionSize}
+              variant="light"
               color="red"
+              radius="md"
               onClick={onDelete}
             >
-              <IconTrash size={12} />
+              <IconTrash size={14} />
             </ActionIcon>
           </Tooltip>
+          </Group>
         </Group>
 
         <MarkdownRenderer content={markdownContent} highlightQuery={searchQuery} />
-
-        <Text c="dimmed" size="xs" mt={4}>
-          Updated at:{" "}
-          {note.updatedAt
-            ? new Date(note.updatedAt)
-                .toLocaleString("en-GB", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-                .replace(/\//g, ".")
-            : "n/a"}
-        </Text>
     </ExpandableSection>
   );
 }

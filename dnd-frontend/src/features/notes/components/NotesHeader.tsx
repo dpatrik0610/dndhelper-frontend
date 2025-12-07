@@ -1,29 +1,18 @@
-import {
-  ActionIcon,
-  Group,
-  MultiSelect,
-  Text,
-  Tooltip,
-  Transition,
-  Box,
-} from "@mantine/core";
-import {
-  IconFilter,
-  IconFileImport,
-  IconPlus,
-  IconRefresh,
-} from "@tabler/icons-react";
+import { Badge, Button, Group, MultiSelect, Stack, Title } from "@mantine/core";
+import { IconFileImport, IconPlus, IconRefresh, IconWand } from "@tabler/icons-react";
+import { magicGlowTheme } from "@styles/magic/glowTheme";
 
 interface NotesHeaderProps {
   loading: boolean;
   onReload: () => void;
   onAdd: () => void;
   onImport: () => void;
-  tags: string[];
-  tagValue: string[];
-  onTagsChange: (tags: string[]) => void;
-  showTagFilter: boolean;
-  toggleTagFilter: () => void;
+  isMobile: boolean;
+  summary: {
+    total: number;
+    favorites: number;
+    tags: number;
+  };
 }
 
 export function NotesHeader({
@@ -31,161 +20,109 @@ export function NotesHeader({
   onReload,
   onAdd,
   onImport,
-  tags,
-  tagValue,
-  onTagsChange,
-  showTagFilter,
-  toggleTagFilter,
+  isMobile,
+  summary,
 }: NotesHeaderProps) {
+  const buttonSize = isMobile ? "xs" : "sm";
+
   return (
-    <Group justify="space-between" mb={6} align="flex-start" gap="xs">
-      <Box>
-        <Text size="lg" fw={600} c="red.3" style={{ lineHeight: 1.1 }}>
-          Personal Notes{" "}
-          {loading && (
-            <Text span c="dimmed" size="sm" style={{ lineHeight: 1.1 }}>
-              (loading...)
-            </Text>
-          )}
-        </Text>
-      </Box>
+    <Stack gap="xs">
+      <Group justify="space-between" align={isMobile ? "flex-start" : "center"} gap="sm" wrap="wrap">
+        <Stack gap={4}>
+          <Group gap="xs">
+            <IconWand size={18} color={magicGlowTheme.palette.primary} />
+            <Title order={3}>Notes</Title>
+          </Group>
+          <Group gap={6} wrap="wrap">
+            <Badge color="violet" variant="light">
+              Total: {summary.total}
+            </Badge>
+            <Badge color="yellow" variant="light">
+              Favorites: {summary.favorites}
+            </Badge>
+            <Badge color="cyan" variant="light">
+              Tags: {summary.tags}
+            </Badge>
+          </Group>
+        </Stack>
 
-      <Group gap="xs" align="flex-start" wrap="nowrap" style={{ position: "relative" }}>
-        <Transition mounted={showTagFilter} transition="slide-left" duration={160} timingFunction="ease">
-          {(styles) => (
-            <Box
-              style={{
-                ...styles,
-                position: "absolute",
-                right: "100%",
-                top: -6,
-                marginRight: 10,
-                minWidth: 180,
-              }}
+        <Stack gap={isMobile ? 8 : "xs"} w={isMobile ? "100%" : "auto"}>
+          <Group gap="xs" justify={isMobile ? "flex-start" : "flex-end"} w={isMobile ? "100%" : "auto"}>
+            <Button
+              size={buttonSize}
+              radius="md"
+              variant="gradient"
+              gradient={{ from: "#c084fc", to: "#60a5fa" }}
+              leftSection={<IconPlus size={16} />}
+              fullWidth={isMobile}
+              onClick={onAdd}
             >
-              <MultiSelect
-                size="xs"
-                label="Tags"
-                placeholder={tags.length ? "Filter tags" : "No tags"}
-                data={tags}
-                value={tagValue}
-                onChange={onTagsChange}
-                searchable
-                clearable
-                maxDropdownHeight={160}
-                classNames={{ input: "glassy-input", label: "glassy-label" }}
-              />
-            </Box>
-          )}
-        </Transition>
-
-        <Tooltip label="Toggle tag filter">
-          <ActionIcon
-            size="md"
-            radius="xl"
-            variant="light"
-            onClick={toggleTagFilter}
-            style={{
-              background: showTagFilter ? "rgba(255,0,0,0.45)" : "rgba(255,0,0,0.2)",
-              border: "1px solid rgba(255,100,100,0.5)",
-              backdropFilter: "blur(6px)",
-              color: "white",
-              transition: "0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.45)";
-              e.currentTarget.style.color = "white";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = showTagFilter
-                ? "rgba(255,0,0,0.45)"
-                : "rgba(255,0,0,0.2)";
-              e.currentTarget.style.color = "white";
-            }}
-          >
-            <IconFilter size={16} />
-          </ActionIcon>
-        </Tooltip>
-
-        <Tooltip label="Import markdown">
-          <ActionIcon
-            size="md"
-            radius="xl"
-            variant="light"
-            onClick={onImport}
-            style={{
-              background: "rgba(255,0,0,0.2)",
-              border: "1px solid rgba(255,100,100,0.5)",
-              backdropFilter: "blur(6px)",
-              color: "rgba(255,200,200,0.9)",
-              transition: "0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.4)";
-              e.currentTarget.style.color = "white";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.2)";
-              e.currentTarget.style.color = "rgba(255,200,200,0.9)";
-            }}
-          >
-            <IconFileImport size={16} />
-          </ActionIcon>
-        </Tooltip>
-
-        <Tooltip label="Refresh">
-          <ActionIcon
-            size="md"
-            radius="xl"
-            variant="light"
-            onClick={onReload}
-            style={{
-              background: "rgba(255,0,0,0.25)",
-              border: "1px solid rgba(255,100,100,0.5)",
-              backdropFilter: "blur(6px)",
-              color: "rgba(255,200,200,0.9)",
-              transition: "0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.45)";
-              e.currentTarget.style.color = "white";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.25)";
-              e.currentTarget.style.color = "rgba(255,200,200,0.9)";
-            }}
-          >
-            <IconRefresh size={16} />
-          </ActionIcon>
-        </Tooltip>
-
-        <Tooltip label="Add note">
-          <ActionIcon
-            size="md"
-            radius="xl"
-            variant="light"
-            onClick={onAdd}
-            style={{
-              background: "rgba(255,0,0,0.35)",
-              border: "1px solid rgba(255,100,100,0.6)",
-              backdropFilter: "blur(6px)",
-              color: "white",
-              boxShadow: "0 0 6px rgba(255,60,60,0.6)",
-              transition: "0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.55)";
-              e.currentTarget.style.boxShadow = "0 0 10px rgba(255,80,80,0.9)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.35)";
-              e.currentTarget.style.boxShadow = "0 0 6px rgba(255,60,60,0.6)";
-            }}
-          >
-            <IconPlus size={16} />
-          </ActionIcon>
-        </Tooltip>
+              Add note
+            </Button>
+            <Button
+              size={buttonSize}
+              radius="md"
+              variant="light"
+              color="grape"
+              leftSection={<IconFileImport size={16} />}
+              fullWidth={isMobile}
+              onClick={onImport}
+            >
+              Import
+            </Button>
+            <Button
+              size={buttonSize}
+              radius="md"
+              variant="light"
+              color="blue"
+              leftSection={<IconRefresh size={16} />}
+              fullWidth={isMobile}
+              loading={loading}
+              onClick={onReload}
+            >
+              Refresh
+            </Button>
+          </Group>
+        </Stack>
       </Group>
-    </Group>
+    </Stack>
+  );
+}
+
+interface MultiTagSelectProps {
+  tags: string[];
+  value: string[];
+  onChange: (value: string[]) => void;
+  hidden?: boolean;
+}
+
+export function MultiTagSelect({ tags, value, onChange, hidden = false }: MultiTagSelectProps) {
+  if (hidden) return null;
+
+  return (
+    <MultiSelect
+      size="sm"
+      placeholder={tags.length ? "Filter tags" : "No tags yet"}
+      data={tags}
+      value={value}
+      onChange={onChange}
+      searchable
+      clearable
+      maxDropdownHeight={200}
+      styles={{
+        input: {
+          background: "rgba(30, 26, 60, 0.78)",
+          boxShadow: magicGlowTheme.card.boxShadow,
+          backdropFilter: magicGlowTheme.card.backdropFilter,
+          borderRadius: 10,
+          color: magicGlowTheme.text.color,
+          borderColor: magicGlowTheme.palette.border,
+          borderWidth: 1,
+          borderStyle: "solid",
+        },
+        dropdown: { background: "rgba(18,16,32,0.96)", borderColor: magicGlowTheme.palette.border },
+        option: { color: "#f3f0ff" },
+      }}
+    />
   );
 }

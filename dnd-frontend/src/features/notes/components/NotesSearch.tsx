@@ -1,25 +1,30 @@
 import { TextInput } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
+import { magicGlowTheme } from "@styles/magic/glowTheme";
 
 interface NotesSearchProps {
   value: string;
   onChange: (value: string) => void;
+  isMobile?: boolean;
 }
 
-export function NotesSearch({ value, onChange }: NotesSearchProps) {
+export function NotesSearch({ value, onChange, isMobile }: NotesSearchProps) {
   return (
     <TextInput
       value={value}
       onChange={(e) => onChange(e.currentTarget.value)}
       placeholder="Search notes..."
-      radius="md"
+      radius="lg"
       variant="filled"
-      leftSection={<IconSearch size={14} />}
+      size={isMobile ? "md" : "sm"}
+      leftSection={<IconSearch size={16} />}
       styles={{
         input: {
-          background: "rgba(255, 0, 0, 0.12)",
-          border: "1px solid rgba(255, 100, 100, 0.35)",
-          color: "rgba(255, 230, 230, 0.95)",
+          ...magicGlowTheme.card,
+          background: "rgba(30, 26, 60, 0.75)",
+          borderColor: magicGlowTheme.palette.border,
+          color: magicGlowTheme.text.color,
+          paddingBlock: isMobile ? 12 : 10,
         },
       }}
     />
