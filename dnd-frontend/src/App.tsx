@@ -19,7 +19,6 @@ import { useTokenExpiryGuard } from "@features/auth/hooks/useTokenExpiryGuard";
 import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapCharacters";
 import { AppBackground } from "@components/layout/AppBackground";
 import { SidebarToggle } from "@components/layout/SidebarToggle";
-import { Notifications } from "@mantine/notifications";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
 import SettingsPage from "@features/settings/SettingsPage";
 import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
@@ -85,7 +84,6 @@ function AppRoutes() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-        <Notifications position="bottom-right" />
       </AppShell.Main>
 
       {showSidebar && (
