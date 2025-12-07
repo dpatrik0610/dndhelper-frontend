@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Session } from "../../types/Session";
+import type { Session } from "@appTypes/Session";
 import {
   createSession,
   deleteSession,
@@ -8,10 +8,10 @@ import {
   getSessionsByCampaign,
   getSessionById,
   updateSession,
-} from "../../services/sessionService";
-import { useAuthStore } from "../useAuthStore";
-import { showNotification } from "../../components/Notification/Notification";
-import { SectionColor } from "../../types/SectionColor";
+} from "@services/sessionService";
+import { useAuthStore } from "@store/useAuthStore";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface SessionState {
   sessions: Session[];

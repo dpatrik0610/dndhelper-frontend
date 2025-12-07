@@ -8,7 +8,7 @@ import {
   updateNote,
   deleteNote,
 } from "@services/noteService";
-import { useAuthStore } from "./useAuthStore";
+import { useAuthStore } from "@store/useAuthStore";
 
 interface NoteState {
   notes: Note[];

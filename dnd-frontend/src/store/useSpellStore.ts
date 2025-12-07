@@ -1,7 +1,8 @@
 import { persist } from "zustand/middleware";
-import type { SpellNameResponse } from "../services/spellService";
-import type { Spell } from "../types/Spell";
+import type { SpellNameResponse } from "@services/spellService";
+import type { Spell } from "@appTypes/Spell";
 import { create } from "zustand";
+import { useAuthStore } from "@store/useAuthStore";
 
 interface SpellStore {
   spellNames: SpellNameResponse[];

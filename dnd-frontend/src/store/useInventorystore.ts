@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Inventory } from "../types/Inventory/Inventory";
-import type { InventoryItem } from "../types/Inventory/InventoryItem";
-import type { Currency } from "../types/Currency";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
+import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
+import type { Currency } from "@appTypes/Currency";
+import { useAuthStore } from "@store/useAuthStore";
 
 interface InventoryState {
   inventories: Inventory[];
