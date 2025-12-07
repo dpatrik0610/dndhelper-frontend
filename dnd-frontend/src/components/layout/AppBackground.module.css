@@ -1,0 +1,20 @@
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: url("https://images.hdqwalls.com/wallpapers/you-are-mine-bird-7s.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  transform: scale(1.02);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(8px) saturate(130%);
+  -webkit-backdrop-filter: blur(4px) saturate(100%);
+  pointer-events: none;
+}

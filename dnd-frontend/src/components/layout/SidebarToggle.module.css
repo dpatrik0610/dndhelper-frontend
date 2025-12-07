@@ -1,0 +1,28 @@
+.button {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  z-index: 999;
+  cursor: pointer;
+  padding: 5px;
+  background-color: #26224eff;
+  border: 3px solid;
+  border-image-slice: 1;
+  border-width: 3px;
+  border-image-source: linear-gradient(45deg, #ff6ec4, #7873f5, #42e695);
+  transition: all 0.3s ease;
+}
+
+.button[data-mobile="true"] {
+  bottom: 14px;
+  left: 14px;
+}
+
+.icon {
+  transition: transform 0.3s ease;
+}
+
+.iconOpen {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}

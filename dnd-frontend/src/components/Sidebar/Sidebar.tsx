@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Drawer,
   Stack,
@@ -9,13 +9,13 @@ import {
   Box,
   Collapse,
 } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { IconChevronDown, IconLogout } from '@tabler/icons-react';
-import { useAuthStore } from '../../store/useAuthStore';
-import { handleLogout } from '../../utils/handleLogout';
+import { useAuthStore } from '@store/useAuthStore';
+import { handleLogout } from '@utils/handleLogout';
 import { tabs, type Section, type TabItem } from './SidebarTabs';
 import { useMediaQuery } from '@mantine/hooks';
-import { ConnectionStatus } from '../ConnectionStatus';
+import { ConnectionStatus } from '@components/ConnectionStatus';
 
 interface SidebarProps {
   opened: boolean;
@@ -26,19 +26,23 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const theme = useMantineTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const username = useAuthStore().username ?? 'NOT LOGGED IN';
   const roles = useAuthStore().roles || [];
   const isAdmin = roles.includes('Admin');
 
-  const sectionTabs: Section[] = ['character'];
-
-  const [section, setSection] = useState<Section>('character');
-  const [active, setActive] = useState(tabs[section][0]?.label ?? '');
+  const [section] = useState<Section>('character');
   const [adminOpen, setAdminOpen] = useState(true);
 
-  const handleNavigate = (link: string, label: string) => {
+  const activeLabel = useMemo(() => {
+    const normalizedPath = location.pathname === '/' ? '/home' : location.pathname;
+    const allTabs = [...tabs.character, ...tabs.admin];
+    const match = allTabs.find((item) => normalizedPath.startsWith(item.link));
+    return match?.label ?? '';
+  }, [location.pathname]);
+
+  const handleNavigate = (link: string) => {
     navigate(link);
-    setActive(label);
     onClose();
   };
 
@@ -67,30 +71,18 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
             <Text fw={700} size="sm" c="gray.4" ta="center">
               {username.toUpperCase()}
             </Text>
-            {/* <SegmentedControl
-              value={section}
-              onChange={(value) => {
-                setSection(value as Section);
-                setActive(tabs[value as Section][0]?.label ?? '');
-              }}
-              fullWidth
-              data={sectionTabs.map((s) => ({
-                label: s.charAt(0).toUpperCase() + s.slice(1),
-                value: s,
-              }))}
-            /> */}
           </Stack>
 
           {/* Links */}
           <Stack mt="md" gap={4}>
             {currentLinks.map((item) => {
               const Icon = item.icon;
-              const isActive = active === item.label;
+              const isActive = activeLabel === item.label;
 
               return (
                 <UnstyledButton
                   key={item.label}
-                  onClick={() => handleNavigate(item.link, item.label)}
+                  onClick={() => handleNavigate(item.link)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -145,12 +137,12 @@ export default function Sidebar({ opened, onClose }: SidebarProps) {
                 <Stack gap={4}>
                   {adminLinks.map((item) => {
                     const Icon = item.icon;
-                    const isActive = active === item.label;
+                    const isActive = activeLabel === item.label;
 
                     return (
                       <UnstyledButton
                         key={item.label}
-                        onClick={() => handleNavigate(item.link, item.label)}
+                        onClick={() => handleNavigate(item.link)}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
