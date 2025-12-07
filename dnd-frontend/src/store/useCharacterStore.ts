@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Character } from "../types/Character/Character";
-import { updateCharacter as updateCharacterApi } from "../services/characterService";
-import { useAuthStore } from "./useAuthStore";
+import type { Character } from "@appTypes/Character/Character";
+import { updateCharacter as updateCharacterApi } from "@services/characterService";
+import { useAuthStore } from "@store/useAuthStore";
 
 interface CharacterState {
   character: Character | null;
@@ -16,7 +16,6 @@ interface CharacterState {
 
   removeCondition: (condition: string) => void;
   addCondition: (condition: string) => void;
-
   removeCurrency: (currencyType: string, amount: number) => void;
 
   clearStore: () => void;
@@ -28,9 +27,7 @@ export const useCharacterStore = create<CharacterState>()(
       const upsertLocalCharacter = (next: Character) => {
         set({ character: next });
         set((state) => ({
-          characters: state.characters.map((c) =>
-            c.id === next.id ? next : c
-          ),
+          characters: state.characters.map((c) => (c.id === next.id ? next : c)),
         }));
       };
 
@@ -41,9 +38,7 @@ export const useCharacterStore = create<CharacterState>()(
 
         try {
           const saved = await updateCharacterApi(character, token);
-          if (saved) {
-            upsertLocalCharacter(saved);
-          }
+          if (saved) upsertLocalCharacter(saved);
           return saved ?? null;
         } catch (err) {
           console.error("Failed to persist character", err);
@@ -54,10 +49,8 @@ export const useCharacterStore = create<CharacterState>()(
       const applyAndPersist = (updater: (current: Character) => Character | null) => {
         const current = get().character;
         if (!current) return;
-
         const updated = updater(current);
         if (!updated) return;
-
         upsertLocalCharacter(updated);
         void persistToApi(updated);
       };
@@ -69,54 +62,39 @@ export const useCharacterStore = create<CharacterState>()(
         setCharacter: (character) => set({ character }),
         setCharacters: (characters) => set({ characters }),
 
-        updateCharacter: (updated: Partial<Character>) => {
-          applyAndPersist((current) => ({ ...current, ...updated }));
-        },
+        updateCharacter: (updated: Partial<Character>) => applyAndPersist((current) => ({ ...current, ...updated })),
 
-        // persist current character to API and sync back
         persistCharacter: async () => {
           const current = get().character;
           if (!current) return null;
           return await persistToApi(current);
         },
 
-        removeCondition: (condition: string) => {
+        removeCondition: (condition: string) =>
           applyAndPersist((current) => ({
             ...current,
             conditions: current.conditions.filter((c) => c !== condition),
-          }));
-        },
+          })),
 
-        addCondition: (condition: string) => {
+        addCondition: (condition: string) =>
           applyAndPersist((current) => {
             if (current.conditions.includes(condition)) return null;
-            return {
-              ...current,
-              conditions: [...current.conditions, condition],
-            };
-          });
-        },
+            return { ...current, conditions: [...current.conditions, condition] };
+          }),
 
-        removeCurrency: (currencyType: string, amount: number) => {
+        removeCurrency: (currencyType: string, amount: number) =>
           applyAndPersist((current) => {
             const existing = current.currencies?.find((c) => c.type === currencyType);
             if (!existing) return null;
 
             const newAmount = existing.amount - amount;
-
             const updatedCurrencies =
               newAmount > 0
-                ? current.currencies.map((c) =>
-                    c.type === currencyType ? { ...c, amount: newAmount } : c
-                  )
+                ? current.currencies.map((c) => (c.type === currencyType ? { ...c, amount: newAmount } : c))
                 : current.currencies.filter((c) => c.type !== currencyType);
 
-            return {
-              ...current,
-              currencies: updatedCurrencies,
-            };
-          });
-        },
+            return { ...current, currencies: updatedCurrencies };
+          }),
 
         clearStore: () => set({ character: null, characters: [] }),
       };
