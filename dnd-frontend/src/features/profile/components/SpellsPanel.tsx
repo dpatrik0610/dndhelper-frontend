@@ -116,7 +116,7 @@ export function SpellsPanel() {
         <Stack>
 
           {/* 🔍 SEARCH + LEVEL FILTER */}
-          <Group grow mb="sm">
+          <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="sm" mb="sm">
             <TextInput
               classNames={glassyInputClasses}
               label="Filter by name"
@@ -155,7 +155,7 @@ export function SpellsPanel() {
               placeholder="Prepared"
               comboboxProps={{ position: 'bottom', middlewares: { flip: true, shift: false } }}
             />
-          </Group>
+          </SimpleGrid>
 
           {/* SPELL GROUPS */}
           {Object.entries(grouped).map(([lvl, spells]) =>
