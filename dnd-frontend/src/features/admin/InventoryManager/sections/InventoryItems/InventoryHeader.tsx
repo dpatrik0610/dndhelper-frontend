@@ -23,12 +23,12 @@ import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
 import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
 import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
 import { useAuthStore } from "@store/useAuthStore";
-import { getCharacterById, updateCharacter } from "@services/characterService";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { ItemModal } from "@features/admin/InventoryManager/sections/InventoryItems/ItemModal";
 import { AddExistingItemModal } from "./AddExistingItemModal";
 import { SelectInventoryOwnersModal } from "./SelectInventoryOwnersModal";
+import { ensureInventoryLinkedToCharacter } from "@utils/inventorySync";
 
 interface CharacterOwnerView {
   id: string;
@@ -122,16 +122,7 @@ export function InventoryHeader() {
     try {
       await Promise.all(
         targets.map(async (c) => {
-          const fullCharacter = await getCharacterById(c.id!, token);
-          if (!fullCharacter) return;
-          const mergedIds = Array.from(new Set([...(fullCharacter.inventoryIds ?? []), invId]));
-          return updateCharacter(
-            {
-              ...fullCharacter,
-              inventoryIds: mergedIds,
-            },
-            token
-          );
+          await ensureInventoryLinkedToCharacter(c.id!, invId, token);
         })
       );
       showNotification({
@@ -204,7 +195,7 @@ export function InventoryHeader() {
                       },
                     }}
                   >
-                    {name.length > 15 ? `${name.slice(0, 15)}…` : name}
+                    {name.length > 15 ? `${name.slice(0, 15)}---` : name}
                   </Badge>
                 ))}
               </Group>
@@ -231,7 +222,7 @@ export function InventoryHeader() {
                     }}
                   >
                     {userId.length > 18
-                      ? `${userId.slice(0, 18)}…`
+                      ? `${userId.slice(0, 18)}---`
                       : userId}
                   </Badge>
                 ))}
@@ -312,4 +303,5 @@ export function InventoryHeader() {
     </>
   );
 }
+
 

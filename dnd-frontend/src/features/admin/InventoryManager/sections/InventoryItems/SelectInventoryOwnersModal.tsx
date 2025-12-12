@@ -17,6 +17,10 @@ import {
 import { useAuthStore } from "@store/useAuthStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
+import {
+  ensureInventoryLinkedToCharacter,
+  removeInventoryFromCharacter,
+} from "@utils/inventorySync";
 
 export function SelectInventoryOwnersModal({
   opened,
@@ -44,14 +48,25 @@ export function SelectInventoryOwnersModal({
     if (!selected?.id) return;
     const currentOwners = selected.characterIds ?? [];
     const addedOwners = selectedOwners.filter((id) => !currentOwners.includes(id));
+    const removedOwners = currentOwners.filter((id) => !selectedOwners.includes(id));
     const targetRefreshCharacter = selectedId || selectedOwners[0] || currentOwners[0];
+    const invId = selected.id;
 
     try {
       if (addedOwners.length > 0) {
         await Promise.all(
-          addedOwners.map((ownerId) =>
-            assignInventoryToCharacter(selected.id!, ownerId, token)
-          )
+          addedOwners.map(async (ownerId) => {
+            await assignInventoryToCharacter(invId, ownerId, token);
+            await ensureInventoryLinkedToCharacter(ownerId, invId, token);
+          })
+        );
+      }
+
+      if (removedOwners.length > 0) {
+        await Promise.all(
+          removedOwners.map(async (ownerId) => {
+            await removeInventoryFromCharacter(ownerId, invId, token);
+          })
         );
       }
 
