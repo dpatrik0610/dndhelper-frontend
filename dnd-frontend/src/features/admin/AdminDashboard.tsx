@@ -12,6 +12,7 @@ import {
   IconRefresh,
   IconUsersGroup,
   IconCloudDownload,
+  IconSword,
 } from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
 import { useAdminDashboardStore, type AdminSection } from "@store/useAdminDashboardStore";
@@ -29,6 +30,7 @@ import { InventoryBrowser } from "./InventoryBrowser/InventoryBrowser";
 import { ItemManager } from "./ItemManager/ItemManager";
 import { SessionManager } from "./SessionManager/SessionManager";
 import { BackupManager } from "./BackupManager/BackupManager";
+import { InitiativeTracker } from "./InitiativeTracker/InitiativeTracker";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -56,6 +58,7 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconUsers, label: "User Manager", key: "UserManager", component: <UserManager /> },
     { icon: IconGhost, label: "Monster Manager", key: "MonsterManager", component: <MonsterManager /> },
     { icon: IconCategory, label: "Item Manager", key: "ItemManager", component: <ItemManager /> },
+    { icon: IconSword, label: "Initiative Tracker", key: "InitiativeTracker", component: <InitiativeTracker /> },
     { icon: IconUsersGroup, label: "Session Manager", key: "SessionManager", component: <SessionManager /> },
     { icon: IconCloudDownload, label: "Backup Manager", key: "BackupManager", component: <BackupManager /> },
   ];
