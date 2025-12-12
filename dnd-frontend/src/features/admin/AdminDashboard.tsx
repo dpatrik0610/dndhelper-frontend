@@ -13,6 +13,7 @@ import {
   IconUsersGroup,
   IconCloudDownload,
   IconSword,
+  IconBook2,
 } from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
 import { useAdminDashboardStore, type AdminSection } from "@store/useAdminDashboardStore";
@@ -31,6 +32,7 @@ import { ItemManager } from "./ItemManager/ItemManager";
 import { SessionManager } from "./SessionManager/SessionManager";
 import { BackupManager } from "./BackupManager/BackupManager";
 import { InitiativeTracker } from "./InitiativeTracker/InitiativeTracker";
+import { RuleManager } from "./RuleManager/RuleManager";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -61,6 +63,7 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconSword, label: "Initiative Tracker", key: "InitiativeTracker", component: <InitiativeTracker /> },
     { icon: IconUsersGroup, label: "Session Manager", key: "SessionManager", component: <SessionManager /> },
     { icon: IconCloudDownload, label: "Backup Manager", key: "BackupManager", component: <BackupManager /> },
+    { icon: IconBook2, label: "Rule Manager", key: "RuleManager", component: <RuleManager /> },
   ];
 
   const currentItem = baseNavItems.find((n) => n.key === activeSection);

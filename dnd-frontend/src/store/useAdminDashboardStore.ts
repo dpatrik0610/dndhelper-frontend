@@ -13,6 +13,7 @@ export type AdminSection =
   | "InventoryBrowser"
   | "SessionManager"
   | "BackupManager"
+  | "RuleManager"
   ;
 
 interface AdminDashboardState {

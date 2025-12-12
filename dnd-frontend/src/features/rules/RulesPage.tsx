@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Badge, Box, Grid, Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
 import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
-import { getRuleDetailMock, getRulesListMock } from "@services/ruleService";
+import { getRuleDetail, getRulesList } from "@services/ruleService";
 import { RuleCategory, type RuleDetail, type RuleSnippet } from "@appTypes/Rules/Rule";
 import { RulesHeader } from "./components/RulesHeader";
 import { RulesFilters } from "./components/RulesFilters";
@@ -32,8 +32,13 @@ export default function RulesPage() {
 
   useEffect(() => {
     const load = async () => {
-      const res = await getRulesListMock();
-      setRules(res.items);
+      try {
+        const res = await getRulesList({ limit: 500 });
+        setRules(res.items ?? []);
+      } catch (error) {
+        console.error("Failed to load rules list:", error);
+        setRules([]);
+      }
     };
     void load();
   }, []);
@@ -44,7 +49,7 @@ export default function RulesPage() {
       return;
     }
     const loadDetail = async () => {
-      const detail = await getRuleDetailMock(selectedSlug);
+      const detail = await getRuleDetail(selectedSlug);
       setSelectedDetail(detail);
     };
     void loadDetail();

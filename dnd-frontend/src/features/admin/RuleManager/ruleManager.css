@@ -1,0 +1,10 @@
+.rule-manager-card {
+  background: linear-gradient(135deg, rgba(30, 20, 50, 0.85), rgba(15, 8, 30, 0.85));
+  border-color: rgba(150, 80, 255, 0.4);
+  backdrop-filter: blur(10px);
+}
+
+.rule-manager-card--import {
+  background: linear-gradient(135deg, rgba(24, 24, 48, 0.85), rgba(18, 12, 36, 0.85));
+  border-color: rgba(90, 180, 255, 0.35);
+}
