@@ -24,10 +24,20 @@ interface CharacterState {
 export const useCharacterStore = create<CharacterState>()(
   persist(
     (set, get) => {
+      const normalizeSpells = (spells?: Character["spells"]) =>
+        (spells ?? []).map((spell: any) =>
+          typeof spell === "string" ? { spellId: spell, isPrepared: false } : spell
+        );
+
+      const normalizeCharacter = (next: Character | null) =>
+        next ? { ...next, spells: normalizeSpells(next.spells) } : null;
+
       const upsertLocalCharacter = (next: Character) => {
-        set({ character: next });
+        const normalized = normalizeCharacter(next);
+        if (!normalized) return;
+        set({ character: normalized });
         set((state) => ({
-          characters: state.characters.map((c) => (c.id === next.id ? next : c)),
+          characters: state.characters.map((c) => (c.id === normalized.id ? normalized : c)),
         }));
       };
 
@@ -50,17 +60,18 @@ export const useCharacterStore = create<CharacterState>()(
         const current = get().character;
         if (!current) return;
         const updated = updater(current);
-        if (!updated) return;
-        upsertLocalCharacter(updated);
-        void persistToApi(updated);
+        const normalized = normalizeCharacter(updated);
+        if (!normalized) return;
+        upsertLocalCharacter(normalized);
+        void persistToApi(normalized);
       };
 
       return {
         character: null,
         characters: [],
 
-        setCharacter: (character) => set({ character }),
-        setCharacters: (characters) => set({ characters }),
+        setCharacter: (character) => set({ character: normalizeCharacter(character) }),
+        setCharacters: (characters) => set({ characters: characters.map((c) => normalizeCharacter(c)!).filter(Boolean) as Character[] }),
 
         updateCharacter: (updated: Partial<Character>) => applyAndPersist((current) => ({ ...current, ...updated })),
 

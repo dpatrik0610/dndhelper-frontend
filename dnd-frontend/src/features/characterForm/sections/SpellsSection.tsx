@@ -1,12 +1,13 @@
-import { ActionIcon, Autocomplete, Button, Group, Stack, Text} from "@mantine/core";
+import { ActionIcon, Autocomplete, Button, Group, Stack, Switch, Text } from "@mantine/core";
 import { useSpellStore } from "@store/useSpellStore";
 import { ExpandableSection } from "@components/ExpandableSection";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getSpellNames } from "@services/spellService";
 import { useAuthStore } from "@store/useAuthStore";
 import {  IconTrash, IconWand } from "@tabler/icons-react";
 import { useCharacterFormStore } from "@store/useCharacterFormStore";
 import { SectionColor } from "@appTypes/SectionColor";
+import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
 
 
 export function SpellsSection() {
@@ -31,29 +32,43 @@ export function SpellsSection() {
         }
     }, [spellNames])
 
-    const addCharacterSpell = () => {
-        if(!selectedSpell) return;
-        const spellId = getSpellIdByName(selectedSpell);
-        if(!spellId) return;
+    const spells = useMemo(
+        () =>
+            (characterForm.spells ?? []).map((spell: CharacterSpell) =>
+                typeof spell === "string" ? { spellId: spell, isPrepared: false } : spell
+            ),
+        [characterForm.spells]
+    );
 
-        let chSpellList = characterForm.spells;
-        chSpellList = [...chSpellList, spellId]
-        setCharacterForm({spells: chSpellList})
+    const addCharacterSpell = () => {
+        if (!selectedSpell) return;
+        const spellId = getSpellIdByName(selectedSpell);
+        if (!spellId) return;
+
+        const updated = [...spells, { spellId, isPrepared: false }];
+        setCharacterForm({ spells: updated });
         setSelectedSpell(null);
-    }
+    };
 
     const removeCharacterSpell = (spellId: string) => {
-        const updated = formAdapter.values["spells"].filter((i: string) => i !== spellId);
+        const updated = spells.filter((i) => i.spellId !== spellId);
+        formAdapter.setFieldValue("spells", updated);
+    };
+
+    const togglePrepared = (spellId: string) => {
+        const updated = spells.map((spell) =>
+            spell.spellId === spellId ? { ...spell, isPrepared: !spell.isPrepared } : spell
+        );
         formAdapter.setFieldValue("spells", updated);
     };
 
     const getSpellNameById = (spellId: string) => {
-        return spellNames.find(x => x.id == spellId)?.name
-    }
+        return spellNames.find(x => x.id == spellId)?.name;
+    };
 
-    const getSpellIdByName = (spellName : string) => {
+    const getSpellIdByName = (spellName: string) => {
         return spellNames.find(x => x.name == spellName)?.id;
-    }
+    };
 
     return (
         <ExpandableSection title="Character Spells" defaultOpen={true}>
@@ -64,7 +79,7 @@ export function SpellsSection() {
             classNames={{ input: "glassy-input", label: "glassy-label", dropdown: "glassy-dropdown" }}
             leftSection={<IconWand size={18} />}
             data={spellNames
-            .filter(spell => !characterForm.spells?.includes(spell.id))
+            .filter(spell => !spells.some((s) => s.spellId === spell.id))
             .map(x => x.name)}
             value={selectedSpell ?? ""}
             onChange={setSelectedSpell}
@@ -85,22 +100,66 @@ export function SpellsSection() {
 
 
         <Stack gap="xs" mt={15}>
-            {formAdapter.values["spells"]?.map((spellId: string) =>(
-                <Group
-                key={spellId}
-                justify="space-between"
-                style={{
-                    background: "rgba(255,255,255,0.04)",
-                    borderRadius: 6,
-                    padding: "4px 8px",
-                }}>
-                    <Text size="sm" c="gray.2">{getSpellNameById(spellId) || "Unknown spell."}</Text>
+            {spells.map((spell) => {
+                const isPrepared = spell.isPrepared;
+                return (
+                    <Group
+                        key={spell.spellId}
+                        justify="space-between"
+                        align="center"
+                        style={{
+                            background: "linear-gradient(90deg, rgba(255,255,255,0.05), rgba(37,99,235,0.07))",
+                            borderRadius: 10,
+                            padding: "8px 12px",
+                            border: "1px solid rgba(255,255,255,0.05)",
+                        }}
+                    >
+                        <Stack gap={4} style={{ flex: 1 }}>
+                            <Text size="sm" fw={600} c="gray.0">
+                                {getSpellNameById(spell.spellId) || "Unknown spell"}
+                            </Text>
+                            <Group gap={6}>
+                                <Text
+                                    size="xs"
+                                    fw={700}
+                                    style={{
+                                        background: isPrepared
+                                            ? "linear-gradient(90deg, #1d4ed8, #2563eb)"
+                                            : "rgba(255,255,255,0.06)",
+                                        color: isPrepared ? "white" : "rgba(255,255,255,0.7)",
+                                        padding: "2px 8px",
+                                        borderRadius: 999,
+                                        border: "1px solid rgba(255,255,255,0.08)",
+                                    }}
+                                >
+                                    {isPrepared ? "Prepared" : "Not Prepared"}
+                                </Text>
+                            </Group>
+                        </Stack>
 
-                    <ActionIcon color="red" variant="light" onClick={() => removeCharacterSpell(spellId)}>
-                        <IconTrash size={14} />
-                    </ActionIcon>
-                </Group>
-            ))}
+                        <Group gap={10} align="center">
+                            <Switch
+                                size="xs"
+                                radius="xl"
+                                color={isPrepared ? "blue" : "gray"}
+                                checked={isPrepared}
+                                onChange={() => togglePrepared(spell.spellId)}
+                                label={isPrepared ? "Un-prepare" : "Prepare"}
+                                labelPosition="left"
+                                styles={{
+                                    label: { color: "white", fontSize: "12px", lineHeight: 1 },
+                                    track: { minWidth: 36, height: 18 },
+                                    thumb: { width: 14, height: 14 },
+                                }}
+                                aria-label="Toggle prepared"
+                            />
+                            <ActionIcon color="red" variant="subtle" onClick={() => removeCharacterSpell(spell.spellId)}>
+                                <IconTrash size={14} />
+                            </ActionIcon>
+                        </Group>
+                    </Group>
+                );
+            })}
         </Stack>
         </ExpandableSection>
     )

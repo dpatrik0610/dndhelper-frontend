@@ -13,6 +13,20 @@ import { useAuthStore } from "@store/useAuthStore";
 export function SpellCastingBlock() {
     const character = useCharacterStore((state) => state.character)!;
     const { updateCharacter : updateStore } = useCharacterStore();
+    const abilityLabelMap: Record<string, string> = {
+        wis: "Wisdom",
+        int: "Intelligence",
+        cha: "Charisma",
+        con: "Constitution",
+        str: "Strength",
+        dex: "Dexterity",
+        none: "None",
+    };
+    const spellcastingAbilityLabel =
+        character?.spellcastingAbility !== undefined
+            ? abilityLabelMap[character.spellcastingAbility.toLowerCase?.() ?? ""] ??
+              character.spellcastingAbility
+            : "Unknown";
 
     const updateAPI = async () => {
         await updateCharacter(character, useAuthStore.getState().token!);
@@ -115,11 +129,7 @@ export function SpellCastingBlock() {
             variant="bordered"
             fullWidth
             label="Spellcasting Ability"
-            value={
-            character?.spellcastingAbility !== undefined
-                ? `${character.spellcastingAbility}`
-                : "Unknown"
-            }
+            value={spellcastingAbilityLabel}
             size="xs"
             color="red"
             background="dark"

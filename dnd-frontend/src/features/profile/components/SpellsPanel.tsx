@@ -22,6 +22,7 @@ import { useSpellStore } from "@store/useSpellStore";
 import CustomBadge from "@components/common/CustomBadge";
 import { useMediaQuery } from "@mantine/hooks";
 import { SpellModal } from "./SpellModal";
+import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
 
 export function SpellsPanel() {
   const token = useAuthStore.getState().token;
@@ -31,9 +32,10 @@ export function SpellsPanel() {
 
   const [loading, setLoading] = useState(true);
   const [modalOpened, setModalOpened] = useState(false);
-  const [spellData, setSpellData] = useState<Spell[]>([]);
+  const [spellData, setSpellData] = useState<Array<{ spellId: string; spell: Spell }>>([]);
   const [search, setSearch] = useState("");
   const [levelFilter, setLevelFilter] = useState<string | null>("all");
+  const [preparedFilter, setPreparedFilter] = useState<string | null>("all");
   const glassyInputClasses = { input: "glassy-input" , label: "glassy-label", dropdown: "glassy-dropdown" };
 
   const setCurrentSpell = useSpellStore((s) => s.setCurrentSpell);
@@ -41,9 +43,18 @@ export function SpellsPanel() {
   // Load spells
   useEffect(() => {
     const load = async () => {
-      if (!chSpells.length) return setLoading(false);
+      if (!chSpells.length || !token) {
+        setSpellData([]);
+        return setLoading(false);
+      }
       try {
-        setSpellData(await Promise.all(chSpells.map((id) => getSpellById(id, token!))));
+        const fetched = await Promise.all(
+          chSpells.map(async ({ spellId }) => ({
+            spellId,
+            spell: await getSpellById(spellId, token),
+          }))
+        );
+        setSpellData(fetched);
       } finally {
         setLoading(false);
       }
@@ -51,21 +62,32 @@ export function SpellsPanel() {
     void load();
   }, [chSpells, token]);
 
+  const preparedMap = useMemo(
+    () =>
+      (chSpells as CharacterSpell[]).reduce<Record<string, boolean>>((acc, { spellId, isPrepared }) => {
+        acc[spellId] = isPrepared;
+        return acc;
+      }, {}),
+    [chSpells]
+  );
+
   // Filter + group
   const grouped = useMemo(() => {
-    const g: Record<number, Spell[]> = {};
+    const g: Record<number, Array<{ spellId: string; spell: Spell }>> = {};
     for (let lvl = 0; lvl <= 9; lvl++) g[lvl] = [];
 
-    const filtered = spellData.filter((s) => {
-      const matchesName = s.name.toLowerCase().includes(search.toLowerCase());
+    const filtered = spellData.filter(({ spellId, spell }) => {
+      const matchesName = spell.name.toLowerCase().includes(search.toLowerCase());
       const matchesLevel =
-        levelFilter === "all" ? true : s.level === Number(levelFilter);
-      return matchesName && matchesLevel;
+        levelFilter === "all" ? true : spell.level === Number(levelFilter);
+      const matchesPrepared =
+        preparedFilter === "all" ? true : preparedMap[spellId] === true;
+      return matchesName && matchesLevel && matchesPrepared;
     });
 
-    filtered.forEach((s) => g[s.level].push(s));
+    filtered.forEach((entry) => g[entry.spell.level].push(entry));
     return g;
-  }, [spellData, search, levelFilter]);
+  }, [spellData, search, levelFilter, preparedFilter, preparedMap]);
 
   // UI states
   if (!chSpells.length)
@@ -97,6 +119,7 @@ export function SpellsPanel() {
           <Group grow mb="sm">
             <TextInput
               classNames={glassyInputClasses}
+              label="Filter by name"
               placeholder="Search spells..."
               leftSection={<IconSearch size={16} />}
               value={search}
@@ -105,6 +128,7 @@ export function SpellsPanel() {
 
             <Select
               classNames={glassyInputClasses}
+              label="Filter by level"
               data={[
                 { value: "all", label: "All" },
                 { value: "0", label: "Cantrips" },
@@ -116,6 +140,19 @@ export function SpellsPanel() {
               value={levelFilter}
               onChange={setLevelFilter}
               placeholder="Level"
+              comboboxProps={{ position: 'bottom', middlewares: { flip: true, shift: false } }}
+            />
+
+            <Select
+              classNames={glassyInputClasses}
+              label="Filter by prepared"
+              data={[
+                { value: "all", label: "All spells" },
+                { value: "prepared", label: "Prepared only" },
+              ]}
+              value={preparedFilter}
+              onChange={setPreparedFilter}
+              placeholder="Prepared"
               comboboxProps={{ position: 'bottom', middlewares: { flip: true, shift: false } }}
             />
           </Group>
@@ -146,29 +183,49 @@ export function SpellsPanel() {
 
                 {/* Spell Grid */}
                 <SimpleGrid cols={isMobile ? 2 : 4}>
-                  {spells.map((spell) => (
-                    <StatBox
-                      key={spell.id}
-                      variant="galaxy"
-                      size="md"
-                      label=""
-                      value=""
-                      onClick={() => {
-                        setCurrentSpell(spell);
-                        setModalOpened(true);
-                      }}
-                    >
-                      <Stack ta="center" align="center">
-                        <Text>{spell.name}</Text>
-                        <CustomBadge
-                          label={spell.level === 0 ? "Cantrip" : `Level ${spell.level}`}
-                          color={spell.level === 0 ? SectionColor.Grape : SectionColor.Lime}
-                          variant="outline"
-                          radius={5}
-                        />
-                      </Stack>
-                    </StatBox>
-                  ))}
+                  {spells.map(({ spellId, spell }) => {
+                    const isPrepared = preparedMap[spellId] ?? false;
+                    return (
+                      <StatBox
+                        key={spellId}
+                        variant="galaxy"
+                        size="md"
+                        label=""
+                        value=""
+                        onClick={() => {
+                          setCurrentSpell(spell);
+                          setModalOpened(true);
+                        }}
+                      >
+                        <Stack ta="center" align="center" gap={6} style={{ width: "100%" }}>
+                          <Text>{spell.name}</Text>
+                          <CustomBadge
+                            label={spell.level === 0 ? "Cantrip" : `Level ${spell.level}`}
+                            color={spell.level === 0 ? SectionColor.Grape : SectionColor.Lime}
+                            variant="outline"
+                            radius={5}
+                          />
+                          {isPrepared && (
+                            <Box
+                              mt={5}
+                              w="100%"
+                              px={6}
+                              py={2}
+                              style={{
+                                background: "linear-gradient(90deg, #6d4ed8, #956deb)",
+                                borderRadius: 6,
+                                border: "1px solid rgba(100,22,255,0.1)",
+                              }}
+                            >
+                              <Text size="10px" fw={700} c="white" lts={1.5} lh="14px">
+                                Prepared
+                              </Text>
+                            </Box>
+                          )}
+                        </Stack>
+                      </StatBox>
+                    );
+                  })}
                 </SimpleGrid>
               </Stack>
             )
