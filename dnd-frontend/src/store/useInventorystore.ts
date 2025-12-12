@@ -3,7 +3,6 @@ import { persist } from "zustand/middleware";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import type { Currency } from "@appTypes/Currency";
-import { useAuthStore } from "@store/useAuthStore";
 
 interface InventoryState {
   inventories: Inventory[];
@@ -15,7 +14,6 @@ interface InventoryState {
   updateInventory: (updated: Partial<Inventory> & { id: string }) => void;
   removeInventory: (id: string) => void;
   selectInventory: (inventory: Inventory | null) => void;
-  moveItem: (sourceInventoryId: string, targetInventoryId: string, equipmentId: string, amount: number) => void;
 
   updateInventoryCurrencies: (id: string, newCurrencies: Currency[]) => void;
   claimCurrencies: (inventoryId: string, currenciesToClaim: Currency[]) => void;
@@ -51,38 +49,6 @@ export const useInventoryStore = create<InventoryState>()(
         })),
       selectInventory: (inventory) => set({ selectedInventory: inventory }),
       clearInventories: () => set({ inventories: [], selectedInventory: null }),
-
-      moveItem: (sourceInventoryId: string, targetInventoryId: string, equipmentId: string, amount: number) =>
-        set((state) => {
-          const source = state.inventories.find((inv) => inv.id === sourceInventoryId);
-          const target = state.inventories.find((inv) => inv.id === targetInventoryId);
-          if (!source || !target || !source.items) return state;
-
-          const itemIndex = source.items.findIndex((i) => i.equipmentId === equipmentId);
-          if (itemIndex === -1) return state;
-
-          const item = { ...source.items[itemIndex] };
-
-          // Reduce quantity from source
-          if ((item.quantity || 0) > amount) {
-            source.items[itemIndex].quantity = (item.quantity || 0) - amount;
-          } else {
-            // remove if fully moved
-            source.items.splice(itemIndex, 1);
-          }
-
-          // Add to target
-          if (!target.items) target.items = [];
-          const targetItemIndex = target.items.findIndex((i) => i.equipmentId === equipmentId);
-
-          if (targetItemIndex !== -1) {
-            target.items[targetItemIndex].quantity! += amount;
-          } else {
-            target.items.push({ ...item, quantity: amount });
-          }
-
-          return { inventories: [...state.inventories] };
-        }),
 
       // --- Item management ---
       addItem: (inventoryId, item) =>

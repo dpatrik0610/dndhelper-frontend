@@ -99,16 +99,6 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
         amount,
       }
       await moveItem(currentInventory.id, moveItemId, request, token);
-
-      useInventoryStore.getState().moveItem(currentInventory.id, targetInventoryId, moveItemId, amount);
-
-      showNotification({
-        id: moveItemId,
-        title: "Item moved successfully!",
-        color: SectionColor.Blue,
-        icon: <IconCheck />,
-        message: "",
-      });
     } catch (error) {
       console.error("Move failed:", error);
       showNotification({
