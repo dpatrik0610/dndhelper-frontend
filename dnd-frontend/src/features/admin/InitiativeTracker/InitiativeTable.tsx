@@ -1,18 +1,11 @@
-import {
-  ActionIcon,
-  Badge,
-  ColorInput,
-  Group,
-  NumberInput,
-  ScrollArea,
-  Stack,
-  Table,
-  Text,
-  TextInput,
-  Tooltip,
-} from "@mantine/core";
-import { IconTrash, IconDotsVertical, IconPlus, IconX, IconRefresh } from "@tabler/icons-react";
+import { ActionIcon, Group, ScrollArea, Table, Tooltip } from "@mantine/core";
 import type { InitiativeEntry } from "@store/admin/useInitiativeTrackerStore";
+import { InitiativeActionsCell } from "./components/InitiativeActionsCell";
+import { IconRefresh } from "@tabler/icons-react";
+import { InitiativeNameCell } from "./components/InitiativeNameCell";
+import { InitiativeStatCell } from "./components/InitiativeStatCell";
+import { InitiativeColorCell } from "./components/InitiativeColorCell";
+import { InitiativeConditionsCell } from "./components/InitiativeConditionsCell";
 
 type ColumnKey = "name" | "initiative" | "hp" | "ac" | "conditions" | "color" | "actions";
 
@@ -107,18 +100,11 @@ export function InitiativeTable({
                   if (col.key === "name") {
                     return (
                       <Table.Td key={`${row.id}-name`}>
-                        <Group gap={6}>
-                          <Badge size="sm" color="violet" variant="light">
-                            {row.type}
-                          </Badge>
-                          <TextInput
-                            size="xs"
-                            value={row.name}
-                            onChange={(e) => onChange(row.id, "name", e.currentTarget.value)}
-                            classNames={{ input: "glassy-input", label: "glassy-label" }}
-                            disabled={isCharacter && !isEditing}
-                          />
-                        </Group>
+                        <InitiativeNameCell
+                          row={row}
+                          disabled={isCharacter && !isEditing}
+                          onChange={(val) => onChange(row.id, "name", val)}
+                        />
                       </Table.Td>
                     );
                   }
@@ -126,11 +112,9 @@ export function InitiativeTable({
                   if (col.key === "initiative") {
                     return (
                       <Table.Td key={`${row.id}-init`}>
-                        <NumberInput
-                          size="xs"
+                        <InitiativeStatCell
                           value={row.initiative}
-                          onChange={(val) => onChange(row.id, "initiative", Number(val ?? 0))}
-                          classNames={{ input: "glassy-input", label: "glassy-label" }}
+                          onChange={(val) => onChange(row.id, "initiative", val)}
                           disabled={isCharacter && !isEditing}
                         />
                       </Table.Td>
@@ -140,11 +124,9 @@ export function InitiativeTable({
                   if (col.key === "hp") {
                     return (
                       <Table.Td key={`${row.id}-hp`}>
-                        <NumberInput
-                          size="xs"
-                          value={row.hp ?? 0}
-                          onChange={(val) => onChange(row.id, "hp", Number(val ?? 0))}
-                          classNames={{ input: "glassy-input", label: "glassy-label" }}
+                        <InitiativeStatCell
+                          value={row.hp}
+                          onChange={(val) => onChange(row.id, "hp", val)}
                           disabled={isCharacter && !isEditing}
                         />
                       </Table.Td>
@@ -154,11 +136,9 @@ export function InitiativeTable({
                   if (col.key === "ac") {
                     return (
                       <Table.Td key={`${row.id}-ac`}>
-                        <NumberInput
-                          size="xs"
-                          value={row.ac ?? 0}
-                          onChange={(val) => onChange(row.id, "ac", Number(val ?? 0))}
-                          classNames={{ input: "glassy-input", label: "glassy-label" }}
+                        <InitiativeStatCell
+                          value={row.ac}
+                          onChange={(val) => onChange(row.id, "ac", val)}
                           disabled={isCharacter && !isEditing}
                         />
                       </Table.Td>
@@ -168,14 +148,10 @@ export function InitiativeTable({
                   if (col.key === "color") {
                     return (
                       <Table.Td key={`${row.id}-color`}>
-                        <ColorInput
-                          size="xs"
+                        <InitiativeColorCell
                           value={row.color}
                           onChange={(value) => onChange(row.id, "color", value)}
-                          withPicker={false}
-                          swatches={colorPresets}
-                          swatchesPerRow={5}
-                          classNames={{ input: "glassy-input", label: "glassy-label" }}
+                          presets={colorPresets}
                           disabled={isCharacter && !isEditing}
                         />
                       </Table.Td>
@@ -185,94 +161,13 @@ export function InitiativeTable({
                   if (col.key === "conditions") {
                     return (
                       <Table.Td key={`${row.id}-cond`}>
-                        <Stack gap={4}>
-                          <Group gap={4} wrap="wrap">
-                            {(row.conditions || []).map((cond) => (
-                              <Badge
-                                key={cond.id}
-                                color="red"
-                                variant="light"
-                                rightSection={
-                                  <ActionIcon
-                                    size="xs"
-                                    variant="subtle"
-                                    color="red"
-                                    onClick={() => onRemoveCondition(row.id, cond.id)}
-                                  >
-                                    <IconX size={10} />
-                                  </ActionIcon>
-                                }
-                              >
-                                {cond.label}
-                                {cond.remaining !== null ? ` (${cond.remaining})` : ""}
-                              </Badge>
-                            ))}
-                            {(row.conditions || []).length === 0 && (
-                              <Text size="xs" c="dimmed">
-                                No conditions
-                              </Text>
-                            )}
-                          </Group>
-                          <Group gap={4}>
-                            <TextInput
-                              size="xs"
-                              placeholder="Condition"
-                              onKeyDown={(e) => {
-                                if (e.key !== "Enter") return;
-                                const target = e.currentTarget;
-                                const label = target.value.trim();
-                                if (!label) return;
-                                onAddCondition(row.id, label, null);
-                                target.value = "";
-                              }}
-                              classNames={{ input: "glassy-input", label: "glassy-label" }}
-                              disabled={isCharacter && !isEditing}
-                            />
-                            <NumberInput
-                              size="xs"
-                              placeholder="Dur."
-                              min={0}
-                              max={99}
-                              onKeyDown={(e) => {
-                                if (e.key !== "Enter") return;
-                              }}
-                              onBlur={(e) => {
-                                const labelInput = (e.currentTarget.previousSibling as HTMLInputElement) ?? null;
-                                if (!labelInput) return;
-                                const label = labelInput.value.trim();
-                                if (!label) return;
-                                const val = Number(e.currentTarget.value || 0);
-                                onAddCondition(row.id, label, Number.isFinite(val) ? val : null);
-                                labelInput.value = "";
-                                e.currentTarget.value = "";
-                              }}
-                              classNames={{ input: "glassy-input", label: "glassy-label" }}
-                              disabled={isCharacter && !isEditing}
-                            />
-                            <Tooltip label="Add condition">
-                              <ActionIcon
-                                size="sm"
-                                variant="light"
-                                color="grape"
-                                onClick={() => {
-                                  const wrapper = (document.activeElement?.parentElement?.parentElement as HTMLElement) ?? null;
-                                  const inputs = wrapper?.querySelectorAll("input");
-                                  if (!inputs || inputs.length === 0) return;
-                                  const [labelInput, durationInput] = Array.from(inputs);
-                                  const label = (labelInput as HTMLInputElement).value.trim();
-                                  const val = Number((durationInput as HTMLInputElement).value || 0);
-                                  if (!label) return;
-                                  onAddCondition(row.id, label, Number.isFinite(val) ? val : null);
-                                  (labelInput as HTMLInputElement).value = "";
-                                  (durationInput as HTMLInputElement).value = "";
-                                }}
-                                disabled={isCharacter && !isEditing}
-                              >
-                                <IconPlus size={14} />
-                              </ActionIcon>
-                            </Tooltip>
-                          </Group>
-                        </Stack>
+                        <InitiativeConditionsCell
+                          rowId={row.id}
+                          conditions={row.conditions || []}
+                          disabled={isCharacter && !isEditing}
+                          onAdd={(label, remaining) => onAddCondition(row.id, label, remaining)}
+                          onRemove={(condId) => onRemoveCondition(row.id, condId)}
+                        />
                       </Table.Td>
                     );
                   }
@@ -280,59 +175,15 @@ export function InitiativeTable({
                   if (col.key === "actions") {
                     return (
                       <Table.Td key={`${row.id}-actions`}>
-                        <Group gap="xs" justify="flex-end" wrap="nowrap" align="center">
-                          <Tooltip label="More coming soon">
-                            <ActionIcon size="md" variant="subtle">
-                              <IconDotsVertical size={16} />
-                            </ActionIcon>
-                          </Tooltip>
-                          {isCharacter && (
-                            <>
-                              {!isEditing ? (
-                                <Tooltip label="Enable editing">
-                                  <ActionIcon
-                                    size="md"
-                                    variant="light"
-                                    color="blue"
-                                    onClick={() => onToggleEdit?.(row.id, true)}
-                                  >
-                                    <IconPlus size={16} />
-                                  </ActionIcon>
-                                </Tooltip>
-                              ) : (
-                                <>
-                                  <Tooltip label="Apply changes">
-                                    <ActionIcon
-                                      size="md"
-                                      variant="filled"
-                                      color="teal"
-                                      loading={isSaving}
-                                      onClick={() => onApplyEdit?.(row.id)}
-                                    >
-                                      <IconRefresh size={16} />
-                                    </ActionIcon>
-                                  </Tooltip>
-                                  <Tooltip label="Cancel editing">
-                                    <ActionIcon
-                                      size="md"
-                                      variant="subtle"
-                                      color="gray"
-                                      onClick={() => onToggleEdit?.(row.id, false)}
-                                      disabled={isSaving}
-                                    >
-                                      <IconX size={14} />
-                                    </ActionIcon>
-                                  </Tooltip>
-                                </>
-                              )}
-                            </>
-                          )}
-                          <Tooltip label="Remove row">
-                            <ActionIcon size="md" color="red" variant="light" onClick={() => onRemove(row.id)}>
-                              <IconTrash size={16} />
-                            </ActionIcon>
-                          </Tooltip>
-                        </Group>
+                        <InitiativeActionsCell
+                          rowId={row.id}
+                          isCharacter={isCharacter}
+                          isEditing={isEditing}
+                          isSaving={isSaving}
+                          onToggleEdit={onToggleEdit}
+                          onApplyEdit={onApplyEdit}
+                          onRemove={onRemove}
+                        />
                       </Table.Td>
                     );
                   }
