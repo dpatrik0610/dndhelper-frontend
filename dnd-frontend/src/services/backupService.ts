@@ -63,6 +63,20 @@ export async function restoreCollection(collectionName: string, file: File, toke
 
   if (!res.ok) await handleError(res);
 
-  const body = await res.json().catch(() => null);
-  return { message: body?.message ?? `Collection '${collectionName}' restored.` };
+  const raw = await res.text();
+  const parsed = (() => {
+    try {
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const message =
+    (parsed as any)?.message ||
+    (raw && raw.trim()) ||
+    res.statusText ||
+    `Collection '${collectionName}' restored.`;
+
+  return { message };
 }

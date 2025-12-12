@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Button,
@@ -25,18 +25,8 @@ import { useAuthStore } from "@store/useAuthStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { exportCollection, restoreCollection } from "@services/backupService";
+import { listCollections } from "@services/databaseService";
 import { useMediaQuery } from "@mantine/hooks";
-
-const popularCollections = [
-  "Campaigns",
-  "Characters",
-  "Sessions",
-  "Equipment",
-  "Inventories",
-  "Notes",
-  "Spells",
-  "Monsters",
-];
 
 export function BackupManager() {
   const token = useAuthStore((s) => s.token)!;
@@ -44,6 +34,8 @@ export function BackupManager() {
   const [file, setFile] = useState<File | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [collections, setCollections] = useState<string[]>([]);
+  const [loadingCollections, setLoadingCollections] = useState(false);
   const downloadLinkRef = useRef<HTMLAnchorElement | null>(null);
   const logPrefix = "[BackupManager]";
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -71,6 +63,29 @@ export function BackupManager() {
     }
     return true;
   };
+
+  useEffect(() => {
+    const loadCollections = async () => {
+      setLoadingCollections(true);
+      try {
+        const names = await listCollections(token);
+        if (names?.length) {
+          setCollections(names);
+          if (!collectionName && names[0]) setCollectionName(names[0]);
+        }
+      } catch (err) {
+        console.error(logPrefix, "Failed to load collections", err);
+        showNotification({
+          title: "Could not fetch collections",
+          message: "Using manual entry and presets instead.",
+          color: SectionColor.Yellow,
+        });
+      } finally {
+        setLoadingCollections(false);
+      }
+    };
+    void loadCollections();
+  }, [token]);
 
   const handleDownload = async () => {
     if (!validateCollection()) return;
@@ -220,7 +235,16 @@ export function BackupManager() {
         />
 
         <Group gap="xs" wrap="wrap">
-          {popularCollections.map((c) => (
+          {(collections.length ? collections : [
+            "Campaigns",
+            "Characters",
+            "Sessions",
+            "Equipment",
+            "Inventories",
+            "Notes",
+            "Spells",
+            "Monsters",
+          ]).map((c) => (
             <Button
               key={c}
               size={isMobile ? "sm" : "xs"}
@@ -316,5 +340,3 @@ export function BackupManager() {
     </Paper>
   );
 }
-
-
