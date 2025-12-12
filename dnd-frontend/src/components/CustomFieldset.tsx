@@ -31,6 +31,7 @@ export function CustomFieldset({
     <Box
       pos="relative"
       p={padding}
+      mt={"md"}
       style={{
         border,
         borderRadius,
