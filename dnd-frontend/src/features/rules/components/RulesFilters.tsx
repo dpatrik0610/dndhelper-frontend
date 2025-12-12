@@ -1,18 +1,19 @@
-import type { CSSProperties } from "react";
 import { Badge, Button, Group, Paper, TextInput } from "@mantine/core";
 import { IconBook2, IconBookmark } from "@tabler/icons-react";
+import { useRulesPalette } from "../hooks/useRulesPalette";
+import { useRulesDataStore } from "../store/useRulesDataStore";
+import { useRulesUiStore } from "../store/useRulesUiStore";
 
 interface RulesFiltersProps {
-  topics: { label: string; value: string }[];
-  topic: string;
-  onTopicChange: (value: string) => void;
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  palette: { border: string };
-  cardStyle: CSSProperties;
 }
 
-export function RulesFilters({ topics, topic, onTopicChange, searchTerm, onSearchChange, palette, cardStyle }: RulesFiltersProps) {
+export function RulesFilters({}: RulesFiltersProps) {
+  const { palette, cardStyle } = useRulesPalette();
+  const topics = useRulesDataStore((s) => s.topics);
+  const topic = useRulesUiStore((s) => s.topic);
+  const setTopic = useRulesUiStore((s) => s.setTopic);
+  const searchTerm = useRulesUiStore((s) => s.searchTerm);
+  const setSearchTerm = useRulesUiStore((s) => s.setSearchTerm);
   return (
     <Paper p="md" withBorder radius="md" shadow="sm" style={cardStyle}>
       <Group gap="xs" wrap="wrap">
@@ -24,7 +25,7 @@ export function RulesFilters({ topics, topic, onTopicChange, searchTerm, onSearc
             key={t.value}
             size="xs"
             variant={topic === t.value ? "filled" : t.value === "all" ? "light" : "outline"}
-            onClick={() => onTopicChange(t.value)}
+            onClick={() => setTopic(topic === t.value ? "all" : t.value)}
           >
             {t.label}
           </Button>
@@ -37,7 +38,7 @@ export function RulesFilters({ topics, topic, onTopicChange, searchTerm, onSearc
         variant="filled"
         radius="md"
         value={searchTerm}
-        onChange={(e) => onSearchChange(e.currentTarget.value)}
+        onChange={(e) => setSearchTerm(e.currentTarget.value)}
         styles={{
           input: {
             backgroundColor: "rgba(255, 255, 255, 0.04)",

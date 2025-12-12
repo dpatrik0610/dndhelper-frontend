@@ -1,19 +1,21 @@
-import type { CSSProperties } from "react";
 import { Badge, Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { RuleCategory, type RuleSnippet } from "@appTypes/Rules/Rule";
 import { magicGlowTheme } from "@styles/magic/glowTheme";
+import { useRulesDataStore } from "@features/rules/store/useRulesDataStore";
+import { useRulesUiStore } from "@features/rules/store/useRulesUiStore";
+import { useRulesPalette } from "@features/rules/hooks/useRulesPalette";
 
 interface RulesListProps {
   rules: RuleSnippet[];
-  paletteTextDim: string;
-  cardStyle: CSSProperties;
-  onOpen: (slug: string) => void;
-  activeTopic?: string;
-  searchTerm?: string;
   matchCount?: number;
 }
 
-export function RulesList({ rules, paletteTextDim, cardStyle, onOpen, activeTopic, searchTerm, matchCount }: RulesListProps) {
+export function RulesList({ rules, matchCount }: RulesListProps) {
+  const { refreshing, loadData } = useRulesDataStore();
+  const topic = useRulesUiStore((s) => s.topic);
+  const searchTerm = useRulesUiStore((s) => s.searchTerm);
+  const setSelectedSlug = useRulesUiStore((s) => s.setSelectedSlug);
+  const { palette, cardStyle } = useRulesPalette();
   const categoryBadgeColor = (category: RuleCategory | string) => {
     if (category === RuleCategory.Homebrew) return "yellow";
     if (category === RuleCategory.Combat) return "red";
@@ -36,18 +38,19 @@ export function RulesList({ rules, paletteTextDim, cardStyle, onOpen, activeTopi
             </Badge>
           )}
         </Group>
-        <Button variant="subtle" size="xs">
-          Auto-refresh soon
+        <Button size="xs" variant="light" color="grape" onClick={() => void loadData()} loading={refreshing}>
+          Refresh
         </Button>
       </Group>
+
       <Stack gap="sm">
         {rules.map((rule) => {
           const isActive =
-            activeTopic &&
-            (rule.category.toString().toLowerCase() === activeTopic.toLowerCase() ||
-              rule.tags.some((t) => t.toLowerCase() === activeTopic.toLowerCase()) ||
-              (rule.source?.title?.toLowerCase().includes(activeTopic.toLowerCase())));
-          const isSearchMode = !!searchTerm && searchTerm.trim().length > 0;
+            topic &&
+            (rule.category.toString().toLowerCase() === topic.toLowerCase() ||
+              rule.tags.some((t) => t.toLowerCase() === topic.toLowerCase()) ||
+              rule.source?.title?.toLowerCase().includes(topic.toLowerCase()));
+  const isSearchMode = !!searchTerm && searchTerm.trim().length > 0;
           const highlightStyle = isActive
             ? magicGlowTheme.outline
             : isSearchMode
@@ -69,7 +72,7 @@ export function RulesList({ rules, paletteTextDim, cardStyle, onOpen, activeTopi
                     </Badge>
                   )}
                 </Group>
-                <Text size="sm" c={paletteTextDim}>
+                <Text size="sm" c={palette.textDim}>
                   {rule.summary}
                 </Text>
                 <Group gap={6} mt={6} wrap="wrap">
@@ -80,7 +83,7 @@ export function RulesList({ rules, paletteTextDim, cardStyle, onOpen, activeTopi
                   ))}
                 </Group>
               </div>
-              <Button size="xs" variant="light" onClick={() => onOpen(rule.slug)}>
+              <Button size="xs" variant="light" onClick={() => setSelectedSlug(rule.slug)}>
                 View detail
               </Button>
             </Group>

@@ -1,13 +1,15 @@
-export enum RuleCategory {
-  Core = "Core",
-  Combat = "Combat",
-  Magic = "Magic",
-  Status = "Status",
-  Equipment = "Equipment",
-  Exploration = "Exploration",
-  Downtime = "Downtime",
-  Homebrew = "Homebrew",
-}
+export const RuleCategory = {
+  Core: "Core",
+  Combat: "Combat",
+  Magic: "Magic",
+  Status: "Status",
+  Equipment: "Equipment",
+  Exploration: "Exploration",
+  Downtime: "Downtime",
+  Homebrew: "Homebrew",
+} as const;
+
+export type RuleCategory = typeof RuleCategory[keyof typeof RuleCategory] | string;
 
 export interface RuleSource {
   title: string;
@@ -56,4 +58,12 @@ export interface RuleListResponse {
 
 export interface RuleDetailResponse {
   rule: RuleDetail;
+}
+
+export interface RuleCategoryResponse {
+  id?: string;
+  slug: string;
+  name: string;
+  description?: string;
+  order: number;
 }

@@ -1,5 +1,12 @@
 import { apiClient } from "@api/apiClient";
-import { type RuleDetail, type RuleDetailResponse, type RuleListResponse } from "@appTypes/Rules/Rule";
+import {
+  type RuleDetail,
+  type RuleDetailResponse,
+  type RuleListResponse,
+  type RuleSource,
+  type RuleExample,
+  type RuleReference,
+} from "@appTypes/Rules/Rule";
 
 const baseUrl = "/rules";
 
@@ -25,9 +32,10 @@ function buildQuery(params: RuleQueryOptions): string {
 export async function getRulesList(options: RuleQueryOptions = {}): Promise<RuleListResponse> {
   const query = buildQuery(options);
   const res = await apiClient<RuleListResponse | Record<string, unknown>>(`${baseUrl}${query}`, { method: "GET" });
-  const rawItems = (res as RuleListResponse)?.items ?? (res as any)?.Items ?? [];
-  const total = (res as RuleListResponse)?.total ?? (res as any)?.Total ?? 0;
-  const nextCursor = (res as RuleListResponse)?.nextCursor ?? (res as any)?.NextCursor;
+  const rawItems = (res as RuleListResponse)?.items ?? (res as { Items?: unknown })?.Items ?? [];
+  const total = (res as RuleListResponse)?.total ?? (res as { Total?: unknown })?.Total ?? 0;
+  const nextCursorRaw = (res as RuleListResponse)?.nextCursor ?? (res as { NextCursor?: unknown })?.NextCursor;
+  const nextCursor = typeof nextCursorRaw === "string" ? nextCursorRaw : undefined;
 
   return {
     items: Array.isArray(rawItems) ? rawItems.map(normalizeRuleDetailOrSnippet) : [],
@@ -43,7 +51,7 @@ export async function getRuleDetail(slug: string): Promise<RuleDetail | null> {
       `${baseUrl}/${encodeURIComponent(slug)}`,
       { method: "GET" },
     );
-    const detail = (res as RuleDetailResponse)?.rule ?? (res as any)?.Rule;
+    const detail = (res as RuleDetailResponse)?.rule ?? (res as { Rule?: unknown })?.Rule;
     return detail ? normalizeRuleDetailOrSnippet(detail) : null;
   } catch (error) {
     console.error("Failed to fetch rule detail:", error);
@@ -58,57 +66,64 @@ export async function createRule(rule: RuleDetail, token: string): Promise<RuleD
     body: rule,
     token,
   });
-  const detail = (res as RuleDetailResponse)?.rule ?? (res as any)?.Rule;
+  const detail = (res as RuleDetailResponse)?.rule ?? (res as { Rule?: unknown })?.Rule;
   return detail ? normalizeRuleDetailOrSnippet(detail) : null;
 }
 
-function normalizeRuleSource(src: any) {
-  if (!src) return undefined;
+function normalizeRuleSource(src: unknown): RuleSource | undefined {
+  if (!src || typeof src !== "object") return undefined;
+  const s = src as Record<string, unknown>;
   return {
-    title: src.title ?? src.Title ?? "",
-    page: src.page ?? src.Page,
-    edition: src.edition ?? src.Edition,
-    url: src.url ?? src.Url,
+    title: (s.title as string) ?? (s.Title as string) ?? "",
+    page: (s.page as string) ?? (s.Page as string),
+    edition: (s.edition as string) ?? (s.Edition as string),
+    url: (s.url as string) ?? (s.Url as string),
   };
 }
 
-function normalizeRuleExample(example: any) {
-  if (!example) return undefined;
+function normalizeRuleExample(example: unknown): RuleExample | undefined {
+  if (!example || typeof example !== "object") return undefined;
+  const e = example as Record<string, unknown>;
   return {
-    title: example.title ?? example.Title,
-    description: example.description ?? example.Description ?? "",
-    outcome: example.outcome ?? example.Outcome,
+    title: (e.title as string) ?? (e.Title as string),
+    description: (e.description as string) ?? (e.Description as string) ?? "",
+    outcome: (e.outcome as string) ?? (e.Outcome as string),
   };
 }
 
-function normalizeRuleReference(reference: any) {
-  if (!reference) return undefined;
+function normalizeRuleReference(reference: unknown): RuleReference | undefined {
+  if (!reference || typeof reference !== "object") return undefined;
+  const r = reference as Record<string, unknown>;
   return {
-    type: reference.type ?? reference.Type ?? "",
-    id: reference.id ?? reference.Id,
-    name: reference.name ?? reference.Name ?? "",
-    url: reference.url ?? reference.Url,
+    type: (r.type as string) ?? (r.Type as string) ?? "",
+    id: (r.id as string) ?? (r.Id as string),
+    name: (r.name as string) ?? (r.Name as string) ?? "",
+    url: (r.url as string) ?? (r.Url as string),
   };
 }
 
-function normalizeRuleDetailOrSnippet(raw: any): RuleDetail {
-  const sources = (raw.sources ?? raw.Sources) as any[] | undefined;
-  const examples = (raw.examples ?? raw.Examples) as any[] | undefined;
-  const references = (raw.references ?? raw.References) as any[] | undefined;
+function normalizeRuleDetailOrSnippet(raw: unknown): RuleDetail {
+  const data = raw as Record<string, unknown>;
+  const sources = (data.sources ?? data.Sources) as unknown[] | undefined;
+  const examples = (data.examples ?? data.Examples) as unknown[] | undefined;
+  const references = (data.references ?? data.References) as unknown[] | undefined;
+  const normalizedSources = sources?.map(normalizeRuleSource).filter((val): val is RuleSource => Boolean(val));
+  const normalizedExamples = examples?.map(normalizeRuleExample).filter((val): val is RuleExample => Boolean(val));
+  const normalizedReferences = references?.map(normalizeRuleReference).filter((val): val is RuleReference => Boolean(val));
 
   return {
-    id: raw.id ?? raw.Id,
-    slug: raw.slug ?? raw.Slug ?? "",
-    title: raw.title ?? raw.Title ?? "",
-    category: raw.category ?? raw.Category ?? "",
-    summary: raw.summary ?? raw.Summary ?? "",
-    tags: raw.tags ?? raw.Tags ?? [],
-    updatedAt: raw.updatedAt ?? raw.UpdatedAt,
-    source: normalizeRuleSource(raw.source ?? raw.Source),
-    body: raw.body ?? raw.Body,
-    sources: sources?.map(normalizeRuleSource).filter(Boolean),
-    examples: examples?.map(normalizeRuleExample).filter(Boolean),
-    references: references?.map(normalizeRuleReference).filter(Boolean),
-    relatedRuleSlugs: raw.relatedRuleSlugs ?? raw.RelatedRuleSlugs,
+    id: (data.id as string) ?? (data.Id as string),
+    slug: (data.slug as string) ?? (data.Slug as string) ?? "",
+    title: (data.title as string) ?? (data.Title as string) ?? "",
+    category: (data.category as string) ?? (data.Category as string) ?? "",
+    summary: (data.summary as string) ?? (data.Summary as string) ?? "",
+    tags: (data.tags as string[]) ?? (data.Tags as string[]) ?? [],
+    updatedAt: (data.updatedAt as string) ?? (data.UpdatedAt as string),
+    source: normalizeRuleSource(data.source ?? data.Source),
+    body: (data.body as string[]) ?? (data.Body as string[]),
+    sources: normalizedSources,
+    examples: normalizedExamples,
+    references: normalizedReferences,
+    relatedRuleSlugs: (data.relatedRuleSlugs as string[]) ?? (data.RelatedRuleSlugs as string[]),
   };
 }

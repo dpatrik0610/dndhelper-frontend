@@ -1,8 +1,9 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Badge, Group, Paper, ScrollArea, Stack, Text } from "@mantine/core";
 import { CustomDrawer } from "@components/overlay/CustomDrawer";
 import { MarkdownRenderer } from "@components/MarkdownRender";
 import { type RuleDetail } from "@appTypes/Rules/Rule";
+import { useRulesPalette } from "../hooks/useRulesPalette";
 
 interface DrawerSection {
   title: string;
@@ -16,8 +17,6 @@ interface RuleDetailDrawerProps {
   isMobile: boolean;
   detail: RuleDetail | null;
   sections: DrawerSection[];
-  paletteTextDim: string;
-  cardStyle: CSSProperties;
 }
 
 export function RuleDetailDrawer({
@@ -25,9 +24,9 @@ export function RuleDetailDrawer({
   onClose,
   isMobile,
   detail,
-  paletteTextDim,
-  cardStyle,
+  sections,
 }: RuleDetailDrawerProps) {
+  const { palette, cardStyle } = useRulesPalette();
   const headerContent: ReactNode | null = detail ? (
     <Group justify="space-between" align="flex-start">
       <div>
@@ -85,7 +84,7 @@ export function RuleDetailDrawer({
                         {ex.title}
                       </Text>
                     )}
-                    <Text size="sm" c={paletteTextDim}>
+                    <Text size="sm" c={palette.textDim}>
                       {ex.description}
                     </Text>
                     {ex.outcome && (
@@ -110,7 +109,7 @@ export function RuleDetailDrawer({
           </Stack>
         </ScrollArea>
       ) : (
-        <Text size="sm" c={paletteTextDim}>
+        <Text size="sm" c={palette.textDim}>
           Loading section...
         </Text>
       )}

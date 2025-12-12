@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Divider, FileInput, Group, MultiSelect, Paper, Select, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
-import { IconCheck, IconFileUpload, IconPlaylistAdd, IconUpload, IconX } from "@tabler/icons-react";
-import { RuleCategory, type RuleDetail } from "@appTypes/Rules/Rule";
+import { IconCheck, IconFileUpload, IconPlaylistAdd, IconUpload, IconX, IconPlus } from "@tabler/icons-react";
+import { RuleCategory, type RuleDetail, type RuleCategoryResponse } from "@appTypes/Rules/Rule";
 import { createRule } from "@services/ruleService";
 import { useAuthStore } from "@store/useAuthStore";
 import { showNotification } from "@components/Notification/Notification";
 import { mockRuleDetails } from "@features/rules/mockRules";
 import { ExpandableSection } from "@components/ExpandableSection";
+import { createRuleCategory, getRuleCategories } from "@services/ruleCategoryService";
 import "./ruleManager.css";
+import { SectionColor } from "@appTypes/SectionColor";
 
-const categoryOptions = Object.values(RuleCategory).map((c) => ({ value: c, label: c }));
+const fallbackCategoryOptions = Object.values(RuleCategory).map((c) => ({ value: c, label: c }));
 
 const defaultRule: RuleDetail = {
   slug: "",
@@ -29,6 +31,34 @@ export function RuleManager() {
   const [importing, setImporting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [jsonFile, setJsonFile] = useState<File | null>(null);
+  const [categories, setCategories] = useState<RuleCategoryResponse[]>([]);
+  const [catName, setCatName] = useState("");
+  const [catSlug, setCatSlug] = useState("");
+  const [catDescription, setCatDescription] = useState("");
+  const [catOrder, setCatOrder] = useState<number | "">("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await getRuleCategories();
+        setCategories(cats ?? []);
+      } catch (error) {
+        console.error("Failed to load rule categories:", error);
+      }
+    };
+    void loadCategories();
+  }, []);
+
+  const categoryOptions = useMemo(() => {
+    if (categories && categories.length) {
+      return categories
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .map((c) => ({ value: c.name, label: c.name }));
+    }
+    return fallbackCategoryOptions;
+  }, [categories]);
 
   const sanitizeRule = (raw: Partial<RuleDetail>): RuleDetail => ({
     id: undefined,
@@ -149,6 +179,40 @@ export function RuleManager() {
     await handleImport(mockRuleDetails.map((r) => sanitizeRule(r)));
   };
 
+  const handleCreateCategory = async () => {
+    if (!token) {
+      showNotification({ message: "Login as admin to create categories.", color: "red", icon: <IconX size={16} /> });
+      return;
+    }
+    if (!catName.trim()) {
+      showNotification({ message: "Category name is required.", color: "yellow" });
+      return;
+    }
+    const payload: RuleCategoryResponse = {
+      name: catName.trim(),
+      slug: (catSlug || catName).trim().toLowerCase().replace(/\s+/g, "-"),
+      description: catDescription.trim() || undefined,
+      order: typeof catOrder === "number" ? catOrder : categories.length + 1,
+    };
+    setCreatingCategory(true);
+    try {
+      const created = await createRuleCategory(payload, token);
+      if (created) {
+        setCategories((prev) => [...prev, created]);
+        showNotification({ message: `Category "${created.name}" created.`, color: "green", icon: <IconCheck size={16} /> });
+        setCatName("");
+        setCatSlug("");
+        setCatDescription("");
+        setCatOrder("");
+      }
+    } catch (error) {
+      console.error("Failed to create category", error);
+      showNotification({ message: "Failed to create category.", color: "red", icon: <IconX size={16} /> });
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
+
   return (
     <Stack gap="md">
       <Paper withBorder radius="md" p="lg" shadow="lg" className="rule-manager-card">
@@ -182,6 +246,7 @@ export function RuleManager() {
           bodyText={bodyText}
           sourceTitle={sourceTitle}
           sourcePage={sourcePage}
+          categoryOptions={categoryOptions}
           onUpdateRule={setRule}
           onUpdateBody={setBodyText}
           onUpdateTags={(tags) => setRule((prev) => ({ ...prev, tags }))}
@@ -230,7 +295,7 @@ export function RuleManager() {
             classNames={{ input: "glassy-input", label: "glassy-label" }}
           />
 
-          <ExpandableSection title="Example RuleDetail JSON" color="grape" defaultOpen>
+          <ExpandableSection title="Example RuleDetail JSON" color={SectionColor.Grape} defaultOpen>
             <Textarea
               readOnly
               minRows={10}
@@ -262,6 +327,72 @@ export function RuleManager() {
           </Text>
         </Stack>
       </Paper>
+
+      <Paper withBorder radius="md" p="lg" shadow="lg" className="rule-manager-card">
+        <Group justify="space-between" align="center" mb="sm">
+          <div>
+            <Title order={4}>Manage categories</Title>
+            <Text size="sm" c="dimmed">
+              Create new categories; they show up in filters and the rule form.
+            </Text>
+          </div>
+          <Button
+            size="xs"
+            variant="light"
+            color="grape"
+            leftSection={<IconPlus size={14} />}
+            loading={creatingCategory}
+            onClick={handleCreateCategory}
+          >
+            Add category
+          </Button>
+        </Group>
+
+        <Stack gap="sm">
+          <Group grow>
+            <TextInput
+              label="Name"
+              placeholder="Exploration"
+              value={catName}
+              onChange={(e) => setCatName(e.currentTarget.value)}
+              classNames={{ input: "glassy-input", label: "glassy-label" }}
+            />
+            <TextInput
+              label="Slug"
+              placeholder="exploration"
+              value={catSlug}
+              onChange={(e) => setCatSlug(e.currentTarget.value)}
+              classNames={{ input: "glassy-input", label: "glassy-label" }}
+            />
+            <TextInput
+              label="Order"
+              placeholder="1"
+              value={catOrder}
+              onChange={(e) => setCatOrder(e.currentTarget.value ? Number(e.currentTarget.value) : "")}
+              classNames={{ input: "glassy-input", label: "glassy-label" }}
+            />
+          </Group>
+          <Textarea
+            label="Description (optional)"
+            value={catDescription}
+            onChange={(e) => setCatDescription(e.currentTarget.value)}
+            classNames={{ input: "glassy-input", label: "glassy-label" }}
+          />
+
+          <ExpandableSection title="Existing categories" color={SectionColor.Violet} defaultOpen>
+            <Stack gap="xs">
+              {(categories.length ? categories : fallbackCategoryOptions.map((c, idx) => ({ name: c.label, order: idx + 1 } as any))).map((cat) => (
+                <Group key={cat.slug ?? cat.name} justify="space-between">
+                  <Text fw={600}>{cat.name}</Text>
+                  <Text size="xs" c="dimmed">
+                    Order: {"order" in cat ? cat.order : "-"}
+                  </Text>
+                </Group>
+              ))}
+            </Stack>
+          </ExpandableSection>
+        </Stack>
+      </Paper>
     </Stack>
   );
 }
@@ -271,6 +402,7 @@ interface SimpleRuleFormProps {
   bodyText: string;
   sourceTitle: string;
   sourcePage: string;
+  categoryOptions: { value: string; label: string }[];
   onUpdateRule: (rule: RuleDetail) => void;
   onUpdateBody: (text: string) => void;
   onUpdateTags: (tags: string[]) => void;
@@ -283,12 +415,31 @@ function SimpleRuleForm({
   bodyText,
   sourceTitle,
   sourcePage,
+  categoryOptions,
   onUpdateRule,
   onUpdateBody,
   onUpdateTags,
   onUpdateSourceTitle,
   onUpdateSourcePage,
 }: SimpleRuleFormProps) {
+  const [newTag, setNewTag] = useState("");
+
+  const tagOptions = useMemo(
+    () => Array.from(new Set(rule.tags ?? [])).map((t) => ({ value: t, label: t })),
+    [rule.tags],
+  );
+
+  const addTag = () => {
+    const trimmed = newTag.trim();
+    if (!trimmed) return;
+    if ((rule.tags ?? []).includes(trimmed)) {
+      setNewTag("");
+      return;
+    }
+    onUpdateTags([...(rule.tags ?? []), trimmed]);
+    setNewTag("");
+  };
+
   return (
     <Stack gap="sm">
       <Group grow align="flex-start">
@@ -313,7 +464,7 @@ function SimpleRuleForm({
       <Group grow align="flex-start">
         <Select
           label="Category"
-          data={categoryOptions}
+          data={categoryOptions.length ? categoryOptions : fallbackCategoryOptions}
           value={rule.category?.toString()}
           onChange={(value) => onUpdateRule({ ...rule, category: value ?? RuleCategory.Core })}
           classNames={{ input: "glassy-input", label: "glassy-label", dropdown: "glassy-dropdown", option: "glassy-option" }}
@@ -353,23 +504,39 @@ function SimpleRuleForm({
         classNames={{ input: "glassy-input", label: "glassy-label" }}
       />
 
-      <MultiSelect
-        label="Tags"
-        placeholder="combat, reaction"
-        data={[]}
-        searchable
-        value={rule.tags}
-        onChange={(values) => onUpdateTags(values)}
-        getCreateLabel={(query) => `+ Add "${query}"`}
-        onCreate={(query) => {
-          const trimmed = query.trim();
-          if (!trimmed) return null;
-          const next = [...new Set([...(rule.tags ?? []), trimmed])];
-          onUpdateTags(next);
-          return trimmed;
-        }}
-        classNames={{ input: "glassy-input", label: "glassy-label", dropdown: "glassy-dropdown", option: "glassy-option" }}
-      />
+      <Group align="flex-end" gap="xs">
+        <MultiSelect
+          label="Tags"
+          placeholder="combat, reaction"
+          data={tagOptions}
+          searchable
+          value={rule.tags}
+          onChange={(values) => onUpdateTags(values)}
+          classNames={{ input: "glassy-input", label: "glassy-label", dropdown: "glassy-dropdown", option: "glassy-option" }}
+        />
+        <TextInput
+          label="New tag"
+          placeholder="Add tag"
+          value={newTag}
+          onChange={(e) => setNewTag(e.currentTarget.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addTag();
+            }
+          }}
+          classNames={{ input: "glassy-input", label: "glassy-label" }}
+          w="30%"
+        />
+        <Button
+          variant="light"
+          color="grape"
+          mt="xs"
+          onClick={addTag}
+        >
+          Add
+        </Button>
+      </Group>
 
       <Group justify="flex-end">
         <Text size="xs" c="dimmed">

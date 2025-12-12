@@ -2,24 +2,19 @@ import { Group, Text, Title } from "@mantine/core";
 import { IconSparkles } from "@tabler/icons-react";
 import CustomBadge from "@components/common/CustomBadge";
 import { magicGlowTheme } from "@styles/magic/glowTheme";
-import type { ReactNode } from "react";
+import { useRulesPalette } from "../hooks/useRulesPalette";
 
-interface RulesHeaderProps {
-  paletteTextDim: string;
-  actions?: ReactNode;
-}
-
-export function RulesHeader({ paletteTextDim, actions }: RulesHeaderProps) {
+export function RulesHeader() {
+  const { palette } = useRulesPalette();
   return (
     <Group justify="space-between" align="flex-start">
       <div>
         <Title order={2}>D&D Rules Reference</Title>
-        <Text c={paletteTextDim} size="sm">
+        <Text c={palette.textDim} size="sm">
           Quick rulings and rules text, powered by the API.
         </Text>
       </div>
       <Group gap="xs">
-        {actions}
         <CustomBadge
           label="Demo"
           color="grape"
