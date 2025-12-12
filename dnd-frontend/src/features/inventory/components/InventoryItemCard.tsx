@@ -45,9 +45,14 @@ export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardP
           >
             <Text
               fw={500}
-              lineClamp={1}
               size={isMobile ? "md" : "sm"}
-              style={{ minWidth: 0 }}
+              style={{
+                minWidth: 0,
+                flex: 1,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
             >
               {item.equipmentName || "Unnamed Item"}
             </Text>
@@ -55,6 +60,7 @@ export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardP
               <CustomBadge
                 hoverText={`Quantity: ${item.quantity}`}
                 label={`x ${item.quantity}`}
+                style={{ flexShrink: 0 }}
                 radius="sm"
                 gradient={{ from: SectionColor.Grape, to: SectionColor.Violet, deg: 135 }}
                 variant="gradient"
