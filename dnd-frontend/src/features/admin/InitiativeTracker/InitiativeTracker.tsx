@@ -35,6 +35,8 @@ export function InitiativeTracker() {
 
   const [customName, setCustomName] = useState("");
   const [customInit, setCustomInit] = useState<number>(0);
+  const [customHp, setCustomHp] = useState<number>(0);
+  const [customAc, setCustomAc] = useState<number>(0);
   const [editingIds, setEditingIds] = useState<Set<string>>(new Set());
   const [savingIds, setSavingIds] = useState<Set<string>>(new Set());
 
@@ -58,12 +60,14 @@ export function InitiativeTracker() {
       name: customName.trim(),
       initiative: Number(customInit) || 0,
       type: "enemy",
-      hp: 0,
-      ac: 0,
+      hp: Number(customHp) || 0,
+      ac: Number(customAc) || 0,
       conditions: [],
     });
     setCustomName("");
     setCustomInit(0);
+    setCustomHp(0);
+    setCustomAc(0);
   };
 
   const persistCharacterRow = useCallback(
@@ -366,6 +370,7 @@ export function InitiativeTracker() {
             </Text>
             <Group gap="xs" wrap="wrap">
               <TextInput
+                label="Name"
                 placeholder="Name (e.g. Goblin, Fire, Trap)"
                 value={customName}
                 onChange={(e) => setCustomName(e.currentTarget.value)}
@@ -379,10 +384,41 @@ export function InitiativeTracker() {
                 style={{ flex: 1, minWidth: isMobile ? "100%" : 200 }}
               />
               <TextInput
+                label="Initiative"
                 placeholder="Initiative"
                 type="number"
                 value={customInit}
                 onChange={(e) => setCustomInit(Number(e.currentTarget.value))}
+                classNames={{ input: "glassy-input", label: "glassy-label" }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddCustom();
+                  }
+                }}
+                style={{ width: isMobile ? "100%" : 120 }}
+              />
+              <TextInput
+                label="HP"
+                placeholder="HP"
+                type="number"
+                value={customHp}
+                onChange={(e) => setCustomHp(Number(e.currentTarget.value))}
+                classNames={{ input: "glassy-input", label: "glassy-label" }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddCustom();
+                  }
+                }}
+                style={{ width: isMobile ? "100%" : 120 }}
+              />
+              <TextInput
+                label="AC"
+                placeholder="AC"
+                type="number"
+                value={customAc}
+                onChange={(e) => setCustomAc(Number(e.currentTarget.value))}
                 classNames={{ input: "glassy-input", label: "glassy-label" }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
