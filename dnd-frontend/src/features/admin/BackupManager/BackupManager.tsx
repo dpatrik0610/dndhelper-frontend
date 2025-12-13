@@ -24,7 +24,7 @@ import {
 import { useAuthStore } from "@store/useAuthStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
-import { exportCollection, restoreCollection } from "@services/backupService";
+import { exportCollection, exportAllCollections, restoreCollection } from "@services/backupService";
 import { listCollections } from "@services/databaseService";
 import { useMediaQuery } from "@mantine/hooks";
 
@@ -35,7 +35,6 @@ export function BackupManager() {
   const [downloading, setDownloading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [collections, setCollections] = useState<string[]>([]);
-  const [loadingCollections, setLoadingCollections] = useState(false);
   const downloadLinkRef = useRef<HTMLAnchorElement | null>(null);
   const logPrefix = "[BackupManager]";
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -66,7 +65,6 @@ export function BackupManager() {
 
   useEffect(() => {
     const loadCollections = async () => {
-      setLoadingCollections(true);
       try {
         const names = await listCollections(token);
         if (names?.length) {
@@ -80,8 +78,6 @@ export function BackupManager() {
           message: "Using manual entry and presets instead.",
           color: SectionColor.Yellow,
         });
-      } finally {
-        setLoadingCollections(false);
       }
     };
     void loadCollections();
@@ -115,6 +111,40 @@ export function BackupManager() {
       showNotification({
         title: "Export ready",
         message: `Downloaded ${result.fileName}`,
+        color: SectionColor.Green,
+      });
+    } catch (err) {
+      showNotification({
+        title: "Export failed",
+        message: String(err),
+        color: SectionColor.Red,
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleDownloadAll = async () => {
+    setDownloading(true);
+    try {
+      const result = await exportAllCollections(token!);
+      const blobUrl = URL.createObjectURL(result.blob);
+      const fileName = result.fileName?.trim() || "backup.zip";
+      const link = downloadLinkRef.current;
+      if (link) {
+        link.href = blobUrl;
+        link.download = fileName;
+        link.click();
+      } else {
+        const temp = document.createElement("a");
+        temp.href = blobUrl;
+        temp.download = fileName;
+        temp.click();
+      }
+      URL.revokeObjectURL(blobUrl);
+      showNotification({
+        title: "All collections backup",
+        message: `Downloaded ${fileName}`,
         color: SectionColor.Green,
       });
     } catch (err) {
@@ -257,6 +287,17 @@ export function BackupManager() {
               {c}
             </Button>
           ))}
+          <Button
+            size={isMobile ? "sm" : "xs"}
+            variant="outline"
+            color="blue"
+            onClick={() => void handleDownloadAll()}
+            leftSection={<IconCloudDownload size={14} />}
+            fullWidth={isMobile}
+            loading={downloading}
+          >
+            Backup all (zip)
+          </Button>
         </Group>
 
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md" mt="sm">

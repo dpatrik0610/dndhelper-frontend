@@ -18,6 +18,23 @@ function buildAuthHeaders(token?: string): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function parseFileName(disposition: string | null, fallback: string) {
+  if (!disposition) return fallback;
+  const match = disposition.match(/filename\*?=([^;]+)/i);
+  if (match?.[1]) {
+    const raw = match[1].trim();
+    if (raw.startsWith("UTF-8''")) {
+      try {
+        return decodeURIComponent(raw.replace(/^UTF-8''/, ""));
+      } catch {
+        return fallback;
+      }
+    }
+    return raw.replace(/['"]/g, "");
+  }
+  return fallback;
+}
+
 async function handleError(res: Response): Promise<never> {
   let message = res.statusText;
   try {
@@ -38,14 +55,28 @@ export async function exportCollection(collectionName: string, token: string): P
   if (!res.ok) await handleError(res);
 
   const contentType = res.headers.get("Content-Type") ?? "application/octet-stream";
-  const disposition = res.headers.get("Content-Disposition") ?? "";
+  const disposition = res.headers.get("Content-Disposition");
+  const fileName = parseFileName(disposition, `${collectionName}.gz`);
 
-  let fileName = `${collectionName}.gz`;
-  const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/i);
-  if (match?.[1]) {
-    // Strip surrounding quotes from filename if present
-    fileName = match[1].replace(/['"]/g, "");
-  }
+  const blob = await res.blob();
+  return { blob, fileName, contentType };
+}
+
+export async function exportAllCollections(token: string): Promise<BackupFile> {
+  const res = await fetch(`${getApiBase()}${baseUrl}/all`, {
+    method: "GET",
+    headers: buildAuthHeaders(token),
+  });
+
+  if (!res.ok) await handleError(res);
+
+  const contentType = res.headers.get("Content-Type") ?? "application/zip";
+  const disposition = res.headers.get("Content-Disposition");
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const envTag = import.meta.env.PROD ? "prod" : "dev";
+  const fallback = `backup-${envTag}-${now.getFullYear()}.${pad(now.getMonth() + 1)}.${pad(now.getDate())}.zip`;
+  const fileName = parseFileName(disposition, fallback);
 
   const blob = await res.blob();
   return { blob, fileName, contentType };
