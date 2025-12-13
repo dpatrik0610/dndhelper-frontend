@@ -6,6 +6,7 @@ import { InitiativeNameCell } from "./components/InitiativeNameCell";
 import { InitiativeStatCell } from "./components/InitiativeStatCell";
 import { InitiativeColorCell } from "./components/InitiativeColorCell";
 import { InitiativeConditionsCell } from "./components/InitiativeConditionsCell";
+import { StatDisplay } from "./components/StatDisplay";
 
 type ColumnKey = "name" | "initiative" | "hp" | "ac" | "conditions" | "color" | "actions";
 
@@ -32,12 +33,16 @@ interface InitiativeTableProps {
   onRemove: (id: string) => void;
   onAddCondition: (id: string, label: string, remaining: number | null) => void;
   onRemoveCondition: (id: string, conditionId: string) => void;
+  onAdjustHp: (id: string, delta: number) => void;
   columns?: ColumnConfig[];
   onReload?: () => void;
   editingIds?: Set<string>;
   savingIds?: Set<string>;
   onToggleEdit?: (id: string, enable: boolean) => void;
   onApplyEdit?: (id: string) => void;
+  addConditionTarget?: string | null;
+  onAddConditionShortcut?: (id: string) => void;
+  onClearAddConditionShortcut?: () => void;
 }
 
 export function InitiativeTable({
@@ -47,12 +52,16 @@ export function InitiativeTable({
   onRemove,
   onAddCondition,
   onRemoveCondition,
+  onAdjustHp,
   columns = defaultColumns,
   onReload,
   editingIds,
   savingIds,
   onToggleEdit,
   onApplyEdit,
+  addConditionTarget,
+  onAddConditionShortcut,
+  onClearAddConditionShortcut,
 }: InitiativeTableProps) {
   const colorPresets = ["#f87171","#fb923c","#facc15","#a3e635","#34d399","#22d3ee","#60a5fa","#a78bfa","#f472b6","#cbd5e1"];
 
@@ -124,11 +133,7 @@ export function InitiativeTable({
                   if (col.key === "hp") {
                     return (
                       <Table.Td key={`${row.id}-hp`}>
-                        <InitiativeStatCell
-                          value={row.hp}
-                          onChange={(val) => onChange(row.id, "hp", val)}
-                          disabled={isCharacter && !isEditing}
-                        />
+                        <StatDisplay value={row.hp} label="HP" />
                       </Table.Td>
                     );
                   }
@@ -136,11 +141,7 @@ export function InitiativeTable({
                   if (col.key === "ac") {
                     return (
                       <Table.Td key={`${row.id}-ac`}>
-                        <InitiativeStatCell
-                          value={row.ac}
-                          onChange={(val) => onChange(row.id, "ac", val)}
-                          disabled={isCharacter && !isEditing}
-                        />
+                        <StatDisplay value={row.ac} label="AC" />
                       </Table.Td>
                     );
                   }
@@ -164,9 +165,11 @@ export function InitiativeTable({
                         <InitiativeConditionsCell
                           rowId={row.id}
                           conditions={row.conditions || []}
-                          disabled={isCharacter && !isEditing}
+                          disabled={false}
                           onAdd={(label, remaining) => onAddCondition(row.id, label, remaining)}
                           onRemove={(condId) => onRemoveCondition(row.id, condId)}
+                          openExternally={addConditionTarget === row.id}
+                          onCloseExternal={onClearAddConditionShortcut}
                         />
                       </Table.Td>
                     );
@@ -177,14 +180,15 @@ export function InitiativeTable({
                       <Table.Td key={`${row.id}-actions`}>
                         <InitiativeActionsCell
                           rowId={row.id}
-                          isCharacter={isCharacter}
                           isEditing={isEditing}
                           isSaving={isSaving}
+                          onAddCondition={onAddConditionShortcut}
+                          onAdjustHp={onAdjustHp}
                           onToggleEdit={onToggleEdit}
                           onApplyEdit={onApplyEdit}
                           onRemove={onRemove}
                         />
-                      </Table.Td>
+                    </Table.Td>
                     );
                   }
 

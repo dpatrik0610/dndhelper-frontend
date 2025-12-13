@@ -1,4 +1,5 @@
 import { useCharacterStore } from "@store/useCharacterStore";
+import { useInitiativeTrackerStore } from "@store/admin/useInitiativeTrackerStore";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 import type { Character } from "@appTypes/Character/Character";
 import { showNotification } from "@components/Notification/Notification";
@@ -9,6 +10,34 @@ export function handleCharacterChange(event: EntityChangeEvent) {
   const existing = characterStore.characters.find((c) => c.id === event.entityId);
   const hasSameTimestamp = (a?: Character | null, b?: Character | null) =>
     Boolean(a?.updatedAt && b?.updatedAt && a.updatedAt === b.updatedAt);
+
+  const syncInitiativeTracker = (character: Character) => {
+    const { rows, updateEntry } = useInitiativeTrackerStore.getState();
+    const target = rows.find(
+      (row) => row.characterId === character.id || row.id === character.id
+    );
+    if (!target) return;
+
+    const byLabel = new Map(
+      (target.conditions ?? []).map((cond) => [cond.label.toLowerCase(), cond])
+    );
+    const mergedConditions = (character.conditions ?? []).map((label) => {
+      const match = byLabel.get(label.toLowerCase());
+      return {
+        id: match?.id ?? `${character.id}-${label}`,
+        label,
+        remaining: match?.remaining ?? null,
+      };
+    });
+
+    updateEntry(target.id, {
+      name: character.name,
+      hp: character.hitPoints,
+      tempHp: character.temporaryHitPoints,
+      ac: character.armorClass,
+      conditions: mergedConditions,
+    });
+  };
 
   switch (event.action) {
     case "created": {
@@ -37,6 +66,7 @@ export function handleCharacterChange(event: EntityChangeEvent) {
           c.id === updatedCharacter.id ? updatedCharacter : c
         )
       );
+      syncInitiativeTracker(updatedCharacter);
 
       if (currentCharacter?.id === updatedCharacter.id) {
         if (hasSameTimestamp(currentCharacter, updatedCharacter)) break;

@@ -132,9 +132,25 @@ export const useInitiativeTrackerStore = create<InitiativeTrackerState>()(
       nextTurn: () =>
         set((state) => {
           if (state.rows.length === 0) return state;
-          const currentIndex = state.activeIndex;
-          const updatedRows = state.rows.map((row, idx) => {
-            if (idx !== currentIndex) return row;
+
+          // Keep ordering consistent with the UI (initiative desc, name asc)
+          const sortRows = (rows: InitiativeEntry[]) =>
+            [...rows].sort((a, b) => {
+              if (a.initiative === b.initiative) return a.name.localeCompare(b.name);
+              return b.initiative - a.initiative;
+            });
+
+          const activeId = state.rows[state.activeIndex]?.id;
+          const sortedRows = sortRows(state.rows);
+          const currentIndex = Math.max(0, sortedRows.findIndex((row) => row.id === activeId));
+
+          const nextIndex = sortedRows.length === 0 ? 0 : (currentIndex + 1) % sortedRows.length;
+          const wrapped = nextIndex <= currentIndex;
+
+          // Decrement on the row that is about to take its turn (nextIndex),
+          // so new conditions applied during a turn live through that full round.
+          const updatedRows = sortedRows.map((row, idx) => {
+            if (idx !== nextIndex) return row;
             const updatedConds = (row.conditions || []).map((c) =>
               c.remaining === null ? c : { ...c, remaining: Math.max(0, c.remaining - 1) }
             );
@@ -144,11 +160,11 @@ export const useInitiativeTrackerStore = create<InitiativeTrackerState>()(
             };
           });
 
-          const nextIndex = currentIndex + 1;
-          if (nextIndex >= updatedRows.length) {
-            return { rows: updatedRows, activeIndex: 0, cycleCount: state.cycleCount + 1 };
-          }
-          return { rows: updatedRows, activeIndex: nextIndex };
+          return {
+            rows: updatedRows,
+            activeIndex: nextIndex,
+            cycleCount: state.cycleCount + (wrapped ? 1 : 0),
+          };
         }),
 
       setCycleCount: (count) => set({ cycleCount: Math.max(0, count) }),

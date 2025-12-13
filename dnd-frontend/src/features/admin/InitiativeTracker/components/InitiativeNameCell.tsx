@@ -8,10 +8,24 @@ interface InitiativeNameCellProps {
 }
 
 export function InitiativeNameCell({ row, disabled, onChange }: InitiativeNameCellProps) {
+  const labelByType: Record<InitiativeEntry["type"], string> = {
+    character: "PC",
+    enemy: "Enemy",
+    ally: "Ally",
+    environment: "Env",
+  };
+
+  const colorByType: Record<InitiativeEntry["type"], string> = {
+    character: "blue",
+    enemy: "red",
+    ally: "teal",
+    environment: "yellow",
+  };
+
   return (
     <Group gap={6}>
-      <Badge size="sm" color="violet" variant="light">
-        {row.type}
+      <Badge size="sm" color={colorByType[row.type] ?? "gray"} variant="light">
+        {labelByType[row.type] ?? row.type}
       </Badge>
       <TextInput
         size="xs"

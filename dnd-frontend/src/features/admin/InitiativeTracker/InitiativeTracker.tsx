@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge, Button, Divider, Group, Paper, SimpleGrid, Stack, Text, TextInput, Title } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconRun, IconUserPlus, IconPlus } from "@tabler/icons-react";
 import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
 import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
-import { useInitiativeTrackerStore } from "@store/admin/useInitiativeTrackerStore";
-import { useEffect } from "react";
+import { useInitiativeTrackerStore, type ConditionEntry } from "@store/admin/useInitiativeTrackerStore";
 import { InitiativeTable } from "./InitiativeTable";
 import { InitiativeControls } from "./InitiativeControls";
 import { getCharacterById } from "@services/characterService";
@@ -124,9 +123,24 @@ export function InitiativeTracker() {
 
   useEffect(() => {
     if (campaignId) {
-    void loadCharacters(campaignId);
-  }
+      void loadCharacters(campaignId);
+    }
   }, [campaignId, loadCharacters]);
+
+  const mergeConditionsWithDurations = useCallback(
+    (labels: string[] | undefined, existing: ConditionEntry[] | undefined, ownerId: string) => {
+      const byLabel = new Map((existing ?? []).map((cond) => [cond.label.toLowerCase(), cond]));
+      return (labels ?? []).map((label) => {
+        const match = byLabel.get(label.toLowerCase());
+        return {
+          id: match?.id ?? `${ownerId}-${label}`,
+          label,
+          remaining: match?.remaining ?? null,
+        };
+      });
+    },
+    []
+  );
 
   const syncCharacterRows = useCallback(async () => {
     if (!token) {
@@ -158,11 +172,11 @@ export function InitiativeTracker() {
             hp: full.hitPoints,
             tempHp: full.temporaryHitPoints,
             ac: full.armorClass,
-            conditions: (full.conditions ?? []).map((label) => ({
-              id: `${full.id}-${label}`,
-              label,
-              remaining: null,
-            })),
+            conditions: mergeConditionsWithDurations(
+              full.conditions,
+              row.conditions,
+              full.id ?? row.id
+            ),
           };
 
           const lastEdit = lastManualEdit.current[row.id] ?? 0;
@@ -185,7 +199,7 @@ export function InitiativeTracker() {
     } catch (err) {
       console.error("[InitiativeTracker] Failed to sync character rows", err);
     }
-  }, [characters, characterRows, token, updateEntry]);
+  }, [characters, characterRows, mergeConditionsWithDurations, token, updateEntry]);
 
   // Keep tracker rows in sync when characters update via SignalR
   useEffect(() => {
@@ -202,6 +216,41 @@ export function InitiativeTracker() {
       console.error("[InitiativeTracker] Failed to reload table", err);
     }
   };
+
+  const [addConditionTarget, setAddConditionTarget] = useState<string | null>(null);
+  const adjustHp = useCallback(
+    (id: string, delta: number) => {
+      const storeRows = useInitiativeTrackerStore.getState().rows;
+      const row = storeRows.find((r) => r.id === id);
+      if (!row) return;
+      const nextHp = Math.max(0, (row.hp ?? 0) + delta);
+      updateEntry(id, { hp: nextHp });
+      void persistCharacterRow(id);
+    },
+    [updateEntry, persistCharacterRow]
+  );
+
+  const handleNextTurn = useCallback(async () => {
+    const before = useInitiativeTrackerStore.getState().rows;
+    nextTurn();
+
+    if (!token) return;
+
+    const after = useInitiativeTrackerStore.getState().rows;
+    await Promise.all(
+      before.map(async (prevRow) => {
+        if (prevRow.type !== "character") return;
+        const nextRow = after.find((r) => r.id === prevRow.id);
+        if (!nextRow) return;
+        const prevLabels = new Set((prevRow.conditions ?? []).map((c) => c.label));
+        const nextLabels = new Set((nextRow.conditions ?? []).map((c) => c.label));
+        const removed = [...prevLabels].filter((label) => !nextLabels.has(label));
+        if (removed.length > 0) {
+          await persistCharacterRow(nextRow.id);
+        }
+      })
+    );
+  }, [nextTurn, token, persistCharacterRow]);
 
   const handleToggleEdit = (rowId: string, enable: boolean) => {
     setEditingIds((prev) => {
@@ -223,17 +272,17 @@ export function InitiativeTracker() {
       const full = await getCharacterById(characterId, token);
       if (!full) return;
 
-    await updateCharacter(
-      {
-        ...full,
-        name: row.name,
-        hitPoints: row.hp ?? full.hitPoints,
-        temporaryHitPoints: row.tempHp ?? full.temporaryHitPoints,
-        armorClass: row.ac ?? full.armorClass,
-        conditions: (row.conditions ?? []).map((c) => c.label),
-      },
-      token
-    );
+      await updateCharacter(
+        {
+          ...full,
+          name: row.name,
+          hitPoints: row.hp ?? full.hitPoints,
+          temporaryHitPoints: row.tempHp ?? full.temporaryHitPoints,
+          armorClass: row.ac ?? full.armorClass,
+          conditions: (row.conditions ?? []).map((c) => c.label),
+        },
+        token
+      );
       setEditingIds((prev) => {
         const next = new Set(prev);
         next.delete(rowId);
@@ -367,7 +416,7 @@ export function InitiativeTracker() {
           <InitiativeControls
             cycleCount={cycleCount}
             onSetCycle={setCycleCount}
-            onNext={nextTurn}
+            onNext={handleNextTurn}
             onReset={resetCycles}
           />
         </Paper>
@@ -382,29 +431,33 @@ export function InitiativeTracker() {
           border: "1px solid rgba(180,150,255,0.35)",
         }}
       >
-      <InitiativeTable
-        rows={sortedRows}
-        activeIndex={activeIndex}
-        onChange={(id, field, value) => {
-          lastManualEdit.current[id] = Date.now();
-          updateEntry(id, { [field]: value });
-        }}
-        onRemove={removeEntry}
-        onAddCondition={(id, label, remaining) => {
-          lastManualEdit.current[id] = Date.now();
-          addCondition(id, label, remaining);
-          void persistCharacterRow(id);
-        }}
-        onRemoveCondition={(id, condId) => {
-          lastManualEdit.current[id] = Date.now();
-          removeCondition(id, condId);
-          void persistCharacterRow(id);
-        }}
+        <InitiativeTable
+          rows={sortedRows}
+          activeIndex={activeIndex}
+          onChange={(id, field, value) => {
+            lastManualEdit.current[id] = Date.now();
+            updateEntry(id, { [field]: value });
+          }}
+          onRemove={removeEntry}
+          onAddCondition={(id, label, remaining) => {
+            lastManualEdit.current[id] = Date.now();
+            addCondition(id, label, remaining);
+            void persistCharacterRow(id);
+          }}
+          onRemoveCondition={(id, condId) => {
+            lastManualEdit.current[id] = Date.now();
+            removeCondition(id, condId);
+            void persistCharacterRow(id);
+          }}
         onReload={handleReloadTable}
         editingIds={editingIds}
         savingIds={savingIds}
         onToggleEdit={handleToggleEdit}
-          onApplyEdit={handleApplyEdit}
+        onApplyEdit={handleApplyEdit}
+        addConditionTarget={addConditionTarget}
+        onAddConditionShortcut={(id) => setAddConditionTarget(id)}
+        onClearAddConditionShortcut={() => setAddConditionTarget(null)}
+        onAdjustHp={adjustHp}
         />
       </Paper>
     </Stack>
