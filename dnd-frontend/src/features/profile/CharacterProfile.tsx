@@ -33,6 +33,7 @@ import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@store/useAuthStore";
 import { getCampaignById } from "@services/campaignService";
+import { ExperienceTableCard } from "./components/ExperienceTableCard";
 
 function useCampaignName(campaignId: string | null | undefined) {
   const [name, setName] = useState("Loading...");
@@ -124,6 +125,7 @@ export default function CharacterProfile() {
             <motion.div key="stats" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
               {/* <AbilityScores /> */}
               <CombatStats />
+              <ExperienceTableCard />
             </motion.div>
           )}
 
