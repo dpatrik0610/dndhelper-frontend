@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Button, Group, Loader } from "@mantine/core";
+import { Button, Group, Loader, Box, Text } from "@mantine/core";
 import { useAuthStore } from "@store/useAuthStore";
-import { CustomFieldset } from "@components/CustomFieldset";
 import { claimFromInventory } from "@services/currencyService";
 import { useCharacterStore } from "@store/useCharacterStore";
 import { useInventoryStore } from "@store/useInventorystore";
@@ -65,8 +64,19 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
   if (claimed || !inventory?.currencies?.length) return null;
 
   return (
-    <CustomFieldset label="Available Currency">
-      <Group justify="space-between" align="center" mt="xs">
+    <Box
+      style={{
+        border: "1px solid rgba(255,255,255,0.12)",
+        borderRadius: 10,
+        padding: 12,
+        background: "linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
+        boxShadow: "0 8px 16px rgba(0,0,0,0.25)",
+      }}
+    >
+      <Text size="sm" fw={700} c="white" mb={6}>
+        Available Currency
+      </Text>
+      <Group justify="space-between" align="center" wrap="wrap" gap="sm">
         <InventoryCurrencyBox inventoryId={inventory.id!} />
 
         <Button
@@ -80,8 +90,7 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
           {loading ? <Loader size="xs" color="white" /> : "Claim"}
         </Button>
       </Group>
-    </CustomFieldset>
+    </Box>
   );
 }
-
 
