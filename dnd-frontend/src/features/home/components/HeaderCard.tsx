@@ -1,7 +1,8 @@
-import { Button, Group, Paper, Stack, Text, ThemeIcon, Title } from "@mantine/core";
+import { Button, Group, Paper, Stack, Text, ThemeIcon, Title, Box } from "@mantine/core";
 import { ConnectionStatus } from "@components/ConnectionStatus";
 import type { ReactNode } from "react";
 import type { Character } from "@appTypes/Character/Character";
+import { XpProgressCard } from "@features/profile/components/XpProgressCard";
 
 interface Props {
   campaignName: string | null;
@@ -56,7 +57,7 @@ export function HeaderCard({
               {character?.name ?? "No character selected"}
             </Text>
             <Text size="sm" c={palette.textDim}>
-              {character ? `Level ${character.level} ${character.race} ${character.characterClass}` : "Select a character to view details"}
+              {!character && "Select a character to view details"}
             </Text>
           </Stack>
         </Group>
@@ -79,6 +80,12 @@ export function HeaderCard({
           )}
         </Group>
       </Group>
+
+      {character && (
+        <Box mt="sm">
+          <XpProgressCard experience={character.experience} />
+        </Box>
+      )}
 
       {characterSelector}
     </Paper>
