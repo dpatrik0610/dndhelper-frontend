@@ -24,7 +24,7 @@ export function SwitchCharacterButton() {
       <Tooltip label="Switch character" withArrow>
           <CustomBadge 
           label={"Swap"} 
-          variant="outline"
+          variant="light"
           icon={<IconArrowsExchange 
             size={16} 
             style={{ cursor: "pointer" }}/>
