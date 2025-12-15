@@ -40,6 +40,7 @@ interface AdminInventoryStore {
   select: (id: string | null) => void;
 
   create: (characterIds: string[] | null, name: string) => Promise<void>;
+  duplicate: (inventoryId: string) => Promise<void>;
   rename: (id: string, name: string) => Promise<void>;
   remove: (id: string) => Promise<void>;
   addItem: (equipment: Equipment) => Promise<void>;
@@ -56,6 +57,28 @@ interface AdminInventoryStore {
 
 export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => {
   const getToken = () => useAuthStore.getState().token!;
+
+  const parseNameParts = (name?: string) => {
+    const trimmed = (name ?? "").trim() || "Inventory";
+    const match = trimmed.match(/^(.*?)(\d+)$/);
+    if (!match) return { base: trimmed, number: 1 };
+    const base = match[1].trim() || "Inventory";
+    const number = Number.parseInt(match[2]!, 10) || 1;
+    return { base, number };
+  };
+
+  const nextDuplicateName = (currentName: string | undefined, inventories: Inventory[]) => {
+    const { base, number } = parseNameParts(currentName);
+    const highestExisting = inventories.reduce((max, inv) => {
+      const parts = parseNameParts(inv.name);
+      if (parts.base === base) {
+        return Math.max(max, parts.number);
+      }
+      return max;
+    }, number);
+
+    return `${base}${highestExisting + 1}`;
+  };
 
   return {
     inventories: [],
@@ -194,6 +217,42 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         message: `${name} added successfully.`,
         color: SectionColor.Green,
       });
+    },
+
+    duplicate: async (inventoryId) => {
+      const { inventories } = get();
+      const source = inventories.find((i) => i.id === inventoryId);
+      if (!source) return;
+
+      const duplicateName = nextDuplicateName(source.name, inventories);
+      const payload: Inventory = {
+        ...source,
+        id: null,
+        name: duplicateName,
+        characterIds: source.characterIds ?? [],
+        ownerIds: source.ownerIds ?? [],
+        items: source.items?.map((item) => ({ ...item })),
+        currencies: source.currencies?.map((cur) => ({ ...cur })) ?? [],
+      };
+
+      try {
+        const created = await createInventory(payload, getToken());
+        set((state) => ({
+          inventories: [created, ...state.inventories],
+          selected: created,
+        }));
+        showNotification({
+          title: "Inventory duplicated",
+          message: `${duplicateName} created from ${source.name ?? "inventory"}.`,
+          color: SectionColor.Green,
+        });
+      } catch (err) {
+        showNotification({
+          title: "Duplicate failed",
+          message: String(err),
+          color: SectionColor.Red,
+        });
+      }
     },
 
     rename: async (id, name) => {

@@ -29,6 +29,7 @@ export function InventoryBrowser() {
     select,
     rename,
     remove,
+    duplicate,
     refreshInventories,
   } = useAdminInventoryStore();
   const { loadAll: loadCharacters } = useAdminCharacterStore();
@@ -62,6 +63,10 @@ export function InventoryBrowser() {
     if (confirm(`Delete inventory "${name || "Unnamed"}"? This cannot be undone.`)) {
       void remove(id);
     }
+  };
+
+  const handleDuplicate = (id: string) => {
+    void duplicate(id);
   };
 
   return (
@@ -123,6 +128,7 @@ export function InventoryBrowser() {
                       name={inv.name || "Unnamed"}
                       selected={selected?.id === inv.id}
                       onClick={() => select(inv.id!)}
+                      onDuplicate={() => handleDuplicate(inv.id!)}
                       onRename={() => handleRename(inv.id!, inv.name || "")}
                       onDelete={() => handleDelete(inv.id!, inv.name || "")}
                     />
@@ -170,4 +176,3 @@ export function InventoryBrowser() {
     </Box>
   );
 }
-

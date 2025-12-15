@@ -1,8 +1,8 @@
-import type { Currency } from "../Currency";
+import type { Currency } from "@appTypes/Currency";
 import type { InventoryItem } from "./InventoryItem";
 
 export interface Inventory {
-  id?: string;
+  id?: string | null;
   name?: string;
   characterIds: string[];
   ownerIds: string[];

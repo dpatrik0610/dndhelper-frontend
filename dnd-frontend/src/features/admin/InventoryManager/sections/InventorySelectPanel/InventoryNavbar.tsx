@@ -11,7 +11,15 @@ import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
 import { InventoryTile } from "./InventoryTile";
 
 export function InventoryNavbar({ onCreate }: { onCreate: () => void }) {
-  const { inventories, selected, select, rename, remove, loadByCharacter } = useAdminInventoryStore();
+  const {
+    inventories,
+    selected,
+    select,
+    rename,
+    duplicate,
+    remove,
+    loadByCharacter,
+  } = useAdminInventoryStore();
   const { selectedId: selectedCharId } = useAdminCharacterStore();
 
   return (
@@ -53,6 +61,7 @@ export function InventoryNavbar({ onCreate }: { onCreate: () => void }) {
                 name={inv.name ?? "Unnamed"}
                 selected={selected?.id === inv.id}
                 onClick={() => select(inv.id!)}
+                onDuplicate={() => duplicate(inv.id!)}
                 onRename={() => {
                   const newName = prompt("Rename inventory:", inv.name ?? "");
                   if (newName?.trim()) rename(inv.id!, newName.trim());

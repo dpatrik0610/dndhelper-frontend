@@ -1,10 +1,11 @@
 import { Paper, Group, Text, ActionIcon, Tooltip } from "@mantine/core";
-import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconCopy, IconEdit, IconTrash } from "@tabler/icons-react";
 
 interface InventoryTileProps {
   name: string;
   selected?: boolean;
   onClick: () => void;
+  onDuplicate: () => void;
   onRename: () => void;
   onDelete: () => void;
 }
@@ -13,6 +14,7 @@ export function InventoryTile({
   name,
   selected,
   onClick,
+  onDuplicate,
   onRename,
   onDelete,
 }: InventoryTileProps) {
@@ -64,6 +66,20 @@ export function InventoryTile({
       </Text>
 
       <Group gap={2}>
+        <Tooltip label="Duplicate">
+          <ActionIcon
+            variant="subtle"
+            color="cyan"
+            size="xs"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDuplicate();
+            }}
+          >
+            <IconCopy size={13} />
+          </ActionIcon>
+        </Tooltip>
+
         <Tooltip label="Rename">
           <ActionIcon
             variant="subtle"
