@@ -9,6 +9,7 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { IconChevronRight } from "@tabler/icons-react";
 import {
   Anchor,
   Badge,
@@ -20,6 +21,7 @@ import {
   Text,
 } from "@mantine/core";
 import "katex/dist/katex.min.css";
+import { hasRenderableContent, normalizeQuoteBlocks } from "@utils/markdown";
 
 interface MarkdownRendererProps {
   content: string;
@@ -30,8 +32,6 @@ interface MarkdownRendererProps {
 }
 
 // --- Config / constants ---
-
-const HASHTAG_REGEX = /#[a-zA-Z0-9_-]+/g;
 
 const WRAPPER_STYLE: CSSProperties = {
   wordBreak: "break-word",
@@ -58,8 +58,13 @@ const HEADING_BASE_STYLE: CSSProperties = {
 
 
 const BLOCKQUOTE_STYLE: CSSProperties = {
-  marginTop: 6,
-  marginBottom: 6,
+  marginTop: 8,
+  marginBottom: 8,
+  borderLeft: "3px solid rgba(255, 200, 150, 0.6)",
+  background: "linear-gradient(135deg, rgba(255,230,200,0.06), rgba(255,180,140,0.06))",
+  padding: "8px 12px",
+  color: "#ffe9c4",
+  boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
 };
 
 const TABLE_STYLE: CSSProperties = {
@@ -78,20 +83,22 @@ const TABLE_CELL_STYLE: CSSProperties = {
   padding: "4px 6px",
 };
 
-const HIGHLIGHT_STYLE: CSSProperties = {
-  background: "rgba(255, 230, 230, 0.35)",
-  color: "white",
-  padding: "0 2px",
-  borderRadius: 3,
-  textShadow: "0 0 6px rgba(255, 150, 150, 0.9)",
-};
-
 const MARK_HIGHLIGHT_STYLE: CSSProperties = {
   background: "rgba(255, 200, 120, 0.18)",
   color: "#ffe9c4",
   padding: "0 2px",
   borderRadius: 3,
   textShadow: "0 0 6px rgba(255, 200, 120, 0.9)", // warm glow
+};
+
+const HASHTAG_REGEX = /#[a-zA-Z0-9_-]+/g;
+
+const HIGHLIGHT_STYLE: CSSProperties = {
+  background: "rgba(255, 230, 230, 0.35)",
+  color: "white",
+  padding: "0 2px",
+  borderRadius: 3,
+  textShadow: "0 0 6px rgba(255, 150, 150, 0.9)",
 };
 
 const TAG_BADGE_STYLE = {
@@ -113,7 +120,7 @@ const TAG_BADGE_STYLE = {
 // --- Helpers ---
 
 const escapeRegex = (value: string) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  value.replace(/[.*+?^${}()|[\\]\\/g, "\\$&");
 
 const renderTextSegments = (text: string, query?: string): ReactNode[] => {
   const escapedQuery = query ? escapeRegex(query) : "";
@@ -187,6 +194,8 @@ export function MarkdownRenderer({
   style,
   textColor,
 }: MarkdownRendererProps) {
+  const normalizedContent = normalizeQuoteBlocks(content);
+
   return (
     <div
       className={className}
@@ -310,15 +319,22 @@ export function MarkdownRenderer({
             );
           },
 
-          blockquote: ({ children, ...props }) => (
-            <Blockquote
-              color="red"
-              style={BLOCKQUOTE_STYLE}
-              {...props}
-            >
-              {children}
-            </Blockquote>
-          ),
+          blockquote: ({ children, ...props }) =>
+            hasRenderableContent(children) ? (
+              <Blockquote
+                color="orange"
+                icon={<IconChevronRight size={16} stroke={1.8} />}
+                iconSize={18}
+                style={BLOCKQUOTE_STYLE}
+                styles={{
+                  root: { gap: 8, fontSize: 18, lineHeight: 1.5, paddingTop: 2 },
+                  icon: { marginTop: 2 },
+                }}
+                {...props}
+              >
+                {children}
+              </Blockquote>
+            ) : null,
 
           mark: ({ children }) => (
             <Text
@@ -361,7 +377,7 @@ export function MarkdownRenderer({
           ),
         }}
       >
-        {content}
+        {normalizedContent}
       </ReactMarkdown>
     </div>
   );
