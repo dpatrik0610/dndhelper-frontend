@@ -33,6 +33,7 @@ import { SessionManager } from "./SessionManager/SessionManager";
 import { BackupManager } from "./BackupManager/BackupManager";
 import { InitiativeTracker } from "./InitiativeTracker/InitiativeTracker";
 import { RuleManager } from "./RuleManager/RuleManager";
+import { DMCharacterPanel } from "./DMCharacterManager/DMCharacterPanel";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -52,6 +53,7 @@ export const AdminDashboard: React.FC = () => {
     key: AdminSection;
     component: JSX.Element;
   }[] = [
+    { icon: IconUsersGroup, label: "Characters Manager", key: "CharactersManager", component: <DMCharacterPanel /> },
     { icon: IconBox, label: "Inventory Manager", key: "InventoryManager", component: <InventoryManager /> },
     { icon: IconLayoutGrid, label: "Inventory Browser", key: "InventoryBrowser", component: <InventoryBrowser /> },
     { icon: IconSettings, label: "Campaign Manager", key: "CampaignManager", component: <CampaignManager /> },

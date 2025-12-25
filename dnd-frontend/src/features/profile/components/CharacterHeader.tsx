@@ -64,7 +64,7 @@ export function CharacterHeader() {
         <Group wrap={isMobile ? "wrap" : "nowrap"} align="stretch" style={{ width: "100%" }}>
           {/* Left Side */}
           <Box style={{ flex: isMobile ? 1 : 1.25, minWidth: isMobile ? "100%" : 0 }}>
-            <CharacterMetaBox containerStyle={{ ...tileStyle, minHeight: 130 }} />
+            <CharacterMetaBox character={character} containerStyle={{ ...tileStyle, minHeight: 130 }} />
           </Box>
 
           {/* Middle */}
@@ -78,7 +78,7 @@ export function CharacterHeader() {
               }}
             >
               <Stack gap={0} align="center" style={{ width: "100%" }}>
-                <HpRing />
+                <HpRing character={character}/>
                 <InspirationBox value={character.inspiration} onClick={handleUseInspiration} containerStyle={{ width: "100%" }} />
               </Stack>
             </Box>
@@ -86,7 +86,7 @@ export function CharacterHeader() {
           {/* Right Side */}
           </Box>
           <Box style={{ flex: isMobile ? 1 : 1.25, minWidth: isMobile ? "100%" : 0 }}>
-            <CharacterCurrencyArea containerStyle={{ ...tileStyle, minHeight: 130 }} />
+            <CharacterCurrencyArea character={character} containerStyle={{ ...tileStyle, minHeight: 130 }} />
           </Box>
         </Group>
 

@@ -1,13 +1,13 @@
+import type { Character } from "@appTypes/Character/Character";
 import { Box, Text } from "@mantine/core";
-import { useCharacterStore } from "@store/useCharacterStore";
 import type { CSSProperties } from "react";
 
 interface Props {
+  character: Pick<Character, "characterClass" | "race" | "alignment">;
   containerStyle?: CSSProperties;
 }
 
-export function CharacterMetaBox({ containerStyle }: Props) {
-  const character = useCharacterStore((s) => s.character);
+export function CharacterMetaBox({ character, containerStyle }: Props) {
   if (!character) return null;
 
   const { characterClass, race, alignment } = character;

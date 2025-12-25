@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 export type AdminSection =
   | "Dashboard"
+  | "CharactersManager"
   | "InventoryManager"
   | "UserManager"
   | "ItemManager"

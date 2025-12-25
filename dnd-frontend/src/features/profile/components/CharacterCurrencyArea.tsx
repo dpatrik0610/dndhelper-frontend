@@ -1,14 +1,15 @@
 import { Box, Group, Text, ThemeIcon } from "@mantine/core";
 import { IconCoin } from "@tabler/icons-react";
-import { useCharacterStore } from "@store/useCharacterStore";
 import type { CSSProperties } from "react";
+import type { Character } from "@appTypes/Character/Character";
 
 interface Props {
+  character?: Pick<Character, "currencies">;
   containerStyle?: CSSProperties;
 }
 
-export function CharacterCurrencyArea({ containerStyle }: Props) {
-  const currencies = useCharacterStore((state) => state.character?.currencies ?? []);
+export function CharacterCurrencyArea({ character, containerStyle }: Props) {
+  const currencies = character?.currencies ?? [];
   const visibleCurrencies = currencies.filter((c) => (c.amount ?? 0) > 0);
 
   const palette = {

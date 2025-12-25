@@ -1,16 +1,26 @@
 import { Box, RingProgress, Text, Title } from "@mantine/core";
-import { useCharacterStore } from "@store/useCharacterStore";
+import type { Character } from "@appTypes/Character/Character";
 import { SwitchCharacterButton } from "./SwitchCharacterButton";
 
-export function HpRing() {
-  const character = useCharacterStore((s) => s.character);
+interface HpRingProps {
+  character: Pick<
+    Character,
+    | "name"
+    | "hitPoints"
+    | "maxHitPoints"
+    | "temporaryHitPoints"
+    | "deathSavesFailures"
+  >;
+}
+
+export function HpRing({ character }: HpRingProps) {
   if (!character) return null;
 
   const currentHp = character.hitPoints ?? 0;
-  const maxHp = Math.max(1, character.maxHitPoints || 1);
+  const maxHp = Math.max(1, character.maxHitPoints ?? 1);
   const tempHp = Math.max(0, character.temporaryHitPoints ?? 0);
 
-  const hpRatio = Math.max(0, currentHp) / maxHp;
+  const hpRatio = currentHp / maxHp;
   const tempRatio = tempHp / maxHp;
 
   let hpPercent = hpRatio * 100;
@@ -69,7 +79,14 @@ export function HpRing() {
         alignItems: "center",
       }}
     >
-      <Title order={2} c="white" mb={2} ta="center" lts={1.5}  style={{ textShadow: "0 1 6px rgba(255,255,255,0.5)" }}>
+      <Title
+        order={2}
+        c="white"
+        mb={2}
+        ta="center"
+        lts={1.5}
+        style={{ textShadow: "0 1px 6px rgba(255,255,255,0.5)" }}
+      >
         {character.name}
       </Title>
       <SwitchCharacterButton />
@@ -82,7 +99,6 @@ export function HpRing() {
         ].filter((s): s is { value: number; color: string } => s !== null)}
         label={<Box ta="center">{renderLabel()}</Box>}
       />
-
     </Box>
   );
 }
