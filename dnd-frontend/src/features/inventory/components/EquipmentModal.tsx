@@ -29,6 +29,7 @@ import DisplayText from "@components/common/DisplayText";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { MarkdownRenderer } from "@components/MarkdownRender";
+import { equipmentTierTheme } from "./styles/equipmentTheme";
 
 interface EquipmentModalProps {
   opened: boolean;
@@ -58,6 +59,11 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
   const descriptionContent = equipment?.description?.join("\n\n") ?? "";
   const dmDescriptionContent = equipment?.dmDescription?.join("\n\n") ?? "";
 
+  const tierTheme =
+    equipment?.tier && equipmentTierTheme[equipment.tier as keyof typeof equipmentTierTheme]
+      ? equipmentTierTheme[equipment.tier as keyof typeof equipmentTierTheme]
+      : equipmentTierTheme.default;
+
   return (
     <Modal
       opened={opened}
@@ -82,14 +88,14 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
       overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
       styles={{
         content: {
-          background: "linear-gradient(175deg, #0a0a2f 0%, #180016 100%)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          boxShadow: "0 0 25px rgba(153, 0, 255, 0.15)",
+          background: tierTheme.gradient,
+          border: `1px solid ${tierTheme.glow}`,
+          boxShadow: `0 0 30px ${tierTheme.glow}`,
           borderRadius: theme.radius.md,
         },
         header: {
           background: "transparent",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+          borderBottom: `1px solid ${tierTheme.glow}`,
           marginBottom: 25,
         },
       }}
