@@ -18,6 +18,7 @@ export interface ShowNotificationOptions {
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   withBorder?: boolean;
   withCloseButton?: boolean;
+  onClick?: () => void;
   onClose?: () => void;
   onOpen?: () => void;
   autoClose?: number | boolean;
@@ -40,6 +41,7 @@ export const showNotification = ({
   position,
   withBorder,
   withCloseButton = true,
+  onClick,
   onClose,
   onOpen,
   autoClose = 3000,
@@ -57,6 +59,7 @@ export const showNotification = ({
     position,
     withBorder,
     withCloseButton,
+    onClick,
     onClose,
     onOpen,
     autoClose,
@@ -76,6 +79,7 @@ export const updateNotification = ({
   position,
   withBorder,
   withCloseButton,
+  onClick,
   onClose,
   onOpen,
   autoClose,
@@ -98,6 +102,7 @@ export const updateNotification = ({
     position,
     withBorder,
     withCloseButton,
+    onClick,
     onClose,
     onOpen,
     autoClose,

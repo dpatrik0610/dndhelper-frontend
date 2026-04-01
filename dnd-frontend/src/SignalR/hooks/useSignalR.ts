@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef } from "react";
 import {
   HubConnection,
   HubConnectionBuilder,
@@ -6,8 +6,10 @@ import {
 } from "@microsoft/signalr";
 import { showNotification } from "@components/Notification/Notification";
 import { useAuthStore } from "@store/useAuthStore";
+import { useSubtleRollStore } from "@store/useSubtleRollStore";
 import { EntitySyncManager } from "@signalr/SyncManager/entitySyncManager";
 import type { EntityChangeEvent } from "@signalr/SyncManager/handlers/entitySyncTypes";
+import type { SubtleRollEvent } from "@appTypes/Roll";
 
 interface SignalRMessage {
   id: string;
@@ -23,17 +25,20 @@ export const useSignalR = () => {
 
   const token = useAuthStore((state) => state.token);
   const userId = useAuthStore((state) => state.id);
+  const roles = useAuthStore((state) => state.roles);
+  const openSubtleRoll = useSubtleRollStore((state) => state.openRoll);
+  const isAdmin = roles.includes("Admin");
 
   useEffect(() => {
     if (!token || !userId) {
-      console.log("⏸️ Not authenticated, skipping SignalR connection");
+      console.log("âŹ¸ď¸Ź Not authenticated, skipping SignalR connection");
       return;
     }
 
     const API_BASE = import.meta.env.VITE_API_BASE || "https://localhost:7222";
     const baseUrl = API_BASE.replace(/\/api$/, "");
 
-    console.log(`🔌 Creating SignalR connection for userId: ${userId}`);
+    console.log(`đź”Ś Creating SignalR connection for userId: ${userId}`);
 
     const newConnection = new HubConnectionBuilder()
       .withUrl(`${baseUrl}/hubs/notifications?userId=${userId}`)
@@ -52,7 +57,7 @@ export const useSignalR = () => {
     setConnection(newConnection);
 
     return () => {
-      console.log("🔌 Stopping SignalR connection...");
+      console.log("đź”Ś Stopping SignalR connection...");
       newConnection.stop();
     };
   }, [token, userId]);
@@ -63,11 +68,11 @@ export const useSignalR = () => {
     const startConnection = async () => {
       try {
         await connection.start();
-        console.log("✅ SignalR Connected!");
+        console.log("âś… SignalR Connected!");
         setIsConnected(true);
 
         connection.on("ReceiveNotification", (message: SignalRMessage) => {
-          console.log("📨 Received notification:", message);
+          console.log("đź“¨ Received notification:", message);
 
           showNotification({
             title: `Message from ${message.sender}`,
@@ -78,7 +83,7 @@ export const useSignalR = () => {
         });
 
         connection.on("EntityChanged", (event: EntityChangeEvent) => {
-          console.log("🧩 EntityChanged received:", event);
+          console.log("đź§© EntityChanged received:", event);
           EntitySyncManager.handleEntityChange(event);
         });
 
@@ -89,14 +94,28 @@ export const useSignalR = () => {
             timestamp: string;
             changes: EntityChangeEvent[];
           }) => {
-            console.log("📦 EntityBatchChanged received:", batch);
+            console.log("đź“¦ EntityBatchChanged received:", batch);
             batch.changes.forEach((event) => {
               EntitySyncManager.handleEntityChange(event);
             });
           }
         );
+
+        connection.on("SubtleRoll", (payload: SubtleRollEvent) => {
+          if (!isAdmin) return;
+
+          console.log("SubtleRoll received:", payload);
+
+          showNotification({
+            title: `Subtle roll from ${payload.characterName}`,
+            message: "Click to view details",
+            color: "violet",
+            autoClose: false,
+            onClick: () => openSubtleRoll(payload),
+          });
+        });
       } catch (err) {
-        console.error("❌ SignalR Connection Error:", err);
+        console.error("âťŚ SignalR Connection Error:", err);
         setIsConnected(false);
       }
     };
@@ -104,12 +123,12 @@ export const useSignalR = () => {
     startConnection();
 
     connection.onreconnecting((error) => {
-      console.log("🔄 SignalR Reconnecting...", error);
+      console.log("đź”„ SignalR Reconnecting...", error);
       setIsConnected(false);
     });
 
     connection.onreconnected((connectionId) => {
-      console.log("✅ SignalR Reconnected!", connectionId);
+      console.log("âś… SignalR Reconnected!", connectionId);
       setIsConnected(true);
 
       showNotification({
@@ -120,7 +139,7 @@ export const useSignalR = () => {
     });
 
     connection.onclose((error) => {
-      console.log("🔴 SignalR Connection closed", error);
+      console.log("đź”´ SignalR Connection closed", error);
       setIsConnected(false);
     });
 
@@ -128,8 +147,9 @@ export const useSignalR = () => {
       connection.off("ReceiveNotification");
       connection.off("EntityChanged");
       connection.off("EntityBatchChanged");
+      connection.off("SubtleRoll");
     };
-  }, [connection]);
+  }, [connection, isAdmin, openSubtleRoll]);
 
   return {
     connection,

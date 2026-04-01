@@ -21,6 +21,7 @@ import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapChar
 import { AppBackground } from "@components/layout/AppBackground";
 import { SidebarToggle } from "@components/layout/SidebarToggle";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
+import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal";
 import SettingsPage from "@features/settings/SettingsPage";
 import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
 import { useUiStore } from "@store/useUiStore";
@@ -59,6 +60,7 @@ function AppRoutes() {
 
       <AppShell.Main>
         <AppBackground />
+        <SubtleRollDetailsModal />
         <div
           style={{
             position: "relative",

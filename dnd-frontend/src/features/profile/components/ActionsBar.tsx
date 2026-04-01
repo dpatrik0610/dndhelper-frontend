@@ -2,7 +2,7 @@ import { Button, Group, Paper, Title } from "@mantine/core";
 import { longrest } from "@services/characterService";
 import { useAuthStore } from "@store/useAuthStore";
 import { showNotification } from "@components/Notification/Notification";
-import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus, IconSwords, IconHeartPlus } from "@tabler/icons-react";
+import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus, IconSwords, IconHeartPlus, IconDice5, IconEyeOff } from "@tabler/icons-react";
 import { loadCharacters } from "@utils/loadCharacter";
 import { useCharacterStore } from "@store/useCharacterStore";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ import { RemoveCurrencyModal } from "./RemoveCurrencyModal";
 import { TransferCurrencyModal } from "./TransferCurrencyModal";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { HealModal } from "./HealModal";
+import { RollModal, SubtleRollModal } from "./RollModal";
 
 export interface ActionButtonProps {
   label: string;
@@ -28,6 +29,8 @@ export function ActionBar() {
   const [healModalOpened, setHealModalOpened] = useState(false);
   const [removeCurrencyModalOpened, setRemoveCurrencyModalOpened] = useState(false);
   const [transferCurrencyModalOpened, setTransferCurrencyModalOpened] = useState(false);
+  const [rollModalOpened, setRollModalOpened] = useState(false);
+  const [subtleRollModalOpened, setSubtleRollModalOpened] = useState(false);
 
   const token = useAuthStore.getState().token;
   const navigate = useNavigate();
@@ -48,6 +51,8 @@ export function ActionBar() {
   }
 
   const actions: ActionButtonProps[] = [
+    { label: "Roll", icon: <IconDice5 size={16} />, onClick: () => setRollModalOpened(true) },
+    { label: "Subtle Roll", icon: <IconEyeOff size={16} />, onClick: () => setSubtleRollModalOpened(true) },
     { label: "Long Rest", icon: <IconMoon />, onClick: handleLongrest },
     { label: "Edit Character", icon: <IconEdit />, onClick: () => navigate("/editCharacter") },
     { label: "Add Condition", icon: <IconPlus />, onClick: () => setModalOpened(true) },
@@ -96,6 +101,8 @@ if (isMobile) {
       <HealModal opened={healModalOpened} onClose={() => setHealModalOpened(false)} />
       <RemoveCurrencyModal opened={removeCurrencyModalOpened} onClose={() => setRemoveCurrencyModalOpened(false)} />
       <TransferCurrencyModal opened={transferCurrencyModalOpened} onClose={() => setTransferCurrencyModalOpened(false)} />
+      <RollModal opened={rollModalOpened} onClose={() => setRollModalOpened(false)} />
+      <SubtleRollModal opened={subtleRollModalOpened} onClose={() => setSubtleRollModalOpened(false)} />
     </>
     );
   }
@@ -139,6 +146,8 @@ if (isMobile) {
       <HealModal opened={healModalOpened} onClose={() => setHealModalOpened(false)} />
       <RemoveCurrencyModal opened={removeCurrencyModalOpened} onClose={() => setRemoveCurrencyModalOpened(false)} />
       <TransferCurrencyModal opened={transferCurrencyModalOpened} onClose={() => setTransferCurrencyModalOpened(false)} />
+      <RollModal opened={rollModalOpened} onClose={() => setRollModalOpened(false)} />
+      <SubtleRollModal opened={subtleRollModalOpened} onClose={() => setSubtleRollModalOpened(false)} />
     </>
   );
 }
