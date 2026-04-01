@@ -20,3 +20,25 @@ export interface SubtleRollEvent extends RollResult {
   note?: string | null;
   timestampUtc: string;
 }
+
+export interface RollHistoryEntry {
+  id?: string | null;
+  userId?: string | null;
+  username?: string | null;
+  characterId?: string | null;
+  campaignId?: string | null;
+  type: number;
+  expression: string;
+  numberOfDice: number;
+  sides: number;
+  modifier: number;
+  rolls: number[];
+  total: number;
+  min: number;
+  max: number;
+  average: number;
+  note?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  isDeleted?: boolean | null;
+}

@@ -1,4 +1,4 @@
-import { IconBook2, IconDashboard, IconHome, IconNotes, IconSettings, IconSparkles, IconUsers } from "@tabler/icons-react";
+import { IconBook2, IconDashboard, IconHome, IconHistory, IconNotes, IconSettings, IconSparkles, IconUsers } from "@tabler/icons-react";
 
 export type Section = "character" | "admin" | "settings";
 
@@ -16,6 +16,7 @@ export const tabs: Record<Section, TabItem[]> = {
     { link: "/spells", label: "Spellbook", icon: IconSparkles },
     { link: "/rules", label: "Rules", icon: IconBook2 },
     { link: "/notes", label: "Notes", icon: IconNotes },
+    { link: "/roll-history", label: "Roll History", icon: IconHistory },
   ],
   admin: [{ link: "/dashboard", label: "Dashboard", icon: IconDashboard }],
   settings: [

@@ -12,6 +12,7 @@ import SpellPage from "@features/spells/SpellPage";
 import { CharacterFormPage } from "@features/characterForm/CharacterFormPage";
 import { AdminDashboard } from "@features/admin/AdminDashboard";
 import NotesPage from "@features/notes/NotesPage";
+import RollHistoryPage from "@features/rollHistory/RollHistoryPage";
 import PrivateRoute from "@components/PrivateRoute";
 import { useAuthStore } from "@store/useAuthStore";
 import { useCharacterStore } from "@store/useCharacterStore";
@@ -79,6 +80,7 @@ function AppRoutes() {
               <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
               <Route path="/rules" element={<RulesPage />} />
               <Route path="/notes" element={<NotesPage />} />
+              <Route path="/roll-history" element={<RollHistoryPage />} />
               {isAdmin && <Route path="/settings" element={<SettingsPage />} />}
               {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
             </Route>

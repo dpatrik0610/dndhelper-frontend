@@ -349,33 +349,66 @@ function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant:
               withBorder
               style={{
                 background: "rgba(0,0,0,0.25)",
-                borderColor: "rgba(255,255,255,0.12)",
+                borderColor: "rgba(120,255,180,0.35)",
+                boxShadow: "0 0 14px rgba(120,255,180,0.22)",
               }}
             >
               <Stack gap="xs">
                 <Group justify="space-between" align="center">
                   <Text fw={600}>Result</Text>
-                  <Badge color="violet" variant="light" size="lg">
+                  <Badge
+                    color="violet"
+                    variant="filled"
+                    size="lg"
+                    style={{
+                      boxShadow: "0 0 12px rgba(128, 90, 255, 0.65)",
+                      border: "1px solid rgba(150,120,255,0.6)",
+                    }}
+                  >
                     Total {result.total}
                   </Badge>
                 </Group>
                 {resultExpression && <Text size="sm">Expression: {resultExpression}</Text>}
-                <Text size="sm">Rolls: {formatRollsList(result)}</Text>
-                <Group gap="xs" wrap="wrap">
+                <Stack gap={4}>
+                  <Text size="sm">Rolls:</Text>
+                  <Group wrap="wrap">
+                    {result.rolls.map((roll, idx) => (
+                      <Badge
+                        key={`roll-${idx}`}
+                        color="gray"
+                        variant="light"
+                        size="lg"
+                        radius="sm"
+                        style={{ fontSize: 16, fontWeight: 450, border: "none" }}
+                      >
+                        {roll}
+                      </Badge>
+                    ))}
+                  </Group>
+                </Stack>
+                <Group
+                  wrap="nowrap"
+                  style={{
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 8,
+                    padding: "4px 8px",
+                    background: "rgba(255,255,255,0.02)",
+                  }}
+                >
                   {typeof result.min === "number" && (
-                    <Badge color="gray" variant="light">
+                    <Text size="xs" c="dimmed" lineClamp={1}>
                       Min {result.min}
-                    </Badge>
+                    </Text>
                   )}
                   {typeof result.max === "number" && (
-                    <Badge color="gray" variant="light">
+                    <Text size="xs" c="dimmed" lineClamp={1}>
                       Max {result.max}
-                    </Badge>
+                    </Text>
                   )}
                   {typeof result.average === "number" && (
-                    <Badge color="gray" variant="light">
+                    <Text size="xs" c="dimmed" lineClamp={1}>
                       Avg {result.average.toFixed(2)}
-                    </Badge>
+                    </Text>
                   )}
                 </Group>
               </Stack>
