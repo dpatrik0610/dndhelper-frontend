@@ -7,12 +7,13 @@ import dayjs from "dayjs";
 import { useCharacterStore } from "@store/useCharacterStore";
 import { useAuthStore } from "@store/useAuthStore";
 import { useSessionStore } from "@store/session/useSessionStore";
-import { getCampaignBasicById } from "@services/campaignService";
+import { getCampaignOverviewByCharacter } from "@services/campaignService";
 import type { Character } from "@appTypes/Character/Character";
 import { quotes } from "./quotes";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { HeaderCard } from "./components/HeaderCard";
 import { ActiveSessionCard } from "./components/ActiveSessionCard";
+import { showNotification } from "@components/Notification/Notification";
 // import { QuickActionBar } from "./components/QuickActionBar";
 
 const palette = {
@@ -61,24 +62,32 @@ export default function Home() {
   // Load campaign + sessions for the active character
   useEffect(() => {
     const load = async () => {
-      if (!character?.campaignId) {
-        console.info("[Home] No campaignId on selected character, skipping session load", { characterId: character?.id });
+      if (!character?.id) {
         setCampaignName(null);
         return;
       }
       const token = useAuthStore.getState().token;
       if (!token) return;
       try {
-        const basic = await getCampaignBasicById(character.campaignId, token);
-        setCampaignName(basic.name);
-      } catch {
-        console.warn("[Home] Failed to load campaign basic", { campaignId: character.campaignId });
+        const overview = await getCampaignOverviewByCharacter(character.id, token);
+        if (!overview) {
+          showNotification({
+            title: "No Campaign Found",
+            message: "No campaign found for this character.",
+            color: "yellow",
+          });
+          setCampaignName(null);
+          return;
+        }
+        setCampaignName(overview.name);
+        void loadByCampaign(overview.id);
+      } catch (error) {
+        console.warn("[Home] Failed to load campaign overview", { characterId: character.id, error });
         setCampaignName(null);
       }
-      void loadByCampaign(character.campaignId);
     };
     void load();
-  }, [character?.campaignId, loadByCampaign, character?.id]);
+  }, [character?.id, loadByCampaign]);
 
   const activeSession = useMemo(() => {
     const live = sessions.find((s) => s.isLive);

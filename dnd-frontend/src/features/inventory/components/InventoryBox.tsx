@@ -5,7 +5,7 @@ import { Text, Loader, Center } from "@mantine/core";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useInventoryStore } from "@store/useInventorystore";
 import { useAuthStore } from "@store/useAuthStore";
-import { decrementItemQuantity as apiDecreaseQuantity, moveItem, type ModifyEquipmentAmount, type MoveItemRequest } from "@services/inventoryService";
+import { decrementItemQuantity as apiDecreaseQuantity, moveItem, moveItemToCharacter, type ModifyEquipmentAmount, type MoveItemRequest, type MoveItemToCharacterRequest } from "@services/inventoryService";
 import { showNotification } from "@components/Notification/Notification";
 import { IconCheck } from "@tabler/icons-react";
 import { loadInventories } from "@utils/loadinventory";
@@ -15,6 +15,7 @@ import { InventoryItemsList } from "./InventoryItemsList";
 import { InventoryItemsGrid } from "./InventoryItemsGrid";
 import { useFilteredItems } from "@features/inventory/hooks/useFilteredItems";
 import { BaseTransition } from "@components/animations/BaseTransition";
+import { useCharacterStore } from "@store/useCharacterStore";
 
 interface InventoryBoxProps {
   inventory: Inventory;
@@ -24,6 +25,7 @@ interface InventoryBoxProps {
 
 export default function InventoryBox({ inventory, searchTerm, viewMode }: InventoryBoxProps) {
   const inventories = useInventoryStore((state) => state.inventories);
+  const character = useCharacterStore((state) => state.character);
 
   const { decrementItemQuantity } = useInventoryStore();
   const token = useAuthStore.getState().token;
@@ -90,15 +92,20 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
     });
   };
 
-  const handleConfirmMove = async (targetInventoryId: string, amount: number) => {
+  const handleConfirmMove = async (payload: { targetInventoryId?: string; targetCharacterId?: string; amount: number }) => {
     if (!moveItemId || !currentInventory?.id || !token) return;
 
     try {
-      const request : MoveItemRequest = {
-        targetInventoryId,
-        amount,
+      if (payload.targetCharacterId) {
+        const request: MoveItemToCharacterRequest = { amount: payload.amount };
+        await moveItemToCharacter(currentInventory.id, moveItemId, payload.targetCharacterId, request, token);
+      } else if (payload.targetInventoryId) {
+        const request : MoveItemRequest = {
+          targetInventoryId: payload.targetInventoryId,
+          amount: payload.amount,
+        }
+        await moveItem(currentInventory.id, moveItemId, request, token);
       }
-      await moveItem(currentInventory.id, moveItemId, request, token);
     } catch (error) {
       console.error("Move failed:", error);
       showNotification({
@@ -147,8 +154,9 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
         }}
         inventories={inventories}
         currentInventoryId={currentInventory.id!}
+        currentCharacterId={character?.id}
         itemId={moveItemId}
-        onConfirm={(targetInventoryId, amount) => handleConfirmMove(targetInventoryId, amount)}
+        onConfirm={handleConfirmMove}
       />
       
       <InventorySection

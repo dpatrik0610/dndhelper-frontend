@@ -51,6 +51,10 @@ export interface MoveItemRequest {
   amount: number;
 }
 
+export interface MoveItemToCharacterRequest {
+  amount: number;
+}
+
 export async function getItems(inventoryId: string, token: string): Promise<InventoryItem[]> {
   return apiClient(`${baseUrl}/${inventoryId}/items`, { method: "GET", token });
 }
@@ -81,4 +85,17 @@ export async function decrementItemQuantity(inventoryId: string, request: Modify
 
 export async function moveItem(sourceInventoryId: string, equipmentId: string, request: MoveItemRequest, token: string): Promise<void> {
   await apiClient(`${baseUrl}/${sourceInventoryId}/items/${equipmentId}/move`, {method: "POST", body: request, token})
+}
+
+export async function moveItemToCharacter(
+  sourceInventoryId: string,
+  equipmentId: string,
+  characterId: string,
+  request: MoveItemToCharacterRequest,
+  token: string
+): Promise<void> {
+  await apiClient(
+    `${baseUrl}/${sourceInventoryId}/items/${equipmentId}/move-to-character/${characterId}`,
+    { method: "POST", body: request, token }
+  );
 }

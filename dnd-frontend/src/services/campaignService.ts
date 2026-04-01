@@ -1,6 +1,7 @@
-import { apiClient } from "../api/apiClient"
-import type { Campaign } from "../types/Campaign"
-import type { Character } from "../types/Character/Character"
+import { apiClient } from "@api/apiClient"
+import type { Campaign } from "@appTypes/Campaign"
+import type { Character } from "@appTypes/Character/Character"
+import type { CampaignOverviewDto } from "@appTypes/CampaignOverview"
 
 // ----------- Base CRUD -----------
 export async function getAllCampaigns(token: string): Promise<Campaign[]> {
@@ -13,6 +14,16 @@ export async function getCampaignById(id: string, token: string): Promise<Campai
 
 export async function getCampaignBasicById(id: string, token: string): Promise<Pick<Campaign, "id" | "name" | "description" | "isActive" | "currentSessionId" | "sessionIds" | "ownerIds">> {
   return apiClient(`/Campaign/${id}/basic`, { token });
+}
+
+export async function getCampaignOverviewByCharacter(characterId: string, token: string): Promise<CampaignOverviewDto | null> {
+  try {
+    return await apiClient(`/campaign/character/${characterId}/overview`, { token });
+  } catch (err) {
+    const status = (err as Error & { status?: number }).status;
+    if (status === 404) return null;
+    throw err;
+  }
 }
 
 export async function createCampaign(campaign: Campaign, token: string): Promise<Campaign> {
