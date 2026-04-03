@@ -1,7 +1,8 @@
-import type { Inventory } from "../types/Inventory/Inventory";
-import type { InventoryItem } from "../types/Inventory/InventoryItem";
-import type { Equipment } from "../types/Equipment/Equipment";
-import { apiClient } from "../api/apiClient";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
+import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
+import { apiClient } from "@api/apiClient";
+
 
 // Base URL for all requests
 const baseUrl = "/inventory";

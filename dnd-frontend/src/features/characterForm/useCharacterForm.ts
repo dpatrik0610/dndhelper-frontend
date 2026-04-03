@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useCharacterFormStore } from "@store/useCharacterFormStore";
 import { useCharacterStore } from "@store/useCharacterStore";
 import { createCharacter, updateCharacter } from "@services/characterService";
-import { createInventory } from "@services/inventoryService";
+import { assignInventoryToCharacter, createInventory } from "@services/inventoryService";
 import { useAuthStore } from "@store/useAuthStore";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { loadCharacters } from "@utils/loadCharacter";
@@ -42,13 +42,18 @@ export function useCharacterForm(editMode: boolean) {
         const newCharacter = await createCharacter(characterForm, token!);
         if (newCharacter) {
           const newInventory: Inventory = {
-            name: "Equipment",
+            name: `${newCharacter.name}'s Equipment`,
             ownerIds: newCharacter.ownerIds ?? [],
             characterIds: [newCharacter.id!],
             currencies: [],
             items: [],
           };
-          await createInventory(newInventory, token!);
+          const createdInventory = await createInventory(newInventory, token!);
+
+          if (createdInventory.id) {
+            await assignInventoryToCharacter(createdInventory.id, newCharacter.id!, token!);
+          }
+
           setCharacter(newCharacter);
 
           showNotification({
