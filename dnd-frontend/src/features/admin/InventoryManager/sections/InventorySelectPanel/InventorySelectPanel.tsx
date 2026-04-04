@@ -6,6 +6,8 @@ import { InventoryNavbar } from "./InventoryNavbar";
 import { BaseModal } from "@components/BaseModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
+import { assignInventoryToCharacter } from "@services/inventoryService";
+import { useAuthStore } from "@store/useAuthStore";
 
 export function InventorySelectPanel() {
   const { loading, loadByCharacter, create } = useAdminInventoryStore();
@@ -61,7 +63,10 @@ export function InventorySelectPanel() {
             });
             return;
           }
-          await create([selectedCharId], newName.trim());
+          const createdInventory = await create([selectedCharId], newName.trim());
+          await assignInventoryToCharacter(createdInventory.id!, selectedCharId, useAuthStore.getState().token!);
+          await loadByCharacter(selectedCharId);
+
           setCreateModal(false);
           setNewName("");
         }}

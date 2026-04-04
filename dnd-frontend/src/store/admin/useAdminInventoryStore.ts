@@ -15,6 +15,7 @@ import {
   getAllInventories,
   type MoveItemRequest,
   type ModifyEquipmentAmount,
+  assignInventoryToCharacter,
 } from "@services/inventoryService";
 import { useAuthStore } from "@store/useAuthStore";
 import { showNotification } from "@components/Notification/Notification";
@@ -35,11 +36,12 @@ interface AdminInventoryStore {
 
   loadByCharacter: (characterId: string) => Promise<void>;
   loadAll: () => Promise<void>;
+  reloadInventory: (id: string) => Promise<void>;
   refreshInventories: (characterId?: string) => Promise<void>;
   refreshSelected: () => Promise<void>;
   select: (id: string | null) => void;
 
-  create: (characterIds: string[] | null, name: string) => Promise<void>;
+  create: (characterIds: string[] | null, name: string) => Promise<Inventory>;
   duplicate: (inventoryId: string) => Promise<void>;
   rename: (id: string, name: string) => Promise<void>;
   remove: (id: string) => Promise<void>;
@@ -50,6 +52,7 @@ interface AdminInventoryStore {
   moveItem: (equipmentId: string, targetInventoryId: string, amount: number) => Promise<void>;
   incrementItemQuantity: (equipmentId: string) => Promise<void>;
   decrementItemQuantity: (equipmentId: string) => Promise<void>;
+  linkInventoryToCharacters: (inventoryId: string, characterIds: string[]) => Promise<void>;
 
   updateEquipment: (equipment: Equipment) => Promise<Equipment>;
   clearStorage: () => void;
@@ -159,18 +162,15 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
 
     // === REFRESH INVENTORY LIST ===
     refreshInventories: async (characterId?: string) => {
-      const charId =
-        characterId ||
-        get().selected?.characterIds?.[0] ||
-        get().inventories[0]?.characterIds?.[0];
 
-      if (!charId) {
+      if (!characterId) {
         await get().loadAll();
         return;
       }
+
       try {
-        const refreshed = await getInventoriesByCharacter(charId, getToken());
-        const owned = refreshed.filter((i) => i.characterIds?.includes(charId));
+        const refreshed = await getInventoriesByCharacter(characterId, getToken());
+        const owned = refreshed.filter((i) => i.characterIds?.includes(characterId));
         const sel = get().selected;
         set({
           inventories: owned,
@@ -179,6 +179,25 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       } catch (err) {
         showNotification({
           title: "Error refreshing inventories",
+          message: String(err),
+          color: SectionColor.Red,
+        });
+      }
+    },
+
+    reloadInventory: async (id: string) => {
+      try {
+        const updated = await getInventory(id, getToken());
+        set((state) => ({
+          inventories: state.inventories.map((i) =>
+            i.id === id ? updated : i
+          ),
+          selected:
+            state.selected?.id === id ? updated : state.selected,
+        }));
+      } catch (err) {
+        showNotification({
+          title: "Error reloading inventory",
           message: String(err),
           color: SectionColor.Red,
         });
@@ -204,19 +223,23 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     // === CREATE NEW INVENTORY ===
     create: async (characterIds, name) => {
       characterIds = characterIds ?? [];
-      if (characterIds.length === 0) return;
 
-      await createInventory(
+      const created = await createInventory(
         { name, characterIds, ownerIds: [], currencies: [] },
         getToken()
       );
 
-      await get().refreshInventories(characterIds[0]);
       showNotification({
         title: "Inventory created",
         message: `${name} added successfully.`,
         color: SectionColor.Green,
       });
+        set((state) => ({
+          inventories: [created, ...state.inventories],
+          selected: created,
+        }));
+
+      return created;
     },
 
     duplicate: async (inventoryId) => {
@@ -237,6 +260,8 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
 
       try {
         const created = await createInventory(payload, getToken());
+        get().linkInventoryToCharacters(created.id!, created.characterIds ?? []);
+
         set((state) => ({
           inventories: [created, ...state.inventories],
           selected: created,
@@ -261,7 +286,8 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       if (!current) return;
 
       await updateInventory(id, { ...current, name }, getToken());
-      await get().refreshInventories();
+      // No need to fetch entire list, just update the changed inventory
+      await get().reloadInventory(id);
 
       showNotification({
         title: "Renamed",
@@ -272,7 +298,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
 
     remove: async (id) => {
       await deleteInventory(id, getToken());
-      await get().refreshInventories();
+      await get().loadAll();
       showNotification({
         title: "Inventory deleted",
         message: "Inventory removed successfully.",
@@ -285,7 +311,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       const sel = get().selected;
       if (!sel?.id) return;
       await addNewItem(sel.id, equipment, getToken());
-      await get().refreshInventories();
+      await get().reloadInventory(sel.id);
       showNotification({
         title: "Item added",
         message: `${equipment.name} added to ${sel.name}.`,
@@ -301,7 +327,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
 
       try {
         await addOrIncrementExisting(sel.id, request, token);
-        await get().refreshInventories();
+        await get().reloadInventory(sel.id);
         showNotification({
           title: "Item added",
           message: `Added ${amount}× item to ${sel.name}.`,
@@ -320,7 +346,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       const sel = get().selected;
       if (!sel?.id || !item.equipmentId) return;
       await updateItemService(sel.id, item.equipmentId, item, getToken());
-      await get().refreshInventories();
+      await get().reloadInventory(sel.id);
       showNotification({
         title: "Item updated",
         message: `${item.equipmentName} updated successfully.`,
@@ -332,7 +358,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       const sel = get().selected;
       if (!sel?.id || !item.equipmentId) return;
       await deleteItemService(sel.id, item.equipmentId, getToken());
-      await get().refreshInventories();
+      await get().reloadInventory(sel.id);
       showNotification({
         title: "Item removed",
         message: `${item.equipmentName} deleted.`,
@@ -346,7 +372,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       const token = getToken();
       const request: MoveItemRequest = { targetInventoryId, amount };
       await moveItemService(sel.id, equipmentId, request, token);
-      await get().refreshInventories();
+      await get().reloadInventory(sel.id);
       showNotification({
         title: "Item moved",
         message: `Moved ${amount}× item from ${sel.name} to target inventory.`,
@@ -381,5 +407,31 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     },
 
     clearStorage: () => set({ inventories: [], selected: null, loading: false }),
+
+    linkInventoryToCharacters: async (inventoryId: string, characterIds: string[]) => {
+      if (characterIds.length === 0 || characterIds.find((id) => id.trim() === "")) {
+        showNotification({
+          title: "Error linking inventory",
+          message: "No characters to link or invalid character IDs",
+          color: SectionColor.Yellow,
+        });
+        return;
+      }
+
+      try {
+        await Promise.all(characterIds.map((charId) => assignInventoryToCharacter(inventoryId, charId, getToken())));
+        showNotification({
+          title: "Success",
+          message: "Inventory linked to characters successfully.",
+          color: SectionColor.Green,
+        });
+      } catch (err) {
+        showNotification({
+          title: "Error linking inventory",
+          message: String(err),
+          color: SectionColor.Red,
+        });
+      }
+    },
   };
 });

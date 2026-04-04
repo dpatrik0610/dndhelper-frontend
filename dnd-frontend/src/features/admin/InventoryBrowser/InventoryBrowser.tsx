@@ -65,8 +65,8 @@ export function InventoryBrowser() {
     }
   };
 
-  const handleDuplicate = (id: string) => {
-    void duplicate(id);
+  const handleDuplicate = (inventoryId: string) => {
+    void duplicate(inventoryId);
   };
 
   return (
