@@ -9,6 +9,7 @@ import {
   Button,
   Select,
   Divider,
+  Input,
 } from "@mantine/core";
 import { useState } from "react";
 import { randomId } from "@mantine/hooks";
@@ -39,6 +40,7 @@ export function AdminCurrencyBox() {
   const [mode, setMode] = useState<"add" | "remove" | null>(null);
   const [amount, setAmount] = useState<number>(0);
   const [currencyCode, setCurrencyCode] = useState<string>("gp");
+  const [customCurrency, setCustomCurrency] = useState<string>();
 
   const isCharacter = !!selectedCharacter;
   const currentCurrencies = isCharacter
@@ -60,7 +62,18 @@ export function AdminCurrencyBox() {
   }
 
 const handleConfirm = async () => {
-  const change: Currency[] = [{ type: currencyCode, amount, currencyCode }];
+  if (currencyCode === "other" && (!customCurrency || !customCurrency)) {
+    alert("Please enter a valid currency code.");
+    return;
+  }
+  let change: Currency[];
+
+  if (currencyCode === "other") {
+    change = [{ type: customCurrency!, amount, currencyCode: customCurrency! }];
+  }
+  else {
+    change = [{ type: currencyCode, amount, currencyCode }];
+  }
 
   if (isCharacter) {
     if (mode === "add") {
@@ -168,6 +181,8 @@ const handleConfirm = async () => {
               { value: "sp", label: "🥈 Silver Pieces" },
               { value: "ep", label: "⚡ Electrum Pieces" },
               { value: "pp", label: "💎 Platinum Pieces" },
+              { value: "cp", label: "🥉 Copper Pieces" },
+              { value: "other", label: "🔶 Other" },
             ]}
             value={currencyCode}
             onChange={(val) => setCurrencyCode(val!)}
@@ -176,6 +191,18 @@ const handleConfirm = async () => {
               input: { background: "rgba(255,255,255,0.05)", border: "none" },
             }}
           />
+          {currencyCode === "other" && (
+            <Input
+              placeholder="Enter currency code (e.g. 'gp' or 'mythril')"
+              value={customCurrency || ""}
+              onChange={(e) => setCustomCurrency(e.target.value)}
+              radius="md"
+              styles={{
+                input: { background: "rgba(255,255,255,0.05)", border: "none" },
+              }}
+            />
+          )}
+
           <NumberInput
             label="Amount"
             min={0}
