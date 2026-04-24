@@ -23,9 +23,9 @@ import { AppBackground } from "@components/layout/AppBackground";
 import { SidebarToggle } from "@components/layout/SidebarToggle";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
 import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal";
-import SettingsPage from "@features/settings/SettingsPage";
 import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
 import { useUiStore } from "@store/useUiStore";
+import AiAssistantPage from "@features/aiAssistant/AiAssistantPage";
 
 function AppRoutes() {
   const location = useLocation();
@@ -81,8 +81,8 @@ function AppRoutes() {
               <Route path="/rules" element={<RulesPage />} />
               <Route path="/notes" element={<NotesPage />} />
               <Route path="/roll-history" element={<RollHistoryPage />} />
-              {isAdmin && <Route path="/settings" element={<SettingsPage />} />}
               {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
+              {isAdmin && <Route path="/ai-assistant" element={<AiAssistantPage />} />}
             </Route>
 
             <Route path="/login" element={<Login />} />

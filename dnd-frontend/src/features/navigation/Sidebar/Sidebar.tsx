@@ -31,7 +31,7 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
 
   const activeLabel = useMemo(() => {
     const normalizedPath = location.pathname === "/" ? "/home" : location.pathname;
-    const allTabs = [...tabs.character, ...tabs.admin, ...tabs.settings];
+    const allTabs = [...tabs.character, ...tabs.admin, /*...tabs.settings*/];
     const match = allTabs.find((item) => normalizedPath.startsWith(item.link));
     return match?.label ?? "";
   }, [location.pathname]);
@@ -44,7 +44,7 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
 
   const currentLinks: TabItem[] = tabs[section];
   const adminLinks: TabItem[] = tabs["admin"];
-  const settingsLinks: TabItem[] = tabs["settings"];
+  // const settingsLinks: TabItem[] = tabs["settings"];
 
   const initials = username
     .split(" ")
@@ -110,12 +110,12 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
             />
           )}
 
-          <NavSection
+          {/* <NavSection
             label="Settings (coming soon)"
             items={settingsLinks}
             activeLabel={activeLabel}
             onNavigate={handleNavigate}
-          />
+          /> */}
         </Stack>
       </Stack>
     </Drawer>
