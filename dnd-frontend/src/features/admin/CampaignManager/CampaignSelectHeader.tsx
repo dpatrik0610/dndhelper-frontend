@@ -33,7 +33,7 @@ export function CampaignSelectPanel() {
 
   useEffect(() => {
     if (campaigns.length === 0) void reload();
-  }, []);
+  }, [campaigns.length, reload]);
 
   const handleCreate = async () => {
     if (!newName.trim()) {
@@ -50,6 +50,7 @@ export function CampaignSelectPanel() {
       description: null,
       characterIds: [],
       ownerIds: [],
+      activeEncounterId: null,
       worldIds: [],
       questIds: [],
       noteIds: [],

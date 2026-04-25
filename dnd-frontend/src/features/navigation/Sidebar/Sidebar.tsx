@@ -27,11 +27,12 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
   const isAdmin = roles.includes("Admin");
 
   const [section] = useState<Section>("character");
+  const encounterLinks: TabItem[] = tabs.encounter;
   const [adminOpen, setAdminOpen] = useState(true);
 
   const activeLabel = useMemo(() => {
     const normalizedPath = location.pathname === "/" ? "/home" : location.pathname;
-    const allTabs = [...tabs.character, ...tabs.admin, /*...tabs.settings*/];
+    const allTabs = [...tabs.character, ...tabs.encounter, ...tabs.admin, /*...tabs.settings*/];
     const match = allTabs.find((item) => normalizedPath.startsWith(item.link));
     return match?.label ?? "";
   }, [location.pathname]);
@@ -43,7 +44,7 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
   const themeTokens = sidebarThemes[themeVariant] ?? sidebarThemes.midnight;
 
   const currentLinks: TabItem[] = tabs[section];
-  const adminLinks: TabItem[] = tabs["admin"];
+  const adminLinks: TabItem[] = tabs.admin;
   // const settingsLinks: TabItem[] = tabs["settings"];
 
   const initials = username
@@ -95,6 +96,13 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
           <NavSection
             label="Character"
             items={currentLinks}
+            activeLabel={activeLabel}
+            onNavigate={handleNavigate}
+          />
+
+          <NavSection
+            label="Encounter"
+            items={encounterLinks}
             activeLabel={activeLabel}
             onNavigate={handleNavigate}
           />

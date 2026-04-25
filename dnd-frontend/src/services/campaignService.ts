@@ -90,3 +90,11 @@ export async function removeSessionFromCampaign(id: string, sessionId: string, t
 export async function setCurrentSessionForCampaign(id: string, sessionId: string, token: string) {
   return apiClient(`/Campaign/${id}/current-session/${sessionId}`, { method: "PUT", token })
 }
+
+export async function setActiveEncounterForCampaign(campaignId: string, encounterId: string, token: string) {
+  return apiClient(`/Campaign/${campaignId}/active-encounter/${encounterId}`, { method: "PUT", token })
+}
+
+export async function clearActiveEncounterForCampaign(campaignId: string, token: string) {
+  return apiClient(`/Campaign/${campaignId}/active-encounter`, { method: "DELETE", token })
+}

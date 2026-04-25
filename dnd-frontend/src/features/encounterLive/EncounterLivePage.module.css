@@ -1,0 +1,135 @@
+.headerShell {
+  background: linear-gradient(135deg, rgba(20, 16, 36, 0.92), rgba(14, 10, 28, 0.9));
+  border-color: rgba(172, 148, 255, 0.22);
+  backdrop-filter: blur(12px);
+}
+
+.topPanel {
+  background: linear-gradient(145deg, rgba(24, 18, 40, 0.92), rgba(12, 10, 24, 0.88));
+  border-color: rgba(172, 148, 255, 0.18);
+  min-height: 130px;
+}
+
+.boardLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px 340px;
+  gap: 16px;
+  align-items: stretch;
+  min-height: 720px;
+}
+
+.mapPanel,
+.toolRail,
+.initiativePanel,
+.emptyState {
+  background: linear-gradient(145deg, rgba(24, 18, 40, 0.92), rgba(12, 10, 24, 0.88));
+  border-color: rgba(172, 148, 255, 0.2);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+}
+
+.mapViewport {
+  flex: 1;
+  min-height: 540px;
+  border-radius: 14px;
+  border: 1px solid rgba(172, 148, 255, 0.16);
+  background:
+    linear-gradient(180deg, rgba(13, 15, 28, 0.84), rgba(10, 10, 18, 0.96)),
+    radial-gradient(circle at top, rgba(177, 151, 252, 0.08), transparent 55%);
+  overflow: hidden;
+  position: relative;
+}
+
+.mapImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mapPlaceholder {
+  width: 100%;
+  height: 100%;
+  min-height: 540px;
+}
+
+.toolRail {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.initiativePanel {
+  min-width: 0;
+}
+
+.initiativeScroll {
+  height: 100%;
+  min-height: 0;
+}
+
+.entityRow {
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(172, 148, 255, 0.14);
+}
+
+.entityRowInteractive {
+  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease;
+}
+
+.entityRowInteractive:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(172, 148, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.entityMain {
+  min-width: 0;
+  flex: 1;
+}
+
+.initiativeBadge {
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #f3efff;
+  background: linear-gradient(145deg, rgba(177, 151, 252, 0.25), rgba(95, 64, 182, 0.22));
+  border: 1px solid rgba(177, 151, 252, 0.25);
+}
+
+.entityText {
+  min-width: 0;
+  flex: 1;
+}
+
+@media (max-width: 1280px) {
+  .boardLayout {
+    grid-template-columns: minmax(0, 1fr) 72px 300px;
+  }
+}
+
+@media (max-width: 992px) {
+  .boardLayout {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .mapViewport,
+  .mapPlaceholder {
+    min-height: 420px;
+  }
+
+  .toolRail {
+    order: 2;
+  }
+
+  .initiativePanel {
+    order: 3;
+  }
+}

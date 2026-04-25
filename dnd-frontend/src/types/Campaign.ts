@@ -4,6 +4,7 @@ export interface Campaign {
     description: string | null;
     characterIds: string[];
     ownerIds: string[] | null;
+    activeEncounterId: string | null;
     worldIds: string[];
     questIds: string[];
     noteIds: string[];

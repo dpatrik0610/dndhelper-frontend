@@ -26,7 +26,7 @@ import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal"
 import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
 import { useUiStore } from "@store/useUiStore";
 import AiAssistantPage from "@features/aiAssistant/AiAssistantPage";
-
+import EncounterLivePage from "@features/encounterLive/EncounterLivePage";
 function AppRoutes() {
   const location = useLocation();
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -80,6 +80,7 @@ function AppRoutes() {
               <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
               <Route path="/rules" element={<RulesPage />} />
               <Route path="/notes" element={<NotesPage />} />
+              <Route path="/encounter" element={<EncounterLivePage />} />
               <Route path="/roll-history" element={<RollHistoryPage />} />
               {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
               {isAdmin && <Route path="/ai-assistant" element={<AiAssistantPage />} />}
