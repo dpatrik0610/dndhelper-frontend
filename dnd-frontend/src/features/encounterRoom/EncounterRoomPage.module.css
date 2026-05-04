@@ -1,0 +1,51 @@
+.page {
+  min-height: calc(100vh - 24px);
+  color: #e5e7eb;
+}
+
+.roomLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
+  height: calc(100vh - 32px);
+  padding: 10px;
+}
+
+.header {
+  grid-column: 1 / -1;
+}
+
+.toolbar {
+  grid-column: 1 / 2;
+}
+
+.canvas {
+  height: clamp(560px, calc(100vh - 170px), 920px);
+  min-height: 420px;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 6px;
+  background: #0f172a;
+}
+
+.sidebar {
+  grid-row: 2 / 4;
+  grid-column: 2 / 3;
+  min-height: 0;
+  overflow: auto;
+}
+
+@media (max-width: 960px) {
+  .roomLayout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 58vh auto;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    grid-row: auto;
+    grid-column: 1;
+  }
+}

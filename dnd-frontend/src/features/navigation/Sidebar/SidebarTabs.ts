@@ -19,7 +19,7 @@ export const tabs: Record<Section, TabItem[]> = {
     { link: "/roll-history", label: "Roll History", icon: IconHistory },
   ],
   encounter: [
-    { link: "/encounter", label: "Live Encounter", icon: IconSwords },
+    { link: "/encounter-room", label: "Encounter Rooms", icon: IconSwords },
   ],
   admin: [
     { link: "/dashboard", label: "Dashboard", icon: IconDashboard },

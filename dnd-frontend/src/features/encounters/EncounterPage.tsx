@@ -396,12 +396,12 @@ export default function EncounterPage({ embedded = false }: { embedded?: boolean
               </Button>
               {campaign?.activeEncounterId && activeEncounter?.mapUrl ? (
                 <Button component="a" href={activeEncounter.mapUrl} target="_blank" rel="noreferrer" variant="light" leftSection={<IconLink size={16} />}>
-                  Open Live Map
+                  Open Map
                 </Button>
               ) : null}
               {!isAdmin && activeEncounter ? (
                 <Button variant="light" leftSection={<IconCheck size={16} />} disabled>
-                  Viewing Live Encounter
+                  Viewing Encounter
                 </Button>
               ) : null}
             </Group>

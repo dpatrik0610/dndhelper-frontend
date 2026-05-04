@@ -36,6 +36,7 @@ import { InitiativeTracker } from "./InitiativeTracker/InitiativeTracker";
 import { RuleManager } from "./RuleManager/RuleManager";
 import { DMCharacterPanel } from "./DMCharacterManager/DMCharacterPanel";
 import EncounterPage from "@features/encounters/EncounterPage";
+import { EncounterRoomManager } from "./EncounterRoomManager/EncounterRoomManager";
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
@@ -65,6 +66,7 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconGhost, label: "Monster Manager", key: "MonsterManager", component: <MonsterManager /> },
     { icon: IconCategory, label: "Item Manager", key: "ItemManager", component: <ItemManager /> },
     { icon: IconSwords, label: "Encounter Board", key: "EncounterBoard", component: <EncounterPage embedded /> },
+    { icon: IconSwords, label: "Encounter Rooms", key: "EncounterRoomManager", component: <EncounterRoomManager /> },
     { icon: IconSword, label: "Initiative Tracker", key: "InitiativeTracker", component: <InitiativeTracker /> },
     { icon: IconUsersGroup, label: "Session Manager", key: "SessionManager", component: <SessionManager /> },
     { icon: IconCloudDownload, label: "Backup Manager", key: "BackupManager", component: <BackupManager /> },
