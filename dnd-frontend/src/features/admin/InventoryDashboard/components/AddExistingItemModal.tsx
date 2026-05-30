@@ -1,5 +1,4 @@
 import {
-  Modal,
   TextInput,
   Stack,
   Button,
@@ -17,6 +16,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useAdminEquipmentStore } from "@store/admin/useAdminEquipmentStore";
 import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
+import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import styles from "@styles/AddExistingItemModal.module.css";
 
 export function AddExistingItemModal({
@@ -66,20 +66,14 @@ export function AddExistingItemModal({
   };
 
   return (
-    <Modal
+    <AdminGlassModal
       opened={opened}
       onClose={onClose}
       title="Add Existing Item"
       centered={!isMobile}
       fullScreen={isMobile}
       size={isMobile ? "100%" : "xl"}
-      radius="md"
       padding={isMobile ? "sm" : "md"}
-      classNames={{
-        content: styles.modalContent,
-        header: styles.modalHeader,
-        title: styles.modalTitle,
-      }}
     >
       <Stack gap="md" style={{ height: isMobile ? "100%" : "auto" }}>
         <TextInput
@@ -176,7 +170,7 @@ export function AddExistingItemModal({
           </ScrollArea>
         )}
       </Stack>
-    </Modal>
+    </AdminGlassModal>
   );
 }
 

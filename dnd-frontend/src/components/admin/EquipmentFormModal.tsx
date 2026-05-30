@@ -1,7 +1,6 @@
 import {
   Button,
   Group,
-  Modal,
   NumberInput,
   Select,
   Stack,
@@ -12,7 +11,8 @@ import { IconDeviceFloppy } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { EQUIPMENT_TIERS, type Equipment } from "../../types/Equipment/Equipment";
 import { defaultEquipment } from "@features/admin/ItemManager/defaultEquipment";
-import { TagsInput } from "@features/admin/InventoryManager/sections/InventoryItems/TagsInput";
+import { TagsInput } from "@features/admin/InventoryDashboard/components/TagsInput";
+import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 
 interface EquipmentFormModalProps {
   opened: boolean;
@@ -89,26 +89,12 @@ export function EquipmentFormModal({
   const glass = { input: "glassy-input", label: "glassy-label" };
 
   return (
-    <Modal
+    <AdminGlassModal
       opened={opened}
       onClose={onClose}
-      title={title ?? ""}
-      centered
+      title={title ?? "Equipment"}
       size="lg"
-      overlayProps={{ blur: 6, color: "rgba(0,0,0,0.45)" }}
-      withCloseButton
-      closeButtonProps={{
-        radius: "xl",
-      }}
-      styles={{
-        content: {
-          background: "rgba(20, 0, 40, 0.85)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          backdropFilter: "blur(14px)",
-        },
-        header: { borderBottom: "none", background: "transparent" },
-        title: { color: "white" },
-      }}
+      loading={saving}
     >
       <Stack gap="sm">
         <Group grow>
@@ -226,6 +212,6 @@ export function EquipmentFormModal({
           </Button>
         </Group>
       </Stack>
-    </Modal>
+    </AdminGlassModal>
   );
 }

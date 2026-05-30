@@ -1,7 +1,7 @@
-import { Stack, Select, NumberInput } from "@mantine/core";
+import { Button, Group, Stack, Select, NumberInput } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import { BaseModal } from "@components/BaseModal";
+import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 
@@ -58,12 +58,11 @@ export function MoveItemModal({ opened, onClose, itemId }: MoveItemModalProps) {
   };
 
   return (
-    <BaseModal
+    <AdminGlassModal
       opened={opened}
       onClose={onClose}
       title="Move Item"
-      onSave={handleMove}
-      saveLabel="Move"
+      size="md"
     >
       <Stack>
         <Select
@@ -82,7 +81,15 @@ export function MoveItemModal({ opened, onClose, itemId }: MoveItemModalProps) {
           value={amount}
           onChange={(v) => setAmount(Number(v ?? 1))}
         />
+        <Group justify="flex-end" mt="md">
+          <Button variant="subtle" color="gray" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button color="indigo" onClick={() => void handleMove()}>
+            Move
+          </Button>
+        </Group>
       </Stack>
-    </BaseModal>
+    </AdminGlassModal>
   );
 }

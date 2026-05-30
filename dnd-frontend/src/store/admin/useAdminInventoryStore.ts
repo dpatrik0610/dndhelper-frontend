@@ -229,15 +229,14 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         getToken()
       );
 
+      get().applyInventoryUpdate(created);
+      set({ selected: created });
+
       showNotification({
         title: "Inventory created",
         message: `${name} added successfully.`,
         color: SectionColor.Green,
       });
-        set((state) => ({
-          inventories: [created, ...state.inventories],
-          selected: created,
-        }));
 
       return created;
     },
@@ -262,10 +261,9 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         const created = await createInventory(payload, getToken());
         get().linkInventoryToCharacters(created.id!, created.characterIds ?? []);
 
-        set((state) => ({
-          inventories: [created, ...state.inventories],
-          selected: created,
-        }));
+        get().applyInventoryUpdate(created);
+        set({ selected: created });
+
         showNotification({
           title: "Inventory duplicated",
           message: `${duplicateName} created from ${source.name ?? "inventory"}.`,
@@ -393,7 +391,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       if (!item) return;
       const updated = { ...item, quantity: (item.quantity ?? 0) + 1 };
       await updateItemService(sel.id, equipmentId, updated, getToken());
-      await get().refreshInventories();
+      await get().reloadInventory(sel.id);
     },
 
     decrementItemQuantity: async (equipmentId) => {
@@ -403,7 +401,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       if (!item || item.quantity! <= 1) return;
       const updated = { ...item, quantity: item.quantity! - 1 };
       await updateItemService(sel.id, equipmentId, updated, getToken());
-      await get().refreshInventories();
+      await get().reloadInventory(sel.id);
     },
 
     clearStorage: () => set({ inventories: [], selected: null, loading: false }),

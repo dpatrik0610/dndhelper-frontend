@@ -1,5 +1,4 @@
 import {
-  Modal,
   Stack,
   Group,
   Checkbox,
@@ -21,6 +20,7 @@ import {
   ensureInventoryLinkedToCharacter,
   removeInventoryFromCharacter,
 } from "@utils/inventorySync";
+import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 
 export function SelectInventoryOwnersModal({
   opened,
@@ -96,22 +96,11 @@ export function SelectInventoryOwnersModal({
   };
 
   return (
-    <Modal
+    <AdminGlassModal
       opened={opened}
       onClose={onClose}
       title="Manage Inventory Owners"
-      centered
       size="lg"
-      radius="md"
-      styles={{
-        header: {marginBottom: "1rem", background:"transparent"},
-        content: {
-          background: "linear-gradient(135deg, rgba(10,20,40,0.85), rgba(20,10,40,0.6))",
-          border: "1px solid rgba(255,255,255,0.1)",
-          backdropFilter: "blur(8px)",
-        },
-        title: { color: "#a8e4ff", fontWeight: 600 },
-      }}
     >
       <Stack gap="md">
         <ScrollArea h={300}>
@@ -141,6 +130,6 @@ export function SelectInventoryOwnersModal({
           </Button>
         </Group>
       </Stack>
-    </Modal>
+    </AdminGlassModal>
   );
 }

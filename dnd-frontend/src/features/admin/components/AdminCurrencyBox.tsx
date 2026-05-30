@@ -3,7 +3,6 @@ import {
   Group,
   Text,
   Tooltip,
-  Modal,
   NumberInput,
   Stack,
   Button,
@@ -23,6 +22,7 @@ import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Currency } from "@appTypes/Currency";
 import CustomBadge from "@components/common/CustomBadge";
+import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 
 export function AdminCurrencyBox() {
   const {
@@ -149,28 +149,13 @@ const handleConfirm = async () => {
         )}
       </Group>
 
-      <Modal
+      <AdminGlassModal
         opened={modalOpen}
         onClose={() => setModalOpen(false)}
         title={mode === "add" ? "Add Currency" : "Remove Currency"}
-        centered
-        radius="md"
-        styles={{
-          content: {
-            background: mode === "add"
-              ? "linear-gradient(135deg, rgba(0,80,40,0.25), rgba(0,40,20,0.35))"
-              : "linear-gradient(135deg, rgba(80,0,0,0.25), rgba(40,0,20,0.35))",
-            border: "1px solid rgba(255,255,255,0.1)",
-            backdropFilter: "blur(10px)",
-          },
-          header: { borderBottom: "none" },
-          title: {
-            color: mode === "add" ? "#7CFFB2" : "#FF7C7C",
-            fontWeight: 600,
-          },
-        }}
+        size="sm"
       >
-        <Stack gap="md" p="sm">
+        <Stack gap="md">
           <Text fz="sm" c="dimmed" ta="center">
             Target: <Text span fw={600}>{targetName}</Text>
           </Text>
@@ -227,7 +212,7 @@ const handleConfirm = async () => {
             {mode === "add" ? "Add Currency" : "Remove Currency"}
           </Button>
         </Stack>
-      </Modal>
+      </AdminGlassModal>
     </Stack>
   );
 }

@@ -1,6 +1,7 @@
-import { Modal, Loader, Center } from "@mantine/core";
+import { Loader, Center } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { EquipmentFormModal } from "@components/admin/EquipmentFormModal";
+import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
@@ -96,11 +97,11 @@ export function ItemModal({
   return (
     <>
       {loading && !equipment && (
-        <Modal opened={opened} onClose={onClose} withCloseButton={false} centered>
+        <AdminGlassModal opened={opened} onClose={onClose} withCloseButton={false} size="sm">
           <Center h={200}>
             <Loader color="grape" />
           </Center>
-        </Modal>
+        </AdminGlassModal>
       )}
 
       {equipment && (

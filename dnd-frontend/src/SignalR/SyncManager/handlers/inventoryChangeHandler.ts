@@ -20,19 +20,23 @@ export function handleInventoryChange(event: EntityChangeEvent) {
       const newInventory = event.data as Inventory;
 
       // --- Player store ---
-      inventoryStore.setInventories([
-        ...inventoryStore.inventories,
-        newInventory,
-      ]);
+      const playerExists = inventoryStore.inventories.some((i) => i.id === newInventory.id);
+      inventoryStore.setInventories(
+        playerExists
+          ? inventoryStore.inventories.map((i) => (i.id === newInventory.id ? newInventory : i))
+          : [...inventoryStore.inventories, newInventory]
+      );
       if (!currentSelected) {
         inventoryStore.selectInventory(newInventory);
       }
 
       // --- Admin inventory store ---
-      if (
+      const isNewUnowned = !newInventory.characterIds || newInventory.characterIds.length === 0;
+      const touchesNewSelectedAdminChar =
         adminSelectedCharId &&
-        newInventory.characterIds?.includes(adminSelectedCharId)
-      ) {
+        newInventory.characterIds?.includes(adminSelectedCharId);
+
+      if (touchesNewSelectedAdminChar || isNewUnowned || !adminSelectedCharId) {
         adminStore.applyInventoryUpdate(newInventory);
       }
 
@@ -59,7 +63,7 @@ export function handleInventoryChange(event: EntityChangeEvent) {
 
       // --- Player store ---
       inventoryStore.updateInventory({
-        id: updatedInventory.id,
+        id: updatedInventory.id!,
         ...updatedInventory,
       });
       if (currentSelected?.id === updatedInventory.id) {
@@ -67,11 +71,13 @@ export function handleInventoryChange(event: EntityChangeEvent) {
       }
 
       // --- Admin inventory list (tiles/items) ---
+      const existsInAdmin = adminStore.inventories.some((i) => i.id === updatedInventory.id);
+      const isUpdatedUnowned = !updatedInventory.characterIds || updatedInventory.characterIds.length === 0;
       const touchesSelectedAdminChar =
         adminSelectedCharId &&
         updatedInventory.characterIds?.includes(adminSelectedCharId);
 
-      if (touchesSelectedAdminChar) {
+      if (existsInAdmin || touchesSelectedAdminChar || isUpdatedUnowned || !adminSelectedCharId) {
         adminStore.applyInventoryUpdate(updatedInventory);
       }
 

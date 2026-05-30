@@ -6,6 +6,7 @@ export interface Inventory {
   name?: string;
   characterIds: string[];
   ownerIds: string[];
+  campaignId?: string | null;
   items?: InventoryItem[];
   currencies: Currency[];
   createdAt?: string;
