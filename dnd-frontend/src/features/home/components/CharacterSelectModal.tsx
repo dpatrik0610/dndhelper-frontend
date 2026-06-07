@@ -1,20 +1,20 @@
 import {
   Modal,
-  Table,
   Avatar,
   Badge,
   Group,
   Text,
   ScrollArea,
-  ActionIcon,
-  Tooltip,
   Title,
   Button,
+  SimpleGrid,
+  Stack,
 } from "@mantine/core";
-import { IconStar, IconUserCheck } from "@tabler/icons-react";
+import { IconPlus, IconUserCircle } from "@tabler/icons-react";
 import { useState } from "react";
 import type { Character } from "@appTypes/Character/Character";
 import { useNavigate } from "react-router-dom";
+import { useMediaQuery } from "@mantine/hooks";
 import classes from "./styles/CharacterSelectModal.module.css";
 
 interface CharacterSelectModalProps {
@@ -32,69 +32,17 @@ export function CharacterSelectModal({
 }: CharacterSelectModalProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const navigate = useNavigate();
-  const rows = characters.map((char) => (
-    <Table.Tr
-      key={char.id}
-      style={{
-        background:
-          selected === char.id
-            ? "linear-gradient(135deg, rgba(0,255,255,0.12), rgba(0,128,128,0.2))"
-            : "rgba(255,255,255,0.03)",
-        cursor: "pointer",
-        transition: "background 150ms ease, transform 100ms ease",
-      }}
-      onMouseEnter={(e) =>
-        (e.currentTarget.style.background =
-          "linear-gradient(135deg, rgba(0,255,255,0.08), rgba(0,128,128,0.15))")
-      }
-      onMouseLeave={(e) =>
-        (e.currentTarget.style.background =
-          selected === char.id
-            ? "linear-gradient(135deg, rgba(0,255,255,0.12), rgba(0,128,128,0.2))"
-            : "rgba(255,255,255,0.03)")
-      }
-      onClick={() => {
-        setSelected(char.id ?? null);
-        onSelect(char);
-        onClose();
-      }}
-    >
-      <Table.Td>
-        <Group gap="md">
-          <Avatar radius="xl" size={36} color="cyan">
-            {char.name.charAt(0).toUpperCase()}
-          </Avatar>
-          <Text fw={500} c="white">
-            {char.name}
-          </Text>
-        </Group>
-      </Table.Td>
+  const isMobile = useMediaQuery("(max-width: 50em)");
 
-      <Table.Td>
-        <Badge color="cyan" variant="light" size="lg">
-          Level {char.level}
-        </Badge>
-      </Table.Td>
-
-      <Table.Td>
-        <Text size="md" c="gray.4" style={{ textTransform: "capitalize" }}>
-          {char.race}
-        </Text>
-      </Table.Td>
-
-      <Table.Td>
-        <Group justify="flex-end" gap="xs">
-          {selected === char.id && (
-            <Tooltip label="Selected">
-              <ActionIcon color="teal" variant="subtle">
-                <IconUserCheck size={16} />
-              </ActionIcon>
-            </Tooltip>
-          )}
-        </Group>
-      </Table.Td>
-    </Table.Tr>
-  ));
+  const handleSelect = (char: Character) => {
+    setSelected(char.id ?? null);
+    // slight delay to show the selected visual state
+    setTimeout(() => {
+      onSelect(char);
+      onClose();
+      setSelected(null);
+    }, 150);
+  };
 
   return (
     <Modal
@@ -102,40 +50,95 @@ export function CharacterSelectModal({
       onClose={onClose}
       centered
       size="xl"
+      fullScreen={isMobile}
       title={
         <Group gap={10}>
-          <Badge color="cyan" variant="light" size="lg">
-            <IconStar size={12} />
-          </Badge>
           <Title order={3} c="white" bg="transparent">
             Choose Your Character
           </Title>
         </Group>
       }
-      overlayProps={{ blur: 6, backgroundOpacity: 0.55 }}
+      overlayProps={{ blur: 12, backgroundOpacity: 0.4 }}
       classNames={{
         content: classes.content,
         header: classes.header,
         title: classes.title,
         close: classes.close,
+        body: classes.body,
       }}
+      transitionProps={{ transition: "pop" }}
     >
-      <ScrollArea h={400}>
-        <Table.ScrollContainer minWidth={600}>
-          <Table verticalSpacing="md">
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th style={{ color: "rgba(255,255,255,0.6)" }}>Name</Table.Th>
-                <Table.Th style={{ color: "rgba(255,255,255,0.6)" }}>Level</Table.Th>
-                <Table.Th style={{ color: "rgba(255,255,255,0.6)" }}>Race</Table.Th>
-                <Table.Th />
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>{rows}</Table.Tbody>
-          </Table>
-        </Table.ScrollContainer>
+      <ScrollArea h={isMobile ? "calc(100vh - 140px)" : 450} type="scroll" offsetScrollbars>
+        {characters.length === 0 ? (
+          <Stack align="center" justify="center" h={300} gap="md">
+            <IconUserCircle size={64} style={{ opacity: 0.3 }} />
+            <Text c="dimmed" size="lg">No characters found</Text>
+          </Stack>
+        ) : (
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" pb="md">
+            {characters.map((char) => (
+              <div
+                key={char.id}
+                className={`${classes.card} ${selected === char.id ? classes.cardSelected : ""}`}
+                onClick={() => handleSelect(char)}
+              >
+                <Group wrap="nowrap" align="center">
+                  <Avatar radius="md" size={64} className={classes.avatar}>
+                    {char.name.charAt(0).toUpperCase()}
+                  </Avatar>
+                  
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Text fw={700} size="xl" c="white" truncate style={{ letterSpacing: '0.3px', fontSize: '1.25rem' }}>
+                      {char.name}
+                    </Text>
+                    <Group gap="xs" mt={8} wrap="wrap">
+                      <Badge 
+                        radius="sm" 
+                        size="md" 
+                        variant="filled"
+                        className={`${classes.detailBadge} ${classes.levelBadge}`}
+                      >
+                        Lvl {char.level}
+                      </Badge>
+                      <Badge 
+                        radius="sm" 
+                        size="md" 
+                        variant="filled"
+                        className={classes.detailBadge}
+                      >
+                        {char.race}
+                      </Badge>
+                      {char.characterClass && (
+                        <Badge 
+                          radius="sm" 
+                          size="md" 
+                          variant="filled"
+                          className={classes.detailBadge}
+                        >
+                          {char.characterClass}
+                        </Badge>
+                      )}
+                    </Group>
+                  </div>
+                </Group>
+              </div>
+            ))}
+          </SimpleGrid>
+        )}
       </ScrollArea>
-      <Button onClick={() => navigate("/newCharacter")}>New Character</Button>
+      
+      <Group justify="flex-end" mt="md" pt="md" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        <Button 
+          className={classes.newButton}
+          leftSection={<IconPlus size={16} />}
+          onClick={() => navigate("/newCharacter")}
+          size="md"
+          radius="md"
+        >
+          New Character
+        </Button>
+      </Group>
     </Modal>
   );
 }
+
