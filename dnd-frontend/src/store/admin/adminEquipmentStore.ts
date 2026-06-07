@@ -9,6 +9,7 @@ import {
   createEquipment,
   updateEquipmentById,
   deleteEquipment,
+  getEquipmentByIds,
 } from "@services/equipmentService";
 import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
@@ -98,6 +99,24 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
           } catch (err) {
             showNotification({
               title: "Search failed",
+              message: String(err),
+              color: SectionColor.Red,
+            });
+          } finally {
+            set({ loading: false });
+          }
+        },
+
+        loadByIds: async (ids: string[]) => {
+          set({ loading: true });
+          try {
+            const data = await getEquipmentByIds(ids, getToken());
+            set((s) => ({
+              equipments: [...s.equipments, ...data],
+            }));
+          } catch (err) {
+            showNotification({
+              title: "Error loading equipment",
               message: String(err),
               color: SectionColor.Red,
             });

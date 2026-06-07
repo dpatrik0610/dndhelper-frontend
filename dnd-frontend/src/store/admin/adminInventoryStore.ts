@@ -1,4 +1,4 @@
-﻿import { create } from "zustand";
+import { create } from "zustand";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import {
@@ -18,6 +18,7 @@ import {
   assignInventoryToCharacter,
 } from "@services/inventoryService";
 import { useAuthStore } from "@store/auth/authStore";
+import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
@@ -60,6 +61,20 @@ interface AdminInventoryStore {
 
 export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => {
   const getToken = () => useAuthStore.getState().token!;
+
+  const getEquipmentIdsFromInventories = (inventories: Inventory[]): string[] => {
+    const equipmentIds = new Set<string>();
+    for (const inventory of inventories) {
+      if (inventory.items) {
+        for (const item of inventory.items) {
+          if (item.equipmentId) {
+            equipmentIds.add(item.equipmentId);
+          }
+        }
+      }
+    }
+    return Array.from(equipmentIds);
+  };
 
   const parseNameParts = (name?: string) => {
     const trimmed = (name ?? "").trim() || "Inventory";
@@ -126,6 +141,11 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         const data = await getInventoriesByCharacter(characterId, getToken());
         const owned = data.filter((i) => i.characterIds?.includes(characterId));
         set({ inventories: owned, selected: owned[0] ?? null });
+
+        const equipmentIds = getEquipmentIdsFromInventories(data);
+        if (equipmentIds.length > 0) {
+          await useAdminEquipmentStore.getState().loadByIds(equipmentIds);
+        }
       } catch (err) {
         showNotification({
           title: "Error loading inventories",
@@ -143,6 +163,11 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       try {
         const data = await getAllInventories(getToken());
         set({ inventories: data, selected: data[0] ?? null });
+
+        const equipmentIds = getEquipmentIdsFromInventories(data);
+        if (equipmentIds.length > 0) {
+          await useAdminEquipmentStore.getState().loadByIds(equipmentIds);
+        }
       } catch (err) {
         showNotification({
           title: "Error loading inventories",
@@ -195,6 +220,13 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
           selected:
             state.selected?.id === id ? updated : state.selected,
         }));
+
+        if (updated.items) {
+          const equipmentIds = getEquipmentIdsFromInventories([updated]);
+          if (equipmentIds.length > 0) {
+            await useAdminEquipmentStore.getState().loadByIds(equipmentIds);
+          }
+        }
       } catch (err) {
         showNotification({
           title: "Error reloading inventory",
@@ -211,6 +243,13 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       try {
         const updated = await getInventory(sel.id, getToken());
         set({ selected: updated });
+
+        if (updated.items) {
+          const equipmentIds = getEquipmentIdsFromInventories([updated]);
+          if (equipmentIds.length > 0) {
+            await useAdminEquipmentStore.getState().loadByIds(equipmentIds);
+          }
+        }
       } catch (err) {
         showNotification({
           title: "Error refreshing inventory",
