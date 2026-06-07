@@ -33,13 +33,13 @@ export function ItemModal({
     const load = async () => {
       if (!opened) return;
 
-      // đź†• Create mode
+      // 🆕 Create mode
       if (!equipmentId && !editMode) {
         setEquipment(defaultEquipment);
         return;
       }
 
-      // đź§© Edit mode
+      // 🧩 Edit mode
       if (equipmentId) {
         setLoading(true);
         try {

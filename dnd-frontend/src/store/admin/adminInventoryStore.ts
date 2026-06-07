@@ -28,7 +28,7 @@ interface AdminInventoryStore {
   selected: Inventory | null;
   loading: boolean;
 
-  // đź”ą SignalR / local helpers
+  // 🔍 SignalR / local helpers
   setInventories: (inventories: Inventory[]) => void;
   setSelected: (inventory: Inventory | null) => void;
   applyInventoryUpdate: (inventory: Inventory) => void;
@@ -328,7 +328,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         await get().reloadInventory(sel.id);
         showNotification({
           title: "Item added",
-          message: `Added ${amount}Ă— item to ${sel.name}.`,
+          message: `Added ${amount}x item to ${sel.name}.`,
           color: SectionColor.Green,
         });
       } catch (err) {
@@ -373,7 +373,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       await get().reloadInventory(sel.id);
       showNotification({
         title: "Item moved",
-        message: `Moved ${amount}Ă— item from ${sel.name} to target inventory.`,
+        message: `Moved ${amount}x item from ${sel.name} to target inventory.`,
         color: SectionColor.Blue,
       });
     },

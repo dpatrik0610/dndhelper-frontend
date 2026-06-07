@@ -100,7 +100,7 @@ const handleConfirm = async () => {
       background: "rgba(255,255,255,0.03)",
     }}>
       <Group justify="space-between" align="center">
-        <Text fw={600}>đź’° {targetName}</Text>
+        <Text fw={600}>💰 {targetName}</Text>
         <Group gap="xs">
           <Tooltip label="Refresh">
             <ActionIcon variant="light" color="blue" onClick={refresh}>
@@ -162,12 +162,12 @@ const handleConfirm = async () => {
           <Select
             label="Currency Type"
             data={[
-              { value: "gp", label: "đźŞ™ Gold Pieces" },
+              { value: "gp", label: "🪙 Gold Pieces" },
               { value: "sp", label: "đźĄ Silver Pieces" },
-              { value: "ep", label: "âšˇ Electrum Pieces" },
-              { value: "pp", label: "đź’Ž Platinum Pieces" },
-              { value: "cp", label: "đźĄ‰ Copper Pieces" },
-              { value: "other", label: "đź”¶ Other" },
+              { value: "ep", label: "Electrum Pieces" },
+              { value: "pp", label: "💎 Platinum Pieces" },
+              { value: "cp", label: "🥉 Copper Pieces" },
+              { value: "other", label: "🔶 Other" },
             ]}
             value={currencyCode}
             onChange={(val) => setCurrencyCode(val!)}

@@ -54,7 +54,7 @@ export default function LoginForm() {
 
     return (
         <>
-        <Title ta='center' order={2}>đźŚ  D&D Login </Title>
+        <Title ta='center' order={2}>D&D Login </Title>
         <TextInput
             label="Username"
             placeholder="Enter username"

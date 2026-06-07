@@ -62,7 +62,7 @@ export default function SpellPage() {
         <Group gap="xs" align="center">
           <SpellSelect />
 
-          {/* đź“Ś Reload Button */}
+          {/* 📦 Reload Button */}
           <ActionIcon
             variant="light"
             radius="xl"

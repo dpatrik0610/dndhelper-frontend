@@ -64,7 +64,7 @@ export default function Register() {
       <Paper className="login-card" radius="md" w={400}>
         <div className="login-card-inner">
           <Group align="center" mb="md">
-            <Title order={2}>đźŚź Register</Title>
+            <Title order={2}>📜 Register</Title>
           </Group>
 
           <TextInput

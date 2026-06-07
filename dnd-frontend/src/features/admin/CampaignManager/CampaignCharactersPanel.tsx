@@ -45,12 +45,12 @@ export function CampaignCharactersPanel() {
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // đź”ą Load campaign members
+  // 🔍 Load campaign members
   useEffect(() => {
     if (campaign?.id) void fetchMembers();
   }, [campaign?.id]);
 
-  // đź”ą Load all characters (light list)
+  // 🔍 Load all characters (light list)
   useEffect(() => {
     if (allCharacters.length === 0) void loadAllCharacters();
   }, [allCharacters.length, loadAllCharacters]);
@@ -225,7 +225,7 @@ const handleRemove = async (charId: string) => {
                 <Text fw={500}>{c.name}</Text>
                 <Text size="xs" c="dimmed">
                   {c.characterClass ?? "Unknown"}{" "}
-                  {c.level ? `â€” lvl ${c.level}` : ""}
+                  {c.level ? `- lvl ${c.level}` : ""}
                 </Text>
               </Box>
 

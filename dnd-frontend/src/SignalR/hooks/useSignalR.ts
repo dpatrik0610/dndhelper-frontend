@@ -31,14 +31,14 @@ export const useSignalR = () => {
 
   useEffect(() => {
     if (!token || !userId) {
-      console.log("âŹ¸ď¸Ź Not authenticated, skipping SignalR connection");
+      console.log("Not authenticated, skipping SignalR connection");
       return;
     }
 
     const API_BASE = import.meta.env.VITE_API_BASE || "https://localhost:7222";
     const baseUrl = API_BASE.replace(/\/api$/, "");
 
-    console.log(`đź”Ś Creating SignalR connection for userId: ${userId}`);
+    console.log(`🔌 Creating SignalR connection for userId: ${userId}`);
 
     const newConnection = new HubConnectionBuilder()
       .withUrl(`${baseUrl}/hubs/notifications?userId=${userId}`)
@@ -57,7 +57,7 @@ export const useSignalR = () => {
     setConnection(newConnection);
 
     return () => {
-      console.log("đź”Ś Stopping SignalR connection...");
+      console.log("🔌 Stopping SignalR connection...");
       newConnection.stop();
     };
   }, [token, userId]);
@@ -68,11 +68,11 @@ export const useSignalR = () => {
     const startConnection = async () => {
       try {
         await connection.start();
-        console.log("âś… SignalR Connected!");
+        console.log("SignalR Connected!");
         setIsConnected(true);
 
         connection.on("ReceiveNotification", (message: SignalRMessage) => {
-          console.log("đź“¨ Received notification:", message);
+          console.log("📩 Received notification:", message);
 
           showNotification({
             title: `Message from ${message.sender}`,
@@ -83,7 +83,7 @@ export const useSignalR = () => {
         });
 
         connection.on("EntityChanged", (event: EntityChangeEvent) => {
-          console.log("đź§© EntityChanged received:", event);
+          console.log("🧩 EntityChanged received:", event);
           EntitySyncManager.handleEntityChange(event);
         });
 
@@ -94,7 +94,7 @@ export const useSignalR = () => {
             timestamp: string;
             changes: EntityChangeEvent[];
           }) => {
-            console.log("đź“¦ EntityBatchChanged received:", batch);
+            console.log("📦 EntityBatchChanged received:", batch);
             batch.changes.forEach((event) => {
               EntitySyncManager.handleEntityChange(event);
             });
@@ -115,7 +115,7 @@ export const useSignalR = () => {
           });
         });
       } catch (err) {
-        console.error("âťŚ SignalR Connection Error:", err);
+        console.error("SignalR Connection Error:", err);
         setIsConnected(false);
       }
     };
@@ -123,12 +123,12 @@ export const useSignalR = () => {
     startConnection();
 
     connection.onreconnecting((error) => {
-      console.log("đź”„ SignalR Reconnecting...", error);
+      console.log("🔄 SignalR Reconnecting...", error);
       setIsConnected(false);
     });
 
     connection.onreconnected((connectionId) => {
-      console.log("âś… SignalR Reconnected!", connectionId);
+      console.log("SignalR Reconnected!", connectionId);
       setIsConnected(true);
 
       showNotification({
@@ -139,7 +139,7 @@ export const useSignalR = () => {
     });
 
     connection.onclose((error) => {
-      console.log("đź”´ SignalR Connection closed", error);
+      console.log("🔴 SignalR Connection closed", error);
       setIsConnected(false);
     });
 

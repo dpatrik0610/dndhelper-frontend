@@ -111,7 +111,7 @@ export function CampaignHeader() {
                     },
                   }}
                 >
-                  {id.length > 12 ? `${id.slice(0, 12)}â€¦` : id}
+                  {id.length > 12 ? `${id.slice(0, 12)}...` : id}
                 </Badge>
               ))}
             </Group>

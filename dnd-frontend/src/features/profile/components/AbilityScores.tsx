@@ -94,7 +94,7 @@ export function AbilityScores() {
       color={SectionColor.Violet}
       defaultOpen
       transparent
-      icon={<span style={{ fontSize: "1.2rem" }}>đź’Ş</span>}
+      icon={<span style={{ fontSize: "1.2rem" }}>💪</span>}
       style={{
         background:
           "linear-gradient(135deg, rgba(36, 0, 33, 0.23), rgba(56, 27, 0, 0.36))",
@@ -194,7 +194,7 @@ export function AbilityScores() {
                                         "drop-shadow(0 0 3px #FFD43B90)",
                                     }}
                                   >
-                                    â…
+                                    ★
                                   </span>
                                 )}
                                 {skill.name}

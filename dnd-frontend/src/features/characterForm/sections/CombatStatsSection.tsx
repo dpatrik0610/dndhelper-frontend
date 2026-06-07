@@ -5,7 +5,7 @@ import { SectionColor } from "@appTypes/SectionColor";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 
 import { FormNumberInput } from "@components/common/FormNumberInput";
-// import { WheelPickerInput } from "@components/common/WheelPickerInput"; // đź”§ Disabled for now
+// import { WheelPickerInput } from "@components/common/WheelPickerInput"; // 🔧 Disabled for now
 
 export function CombatStatsSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
@@ -21,7 +21,7 @@ export function CombatStatsSection() {
       <Stack>
 
         {/* ---------------------------------------- */}
-        {/* đź”Ą HP + MAX HP â†’ NORMAL Number Inputs     */}
+        {/* 🔀 HP + MAX HP -> NORMAL Number Inputs     */}
         {/* ---------------------------------------- */}
         <Group grow>
           {/* WheelPickerInput temporarily disabled */}

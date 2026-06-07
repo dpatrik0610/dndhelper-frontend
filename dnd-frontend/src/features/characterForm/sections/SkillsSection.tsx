@@ -155,11 +155,11 @@ export function SkillsSection() {
                       c={def ? "teal.3" : "gray.5"}
                       style={{ opacity: def ? 0.85 : 0.35, fontWeight: 600 }}
                     >
-                      {def ? (base! >= 0 ? `+${base}` : base) : "â€“"}
+                      {def ? (base! >= 0 ? `+${base}` : base) : "-"}
                     </Text>
                   </Stack>
 
-                  {/* NUMBER INPUT â€” tightened */}
+                  {/* NUMBER INPUT - tightened */}
                   <FormNumberInput
                     classNames={{ input: "glassy-input" }}
                     value={shown}

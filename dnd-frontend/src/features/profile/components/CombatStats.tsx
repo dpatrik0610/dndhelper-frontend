@@ -84,14 +84,14 @@ export function CombatStats() {
     {
       type: "success" as const,
       iconColor: "teal",
-      label: "Death Saves â€“ Successes",
+      label: "Death Saves - Successes",
       labelColor: "#0fbba0",
       value: `${character.deathSavesSuccesses ?? 0} / 3`,
     },
     {
       type: "failure" as const,
       iconColor: "red",
-      label: "Death Saves â€“ Failures",
+      label: "Death Saves - Failures",
       labelColor: "#ff6b6b",
       value: `${character.deathSavesFailures ?? 0} / 3`,
     },
@@ -100,7 +100,7 @@ export function CombatStats() {
   return (
     <ExpandableSection
       title="Combat Statistics"
-      icon={<span style={{ fontSize: "1.2rem" }}>âš”ď¸Ź</span>}
+      icon={<span style={{ fontSize: "1.2rem" }}><IconSword size={20} /></span>}
       color={SectionColor.Red}
       defaultOpen
       style={{

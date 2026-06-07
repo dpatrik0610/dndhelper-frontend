@@ -45,7 +45,7 @@ export function ActionBar() {
     showNotification({
       id: "longrest-success",
       title: "Success",
-      message: "You slept through the night đź™‚",
+      message: "You slept through the night 🙂",
       icon: <IconMoon />,
     });
   }
@@ -63,7 +63,7 @@ export function ActionBar() {
   ];
 
   // --------------------------------------------
-  //      MOBILE VERSION â†’ SAME BUTTONS, NO SHRINKING
+  //      MOBILE VERSION -> SAME BUTTONS, NO SHRINKING
   // --------------------------------------------
 if (isMobile) {
   return (
@@ -108,7 +108,7 @@ if (isMobile) {
   }
 
   // --------------------------------------------
-  //      DESKTOP VERSION â†’ Original Paper
+  //      DESKTOP VERSION -> Original Paper
   // --------------------------------------------
   return (
     <>

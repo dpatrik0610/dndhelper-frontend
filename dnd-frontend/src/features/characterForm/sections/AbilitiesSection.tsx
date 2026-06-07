@@ -245,7 +245,7 @@ export function AbilitiesSection() {
               Perception).
             </InfoIconPopover>
             <FormNumberInput
-              label={`Passive Perception ${hasSkillProficiency("Perception") ? `â­` : ""}`}
+              label={`Passive Perception ${hasSkillProficiency("Perception") ? `*` : ""}`}
               classNames={input}
               value={passivePerception}
               disabled
@@ -268,7 +268,7 @@ export function AbilitiesSection() {
               Insight).
             </InfoIconPopover>
             <FormNumberInput
-              label={`Passive Insight ${hasSkillProficiency("Insight") ? `â­` : ""}`}
+              label={`Passive Insight ${hasSkillProficiency("Insight") ? `*` : ""}`}
               classNames={input}
               value={passiveInsight}
               disabled
@@ -291,7 +291,7 @@ export function AbilitiesSection() {
               Investigation).
             </InfoIconPopover>
             <FormNumberInput
-              label={`Passive Investigation ${hasSkillProficiency("Investigation") ? `â­` : ""}`}
+              label={`Passive Investigation ${hasSkillProficiency("Investigation") ? `*` : ""}`}
               classNames={input}
               value={passiveInvestigation}
               disabled
@@ -349,7 +349,7 @@ export function AbilitiesSection() {
           <Stack gap={4} style={{ flex: 1 }}>
             <InfoIconPopover title="Spell Save DC">
               Spell Save DC is the target number a creature must meet or beat on
-              a saving throw to resist your spellâ€™s effect.
+              a saving throw to resist your spell's effect.
               <br />
               <br />
               <strong>

@@ -45,7 +45,7 @@ export function BasicInfoSection() {
         {/* NAME */}
         <TextInput
           classNames={cls}
-          label={L("Name", "Your characterâ€™s chosen name.")}
+          label={L("Name", "Your character's chosen name.")}
           required
           value={characterForm.name}
           onChange={(e) => setCharacterForm({ name: e.currentTarget.value })}
@@ -90,7 +90,7 @@ export function BasicInfoSection() {
 
           <FormNumberInput
             classNames={cls}
-            label={L("Level", "Overall character level (1â€“20).")}
+            label={L("Level", "Overall character level (1-20).")}
             min={1}
             max={20}
             value={characterForm.level}

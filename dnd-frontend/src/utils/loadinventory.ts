@@ -7,7 +7,7 @@ export async function loadInventories(tokenOverride?: string) {
   const token = tokenOverride || getAuthToken();
   const character = useCharacterStore.getState().character;
   if (!character?.id) {
-    console.warn("Ă˘ĹˇÂ ÄŹÂ¸Ĺą No character selected Ă˘â‚¬â€ť skipping inventory load.");
+    console.warn("⚠️ No character selected — skipping inventory load.");
     return [];
   }
 
@@ -19,7 +19,7 @@ export async function loadInventories(tokenOverride?: string) {
 
     return inventories;
   } catch (error) {
-    console.error("Ă˘ĹĄĹš Failed to load inventories:", error);
+    console.error("❌ Failed to load inventories:", error);
     useInventoryStore.getState().setInventories([]);
     return [];
   }
@@ -28,7 +28,7 @@ export async function loadInventories(tokenOverride?: string) {
 export async function loadInventoryById(inventoryId: string, tokenOverride?: string) {
   const token = tokenOverride || getAuthToken();
   if (!inventoryId) {
-    console.warn("Ă˘ĹˇÂ ÄŹÂ¸Ĺą No inventoryId provided Ă˘â‚¬â€ť skipping load.");
+    console.warn("⚠️ No inventoryId provided — skipping load.");
     return null;
   }
 
@@ -41,15 +41,15 @@ export async function loadInventoryById(inventoryId: string, tokenOverride?: str
 
     if (existing) {
       store.updateInventory({ ...inventory, id: inventoryId });
-      console.log(`đź”„ Updated inventory: ${inventory.name ?? inventoryId}`);
+      console.log(`🔄 Updated inventory: ${inventory.name ?? inventoryId}`);
     } else {
       store.addInventory(inventory);
-      console.log(`âž• Loaded single inventory: ${inventory.name ?? inventoryId}`);
+      console.log(`Loaded single inventory: ${inventory.name ?? inventoryId}`);
     }
 
     return inventory;
   } catch (error) {
-    console.error(`Ă˘ĹĄĹš Failed to load inventory ${inventoryId}:`, error);
+    console.error(`❌ Failed to load inventory ${inventoryId}:`, error);
     return null;
   }
 }

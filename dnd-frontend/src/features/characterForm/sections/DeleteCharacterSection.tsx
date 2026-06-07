@@ -46,7 +46,7 @@ export function DeleteCharacterSection() {
       await loadCharacters(token ?? "");
       navigate("/home");
     } catch (err) {
-      console.error("âťŚ Delete failed:", err);
+      console.error("Delete failed:", err);
       showNotification({
         title: "Error",
         message: "Failed to delete character.",
@@ -61,8 +61,8 @@ export function DeleteCharacterSection() {
     <ExpandableSection title="Delete Character" icon={<IconTrash />} color={SectionColor.Red}>
       <Paper p="md" radius="md" style={{ background: "rgba(255,0,0,0.05)", border: "1px solid rgba(255,0,0,0.2)" }}>
         <Stack gap="xs">
-          <Text size="sm" c="red.4" fw={500}>âš ď¸Ź This action is irreversible!</Text>
-          <Text size="sm" c="dimmed">To confirm, type your characterâ€™s name below:</Text>
+          <Text size="sm" c="red.4" fw={500}>Warning: This action is irreversible!</Text>
+          <Text size="sm" c="dimmed">To confirm, type your character's name below:</Text>
 
           <TextInput
             placeholder={`Type "${character.name}" to confirm`}

@@ -25,7 +25,7 @@ const DAMAGE_TYPES = [
 
 const AREAS = ["Sphere", "Cone", "Cube", "Line", "Cylinder"];
 
-// âś… Extracted school list
+// Extracted school list
 const SCHOOLS = [
   "Abjuration",
   "Conjuration",
@@ -174,7 +174,7 @@ export function SpellForm() {
             onChange={(v) => handleChange("level", Number(v))}
           />
 
-          {/* âś… SCHOOL SELECT */}
+          {/* SCHOOL SELECT */}
           <Select
             classNames={glass}
             label="School"

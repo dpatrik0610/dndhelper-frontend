@@ -1,4 +1,5 @@
 ﻿import { Box } from "@mantine/core";
+import { IconArrowLeft } from "@tabler/icons-react";
 import { useAdminDashboardStore } from "@store/ui/adminDashboardStore";
 
 export const BackToDashboardButton: React.FC = () => {
@@ -30,7 +31,7 @@ export const BackToDashboardButton: React.FC = () => {
         e.currentTarget.style.boxShadow = "0 0 10px rgba(0,0,0,0.3)";
       }}
     >
-      â¬… Back to Dashboard
+      <IconArrowLeft size={16} /> Back to Dashboard
     </Box>
   );
 };

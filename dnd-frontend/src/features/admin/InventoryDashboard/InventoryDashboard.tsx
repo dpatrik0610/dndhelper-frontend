@@ -243,7 +243,7 @@ export function InventoryDashboard() {
             </Group>
 
             <TextInput
-              placeholder="Search inventoriesâ€¦"
+              placeholder="Search inventories..."
               leftSection={<IconSearch size={14} />}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.currentTarget.value)}
@@ -359,7 +359,7 @@ export function InventoryDashboard() {
         <Stack gap="md">
           <TextInput
             label="Inventory Name"
-            placeholder="e.g. Bag of Holding, Dragon's Hoardâ€¦"
+            placeholder="e.g. Bag of Holding, Dragon's Hoard..."
             value={newInventoryName}
             onChange={(e) => setNewInventoryName(e.currentTarget.value)}
             required
@@ -367,7 +367,7 @@ export function InventoryDashboard() {
           />
           <Select
             label="Associate with Character (Optional)"
-            placeholder="Select owner characterâ€¦"
+            placeholder="Select owner character..."
             value={newInventoryCharId}
             onChange={(val) => setNewInventoryCharId(val)}
             data={[
@@ -378,7 +378,7 @@ export function InventoryDashboard() {
           />
           <Select
             label="Campaign Link"
-            placeholder="Select campaignâ€¦"
+            placeholder="Select campaign..."
             value={newInventoryCampaignId}
             onChange={(val) => setNewInventoryCampaignId(val)}
             data={[

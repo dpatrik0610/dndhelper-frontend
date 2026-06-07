@@ -114,7 +114,7 @@ export function SpellsPanel() {
       >
         <Stack>
 
-          {/* đź”Ť SEARCH + LEVEL FILTER */}
+          {/* SEARCH + LEVEL FILTER */}
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="sm" mb="sm">
             <TextInput
               classNames={glassyInputClasses}
@@ -176,7 +176,7 @@ export function SpellsPanel() {
                   }}
                 >
                   <Text fw={700} ta="center" c="white" fz="sm">
-                    {lvl === "0" ? "âś¨ Cantrips" : `đźŞ„ Level ${lvl}`}
+                    {lvl === "0" ? "✨ Cantrips" : `🪄 Level ${lvl}`}
                   </Text>
                 </Box>
 

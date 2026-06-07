@@ -48,7 +48,7 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     };
   }, [opened, character]);
 
-  // âť— Compute filtered list based on search
+  // Compute filtered list based on search
   const filteredList = useMemo(() => {
     if (!search.trim()) return list;
     return list.filter((c) =>
