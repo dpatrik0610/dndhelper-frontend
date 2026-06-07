@@ -8,7 +8,6 @@ import {
   Group,
   Loader,
   Modal,
-  Paper,
   SimpleGrid,
   Stack,
   Text,
@@ -35,30 +34,28 @@ import { MarkdownRenderer } from "@components/MarkdownRender";
 import { equipmentTierTheme } from "./styles/equipmentTheme";
 import classes from "./EquipmentModal.module.css";
 
-function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: React.ReactNode; color: string }) {
-  return (
-    <Paper className={classes.glassPaper} p="sm" radius="md">
-      <Stack gap={2}>
-        <Group gap={6} c="dimmed" wrap="nowrap">
-          <ThemeIcon size="sm" variant="transparent" color={color}>
-            {icon}
-          </ThemeIcon>
-          <Text size="xs" tt="uppercase" fw={700} truncate="end" style={{ letterSpacing: 0.5 }}>
-            {label}
-          </Text>
-        </Group>
-        <Text size="sm" fw={500} style={{ wordBreak: "break-word", lineHeight: 1.2 }}>
-          {value}
-        </Text>
-      </Stack>
-    </Paper>
-  );
-}
-
 interface EquipmentModalProps {
   opened: boolean;
   onClose: () => void;
   equipmentId: string | null;
+}
+
+function StatItem({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: React.ReactNode; color: string }) {
+  return (
+    <Group wrap="nowrap" align="center" gap="xs">
+      <ThemeIcon size="md" variant="light" color={color} radius="md">
+        {icon}
+      </ThemeIcon>
+      <div>
+        <Text size="xs" tt="uppercase" c="dimmed" fw={700} style={{ letterSpacing: 0.5, lineHeight: 1 }}>
+          {label}
+        </Text>
+        <Text size="sm" fw={500} style={{ wordBreak: "break-word", lineHeight: 1.2 }}>
+          {value}
+        </Text>
+      </div>
+    </Group>
+  );
 }
 
 export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalProps) {
@@ -108,17 +105,18 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
               size={isMobile ? "md" : "lg"}
             />
             {isAdmin && (
-              <ActionIcon
-                variant="light"
-                color="blue"
-                size="md"
-                radius="md"
-                onClick={() => console.log("Edit Equipment Modal triggered")}
-                title="Edit Equipment"
-                style={{ marginLeft: 8 }}
-              >
-                <IconEdit size={18} />
-              </ActionIcon>
+              <Tooltip label="Edit Equipment" position="bottom" withArrow>
+                <ActionIcon
+                  variant="transparent"
+                  size="lg"
+                  radius="xl"
+                  className={classes.editButton}
+                  onClick={() => console.log("Edit Equipment Modal triggered")}
+                  style={{ marginLeft: 8 }}
+                >
+                  <IconEdit size={18} />
+                </ActionIcon>
+              </Tooltip>
             )}
           </Group>
         )
@@ -132,6 +130,8 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
       style={{
         "--tier-glow": tierTheme.glow,
         "--tier-gradient": tierTheme.gradient,
+        "--tier-accent": `var(--mantine-color-${tierTheme.accent}-9)`,
+        "--tier-accent-bg": `var(--mantine-color-${tierTheme.accent}-filled)`,
       } as React.CSSProperties}
     >
       {loading ? (
@@ -143,36 +143,39 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
           No equipment data available.
         </Text>
       ) : (
-        <Stack gap="xl">
+        <Stack gap="xl" pt="md">
+          {(equipment.weight != null || (isAdmin && equipment.cost) || equipment.damage || equipment.range || equipment.tier) && (
+            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
+              {equipment.weight != null && (
+                <StatItem icon={<IconWeight size={20} />} color={tierTheme.accent} label="Weight" value={`${equipment.weight} lb`} />
+              )}
+              {isAdmin && equipment.cost && (
+                <StatItem icon={<IconCoins size={20} />} color={tierTheme.accent} label="Cost" value={`${equipment.cost.quantity} ${equipment.cost.unit}`} />
+              )}
+              {equipment.damage && (
+                <StatItem icon={<IconSwords size={20} />} color={tierTheme.accent} label="Damage" value={`${equipment.damage.damageDice} (${equipment.damage.damageType.name})`} />
+              )}
+              {equipment.range && (
+                <StatItem icon={<IconRulerMeasure size={20} />} color={tierTheme.accent} label="Range" value={`Norm: ${equipment.range.normal} ft` + (equipment.range.long ? ` / Long: ${equipment.range.long} ft` : "")} />
+              )}
+              {equipment.tier && (
+                <StatItem icon={<IconCategory size={20} />} color={tierTheme.accent} label="Tier" value={equipment.tier} />
+              )}
+            </SimpleGrid>
+          )}
+          <Divider variant="solid" opacity={0.5} />
           <Box className={classes.descriptionWrapper}>
+            <Text size="md" c="dimmed" fw={600} tt="uppercase" mb="xs" style={{ letterSpacing: 0.5 }}>
+              Description
+            </Text>
             {descriptionContent ? (
               <MarkdownRenderer content={descriptionContent} />
             ) : (
-              <Text size="sm" c="dimmed" fs="italic">
+              <Text size="xl" c="dimmed" fs="italic">
                 No description provided.
               </Text>
             )}
           </Box>
-
-          {(equipment.weight || equipment.cost || equipment.damage || equipment.range || equipment.tier) && (
-            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm">
-              {equipment.weight && (
-                <StatCard icon={<IconWeight size={18} />} color="violet" label="Weight" value={`${equipment.weight} lb`} />
-              )}
-              {equipment.cost && isAdmin && (
-                <StatCard icon={<IconCoins size={18} />} color="yellow" label="Cost" value={`${equipment.cost.quantity} ${equipment.cost.unit}`} />
-              )}
-              {equipment.damage && (
-                <StatCard icon={<IconSwords size={18} />} color="red" label="Damage" value={`${equipment.damage.damageDice} (${equipment.damage.damageType.name})`} />
-              )}
-              {equipment.range && (
-                <StatCard icon={<IconRulerMeasure size={18} />} color="cyan" label="Range" value={`Norm: ${equipment.range.normal} ft` + (equipment.range.long ? ` / Long: ${equipment.range.long} ft` : "")} />
-              )}
-              {equipment.tier && (
-                <StatCard icon={<IconCategory size={18} />} color="grape" label="Tier" value={equipment.tier} />
-              )}
-            </SimpleGrid>
-          )}
 
           {equipment.tags && equipment.tags.length > 0 && (
             <Box>
@@ -197,7 +200,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
               {dmDescriptionContent ? (
                 <MarkdownRenderer content={dmDescriptionContent} textColor="red.1" />
               ) : (
-                <Text size="sm" c="dimmed" fs="italic">
+                <Text size="xl" c="dimmed" fs="italic">
                   No DM notes provided.
                 </Text>
               )}
