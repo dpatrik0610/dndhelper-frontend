@@ -1,4 +1,4 @@
-import {
+﻿import {
   Group,
   Stack,
   Title,
@@ -11,7 +11,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import { IconBrain } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import type { SavingThrows } from "@appTypes/Character/SavingThrows";
 import { InfoIconPopover } from "@components/common/InfoIconPopover";
@@ -245,7 +245,7 @@ export function AbilitiesSection() {
               Perception).
             </InfoIconPopover>
             <FormNumberInput
-              label={`Passive Perception ${hasSkillProficiency("Perception") ? `⭐` : ""}`}
+              label={`Passive Perception ${hasSkillProficiency("Perception") ? `â­` : ""}`}
               classNames={input}
               value={passivePerception}
               disabled
@@ -268,7 +268,7 @@ export function AbilitiesSection() {
               Insight).
             </InfoIconPopover>
             <FormNumberInput
-              label={`Passive Insight ${hasSkillProficiency("Insight") ? `⭐` : ""}`}
+              label={`Passive Insight ${hasSkillProficiency("Insight") ? `â­` : ""}`}
               classNames={input}
               value={passiveInsight}
               disabled
@@ -291,7 +291,7 @@ export function AbilitiesSection() {
               Investigation).
             </InfoIconPopover>
             <FormNumberInput
-              label={`Passive Investigation ${hasSkillProficiency("Investigation") ? `⭐` : ""}`}
+              label={`Passive Investigation ${hasSkillProficiency("Investigation") ? `â­` : ""}`}
               classNames={input}
               value={passiveInvestigation}
               disabled
@@ -349,7 +349,7 @@ export function AbilitiesSection() {
           <Stack gap={4} style={{ flex: 1 }}>
             <InfoIconPopover title="Spell Save DC">
               Spell Save DC is the target number a creature must meet or beat on
-              a saving throw to resist your spell’s effect.
+              a saving throw to resist your spellâ€™s effect.
               <br />
               <br />
               <strong>

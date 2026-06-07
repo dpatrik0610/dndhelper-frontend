@@ -5,8 +5,8 @@ import {
   LogLevel,
 } from "@microsoft/signalr";
 import { showNotification } from "@components/Notification/Notification";
-import { useAuthStore } from "@store/useAuthStore";
-import { useSubtleRollStore } from "@store/useSubtleRollStore";
+import { useAuthStore } from "@store/auth/authStore";
+import { useSubtleRollStore } from "@store/ui/subtleRollStore";
 import { EntitySyncManager } from "@signalr/SyncManager/entitySyncManager";
 import type { EntityChangeEvent } from "@signalr/SyncManager/handlers/entitySyncTypes";
 import type { SubtleRollEvent } from "@appTypes/Roll";

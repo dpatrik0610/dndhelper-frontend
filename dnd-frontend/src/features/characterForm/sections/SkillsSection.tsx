@@ -1,4 +1,4 @@
-import {
+﻿import {
   Group, Stack, TextInput, ActionIcon, Text, SimpleGrid, Switch,
 } from "@mantine/core";
 import { useState, useEffect, useMemo } from "react";
@@ -9,7 +9,7 @@ import {
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import CustomBadge from "@components/common/CustomBadge";
-import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
 import { InfoIconPopover } from "@components/common/InfoIconPopover";
@@ -155,11 +155,11 @@ export function SkillsSection() {
                       c={def ? "teal.3" : "gray.5"}
                       style={{ opacity: def ? 0.85 : 0.35, fontWeight: 600 }}
                     >
-                      {def ? (base! >= 0 ? `+${base}` : base) : "–"}
+                      {def ? (base! >= 0 ? `+${base}` : base) : "â€“"}
                     </Text>
                   </Stack>
 
-                  {/* NUMBER INPUT — tightened */}
+                  {/* NUMBER INPUT â€” tightened */}
                   <FormNumberInput
                     classNames={{ input: "glassy-input" }}
                     value={shown}

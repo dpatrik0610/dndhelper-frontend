@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { useCharacterFormStore } from "@store/useCharacterFormStore";
-import { useCharacterStore } from "@store/useCharacterStore";
+﻿import { useState, useEffect } from "react";
+import { useCharacterFormStore } from "@store/character/characterFormStore";
+import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { createCharacter, updateCharacter } from "@services/characterService";
 import { assignInventoryToCharacter, createInventory } from "@services/inventoryService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { loadCharacters } from "@utils/loadCharacter";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +14,8 @@ export function useCharacterForm(editMode: boolean) {
   const isAdmin = useAuthStore.getState().roles.includes("Admin");
   const navigate = useNavigate()
   const { characterForm, replaceCharacterForm, resetCharacterForm } = useCharacterFormStore();
-  const { character, setCharacter, updateCharacter: updateInStore } = useCharacterStore();
+  const character = useCurrentCharacter();
+  const { setCharacter, updateCharacter: updateInStore } = useCharacterCoreActions();
 
   const [loading, setLoading] = useState(false);
 

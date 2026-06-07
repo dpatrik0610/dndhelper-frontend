@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { Drawer, Stack, useMantineTheme } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { handleLogout } from "@utils/handleLogout";
 import { tabs, type Section, type TabItem } from "./SidebarTabs";
 import { useMediaQuery } from "@mantine/hooks";

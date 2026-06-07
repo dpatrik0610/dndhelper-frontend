@@ -1,5 +1,5 @@
 import { ActionIcon, Group, ScrollArea, Table, Tooltip } from "@mantine/core";
-import type { InitiativeEntry } from "@store/admin/useInitiativeTrackerStore";
+import type { InitiativeEntry } from "@store/admin/initiativeTrackerStore";
 import { InitiativeActionsCell } from "./components/InitiativeActionsCell";
 import { IconRefresh } from "@tabler/icons-react";
 import { InitiativeNameCell } from "./components/InitiativeNameCell";
@@ -163,7 +163,6 @@ export function InitiativeTable({
                     return (
                       <Table.Td key={`${row.id}-cond`}>
                         <InitiativeConditionsCell
-                          rowId={row.id}
                           conditions={row.conditions || []}
                           disabled={false}
                           onAdd={(label, remaining) => onAddCondition(row.id, label, remaining)}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import {
   ActionIcon,
   Autocomplete,
@@ -41,7 +41,7 @@ import {
   ENCOUNTER_STATUSES,
 } from "@appTypes/Encounter";
 import type { Session } from "@appTypes/Session";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { searchEquipmentByName } from "@services/equipmentService";
 import { monsterService } from "@services/Admin/monsterService";
 import { getDateTimeInputValue, parseDateInput, toNullableString } from "../encounterUtils";

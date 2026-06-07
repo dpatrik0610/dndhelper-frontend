@@ -1,4 +1,4 @@
-import {
+﻿import {
   ActionIcon,
   Box,
   Button,
@@ -31,11 +31,11 @@ import {
 } from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
 import { AdminNavItem } from "./components/AdminNavItem";
-import { useAdminDashboardStore, type AdminSection } from "@store/useAdminDashboardStore";
+import { useAdminDashboardStore, type AdminSection } from "@store/ui/adminDashboardStore";
 import { InventoryDashboard } from "./InventoryDashboard/InventoryDashboard";
 import { useEffect, useState, type JSX, type ForwardRefExoticComponent } from "react";
 import { SelectCampaignModal } from "./components/SelectCampaignModal";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import { CampaignManager } from "./CampaignManager/CampaignManager";
 import { SpellForm } from "./SpellManager/SpellForm";
 import { CacheManager } from "./CacheManager/CacheManager";

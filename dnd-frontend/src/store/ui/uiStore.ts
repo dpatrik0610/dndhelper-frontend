@@ -1,8 +1,11 @@
 import { create } from "zustand";
 import type { SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
 
-interface UiState {
+export interface UiState {
   sidebarTheme: SidebarThemeVariant;
+}
+
+export interface UiActions {
   setSidebarTheme: (theme: SidebarThemeVariant) => void;
 }
 
@@ -12,7 +15,7 @@ const getInitialSidebarTheme = (): SidebarThemeVariant => {
   return stored ?? "sunset";
 };
 
-export const useUiStore = create<UiState>((set) => ({
+export const useUiStore = create<UiState & UiActions>((set) => ({
   sidebarTheme: getInitialSidebarTheme(),
   setSidebarTheme: (theme) => {
     if (typeof window !== "undefined") {

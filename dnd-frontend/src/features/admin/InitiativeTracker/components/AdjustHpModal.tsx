@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Group, Modal, NumberInput, Stack, Text } from "@mantine/core";
-import { IconCheck, IconDroplet, IconHeartPlus } from "@tabler/icons-react";
+import { IconDroplet, IconHeartPlus } from "@tabler/icons-react";
 import { magicGlowTheme } from "@styles/magic/glowTheme";
 
 type Mode = "heal" | "damage";

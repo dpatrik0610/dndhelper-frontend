@@ -1,4 +1,4 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Currency } from "@appTypes/Currency";
 import {
@@ -9,7 +9,7 @@ import {
 } from "@services/currencyService";
 import type { Character } from "@appTypes/Character/Character";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { getInventory } from "@services/inventoryService";

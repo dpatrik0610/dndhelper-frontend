@@ -1,16 +1,16 @@
-import { useAuthStore } from "@store/useAuthStore";
-import { useCharacterStore } from "@store/useCharacterStore";
-import { useInventoryStore } from "@store/useInventorystore";
-import { useNoteStore } from "@store/useNoteStore";
-import { useSpellStore } from "@store/useSpellStore";
-import { useSessionStore } from "@store/session/useSessionStore";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
-import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
-import { useAdminEquipmentStore } from "@store/admin/useAdminEquipmentStore";
-import { useAdminMonsterStore } from "@store/admin/useAdminMonsterStore";
-import { useAdminUserStore } from "@store/admin/useAdminUserStore";
+﻿import { useAuthStore } from "@store/auth/authStore";
+import { useCharacterStore } from "@store/character/characterStore";
+import { useInventoryStore } from "@store/inventory/inventoryStore";
+import { useNoteStore } from "@store/note/noteStore";
+import { useSpellStore } from "@store/spell/spellStore";
+import { useSessionStore } from "@store/session/sessionStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
+import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
+import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
+import { useAdminMonsterStore } from "@store/admin/adminMonsterStore";
+import { useAdminUserStore } from "@store/admin/adminUserStore";
 
 let registered = false;
 

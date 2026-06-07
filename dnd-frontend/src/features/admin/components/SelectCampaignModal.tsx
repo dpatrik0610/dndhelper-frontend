@@ -1,8 +1,8 @@
-// components/Admin/SelectCampaignModal.tsx
+﻿// components/Admin/SelectCampaignModal.tsx
 import { useEffect } from "react";
 import { Box, Group, Text, Loader, Paper, ScrollArea, SimpleGrid } from "@mantine/core";
 import { IconMapPin, IconCheck } from "@tabler/icons-react";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import { BaseModal } from "@components/BaseModal";
 import { SectionColor } from "@appTypes/SectionColor";
 

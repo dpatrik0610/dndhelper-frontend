@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Button, Group, Paper, Skeleton, Stack, Text, TextInput, Textarea } from "@mantine/core";
-import { useNoteStore } from "@store/useNoteStore";
+import { useNoteStore } from "@store/note/noteStore";
 import type { Note } from "@appTypes/Note";
 import type { Session } from "@appTypes/Session";
 

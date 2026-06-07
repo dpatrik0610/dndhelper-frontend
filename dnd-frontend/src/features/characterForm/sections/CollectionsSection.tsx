@@ -1,9 +1,9 @@
-import { Stack } from "@mantine/core";
+﻿import { Stack } from "@mantine/core";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { IconBook2 } from "@tabler/icons-react";
 import { ListEditor } from "@features/characterForm/components/ListEditor";
-import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { useCharacterFormStore } from "@store/character/characterFormStore";
 
 export function CollectionsSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();

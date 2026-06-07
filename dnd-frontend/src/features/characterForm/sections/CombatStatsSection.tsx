@@ -1,11 +1,11 @@
-import { Group, Stack, TextInput } from "@mantine/core";
+﻿import { Group, Stack, TextInput } from "@mantine/core";
 import { IconSword } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { useCharacterFormStore } from "@store/character/characterFormStore";
 
 import { FormNumberInput } from "@components/common/FormNumberInput";
-// import { WheelPickerInput } from "@components/common/WheelPickerInput"; // 🔧 Disabled for now
+// import { WheelPickerInput } from "@components/common/WheelPickerInput"; // đź”§ Disabled for now
 
 export function CombatStatsSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
@@ -21,7 +21,7 @@ export function CombatStatsSection() {
       <Stack>
 
         {/* ---------------------------------------- */}
-        {/* 🔥 HP + MAX HP → NORMAL Number Inputs     */}
+        {/* đź”Ą HP + MAX HP â†’ NORMAL Number Inputs     */}
         {/* ---------------------------------------- */}
         <Group grow>
           {/* WheelPickerInput temporarily disabled */}

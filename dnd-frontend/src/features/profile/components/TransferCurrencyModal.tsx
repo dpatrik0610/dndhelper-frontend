@@ -2,8 +2,8 @@ import { Select, Stack } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { getCampaignCharacters } from "@services/campaignService";
 import { transferBetweenCharacters } from "@services/currencyService";
-import { useAuthStore } from "@store/useAuthStore";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useToken } from "@store/auth/authSelectors";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { showNotification } from "@components/Notification/Notification";
 import type { Character } from "@appTypes/Character/Character";
 import { loadCharacters } from "@utils/loadCharacter";
@@ -16,8 +16,8 @@ interface Props {
 }
 
 export function TransferCurrencyModal({ opened, onClose }: Props) {
-  const token = useAuthStore.getState().token!;
-  const character = useCharacterStore((s) => s.character)!;
+  const token = useToken()!;
+  const character = useCurrentCharacter()!;
 
   const [loading, setLoading] = useState(false);
   const [characters, setCharacters] = useState<Character[]>([]);

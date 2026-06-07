@@ -1,7 +1,6 @@
 import { IconAutomaticGearbox, IconStarFilled, IconSearch } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
-import { useCharacterStore } from "@store/useCharacterStore";
-import { SectionColor } from "@appTypes/SectionColor";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import {
   Box,
   Group,
@@ -18,7 +17,7 @@ import { DividerWithLabel } from "@components/common/DividerWithLabel";
 
 export function SkillsPanel() {
   const theme = useMantineTheme();
-  const character = useCharacterStore((s) => s.character);
+  const character = useCurrentCharacter();
   const skills = character?.skills || [];
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebouncedValue(search, 150);

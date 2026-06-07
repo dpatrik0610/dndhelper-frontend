@@ -1,7 +1,7 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Group, NumberInput, Text, ActionIcon, Tooltip, Stack, Box } from "@mantine/core";
 import { IconPlus, IconMinus } from "@tabler/icons-react";
-import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
+import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import type { Currency } from "@appTypes/Currency";
 
 interface CurrencyInlineProps {

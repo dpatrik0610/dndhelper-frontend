@@ -61,7 +61,6 @@ export function CustomDateInput({ label = "Scheduled For", value, onChange, disa
                 }
                 setOpened(false);
               }}
-              disabled={disabled}
               classNames={{
                 day: "glassy-date-day",
                 month: "glassy-date-month",

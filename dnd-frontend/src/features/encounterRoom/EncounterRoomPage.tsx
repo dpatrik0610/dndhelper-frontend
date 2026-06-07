@@ -3,7 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button, Group, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import type { CreateRoomRequest, Point2D, ShapeType } from "@appTypes/EncounterRoom";
-import { useEncounterRoomStore } from "@store/useEncounterRoomStore";
+import {
+  useRoom,
+  useSelectedEntityId,
+  useMyRooms,
+  useRoomLoading,
+  useRoomError,
+  useEncounterRoomActions,
+} from "@store/encounterRoom/encounterRoomSelectors";
 import { BattleCanvas, type EncounterTool } from "./components/canvas/BattleCanvas";
 import { RoomHeader } from "./components/header/RoomHeader";
 import { RoomLobby } from "./components/lobby/RoomLobby";
@@ -22,20 +29,22 @@ import classes from "./EncounterRoomPage.module.css";
 export default function EncounterRoomPage() {
   const { roomId } = useParams();
   const navigate = useNavigate();
-  const room = useEncounterRoomStore((state) => state.room);
-  const selectedEntityId = useEncounterRoomStore((state) => state.selectedEntityId);
-  const myRooms = useEncounterRoomStore((state) => state.myRooms);
-  const loading = useEncounterRoomStore((state) => state.loading);
-  const error = useEncounterRoomStore((state) => state.error);
-  const loadMyRooms = useEncounterRoomStore((state) => state.loadMyRooms);
-  const loadRoom = useEncounterRoomStore((state) => state.loadRoom);
-  const createRoom = useEncounterRoomStore((state) => state.createRoom);
-  const joinRoomByCode = useEncounterRoomStore((state) => state.joinRoomByCode);
-  const leaveRoom = useEncounterRoomStore((state) => state.leaveRoom);
-  const deleteRoom = useEncounterRoomStore((state) => state.deleteRoom);
-  const regenerateJoinCode = useEncounterRoomStore((state) => state.regenerateJoinCode);
-  const setSelectedEntityId = useEncounterRoomStore((state) => state.setSelectedEntityId);
-  const clearRoom = useEncounterRoomStore((state) => state.clearRoom);
+  const room = useRoom();
+  const selectedEntityId = useSelectedEntityId();
+  const myRooms = useMyRooms();
+  const loading = useRoomLoading();
+  const error = useRoomError();
+  const {
+    loadMyRooms,
+    loadRoom,
+    createRoom,
+    joinRoomByCode,
+    leaveRoom,
+    deleteRoom,
+    regenerateJoinCode,
+    setSelectedEntityId,
+    clearRoom,
+  } = useEncounterRoomActions();
 
   const { invoke, isConnected } = useEncounterRoomHub(room?.id ?? roomId ?? null);
   const actions = useRoomActions(invoke);

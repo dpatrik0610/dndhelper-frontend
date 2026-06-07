@@ -8,12 +8,12 @@ import {
   SimpleGrid,
 } from "@mantine/core";
 import { IconStars, IconSparkles } from "@tabler/icons-react";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 
 export function FeaturesPanel() {
-  const character = useCharacterStore((s) => s.character);
+  const character = useCurrentCharacter();
   if (!character) return null;
 
   const features = character.features ?? [];

@@ -1,5 +1,5 @@
-import { showNotification } from "@components/Notification/Notification";
-import { useEncounterStore } from "@store/useEncounterStore";
+﻿import { showNotification } from "@components/Notification/Notification";
+import { useEncounterStore } from "@store/encounter/encounterStore";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 
 export function handleCampaignChange(event: EntityChangeEvent) {

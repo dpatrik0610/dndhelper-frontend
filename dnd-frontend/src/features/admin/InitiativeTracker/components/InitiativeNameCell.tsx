@@ -1,5 +1,5 @@
-import { Badge, Group, TextInput } from "@mantine/core";
-import type { InitiativeEntry } from "@store/admin/useInitiativeTrackerStore";
+﻿import { Badge, Group, TextInput } from "@mantine/core";
+import type { InitiativeEntry } from "@store/admin/initiativeTrackerStore";
 
 interface InitiativeNameCellProps {
   row: InitiativeEntry;

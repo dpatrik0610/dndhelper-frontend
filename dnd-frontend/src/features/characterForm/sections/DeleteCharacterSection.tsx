@@ -1,17 +1,18 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button, Stack, TextInput, Group, Text, Paper } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useCharacterStore } from "@store/useCharacterStore";
-import { useAuthStore } from "@store/useAuthStore";
+import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
+import { useAuthStore } from "@store/auth/authStore";
 import { useNavigate } from "react-router-dom";
 import { deleteCharacter } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
 import { showNotification } from "@components/Notification/Notification";
 
 export function DeleteCharacterSection() {
-  const { character, clearStore } = useCharacterStore();
+  const character = useCurrentCharacter();
+  const { clearStore } = useCharacterCoreActions();
   const token = useAuthStore((s) => s.token);
   const navigate = useNavigate();
 
@@ -45,7 +46,7 @@ export function DeleteCharacterSection() {
       await loadCharacters(token ?? "");
       navigate("/home");
     } catch (err) {
-      console.error("❌ Delete failed:", err);
+      console.error("âťŚ Delete failed:", err);
       showNotification({
         title: "Error",
         message: "Failed to delete character.",
@@ -60,8 +61,8 @@ export function DeleteCharacterSection() {
     <ExpandableSection title="Delete Character" icon={<IconTrash />} color={SectionColor.Red}>
       <Paper p="md" radius="md" style={{ background: "rgba(255,0,0,0.05)", border: "1px solid rgba(255,0,0,0.2)" }}>
         <Stack gap="xs">
-          <Text size="sm" c="red.4" fw={500}>⚠️ This action is irreversible!</Text>
-          <Text size="sm" c="dimmed">To confirm, type your character’s name below:</Text>
+          <Text size="sm" c="red.4" fw={500}>âš ď¸Ź This action is irreversible!</Text>
+          <Text size="sm" c="dimmed">To confirm, type your characterâ€™s name below:</Text>
 
           <TextInput
             placeholder={`Type "${character.name}" to confirm`}

@@ -1,10 +1,10 @@
-import { Button, Group, Stack, TextInput, Textarea, Switch } from "@mantine/core";
+﻿import { Button, Group, Stack, TextInput, Textarea, Switch } from "@mantine/core";
 import { BaseModal } from "@components/BaseModal";
 import { CustomDateInput } from "@components/common/CustomDateInput";
 import { IconLock, IconPlus } from "@tabler/icons-react";
 import type { Session } from "@appTypes/Session";
 import type { Campaign } from "@appTypes/Campaign";
-import { useSessionStore } from "@store/session/useSessionStore";
+import { useSessionStore } from "@store/session/sessionStore";
 import { SessionNotesPanel } from "./SessionNotesPanel";
 import { SectionColor } from "@appTypes/SectionColor";
 

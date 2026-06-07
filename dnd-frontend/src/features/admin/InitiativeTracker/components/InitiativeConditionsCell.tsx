@@ -1,7 +1,7 @@
-import { ActionIcon, Badge, Group, Stack, Text, Tooltip } from "@mantine/core";
-import { IconPlus, IconX } from "@tabler/icons-react";
+import { ActionIcon, Badge, Group, Stack, Text } from "@mantine/core";
+import { IconX } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-import type { ConditionEntry } from "@store/admin/useInitiativeTrackerStore";
+import type { ConditionEntry } from "@store/admin/initiativeTrackerStore";
 import { AddConditionModal } from "./AddConditionModal";
 import { useEffect } from "react";
 

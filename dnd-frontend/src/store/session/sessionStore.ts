@@ -9,30 +9,30 @@ import {
   getSessionById,
   updateSession,
 } from "@services/sessionService";
-import { useAuthStore } from "@store/useAuthStore";
+import { getAuthToken } from "@store/auth/authUtils";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 
-interface SessionState {
+export interface SessionState {
   sessions: Session[];
   selected: Session | null;
   loading: boolean;
   error: string | null;
+}
 
+export interface SessionActions {
   loadAll: () => Promise<void>;
   loadByCampaign: (campaignId: string) => Promise<void>;
   loadById: (id: string) => Promise<Session | null>;
   select: (id: string | null) => void;
-
   create: (session: Session) => Promise<Session | null>;
   update: (session: Session) => Promise<Session | null>;
   remove: (id: string) => Promise<boolean>;
   setLive: (id: string) => Promise<void>;
-
   clear: () => void;
 }
 
-export const useSessionStore = create<SessionState>()(
+export const useSessionStore = create<SessionState & SessionActions>()(
   persist(
     (set, get) => ({
       sessions: [],
@@ -43,7 +43,7 @@ export const useSessionStore = create<SessionState>()(
       async loadAll() {
         set({ loading: true, error: null });
         try {
-          const token = useAuthStore.getState().token!;
+          const token = getAuthToken();
           const data = await getAllSessions(token);
           set({
             sessions: data,
@@ -66,7 +66,7 @@ export const useSessionStore = create<SessionState>()(
       async loadByCampaign(campaignId) {
         set({ loading: true, error: null });
         try {
-          const token = useAuthStore.getState().token!;
+          const token = getAuthToken();
           const data = await getSessionsByCampaign(campaignId, token);
           console.info("[SessionStore] Loaded sessions by campaign", { campaignId, count: data.length });
           set({
@@ -89,7 +89,7 @@ export const useSessionStore = create<SessionState>()(
       async loadById(id) {
         set({ loading: true, error: null });
         try {
-          const token = useAuthStore.getState().token!;
+          const token = getAuthToken();
           const session = await getSessionById(id, token);
           set((state) => ({
             sessions: state.sessions.some((s) => s.id === id)
@@ -119,7 +119,7 @@ export const useSessionStore = create<SessionState>()(
       async create(session) {
         set({ loading: true, error: null });
         try {
-          const token = useAuthStore.getState().token!;
+          const token = getAuthToken();
           const created = await createSession(session, token);
           set((state) => ({
             sessions: [...state.sessions, created],
@@ -148,7 +148,7 @@ export const useSessionStore = create<SessionState>()(
         if (!session.id) return null;
         set({ loading: true, error: null });
         try {
-          const token = useAuthStore.getState().token!;
+          const token = getAuthToken();
           const updated = await updateSession(session.id, session, token);
           set((state) => ({
             sessions: state.sessions.map((s) => (s.id === updated.id ? updated : s)),
@@ -176,7 +176,7 @@ export const useSessionStore = create<SessionState>()(
       async remove(id) {
         set({ loading: true, error: null });
         try {
-          const token = useAuthStore.getState().token!;
+          const token = getAuthToken();
           await deleteSession(id, token);
           set((state) => {
             const sessions = state.sessions.filter((s) => s.id !== id);
@@ -210,7 +210,7 @@ export const useSessionStore = create<SessionState>()(
       async setLive(id: string) {
         set({ loading: true, error: null });
         try {
-          const token = useAuthStore.getState().token!;
+          const token = getAuthToken();
           const target = get().sessions.find((s) => s.id === id);
           if (!target) return;
 

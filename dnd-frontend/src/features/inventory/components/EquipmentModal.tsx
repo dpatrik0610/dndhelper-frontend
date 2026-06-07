@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   Badge,
   Center,
@@ -23,7 +23,7 @@ import {
 } from "@tabler/icons-react";
 import { getEquipmentById } from "@services/equipmentService";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import CustomBadge from "@components/common/CustomBadge";
 import DisplayText from "@components/common/DisplayText";
 import { ExpandableSection } from "@components/ExpandableSection";

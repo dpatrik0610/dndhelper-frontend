@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import { useAuthStore } from "@store/useAuthStore";
+﻿import { create } from "zustand";
+import { useAuthStore } from "@store/auth/authStore";
 import { UserService } from "@services/Admin/userService";
 import { registerUser, resetPassword } from "@services/authService";
 import type { User } from "@appTypes/User";

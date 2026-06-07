@@ -3,12 +3,12 @@ import { StatBox } from "./StatBox";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { Group, Stack, Text } from "@mantine/core";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { DividerWithLabel } from "@components/common/DividerWithLabel";
 
 
 export function ExtraInfo() {
-  const character = useCharacterStore((state) => state.character)!;
+  const character = useCurrentCharacter()!;
   return (
     <ExpandableSection
       title="Additional Info"

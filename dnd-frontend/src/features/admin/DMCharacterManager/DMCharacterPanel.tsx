@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { Box, SimpleGrid } from "@mantine/core";
-import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
+import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import { CharacterCard } from "./components/CharacterCard";
 
 export function DMCharacterPanel() {

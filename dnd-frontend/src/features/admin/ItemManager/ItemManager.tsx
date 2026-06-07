@@ -1,4 +1,4 @@
-import {
+﻿import {
   ActionIcon,
   Badge,
   Button,
@@ -18,7 +18,7 @@ import {
 } from "@mantine/core";
 import { IconEdit, IconPlus, IconRefresh, IconSearch, IconTrash, IconX } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { useAdminEquipmentStore } from "@store/admin/useAdminEquipmentStore";
+import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import { EQUIPMENT_TIERS, type Equipment } from "@appTypes/Equipment/Equipment";
 import { EquipmentFormModal } from "@components/admin/EquipmentFormModal";
 import { ImportModal } from "./components/ImportModal";

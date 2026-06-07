@@ -1,4 +1,4 @@
-import {
+﻿import {
   ActionIcon,
   Button,
   Code,
@@ -14,7 +14,7 @@ import { BaseModal } from "@components/BaseModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { createManyEquipment } from "@services/equipmentService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { importSamplePretty } from "./ImportTemplate";
 
 interface ImportModalProps {

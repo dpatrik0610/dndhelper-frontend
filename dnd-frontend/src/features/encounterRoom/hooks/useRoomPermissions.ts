@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useAuthStore } from "@store/useAuthStore";
+﻿import { useMemo } from "react";
+import { useAuthStore } from "@store/auth/authStore";
 import type { EncounterRoom, RoomToken, SessionEntity } from "@appTypes/EncounterRoom";
 
 export function useRoomPermissions(room: EncounterRoom | null) {

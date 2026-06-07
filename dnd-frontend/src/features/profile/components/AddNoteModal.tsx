@@ -16,8 +16,8 @@ import {
   IconSparkles,
   IconX,
 } from "@tabler/icons-react";
-import { useCharacterStore } from "@store/useCharacterStore";
-import { useNoteStore } from "@store/useNoteStore";
+import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
+import { useNoteActions } from "@store/note/noteSelectors";
 import { showNotification } from "@components/Notification/Notification";
 import { MarkdownTextarea } from "@components/common/MarkdownTextarea";
 import { magicGlowTheme } from "@styles/magic/glowTheme";
@@ -30,9 +30,9 @@ interface Props {
 }
 
 export function AddNoteModal({ opened, onClose }: Props) {
-  const character = useCharacterStore((s) => s.character);
-  const updateCharacter = useCharacterStore((s) => s.updateCharacter);
-  const createNote = useNoteStore((s) => s.create);
+  const character = useCurrentCharacter();
+  const { updateCharacter } = useCharacterCoreActions();
+  const { create: createNote } = useNoteActions();
 
   const isMobile = useMediaQuery("(max-width: 768px)");
 

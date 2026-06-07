@@ -1,4 +1,4 @@
-import {
+﻿import {
   TextInput,
   NumberInput,
   Switch,
@@ -12,7 +12,7 @@ import {
   Divider,
 } from "@mantine/core";
 import { useState } from "react";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import type { Spell } from "@appTypes/Spell";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -25,7 +25,7 @@ const DAMAGE_TYPES = [
 
 const AREAS = ["Sphere", "Cone", "Cube", "Line", "Cylinder"];
 
-// ✅ Extracted school list
+// âś… Extracted school list
 const SCHOOLS = [
   "Abjuration",
   "Conjuration",
@@ -174,7 +174,7 @@ export function SpellForm() {
             onChange={(v) => handleChange("level", Number(v))}
           />
 
-          {/* ✅ SCHOOL SELECT */}
+          {/* âś… SCHOOL SELECT */}
           <Select
             classNames={glass}
             label="School"

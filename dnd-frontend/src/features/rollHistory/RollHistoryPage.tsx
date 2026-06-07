@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -17,8 +17,8 @@ import { useMediaQuery } from "@mantine/hooks";
 import { IconX } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
-import { useAuthStore } from "@store/useAuthStore";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useToken, useRoles } from "@store/auth/authSelectors";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { getRollHistory } from "@services/rollService";
 import type { RollHistoryEntry } from "@appTypes/Roll";
 import { formatRollExpression } from "@utils/rollFormat";
@@ -48,9 +48,9 @@ function isSubtleRoll(entry: RollHistoryEntry) {
 export default function RollHistoryPage() {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
-  const token = useAuthStore((s) => s.token);
-  const roles = useAuthStore((s) => s.roles);
-  const character = useCharacterStore((s) => s.character);
+  const token = useToken();
+  const roles = useRoles();
+  const character = useCurrentCharacter();
 
   const isAdmin = roles.includes("Admin");
   const campaignId = character?.campaignId ?? null;

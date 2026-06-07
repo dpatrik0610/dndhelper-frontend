@@ -1,8 +1,8 @@
 import type { Inventory } from '@appTypes/Inventory/Inventory';
 import { useEffect, useState } from 'react';
 import { getInventoriesByCharacter } from "@services/inventoryService";
-import { useCharacterStore } from "@store/useCharacterStore";
-import { useAuthStore } from "@store/useAuthStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
+import { useAuthStore } from "@store/auth/authStore";
 import { Box } from '@mantine/core';
 import { IconError404 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
@@ -13,7 +13,7 @@ import { showNotification } from '@components/Notification/Notification';
 
 export function Inventory() {
 
-  const character = useCharacterStore((state) => state.character);
+  const character = useCurrentCharacter();
   const token = useAuthStore.getState().token || '';
   const [inventories, setInventories] = useState<Inventory[]>([]);
   const { searchTerm, setSearchTerm, viewMode, setViewMode } = useInventoryFilters();
@@ -61,7 +61,6 @@ export function Inventory() {
   if (!character) return null;
 
   return (
-    
     <Box>
       <InventoryFilters
         searchTerm={searchTerm}
@@ -77,4 +76,3 @@ export function Inventory() {
     </Box>
   );
 }
-

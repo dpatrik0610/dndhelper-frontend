@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import type { Note } from "@appTypes/Note";
-import { useNoteStore } from "@store/useNoteStore";
+import { useNoteStore } from "@store/note/noteStore";
 
 export function useSessionNotes(noteIds: (string | null | undefined)[]) {
   const { loadMany } = useNoteStore();

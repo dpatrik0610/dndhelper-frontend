@@ -1,5 +1,5 @@
-import { useCharacterStore } from "@store/useCharacterStore";
-import { useInitiativeTrackerStore } from "@store/admin/useInitiativeTrackerStore";
+﻿import { useCharacterStore } from "@store/character/characterStore";
+import { useInitiativeTrackerStore } from "@store/admin/initiativeTrackerStore";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 import type { Character } from "@appTypes/Character/Character";
 import { showNotification } from "@components/Notification/Notification";

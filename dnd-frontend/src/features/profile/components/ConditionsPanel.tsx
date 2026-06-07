@@ -8,10 +8,11 @@ import {
 import { IconSearch, IconSparkles } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCharacterStore } from "@store/character/characterStore";
+import { useCurrentCharacter, useCharacterCombatActions } from "@store/character/characterSelectors";
 import { getCondition } from "@services/conditionService";
 import { updateCharacter } from "@services/characterService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useToken } from "@store/auth/authSelectors";
 import { ConditionDetailsModal } from "./ConditionDetailsModal";
 
 const BADGE_STYLES: React.CSSProperties = {
@@ -22,10 +23,10 @@ const BADGE_STYLES: React.CSSProperties = {
 };
 
 export function ConditionsPanel() {
-  const character = useCharacterStore((state) => state.character);
-  const removeCondition = useCharacterStore((state) => state.removeCondition);
+  const character = useCurrentCharacter();
+  const { removeCondition } = useCharacterCombatActions();
 
-  const token = useAuthStore((s) => s.token)!;
+  const token = useToken()!;
 
   const [opened, setOpened] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);

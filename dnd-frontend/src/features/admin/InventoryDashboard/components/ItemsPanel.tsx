@@ -1,7 +1,7 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button, Group, ScrollArea, Text } from "@mantine/core";
 import { IconBox, IconPlus } from "@tabler/icons-react";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { ItemCard } from "./ItemCard";
 import { ItemModal } from "./ItemModal";
 import { AddExistingItemModal } from "./AddExistingItemModal";

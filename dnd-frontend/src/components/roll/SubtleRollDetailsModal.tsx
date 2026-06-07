@@ -1,6 +1,6 @@
 ﻿import { ActionIcon, Badge, Divider, Group, Modal, Paper, Stack, Text } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
-import { useSubtleRollStore } from "@store/useSubtleRollStore";
+import { useSubtleRollStore } from "@store/ui/subtleRollStore";
 import { formatRollExpression, formatRollsList } from "@utils/rollFormat";
 
 export function SubtleRollDetailsModal() {

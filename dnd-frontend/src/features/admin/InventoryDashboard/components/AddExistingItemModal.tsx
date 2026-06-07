@@ -1,4 +1,4 @@
-import {
+﻿import {
   TextInput,
   Stack,
   Button,
@@ -13,8 +13,8 @@ import {
 import { useMediaQuery } from "@mantine/hooks";
 import { IconSearch, IconBox } from "@tabler/icons-react";
 import { useEffect, useState, useMemo } from "react";
-import { useAdminEquipmentStore } from "@store/admin/useAdminEquipmentStore";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
+import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import styles from "@styles/AddExistingItemModal.module.css";

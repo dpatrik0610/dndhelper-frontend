@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Badge, Group, Paper, Stack, Text } from "@mantine/core";
 import { getInventory } from "@services/inventoryService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 
 interface InventoryPanelProps {

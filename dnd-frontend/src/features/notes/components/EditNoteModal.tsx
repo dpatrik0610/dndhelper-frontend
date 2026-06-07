@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Button,
@@ -11,7 +11,7 @@ import {
 import { useMediaQuery } from "@mantine/hooks";
 import { IconDeviceFloppy, IconRefresh, IconSparkles, IconX } from "@tabler/icons-react";
 import type { Note } from "@appTypes/Note";
-import { useNoteStore } from "@store/useNoteStore";
+import { useNoteStore } from "@store/note/noteStore";
 import { MarkdownTextarea } from "@components/common/MarkdownTextarea";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";

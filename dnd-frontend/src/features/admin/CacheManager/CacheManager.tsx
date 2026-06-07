@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   Paper,
   Text,
@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { IconTrash, IconDatabaseSearch, IconReload } from "@tabler/icons-react";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { CacheInfoResponse } from "@appTypes/Cache";

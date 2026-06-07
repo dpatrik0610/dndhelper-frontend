@@ -1,6 +1,6 @@
 import { Tooltip } from "@mantine/core";
 import { IconArrowsExchange } from "@tabler/icons-react";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCharacterList, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { useState } from "react";
 import { CharacterSelectModal } from "@features/home/components/CharacterSelectModal";
 import type { Character } from "@appTypes/Character/Character";
@@ -8,7 +8,8 @@ import { SectionColor } from "@appTypes/SectionColor";
 import CustomBadge from "@components/common/CustomBadge";
 
 export function SwitchCharacterButton() {
-  const { characters, setCharacter } = useCharacterStore();
+  const characters = useCharacterList();
+  const { setCharacter } = useCharacterCoreActions();
   const canSwitch = (characters?.length ?? 0) > 1;
   const [opened, setOpened] = useState(false);
 

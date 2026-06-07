@@ -7,12 +7,12 @@ import {
   ThemeIcon,
 } from "@mantine/core";
 import { IconLanguage, IconSword } from "@tabler/icons-react";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 
 export function ProficienciesPanel() {
-  const character = useCharacterStore((s) => s.character);
+  const character = useCurrentCharacter();
   if (!character) return null;
 
   const renderList = (items: string[] | undefined, empty: string, badgeProps = {}) =>

@@ -1,8 +1,8 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Campaign } from "@appTypes/Campaign";
 import type { Character } from "@appTypes/Character/Character";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { apiClient } from "@api/apiClient";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";

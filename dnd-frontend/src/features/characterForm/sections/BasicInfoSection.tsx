@@ -1,8 +1,8 @@
-import { Stack, Group, TextInput, Select } from "@mantine/core";
+﻿import { Stack, Group, TextInput, Select } from "@mantine/core";
 import { IconUser } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { InfoIconPopover } from "@components/common/InfoIconPopover";
 import { useEffect } from "react";
@@ -25,7 +25,7 @@ export function BasicInfoSection() {
     </Group>
   );
 
-  // ⭐ Auto-compute proficiency bonus from level
+  // â­ Auto-compute proficiency bonus from level
   useEffect(() => {
     const pb = Math.floor((characterForm.level - 1) / 4) + 2;
     if (pb !== characterForm.proficiencyBonus) {
@@ -45,7 +45,7 @@ export function BasicInfoSection() {
         {/* NAME */}
         <TextInput
           classNames={cls}
-          label={L("Name", "Your character’s chosen name.")}
+          label={L("Name", "Your characterâ€™s chosen name.")}
           required
           value={characterForm.name}
           onChange={(e) => setCharacterForm({ name: e.currentTarget.value })}
@@ -90,7 +90,7 @@ export function BasicInfoSection() {
 
           <FormNumberInput
             classNames={cls}
-            label={L("Level", "Overall character level (1–20).")}
+            label={L("Level", "Overall character level (1â€“20).")}
             min={1}
             max={20}
             value={characterForm.level}

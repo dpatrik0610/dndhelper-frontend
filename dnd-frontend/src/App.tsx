@@ -14,8 +14,8 @@ import { AdminDashboard } from "@features/admin/AdminDashboard";
 import NotesPage from "@features/notes/NotesPage";
 import RollHistoryPage from "@features/rollHistory/RollHistoryPage";
 import PrivateRoute from "@components/PrivateRoute";
-import { useAuthStore } from "@store/useAuthStore";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useToken, useRoles } from "@store/auth/authSelectors";
+import { useCharacterList } from "@store/character/characterSelectors";
 import { useTokenExpiryGuard } from "@features/auth/hooks/useTokenExpiryGuard";
 import RulesPage from "@features/rules/RulesPage";
 import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapCharacters";
@@ -24,7 +24,7 @@ import { SidebarToggle } from "@components/layout/SidebarToggle";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
 import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal";
 import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
-import { useUiStore } from "@store/useUiStore";
+import { useUiStore } from "@store/ui/uiStore";
 import AiAssistantPage from "@features/aiAssistant/AiAssistantPage";
 import EncounterRoomPage from "@features/encounterRoom/EncounterRoomPage";
 function AppRoutes() {
@@ -33,9 +33,9 @@ function AppRoutes() {
   const [opened, handlers] = useDisclosure(false);
   const sidebarTheme = useUiStore((s) => s.sidebarTheme) as SidebarThemeVariant;
 
-  const token = useAuthStore((s) => s.token);
-  const roles = useAuthStore((s) => s.roles);
-  const { characters } = useCharacterStore();
+  const token = useToken();
+  const roles = useRoles();
+  const characters = useCharacterList();
   const isAdmin = roles.includes("Admin");
 
   const localToken = useMemo(() => localStorage.getItem("authToken"), []);

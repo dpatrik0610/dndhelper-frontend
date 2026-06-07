@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
+﻿import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 import { Box } from "@mantine/core";
 import type { AddMapElementRequest, Point2D, ShapeType } from "@appTypes/EncounterRoom";
-import { useEncounterRoomStore } from "@store/useEncounterRoomStore";
+import { useEncounterRoomStore } from "@store/encounterRoom/encounterRoomStore";
 import { renderGrid } from "./GridRenderer";
 import { drawMapElements } from "./DrawingLayer";
 import { drawMeasureOverlay } from "./MeasureOverlay";

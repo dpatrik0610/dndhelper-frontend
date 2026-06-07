@@ -1,6 +1,6 @@
-import { Button, Group, Stack, Select, NumberInput } from "@mantine/core";
+﻿import { Button, Group, Stack, Select, NumberInput } from "@mantine/core";
 import { useState, useEffect } from "react";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";

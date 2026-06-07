@@ -1,18 +1,20 @@
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { SpellNameResponse } from "@services/spellService";
 import type { Spell } from "@appTypes/Spell";
-import { create } from "zustand";
-import { useAuthStore } from "@store/useAuthStore";
 
-interface SpellStore {
+export interface SpellState {
   spellNames: SpellNameResponse[];
   currentSpell: Spell | null;
+}
+
+export interface SpellActions {
   setSpellNames: (spells: SpellNameResponse[]) => void;
   setCurrentSpell: (spell: Spell | null) => void;
   clearCurrentSpell: () => void;
 }
 
-export const useSpellStore = create<SpellStore>()(
+export const useSpellStore = create<SpellState & SpellActions>()(
   persist(
     (set) => ({
       spellNames: [],

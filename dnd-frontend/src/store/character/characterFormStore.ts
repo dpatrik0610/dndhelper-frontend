@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { Character } from "../types/Character/Character";
-import { defaultCharacter } from "../types/Character/DefaultCharacter";
+import type { Character } from "@appTypes/Character/Character";
+import { defaultCharacter } from "@appTypes/Character/DefaultCharacter";
 
 interface CharacterFormStore {
   characterForm: Character;

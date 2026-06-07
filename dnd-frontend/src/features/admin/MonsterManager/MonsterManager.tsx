@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Center, Group, Modal, Paper, Pagination, Stack, Text, Title, Tooltip } from "@mantine/core";
+﻿import { ActionIcon, Button, Center, Group, Modal, Paper, Pagination, Stack, Text, Title, Tooltip } from "@mantine/core";
 import { IconPlus, IconRefresh } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import type { Monster } from "@appTypes/Monster";
@@ -6,7 +6,7 @@ import { MonsterFilters } from "./components/MonsterFilters";
 import { MonsterTable } from "./components/MonsterTable";
 import { MonsterFormModal } from "./components/MonsterFormModal";
 import { MonsterViewModal } from "./components/MonsterViewModal";
-import { useAdminMonsterStore } from "@store/admin/useAdminMonsterStore";
+import { useAdminMonsterStore } from "@store/admin/adminMonsterStore";
 
 export function MonsterManager() {
   const {

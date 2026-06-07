@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   ActionIcon,
   Group,
@@ -11,10 +11,10 @@ import {
   IconReload,
   IconUserCog,
 } from "@tabler/icons-react";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
-import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
+import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
+import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { ensureInventoryLinkedToCharacter } from "@utils/inventorySync";
@@ -48,7 +48,7 @@ export function MetaPanel() {
       : currencies
           .slice(0, 3)
           .map((c) => `${c.amount} ${c.currencyCode}`)
-          .join(" · ");
+          .join(" Â· ");
 
   const handleSyncLinks = async () => {
     if (!selected?.id) return;
@@ -107,13 +107,13 @@ export function MetaPanel() {
             {selected.name || "Unnamed"}
           </Text>
           <Text size="xs" c="dimmed" className={styles.metaBarDivider}>
-            ·
+            Â·
           </Text>
           <Text size="xs" c="dimmed" className={styles.metaBarSegment} title={ownerCharacters.map((c) => c.name).join(", ")}>
             {ownerSummary}
           </Text>
           <Text size="xs" c="dimmed" className={styles.metaBarDivider}>
-            ·
+            Â·
           </Text>
           <Text size="xs" c="dimmed" className={styles.metaBarSegment}>
             {currencySummary}

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import {
   Grid,
   Paper,
@@ -13,13 +13,13 @@ import { useMantineTheme } from "@mantine/core";
 import { RadarChart } from "@mantine/charts";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { AbilityScore } from "./AbilityScore";
 import { StatBox } from "./StatBox";
 import AbilityScoreTooltip from "./AbilityScoreToolTip";
 
 export function AbilityScores() {
-  const character = useCharacterStore((state) => state.character)!;
+  const character = useCurrentCharacter()!;
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
 
@@ -94,7 +94,7 @@ export function AbilityScores() {
       color={SectionColor.Violet}
       defaultOpen
       transparent
-      icon={<span style={{ fontSize: "1.2rem" }}>💪</span>}
+      icon={<span style={{ fontSize: "1.2rem" }}>đź’Ş</span>}
       style={{
         background:
           "linear-gradient(135deg, rgba(36, 0, 33, 0.23), rgba(56, 27, 0, 0.36))",
@@ -194,7 +194,7 @@ export function AbilityScores() {
                                         "drop-shadow(0 0 3px #FFD43B90)",
                                     }}
                                   >
-                                    ★
+                                    â…
                                   </span>
                                 )}
                                 {skill.name}

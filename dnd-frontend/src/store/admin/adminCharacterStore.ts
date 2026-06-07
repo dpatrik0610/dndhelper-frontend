@@ -1,8 +1,8 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import { getCampaignCharacters } from "@services/campaignService";
 import { updateCharacter as updateCharacterService } from "@services/characterService";
 import { transferCurrenciesToCharacter, removeCurrencies } from "@services/currencyService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Character } from "@appTypes/Character/Character";

@@ -1,11 +1,11 @@
-import { Box, Paper, Stack } from "@mantine/core";
+﻿import { Box, Paper, Stack } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import type { Character } from "@appTypes/Character/Character";
 import { CharacterMetaBox } from "@features/profile/components/CharacterMetaBox";
 import { HpRing } from "@features/profile/components/HpRing";
 import { InspirationBox } from "@features/profile/components/InspirationBox";
 import { CharacterCurrencyArea } from "@features/profile/components/CharacterCurrencyArea";
-import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
+import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 
 interface CharacterCardProps {
   character: Character;

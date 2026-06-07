@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Button,
@@ -21,7 +21,7 @@ import {
   IconLock,
   IconRefresh,
 } from "@tabler/icons-react";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { exportCollection, exportAllCollections, restoreCollection } from "@services/backupService";

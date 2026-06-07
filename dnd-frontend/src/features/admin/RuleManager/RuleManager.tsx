@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Button, Divider, FileInput, Group, MultiSelect, Paper, Select, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
 import { IconCheck, IconFileUpload, IconPlaylistAdd, IconUpload, IconX, IconPlus } from "@tabler/icons-react";
 import { RuleCategory, type RuleDetail, type RuleCategoryResponse } from "@appTypes/Rules/Rule";
 import { createRule } from "@services/ruleService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { mockRuleDetails } from "@features/rules/mockRules";
 import { ExpandableSection } from "@components/ExpandableSection";

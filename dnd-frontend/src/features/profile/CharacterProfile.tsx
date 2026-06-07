@@ -14,7 +14,7 @@ import {
 } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { CharacterHeader } from "./components/CharacterHeader";
 import { CombatStats } from "./components/CombatStats";
 import { AbilityScores } from "./components/AbilityScores";
@@ -31,7 +31,7 @@ import { FeaturesPanel } from "./components/FeaturesPanel";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { getCampaignById } from "@services/campaignService";
 import { ExperienceTableCard } from "./components/ExperienceTableCard";
 
@@ -64,7 +64,7 @@ function useCampaignName(campaignId: string | null | undefined) {
 }
 
 export default function CharacterProfile() {
-  const character = useCharacterStore((state) => state.character);
+  const character = useCurrentCharacter();
   const [activeTab, setActiveTab] = useState<string | null>("overview");
   const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();

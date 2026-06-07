@@ -8,10 +8,19 @@ import { createEncounterTemplate } from "@appTypes/Encounter";
 import type { Session } from "@appTypes/Session";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
 import { getCharacters } from "@services/characterService";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
-import { useAuthStore } from "@store/useAuthStore";
-import { useCharacterStore } from "@store/useCharacterStore";
-import { useEncounterStore } from "@store/useEncounterStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useToken, useRoles } from "@store/auth/authSelectors";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
+import {
+  useCampaign,
+  useEncounterList,
+  useSessionList,
+  useSelectedEncounterId,
+  useEncounterLoading,
+  useEncounterSaving,
+  useEncounterError,
+  useEncounterActions,
+} from "@store/encounter/encounterSelectors";
 import { AdminEncounterEditor } from "./components/AdminEncounterEditor";
 import { CreateEncounterModal } from "./components/CreateEncounterModal";
 import { ReadOnlyEncounterState } from "./components/ReadOnlyEncounterState";
@@ -28,7 +37,7 @@ const panelStyle = {
 } as const;
 
 const buildEncounterCreatePrefill = (
-  campaign: NonNullable<ReturnType<typeof useEncounterStore.getState>["campaign"]>,
+  campaign: NonNullable<ReturnType<typeof useCampaign>>,
   sessions: Session[],
   encounterCount: number,
 ): Encounter => {
@@ -46,20 +55,20 @@ const buildEncounterCreatePrefill = (
 };
 
 export default function EncounterPage({ embedded = false }: { embedded?: boolean }) {
-  const token = useAuthStore((state) => state.token);
-  const roles = useAuthStore((state) => state.roles);
-  const character = useCharacterStore((state) => state.character);
+  const token = useToken();
+  const roles = useRoles();
+  const character = useCurrentCharacter();
   const selectedAdminCampaignId = useAdminCampaignStore((state) => state.selectedId);
   const isAdmin = roles.includes("Admin");
 
+  const campaign = useCampaign();
+  const encounters = useEncounterList();
+  const sessions = useSessionList();
+  const selectedEncounterId = useSelectedEncounterId();
+  const loading = useEncounterLoading();
+  const saving = useEncounterSaving();
+  const error = useEncounterError();
   const {
-    campaign,
-    encounters,
-    sessions,
-    selectedEncounterId,
-    loading,
-    saving,
-    error,
     loadCampaignContext,
     selectEncounter,
     createEncounter: createEncounterRecord,
@@ -67,7 +76,8 @@ export default function EncounterPage({ embedded = false }: { embedded?: boolean
     removeEncounter,
     setActiveEncounter,
     clearActiveEncounter,
-  } = useEncounterStore();
+    clear,
+  } = useEncounterActions();
 
   const [resolvedCampaignId, setResolvedCampaignId] = useState<string | null>(selectedAdminCampaignId ?? null);
   const [resolvingCampaign, setResolvingCampaign] = useState(false);
@@ -107,7 +117,7 @@ export default function EncounterPage({ embedded = false }: { embedded?: boolean
 
   useEffect(() => {
     if (!resolvedCampaignId) {
-      useEncounterStore.getState().clear();
+      clear();
       return;
     }
 

@@ -2,7 +2,6 @@ import { apiClient } from "../api/apiClient";
 import type {
   AuthRequest,
   AuthResponse,
-  ApiError,
   ChangePasswordRequest,
   ResetPasswordRequest,
 } from '../types/AuthTypes';

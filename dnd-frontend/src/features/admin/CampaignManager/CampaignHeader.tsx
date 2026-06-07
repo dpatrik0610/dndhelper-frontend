@@ -1,4 +1,4 @@
-import {
+﻿import {
   Box,
   Group,
   Text,
@@ -20,7 +20,7 @@ import {
 } from "@tabler/icons-react";
 
 import { useState } from "react";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 
@@ -111,7 +111,7 @@ export function CampaignHeader() {
                     },
                   }}
                 >
-                  {id.length > 12 ? `${id.slice(0, 12)}…` : id}
+                  {id.length > 12 ? `${id.slice(0, 12)}â€¦` : id}
                 </Badge>
               ))}
             </Group>

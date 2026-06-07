@@ -7,8 +7,8 @@ import { SectionColor } from "@appTypes/SectionColor";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { defaultEquipment } from "@features/admin/ItemManager/defaultEquipment";
 import { getEquipmentById } from "@services/equipmentService";
-import { useAuthStore } from "@store/useAuthStore";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
+import { useAuthStore } from "@store/auth/authStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 
 interface ItemModalProps {
   opened: boolean;
@@ -33,13 +33,13 @@ export function ItemModal({
     const load = async () => {
       if (!opened) return;
 
-      // 🆕 Create mode
+      // đź†• Create mode
       if (!equipmentId && !editMode) {
         setEquipment(defaultEquipment);
         return;
       }
 
-      // 🧩 Edit mode
+      // đź§© Edit mode
       if (equipmentId) {
         setLoading(true);
         try {
@@ -60,10 +60,6 @@ export function ItemModal({
     load();
   }, [equipmentId, opened, token, editMode]);
 
-  const handleChange = <K extends keyof Equipment>(
-    key: K,
-    value: Equipment[K]
-  ) => setEquipment((prev) => (prev ? { ...prev, [key]: value } : prev));
 
   const handleSave = async (payload?: Equipment) => {
     const eq = payload ?? equipment;

@@ -1,8 +1,8 @@
-import { Stack, Textarea, Group, TextInput } from "@mantine/core";
+﻿import { Stack, Textarea, Group, TextInput } from "@mantine/core";
 import { IconBook } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useCharacterFormStore } from "@store/useCharacterFormStore";
+import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 
 export function LoreSection() {

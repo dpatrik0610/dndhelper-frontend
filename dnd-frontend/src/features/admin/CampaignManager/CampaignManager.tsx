@@ -1,7 +1,7 @@
-import { Box, Paper, Stack, Loader, Text, Group } from "@mantine/core";
+﻿import { Box, Paper, Stack, Loader, Text, Group } from "@mantine/core";
 import { useEffect } from "react";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { CampaignHeader } from "./CampaignHeader";
 import { CampaignSelectPanel } from "./CampaignSelectHeader";
 import { CampaignCharactersPanel } from "./CampaignCharactersPanel";

@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Stack, Group, Title, Button } from "@mantine/core";
 import dayjs from "dayjs";
-import { useSessionStore } from "@store/session/useSessionStore";
+import { useSessionStore } from "@store/session/sessionStore";
 import { sessionTemplate, type Session } from "@appTypes/Session";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import SessionTable from "./components/SessionTable";
 import SessionModal from "./components/SessionModal";
 import SessionViewModal from "./components/SessionViewModal";

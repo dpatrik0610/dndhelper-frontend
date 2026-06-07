@@ -5,18 +5,11 @@ import { MarkdownRenderer } from "@components/MarkdownRender";
 import { type RuleDetail } from "@appTypes/Rules/Rule";
 import { useRulesPalette } from "../hooks/useRulesPalette";
 
-interface DrawerSection {
-  title: string;
-  color: string;
-  bullets: string[];
-}
-
 interface RuleDetailDrawerProps {
   opened: boolean;
   onClose: () => void;
   isMobile: boolean;
   detail: RuleDetail | null;
-  sections: DrawerSection[];
 }
 
 export function RuleDetailDrawer({
@@ -24,7 +17,6 @@ export function RuleDetailDrawer({
   onClose,
   isMobile,
   detail,
-  sections,
 }: RuleDetailDrawerProps) {
   const { palette, cardStyle } = useRulesPalette();
   const headerContent: ReactNode | null = detail ? (

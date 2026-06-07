@@ -1,5 +1,5 @@
-import { Box } from "@mantine/core";
-import { useAdminDashboardStore } from "@store/useAdminDashboardStore";
+﻿import { Box } from "@mantine/core";
+import { useAdminDashboardStore } from "@store/ui/adminDashboardStore";
 
 export const BackToDashboardButton: React.FC = () => {
   const resetSection = useAdminDashboardStore((state) => state.resetSection);
@@ -30,7 +30,7 @@ export const BackToDashboardButton: React.FC = () => {
         e.currentTarget.style.boxShadow = "0 0 10px rgba(0,0,0,0.3)";
       }}
     >
-      ⬅ Back to Dashboard
+      â¬… Back to Dashboard
     </Box>
   );
 };

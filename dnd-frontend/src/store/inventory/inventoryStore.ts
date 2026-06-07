@@ -4,21 +4,19 @@ import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import type { Currency } from "@appTypes/Currency";
 
-interface InventoryState {
+export interface InventoryState {
   inventories: Inventory[];
   selectedInventory: Inventory | null;
+}
 
-  // inventory actions
+export interface InventoryActions {
   setInventories: (inventories: Inventory[]) => void;
   addInventory: (inventory: Inventory) => void;
   updateInventory: (updated: Partial<Inventory> & { id: string }) => void;
   removeInventory: (id: string) => void;
   selectInventory: (inventory: Inventory | null) => void;
-
   updateInventoryCurrencies: (id: string, newCurrencies: Currency[]) => void;
   claimCurrencies: (inventoryId: string, currenciesToClaim: Currency[]) => void;
-  
-  // item actions
   addItem: (inventoryId: string, item: InventoryItem) => void;
   updateItem: (inventoryId: string, equipmentId: string, updated: Partial<InventoryItem>) => void;
   removeItem: (inventoryId: string, equipmentId: string) => void;
@@ -27,13 +25,12 @@ interface InventoryState {
   clearInventories: () => void;
 }
 
-export const useInventoryStore = create<InventoryState>()(
+export const useInventoryStore = create<InventoryState & InventoryActions>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       inventories: [],
       selectedInventory: null,
 
-      // --- Inventory management ---
       setInventories: (inventories) => set({ inventories }),
       addInventory: (inventory) =>
         set((state) => ({ inventories: [...state.inventories, inventory] })),
@@ -50,7 +47,6 @@ export const useInventoryStore = create<InventoryState>()(
       selectInventory: (inventory) => set({ selectedInventory: inventory }),
       clearInventories: () => set({ inventories: [], selectedInventory: null }),
 
-      // --- Item management ---
       addItem: (inventoryId, item) =>
         set((state) => ({
           inventories: state.inventories.map((inv) =>
@@ -116,36 +112,31 @@ export const useInventoryStore = create<InventoryState>()(
         })),
 
       updateInventoryCurrencies: (id: string, newCurrencies: Currency[]) =>
-        set((state) => {
-          return {
-            inventories: state.inventories.map((inv) =>
-              inv.id === id ? { ...inv, currencies: newCurrencies } : inv
-            ),
-          };
-        }),
+        set((state) => ({
+          inventories: state.inventories.map((inv) =>
+            inv.id === id ? { ...inv, currencies: newCurrencies } : inv
+          ),
+        })),
 
-        claimCurrencies: (inventoryId: string, currenciesToClaim: Currency[]) =>
-          set((state) => ({
-            inventories: state.inventories.map((inv) => {
-              if (inv.id !== inventoryId) return inv;
+      claimCurrencies: (inventoryId: string, currenciesToClaim: Currency[]) =>
+        set((state) => ({
+          inventories: state.inventories.map((inv) => {
+            if (inv.id !== inventoryId) return inv;
 
-              const existing = inv.currencies || [];
+            const existing = inv.currencies || [];
+            const updated = existing
+              .map((c) => {
+                const claim = currenciesToClaim.find((x) => x.currencyCode === c.currencyCode);
+                if (!claim) return c;
 
-              // reduce inventory currencies
-              const updated = existing
-                .map((c) => {
-                  const claim = currenciesToClaim.find((x) => x.currencyCode === c.currencyCode);
-                  if (!claim) return c;
+                const newAmount = c.amount - claim.amount;
+                return { ...c, amount: Math.max(0, newAmount) };
+              })
+              .filter((c) => c.amount > 0);
 
-                  const newAmount = c.amount - claim.amount;
-                  return { ...c, amount: Math.max(0, newAmount) };
-                })
-                .filter((c) => c.amount > 0);
-
-              return { ...inv, currencies: updated };
-            }),
-          })),
-
+            return { ...inv, currencies: updated };
+          }),
+        })),
     }),
     {
       name: "inventory-storage",

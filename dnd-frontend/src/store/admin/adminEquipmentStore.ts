@@ -1,4 +1,4 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import {
@@ -10,7 +10,7 @@ import {
   updateEquipmentById,
   deleteEquipment,
 } from "@services/equipmentService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 

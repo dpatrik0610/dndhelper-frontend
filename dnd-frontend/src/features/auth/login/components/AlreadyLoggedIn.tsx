@@ -12,7 +12,7 @@ export default function AlreadyLoggedIn() {
         mt="md"
         fullWidth
         onClick={() => {
-          handleLogout(navigate)
+          handleLogout();
         }}
       >
         Logout
@@ -23,8 +23,7 @@ export default function AlreadyLoggedIn() {
       fullWidth
       onClick={() => {
         navigate('/home');
-      }
-    }
+      }}
       >
         Home
       </Button>

@@ -1,9 +1,9 @@
-import { Button, Group, Paper, SimpleGrid, Stack, Tabs, Text } from "@mantine/core";
+﻿import { Button, Group, Paper, SimpleGrid, Stack, Tabs, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEncounterRoomHub } from "@features/encounterRoom/hooks/useEncounterRoomHub";
 import { useRoomActions } from "@features/encounterRoom/hooks/useRoomActions";
-import { useEncounterRoomStore } from "@store/useEncounterRoomStore";
+import { useEncounterRoomStore } from "@store/encounterRoom/encounterRoomStore";
 import type { EncounterRoom } from "@appTypes/EncounterRoom";
 import { RoomEntityEditor } from "./RoomEntityEditor";
 import { RoomInvitePanel } from "./RoomInvitePanel";

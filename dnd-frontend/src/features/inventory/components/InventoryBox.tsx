@@ -1,10 +1,10 @@
-import type { Inventory } from "@appTypes/Inventory/Inventory";
+﻿import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { useEffect, useState } from "react";
 import { RemoveItemModal } from "@appTypes/Inventory/components/RemoveItemModal";
 import { Text, Loader, Center } from "@mantine/core";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useInventoryStore } from "@store/useInventorystore";
-import { useAuthStore } from "@store/useAuthStore";
+import { useInventoryStore } from "@store/inventory/inventoryStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { decrementItemQuantity as apiDecreaseQuantity, moveItem, moveItemToCharacter, type ModifyEquipmentAmount, type MoveItemRequest, type MoveItemToCharacterRequest } from "@services/inventoryService";
 import { showNotification } from "@components/Notification/Notification";
 import { IconCheck } from "@tabler/icons-react";
@@ -15,7 +15,7 @@ import { InventoryItemsList } from "./InventoryItemsList";
 import { InventoryItemsGrid } from "./InventoryItemsGrid";
 import { useFilteredItems } from "@features/inventory/hooks/useFilteredItems";
 import { BaseTransition } from "@components/animations/BaseTransition";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 
 interface InventoryBoxProps {
   inventory: Inventory;
@@ -25,7 +25,7 @@ interface InventoryBoxProps {
 
 export default function InventoryBox({ inventory, searchTerm, viewMode }: InventoryBoxProps) {
   const inventories = useInventoryStore((state) => state.inventories);
-  const character = useCharacterStore((state) => state.character);
+  const character = useCurrentCharacter();
 
   const { decrementItemQuantity } = useInventoryStore();
   const token = useAuthStore.getState().token;

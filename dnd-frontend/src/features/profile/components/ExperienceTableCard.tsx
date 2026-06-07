@@ -1,9 +1,9 @@
 import { Badge, Group, Paper, Table, Text, Title } from "@mantine/core";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { EXPERIENCE_TABLE, getLevelForExperience } from "@utils/experienceTable";
 
 export function ExperienceTableCard() {
-  const character = useCharacterStore((s) => s.character);
+  const character = useCurrentCharacter();
   const currentXpLevel = character ? getLevelForExperience(character.experience).level : null;
 
   return (

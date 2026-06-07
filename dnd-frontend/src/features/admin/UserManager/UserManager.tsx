@@ -1,4 +1,4 @@
-import {
+﻿import {
   ActionIcon,
   Button,
   Group,
@@ -15,7 +15,7 @@ import {
 } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "@mantine/hooks";
-import { useAdminUserStore } from "@store/admin/useAdminUserStore";
+import { useAdminUserStore } from "@store/admin/adminUserStore";
 import { UserRole, UserStatus } from "@appTypes/User";
 import { AddUserModal } from "./components/AddUserModal";
 import { EditUserModal } from "./components/EditUserModal";

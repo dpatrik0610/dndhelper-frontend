@@ -1,8 +1,8 @@
-import {  useState } from 'react'
+﻿import {  useState } from 'react'
 import { TextInput, PasswordInput, Button, Title, Text } from '@mantine/core'
 import type { AuthRequest } from '@appTypes/AuthTypes'
 import { loginUser } from '@services/authService'
-import { useAuthStore } from '@store/useAuthStore'
+import { useAuthStore } from '@store/auth/authStore'
 import { useNavigate } from 'react-router-dom'
 import { processToken } from '@utils/processToken'
 import { useLoadingNotification } from '@components/Notification/LoadingNotification'
@@ -54,7 +54,7 @@ export default function LoginForm() {
 
     return (
         <>
-        <Title ta='center' order={2}>🌠 D&D Login </Title>
+        <Title ta='center' order={2}>đźŚ  D&D Login </Title>
         <TextInput
             label="Username"
             placeholder="Enter username"

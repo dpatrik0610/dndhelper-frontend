@@ -1,4 +1,4 @@
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import {
@@ -17,7 +17,7 @@ import {
   type ModifyEquipmentAmount,
   assignInventoryToCharacter,
 } from "@services/inventoryService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
@@ -28,7 +28,7 @@ interface AdminInventoryStore {
   selected: Inventory | null;
   loading: boolean;
 
-  // 🔹 SignalR / local helpers
+  // đź”ą SignalR / local helpers
   setInventories: (inventories: Inventory[]) => void;
   setSelected: (inventory: Inventory | null) => void;
   applyInventoryUpdate: (inventory: Inventory) => void;
@@ -328,7 +328,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         await get().reloadInventory(sel.id);
         showNotification({
           title: "Item added",
-          message: `Added ${amount}× item to ${sel.name}.`,
+          message: `Added ${amount}Ă— item to ${sel.name}.`,
           color: SectionColor.Green,
         });
       } catch (err) {
@@ -373,7 +373,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       await get().reloadInventory(sel.id);
       showNotification({
         title: "Item moved",
-        message: `Moved ${amount}× item from ${sel.name} to target inventory.`,
+        message: `Moved ${amount}Ă— item from ${sel.name} to target inventory.`,
         color: SectionColor.Blue,
       });
     },

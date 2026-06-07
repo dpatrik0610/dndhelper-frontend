@@ -4,8 +4,8 @@ import { IconSearch } from "@tabler/icons-react";
 
 import { getConditions } from "@services/conditionService";
 import { updateCharacter as apiUpdateCharacter } from "@services/characterService";
-import { useCharacterStore } from "@store/useCharacterStore";
-import { useAuthStore } from "@store/useAuthStore";
+import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
+import { useToken } from "@store/auth/authSelectors";
 
 interface AddConditionModalProps {
   opened: boolean;
@@ -13,9 +13,9 @@ interface AddConditionModalProps {
 }
 
 export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
-  const character = useCharacterStore((s) => s.character);
-  const updateCharacterLocal = useCharacterStore((s) => s.updateCharacter);
-  const token = useAuthStore.getState().token!;
+  const character = useCurrentCharacter();
+  const { updateCharacter: updateCharacterLocal } = useCharacterCoreActions();
+  const token = useToken()!;
 
   const [list, setList] = useState<string[]>([]);
   const [search, setSearch] = useState("");          // NEW
@@ -48,7 +48,7 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     };
   }, [opened, character]);
 
-  // ❗ Compute filtered list based on search
+  // âť— Compute filtered list based on search
   const filteredList = useMemo(() => {
     if (!search.trim()) return list;
     return list.filter((c) =>
@@ -63,9 +63,8 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     const updatedConditions = [...character.conditions, selected];
     updateCharacterLocal({ conditions: updatedConditions });
 
-    const updated = useCharacterStore.getState().character;
-    if (updated) {
-      await apiUpdateCharacter(updated, token);
+    if (character) {
+      await apiUpdateCharacter({ ...character, conditions: updatedConditions }, token);
     }
 
     setSelected(null);

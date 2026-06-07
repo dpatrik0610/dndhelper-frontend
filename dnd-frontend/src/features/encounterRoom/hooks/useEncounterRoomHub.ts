@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import {
   HubConnection,
   HubConnectionBuilder,
@@ -6,8 +6,8 @@ import {
   LogLevel,
 } from "@microsoft/signalr";
 import { showNotification } from "@components/Notification/Notification";
-import { useAuthStore } from "@store/useAuthStore";
-import { useEncounterRoomStore } from "@store/useEncounterRoomStore";
+import { useAuthStore } from "@store/auth/authStore";
+import { useEncounterRoomStore } from "@store/encounterRoom/encounterRoomStore";
 import type {
   EncounterRoom,
   MapElement,

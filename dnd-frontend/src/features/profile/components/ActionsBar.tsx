@@ -1,10 +1,10 @@
-import { Button, Group, Paper, Title } from "@mantine/core";
+﻿import { Button, Group, Paper, Title } from "@mantine/core";
 import { longrest } from "@services/characterService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus, IconSwords, IconHeartPlus, IconDice5, IconEyeOff } from "@tabler/icons-react";
 import { loadCharacters } from "@utils/loadCharacter";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { useNavigate } from "react-router-dom";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useState, type MouseEventHandler } from "react";
@@ -34,7 +34,7 @@ export function ActionBar() {
 
   const token = useAuthStore.getState().token;
   const navigate = useNavigate();
-  const character = useCharacterStore((state) => state.character);
+  const character = useCurrentCharacter();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   if (!token || !character?.id) return null;
@@ -45,7 +45,7 @@ export function ActionBar() {
     showNotification({
       id: "longrest-success",
       title: "Success",
-      message: "You slept through the night 🙂",
+      message: "You slept through the night đź™‚",
       icon: <IconMoon />,
     });
   }
@@ -63,7 +63,7 @@ export function ActionBar() {
   ];
 
   // --------------------------------------------
-  //      MOBILE VERSION → SAME BUTTONS, NO SHRINKING
+  //      MOBILE VERSION â†’ SAME BUTTONS, NO SHRINKING
   // --------------------------------------------
 if (isMobile) {
   return (
@@ -108,7 +108,7 @@ if (isMobile) {
   }
 
   // --------------------------------------------
-  //      DESKTOP VERSION → Original Paper
+  //      DESKTOP VERSION â†’ Original Paper
   // --------------------------------------------
   return (
     <>

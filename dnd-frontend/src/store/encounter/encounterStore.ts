@@ -16,9 +16,9 @@ import {
   updateEncounter,
 } from "@services/encounterService";
 import { getSessionsByCampaign } from "@services/sessionService";
-import { useAuthStore } from "@store/useAuthStore";
+import { getAuthTokenSafe, getIsAdmin } from "@store/auth/authUtils";
 
-interface EncounterStoreState {
+export interface EncounterState {
   campaign: Campaign | null;
   encounters: Encounter[];
   sessions: Session[];
@@ -26,7 +26,9 @@ interface EncounterStoreState {
   loading: boolean;
   saving: boolean;
   error: string | null;
+}
 
+export interface EncounterActions {
   loadCampaignContext: (campaignId: string) => Promise<void>;
   selectEncounter: (encounterId: string | null) => void;
   createEncounter: (encounter: Encounter) => Promise<Encounter | null>;
@@ -39,15 +41,12 @@ interface EncounterStoreState {
 }
 
 const getToken = () => {
-  const token = useAuthStore.getState().token;
+  const token = getAuthTokenSafe();
   if (!token) {
     throw new Error("Authentication token is required.");
   }
-
   return token;
 };
-
-const getIsAdmin = () => useAuthStore.getState().roles.includes("Admin");
 
 const resolveSelectedEncounterId = (
   encounters: Encounter[],
@@ -65,7 +64,7 @@ const resolveSelectedEncounterId = (
   return encounters[0]?.id ?? null;
 };
 
-export const useEncounterStore = create<EncounterStoreState>((set, get) => ({
+export const useEncounterStore = create<EncounterState & EncounterActions>((set, get) => ({
   campaign: null,
   encounters: [],
   sessions: [],

@@ -1,8 +1,8 @@
 import { showNotification } from "@components/Notification/Notification";
-import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import { useInventoryStore } from "@store/useInventorystore";
-import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
+import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
+import { useInventoryStore } from "@store/inventory/inventoryStore";
+import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 
@@ -63,8 +63,8 @@ export function handleInventoryChange(event: EntityChangeEvent) {
 
       // --- Player store ---
       inventoryStore.updateInventory({
-        id: updatedInventory.id!,
         ...updatedInventory,
+        id: updatedInventory.id!,
       });
       if (currentSelected?.id === updatedInventory.id) {
         inventoryStore.selectInventory(updatedInventory);

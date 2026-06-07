@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { Text } from "@mantine/core";
 import { IconArchive } from "@tabler/icons-react";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
+import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
 import { MetaPanel } from "./MetaPanel";
 import { ItemsPanel } from "./ItemsPanel";
 import styles from "@styles/InventoryDashboard.module.css";

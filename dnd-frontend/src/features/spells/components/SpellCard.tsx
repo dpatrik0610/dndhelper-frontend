@@ -1,4 +1,4 @@
-import {
+﻿import {
   Card,
   Group,
   Stack,
@@ -6,7 +6,7 @@ import {
   Divider,
   Table,
 } from "@mantine/core";
-import { useSpellStore } from "@store/useSpellStore";
+import { useSpellStore } from "@store/spell/spellStore";
 import CustomBadge from "@components/common/CustomBadge";
 import DisplayText from "@components/common/DisplayText";
 import { ExpandableSection } from "@components/ExpandableSection";

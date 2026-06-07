@@ -12,7 +12,6 @@ import { LibrarySnapshot } from "./components/LibrarySnapshot";
 import "./rulesPage.css";
 import { useRulesDataStore } from "./store/useRulesDataStore";
 import { useRuleFilters } from "./hooks/useRuleFilters";
-import { useRuleDrawerSections } from "./hooks/useRuleDrawerSections";
 import { useRulesUiStore, type RulesUiState } from "./store/useRulesUiStore";
 
 export default function RulesPage() {
@@ -34,7 +33,6 @@ export default function RulesPage() {
     debouncedSearch,
     pageSize,
   );
-  const drawerSections = useRuleDrawerSections(selectedDetail);
 
   useEffect(() => {
     if (!initialized) void loadData();
@@ -93,7 +91,6 @@ export default function RulesPage() {
         onClose={() => setSelectedSlug(null)}
         isMobile={isMobile}
         detail={selectedDetail}
-        sections={drawerSections}
       />
     </Box>
   );

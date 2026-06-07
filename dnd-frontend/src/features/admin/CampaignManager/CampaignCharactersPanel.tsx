@@ -1,4 +1,4 @@
-import {
+﻿import {
   Box,
   Group,
   Text,
@@ -23,8 +23,8 @@ import {
   addCharacterToCampaign,
   removeCharacterFromCampaign,
 } from "@services/campaignService";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Character } from "@appTypes/Character/Character";
@@ -45,12 +45,12 @@ export function CampaignCharactersPanel() {
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Load campaign members
+  // đź”ą Load campaign members
   useEffect(() => {
     if (campaign?.id) void fetchMembers();
   }, [campaign?.id]);
 
-  // 🔹 Load all characters (light list)
+  // đź”ą Load all characters (light list)
   useEffect(() => {
     if (allCharacters.length === 0) void loadAllCharacters();
   }, [allCharacters.length, loadAllCharacters]);
@@ -225,7 +225,7 @@ const handleRemove = async (charId: string) => {
                 <Text fw={500}>{c.name}</Text>
                 <Text size="xs" c="dimmed">
                   {c.characterClass ?? "Unknown"}{" "}
-                  {c.level ? `— lvl ${c.level}` : ""}
+                  {c.level ? `â€” lvl ${c.level}` : ""}
                 </Text>
               </Box>
 

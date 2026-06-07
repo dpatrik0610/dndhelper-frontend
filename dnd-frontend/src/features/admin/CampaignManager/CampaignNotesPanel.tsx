@@ -1,4 +1,4 @@
-import {
+﻿import {
   Paper,
   Group,
   Text,
@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { IconPlus, IconTrash, IconNote } from "@tabler/icons-react";
 import { useState } from "react";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 

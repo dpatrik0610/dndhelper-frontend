@@ -1,4 +1,4 @@
-import {
+﻿import {
   ActionIcon,
   Group,
   Text,
@@ -18,7 +18,7 @@ import {
   IconPlus,
   IconMinus,
 } from "@tabler/icons-react";
-import { useAdminCurrencyStore } from "@store/admin/useAdminCurrencyStore";
+import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Currency } from "@appTypes/Currency";
 import CustomBadge from "@components/common/CustomBadge";
@@ -100,7 +100,7 @@ const handleConfirm = async () => {
       background: "rgba(255,255,255,0.03)",
     }}>
       <Group justify="space-between" align="center">
-        <Text fw={600}>💰 {targetName}</Text>
+        <Text fw={600}>đź’° {targetName}</Text>
         <Group gap="xs">
           <Tooltip label="Refresh">
             <ActionIcon variant="light" color="blue" onClick={refresh}>
@@ -162,12 +162,12 @@ const handleConfirm = async () => {
           <Select
             label="Currency Type"
             data={[
-              { value: "gp", label: "🪙 Gold Pieces" },
-              { value: "sp", label: "🥈 Silver Pieces" },
-              { value: "ep", label: "⚡ Electrum Pieces" },
-              { value: "pp", label: "💎 Platinum Pieces" },
-              { value: "cp", label: "🥉 Copper Pieces" },
-              { value: "other", label: "🔶 Other" },
+              { value: "gp", label: "đźŞ™ Gold Pieces" },
+              { value: "sp", label: "đźĄ Silver Pieces" },
+              { value: "ep", label: "âšˇ Electrum Pieces" },
+              { value: "pp", label: "đź’Ž Platinum Pieces" },
+              { value: "cp", label: "đźĄ‰ Copper Pieces" },
+              { value: "other", label: "đź”¶ Other" },
             ]}
             value={currencyCode}
             onChange={(val) => setCurrencyCode(val!)}

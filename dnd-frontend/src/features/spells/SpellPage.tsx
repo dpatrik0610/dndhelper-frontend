@@ -1,6 +1,6 @@
-import { Box, Group, Title, Text, Container, ActionIcon } from "@mantine/core";
-import { useAuthStore } from "@store/useAuthStore";
-import { useSpellStore } from "@store/useSpellStore";
+﻿import { Box, Group, Title, Text, Container, ActionIcon } from "@mantine/core";
+import { useAuthStore } from "@store/auth/authStore";
+import { useSpellStore } from "@store/spell/spellStore";
 import { useEffect } from "react";
 import { loadSpells } from "@utils/loadSpells";
 import { SpellSelect } from "./components/SpellSelect";
@@ -62,7 +62,7 @@ export default function SpellPage() {
         <Group gap="xs" align="center">
           <SpellSelect />
 
-          {/* 📌 Reload Button */}
+          {/* đź“Ś Reload Button */}
           <ActionIcon
             variant="light"
             radius="xl"

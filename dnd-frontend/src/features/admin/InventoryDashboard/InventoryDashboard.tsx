@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import {
   ActionIcon,
   Button,
@@ -21,9 +21,9 @@ import {
   IconSearch,
   IconTrash,
 } from "@tabler/icons-react";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
-import { useAdminCampaignStore } from "@store/admin/useAdminCampaignStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
+import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
+import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
@@ -243,7 +243,7 @@ export function InventoryDashboard() {
             </Group>
 
             <TextInput
-              placeholder="Search inventories…"
+              placeholder="Search inventoriesâ€¦"
               leftSection={<IconSearch size={14} />}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.currentTarget.value)}
@@ -359,7 +359,7 @@ export function InventoryDashboard() {
         <Stack gap="md">
           <TextInput
             label="Inventory Name"
-            placeholder="e.g. Bag of Holding, Dragon's Hoard…"
+            placeholder="e.g. Bag of Holding, Dragon's Hoardâ€¦"
             value={newInventoryName}
             onChange={(e) => setNewInventoryName(e.currentTarget.value)}
             required
@@ -367,7 +367,7 @@ export function InventoryDashboard() {
           />
           <Select
             label="Associate with Character (Optional)"
-            placeholder="Select owner character…"
+            placeholder="Select owner characterâ€¦"
             value={newInventoryCharId}
             onChange={(val) => setNewInventoryCharId(val)}
             data={[
@@ -378,7 +378,7 @@ export function InventoryDashboard() {
           />
           <Select
             label="Campaign Link"
-            placeholder="Select campaign…"
+            placeholder="Select campaignâ€¦"
             value={newInventoryCampaignId}
             onChange={(val) => setNewInventoryCampaignId(val)}
             data={[

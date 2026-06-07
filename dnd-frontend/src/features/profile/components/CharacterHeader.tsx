@@ -1,5 +1,5 @@
 import { Stack, Box, Group } from "@mantine/core";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { useMediaQuery } from "@mantine/hooks";
 import { CharacterCurrencyArea } from "./CharacterCurrencyArea";
 import { showNotification } from "@components/Notification/Notification";
@@ -9,22 +9,22 @@ import { InspirationBox } from "./InspirationBox";
 import { CharacterMetaBox } from "./CharacterMetaBox";
 
 export function CharacterHeader() {
-  const character = useCharacterStore((s) => s.character)!;
+  const character = useCurrentCharacter()!;
+  const { updateCharacter } = useCharacterCoreActions();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   async function handleUseInspiration() {
-    const current = useCharacterStore.getState().character;
-    if (!current) return;
-    if (!current.inspiration || current.inspiration <= 0) return;
+    if (!character) return;
+    if (!character.inspiration || character.inspiration <= 0) return;
 
     const confirmed = window.confirm(
       "Use one point of Inspiration?"
     );
     if (!confirmed) return;
 
-    const newInspiration = current.inspiration - 1;
+    const newInspiration = character.inspiration - 1;
 
-    useCharacterStore.getState().updateCharacter({inspiration: newInspiration});
+    updateCharacter({inspiration: newInspiration});
 
     showNotification({
       title: "Inspiration used",

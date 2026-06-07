@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Stack, Select, NumberInput, SegmentedControl } from "@mantine/core";
 import { BaseModal } from "@components/BaseModal";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import type { CampaignCharacterDto } from "@appTypes/CampaignOverview";
 

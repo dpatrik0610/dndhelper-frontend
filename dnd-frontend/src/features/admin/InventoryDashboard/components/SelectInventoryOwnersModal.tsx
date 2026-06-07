@@ -1,4 +1,4 @@
-import {
+﻿import {
   Stack,
   Group,
   Checkbox,
@@ -6,14 +6,14 @@ import {
   Text,
   ScrollArea,
 } from "@mantine/core";
-import { useAdminCharacterStore } from "@store/admin/useAdminCharacterStore";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
+import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useState, useEffect } from "react";
 import {
   updateInventory,
   assignInventoryToCharacter,
 } from "@services/inventoryService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import {

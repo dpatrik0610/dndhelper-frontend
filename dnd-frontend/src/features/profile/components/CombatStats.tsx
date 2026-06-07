@@ -12,12 +12,12 @@ import {
 import { StatBox } from "./StatBox";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { useMediaQuery } from "@mantine/hooks";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { SectionColor } from "@appTypes/SectionColor";
 
 export function CombatStats() {
-  const character = useCharacterStore((s) => s.character)!;
-  const updateCharacter = useCharacterStore((s) => s.updateCharacter);
+  const character = useCurrentCharacter()!;
+  const { updateCharacter } = useCharacterCoreActions();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const stats = [
@@ -84,14 +84,14 @@ export function CombatStats() {
     {
       type: "success" as const,
       iconColor: "teal",
-      label: "Death Saves – Successes",
+      label: "Death Saves â€“ Successes",
       labelColor: "#0fbba0",
       value: `${character.deathSavesSuccesses ?? 0} / 3`,
     },
     {
       type: "failure" as const,
       iconColor: "red",
-      label: "Death Saves – Failures",
+      label: "Death Saves â€“ Failures",
       labelColor: "#ff6b6b",
       value: `${character.deathSavesFailures ?? 0} / 3`,
     },
@@ -100,7 +100,7 @@ export function CombatStats() {
   return (
     <ExpandableSection
       title="Combat Statistics"
-      icon={<span style={{ fontSize: "1.2rem" }}>⚔️</span>}
+      icon={<span style={{ fontSize: "1.2rem" }}>âš”ď¸Ź</span>}
       color={SectionColor.Red}
       defaultOpen
       style={{

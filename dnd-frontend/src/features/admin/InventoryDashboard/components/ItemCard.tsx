@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -19,8 +19,8 @@ import {
   IconTrash,
   IconWeight,
 } from "@tabler/icons-react";
-import { useAdminInventoryStore } from "@store/admin/useAdminInventoryStore";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { getEquipmentById } from "@services/equipmentService";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { ItemModal } from "./ItemModal";

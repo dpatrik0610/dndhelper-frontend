@@ -1,20 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { Box } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useNoteStore } from "@store/useNoteStore";
+import { useNoteStore } from "@store/note/noteStore";
 import type { Note } from "@appTypes/Note";
 import { AddNoteModal } from "@features/profile/components/AddNoteModal";
 import { EditNoteModal } from "./components/EditNoteModal";
 import { NotesPanel } from "./components/NotesPanel";
 
 export default function NotesPage() {
-  const character = useCharacterStore((state) => state.character);
-  const updateCharacter = useCharacterStore((s) => s.updateCharacter);
+  const character = useCurrentCharacter();
+  const { updateCharacter } = useCharacterCoreActions();
   const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);

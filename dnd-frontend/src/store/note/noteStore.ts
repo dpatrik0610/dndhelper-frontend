@@ -8,12 +8,14 @@ import {
   updateNote,
   deleteNote,
 } from "@services/noteService";
-import { useAuthStore } from "@store/useAuthStore";
+import { getAuthToken } from "@store/auth/authUtils";
 
-interface NoteState {
+export interface NoteState {
   notes: Note[];
   loading: boolean;
+}
 
+export interface NoteActions {
   getById: (id: string) => Note | undefined;
   getForCharacter: (noteIds: string[]) => Note[];
 
@@ -28,7 +30,7 @@ interface NoteState {
   clearStore: () => void;
 }
 
-export const useNoteStore = create<NoteState>()(
+export const useNoteStore = create<NoteState & NoteActions>()(
   persist(
     (set, get) => ({
       notes: [],
@@ -40,8 +42,8 @@ export const useNoteStore = create<NoteState>()(
         get().notes.filter((n) => n.id && noteIds.includes(n.id)),
 
       loadOne: async (id: string) => {
-        const token = useAuthStore.getState().token;
-        if (!token) return null;
+        let token;
+        try { token = getAuthToken(); } catch { return null; }
 
         set({ loading: true });
 
@@ -59,8 +61,9 @@ export const useNoteStore = create<NoteState>()(
       },
 
       loadMany: async (ids: string[]) => {
-        const token = useAuthStore.getState().token;
-        if (!token || ids.length === 0) return [];
+        if (ids.length === 0) return [];
+        let token;
+        try { token = getAuthToken(); } catch { return []; }
 
         set({ loading: true });
 
@@ -81,8 +84,9 @@ export const useNoteStore = create<NoteState>()(
       },
 
       loadForCharacter: async (noteIds: string[]) => {
-        const token = useAuthStore.getState().token;
-        if (!token || noteIds.length === 0) return [];
+        if (noteIds.length === 0) return [];
+        let token;
+        try { token = getAuthToken(); } catch { return []; }
 
         const uniqueIds = Array.from(new Set(noteIds)).filter(Boolean) as string[];
 
@@ -106,9 +110,7 @@ export const useNoteStore = create<NoteState>()(
       },
 
       create: async (note: Partial<Note>) => {
-        const token = useAuthStore.getState().token;
-        if (!token) throw new Error("No token");
-
+        const token = getAuthToken();
         set({ loading: true });
 
         try {
@@ -125,9 +127,7 @@ export const useNoteStore = create<NoteState>()(
       },
 
       update: async (id: string, patch: Partial<Note>) => {
-        const token = useAuthStore.getState().token;
-        if (!token) throw new Error("No token");
-
+        const token = getAuthToken();
         set({ loading: true });
 
         try {
@@ -154,9 +154,7 @@ export const useNoteStore = create<NoteState>()(
       },
 
       remove: async (id: string) => {
-        const token = useAuthStore.getState().token;
-        if (!token) throw new Error("No token");
-
+        const token = getAuthToken();
         set({ loading: true });
 
         try {

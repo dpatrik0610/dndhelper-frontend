@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
 
-import { useCharacterStore } from "@store/useCharacterStore";
-import { useAuthStore } from "@store/useAuthStore";
-import { useSessionStore } from "@store/session/useSessionStore";
+import { useCharacterList, useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
+import { useAuthStore } from "@store/auth/authStore";
+import { useSessionStore } from "@store/session/sessionStore";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
 import type { Character } from "@appTypes/Character/Character";
 import { quotes } from "./quotes";
@@ -29,8 +29,9 @@ const palette = {
 export default function Home() {
   // const isAdmin = useAuthStore.getState().roles.includes("Admin");
   const navigate = useNavigate();
-  const { characters, setCharacter } = useCharacterStore();
-  const character = useCharacterStore((state) => state.character);
+  const characters = useCharacterList();
+  const { setCharacter } = useCharacterCoreActions();
+  const character = useCurrentCharacter();
   const { sessions, loadByCampaign } = useSessionStore();
 
   const [modalOpened, setModalOpened] = useState(false);

@@ -1,4 +1,4 @@
-import type { ChatSession } from "@features/aiAssistant/types/chatSession";
+export type ChatSession = any;
 
 const KEY = "ai-chat-sessions";
 

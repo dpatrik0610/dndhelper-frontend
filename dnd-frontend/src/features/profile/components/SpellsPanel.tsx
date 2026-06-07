@@ -1,6 +1,6 @@
 import { IconSparkles, IconSearch } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { StatBox } from "./StatBox";
 import {
   SimpleGrid,
@@ -11,22 +11,21 @@ import {
   Box,
   TextInput,
   Select,
-  Group,
 } from "@mantine/core";
 import { SectionColor } from "@appTypes/SectionColor";
 import { getSpellById } from "@services/spellService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useToken } from "@store/auth/authSelectors";
 import type { Spell } from "@appTypes/Spell";
 import { useEffect, useMemo, useState } from "react";
-import { useSpellStore } from "@store/useSpellStore";
+import { useSpellActions } from "@store/spell/spellSelectors";
 import CustomBadge from "@components/common/CustomBadge";
 import { useMediaQuery } from "@mantine/hooks";
 import { SpellModal } from "./SpellModal";
 import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
 
 export function SpellsPanel() {
-  const token = useAuthStore.getState().token;
-  const character = useCharacterStore((s) => s.character);
+  const token = useToken();
+  const character = useCurrentCharacter();
   const chSpells = character?.spells ?? [];
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -38,7 +37,7 @@ export function SpellsPanel() {
   const [preparedFilter, setPreparedFilter] = useState<string | null>("all");
   const glassyInputClasses = { input: "glassy-input" , label: "glassy-label", dropdown: "glassy-dropdown" };
 
-  const setCurrentSpell = useSpellStore((s) => s.setCurrentSpell);
+  const { setCurrentSpell } = useSpellActions();
 
   // Load spells
   useEffect(() => {
@@ -115,7 +114,7 @@ export function SpellsPanel() {
       >
         <Stack>
 
-          {/* 🔍 SEARCH + LEVEL FILTER */}
+          {/* đź”Ť SEARCH + LEVEL FILTER */}
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="sm" mb="sm">
             <TextInput
               classNames={glassyInputClasses}
@@ -177,7 +176,7 @@ export function SpellsPanel() {
                   }}
                 >
                   <Text fw={700} ta="center" c="white" fz="sm">
-                    {lvl === "0" ? "✨ Cantrips" : `🪄 Level ${lvl}`}
+                    {lvl === "0" ? "âś¨ Cantrips" : `đźŞ„ Level ${lvl}`}
                   </Text>
                 </Box>
 

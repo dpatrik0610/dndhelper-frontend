@@ -1,11 +1,11 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Container, Paper, TextInput, Button, Title, Text, Group } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { PasswordStrength } from './PasswordRequirement';
 import { registerUser } from '@services/authService';
 import { processToken } from '@utils/processToken';
 import { useLoadingNotification } from '@components/Notification/LoadingNotification';
-import { useAuthStore } from '@store/useAuthStore';
+import { useAuthStore } from '@store/auth/authStore';
 import AlreadyLoggedIn from '@features/auth/login/components/AlreadyLoggedIn';
 import { validateRegisterForm } from '@validations/registerValidation';
 import "@features/auth/styles/AuthCard.css"
@@ -64,7 +64,7 @@ export default function Register() {
       <Paper className="login-card" radius="md" w={400}>
         <div className="login-card-inner">
           <Group align="center" mb="md">
-            <Title order={2}>🌟 Register</Title>
+            <Title order={2}>đźŚź Register</Title>
           </Group>
 
           <TextInput

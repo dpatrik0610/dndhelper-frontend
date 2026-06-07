@@ -3,7 +3,7 @@ import { HeightLabel } from "./HeightLabel";
 
 export const defaultCharacter: Character = {
   id: undefined,
-  ownerId: undefined,
+  ownerIds: [],
   imageUrl: "",
   name: "",
   isDead: false,
@@ -63,6 +63,7 @@ export const defaultCharacter: Character = {
   ],
   spellSaveDc: 10,
   spellAttackBonus: 2,
+  spellcastingAbility: "charisma",
   spellSlots: [
     { level: 1, current: 0, max: 0 },
     { level: 2, current: 0, max: 0 },
@@ -95,7 +96,7 @@ export const defaultCharacter: Character = {
   ideals: "",
   bonds: "",
   flaws: "",
-  notes: "",
+  noteIds: [],
   description: "",
   factionIds: [],
   inventoryIds: [],

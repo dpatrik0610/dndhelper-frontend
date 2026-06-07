@@ -1,11 +1,13 @@
 import { getInventoriesByCharacter, getInventory } from "@services/inventoryService";
-import { useInventoryStore } from "@store/useInventorystore";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useInventoryStore } from "@store/inventory/inventoryStore";
+import { useCharacterStore } from "@store/character/characterStore";
+import { getAuthToken } from "@store/auth/authUtils";
 
-export async function loadInventories(token: string) {
+export async function loadInventories(tokenOverride?: string) {
+  const token = tokenOverride || getAuthToken();
   const character = useCharacterStore.getState().character;
   if (!character?.id) {
-    console.warn("⚠️ No character selected — skipping inventory load.");
+    console.warn("Ă˘ĹˇÂ ÄŹÂ¸Ĺą No character selected Ă˘â‚¬â€ť skipping inventory load.");
     return [];
   }
 
@@ -14,37 +16,40 @@ export async function loadInventories(token: string) {
   try {
     const response = await getInventoriesByCharacter(character.id, token);
     setInventories(response);
-    
+
     return inventories;
   } catch (error) {
-    console.error("❌ Failed to load inventories:", error);
+    console.error("Ă˘ĹĄĹš Failed to load inventories:", error);
     useInventoryStore.getState().setInventories([]);
     return [];
   }
 }
 
-export async function loadInventoryById(inventoryId: string, token: string) {
+export async function loadInventoryById(inventoryId: string, tokenOverride?: string) {
+  const token = tokenOverride || getAuthToken();
   if (!inventoryId) {
-    console.warn("⚠️ No inventoryId provided — skipping load.");
+    console.warn("Ă˘ĹˇÂ ÄŹÂ¸Ĺą No inventoryId provided Ă˘â‚¬â€ť skipping load.");
     return null;
   }
 
   try {
     const inventory = await getInventory(inventoryId, token);
+    if (!inventory) return null;
+
     const store = useInventoryStore.getState();
     const existing = store.inventories.find((i) => i.id === inventoryId);
 
     if (existing) {
-      store.updateInventory({ id: inventoryId, ...inventory });
-      console.log(`🔄 Updated inventory: ${inventory.name ?? inventoryId}`);
+      store.updateInventory({ ...inventory, id: inventoryId });
+      console.log(`đź”„ Updated inventory: ${inventory.name ?? inventoryId}`);
     } else {
       store.addInventory(inventory);
-      console.log(`🆕 Loaded single inventory: ${inventory.name ?? inventoryId}`);
+      console.log(`âž• Loaded single inventory: ${inventory.name ?? inventoryId}`);
     }
 
     return inventory;
   } catch (error) {
-    console.error(`❌ Failed to load inventory ${inventoryId}:`, error);
+    console.error(`Ă˘ĹĄĹš Failed to load inventory ${inventoryId}:`, error);
     return null;
   }
 }

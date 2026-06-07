@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -17,11 +17,11 @@ import {
 import { IconX } from "@tabler/icons-react";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { showNotification } from "@components/Notification/Notification";
-import { useAuthStore } from "@store/useAuthStore";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useToken } from "@store/auth/authSelectors";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { rollByDice, rollByExpression, subtleRoll } from "@services/rollService";
 import type { RollResult } from "@appTypes/Roll";
-import { formatRollExpression, formatRollsList } from "@utils/rollFormat";
+import { formatRollExpression } from "@utils/rollFormat";
 
 interface RollModalProps {
   opened: boolean;
@@ -44,8 +44,8 @@ function getErrorStatus(error: unknown) {
 }
 
 function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant: RollModalVariant }) {
-  const token = useAuthStore.getState().token;
-  const character = useCharacterStore((s) => s.character);
+  const token = useToken();
+  const character = useCurrentCharacter();
 
   const [inputMode, setInputMode] = useState<InputMode>("manual");
   const [expression, setExpression] = useState("");

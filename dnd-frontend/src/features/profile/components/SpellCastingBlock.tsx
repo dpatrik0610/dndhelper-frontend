@@ -2,17 +2,18 @@ import { SimpleGrid, Tooltip } from "@mantine/core";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { StatBox } from "./StatBox";
 import { IconExclamationCircle, IconWand } from "@tabler/icons-react";
-import { useCharacterStore } from "@store/useCharacterStore";
+import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { SectionColor } from "@appTypes/SectionColor";
 import { DividerWithLabel } from "@components/common/DividerWithLabel";
 import type { SpellSlot } from "@appTypes/Character/SpellSlot";
 import { showNotification } from "@components/Notification/Notification";
 import { updateCharacter } from "@services/characterService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useToken } from "@store/auth/authSelectors";
 
 export function SpellCastingBlock() {
-    const character = useCharacterStore((state) => state.character)!;
-    const { updateCharacter : updateStore } = useCharacterStore();
+    const character = useCurrentCharacter()!;
+    const { updateCharacter : updateStore } = useCharacterCoreActions();
+    const token = useToken()!;
     const abilityLabelMap: Record<string, string> = {
         wis: "Wisdom",
         int: "Intelligence",
@@ -29,7 +30,7 @@ export function SpellCastingBlock() {
             : "Unknown";
 
     const updateAPI = async () => {
-        await updateCharacter(character, useAuthStore.getState().token!);
+        await updateCharacter(character, token);
     }
     
     const spellSlotHandler = (slot : SpellSlot) => {

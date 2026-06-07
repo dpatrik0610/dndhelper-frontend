@@ -1,8 +1,8 @@
-import { Button, Group, MultiSelect, Paper, Stack, Text } from "@mantine/core";
+﻿import { Button, Group, MultiSelect, Paper, Stack, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { UserService } from "@services/Admin/userService";
 import { encounterRoomService } from "@services/encounterRoomService";
-import { useAuthStore } from "@store/useAuthStore";
+import { useAuthStore } from "@store/auth/authStore";
 import type { EncounterRoom } from "@appTypes/EncounterRoom";
 import type { User } from "@appTypes/User";
 
