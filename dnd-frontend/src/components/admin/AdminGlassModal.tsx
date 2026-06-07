@@ -86,7 +86,7 @@ export function AdminGlassModal({
       }}
     >
       {(title || withCloseButton) && (
-        <Group justify="space-between" align="center" mb="md" wrap="nowrap" mt={12}>
+        <Group justify="space-between" align="center" mb="md" px={padding === 0 ? "md" : undefined} wrap="nowrap" mt={padding === 0 ? "md" : 12}>
           {title ? (
             typeof title === "string" ? (
               <Text fw={700} size="lg" c={theme.titleColor}>

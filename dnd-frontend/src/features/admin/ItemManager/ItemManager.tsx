@@ -20,7 +20,7 @@ import { IconEdit, IconPlus, IconRefresh, IconSearch, IconTrash, IconX } from "@
 import { useEffect, useState } from "react";
 import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import { EQUIPMENT_TIERS, type Equipment } from "@appTypes/Equipment/Equipment";
-import { EquipmentFormModal } from "@components/admin/EquipmentFormModal";
+import { EquipmentFormModal } from "@components/EquipmentFormModal/EquipmentFormModal";
 import { ImportModal } from "./components/ImportModal";
 import { useItemFilters } from "@features/admin/hooks/useItemFilters";
 

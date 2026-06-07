@@ -1,6 +1,6 @@
 import { Loader, Center } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { EquipmentFormModal } from "@components/admin/EquipmentFormModal";
+import { EquipmentFormModal } from "@components/EquipmentFormModal/EquipmentFormModal";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";

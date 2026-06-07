@@ -27,10 +27,12 @@ import {
 import { getEquipmentById } from "@services/equipmentService";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { useAuthStore } from "@store/auth/authStore";
+import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import CustomBadge from "@components/common/CustomBadge";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { MarkdownRenderer } from "@components/MarkdownRender";
+import { EquipmentFormModal } from "@components/EquipmentFormModal/EquipmentFormModal";
 import { equipmentTierTheme } from "./styles/equipmentTheme";
 import classes from "./EquipmentModal.module.css";
 
@@ -63,9 +65,11 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
   const token = useAuthStore.getState().token;
   const roles = useAuthStore.getState().roles;
   const isAdmin = roles.includes("Admin");
+  const { update } = useAdminEquipmentStore();
 
   const [equipment, setEquipment] = useState<Equipment | null>(null);
   const [loading, setLoading] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   useEffect(() => {
     if (!opened || !equipmentId) return;
@@ -77,6 +81,12 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
       .finally(() => setLoading(false));
   }, [opened, equipmentId, token]);
 
+  const handleEditSubmit = async (updatedItem: Equipment) => {
+    await update(updatedItem);
+    setEquipment(updatedItem);
+    setEditModalOpen(false);
+  };
+
   const descriptionContent = equipment?.description?.join("\n\n") ?? "";
   const dmDescriptionContent = equipment?.dmDescription?.join("\n\n") ?? "";
 
@@ -86,138 +96,147 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
       : equipmentTierTheme.default;
 
   return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      centered
-      size="xl"
-      fullScreen={isMobile}
-      title={
-        equipment && (
-          <Group align="center" gap="sm">
-            <Text fw={700} fz={isMobile ? 20 : 26} tt="uppercase" style={{ letterSpacing: 1 }}>
-              {equipment.name}
-            </Text>
-            <CustomBadge
-              label={equipment.isCustom ? "Custom" : "Official"}
-              color={equipment.isCustom ? SectionColor.Orange : SectionColor.Blue}
-              variant="light"
-              size={isMobile ? "md" : "lg"}
-            />
-            {isAdmin && (
-              <Tooltip label="Edit Equipment" position="bottom" withArrow>
-                <ActionIcon
-                  variant="transparent"
-                  size="lg"
-                  radius="xl"
-                  className={classes.editButton}
-                  onClick={() => console.log("Edit Equipment Modal triggered")}
-                  style={{ marginLeft: 8 }}
-                >
-                  <IconEdit size={18} />
-                </ActionIcon>
-              </Tooltip>
-            )}
-          </Group>
-        )
-      }
-      overlayProps={{ backgroundOpacity: 0.55, blur: 5 }}
-      classNames={{
-        content: classes.modalContent,
-        header: classes.modalHeader,
-        body: classes.modalBody,
-      }}
-      style={{
-        "--tier-glow": tierTheme.glow,
-        "--tier-gradient": tierTheme.gradient,
-        "--tier-accent": `var(--mantine-color-${tierTheme.accent}-9)`,
-        "--tier-accent-bg": `var(--mantine-color-${tierTheme.accent}-filled)`,
-      } as React.CSSProperties}
-    >
-      {loading ? (
-        <Center py="xl">
-          <Loader color="violet" />
-        </Center>
-      ) : !equipment ? (
-        <Text c="dimmed" ta="center">
-          No equipment data available.
-        </Text>
-      ) : (
-        <Stack gap="xl" pt="md">
-          {(equipment.weight != null || (isAdmin && equipment.cost) || equipment.damage || equipment.range || equipment.tier) && (
-            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
-              {equipment.weight != null && (
-                <StatItem icon={<IconWeight size={20} />} color={tierTheme.accent} label="Weight" value={`${equipment.weight} lb`} />
-              )}
-              {isAdmin && equipment.cost && (
-                <StatItem icon={<IconCoins size={20} />} color={tierTheme.accent} label="Cost" value={`${equipment.cost.quantity} ${equipment.cost.unit}`} />
-              )}
-              {equipment.damage && (
-                <StatItem icon={<IconSwords size={20} />} color={tierTheme.accent} label="Damage" value={`${equipment.damage.damageDice} (${equipment.damage.damageType.name})`} />
-              )}
-              {equipment.range && (
-                <StatItem icon={<IconRulerMeasure size={20} />} color={tierTheme.accent} label="Range" value={`Norm: ${equipment.range.normal} ft` + (equipment.range.long ? ` / Long: ${equipment.range.long} ft` : "")} />
-              )}
-              {equipment.tier && (
-                <StatItem icon={<IconCategory size={20} />} color={tierTheme.accent} label="Tier" value={equipment.tier} />
-              )}
-            </SimpleGrid>
-          )}
-          <Divider variant="solid" opacity={0.5} />
-          <Box className={classes.descriptionWrapper}>
-            <Text size="md" c="dimmed" fw={600} tt="uppercase" mb="xs" style={{ letterSpacing: 0.5 }}>
-              Description
-            </Text>
-            {descriptionContent ? (
-              <MarkdownRenderer content={descriptionContent} />
-            ) : (
-              <Text size="xl" c="dimmed" fs="italic">
-                No description provided.
+    <>
+      <Modal
+        opened={opened}
+        onClose={onClose}
+        centered
+        size="xl"
+        fullScreen={isMobile}
+        title={
+          equipment && (
+            <Group align="center" gap="sm">
+              <Text fw={700} fz={isMobile ? 20 : 26} tt="uppercase" style={{ letterSpacing: 1 }}>
+                {equipment.name}
               </Text>
+              <CustomBadge
+                label={equipment.isCustom ? "Custom" : "Official"}
+                color={equipment.isCustom ? SectionColor.Orange : SectionColor.Blue}
+                variant="light"
+                size={isMobile ? "md" : "lg"}
+              />
+              {isAdmin && (
+                <Tooltip label="Edit Equipment" position="bottom" withArrow>
+                  <ActionIcon
+                    variant="transparent"
+                    size="lg"
+                    radius="xl"
+                    className={classes.editButton}
+                    onClick={() => setEditModalOpen(true)}
+                    style={{ marginLeft: 8 }}
+                  >
+                    <IconEdit size={18} />
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </Group>
+          )
+        }
+        overlayProps={{ backgroundOpacity: 0.55, blur: 5 }}
+        classNames={{
+          content: classes.modalContent,
+          header: classes.modalHeader,
+          body: classes.modalBody,
+        }}
+        style={{
+          "--tier-glow": tierTheme.glow,
+          "--tier-gradient": tierTheme.gradient,
+          "--tier-accent": `var(--mantine-color-${tierTheme.accent}-9)`,
+          "--tier-accent-bg": `var(--mantine-color-${tierTheme.accent}-filled)`,
+        } as React.CSSProperties}
+      >
+        {loading ? (
+          <Center py="xl">
+            <Loader color="violet" />
+          </Center>
+        ) : !equipment ? (
+          <Text c="dimmed" ta="center">
+            No equipment data available.
+          </Text>
+        ) : (
+          <Stack gap="xl" pt="md">
+            {(equipment.weight != null || (isAdmin && equipment.cost) || equipment.damage || equipment.range || equipment.tier) && (
+              <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
+                {equipment.weight != null && (
+                  <StatItem icon={<IconWeight size={20} />} color={tierTheme.accent} label="Weight" value={`${equipment.weight} lb`} />
+                )}
+                {isAdmin && equipment.cost && (
+                  <StatItem icon={<IconCoins size={20} />} color={tierTheme.accent} label="Cost" value={`${equipment.cost.quantity} ${equipment.cost.unit}`} />
+                )}
+                {equipment.damage && (
+                  <StatItem icon={<IconSwords size={20} />} color={tierTheme.accent} label="Damage" value={`${equipment.damage.damageDice} (${equipment.damage.damageType.name})`} />
+                )}
+                {equipment.range && (
+                  <StatItem icon={<IconRulerMeasure size={20} />} color={tierTheme.accent} label="Range" value={`Norm: ${equipment.range.normal} ft` + (equipment.range.long ? ` / Long: ${equipment.range.long} ft` : "")} />
+                )}
+                {equipment.tier && (
+                  <StatItem icon={<IconCategory size={20} />} color={tierTheme.accent} label="Tier" value={equipment.tier} />
+                )}
+              </SimpleGrid>
             )}
-          </Box>
-
-          {equipment.tags && equipment.tags.length > 0 && (
-            <Box>
-              <Group gap="xs" align="center" mb="xs">
-                <IconTags size={16} style={{ color: "var(--mantine-color-dimmed)" }} />
-                <Text size="sm" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: 0.5 }}>
-                  Tags
-                </Text>
-              </Group>
-              <Group gap="xs">
-                {equipment.tags.map((t) => (
-                  <Badge key={t} color="lime" variant="light" size="md" radius="sm">
-                    {t}
-                  </Badge>
-                ))}
-              </Group>
-            </Box>
-          )}
-
-          {isAdmin && (
-            <ExpandableSection title="DM Notes" color={SectionColor.Red} defaultOpen>
-              {dmDescriptionContent ? (
-                <MarkdownRenderer content={dmDescriptionContent} textColor="red.1" />
+            <Divider variant="solid" opacity={0.5} />
+            <Box className={classes.descriptionWrapper}>
+              <Text size="md" c="dimmed" fw={600} tt="uppercase" mb="xs" style={{ letterSpacing: 0.5 }}>
+                Description
+              </Text>
+              {descriptionContent ? (
+                <MarkdownRenderer content={descriptionContent} />
               ) : (
                 <Text size="xl" c="dimmed" fs="italic">
-                  No DM notes provided.
+                  No description provided.
                 </Text>
               )}
-            </ExpandableSection>
-          )}
+            </Box>
 
-          <Divider variant="dashed" opacity={0.3} />
-          <Group justify="space-between" c="dimmed" fz="xs">
-            <Tooltip label="MongoDB document ID">
-              <Text>Id: {equipment.id}</Text>
-            </Tooltip>
-            <Text>
-              Updated: {equipment.updatedAt ? new Date(equipment.updatedAt).toLocaleDateString() : "Unknown"}
-            </Text>
-          </Group>
-        </Stack>
-      )}
-    </Modal>
+            {equipment.tags && equipment.tags.length > 0 && (
+              <Box>
+                <Group gap="xs" align="center" mb="xs">
+                  <IconTags size={16} style={{ color: "var(--mantine-color-dimmed)" }} />
+                  <Text size="sm" c="dimmed" fw={600} tt="uppercase" style={{ letterSpacing: 0.5 }}>
+                    Tags
+                  </Text>
+                </Group>
+                <Group gap="xs">
+                  {equipment.tags.map((t) => (
+                    <Badge key={t} color="lime" variant="light" size="md" radius="sm">
+                      {t}
+                    </Badge>
+                  ))}
+                </Group>
+              </Box>
+            )}
+
+            {isAdmin && (
+              <ExpandableSection title="DM Notes" color={SectionColor.Red} defaultOpen>
+                {dmDescriptionContent ? (
+                  <MarkdownRenderer content={dmDescriptionContent} textColor="red.1" />
+                ) : (
+                  <Text size="xl" c="dimmed" fs="italic">
+                    No DM notes provided.
+                  </Text>
+                )}
+              </ExpandableSection>
+            )}
+
+            <Divider variant="dashed" opacity={0.3} />
+            <Group justify="space-between" c="dimmed" fz="xs">
+              <Tooltip label="MongoDB document ID">
+                <Text>Id: {equipment.id}</Text>
+              </Tooltip>
+              <Text>
+                Updated: {equipment.updatedAt ? new Date(equipment.updatedAt).toLocaleDateString() : "Unknown"}
+              </Text>
+            </Group>
+          </Stack>
+        )}
+      </Modal>
+
+      <EquipmentFormModal
+        opened={editModalOpen}
+        initial={equipment}
+        onClose={() => setEditModalOpen(false)}
+        onSubmit={handleEditSubmit}
+      />
+    </>
   );
 }
