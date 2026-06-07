@@ -7,6 +7,7 @@ import { getAllPaginatedEquipment, deleteEquipment } from '@services/equipmentSe
 import type { Equipment } from '@appTypes/Equipment/Equipment';
 import type { PagedResult } from '@appTypes/PagedResult';
 import { EquipmentFormModal } from '@components/EquipmentFormModal/EquipmentFormModal';
+import { EquipmentModal } from '@features/inventory/components/EquipmentModal';
 import { showNotification } from '@components/Notification/Notification';
 import { SectionColor } from '@appTypes/SectionColor';
 import FilterControls from './components/FilterControls';
@@ -23,6 +24,7 @@ export function ItemManager() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Equipment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [detailsId, setDetailsId] = useState<string | null>(null);
 
   const token = useAuthStore.getState().token!;
 
@@ -82,6 +84,10 @@ export function ItemManager() {
     setModalOpen(true);
   };
 
+  const handleDetails = (item: Equipment) => {
+    setDetailsId(item.id!);
+  };
+
   return (
     <div className={styles.dashboard}>
       <Grid>
@@ -98,6 +104,7 @@ export function ItemManager() {
             items={data.items}
             onEdit={(item) => openModal(item)}
             onDelete={(item) => setDeleteId(item.id!)}
+            onDetails={handleDetails}
           />
         </Grid.Col>
         <Grid.Col span={12}>
@@ -122,6 +129,8 @@ export function ItemManager() {
         }}
         title={editingItem?.id ? 'Edit Item' : 'Create Item'}
       />
+
+      <EquipmentModal opened={!!detailsId} onClose={() => setDetailsId(null)} equipmentId={detailsId} />
 
       <Modal opened={!!deleteId} onClose={() => setDeleteId(null)} title="Delete item?" centered>
         <Stack>

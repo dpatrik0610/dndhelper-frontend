@@ -9,11 +9,12 @@ interface ItemListProps {
   items: Equipment[];
   onEdit: (item: Equipment) => void;
   onDelete: (item: Equipment) => void;
+  onDetails: (item: Equipment) => void;
 }
 
-const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete }) => {
+const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails }) => {
   const rows = items.map((item) => (
-    <Table.Tr key={item.id}>
+    <Table.Tr key={item.id} onClick={() => onDetails(item)} style={{ cursor: 'pointer' }}>
       <Table.Td>{item.name}</Table.Td>
       <Table.Td>
         <Badge>{item.tier}</Badge>
