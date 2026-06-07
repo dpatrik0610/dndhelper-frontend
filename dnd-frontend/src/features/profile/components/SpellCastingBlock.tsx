@@ -29,22 +29,25 @@ export function SpellCastingBlock() {
               character.spellcastingAbility
             : "Unknown";
 
-    const updateAPI = async () => {
-        await updateCharacter(character, token);
-    }
-    
     const spellSlotHandler = (slot : SpellSlot) => {
         const all = character.spellSlots;
-        const found = all.find(x => x.level == slot.level);
+        const foundIndex = all.findIndex(x => x.level == slot.level);
+        if (foundIndex === -1) return;
+
+        const found = all[foundIndex];
 
         if (!found?.current || found?.current <= 0) {
             showNotification({id: "spellslot-used", title:"", message: "Spell Level Depleted.", color: SectionColor.Yellow, icon: <IconExclamationCircle/>})
             return;
         }
-        found!.current -= 1;
 
-        updateStore({spellSlots: all});
-        updateAPI();
+        const updatedSlots = [...all];
+        updatedSlots[foundIndex] = { ...found, current: found.current - 1 };
+
+        updateStore({spellSlots: updatedSlots});
+        
+        const updatedCharacter = { ...character, spellSlots: updatedSlots };
+        updateCharacter(updatedCharacter, token);
     }
 
     function generateSpellSlots() {
