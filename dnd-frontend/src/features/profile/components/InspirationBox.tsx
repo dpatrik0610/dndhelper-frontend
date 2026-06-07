@@ -9,42 +9,38 @@ interface Props {
 
 export function InspirationBox({ value, onClick, containerStyle }: Props) {
   const capped = Math.max(0, Math.min(3, value ?? 0));
-  const barColor = (idx: number) => (idx < capped ? "#8fffe0" : "rgba(255,255,255,0.15)");
 
   return (
-    <Box
+    <Group
+      gap="sm"
       onClick={onClick}
       style={{
-        height: "100%",
-        padding: "8px",
-        borderRadius: 10,
-        background: "rgba(255,255,255,0.05)",
-        border: "1px solid rgba(255,255,255,0.12)",
-        boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
         cursor: onClick ? "pointer" : "default",
-        transition: "transform 120ms ease, box-shadow 120ms ease",
+        background: "rgba(0,0,0,0.2)",
+        padding: "6px 12px",
+        borderRadius: 20,
         ...containerStyle,
-        textAlign: "center",
       }}
     >
-      <Text size="xs" c="#8fffe0" fw={700} tt="uppercase" lts={1} mb={4}>
-        Inspirations
+      <Text size="xs" c="dimmed" fw={800} tt="uppercase" lts={1.5}>
+        Inspiration
       </Text>
-      <Group gap={6} justify="space-between">
+      <Group gap={6}>
         {[0, 1, 2].map((i) => (
           <Box
             key={i}
             style={{
-              flex: 1,
+              width: 12,
               height: 12,
-              borderRadius: 5,
-              background: barColor(i),
-              border: "1px solid rgba(255,255,255,0.12)",
-              boxShadow: i < capped ? "0 0 10px rgba(143,255,224,0.6)" : "none",
+              borderRadius: "2px",
+              transform: "rotate(45deg)",
+              background: i < capped ? "#8fffe0" : "rgba(255,255,255,0.1)",
+              boxShadow: i < capped ? "0 0 8px rgba(143,255,224,0.6)" : "none",
+              transition: "all 0.2s ease",
             }}
           />
         ))}
       </Group>
-    </Box>
+    </Group>
   );
 }

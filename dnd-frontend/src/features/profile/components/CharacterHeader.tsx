@@ -1,4 +1,4 @@
-import { Stack, Box, Group } from "@mantine/core";
+import { Stack, Box, Group, Title, Text } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { useMediaQuery } from "@mantine/hooks";
 import { CharacterCurrencyArea } from "./CharacterCurrencyArea";
@@ -6,7 +6,7 @@ import { showNotification } from "@components/Notification/Notification";
 import { HpRing } from "./HpRing";
 import { XpProgressCard } from "./XpProgressCard";
 import { InspirationBox } from "./InspirationBox";
-import { CharacterMetaBox } from "./CharacterMetaBox";
+import { SwitchCharacterButton } from "./SwitchCharacterButton";
 
 export function CharacterHeader() {
   const character = useCurrentCharacter()!;
@@ -17,14 +17,11 @@ export function CharacterHeader() {
     if (!character) return;
     if (!character.inspiration || character.inspiration <= 0) return;
 
-    const confirmed = window.confirm(
-      "Use one point of Inspiration?"
-    );
+    const confirmed = window.confirm("Use one point of Inspiration?");
     if (!confirmed) return;
 
     const newInspiration = character.inspiration - 1;
-
-    updateCharacter({inspiration: newInspiration});
+    updateCharacter({ inspiration: newInspiration });
 
     showNotification({
       title: "Inspiration used",
@@ -33,66 +30,69 @@ export function CharacterHeader() {
     });
   }
 
-  const tileStyle = {
-    background: "linear-gradient(135deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01))",
-    border: "1px solid rgba(255,255,255,0.12)",
-    borderRadius: 12,
-    boxShadow: "0 10px 20px rgba(0,0,0,0.35)",
-    padding: 10,
-  } as const;
+  // Construct meta text safely
+  const metaItems = [character.race, character.characterClass, character.alignment].filter(Boolean);
+  const metaString = metaItems.length > 0 ? metaItems.join(" • ") : "No details set";
 
   return (
     <Box
+      mb="xl"
       style={{
-        padding: isMobile ? "8px" : "10px",
+        background: "rgba(20, 15, 35, 0.4)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        border: "1px solid rgba(255, 255, 255, 0.1)",
         borderRadius: 16,
-        background: "linear-gradient(145deg, rgba(15,10,35,0.6), rgba(35,10,25,0.55))",
-        border: "1px solid rgba(255,255,255,0.12)",
-        boxShadow: "0 10px 20px rgba(0,0,0,0.45)",
-        position: "relative",
-        overflow: "hidden",
-        marginBottom: 10,
+        padding: isMobile ? "16px" : "24px",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
       }}
     >
-      <Stack gap={10} style={{ position: "relative" }}>
-        <Group justify="space-between" align="center">
-          <Group gap="xs" wrap="nowrap">
-            
-          </Group>
-        </Group>
-
-        <Group wrap={isMobile ? "wrap" : "nowrap"} align="stretch" style={{ width: "100%" }}>
-          {/* Left Side */}
-          <Box style={{ flex: isMobile ? 1 : 1.25, minWidth: isMobile ? "100%" : 0 }}>
-            <CharacterMetaBox character={character} containerStyle={{ ...tileStyle, minHeight: 130 }} />
+      <Stack gap="lg">
+        <Group wrap={isMobile ? "wrap" : "nowrap"} align="flex-start" gap="xl" style={{ width: "100%" }}>
+          
+          {/* Left: HP */}
+          <Box style={{ flexShrink: 0, margin: isMobile ? "0 auto" : 0 }}>
+            <HpRing character={character} size={isMobile ? 120 : 130} />
           </Box>
 
-          {/* Middle */}
-          <Box style={{ flex: isMobile ? 1 : 0.65, minWidth: isMobile ? "100%" : 0 }}>
-            <Box
-              style={{
-                ...tileStyle,
-                boxShadow: "none",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Stack gap={0} align="center" style={{ width: "100%" }}>
-                <HpRing character={character}/>
-                <InspirationBox value={character.inspiration} onClick={handleUseInspiration} containerStyle={{ width: "100%" }} />
-              </Stack>
+          {/* Center: Info & Inspiration */}
+          <Stack gap="xs" style={{ flex: 1, minWidth: isMobile ? "100%" : 0, textAlign: isMobile ? "center" : "left" }}>
+            
+            <Group gap="sm" wrap="nowrap" justify={isMobile ? "center" : "flex-start"} align="center">
+              <Title order={1} c="white" style={{ fontSize: isMobile ? "24px" : "32px", lineHeight: 1.1, textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+                {character.name || "Unnamed"}
+              </Title>
+              <SwitchCharacterButton />
+            </Group>
+
+            <Text size="sm" c="dimmed" fw={700} lts={0.5} style={{ textTransform: "uppercase" }}>
+              {metaString}
+            </Text>
+
+            <Box mt={isMobile ? "xs" : "auto"} style={{ display: "flex", justifyContent: isMobile ? "center" : "flex-start" }}>
+              <InspirationBox value={character.inspiration} onClick={handleUseInspiration} />
             </Box>
 
-          {/* Right Side */}
+          </Stack>
+
+          {/* Right: Currency */}
+          <Box style={{ width: isMobile ? "100%" : "260px", flexShrink: 0 }}>
+            <CharacterCurrencyArea
+              character={character}
+              containerStyle={{
+                background: "transparent",
+                border: "none",
+                boxShadow: "none",
+                padding: 0,
+              }}
+            />
           </Box>
-          <Box style={{ flex: isMobile ? 1 : 1.25, minWidth: isMobile ? "100%" : 0 }}>
-            <CharacterCurrencyArea character={character} containerStyle={{ ...tileStyle, minHeight: 130 }} />
-          </Box>
+          
         </Group>
 
-        {/* XP Progress */}
+        {/* Bottom: XP Bar */}
         <Box style={{ width: "100%" }}>
-          <XpProgressCard experience={character.experience} containerStyle={{ ...tileStyle }} />
+          <XpProgressCard experience={character.experience} containerStyle={{ margin: 0 }} />
         </Box>
       </Stack>
     </Box>
