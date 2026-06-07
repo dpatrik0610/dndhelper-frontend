@@ -1,6 +1,6 @@
 ﻿import { create } from "zustand";
 import { getCampaignCharacters } from "@services/campaignService";
-import { updateCharacter as updateCharacterService } from "@services/characterService";
+import { updateCharacter as updateCharacterService, longrest as longrestService } from "@services/characterService";
 import { transferCurrenciesToCharacter, removeCurrencies } from "@services/currencyService";
 import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
@@ -15,6 +15,8 @@ interface AdminCharacterStore {
 
   loadAll: (campaignId: string) => Promise<void>;
   updateCharacter: (id: string, patch: Partial<Character>) => Promise<void>;
+  longRestCharacter: (id: string) => Promise<void>;
+  bulkLongRest: (characterIds: string[]) => Promise<void>;
   modifyCurrency: (characterId: string, currencyCode: string, delta: number) => Promise<void>;
 
   select: (id: string | null) => void;
@@ -84,6 +86,101 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
       showNotification({
         title: "Failed to update character",
         message: String(err),
+        color: SectionColor.Red,
+      });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  // -------------------------
+  // LONG REST CHARACTER
+  // -------------------------
+  longRestCharacter: async (id) => {
+    const token = useAuthStore.getState().token!;
+    const existing = get().characters.find(c => c.id === id);
+    if (!existing) return;
+
+    try {
+      const response = await longrestService(id, token);
+      if (response.success) {
+        set((state) => ({
+          characters: state.characters.map(c => 
+            c.id === id ? { 
+              ...c, 
+              hitPoints: c.maxHitPoints, 
+              temporaryHitPoints: 0, 
+              deathSavesSuccesses: 0, 
+              deathSavesFailures: 0 
+            } : c
+          ),
+        }));
+      } else {
+        throw new Error(response.message);
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification({
+        title: "Long rest failed",
+        message: String(err),
+        color: SectionColor.Red,
+      });
+    }
+  },
+
+  // -------------------------
+  // BULK LONG REST
+  // -------------------------
+  bulkLongRest: async (characterIds) => {
+    const token = useAuthStore.getState().token!;
+    if (!characterIds.length) return;
+
+    try {
+      set({ loading: true });
+      
+      const results = await Promise.allSettled(
+        characterIds.map(id => longrestService(id, token))
+      );
+
+      const successfulIds = characterIds.filter((_, index) => {
+        const res = results[index];
+        return res.status === "fulfilled" && res.value.success;
+      });
+
+      if (successfulIds.length > 0) {
+        set((state) => ({
+          characters: state.characters.map(c => 
+            successfulIds.includes(c.id!) ? { 
+              ...c, 
+              hitPoints: c.maxHitPoints, 
+              temporaryHitPoints: 0, 
+              deathSavesSuccesses: 0, 
+              deathSavesFailures: 0 
+            } : c
+          ),
+        }));
+
+        showNotification({
+          title: "Group Long Rest Complete",
+          message: `Successfully rested ${successfulIds.length} character(s).`,
+          color: SectionColor.Green,
+        });
+      }
+
+      const failures = results.filter(r => r.status === "rejected" || (r.status === "fulfilled" && !r.value.success));
+      if (failures.length > 0) {
+        showNotification({
+          title: "Group Rest Incomplete",
+          message: `Failed to rest ${failures.length} character(s).`,
+          color: SectionColor.Orange,
+        });
+      }
+
+    } catch (err) {
+      console.error(err);
+      showNotification({
+        title: "Group Long Rest Error",
+        message: "An unexpected error occurred during the bulk rest.",
         color: SectionColor.Red,
       });
     } finally {

@@ -1,0 +1,51 @@
+.card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%) !important;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid transparent !important;
+  border-top-color: rgba(255, 255, 255, 0.15) !important;
+  border-left-color: rgba(255, 255, 255, 0.1) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.02) !important;
+  border-right-color: rgba(255, 255, 255, 0.02) !important;
+  border-radius: var(--mantine-radius-md);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: visible; /* To allow tooltips to show outside */
+  padding: 1rem;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+  border-top-color: rgba(255, 255, 255, 0.25) !important;
+  border-left-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.activeCard {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.12) 0%, rgba(129, 140, 248, 0.03) 100%) !important;
+  border-color: rgba(129, 140, 248, 0.3) !important;
+  border-top-color: rgba(129, 140, 248, 0.6) !important;
+  border-left-color: rgba(129, 140, 248, 0.4) !important;
+  box-shadow: 0 4px 20px rgba(129, 140, 248, 0.2) !important;
+}
+
+.activeCard:hover {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.18) 0%, rgba(129, 140, 248, 0.05) 100%) !important;
+  border-top-color: rgba(129, 140, 248, 0.8) !important;
+}
+
+.avatar {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.name {
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.2;
+}
+
+.statIcon {
+  vertical-align: middle;
+}
