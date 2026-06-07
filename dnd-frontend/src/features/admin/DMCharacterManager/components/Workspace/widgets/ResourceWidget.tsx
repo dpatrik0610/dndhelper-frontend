@@ -60,7 +60,7 @@ export function ResourceWidget({ character }: { character: Character }) {
                     <NumberInput 
                       placeholder="Amount"
                       value={delta}
-                      onChange={(val) => setCurrencyDeltas(prev => ({ ...prev, [code]: val }))}
+                      onChange={(val) => setCurrencyDeltas(prev => ({ ...prev, [code]: val as number | '' }))}
                       min={0}
                       style={{ flex: 1 }}
                       size="sm"

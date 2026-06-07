@@ -1,0 +1,11 @@
+
+.dashboard {
+  padding: 2rem;
+  background: #1a1a1a;
+  min-height: 100vh;
+}
+
+.glassyBox {
+  background: rgba(40, 40, 40, 0.5);
+  padding: 1.5rem;
+}

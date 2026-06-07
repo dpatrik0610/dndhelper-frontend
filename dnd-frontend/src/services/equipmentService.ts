@@ -1,5 +1,6 @@
 import { apiClient } from "@api/apiClient";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
+import type { PagedResult } from "@appTypes/PagedResult";
 
 const baseUrl = "/Equipment";
 
@@ -8,6 +9,26 @@ const baseUrl = "/Equipment";
  */
 export async function getAllEquipment(token: string): Promise<Equipment[]> {
   return apiClient(baseUrl, { method: "GET", token });
+}
+
+export async function getAllPaginatedEquipment(
+    page: number, 
+    pageSize: number, 
+    tag: string, 
+    tier: string, 
+    damageType: string, 
+    name: string,
+    token: string
+): Promise<PagedResult<Equipment>> {
+    const query = new URLSearchParams({
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        tag,
+        tier,
+        damageType,
+        name
+    }).toString();
+    return apiClient(`${baseUrl}/paginated?${query}`, { method: "GET", token });
 }
 
 /**

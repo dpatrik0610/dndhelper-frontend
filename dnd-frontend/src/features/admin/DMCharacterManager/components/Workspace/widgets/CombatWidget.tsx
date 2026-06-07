@@ -117,7 +117,7 @@ export function CombatWidget({ character }: { character: Character }) {
               <NumberInput
                 placeholder="0"
                 value={hpChange}
-                onChange={setHpChange}
+                onChange={(value) => setHpChange(Number(value))}
                 min={0}
                 hideControls
                 size="sm"

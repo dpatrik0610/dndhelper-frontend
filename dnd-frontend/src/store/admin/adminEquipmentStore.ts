@@ -24,6 +24,7 @@ interface AdminEquipmentStore {
   getById: (id: string) => Promise<Equipment | null>;
   getByIndex: (index: string) => Promise<Equipment | null>;
   searchByName: (name: string) => Promise<void>;
+  loadByIds: (ids: string[]) => Promise<void>;
 
   select: (id: string | null) => void;
 

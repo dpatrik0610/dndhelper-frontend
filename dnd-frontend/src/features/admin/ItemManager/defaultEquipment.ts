@@ -1,18 +1,13 @@
-import type { Equipment } from "@appTypes/Equipment/Equipment";
+import type { Equipment } from '@appTypes/Equipment/Equipment';
 
 export const defaultEquipment: Equipment = {
-  index: "",
-  name: "",
+  id: '',
+  index: '',
+  name: '',
   description: [],
-  dmDescription: [],
-  cost: { quantity: 0, unit: "gp" },
-  damage: undefined,
-  range: undefined,
   weight: 0,
+  cost: { quantity: 0, unit: 'gp' },
+  tier: 'Common',
   isCustom: true,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
   isDeleted: false,
-  tags: [],
-  tier: undefined,
 };

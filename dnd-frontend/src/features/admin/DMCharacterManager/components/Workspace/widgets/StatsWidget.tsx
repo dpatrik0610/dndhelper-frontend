@@ -46,7 +46,16 @@ export function StatsWidget({ character }: { character: Character }) {
             {abilityKeys.map(({ key, label, color }) => {
               const score = character.abilityScores?.[key] || 10;
               const mod = getModifier(score);
-              const save = character.savingThrows?.[key] || 0;
+              const keyMap: { [key in keyof AbilityScores]: keyof import('@appTypes/Character/SavingThrows').SavingThrows } = {
+                str: 'strength',
+                dex: 'dexterity',
+                con: 'constitution',
+                int: 'intelligence',
+                wis: 'wisdom',
+                cha: 'charisma',
+              };
+              const saveKey = keyMap[key];
+              const save = character.savingThrows?.[saveKey] || 0;
               
               return (
                 <Paper key={key} p="sm" radius="md" style={glassTileInner}>
@@ -79,7 +88,7 @@ export function StatsWidget({ character }: { character: Character }) {
               Passives
             </Title>
             <Stack gap="sm">
-              <Group justify="space-between" p="sm" style={glassTileInner} radius="md">
+              <Group justify="space-between" p="sm" style={glassTileInner}>
                 <Group gap={8}>
                   <IconEye size={18} color="var(--mantine-color-teal-4)"/> 
                   <Text fw={600} c="white">Perception</Text>
@@ -87,7 +96,7 @@ export function StatsWidget({ character }: { character: Character }) {
                 <Badge size="lg" variant="filled" color="teal" radius="sm">{character.passivePerception}</Badge>
               </Group>
 
-              <Group justify="space-between" p="sm" style={glassTileInner} radius="md">
+              <Group justify="space-between" p="sm" style={glassTileInner}>
                 <Group gap={8}>
                   <IconSearch size={18} color="var(--mantine-color-blue-4)"/> 
                   <Text fw={600} c="white">Investigation</Text>
@@ -95,7 +104,7 @@ export function StatsWidget({ character }: { character: Character }) {
                 <Badge size="lg" variant="filled" color="blue" radius="sm">{character.passiveInvestigation}</Badge>
               </Group>
 
-              <Group justify="space-between" p="sm" style={glassTileInner} radius="md">
+              <Group justify="space-between" p="sm" style={glassTileInner}>
                 <Group gap={8}>
                   <IconEar size={18} color="var(--mantine-color-green-4)"/> 
                   <Text fw={600} c="white">Insight</Text>
@@ -128,7 +137,7 @@ export function StatsWidget({ character }: { character: Character }) {
           </Title>
           <SimpleGrid cols={{ base: 1, xs: 2, sm: 3, md: 4 }} spacing="md">
             {character.skills?.map((skill, index) => (
-              <Group key={index} justify="space-between" p="sm" style={glassTileInner} radius="md">
+              <Group key={index} justify="space-between" p="sm" style={glassTileInner}>
                 <Text fw={600} c={skill.proficient ? "white" : "dimmed"}>{skill.name}</Text>
                 <Badge 
                   size="lg" 
