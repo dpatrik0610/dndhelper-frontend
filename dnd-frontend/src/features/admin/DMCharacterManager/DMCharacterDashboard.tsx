@@ -9,7 +9,8 @@ import styles from "./DMCharacterDashboard.module.css";
 
 export function DMCharacterDashboard() {
   const { selectedId: campaignId } = useAdminCampaignStore();
-  const { characters, loadAll, loading, updateCharacter, longRestCharacter, bulkLongRest } = useAdminCharacterStore();
+    const { loadAll, loading, bulkLongRest } = useAdminCharacterStore();
+  const characters = useAdminCharacterStore((state) => state.characters);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
 
@@ -19,7 +20,7 @@ export function DMCharacterDashboard() {
     }
   }, [campaignId, loadAll]);
 
-  const filteredCharacters = useMemo(() => {
+      const filteredCharacters = useMemo(() => {
     if (!searchQuery.trim()) return characters;
     return characters.filter(char =>
       char.name.toLowerCase().includes(searchQuery.toLowerCase())

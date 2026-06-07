@@ -1,6 +1,6 @@
-﻿import { create } from "zustand";
+import { create } from "zustand";
 import { getCampaignCharacters } from "@services/campaignService";
-import { updateCharacter as updateCharacterService, longrest as longrestService } from "@services/characterService";
+import { updateCharacter as updateCharacterService, longrest as longrestService, bulkLongRest } from "@services/characterService";
 import { transferCurrenciesToCharacter, removeCurrencies } from "@services/currencyService";
 import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
@@ -137,41 +137,33 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
 
     try {
       set({ loading: true });
-      
-      const results = await Promise.allSettled(
-        characterIds.map(id => longrestService(id, token))
-      );
 
-      const successfulIds = characterIds.filter((_, index) => {
-        const res = results[index];
-        return res.status === "fulfilled" && res.value.success;
-      });
+      const { successful, failed } = await bulkLongRest(characterIds, token);
 
-      if (successfulIds.length > 0) {
+      if (successful.length > 0) {
         set((state) => ({
-          characters: state.characters.map(c => 
-            successfulIds.includes(c.id!) ? { 
-              ...c, 
-              hitPoints: c.maxHitPoints, 
-              temporaryHitPoints: 0, 
-              deathSavesSuccesses: 0, 
-              deathSavesFailures: 0 
+          characters: state.characters.map(c =>
+            successful.includes(c.id!) ? {
+              ...c,
+              hitPoints: c.maxHitPoints,
+              temporaryHitPoints: 0,
+              deathSavesSuccesses: 0,
+              deathSavesFailures: 0
             } : c
           ),
         }));
 
         showNotification({
           title: "Group Long Rest Complete",
-          message: `Successfully rested ${successfulIds.length} character(s).`,
+          message: `Successfully rested ${successful.length} character(s).`,
           color: SectionColor.Green,
         });
       }
 
-      const failures = results.filter(r => r.status === "rejected" || (r.status === "fulfilled" && !r.value.success));
-      if (failures.length > 0) {
+      if (failed.length > 0) {
         showNotification({
           title: "Group Rest Incomplete",
-          message: `Failed to rest ${failures.length} character(s).`,
+          message: `Failed to rest ${failed.length} character(s).`,
           color: SectionColor.Orange,
         });
       }

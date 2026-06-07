@@ -119,3 +119,19 @@ export async function longrest(characterId: string, token: string): Promise<{ su
     return { success: false, message: (error as Error).message || "Failed to perform long rest." };
   }
 }
+
+export async function bulkLongRest(characterIds: string[], token: string): Promise<{ successful: string[], failed: string[] }> {
+  checkToken(token);
+
+  try {
+    const response = await apiClient<{ successful: string[], failed: string[] }>('/character/bulk-long-rest', {
+      method: 'POST',
+      body: characterIds,
+      token,
+    });
+    return response;
+  } catch (error) {
+    console.error("Bulk long rest failed:", error);
+    return { successful: [], failed: characterIds };
+  }
+}
