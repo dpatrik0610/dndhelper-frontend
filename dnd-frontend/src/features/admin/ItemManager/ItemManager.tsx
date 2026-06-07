@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Grid, Button, Modal, Stack, Text, Group } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { useAuthStore } from '@store/auth/authStore';
-import { getAllPaginatedEquipment, deleteEquipment } from '@services/equipmentService';
+import { getAllEquipment, deleteEquipment } from '@services/equipmentService';
 import type { Equipment } from '@appTypes/Equipment/Equipment';
 import type { PagedResult } from '@appTypes/PagedResult';
 import { EquipmentFormModal } from '@components/EquipmentFormModal/EquipmentFormModal';
@@ -15,11 +15,14 @@ import ItemList from './components/ItemList';
 import Pagination from './components/Pagination';
 import styles from './ItemManager.module.css';
 
+import { usePagination } from '@mantine/hooks';
+
 export function ItemManager() {
-  const [data, setData] = useState<PagedResult<Equipment>>({ items: [], totalItems: 0, page: 1, pageSize: 10 });
-  const [, setLoading] = useState(false);
-  const [filters, setFilters] = useState({ name: '', tag: '', tier: '', damageType: '' });
-  const [appliedFilters, setAppliedFilters] = useState(filters);
+  const [allData, setAllData] = useState<Equipment[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [filteredData, setFilteredData] = useState<Equipment[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({ name: '', tag: '', tier: '', damageType: '', tags: [] as string[], tagsRule: 'any' as 'any' | 'all' });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Equipment | null>(null);
@@ -28,20 +31,17 @@ export function ItemManager() {
 
   const token = useAuthStore.getState().token!;
 
-  const loadData = useCallback(async (page: number, currentFilters: typeof filters) => {
+  const pagination = usePagination({ total: Math.ceil(filteredData.length / 10), page: 1, siblings: 1, boundaries: 1 });
+
+  const loadAllData = useCallback(async () => {
     setLoading(true);
-    console.log('Loading Data', { page, filters: currentFilters });
     try {
-      const result = await getAllPaginatedEquipment(
-        page,
-        10,
-        currentFilters.tag,
-        currentFilters.tier,
-        currentFilters.damageType,
-        currentFilters.name,
-        token
-      );
-      setData(result);
+      const result = await getAllEquipment(token);
+      setAllData(result);
+      setFilteredData(result);
+      const tags = result.flatMap(item => item.tags || []);
+      const uniqueTags = [...new Set(tags)];
+      setAllTags(uniqueTags);
     } catch (e) {
       console.error('Failed to load equipment:', e);
       showNotification({ title: 'Error', message: 'Failed to load equipment', color: SectionColor.Red });
@@ -51,27 +51,56 @@ export function ItemManager() {
   }, [token]);
 
   useEffect(() => {
-    loadData(1, appliedFilters);
-  }, [appliedFilters, loadData]);
+    loadAllData();
+  }, [loadAllData]);
+
+  useEffect(() => {
+    let data = allData;
+
+    if (filters.name) {
+      data = data.filter(item => item.name.toLowerCase().includes(filters.name.toLowerCase()));
+    }
+
+    if (filters.tier) {
+      data = data.filter(item => item.tier === filters.tier);
+    }
+
+    if (filters.damageType) {
+      data = data.filter(item => item.damage?.damageType.name === filters.damageType);
+    }
+
+    if (filters.tags.length > 0) {
+      if (filters.tagsRule === 'any') {
+        data = data.filter(item => item.tags?.some(tag => filters.tags.includes(tag)));
+      } else {
+        data = data.filter(item => filters.tags.every(tag => item.tags?.includes(tag)));
+      }
+    }
+
+    setFilteredData(data);
+    pagination.setPage(1);
+
+  }, [filters, allData]);
+
+  const paginatedData = filteredData.slice((pagination.active - 1) * 10, pagination.active * 10);
 
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
   };
 
   const handleSearch = () => {
-    setAppliedFilters(filters);
-    console.log('Search Applied', filters);
+    // This is now handled by the useEffect
   };
 
   const handlePageChange = (page: number) => {
-    loadData(page, appliedFilters);
+    pagination.setPage(page);
   };
 
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
       await deleteEquipment(deleteId, token);
-      loadData(data.page, appliedFilters);
+      loadAllData();
       setDeleteId(null);
       showNotification({ title: 'Deleted', message: 'Item removed', color: SectionColor.Green });
     } catch (e) {
@@ -92,7 +121,7 @@ export function ItemManager() {
     <div className={styles.dashboard}>
       <Grid>
         <Grid.Col span={12}>
-          <FilterControls filters={filters} onFilterChange={handleFilterChange} onSearch={handleSearch} />
+          <FilterControls filters={filters} onFilterChange={handleFilterChange} onSearch={handleSearch} allTags={allTags} />
         </Grid.Col>
         <Grid.Col span={12}>
           <Button onClick={() => openModal(null)} leftSection={<IconPlus size={16} />}>
@@ -101,16 +130,16 @@ export function ItemManager() {
         </Grid.Col>
         <Grid.Col span={12}>
           <ItemList
-            items={data.items}
-            onEdit={(item) => openModal(item)}
+            items={paginatedData}
+            onEdit={openModal}
             onDelete={(item) => setDeleteId(item.id!)}
             onDetails={handleDetails}
           />
         </Grid.Col>
         <Grid.Col span={12}>
           <Pagination
-            page={data.page}
-            total={Math.ceil(data.totalItems / data.pageSize)}
+            page={pagination.active}
+            total={pagination.total}
             onChange={handlePageChange}
           />
         </Grid.Col>
@@ -125,7 +154,7 @@ export function ItemManager() {
         }}
         onSubmit={async () => {
           setModalOpen(false);
-          loadData(data.page, appliedFilters);
+          loadAllData();
         }}
         title={editingItem?.id ? 'Edit Item' : 'Create Item'}
       />

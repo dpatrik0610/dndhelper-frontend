@@ -1,24 +1,24 @@
-
 import React from 'react';
-import { TextInput, Select, Button, Group } from '@mantine/core';
+import { TextInput, Select, Button, Group, MultiSelect, SegmentedControl, Divider, Title } from '@mantine/core';
 import { IconSearch } from '@tabler/icons-react';
 import GlassyBox from './GlassyBox';
 
 interface FilterControlsProps {
   filters: {
     name: string;
-    tag: string;
     tier: string;
     damageType: string;
+    tags: string[];
+    tagsRule: 'any' | 'all';
   };
   onFilterChange: (filters: FilterControlsProps['filters']) => void;
   onSearch: () => void;
+  allTags: string[];
 }
 
-const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange, onSearch }) => {
-  const handleInputChange = (field: keyof typeof filters, value: string) => {
-    const newFilters = { ...filters, [field]: value };
-    onFilterChange(newFilters);
+const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange, onSearch, allTags }) => {
+  const handleInputChange = (field: keyof FilterControlsProps['filters'], value: any) => {
+    onFilterChange({ ...filters, [field]: value });
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -54,6 +54,27 @@ const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange
         <Button onClick={onSearch} leftSection={<IconSearch size={16} />}>
           Find
         </Button>
+      </Group>
+      <Divider my="md" />
+      <Group>
+        <Title order={5}>Tags</Title>
+        <MultiSelect
+          placeholder="Filter by tags"
+          data={allTags}
+          value={filters.tags}
+          onChange={(value) => handleInputChange('tags', value)}
+          searchable
+          creatable="true"
+          style={{ flex: 1 }}
+        />
+        <SegmentedControl
+          value={filters.tagsRule}
+          onChange={(value) => handleInputChange('tagsRule', value as 'any' | 'all')}
+          data={[
+            { label: 'Any', value: 'any' },
+            { label: 'All', value: 'all' },
+          ]}
+        />
       </Group>
     </GlassyBox>
   );
