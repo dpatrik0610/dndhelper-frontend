@@ -17,6 +17,7 @@ export async function apiClient<T>(endpoint: string, options: ApiOptions = {}): 
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
   })
 
   if (!res.ok) {

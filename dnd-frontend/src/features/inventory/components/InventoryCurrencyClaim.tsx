@@ -18,7 +18,7 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
   const [loading, setLoading] = useState(false);
 
   const token = useAuthStore.getState().token!;
-  const character = useCurrentCharacter()!;
+  const character = useCurrentCharacter();
 
   const inventory = useInventoryStore((state) =>
     state.inventories.find((x) => x.id === inventoryId)
@@ -32,6 +32,7 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
     setLoading(true);
 
     try {
+      if (!character) throw new Error("No character selected");
       // 1) Backend: claim currencies
       await claimFromInventory(character.id!, inventory.id!, inventory.currencies, token);
 
@@ -49,10 +50,10 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
       });
 
       setClaimed(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       showNotification({
         title: "Error",
-        message: "Failed to claim currencies: " + error?.message,
+        message: "Failed to claim currencies: " + (error as Error).message,
         color: "red",
       });
     } finally {
