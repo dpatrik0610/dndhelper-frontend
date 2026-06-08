@@ -1,7 +1,7 @@
 import { useState, type ReactNode, type CSSProperties } from "react";
 import { Paper, Group, Text, ActionIcon, Collapse } from "@mantine/core";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
-import { SectionColor } from "../types/SectionColor";
+import { SectionColor } from "@appTypes/SectionColor";
 import { BaseTransition } from "./animations/BaseTransition";
 
 interface ExpandableSectionProps {
@@ -47,7 +47,8 @@ export function ExpandableSection({
         backgroundColor: transparent
           ? "rgba(0, 0, 0, 0.14)"
           : "var(--mantine-color-body)",
-        transition: "background-color 0.2s ease",
+          transform: "translateZ(0)",
+          isolation: "isolate",
         ...style,
       }}
     >
