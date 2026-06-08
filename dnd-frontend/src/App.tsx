@@ -1,23 +1,12 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { AppShell } from "@mantine/core";
+import { AppShell, Loader, Center } from "@mantine/core";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, lazy, Suspense } from "react";
 import Sidebar from "@features/navigation/Sidebar/Sidebar";
-import Home from "@features/home/Home";
-import Login from "@features/auth/login/Login";
-import Register from "@features/auth/register/Register";
-import NotFound from "@features/notFound/NotFound";
-import CharacterProfile from "@features/profile/CharacterProfile";
-import SpellPage from "@features/spells/SpellPage";
-import { CharacterFormPage } from "@features/characterForm/CharacterFormPage";
-import { AdminDashboard } from "@features/admin/AdminDashboard";
-import NotesPage from "@features/notes/NotesPage";
-import RollHistoryPage from "@features/rollHistory/RollHistoryPage";
 import PrivateRoute from "@components/PrivateRoute";
 import { useToken, useRoles } from "@store/auth/authSelectors";
 import { useCharacterList } from "@store/character/characterSelectors";
 import { useTokenExpiryGuard } from "@features/auth/hooks/useTokenExpiryGuard";
-import RulesPage from "@features/rules/RulesPage";
 import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapCharacters";
 import { AppBackground } from "@components/layout/AppBackground";
 import { SidebarToggle } from "@components/layout/SidebarToggle";
@@ -25,8 +14,22 @@ import { getAppShellStyles } from "@components/layout/appShellStyles";
 import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal";
 import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
 import { useUiStore } from "@store/ui/uiStore";
-import AiAssistantPage from "@features/aiAssistant/AiAssistantPage";
-import EncounterRoomPage from "@features/encounterRoom/EncounterRoomPage";
+
+// Lazy load route components for code splitting
+const Home = lazy(() => import("@features/home/Home"));
+const Login = lazy(() => import("@features/auth/login/Login"));
+const Register = lazy(() => import("@features/auth/register/Register"));
+const NotFound = lazy(() => import("@features/notFound/NotFound"));
+const CharacterProfile = lazy(() => import("@features/profile/CharacterProfile"));
+const SpellPage = lazy(() => import("@features/spells/SpellPage"));
+const CharacterFormPage = lazy(() => import("@features/characterForm/CharacterFormPage").then(m => ({ default: m.CharacterFormPage })));
+const AdminDashboard = lazy(() => import("@features/admin/AdminDashboard").then(m => ({ default: m.AdminDashboard })));
+const NotesPage = lazy(() => import("@features/notes/NotesPage"));
+const RollHistoryPage = lazy(() => import("@features/rollHistory/RollHistoryPage"));
+const RulesPage = lazy(() => import("@features/rules/RulesPage"));
+const AiAssistantPage = lazy(() => import("@features/aiAssistant/AiAssistantPage"));
+const EncounterRoomPage = lazy(() => import("@features/encounterRoom/EncounterRoomPage"));
+
 function AppRoutes() {
   const location = useLocation();
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -69,29 +72,31 @@ function AppRoutes() {
             padding: isMobile ? 0 : "md",
           }}
         >
-          <Routes>
-            <Route element={<PrivateRoute />}>
-              <Route path="/" element={<Home />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/profile" element={<CharacterProfile />} />
-              <Route path="/spells" element={<SpellPage />} />
-              <Route path="/spells/:spellName" element={<SpellPage />} />
-              <Route path="/newCharacter" element={<CharacterFormPage />} />
-              <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
-              <Route path="/rules" element={<RulesPage />} />
-              <Route path="/notes" element={<NotesPage />} />
-              <Route path="/encounter" element={<Navigate to="/encounter-room" replace />} />
-              <Route path="/encounter-room" element={<EncounterRoomPage />} />
-              <Route path="/encounter-room/:roomId" element={<EncounterRoomPage />} />
-              <Route path="/roll-history" element={<RollHistoryPage />} />
-              {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
-              {isAdmin && <Route path="/ai-assistant" element={<AiAssistantPage />} />}
-            </Route>
+          <Suspense fallback={<Center mt="20vh"><Loader color="indigo" /></Center>}>
+            <Routes>
+              <Route element={<PrivateRoute />}>
+                <Route path="/" element={<Home />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/profile" element={<CharacterProfile />} />
+                <Route path="/spells" element={<SpellPage />} />
+                <Route path="/spells/:spellName" element={<SpellPage />} />
+                <Route path="/newCharacter" element={<CharacterFormPage />} />
+                <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
+                <Route path="/rules" element={<RulesPage />} />
+                <Route path="/notes" element={<NotesPage />} />
+                <Route path="/encounter" element={<Navigate to="/encounter-room" replace />} />
+                <Route path="/encounter-room" element={<EncounterRoomPage />} />
+                <Route path="/encounter-room/:roomId" element={<EncounterRoomPage />} />
+                <Route path="/roll-history" element={<RollHistoryPage />} />
+                {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
+                {isAdmin && <Route path="/ai-assistant" element={<AiAssistantPage />} />}
+              </Route>
 
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </div>
       </AppShell.Main>
 
