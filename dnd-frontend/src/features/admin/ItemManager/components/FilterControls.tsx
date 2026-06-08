@@ -17,7 +17,7 @@ interface FilterControlsProps {
 }
 
 const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange, onSearch, allTags }) => {
-  const handleInputChange = (field: keyof FilterControlsProps['filters'], value: any) => {
+  const handleInputChange = (field: keyof FilterControlsProps['filters'], value: unknown) => {
     onFilterChange({ ...filters, [field]: value });
   };
 
