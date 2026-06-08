@@ -4,6 +4,8 @@
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
   border-radius: 16px !important;
   color: white;
 }
@@ -97,6 +99,9 @@
   color: white !important;
   transition: all 0.3s ease !important;
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 .newButton:hover {
