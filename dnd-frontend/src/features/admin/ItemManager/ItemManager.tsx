@@ -1,11 +1,9 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Grid, Button, Modal, Stack, Text, Group } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { useAuthStore } from '@store/auth/authStore';
 import { getAllEquipment, deleteEquipment } from '@services/equipmentService';
 import type { Equipment } from '@appTypes/Equipment/Equipment';
-import type { PagedResult } from '@appTypes/PagedResult';
 import { EquipmentFormModal } from '@components/EquipmentFormModal/EquipmentFormModal';
 import { EquipmentModal } from '@features/inventory/components/EquipmentModal';
 import { showNotification } from '@components/Notification/Notification';
@@ -21,8 +19,9 @@ export function ItemManager() {
   const [allData, setAllData] = useState<Equipment[]>([]);
   const [allTags, setAllTags] = useState<string[]>([]);
   const [filteredData, setFilteredData] = useState<Equipment[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState({ name: '', tag: '', tier: '', damageType: '', tags: [] as string[], tagsRule: 'any' as 'any' | 'all' });
+  
+  // loading removed as it was unused
+  const [filters, setFilters] = useState({ name: '', tier: '', damageType: '', tags: [] as string[], tagsRule: 'any' as 'any' | 'all' });
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Equipment | null>(null);
@@ -31,10 +30,10 @@ export function ItemManager() {
 
   const token = useAuthStore.getState().token!;
 
-  const pagination = usePagination({ total: Math.ceil(filteredData.length / 10), page: 1, siblings: 1, boundaries: 1 });
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / 10));
+  const pagination = usePagination({ total: totalPages, page: 1, siblings: 1, boundaries: 1 });
 
   const loadAllData = useCallback(async () => {
-    setLoading(true);
     try {
       const result = await getAllEquipment(token);
       setAllData(result);
@@ -45,8 +44,6 @@ export function ItemManager() {
     } catch (e) {
       console.error('Failed to load equipment:', e);
       showNotification({ title: 'Error', message: 'Failed to load equipment', color: SectionColor.Red });
-    } finally {
-      setLoading(false);
     }
   }, [token]);
 
@@ -79,7 +76,7 @@ export function ItemManager() {
 
     setFilteredData(data);
     pagination.setPage(1);
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, allData]);
 
   const paginatedData = filteredData.slice((pagination.active - 1) * 10, pagination.active * 10);
@@ -139,7 +136,7 @@ export function ItemManager() {
         <Grid.Col span={12}>
           <Pagination
             page={pagination.active}
-            total={pagination.total}
+            total={totalPages}
             onChange={handlePageChange}
           />
         </Grid.Col>

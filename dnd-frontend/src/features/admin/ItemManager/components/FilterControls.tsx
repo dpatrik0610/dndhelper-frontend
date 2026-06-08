@@ -64,7 +64,6 @@ const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange
           value={filters.tags}
           onChange={(value) => handleInputChange('tags', value)}
           searchable
-          creatable="true"
           style={{ flex: 1 }}
         />
         <SegmentedControl
