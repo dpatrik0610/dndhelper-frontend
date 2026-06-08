@@ -169,24 +169,26 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
             : SectionColor.Grape
         }
       >
-        <BaseTransition show={viewMode === "list"}>
-          <InventoryItemsList
-            filteredItems={filteredItems}
-            totalItemsCount={currentInventory.items?.length ?? 0}
-            inventoryId={inventory.id!}
-            onRemove={handleRemoveClick}
-            onMove={handleMoveClick}
-          />
-        </BaseTransition>
-        <BaseTransition show={viewMode === "cards"}>
-          <InventoryItemsGrid
-            filteredItems={filteredItems}
-            totalItemsCount={currentInventory.items?.length ?? 0}
-            inventoryId={inventory.id!}
-            onRemove={handleRemoveClick}
-            onMove={handleMoveClick}
-          />
-        </BaseTransition>
+        <div style={{ transform: "translateZ(0)", isolation: "isolate" }}>
+          <BaseTransition show={viewMode === "list"}>
+            <InventoryItemsList
+              filteredItems={filteredItems}
+              totalItemsCount={currentInventory.items?.length ?? 0}
+              inventoryId={inventory.id!}
+              onRemove={handleRemoveClick}
+              onMove={handleMoveClick}
+              />
+          </BaseTransition>
+          <BaseTransition show={viewMode === "cards"}>
+            <InventoryItemsGrid
+              filteredItems={filteredItems}
+              totalItemsCount={currentInventory.items?.length ?? 0}
+              inventoryId={inventory.id!}
+              onRemove={handleRemoveClick}
+              onMove={handleMoveClick}
+              />
+          </BaseTransition>
+        </div>
       </InventorySection>
     </>
   );

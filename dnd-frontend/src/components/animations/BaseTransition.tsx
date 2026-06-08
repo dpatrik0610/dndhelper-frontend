@@ -44,7 +44,7 @@ export function BaseTransition({
   children,
   mode = "wait",
   variant = "slide",
-  layout = true,
+  layout = false,
   initial,
   animate,
   exit,
