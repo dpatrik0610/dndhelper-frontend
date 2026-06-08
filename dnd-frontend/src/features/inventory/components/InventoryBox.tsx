@@ -169,7 +169,6 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
             : SectionColor.Grape
         }
       >
-        <div style={{ transform: "translateZ(0)", isolation: "isolate" }}>
           <BaseTransition show={viewMode === "list"}>
             <InventoryItemsList
               filteredItems={filteredItems}
@@ -188,7 +187,6 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
               onMove={handleMoveClick}
               />
           </BaseTransition>
-        </div>
       </InventorySection>
     </>
   );

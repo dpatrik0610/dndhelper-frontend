@@ -48,6 +48,7 @@ export function ExpandableSection({
           ? "rgba(0, 0, 0, 0.14)"
           : "var(--mantine-color-body)",
           transform: "translateZ(0)",
+          WebkitTransform: "translateZ(0)",
           isolation: "isolate",
         ...style,
       }}
