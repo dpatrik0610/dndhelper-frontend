@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -31,10 +31,11 @@ import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import CustomBadge from "@components/common/CustomBadge";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { MarkdownRenderer } from "@components/MarkdownRender";
-import { EquipmentFormModal } from "@components/EquipmentFormModal/EquipmentFormModal";
 import { equipmentTierTheme } from "./styles/equipmentTheme";
 import classes from "./EquipmentModal.module.css";
+
+const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then(m => ({ default: m.MarkdownRenderer })));
+const EquipmentFormModal = lazy(() => import("@components/EquipmentFormModal/EquipmentFormModal").then(m => ({ default: m.EquipmentFormModal })));
 
 interface EquipmentModalProps {
   opened: boolean;
@@ -180,7 +181,9 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 Description
               </Text>
               {descriptionContent ? (
-                <MarkdownRenderer content={descriptionContent} />
+                <Suspense fallback={<Loader size="sm" color="violet" />}>
+                  <MarkdownRenderer content={descriptionContent} />
+                </Suspense>
               ) : (
                 <Text size="xl" c="dimmed" fs="italic">
                   No description provided.
@@ -209,7 +212,9 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
             {isAdmin && (
               <ExpandableSection title="DM Notes" color={SectionColor.Red} defaultOpen>
                 {dmDescriptionContent ? (
-                  <MarkdownRenderer content={dmDescriptionContent} textColor="red.1" />
+                  <Suspense fallback={<Loader size="sm" color="red" />}>
+                    <MarkdownRenderer content={dmDescriptionContent} textColor="red.1" />
+                  </Suspense>
                 ) : (
                   <Text size="xl" c="dimmed" fs="italic">
                     No DM notes provided.
@@ -231,12 +236,14 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
         )}
       </Modal>
 
-      <EquipmentFormModal
-        opened={editModalOpen}
-        initial={equipment}
-        onClose={() => setEditModalOpen(false)}
-        onSubmit={handleEditSubmit}
-      />
+      <Suspense fallback={null}>
+        <EquipmentFormModal
+          opened={editModalOpen}
+          initial={equipment}
+          onClose={() => setEditModalOpen(false)}
+          onSubmit={handleEditSubmit}
+        />
+      </Suspense>
     </>
   );
 }

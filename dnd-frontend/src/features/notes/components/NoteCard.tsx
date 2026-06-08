@@ -1,4 +1,5 @@
-import { ActionIcon, Group, Text, Tooltip } from "@mantine/core";
+import { Suspense, lazy } from "react";
+import { ActionIcon, Group, Text, Tooltip, Loader } from "@mantine/core";
 import {
   IconDownload,
   IconPencil,
@@ -7,7 +8,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import type { Note } from "@appTypes/Note";
-import { MarkdownRenderer } from "@components/MarkdownRender";
+const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then(m => ({ default: m.MarkdownRenderer })));
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { magicGlowTheme } from "@styles/magic/glowTheme";
@@ -147,7 +148,9 @@ export function NoteCard({
           </Group>
         </Group>
 
-        <MarkdownRenderer content={markdownContent} highlightQuery={searchQuery} />
+        <Suspense fallback={<Loader size="sm" color="blue" />}>
+          <MarkdownRenderer content={markdownContent} highlightQuery={searchQuery} />
+        </Suspense>
     </ExpandableSection>
   );
 }

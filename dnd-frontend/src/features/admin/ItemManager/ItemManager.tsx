@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Grid, Button, Modal, Stack, Text, Group } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { useAuthStore } from '@store/auth/authStore';
 import { getAllEquipment, deleteEquipment } from '@services/equipmentService';
 import type { Equipment } from '@appTypes/Equipment/Equipment';
-import { EquipmentFormModal } from '@components/EquipmentFormModal/EquipmentFormModal';
+const EquipmentFormModal = lazy(() => import("@components/EquipmentFormModal/EquipmentFormModal").then(m => ({ default: m.EquipmentFormModal })));
 import { EquipmentModal } from '@features/inventory/components/EquipmentModal';
 import { showNotification } from '@components/Notification/Notification';
 import { SectionColor } from '@appTypes/SectionColor';
@@ -142,19 +142,21 @@ export function ItemManager() {
         </Grid.Col>
       </Grid>
 
-      <EquipmentFormModal
-        opened={modalOpen}
-        initial={editingItem}
-        onClose={() => {
-          setModalOpen(false);
-          setEditingItem(null);
-        }}
-        onSubmit={async () => {
-          setModalOpen(false);
-          loadAllData();
-        }}
-        title={editingItem?.id ? 'Edit Item' : 'Create Item'}
-      />
+      <Suspense fallback={null}>
+        <EquipmentFormModal
+          opened={modalOpen}
+          initial={editingItem}
+          onClose={() => {
+            setModalOpen(false);
+            setEditingItem(null);
+          }}
+          onSubmit={async () => {
+            setModalOpen(false);
+            loadAllData();
+          }}
+          title={editingItem?.id ? 'Edit Item' : 'Create Item'}
+        />
+      </Suspense>
 
       <EquipmentModal opened={!!detailsId} onClose={() => setDetailsId(null)} equipmentId={detailsId} />
 

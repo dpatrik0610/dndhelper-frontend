@@ -1,6 +1,6 @@
 import { Loader, Center } from "@mantine/core";
-import { useEffect, useState } from "react";
-import { EquipmentFormModal } from "@components/EquipmentFormModal/EquipmentFormModal";
+import { useEffect, useState, lazy, Suspense } from "react";
+const EquipmentFormModal = lazy(() => import("@components/EquipmentFormModal/EquipmentFormModal").then(m => ({ default: m.EquipmentFormModal })));
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -101,18 +101,20 @@ export function ItemModal({
       )}
 
       {equipment && (
-        <EquipmentFormModal
-          opened={opened}
-          initial={equipment}
-          saving={loading}
-          onClose={onClose}
-          onSubmit={async (item) => {
-            setEquipment(item);
-            await handleSave(item);
-          }}
-          title={editMode && equipmentId ? `Edit Equipment: ${equipment.name}` : "Create New Equipment"}
-          submitLabel={editMode && equipmentId ? "Save changes" : "Add Item"}
-        />
+        <Suspense fallback={<Center h={200}><Loader color="grape" /></Center>}>
+          <EquipmentFormModal
+            opened={opened}
+            initial={equipment}
+            saving={loading}
+            onClose={onClose}
+            onSubmit={async (item) => {
+              setEquipment(item);
+              await handleSave(item);
+            }}
+            title={editMode && equipmentId ? `Edit Equipment: ${equipment.name}` : "Create New Equipment"}
+            submitLabel={editMode && equipmentId ? "Save changes" : "Add Item"}
+          />
+        </Suspense>
       )}
     </>
   );

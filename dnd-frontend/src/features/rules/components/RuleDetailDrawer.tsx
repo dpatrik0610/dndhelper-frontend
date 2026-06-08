@@ -1,7 +1,8 @@
+import { Suspense, lazy } from "react";
 import type { ReactNode } from "react";
-import { Badge, Group, Paper, ScrollArea, Stack, Text } from "@mantine/core";
+import { Badge, Group, Paper, ScrollArea, Stack, Text, Loader, Center } from "@mantine/core";
 import { CustomDrawer } from "@components/overlay/CustomDrawer";
-import { MarkdownRenderer } from "@components/MarkdownRender";
+const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then(m => ({ default: m.MarkdownRenderer })));
 import { type RuleDetail } from "@appTypes/Rules/Rule";
 import { useRulesPalette } from "../hooks/useRulesPalette";
 
@@ -56,11 +57,13 @@ export function RuleDetailDrawer({
           <Stack gap="sm" pb="md">
             {detail.body && detail.body.length > 0 && (
               <Paper p="sm" radius="md" withBorder style={cardStyle}>
-                <MarkdownRenderer
-                  content={detail.body.join("\n\n")}
-                  textColor="white"
-                  style={{ padding: 0, margin: 0 }}
-                />
+                <Suspense fallback={<Center p="sm"><Loader size="sm" color="grape" /></Center>}>
+                  <MarkdownRenderer
+                    content={detail.body.join("\n\n")}
+                    textColor="white"
+                    style={{ padding: 0, margin: 0 }}
+                  />
+                </Suspense>
               </Paper>
             )}
 

@@ -1,6 +1,7 @@
-import { Anchor, Badge, Box, Card, Image, SimpleGrid, Stack, Table, Text } from "@mantine/core";
+import { Anchor, Badge, Box, Card, Image, SimpleGrid, Stack, Table, Text, Loader } from "@mantine/core";
+import { Suspense, lazy } from "react";
 import { IconMap2, IconPackage, IconSparkles, IconUsersGroup } from "@tabler/icons-react";
-import { MarkdownRenderer } from "@components/MarkdownRender";
+const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then(m => ({ default: m.MarkdownRenderer })));
 import type { Encounter } from "@appTypes/Encounter";
 import type { Session } from "@appTypes/Session";
 import { sortEntities } from "../encounterUtils";
@@ -60,7 +61,9 @@ export function ReadOnlyEncounterState({
             Description
           </Text>
           {encounter.description ? (
-            <MarkdownRenderer content={encounter.description} />
+            <Suspense fallback={<Loader size="sm" color="indigo" />}>
+              <MarkdownRenderer content={encounter.description} />
+            </Suspense>
           ) : (
             <Text c="dimmed">No description provided.</Text>
           )}
