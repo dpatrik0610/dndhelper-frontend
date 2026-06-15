@@ -1,8 +1,9 @@
+import { getAuthTokenSafe } from "@store/auth/authUtils";
 import type { Inventory } from '@appTypes/Inventory/Inventory';
 import { useEffect, useState } from 'react';
 import { getInventoriesByCharacter } from "@services/inventoryService";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { Box } from '@mantine/core';
 import { IconError404 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
@@ -14,7 +15,7 @@ import { showNotification } from '@components/Notification/Notification';
 export function Inventory() {
 
   const character = useCurrentCharacter();
-  const token = useAuthStore.getState().token || '';
+  const token = getAuthTokenSafe() || '';
   const [inventories, setInventories] = useState<Inventory[]>([]);
   const { searchTerm, setSearchTerm, viewMode, setViewMode } = useInventoryFilters();
   const navigate = useNavigate();

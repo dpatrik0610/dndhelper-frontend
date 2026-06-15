@@ -1,8 +1,9 @@
-﻿import {  useState } from 'react'
+import { useToken } from "@store/auth/authSelectors";
+import {  useState } from 'react'
 import { TextInput, PasswordInput, Button, Title, Text } from '@mantine/core'
 import type { AuthRequest } from '@appTypes/AuthTypes'
 import { loginUser } from '@services/authService'
-import { useAuthStore } from '@store/auth/authStore'
+
 import { useNavigate } from 'react-router-dom'
 import { processToken } from '@utils/processToken'
 import { useLoadingNotification } from '@components/Notification/LoadingNotification'
@@ -11,7 +12,7 @@ import AlreadyLoggedIn from './components/AlreadyLoggedIn'
 export default function LoginForm() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const token = useAuthStore((state) => state.token);
+    const token = useToken();
     
     const navigate = useNavigate()
     const toggleNotification = useLoadingNotification({
@@ -43,7 +44,7 @@ export default function LoginForm() {
 
             toggleNotification(false, true); // success
             navigate("/");
-        } catch (err) {
+        } catch {
             toggleNotification(false, false); // failure
         }
     };

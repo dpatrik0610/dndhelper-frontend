@@ -1,4 +1,5 @@
-﻿import {
+import { useToken } from "@store/auth/authSelectors";
+import {
   Box,
   Group,
   Text,
@@ -24,7 +25,7 @@ import {
   removeCharacterFromCampaign,
 } from "@services/campaignService";
 import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Character } from "@appTypes/Character/Character";
@@ -37,7 +38,7 @@ export function CampaignCharactersPanel() {
     allCharacters,
     loadAllCharacters,
   } = useAdminCampaignStore();
-  const token = useAuthStore((s) => s.token)!;
+  const token = useToken()!;
 
   const campaign = selectedCampaign();
   const [members, setMembers] = useState<Character[]>([]);

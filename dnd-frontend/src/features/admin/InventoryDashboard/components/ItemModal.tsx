@@ -1,15 +1,15 @@
 import { Loader, Center } from "@mantine/core";
 import { useEffect, useState, lazy, Suspense } from "react";
-const EquipmentFormModal = lazy(() => import("@components/EquipmentFormModal/EquipmentFormModal").then(m => ({ default: m.EquipmentFormModal })));
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { defaultEquipment } from "@features/admin/ItemManager/defaultEquipment";
 import { getEquipmentById } from "@services/equipmentService";
-import { useAuthStore } from "@store/auth/authStore";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
+import { useToken } from "@store/auth/authSelectors";
 
+const EquipmentFormModal = lazy(() => import("@components/EquipmentFormModal/EquipmentFormModal").then(m => ({ default: m.EquipmentFormModal })));
 interface ItemModalProps {
   opened: boolean;
   onClose: () => void;
@@ -25,7 +25,7 @@ export function ItemModal({
 }: ItemModalProps) {
   const [equipment, setEquipment] = useState<Equipment | null>(null);
   const [loading, setLoading] = useState(false);
-  const token = useAuthStore.getState().token;
+  const token = useToken();
   const { updateEquipment, addItem } = useAdminInventoryStore();
 
   // Load or initialize equipment

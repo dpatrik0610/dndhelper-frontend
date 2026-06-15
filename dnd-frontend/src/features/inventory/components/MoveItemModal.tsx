@@ -1,9 +1,10 @@
-﻿import { useState, useEffect } from "react";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { useState, useEffect } from "react";
 import { Stack, Select, NumberInput, SegmentedControl } from "@mantine/core";
 import { BaseModal } from "@components/BaseModal";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { showNotification } from "@components/Notification/Notification";
 import type { CampaignCharacterDto } from "@appTypes/CampaignOverview";
 
@@ -57,7 +58,7 @@ export function MoveItemModal({
     const loadCharacters = async () => {
       if (!opened || targetType !== "character") return;
       if (!currentCharacterId) return;
-      const token = useAuthStore.getState().token;
+      const token = getAuthTokenSafe();
       if (!token) return;
 
       try {

@@ -1,4 +1,5 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useToken } from "@store/auth/authSelectors";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Button,
@@ -21,7 +22,6 @@ import {
   IconLock,
   IconRefresh,
 } from "@tabler/icons-react";
-import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { exportCollection, exportAllCollections, restoreCollection } from "@services/backupService";
@@ -30,7 +30,7 @@ import { useIsMobile } from "@hooks/useIsMobile";
 
 
 export function BackupManager() {
-  const token = useAuthStore((s) => s.token)!;
+  const token = useToken()!;
   const [collectionName, setCollectionName] = useState("Campaigns");
   const [file, setFile] = useState<File | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -82,7 +82,7 @@ export function BackupManager() {
       }
     };
     void loadCollections();
-  }, [token]);
+  }, [token, collectionName]);
 
   const handleDownload = async () => {
     if (!validateCollection()) return;

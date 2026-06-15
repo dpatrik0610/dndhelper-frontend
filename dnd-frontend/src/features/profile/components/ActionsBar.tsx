@@ -1,6 +1,7 @@
-﻿import { Button, Group, Paper, Title } from "@mantine/core";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { Button, Group, Paper, Title } from "@mantine/core";
 import { longrest } from "@services/characterService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { showNotification } from "@components/Notification/Notification";
 import { IconCoin, IconDroplet, IconEdit, IconMoon, IconPlus, IconSwords, IconHeartPlus, IconDice5, IconEyeOff } from "@tabler/icons-react";
 import { loadCharacters } from "@utils/loadCharacter";
@@ -33,7 +34,7 @@ export function ActionBar() {
   const [rollModalOpened, setRollModalOpened] = useState(false);
   const [subtleRollModalOpened, setSubtleRollModalOpened] = useState(false);
 
-  const token = useAuthStore.getState().token;
+  const token = getAuthTokenSafe();
   const navigate = useNavigate();
   const character = useCurrentCharacter();
   const isMobile = useIsMobile();

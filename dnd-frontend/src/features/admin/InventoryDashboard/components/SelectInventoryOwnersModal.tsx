@@ -1,4 +1,5 @@
-﻿import {
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import {
   Stack,
   Group,
   Checkbox,
@@ -13,7 +14,7 @@ import {
   updateInventory,
   assignInventoryToCharacter,
 } from "@services/inventoryService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import {
@@ -31,7 +32,7 @@ export function SelectInventoryOwnersModal({
 }) {
   const { characters, selectedId } = useAdminCharacterStore();
   const { selected, refreshInventories } = useAdminInventoryStore();
-  const token = useAuthStore.getState().token!;
+  const token = getAuthTokenSafe()!;
   const [selectedOwners, setSelectedOwners] = useState<string[]>([]);
 
   useEffect(() => {

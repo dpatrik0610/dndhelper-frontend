@@ -1,7 +1,8 @@
+import { getAuthTokenSafe } from "@store/auth/authUtils";
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Grid, Button, Modal, Stack, Text, Group } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
-import { useAuthStore } from '@store/auth/authStore';
+
 import { getAllEquipment, deleteEquipment } from '@services/equipmentService';
 import type { Equipment } from '@appTypes/Equipment/Equipment';
 const EquipmentFormModal = lazy(() => import("@components/EquipmentFormModal/EquipmentFormModal").then(m => ({ default: m.EquipmentFormModal })));
@@ -28,7 +29,7 @@ export function ItemManager() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [detailsId, setDetailsId] = useState<string | null>(null);
 
-  const token = useAuthStore.getState().token!;
+  const token = getAuthTokenSafe()!;
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / 10));
   const pagination = usePagination({ total: totalPages, page: 1, siblings: 1, boundaries: 1 });
@@ -100,8 +101,8 @@ export function ItemManager() {
       loadAllData();
       setDeleteId(null);
       showNotification({ title: 'Deleted', message: 'Item removed', color: SectionColor.Green });
-    } catch (e) {
-      showNotification({ title: 'Error', message: 'Failed to delete', color: SectionColor.Red });
+    } catch (error) {
+      showNotification({ title: 'Error', message: `Failed to delete ${error}`, color: SectionColor.Red });
     }
   };
 

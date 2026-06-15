@@ -1,10 +1,11 @@
-﻿import type { Inventory } from "@appTypes/Inventory/Inventory";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { useEffect, useState } from "react";
 import { RemoveItemModal } from "@appTypes/Inventory/components/RemoveItemModal";
 import { Text, Loader, Center } from "@mantine/core";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { decrementItemQuantity as apiDecreaseQuantity, moveItem, moveItemToCharacter, type ModifyEquipmentAmount, type MoveItemRequest, type MoveItemToCharacterRequest } from "@services/inventoryService";
 import { showNotification } from "@components/Notification/Notification";
 import { IconCheck } from "@tabler/icons-react";
@@ -27,7 +28,7 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
   const character = useCurrentCharacter();
 
   const { decrementItemQuantity } = useInventoryStore();
-  const token = useAuthStore.getState().token;
+  const token = getAuthTokenSafe();
   const [removeModalOpened, setRemoveModalOpened] = useState(false);
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

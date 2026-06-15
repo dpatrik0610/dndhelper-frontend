@@ -1,13 +1,14 @@
-﻿import { useState } from "react";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { useState } from "react";
 import { Autocomplete, Select, Group, Box } from "@mantine/core";
 import { useSpellStore } from "@store/spell/spellStore";
 import { loadCurrentSpell } from "@utils/loadSpells";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { IconWand, IconFilter } from "@tabler/icons-react";
 
 export function SpellSelect() {
   const { spellNames } = useSpellStore();
-  const token = useAuthStore.getState().token;
+  const token = getAuthTokenSafe();
   const [inputValue, setInputValue] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
 

@@ -9,14 +9,14 @@ import { InitiativeTable } from "./InitiativeTable";
 import { InitiativeControls } from "./InitiativeControls";
 import { getCharacterById } from "@services/characterService";
 import { updateCharacter } from "@services/characterService";
-import { useAuthStore } from "@store/auth/authStore";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { useToken } from "@store/auth/authSelectors";
 
 export function InitiativeTracker() {
   const isMobile = useIsMobile();
   const { selectedId: campaignId } = useAdminCampaignStore();
   const { characters, loadAll: loadCharacters } = useAdminCharacterStore();
-  const token = useAuthStore.getState().token;
+  const token = useToken();
   const {
     rows,
     activeIndex,

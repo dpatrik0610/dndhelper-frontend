@@ -1,4 +1,5 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useToken } from "@store/auth/authSelectors";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   HubConnection,
   HubConnectionBuilder,
@@ -26,7 +27,7 @@ const hubBaseUrl = () => {
 };
 
 export function useEncounterRoomHub(roomId?: string | null) {
-  const token = useAuthStore((state) => state.token);
+  const token = useToken();
   const userId = useAuthStore((state) => state.id);
   const isConnected = useEncounterRoomStore((state) => state.isConnected);
   const setConnected = useEncounterRoomStore((state) => state.setConnected);

@@ -1,8 +1,9 @@
+import { getAuthTokenSafe } from "@store/auth/authUtils";
 import { create } from "zustand";
 import { getCampaignCharacters } from "@services/campaignService";
 import { updateCharacter as updateCharacterService, longrest as longrestService, bulkLongRest } from "@services/characterService";
 import { transferCurrenciesToCharacter, removeCurrencies } from "@services/currencyService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Character } from "@appTypes/Character/Character";
@@ -32,7 +33,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // LOAD ALL CHARACTERS
   // -------------------------
   loadAll: async (campaignId) => {
-    const token = useAuthStore.getState().token!;
+    const token = getAuthTokenSafe()!;
     try {
       set({ loading: true });
 
@@ -66,7 +67,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // UPDATE CHARACTER
   // -------------------------
   updateCharacter: async (id, patch) => {
-    const token = useAuthStore.getState().token!;
+    const token = getAuthTokenSafe()!;
     const existing = get().characters.find(c => c.id === id);
     if (!existing) return;
 
@@ -97,7 +98,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // LONG REST CHARACTER
   // -------------------------
   longRestCharacter: async (id) => {
-    const token = useAuthStore.getState().token!;
+    const token = getAuthTokenSafe()!;
     const existing = get().characters.find(c => c.id === id);
     if (!existing) return;
 
@@ -132,7 +133,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // BULK LONG REST
   // -------------------------
   bulkLongRest: async (characterIds) => {
-    const token = useAuthStore.getState().token!;
+    const token = getAuthTokenSafe()!;
     if (!characterIds.length) return;
 
     try {
@@ -184,7 +185,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // MODIFY CURRENCY
   // -------------------------
   modifyCurrency: async (characterId, currencyCode, delta) => {
-    const token = useAuthStore.getState().token!;
+    const token = getAuthTokenSafe()!;
     if (!delta) return;
 
     const payload: Currency[] = [

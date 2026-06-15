@@ -1,5 +1,6 @@
-﻿import { Box, Group, Title, Text, Container, ActionIcon } from "@mantine/core";
-import { useAuthStore } from "@store/auth/authStore";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { Box, Group, Title, Text, Container, ActionIcon } from "@mantine/core";
+
 import { useSpellStore } from "@store/spell/spellStore";
 import { useEffect } from "react";
 import { loadSpells } from "@utils/loadSpells";
@@ -12,7 +13,7 @@ import { getSpellById } from "@services/spellService";
 import { useIsMobile } from "@hooks/useIsMobile";
 
 export default function SpellPage() {
-  const token = useAuthStore.getState().token;
+  const token = getAuthTokenSafe();
   const urlParam = useParams<{ spellName?: string }>();
 
   const spellList = useSpellStore((state) => state.spellNames);

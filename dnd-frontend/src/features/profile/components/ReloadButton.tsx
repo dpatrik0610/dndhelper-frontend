@@ -1,7 +1,8 @@
-﻿import { ActionIcon, Tooltip } from "@mantine/core";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { ActionIcon, Tooltip } from "@mantine/core";
 import { IconRefresh } from "@tabler/icons-react";
 import { useState } from "react";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { useCharacterStore } from "@store/character/characterStore";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
 import { useSpellStore } from "@store/spell/spellStore";
@@ -19,7 +20,7 @@ export default function ReloadButton() {
   const handleReload = async () => {
     setLoading(true);
     try {
-      const token = useAuthStore.getState().token;
+      const token = getAuthTokenSafe();
       if (!token) throw new Error("Missing auth token");
 
       const characterStore = useCharacterStore.getState();

@@ -1,5 +1,6 @@
-﻿import { create } from "zustand";
-import { useAuthStore } from "@store/auth/authStore";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { create } from "zustand";
+
 import { UserService } from "@services/Admin/userService";
 import { registerUser, resetPassword } from "@services/authService";
 import type { User } from "@appTypes/User";
@@ -28,7 +29,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
   setSearch: (value) => set({ search: value }),
 
   fetchUsers: async () => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
 
     if (!token) {
       showNotification({
@@ -56,7 +57,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
   },
 
   createUser: async (payload) => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     if (!payload.username || !payload.password) {
       showNotification({
         title: "Missing fields",
@@ -114,7 +115,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
   },
 
   updateUser: async (id, updates) => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     const user = get().users.find((u) => u.id === id);
     if (!token || !user) return;
 
@@ -139,7 +140,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
   },
 
   updateStatus: async (id, status) => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     if (!token) return;
     const user = get().users.find((u) => u.id === id);
     if (!user) return;
@@ -164,7 +165,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
   },
 
   removeUser: async (id) => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     if (!token) return;
 
     try {
@@ -185,7 +186,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
   },
 
   resetPassword: async (username, newPassword) => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     if (!token) return;
     try {
       await resetPassword({ username, newPassword }, token);

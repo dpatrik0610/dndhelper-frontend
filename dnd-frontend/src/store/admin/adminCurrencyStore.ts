@@ -1,4 +1,5 @@
-﻿import { create } from "zustand";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Currency } from "@appTypes/Currency";
 import {
@@ -9,7 +10,7 @@ import {
 } from "@services/currencyService";
 import type { Character } from "@appTypes/Character/Character";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { getInventory } from "@services/inventoryService";
@@ -58,7 +59,7 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
         })),
 
       loadCharacterById: async (characterId) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         set({ loading: true });
         try {
           const currencies = await getCharacterCurrencies(characterId, token);
@@ -78,7 +79,7 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       loadInventoryById: async (inventoryId) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         set({ loading: true });
         try {
           const inv = await getInventory(inventoryId, token);
@@ -95,7 +96,7 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       refresh: async () => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         const { selectedCharacter, selectedInventory } = get();
         try {
           if (selectedCharacter?.id) {
@@ -116,19 +117,19 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       remove: async (characterId, currencies) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         await removeCurrencies(characterId, currencies, token);
         await get().refresh();
       },
 
       transfer: async (targetId, currencies) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         await transferCurrenciesToCharacter(targetId, currencies, token);
         await get().refresh();
       },
 
       addToCharacter: async (currencies, characterId) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         const id = characterId ?? get().selectedCharacter?.id;
         if (!id) return;
         await transferCurrenciesToCharacter(id, currencies, token);
@@ -136,7 +137,7 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       removeFromCharacter: async (currencies, characterId) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         const id = characterId ?? get().selectedCharacter?.id;
         if (!id) return;
         await removeCurrencies(id, currencies, token);
@@ -144,7 +145,7 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       addToInventory: async (currencies, inventoryId) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         const id = inventoryId ?? get().selectedInventory?.id;
         if (!id) return;
 
@@ -166,7 +167,7 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       removeFromInventory: async (currencies, inventoryId) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         const id = inventoryId ?? get().selectedInventory?.id;
         if (!id) return;
 

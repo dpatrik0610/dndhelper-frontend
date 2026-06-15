@@ -1,4 +1,5 @@
-﻿import { useMemo, useState } from "react";
+import { useToken } from "@store/auth/authSelectors";
+import { useMemo, useState } from "react";
 import {
   ActionIcon,
   Autocomplete,
@@ -41,7 +42,7 @@ import {
   ENCOUNTER_STATUSES,
 } from "@appTypes/Encounter";
 import type { Session } from "@appTypes/Session";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { searchEquipmentByName } from "@services/equipmentService";
 import { monsterService } from "@services/Admin/monsterService";
 import { getDateTimeInputValue, parseDateInput, toNullableString } from "../encounterUtils";
@@ -79,7 +80,7 @@ export function AdminEncounterEditor({
   onClearActive,
   onReset,
 }: AdminEncounterEditorProps) {
-  const token = useAuthStore((state) => state.token);
+  const token = useToken();
   const [enemyModeByIndex, setEnemyModeByIndex] = useState<Record<number, SelectMode>>({});
   const [lootModeByIndex, setLootModeByIndex] = useState<Record<number, SelectMode>>({});
   const [enemyOptionsByIndex, setEnemyOptionsByIndex] = useState<Record<number, Option[]>>({});

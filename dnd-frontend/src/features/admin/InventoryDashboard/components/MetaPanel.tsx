@@ -14,19 +14,19 @@ import {
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
-import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { ensureInventoryLinkedToCharacter } from "@utils/inventorySync";
 import { SelectInventoryOwnersModal } from "./SelectInventoryOwnersModal";
 import { CurrencyModal } from "./CurrencyModal";
 import styles from "@styles/InventoryDashboard.module.css";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
 
 export function MetaPanel() {
   const { selected, refreshSelected } = useAdminInventoryStore();
   const { characters } = useAdminCharacterStore();
   const { selectedInventory } = useAdminCurrencyStore();
-  const token = useAuthStore.getState().token!;
+  const token = getAuthTokenSafe()!;
 
   const [ownerModal, setOwnerModal] = useState(false);
   const [currencyModal, setCurrencyModal] = useState(false);

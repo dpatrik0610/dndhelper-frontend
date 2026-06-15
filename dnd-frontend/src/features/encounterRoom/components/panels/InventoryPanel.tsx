@@ -1,7 +1,8 @@
-﻿import { useEffect, useState } from "react";
+import { useToken } from "@store/auth/authSelectors";
+import { useEffect, useState } from "react";
 import { Badge, Group, Paper, Stack, Text } from "@mantine/core";
 import { getInventory } from "@services/inventoryService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 
 interface InventoryPanelProps {
@@ -9,7 +10,7 @@ interface InventoryPanelProps {
 }
 
 export function InventoryPanel({ inventoryIds }: InventoryPanelProps) {
-  const token = useAuthStore((state) => state.token);
+  const token = useToken();
   const [inventories, setInventories] = useState<Inventory[]>([]);
 
   useEffect(() => {

@@ -1,8 +1,9 @@
-﻿import { Button, Group, MultiSelect, Paper, Stack, Text } from "@mantine/core";
+import { useToken } from "@store/auth/authSelectors";
+import { Button, Group, MultiSelect, Paper, Stack, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { UserService } from "@services/Admin/userService";
 import { encounterRoomService } from "@services/encounterRoomService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import type { EncounterRoom } from "@appTypes/EncounterRoom";
 import type { User } from "@appTypes/User";
 
@@ -11,7 +12,7 @@ interface RoomInvitePanelProps {
 }
 
 export function RoomInvitePanel({ room }: RoomInvitePanelProps) {
-  const token = useAuthStore((state) => state.token);
+  const token = useToken();
   const [users, setUsers] = useState<User[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
 

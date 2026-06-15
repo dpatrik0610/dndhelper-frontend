@@ -1,3 +1,4 @@
+import { getAuthTokenSafe } from "@store/auth/authUtils";
 import { create } from "zustand";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
@@ -17,7 +18,7 @@ import {
   type ModifyEquipmentAmount,
   assignInventoryToCharacter,
 } from "@services/inventoryService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -60,7 +61,7 @@ interface AdminInventoryStore {
 }
 
 export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => {
-  const getToken = () => useAuthStore.getState().token!;
+  const getToken = () => getAuthTokenSafe()!;
 
   const getEquipmentIdsFromInventories = (inventories: Inventory[]): string[] => {
     const equipmentIds = new Set<string>();

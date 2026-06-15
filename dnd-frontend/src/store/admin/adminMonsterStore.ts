@@ -1,6 +1,7 @@
-﻿import { create } from "zustand";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { create } from "zustand";
 import { monsterService } from "@services/Admin/monsterService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import type { Monster } from "@appTypes/Monster";
 
 type NpcFilter = "all" | "npc" | "creature";
@@ -59,7 +60,7 @@ export const useAdminMonsterStore = create<AdminMonsterStore>((set, get) => ({
   setNpcFilter: (filter) => set({ npcFilter: filter }),
 
   loadMonsters: async (opts) => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     if (!token) return;
 
     const targetPage = opts?.page ?? get().page;
@@ -138,7 +139,7 @@ export const useAdminMonsterStore = create<AdminMonsterStore>((set, get) => ({
   },
 
   createMonster: async (monster) => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     if (!token) return;
     const created = await monsterService.create(monster, token);
     set((state) => ({
@@ -148,7 +149,7 @@ export const useAdminMonsterStore = create<AdminMonsterStore>((set, get) => ({
   },
 
   updateMonster: async (id, monster) => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     if (!token) return;
     const updated = await monsterService.update(id, monster, token);
     set((state) => ({
@@ -157,7 +158,7 @@ export const useAdminMonsterStore = create<AdminMonsterStore>((set, get) => ({
   },
 
   deleteMonster: async (id) => {
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     if (!token) return;
     await monsterService.delete(id, token);
     set((state) => ({

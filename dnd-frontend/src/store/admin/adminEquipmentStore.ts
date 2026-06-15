@@ -1,4 +1,5 @@
-﻿import { create } from "zustand";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import {
@@ -11,7 +12,7 @@ import {
   deleteEquipment,
   getEquipmentByIds,
 } from "@services/equipmentService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 
@@ -39,7 +40,7 @@ interface AdminEquipmentStore {
 export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
   persist(
     (set, get) => {
-      const getToken = () => useAuthStore.getState().token!;
+      const getToken = () => getAuthTokenSafe()!;
 
       return {
         equipments: [],

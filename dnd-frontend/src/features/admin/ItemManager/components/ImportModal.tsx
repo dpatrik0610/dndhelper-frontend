@@ -1,4 +1,5 @@
-﻿import {
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import {
   ActionIcon,
   Button,
   Code,
@@ -14,7 +15,7 @@ import { BaseModal } from "@components/BaseModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { createManyEquipment } from "@services/equipmentService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { importSamplePretty } from "./ImportTemplate";
 
 interface ImportModalProps {
@@ -42,7 +43,7 @@ export function ImportModal({
 
   const handleBulkImport = async () => {
     onError("");
-    const token = useAuthStore.getState().token;
+    const token = getAuthTokenSafe();
     if (!token) {
       showNotification({ title: "Not authenticated", message: "Please login again.", color: SectionColor.Red });
       return;

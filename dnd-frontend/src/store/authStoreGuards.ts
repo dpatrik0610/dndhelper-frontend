@@ -1,4 +1,4 @@
-﻿import { useAuthStore } from "@store/auth/authStore";
+import { useAuthStore } from "@store/auth/authStore";
 import { useCharacterStore } from "@store/character/characterStore";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
 import { useNoteStore } from "@store/note/noteStore";

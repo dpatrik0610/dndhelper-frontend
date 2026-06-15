@@ -1,4 +1,5 @@
-﻿import { useState, useEffect } from "react";
+import { useToken } from "@store/auth/authSelectors";
+import { useState, useEffect } from "react";
 import {
   Paper,
   Text,
@@ -12,14 +13,14 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { IconTrash, IconDatabaseSearch, IconReload } from "@tabler/icons-react";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { CacheInfoResponse } from "@appTypes/Cache";
 import { clearCache, getCacheInfo } from "@services/Admin/cacheService";
 
 export function CacheManager() {
-  const token = useAuthStore((s) => s.token)!;
+  const token = useToken()!;
 
   const [loading, setLoading] = useState(true);
   const [info, setInfo] = useState<CacheInfoResponse | null>(null);

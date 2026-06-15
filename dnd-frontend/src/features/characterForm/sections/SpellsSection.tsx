@@ -1,9 +1,10 @@
-﻿import { ActionIcon, Autocomplete, Button, Group, Stack, Switch, Text } from "@mantine/core";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { ActionIcon, Autocomplete, Button, Group, Stack, Switch, Text } from "@mantine/core";
 import { useSpellStore } from "@store/spell/spellStore";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { useEffect, useMemo, useState } from "react";
 import { getSpellNames } from "@services/spellService";
-import { useAuthStore } from "@store/auth/authStore";
+
 import {  IconTrash, IconWand } from "@tabler/icons-react";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -11,7 +12,7 @@ import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
 
 
 export function SpellsSection() {
-    const token = useAuthStore.getState().token!;
+    const token = getAuthTokenSafe()!;
     const spellNames = useSpellStore((state) => state.spellNames);
     const setSpellNames = useSpellStore.getState().setSpellNames;
     const [selectedSpell, setSelectedSpell] = useState<string | null>(null);

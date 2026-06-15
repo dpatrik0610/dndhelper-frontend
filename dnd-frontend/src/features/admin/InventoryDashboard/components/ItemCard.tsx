@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from "react";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { useEffect, useState } from "react";
 import {
   ActionIcon,
   Badge,
@@ -20,7 +21,7 @@ import {
   IconWeight,
 } from "@tabler/icons-react";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { getEquipmentById } from "@services/equipmentService";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { ItemModal } from "./ItemModal";
@@ -34,7 +35,7 @@ interface ItemCardProps {
 
 export function ItemCard({ itemId }: ItemCardProps) {
   const { selected, deleteItem, updateItem } = useAdminInventoryStore();
-  const token = useAuthStore.getState().token!;
+  const token = getAuthTokenSafe()!;
 
   const [editOpen, setEditOpen] = useState(false);
   const [inspectOpen, setInspectOpen] = useState(false);

@@ -1,6 +1,6 @@
-﻿import { useState } from "react";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { useState } from "react";
 import { Button, Group, Loader, Box, Text } from "@mantine/core";
-import { useAuthStore } from "@store/auth/authStore";
 import { claimFromInventory } from "@services/currencyService";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
@@ -17,7 +17,7 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
   const [claimed, setClaimed] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const token = useAuthStore.getState().token!;
+  const token = getAuthTokenSafe()!;
   const character = useCurrentCharacter();
 
   const inventory = useInventoryStore((state) =>

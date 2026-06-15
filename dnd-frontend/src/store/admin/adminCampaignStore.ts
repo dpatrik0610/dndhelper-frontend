@@ -1,8 +1,9 @@
-﻿import { create } from "zustand";
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Campaign } from "@appTypes/Campaign";
 import type { Character } from "@appTypes/Character/Character";
-import { useAuthStore } from "@store/auth/authStore";
+
 import { apiClient } from "@api/apiClient";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -43,7 +44,7 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
       loading: false,
 
       reload: async () => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         set({ loading: true });
         try {
           const data = await apiClient<Campaign[]>("/campaign", { method: "GET", token });
@@ -69,7 +70,7 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
       },
 
       create: async (campaign) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         try {
           const created = await apiClient<Campaign>("/campaign/create", {
             method: "POST",
@@ -92,7 +93,7 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
       },
 
       update: async (id, campaign) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         try {
           const updated = await apiClient<Campaign>(`/campaign/${id}`, {
             method: "PUT",
@@ -117,7 +118,7 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
       },
 
       remove: async (id) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         try {
           await apiClient(`/campaign/${id}`, { method: "DELETE", token });
           set((s) => ({
@@ -139,7 +140,7 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
       },
 
       loadCharacters: async (campaignId) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         try {
           const chars = await apiClient<Character[]>(`/campaign/${campaignId}/characters`, { token });
           set({ characters: chars });
@@ -153,19 +154,19 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
       },
 
       addCharacter: async (campaignId, charId) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         await apiClient(`/campaign/${campaignId}/characters/${charId}`, { method: "POST", token });
         await get().loadCharacters(campaignId);
       },
 
       removeCharacter: async (campaignId, charId) => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         await apiClient(`/campaign/${campaignId}/characters/${charId}`, { method: "DELETE", token });
         await get().loadCharacters(campaignId);
       },
 
       loadAllCharacters: async () => {
-        const token = useAuthStore.getState().token!;
+        const token = getAuthTokenSafe()!;
         try {
           const chars = await getCharacters(token);
           set(
