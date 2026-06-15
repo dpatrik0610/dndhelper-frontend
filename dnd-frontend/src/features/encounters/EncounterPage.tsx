@@ -9,7 +9,7 @@ import type { Session } from "@appTypes/Session";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
 import { getCharacters } from "@services/characterService";
 import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
-import { useToken, useRoles } from "@store/auth/authSelectors";
+import { useToken, useIsAdmin } from "@store/auth/authSelectors";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import {
   useCampaign,
@@ -56,10 +56,9 @@ const buildEncounterCreatePrefill = (
 
 export default function EncounterPage({ embedded = false }: { embedded?: boolean }) {
   const token = useToken();
-  const roles = useRoles();
   const character = useCurrentCharacter();
   const selectedAdminCampaignId = useAdminCampaignStore((state) => state.selectedId);
-  const isAdmin = roles.includes("Admin");
+  const isAdmin = useIsAdmin();
 
   const campaign = useCampaign();
   const encounters = useEncounterList();

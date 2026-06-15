@@ -3,15 +3,15 @@ import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { createCharacter, updateCharacter } from "@services/characterService";
 import { assignInventoryToCharacter, createInventory } from "@services/inventoryService";
-import { useAuthStore } from "@store/auth/authStore";
+import { useToken, useIsAdmin } from "@store/auth/authSelectors";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { loadCharacters } from "@utils/loadCharacter";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
 
 export function useCharacterForm(editMode: boolean) {
-  const token = useAuthStore((s) => s.token);
-  const isAdmin = useAuthStore.getState().roles.includes("Admin");
+  const token = useToken();
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate()
   const { characterForm, replaceCharacterForm, resetCharacterForm } = useCharacterFormStore();
   const character = useCurrentCharacter();

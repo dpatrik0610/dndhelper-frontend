@@ -1,7 +1,7 @@
 ﻿import { useMemo, useState } from "react";
 import { Drawer, Stack, useMantineTheme } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuthStore } from "@store/auth/authStore";
+import { useUsername, useIsAdmin } from "@store/auth/authSelectors";
 import { handleLogout } from "@utils/handleLogout";
 import { tabs, type Section, type TabItem } from "./SidebarTabs";
 import { useMediaQuery } from "@mantine/hooks";
@@ -22,9 +22,8 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const username = useAuthStore().username ?? "NOT LOGGED IN";
-  const roles = useAuthStore().roles || [];
-  const isAdmin = roles.includes("Admin");
+  const username = useUsername() ?? "NOT LOGGED IN";
+  const isAdmin = useIsAdmin();
 
   const [section] = useState<Section>("character");
   const encounterLinks: TabItem[] = tabs.encounter;

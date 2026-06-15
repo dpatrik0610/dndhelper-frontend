@@ -5,7 +5,7 @@ import { useMediaQuery } from "@mantine/hooks";
 import dayjs from "dayjs";
 
 import { useCharacterList, useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { useAuthStore } from "@store/auth/authStore";
+import { useToken } from "@store/auth/authSelectors";
 import { useSessionStore } from "@store/session/sessionStore";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
 import type { Character } from "@appTypes/Character/Character";
@@ -14,7 +14,6 @@ import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { HeaderCard } from "./components/HeaderCard";
 import { ActiveSessionCard } from "./components/ActiveSessionCard";
 import { showNotification } from "@components/Notification/Notification";
-// import { QuickActionBar } from "./components/QuickActionBar";
 
 const palette = {
   accent: "#b197fc",
@@ -27,7 +26,6 @@ const palette = {
 };
 
 export default function Home() {
-  // const isAdmin = useAuthStore.getState().roles.includes("Admin");
   const navigate = useNavigate();
   const characters = useCharacterList();
   const { setCharacter } = useCharacterCoreActions();
@@ -38,12 +36,6 @@ export default function Home() {
   const [quote, setQuote] = useState("");
   const [campaignName, setCampaignName] = useState<string | null>(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
-
-  // const quickNavigations = [
-  //   { label: "Spellbook", icon: <IconBook />, path: "/spells" },
-  //   { label: "Personal Notes", icon: <IconNote />, path: "/notes" },
-  //   isAdmin ? { label: "Admin Dashboard", icon: <IconDashboard />, path: "/dashboard" } : null,
-  // ].filter(Boolean) as { label: string; icon: JSX.Element; path: string }[];
 
   useEffect(() => {
     if (quotes?.length) {
@@ -61,13 +53,13 @@ export default function Home() {
   }, [characters, character, setCharacter]);
 
   // Load campaign + sessions for the active character
+  const token = useToken();
   useEffect(() => {
     const load = async () => {
       if (!character?.id) {
         setCampaignName(null);
         return;
       }
-      const token = useAuthStore.getState().token;
       if (!token) return;
       try {
         const overview = await getCampaignOverviewByCharacter(character.id, token);
@@ -88,7 +80,7 @@ export default function Home() {
       }
     };
     void load();
-  }, [character?.id, loadByCampaign]);
+  }, [character?.id, loadByCampaign, token]);
 
   const activeSession = useMemo(() => {
     const live = sessions.find((s) => s.isLive);

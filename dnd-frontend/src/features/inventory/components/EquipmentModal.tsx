@@ -26,13 +26,13 @@ import {
 } from "@tabler/icons-react";
 import { getEquipmentById, getEquipmentByIdsForUser } from "@services/equipmentService";
 import type { Equipment, EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
-import { useAuthStore } from "@store/auth/authStore";
 import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import CustomBadge from "@components/common/CustomBadge";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { equipmentTierTheme } from "./styles/equipmentTheme";
 import classes from "./EquipmentModal.module.css";
+import { useIsAdmin, useToken } from "@store/auth/authSelectors";
 
 const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then(m => ({ default: m.MarkdownRenderer })));
 const EquipmentFormModal = lazy(() => import("@components/EquipmentFormModal/EquipmentFormModal").then(m => ({ default: m.EquipmentFormModal })));
@@ -63,9 +63,8 @@ function StatItem({ icon, label, value, color }: { icon: React.ReactNode; label:
 
 export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalProps) {
   const isMobile = useMediaQuery("(max-width: 48em)");
-  const token = useAuthStore((s) => s.token);
-  const roles = useAuthStore((s) => s.roles);
-  const isAdmin = roles.includes("Admin");
+  const token = useToken();
+  const isAdmin = useIsAdmin();
   const { update } = useAdminEquipmentStore();
 
   const [equipment, setEquipment] = useState<Equipment | EquipmentUserResponse | null>(null);

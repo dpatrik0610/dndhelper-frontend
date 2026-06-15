@@ -5,7 +5,7 @@ import {
   LogLevel,
 } from "@microsoft/signalr";
 import { showNotification } from "@components/Notification/Notification";
-import { useAuthStore } from "@store/auth/authStore";
+import { useToken, useCurrentUserId, useIsAdmin } from "@store/auth/authSelectors";
 import { useSubtleRollStore } from "@store/ui/subtleRollStore";
 import { EntitySyncManager } from "@signalr/SyncManager/entitySyncManager";
 import type { EntityChangeEvent } from "@signalr/SyncManager/handlers/entitySyncTypes";
@@ -23,11 +23,10 @@ export const useSignalR = () => {
   const [isConnected, setIsConnected] = useState(false);
   const connectionRef = useRef<HubConnection | null>(null);
 
-  const token = useAuthStore((state) => state.token);
-  const userId = useAuthStore((state) => state.id);
-  const roles = useAuthStore((state) => state.roles);
+  const token = useToken();
+  const userId = useCurrentUserId();
+  const isAdmin = useIsAdmin();
   const openSubtleRoll = useSubtleRollStore((state) => state.openRoll);
-  const isAdmin = roles.includes("Admin");
 
   useEffect(() => {
     if (!token || !userId) {

@@ -34,19 +34,23 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@store/auth/authStore";
 import { getCampaignById } from "@services/campaignService";
 import { ExperienceTableCard } from "./components/ExperienceTableCard";
+import { useIsAdmin } from "@store/auth/authSelectors";
+import type { Campaign } from "@appTypes/Campaign";
 
-function useCampaignName(campaignId: string | null | undefined) {
-  const [name, setName] = useState("Loading...");
-  const token = useAuthStore.getState().token!;
+function useCampaignName(campaignId: string | null) {
+  const [name, setName] = useState<string>("Loading...");
+  const token = useAuthStore((s) => s.token);
 
   useEffect(() => {
-    if (!campaignId) {
+    if (!campaignId || !token) {
       setName("No Campaign");
       return;
     }
+
     (async () => {
-      let data = null;
-      try {
+      let data: Campaign | null = null;
+      try
+      {
         const campaign = await getCampaignById(campaignId, token);
         if (campaign) data = campaign;
       }
@@ -68,10 +72,9 @@ export default function CharacterProfile() {
   const [activeTab, setActiveTab] = useState<string | null>("overview");
   const isMobile = useMediaQuery("(max-width: 768px)");
   const navigate = useNavigate();
-  
-  const isAdmin = useAuthStore.getState().roles.includes("Admin");
-  const campaignName = useCampaignName(isAdmin ? character?.campaignId ?? null : null);
 
+  const isAdmin = useIsAdmin();
+  const campaignName = useCampaignName(isAdmin ? character?.campaignId ?? null : null);
   useEffect(() => {
     if (!character) {
       showNotification({

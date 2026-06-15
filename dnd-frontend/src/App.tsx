@@ -4,7 +4,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useEffect, useMemo, lazy, Suspense } from "react";
 import Sidebar from "@features/navigation/Sidebar/Sidebar";
 import PrivateRoute from "@components/PrivateRoute";
-import { useToken, useRoles } from "@store/auth/authSelectors";
+import { useToken, useIsAdmin } from "@store/auth/authSelectors";
 import { useCharacterList } from "@store/character/characterSelectors";
 import { useTokenExpiryGuard } from "@features/auth/hooks/useTokenExpiryGuard";
 import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapCharacters";
@@ -37,9 +37,8 @@ function AppRoutes() {
   const sidebarTheme = useUiStore((s) => s.sidebarTheme) as SidebarThemeVariant;
 
   const token = useToken();
-  const roles = useRoles();
   const characters = useCharacterList();
-  const isAdmin = roles.includes("Admin");
+  const isAdmin = useIsAdmin();
 
   const localToken = useMemo(() => localStorage.getItem("authToken"), []);
   const activeToken = token ?? localToken ?? null;
