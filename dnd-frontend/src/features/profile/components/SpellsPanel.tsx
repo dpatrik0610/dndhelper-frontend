@@ -19,15 +19,16 @@ import type { Spell } from "@appTypes/Spell";
 import { useEffect, useMemo, useState } from "react";
 import { useSpellActions } from "@store/spell/spellSelectors";
 import CustomBadge from "@components/common/CustomBadge";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { SpellModal } from "./SpellModal";
 import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export function SpellsPanel() {
   const token = useToken();
   const character = useCurrentCharacter();
   const chSpells = character?.spells ?? [];
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   const [loading, setLoading] = useState(true);
   const [modalOpened, setModalOpened] = useState(false);

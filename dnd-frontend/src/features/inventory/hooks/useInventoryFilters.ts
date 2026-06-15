@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useMediaQuery } from "@mantine/hooks";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export function useInventoryFilters() {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "cards">(
     isMobile ? "list" : "cards"

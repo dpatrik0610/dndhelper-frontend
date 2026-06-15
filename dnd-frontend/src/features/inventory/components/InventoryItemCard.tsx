@@ -1,11 +1,11 @@
 ﻿import { Card, Grid, Text, ActionIcon, Group, Badge } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import CustomBadge from "@components/common/CustomBadge";
 import { SectionColor } from "@appTypes/SectionColor";
 import { IconTrash, IconArrowsRightLeft, IconZoom } from "@tabler/icons-react";
 import { useState } from "react";
 import { EquipmentModal } from "./EquipmentModal";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface InventoryItemCardProps {
   item: InventoryItem;
@@ -15,7 +15,7 @@ interface InventoryItemCardProps {
 
 export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardProps) {
   const [modalOpened, setModalOpened] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 48em)");
+  const isMobile = useIsMobile();
 
   return (
     <Card

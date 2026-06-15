@@ -8,7 +8,7 @@ import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { useNavigate } from "react-router-dom";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useState, type MouseEventHandler } from "react";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { AddConditionModal } from "./AddConditionModal";
 import { DamageModal } from "./DamageModal";
 import { RemoveCurrencyModal } from "./RemoveCurrencyModal";
@@ -16,6 +16,7 @@ import { TransferCurrencyModal } from "./TransferCurrencyModal";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { HealModal } from "./HealModal";
 import { RollModal, SubtleRollModal } from "./RollModal";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export interface ActionButtonProps {
   label: string;
@@ -35,7 +36,7 @@ export function ActionBar() {
   const token = useAuthStore.getState().token;
   const navigate = useNavigate();
   const character = useCurrentCharacter();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   if (!token || !character?.id) return null;
 

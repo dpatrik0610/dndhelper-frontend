@@ -26,7 +26,8 @@ import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { exportCollection, exportAllCollections, restoreCollection } from "@services/backupService";
 import { listCollections } from "@services/databaseService";
-import { useMediaQuery } from "@mantine/hooks";
+import { useIsMobile } from "@hooks/useIsMobile";
+
 
 export function BackupManager() {
   const token = useAuthStore((s) => s.token)!;
@@ -37,7 +38,7 @@ export function BackupManager() {
   const [collections, setCollections] = useState<string[]>([]);
   const downloadLinkRef = useRef<HTMLAnchorElement | null>(null);
   const logPrefix = "[BackupManager]";
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   const normalizedCollection = useMemo(() => collectionName.trim(), [collectionName]);
 

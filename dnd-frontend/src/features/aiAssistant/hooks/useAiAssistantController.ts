@@ -1,11 +1,12 @@
 import { useAiAssistantConfigStore } from "@store/useAiAssistantConfigStore";
 import { useEffect, useRef, useState } from "react";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { showNotification } from "@components/Notification/Notification";
 import { cloneAssistantConfig } from "@features/aiAssistant/defaults";
 import { sendAssistantMessage } from "@features/aiAssistant/services/geminiChatService";
 import type { AssistantController } from "@features/aiAssistant/types/assistantController";
 import type { AssistantConfig, AssistantMessage } from "@features/aiAssistant/types";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 function createMessage(
   role: AssistantMessage["role"],
@@ -24,7 +25,7 @@ export function useAiAssistantController(): AssistantController {
   const setConfig = useAiAssistantConfigStore((s) => s.setConfig);
   const resetConfig = useAiAssistantConfigStore((s) => s.resetConfig);
 
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 

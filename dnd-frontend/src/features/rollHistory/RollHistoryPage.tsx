@@ -13,7 +13,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { IconX } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
@@ -23,6 +23,7 @@ import { getRollHistory } from "@services/rollService";
 import type { RollHistoryEntry } from "@appTypes/Roll";
 import { formatRollExpression } from "@utils/rollFormat";
 import { SectionColor } from "@appTypes/SectionColor";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 const pageSize = 10;
 
@@ -46,7 +47,7 @@ function isSubtleRoll(entry: RollHistoryEntry) {
 }
 
 export default function RollHistoryPage() {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const token = useToken();
   const character = useCurrentCharacter();

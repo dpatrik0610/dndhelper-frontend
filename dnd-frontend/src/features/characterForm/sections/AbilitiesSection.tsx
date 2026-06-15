@@ -7,7 +7,7 @@
   Select,
 } from "@mantine/core";
 import { useMemo, useEffect } from "react";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { IconBrain } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -16,6 +16,7 @@ import { FormNumberInput } from "@components/common/FormNumberInput";
 import type { SavingThrows } from "@appTypes/Character/SavingThrows";
 import { InfoIconPopover } from "@components/common/InfoIconPopover";
 import { abilityTooltips, saveTooltips } from "@features/characterForm/Tooltips/tooltips";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 const map = {
   strength: "str",
@@ -41,7 +42,7 @@ const saveKeyMap: Record<AbilityLong, keyof SavingThrows> = {
 };
 
 export function AbilitiesSection() {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const characterForm = useCharacterFormStore((s) => s.characterForm);
   const setCharacterForm = useCharacterFormStore((s) => s.setCharacterForm);
 

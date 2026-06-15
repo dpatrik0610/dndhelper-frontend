@@ -8,9 +8,8 @@
   Paper,
   Loader,
   NumberInput,
-  useMantineTheme,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { IconSearch, IconBox } from "@tabler/icons-react";
 import { useEffect, useState, useMemo } from "react";
 import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
@@ -18,6 +17,7 @@ import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import styles from "@styles/AddExistingItemModal.module.css";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export function AddExistingItemModal({
   opened,
@@ -26,8 +26,7 @@ export function AddExistingItemModal({
   opened: boolean;
   onClose: () => void;
 }) {
-  const theme = useMantineTheme();
-  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const isMobile = useIsMobile();
 
   const { equipments, loadAll } = useAdminEquipmentStore();
   const { addExisting } = useAdminInventoryStore();

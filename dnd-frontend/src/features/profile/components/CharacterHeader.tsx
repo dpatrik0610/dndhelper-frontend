@@ -1,17 +1,18 @@
 import { Stack, Box, Group, Title, Text } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { CharacterCurrencyArea } from "./CharacterCurrencyArea";
 import { showNotification } from "@components/Notification/Notification";
 import { HpRing } from "./HpRing";
 import { XpProgressCard } from "./XpProgressCard";
 import { InspirationBox } from "./InspirationBox";
 import { SwitchCharacterButton } from "./SwitchCharacterButton";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export function CharacterHeader() {
   const character = useCurrentCharacter()!;
   const { updateCharacter } = useCharacterCoreActions();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   async function handleUseInspiration() {
     if (!character) return;

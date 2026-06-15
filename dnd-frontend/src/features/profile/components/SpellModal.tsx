@@ -1,7 +1,8 @@
 import { Modal, ActionIcon, Box } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { SpellCard } from "@features/spells/components/SpellCard";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface SpellModalProps {
   opened: boolean;
@@ -9,7 +10,7 @@ interface SpellModalProps {
 }
 
 export function SpellModal({ opened, onClose }: SpellModalProps) {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   return (
     <Modal

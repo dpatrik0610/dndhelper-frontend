@@ -6,9 +6,10 @@ import { loadSpells } from "@utils/loadSpells";
 import { SpellSelect } from "./components/SpellSelect";
 import { SpellCard } from "./components/SpellCard";
 import { IconDatabase, IconRefresh } from "@tabler/icons-react";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { useParams } from "react-router-dom";
 import { getSpellById } from "@services/spellService";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export default function SpellPage() {
   const token = useAuthStore.getState().token;
@@ -18,7 +19,7 @@ export default function SpellPage() {
   const currentSpell = useSpellStore((state) => state.currentSpell);
   const setCurrentSpell = useSpellStore((state) => state.setCurrentSpell);
 
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const fetchSpells = async () => {

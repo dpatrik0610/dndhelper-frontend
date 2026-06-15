@@ -8,7 +8,7 @@ import {
   TextInput,
   ThemeIcon,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { IconDeviceFloppy, IconRefresh, IconSparkles, IconX } from "@tabler/icons-react";
 import type { Note } from "@appTypes/Note";
 import { useNoteStore } from "@store/note/noteStore";
@@ -17,6 +17,7 @@ import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 import { magicGlowTheme } from "@styles/magic/glowTheme";
 import { NoteModalShell } from "./NoteModalShell";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface EditNoteModalProps {
   opened: boolean;
@@ -26,7 +27,7 @@ interface EditNoteModalProps {
 
 export function EditNoteModal({ opened, note, onClose }: EditNoteModalProps) {
   const updateNote = useNoteStore((s) => s.update);
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   const [title, setTitle] = useState(note?.title ?? "");
   const [lines, setLines] = useState((note?.lines ?? []).join("\n"));

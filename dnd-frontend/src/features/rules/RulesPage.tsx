@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Box, Grid, Group, Pagination, Stack } from "@mantine/core";
-import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
+import { useDebouncedValue } from "@mantine/hooks";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { getRuleDetail } from "@services/ruleService";
 import { RulesHeader } from "./components/RulesHeader";
@@ -13,6 +13,7 @@ import "./rulesPage.css";
 import { useRulesDataStore } from "./store/useRulesDataStore";
 import { useRuleFilters } from "./hooks/useRuleFilters";
 import { useRulesUiStore, type RulesUiState } from "./store/useRulesUiStore";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export default function RulesPage() {
   const topic = useRulesUiStore((s: RulesUiState) => s.topic);
@@ -24,7 +25,7 @@ export default function RulesPage() {
 
   const [debouncedSearch] = useDebouncedValue(searchTerm, 250);
   const pageSize = 15;
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   const { rules, topics, categories, initialized, loadData } = useRulesDataStore();
   const { filteredRules, paginatedRules, summaryStats, page, setPage } = useRuleFilters(

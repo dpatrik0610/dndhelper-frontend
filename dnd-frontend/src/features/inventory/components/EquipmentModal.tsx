@@ -14,7 +14,7 @@ import {
   ThemeIcon,
   Tooltip,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+
 import {
   IconCategory,
   IconCoins,
@@ -33,6 +33,7 @@ import { SectionColor } from "@appTypes/SectionColor";
 import { equipmentTierTheme } from "./styles/equipmentTheme";
 import classes from "./EquipmentModal.module.css";
 import { useIsAdmin, useToken } from "@store/auth/authSelectors";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then(m => ({ default: m.MarkdownRenderer })));
 const EquipmentFormModal = lazy(() => import("@components/EquipmentFormModal/EquipmentFormModal").then(m => ({ default: m.EquipmentFormModal })));
@@ -62,7 +63,7 @@ function StatItem({ icon, label, value, color }: { icon: React.ReactNode; label:
 }
 
 export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalProps) {
-  const isMobile = useMediaQuery("(max-width: 48em)");
+  const isMobile = useIsMobile();
   const token = useToken();
   const isAdmin = useIsAdmin();
   const { update } = useAdminEquipmentStore();

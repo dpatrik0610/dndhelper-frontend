@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState} from "react";
 import { Stack } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import { useMediaQuery } from "@mantine/hooks";
+
 import dayjs from "dayjs";
 
 import { useCharacterList, useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
@@ -14,6 +14,7 @@ import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { HeaderCard } from "./components/HeaderCard";
 import { ActiveSessionCard } from "./components/ActiveSessionCard";
 import { showNotification } from "@components/Notification/Notification";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 const palette = {
   accent: "#b197fc",
@@ -35,7 +36,7 @@ export default function Home() {
   const [modalOpened, setModalOpened] = useState(false);
   const [quote, setQuote] = useState("");
   const [campaignName, setCampaignName] = useState<string | null>(null);
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (quotes?.length) {

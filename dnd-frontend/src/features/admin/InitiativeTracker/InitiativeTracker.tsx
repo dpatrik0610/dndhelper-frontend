@@ -1,6 +1,6 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge, Button, Divider, Group, Paper, SimpleGrid, Stack, Text, TextInput, Title } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { IconRun, IconUserPlus, IconPlus } from "@tabler/icons-react";
 import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
@@ -10,9 +10,10 @@ import { InitiativeControls } from "./InitiativeControls";
 import { getCharacterById } from "@services/characterService";
 import { updateCharacter } from "@services/characterService";
 import { useAuthStore } from "@store/auth/authStore";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export function InitiativeTracker() {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const { selectedId: campaignId } = useAdminCampaignStore();
   const { characters, loadAll: loadCharacters } = useAdminCharacterStore();
   const token = useAuthStore.getState().token;

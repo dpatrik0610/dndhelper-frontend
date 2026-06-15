@@ -1,6 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppShell, Loader, Center } from "@mantine/core";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useMemo, lazy, Suspense } from "react";
 import Sidebar from "@features/navigation/Sidebar/Sidebar";
 import PrivateRoute from "@components/PrivateRoute";
@@ -14,6 +14,7 @@ import { getAppShellStyles } from "@components/layout/appShellStyles";
 import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal";
 import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
 import { useUiStore } from "@store/ui/uiStore";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 // Lazy load route components for code splitting
 const Home = lazy(() => import("@features/home/Home"));
@@ -32,7 +33,7 @@ const EncounterRoomPage = lazy(() => import("@features/encounterRoom/EncounterRo
 
 function AppRoutes() {
   const location = useLocation();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const [opened, handlers] = useDisclosure(false);
   const sidebarTheme = useUiStore((s) => s.sidebarTheme) as SidebarThemeVariant;
 

@@ -2,7 +2,7 @@
   Group, Stack, TextInput, ActionIcon, Text, SimpleGrid, Switch,
 } from "@mantine/core";
 import { useState, useEffect, useMemo } from "react";
-import { useMediaQuery } from "@mantine/hooks";
+
 import {
   IconAutomaticGearbox, IconTrash, IconPlus, IconStarFilled, IconX,
 } from "@tabler/icons-react";
@@ -13,6 +13,7 @@ import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
 import { InfoIconPopover } from "@components/common/InfoIconPopover";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 
@@ -20,7 +21,7 @@ export function SkillsSection() {
   const characterForm = useCharacterFormStore(s => s.characterForm);
   const setCharacterForm = useCharacterFormStore(s => s.setCharacterForm);
 
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const [newSkill, setNewSkill] = useState("");
 
   const skills = characterForm.skills ?? [];

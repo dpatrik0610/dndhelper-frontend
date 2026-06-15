@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button, Group, ScrollArea, Stack } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { IconDeviceFloppy } from "@tabler/icons-react";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
@@ -9,6 +9,7 @@ import { defaultEquipment } from "@features/admin/ItemManager/defaultEquipment";
 import { EquipmentBasicInfo } from "./EquipmentBasicInfo";
 import { EquipmentCombat } from "./EquipmentCombat";
 import { EquipmentDescription } from "./EquipmentDescription";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface EquipmentFormModalProps {
   opened: boolean;
@@ -31,7 +32,7 @@ export function EquipmentFormModal({
   submitLabel = "Save",
   cancelLabel = "Cancel",
 }: EquipmentFormModalProps) {
-  const isMobile = useMediaQuery("(max-width: 48em)");
+  const isMobile = useIsMobile();
   const [draft, setDraft] = useState<Equipment>(defaultEquipment);
 
   // Reset draft when opening or when initial changes

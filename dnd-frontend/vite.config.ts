@@ -24,6 +24,7 @@ export default defineConfig({
       '@styles': path.resolve(__dirname, 'src/styles'),
       '@signalr': path.resolve(__dirname, 'src/SignalR'),
       '@api': path.resolve(__dirname, 'src/api'),
+      '@hooks': path.resolve(__dirname, 'src/hooks'),
       '@': path.resolve(__dirname, 'src'),
     },
   },

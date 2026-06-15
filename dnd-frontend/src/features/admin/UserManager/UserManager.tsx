@@ -14,7 +14,7 @@ import {
   IconUser,
 } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { useAdminUserStore } from "@store/admin/adminUserStore";
 import { UserRole, UserStatus } from "@appTypes/User";
 import { AddUserModal } from "./components/AddUserModal";
@@ -22,9 +22,10 @@ import { EditUserModal } from "./components/EditUserModal";
 import { DeleteConfirmModal } from "./components/DeleteConfirmModal";
 import { UsersTable } from "./components/UsersTable";
 import { StatsGrid } from "./components/StatsGrid";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export function UserManager() {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const {
     users,
     loading,

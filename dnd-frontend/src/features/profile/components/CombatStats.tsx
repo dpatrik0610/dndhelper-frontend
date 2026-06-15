@@ -11,14 +11,15 @@ import {
 } from "@tabler/icons-react";
 import { StatBox } from "./StatBox";
 import { ExpandableSection } from "@components/ExpandableSection";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { SectionColor } from "@appTypes/SectionColor";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export function CombatStats() {
   const character = useCurrentCharacter()!;
   const { updateCharacter } = useCharacterCoreActions();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   const stats = [
     { label: "Armor Class", value: character.armorClass, color: "blue", icon: <IconShield size={18} /> },

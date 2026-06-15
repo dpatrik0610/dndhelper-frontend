@@ -19,9 +19,10 @@ import { SkillsSection } from "./sections/SkillsSection";
 import { LoreSection } from "./sections/LoreSection";
 import { DeleteCharacterSection } from "./sections/DeleteCharacterSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { SpellSlotsSection } from "./sections/SpellSlotsSection";
 import { SpellsSection } from "./sections/SpellsSection";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface CharacterFormPageProps {
   editMode?: boolean;
@@ -30,7 +31,7 @@ interface CharacterFormPageProps {
 export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) {
   const { handleSubmit, loading, isAdmin } = useCharacterForm(editMode);
   const navigate = useNavigate();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   const submitLabel = editMode ? "Save Changes" : "Create Character";
 

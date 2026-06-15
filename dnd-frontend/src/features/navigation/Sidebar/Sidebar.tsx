@@ -4,11 +4,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useUsername, useIsAdmin } from "@store/auth/authSelectors";
 import { handleLogout } from "@utils/handleLogout";
 import { tabs, type Section, type TabItem } from "./SidebarTabs";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { SidebarHeader } from "./components/SidebarHeader";
 import { NavSection } from "./components/NavSection";
 import classes from "./Sidebar.module.css";
 import { sidebarThemes, type SidebarThemeVariant } from "./sidebarThemes";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface SidebarProps {
   opened: boolean;
@@ -18,7 +19,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ opened, onClose, position = "left", themeVariant = "midnight" }: SidebarProps) {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const location = useLocation();

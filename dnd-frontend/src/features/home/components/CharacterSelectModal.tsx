@@ -14,8 +14,9 @@ import { IconPlus, IconUserCircle } from "@tabler/icons-react";
 import { useState } from "react";
 import type { Character } from "@appTypes/Character/Character";
 import { useNavigate } from "react-router-dom";
-import { useMediaQuery } from "@mantine/hooks";
+
 import classes from "./styles/CharacterSelectModal.module.css";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface CharacterSelectModalProps {
   opened: boolean;
@@ -32,7 +33,7 @@ export function CharacterSelectModal({
 }: CharacterSelectModalProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const navigate = useNavigate();
-  const isMobile = useMediaQuery("(max-width: 50em)");
+  const isMobile = useIsMobile();
 
   const handleSelect = (char: Character) => {
     setSelected(char.id ?? null);

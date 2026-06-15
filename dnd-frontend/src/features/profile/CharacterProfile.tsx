@@ -23,7 +23,7 @@ import { SpellCastingBlock } from "./components/SpellCastingBlock";
 import { ActionBar } from "./components/ActionsBar";
 import { ConditionsPanel } from "./components/ConditionsPanel";
 import { SpellsPanel } from "./components/SpellsPanel";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { Inventory } from "@features/inventory/Inventory";
 import { ProficienciesPanel } from "./components/ProficienciesPanel";
 import "./styles/CharacterProfile.styles.css"
@@ -36,6 +36,7 @@ import { getCampaignById } from "@services/campaignService";
 import { ExperienceTableCard } from "./components/ExperienceTableCard";
 import { useIsAdmin } from "@store/auth/authSelectors";
 import type { Campaign } from "@appTypes/Campaign";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 function useCampaignName(campaignId: string | null) {
   const [name, setName] = useState<string>("Loading...");
@@ -70,7 +71,7 @@ function useCampaignName(campaignId: string | null) {
 export default function CharacterProfile() {
   const character = useCurrentCharacter();
   const [activeTab, setActiveTab] = useState<string | null>("overview");
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
 
   const isAdmin = useIsAdmin();

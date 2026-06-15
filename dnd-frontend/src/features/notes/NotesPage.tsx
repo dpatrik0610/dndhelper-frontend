@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { Box } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
@@ -11,11 +11,12 @@ import type { Note } from "@appTypes/Note";
 import { AddNoteModal } from "@features/profile/components/AddNoteModal";
 import { EditNoteModal } from "./components/EditNoteModal";
 import { NotesPanel } from "./components/NotesPanel";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export default function NotesPage() {
   const character = useCurrentCharacter();
   const { updateCharacter } = useCharacterCoreActions();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 

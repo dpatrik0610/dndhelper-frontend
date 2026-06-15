@@ -1,8 +1,8 @@
 import { ActionIcon, Group, Paper, Text } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
 import { IconMenu2 } from "@tabler/icons-react";
 import { useState, type JSX } from "react";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface Action {
   label: string;
@@ -17,7 +17,7 @@ interface Props {
 
 export function QuickActionBar({ actions, palette }: Props) {
   const navigate = useNavigate();
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const showActions = !isMobile || open;
 

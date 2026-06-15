@@ -35,7 +35,8 @@
       "@validations/*": ["src/validations/*"],
       "@styles/*": ["src/styles/*"],
       "@signalr/*": ["src/SignalR/*"],
-      "@api/*": ["src/api/*"]
+      "@api/*": ["src/api/*"],
+      "@hooks/*": ["src/hooks/*"]
     }
   },
   "include": ["src"]

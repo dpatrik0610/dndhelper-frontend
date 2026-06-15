@@ -9,7 +9,7 @@ import {
   ThemeIcon,
   Tooltip,
 } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+
 import {
   IconDeviceFloppy,
   IconHash,
@@ -23,6 +23,7 @@ import { MarkdownTextarea } from "@components/common/MarkdownTextarea";
 import { magicGlowTheme } from "@styles/magic/glowTheme";
 import CustomBadge from "@components/common/CustomBadge";
 import { NoteModalShell } from "@features/notes/components/NoteModalShell";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface Props {
   opened: boolean;
@@ -34,7 +35,7 @@ export function AddNoteModal({ opened, onClose }: Props) {
   const { updateCharacter } = useCharacterCoreActions();
   const { create: createNote } = useNoteActions();
 
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useIsMobile();
 
   const [title, setTitle] = useState("");
   const [lines, setLines] = useState("");
