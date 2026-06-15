@@ -63,8 +63,8 @@ function StatItem({ icon, label, value, color }: { icon: React.ReactNode; label:
 
 export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalProps) {
   const isMobile = useMediaQuery("(max-width: 48em)");
-  const token = useAuthStore.getState().token;
-  const roles = useAuthStore.getState().roles;
+  const token = useAuthStore((s) => s.token);
+  const roles = useAuthStore((s) => s.roles);
   const isAdmin = roles.includes("Admin");
   const { update } = useAdminEquipmentStore();
 

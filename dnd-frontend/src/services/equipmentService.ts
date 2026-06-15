@@ -114,7 +114,7 @@ export async function getEquipmentByIds(ids: string[], token: string): Promise<E
 
 export async function getEquipmentByIdsForUser(ids: string[], token: string): Promise<EquipmentUserResponse[]> {
   return apiClient(`${baseUrl}/userview`, {
-    method: 'GET',
+    method: 'POST',
     body: ids,
     token,
   });
