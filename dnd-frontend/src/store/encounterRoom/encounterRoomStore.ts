@@ -1,6 +1,5 @@
 import { create, type StoreApi, type UseBoundStore } from "zustand";
 import { encounterRoomService } from "@services/encounterRoomService";
-import { getAuthTokenSafe } from "@store/auth/authUtils";
 import type {
   AddEntityRequest,
   CreateRoomRequest,
@@ -54,12 +53,6 @@ export interface EncounterRoomActions {
   applyPlayerLeft: (userId: string, revision?: number) => void;
 }
 
-const tokenOrThrow = () => {
-  const token = getAuthTokenSafe() ?? localStorage.getItem("authToken");
-  if (!token) throw new Error("Authentication token is missing.");
-  return token;
-};
-
 const setFailure = (set: (partial: Partial<EncounterRoomState>) => void, error: unknown) => {
   set({ error: error instanceof Error ? error.message : "Encounter room action failed." });
 };
@@ -82,7 +75,7 @@ export const useEncounterRoomStore: UseBoundStore<StoreApi<EncounterRoomState & 
     loadMyRooms: async () => {
       set({ loading: true, error: null });
       try {
-        const myRooms = await encounterRoomService.getMyRooms(tokenOrThrow());
+        const myRooms = await encounterRoomService.getMyRooms();
         set({ myRooms, loading: false });
       } catch (error) {
         setFailure(set, error);
@@ -93,7 +86,7 @@ export const useEncounterRoomStore: UseBoundStore<StoreApi<EncounterRoomState & 
     createRoom: async (request: CreateRoomRequest) => {
       set({ loading: true, error: null });
       try {
-        const room = await encounterRoomService.createRoom(request, tokenOrThrow());
+        const room = await encounterRoomService.createRoom(request);
         set((state) => ({ room, myRooms: [room, ...state.myRooms], loading: false }));
         return room;
       } catch (error) {
@@ -106,7 +99,7 @@ export const useEncounterRoomStore: UseBoundStore<StoreApi<EncounterRoomState & 
     joinRoomByCode: async (joinCode: string) => {
       set({ loading: true, error: null });
       try {
-        const response = await encounterRoomService.joinRoom(joinCode, tokenOrThrow());
+        const response = await encounterRoomService.joinRoom(joinCode);
         set({ room: response.roomState, loading: false });
         return response.roomState;
       } catch (error) {
@@ -119,7 +112,7 @@ export const useEncounterRoomStore: UseBoundStore<StoreApi<EncounterRoomState & 
     loadRoom: async (roomId: string) => {
       set({ loading: true, error: null });
       try {
-        const room = await encounterRoomService.getRoom(roomId, tokenOrThrow());
+        const room = await encounterRoomService.getRoom(roomId);
         set({ room, loading: false });
         return room;
       } catch (error) {
@@ -130,7 +123,7 @@ export const useEncounterRoomStore: UseBoundStore<StoreApi<EncounterRoomState & 
     },
 
     deleteRoom: async (roomId: string) => {
-      await encounterRoomService.deleteRoom(roomId, tokenOrThrow());
+      await encounterRoomService.deleteRoom(roomId);
       set((state) => ({
         myRooms: state.myRooms.filter((room) => room.id !== roomId),
         room: state.room?.id === roomId ? null : state.room,
@@ -138,7 +131,7 @@ export const useEncounterRoomStore: UseBoundStore<StoreApi<EncounterRoomState & 
     },
 
     leaveRoom: async (roomId: string) => {
-      await encounterRoomService.leaveRoom(roomId, tokenOrThrow());
+      await encounterRoomService.leaveRoom(roomId);
       set((state) => ({
         myRooms: state.myRooms.filter((room) => room.id !== roomId),
         room: state.room?.id === roomId ? null : state.room,
@@ -147,7 +140,7 @@ export const useEncounterRoomStore: UseBoundStore<StoreApi<EncounterRoomState & 
 
     regenerateJoinCode: async (roomId: string) => {
       try {
-        const joinCode = await encounterRoomService.regenerateJoinCode(roomId, tokenOrThrow());
+        const joinCode = await encounterRoomService.regenerateJoinCode(roomId);
         updateRoom((room) => (room.id === roomId ? { ...room, joinCode } : room));
         return joinCode;
       } catch (error) {

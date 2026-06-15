@@ -1,3 +1,5 @@
+import { getAuthTokenSafe } from "@store/auth/authUtils";
+
 const baseUrl = "/Backup";
 
 interface BackupFile {
@@ -14,7 +16,8 @@ function getApiBase() {
   return import.meta.env.VITE_API_BASE;
 }
 
-function buildAuthHeaders(token?: string): HeadersInit {
+function buildAuthHeaders(): HeadersInit {
+  const token = getAuthTokenSafe();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -46,10 +49,10 @@ async function handleError(res: Response): Promise<never> {
   throw new Error(message || "Request failed");
 }
 
-export async function exportCollection(collectionName: string, token: string): Promise<BackupFile> {
+export async function exportCollection(collectionName: string): Promise<BackupFile> {
   const res = await fetch(`${getApiBase()}${baseUrl}/${encodeURIComponent(collectionName)}`, {
     method: "GET",
-    headers: buildAuthHeaders(token),
+    headers: buildAuthHeaders(),
   });
 
   if (!res.ok) await handleError(res);
@@ -62,10 +65,10 @@ export async function exportCollection(collectionName: string, token: string): P
   return { blob, fileName, contentType };
 }
 
-export async function exportAllCollections(token: string): Promise<BackupFile> {
+export async function exportAllCollections(): Promise<BackupFile> {
   const res = await fetch(`${getApiBase()}${baseUrl}/all`, {
     method: "GET",
-    headers: buildAuthHeaders(token),
+    headers: buildAuthHeaders(),
   });
 
   if (!res.ok) await handleError(res);
@@ -82,13 +85,13 @@ export async function exportAllCollections(token: string): Promise<BackupFile> {
   return { blob, fileName, contentType };
 }
 
-export async function restoreCollection(collectionName: string, file: File, token: string): Promise<RestoreResponse> {
+export async function restoreCollection(collectionName: string, file: File): Promise<RestoreResponse> {
   const formData = new FormData();
   formData.append("file", file);
 
   const res = await fetch(`${getApiBase()}${baseUrl}/${encodeURIComponent(collectionName)}/restore`, {
     method: "POST",
-    headers: buildAuthHeaders(token),
+    headers: buildAuthHeaders(),
     body: formData,
   });
 

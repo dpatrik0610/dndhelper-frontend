@@ -8,12 +8,12 @@ import { DividerWithLabel } from "@components/common/DividerWithLabel";
 import type { SpellSlot } from "@appTypes/Character/SpellSlot";
 import { showNotification } from "@components/Notification/Notification";
 import { updateCharacter } from "@services/characterService";
-import { useToken } from "@store/auth/authSelectors";
+
 
 export function SpellCastingBlock() {
     const character = useCurrentCharacter()!;
     const { updateCharacter : updateStore } = useCharacterCoreActions();
-    const token = useToken()!;
+
     const abilityLabelMap: Record<string, string> = {
         wis: "Wisdom",
         int: "Intelligence",
@@ -47,7 +47,7 @@ export function SpellCastingBlock() {
         updateStore({spellSlots: updatedSlots});
         
         const updatedCharacter = { ...character, spellSlots: updatedSlots };
-        updateCharacter(updatedCharacter, token);
+        updateCharacter(updatedCharacter);
     }
 
     function generateSpellSlots() {

@@ -5,43 +5,43 @@ export interface ApiResponse {
   message?: string;
 }
 
-function checkToken(token: string) {
-  if (!token) throw new Error("Token is required for this request");
-}
 
-export async function getCharacters(token: string): Promise<Character[]> {
-  checkToken(token);
+  
 
-  const response = await apiClient<Character[] | Character>("/character", { method: "GET", token });
+
+export async function getCharacters(): Promise<Character[]> {
+  
+
+  const response = await apiClient<Character[] | Character>("/character", { method: "GET" });
   return Array.isArray(response) ? response : [response];
 }
 
-export async function getOwnCharacters(token: string): Promise<Character[]> {
-  checkToken(token);
+export async function getOwnCharacters(): Promise<Character[]> {
+  
 
-  const response = await apiClient<Character[] | Character>("/character/own", { method: "GET", token });
+  const response = await apiClient<Character[] | Character>("/character/own", { method: "GET" });
   return Array.isArray(response) ? response : [response];
 }
 
-export async function getCharacterById(characterId: string, token: string): Promise<Character | null> {
-  checkToken(token);
+export async function getCharacterById(characterId: string): Promise<Character | null> {
+  
 
   try {
-    return await apiClient<Character>(`/character/${characterId}`, { method: "GET", token });
+    return await apiClient<Character>(`/character/${characterId}`, { method: "GET" });
   } catch (error) {
     console.error("Failed to fetch character:", error);
     return null;
   }
 }
 
-export async function createCharacter(character: Character, token: string): Promise<Character | null> {
-  checkToken(token);
+export async function createCharacter(character: Character): Promise<Character | null> {
+  
 
   try {
     return await apiClient<Character>("/character", {
       method: "POST",
       body: character,
-      token,
+
     });
   } catch (error) {
     console.error("Character creation failed:", error);
@@ -49,8 +49,8 @@ export async function createCharacter(character: Character, token: string): Prom
   }
 }
 
-export async function updateCharacter(character: Character, token: string): Promise<Character | null> {
-  checkToken(token);
+export async function updateCharacter(character: Character): Promise<Character | null> {
+  
 
   if (!character.id) throw new Error("Character ID is required for update");
 
@@ -58,7 +58,7 @@ export async function updateCharacter(character: Character, token: string): Prom
     return await apiClient<Character>(`/character/${character.id}`, {
       method: "PUT",
       body: character,
-      token,
+
     });
   } catch (error) {
     console.error("Character update failed:", error);
@@ -66,11 +66,11 @@ export async function updateCharacter(character: Character, token: string): Prom
   }
 }
 
-export async function deleteCharacter(characterId: string, token: string): Promise<boolean> {
-  checkToken(token);
+export async function deleteCharacter(characterId: string): Promise<boolean> {
+  
 
   try {
-    await apiClient<void>(`/character/${characterId}`, { method: "DELETE", token });
+    await apiClient<void>(`/character/${characterId}`, { method: "DELETE" });
     return true;
   } catch (error) {
     console.error("Character deletion failed:", error);
@@ -78,13 +78,13 @@ export async function deleteCharacter(characterId: string, token: string): Promi
   }
 }
 
-export async function useSpellSlot(characterId: string, level: number, token: string): Promise<{ success: boolean; message: string }> {
-  checkToken(token);
+export async function useSpellSlot(characterId: string, level: number): Promise<{ success: boolean; message: string }> {
+  
 
   try {
     await apiClient<void>(`/character/${characterId}/spellslots/use/${level}`, {
       method: "POST",
-      token,
+
     });
     return { success: true, message: `Used a level ${level} spell slot.` };
   } catch (error) {
@@ -92,13 +92,13 @@ export async function useSpellSlot(characterId: string, level: number, token: st
   }
 }
 
-export async function recoverSpellSlot(characterId: string, level: number, token: string, amount: number = 1): Promise<{ success: boolean; message: string }> {
-  checkToken(token);
+export async function recoverSpellSlot(characterId: string, level: number, amount: number = 1): Promise<{ success: boolean; message: string }> {
+  
 
   try {
     await apiClient<void>(`/character/${characterId}/spellslots/recover/${level}?amount=${amount}`, {
       method: "POST",
-      token,
+
     });
     return { success: true, message: `Recovered ${amount} level ${level} spell slot(s).` };
   } catch (error) {
@@ -106,13 +106,13 @@ export async function recoverSpellSlot(characterId: string, level: number, token
   }
 }
 
-export async function longrest(characterId: string, token: string): Promise<{ success: boolean; message: string }> {
-  checkToken(token);
+export async function longrest(characterId: string): Promise<{ success: boolean; message: string }> {
+  
 
   try {
     const response = await apiClient<ApiResponse>(`/character/${characterId}/longrest`, {
       method: "POST",
-      token,
+
     });
     return { success: true, message: response.message || "You slept through the night :)" };
   } catch (error) {
@@ -120,14 +120,14 @@ export async function longrest(characterId: string, token: string): Promise<{ su
   }
 }
 
-export async function bulkLongRest(characterIds: string[], token: string): Promise<{ successful: string[], failed: string[] }> {
-  checkToken(token);
+export async function bulkLongRest(characterIds: string[]): Promise<{ successful: string[], failed: string[] }> {
+  
 
   try {
     const response = await apiClient<{ successful: string[], failed: string[] }>('/character/bulk-long-rest', {
       method: 'POST',
       body: characterIds,
-      token,
+
     });
     return response;
   } catch (error) {

@@ -4,21 +4,21 @@ import type { Character } from "@appTypes/Character/Character"
 import type { CampaignOverviewDto } from "@appTypes/CampaignOverview"
 
 // ----------- Base CRUD -----------
-export async function getAllCampaigns(token: string): Promise<Campaign[]> {
-  return apiClient<Campaign[]>("/Campaign", { token })
+export async function getAllCampaigns(): Promise<Campaign[]> {
+  return apiClient<Campaign[]>("/Campaign", {})
 }
 
-export async function getCampaignById(id: string, token: string): Promise<Campaign> {
-  return apiClient<Campaign>(`/Campaign/${id}`, { token })
+export async function getCampaignById(id: string): Promise<Campaign> {
+  return apiClient<Campaign>(`/Campaign/${id}`, {})
 }
 
-export async function getCampaignBasicById(id: string, token: string): Promise<Pick<Campaign, "id" | "name" | "description" | "isActive" | "currentSessionId" | "sessionIds" | "ownerIds">> {
-  return apiClient(`/Campaign/${id}/basic`, { token });
+export async function getCampaignBasicById(id: string): Promise<Pick<Campaign, "id" | "name" | "description" | "isActive" | "currentSessionId" | "sessionIds" | "ownerIds">> {
+  return apiClient(`/Campaign/${id}/basic`, {});
 }
 
-export async function getCampaignOverviewByCharacter(characterId: string, token: string): Promise<CampaignOverviewDto | null> {
+export async function getCampaignOverviewByCharacter(characterId: string): Promise<CampaignOverviewDto | null> {
   try {
-    return await apiClient(`/campaign/character/${characterId}/overview`, { token });
+    return await apiClient(`/campaign/character/${characterId}/overview`, {});
   } catch (err) {
     const status = (err as Error & { status?: number }).status;
     if (status === 404) return null;
@@ -26,75 +26,75 @@ export async function getCampaignOverviewByCharacter(characterId: string, token:
   }
 }
 
-export async function createCampaign(campaign: Campaign, token: string): Promise<Campaign> {
-  return apiClient<Campaign>("/Campaign/create", { method: "POST", body: campaign, token})
+export async function createCampaign(campaign: Campaign): Promise<Campaign> {
+  return apiClient<Campaign>("/Campaign/create", { method: "POST", body: campaign })
 }
 
-export async function updateCampaign(id: string, campaign: Campaign, token: string): Promise<Campaign> {
-  return apiClient<Campaign>(`/Campaign/${id}`, { method: "PUT", body: campaign, token })
+export async function updateCampaign(id: string, campaign: Campaign): Promise<Campaign> {
+  return apiClient<Campaign>(`/Campaign/${id}`, { method: "PUT", body: campaign })
 }
 
-export async function deleteCampaign(id: string, token: string): Promise<void> {
-  return apiClient<void>(`/Campaign/${id}`, { method: "DELETE", token })
+export async function deleteCampaign(id: string): Promise<void> {
+  return apiClient<void>(`/Campaign/${id}`, { method: "DELETE" })
 }
 
 // ----------- Characters -----------
-export async function getCampaignCharacters(id: string, token: string): Promise<Character[]> {
-  return apiClient(`/Campaign/${id}/characters`, { token })
+export async function getCampaignCharacters(id: string): Promise<Character[]> {
+  return apiClient(`/Campaign/${id}/characters`, {})
 }
 
-export async function addCharacterToCampaign(id: string, characterId: string, token: string): Promise<void> {
-  return apiClient(`/Campaign/${id}/characters/${characterId}`, { method: "POST", token })
+export async function addCharacterToCampaign(id: string, characterId: string): Promise<void> {
+  return apiClient(`/Campaign/${id}/characters/${characterId}`, { method: "POST" })
 }
 
-export async function removeCharacterFromCampaign(id: string, characterId: string, token: string): Promise<void> {
-  return apiClient(`/Campaign/${id}/characters/${characterId}`, { method: "DELETE", token })
+export async function removeCharacterFromCampaign(id: string, characterId: string): Promise<void> {
+  return apiClient(`/Campaign/${id}/characters/${characterId}`, { method: "DELETE" })
 }
 
 // ----------- Worlds -----------
-export async function addWorldToCampaign(id: string, worldId: string, token: string) {
-  return apiClient(`/Campaign/${id}/worlds/${worldId}`, { method: "POST", token })
+export async function addWorldToCampaign(id: string, worldId: string) {
+  return apiClient(`/Campaign/${id}/worlds/${worldId}`, { method: "POST" })
 }
 
-export async function removeWorldFromCampaign(id: string, worldId: string, token: string) {
-  return apiClient(`/Campaign/${id}/worlds/${worldId}`, { method: "DELETE", token })
+export async function removeWorldFromCampaign(id: string, worldId: string) {
+  return apiClient(`/Campaign/${id}/worlds/${worldId}`, { method: "DELETE" })
 }
 
 // ----------- Quests -----------
-export async function addQuestToCampaign(id: string, questId: string, token: string) {
-  return apiClient(`/Campaign/${id}/quests/${questId}`, { method: "POST", token })
+export async function addQuestToCampaign(id: string, questId: string) {
+  return apiClient(`/Campaign/${id}/quests/${questId}`, { method: "POST" })
 }
 
-export async function removeQuestFromCampaign(id: string, questId: string, token: string) {
-  return apiClient(`/Campaign/${id}/quests/${questId}`, { method: "DELETE", token })
+export async function removeQuestFromCampaign(id: string, questId: string) {
+  return apiClient(`/Campaign/${id}/quests/${questId}`, { method: "DELETE" })
 }
 
 // ----------- Notes -----------
-export async function addNoteToCampaign(id: string, noteId: string, token: string) {
-  return apiClient(`/Campaign/${id}/notes/${noteId}`, { method: "POST", token })
+export async function addNoteToCampaign(id: string, noteId: string) {
+  return apiClient(`/Campaign/${id}/notes/${noteId}`, { method: "POST" })
 }
 
-export async function removeNoteFromCampaign(id: string, noteId: string, token: string) {
-  return apiClient(`/Campaign/${id}/notes/${noteId}`, { method: "DELETE", token })
+export async function removeNoteFromCampaign(id: string, noteId: string) {
+  return apiClient(`/Campaign/${id}/notes/${noteId}`, { method: "DELETE" })
 }
 
 // ----------- Sessions -----------
-export async function addSessionToCampaign(id: string, sessionId: string, token: string) {
-  return apiClient(`/Campaign/${id}/sessions/${sessionId}`, { method: "POST", token })
+export async function addSessionToCampaign(id: string, sessionId: string) {
+  return apiClient(`/Campaign/${id}/sessions/${sessionId}`, { method: "POST" })
 }
 
-export async function removeSessionFromCampaign(id: string, sessionId: string, token: string) {
-  return apiClient(`/Campaign/${id}/sessions/${sessionId}`, { method: "DELETE", token })
+export async function removeSessionFromCampaign(id: string, sessionId: string) {
+  return apiClient(`/Campaign/${id}/sessions/${sessionId}`, { method: "DELETE" })
 }
 
-export async function setCurrentSessionForCampaign(id: string, sessionId: string, token: string) {
-  return apiClient(`/Campaign/${id}/current-session/${sessionId}`, { method: "PUT", token })
+export async function setCurrentSessionForCampaign(id: string, sessionId: string) {
+  return apiClient(`/Campaign/${id}/current-session/${sessionId}`, { method: "PUT" })
 }
 
-export async function setActiveEncounterForCampaign(campaignId: string, encounterId: string, token: string) {
-  return apiClient(`/Campaign/${campaignId}/active-encounter/${encounterId}`, { method: "PUT", token })
+export async function setActiveEncounterForCampaign(campaignId: string, encounterId: string) {
+  return apiClient(`/Campaign/${campaignId}/active-encounter/${encounterId}`, { method: "PUT" })
 }
 
-export async function clearActiveEncounterForCampaign(campaignId: string, token: string) {
-  return apiClient(`/Campaign/${campaignId}/active-encounter`, { method: "DELETE", token })
+export async function clearActiveEncounterForCampaign(campaignId: string) {
+  return apiClient(`/Campaign/${campaignId}/active-encounter`, { method: "DELETE" })
 }

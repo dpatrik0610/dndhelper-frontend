@@ -43,7 +43,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
     set({ loading: true });
 
     try {
-      const data = await UserService.getAll(token);
+      const data = await UserService.getAll();
       set({ users: data });
     } catch (err) {
       showNotification({
@@ -57,7 +57,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
   },
 
   createUser: async (payload) => {
-    const token = getAuthTokenSafe();
+
     if (!payload.username || !payload.password) {
       showNotification({
         title: "Missing fields",
@@ -78,16 +78,8 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
 
       if (created && (payload.email || payload.roles || payload.isActive)) {
         try {
-          const updated = await UserService.update(
-            created.id,
-            {
-              ...created,
-              email: payload.email ?? created.email,
-              roles: payload.roles ?? created.roles,
-              isActive: payload.isActive ?? created.isActive,
-            },
-            token ?? undefined
-          );
+          const updated = await UserService.update(created.id, {
+              ...created, email: payload.email ?? created.email, roles: payload.roles ?? created.roles, isActive: payload.isActive ?? created.isActive, });
           set((state) => ({
             users: state.users.map((u) => (u.id === updated.id ? updated : u)),
           }));
@@ -121,7 +113,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
 
     try {
       const body: User = { ...user, ...updates };
-      const updated = await UserService.update(id, body, token);
+      const updated = await UserService.update(id, body);
       set((state) => ({
         users: state.users.map((u) => (u.id === id ? updated : u)),
       }));
@@ -146,7 +138,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
     if (!user) return;
 
     try {
-      const updated = await UserService.update(id, { ...user, isActive: status }, token);
+      const updated = await UserService.update(id, { ...user, isActive: status });
       set((state) => ({
         users: state.users.map((u) => (u.id === id ? updated : u)),
       }));
@@ -169,7 +161,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
     if (!token) return;
 
     try {
-      await UserService.delete(id, token);
+      await UserService.delete(id);
       set((state) => ({ users: state.users.filter((u) => u.id !== id) }));
       showNotification({
         title: "User removed",
@@ -189,7 +181,7 @@ export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
     const token = getAuthTokenSafe();
     if (!token) return;
     try {
-      await resetPassword({ username, newPassword }, token);
+      await resetPassword({ username, newPassword });
       showNotification({
         title: "Password reset",
         message: `Password reset for ${username}.`,

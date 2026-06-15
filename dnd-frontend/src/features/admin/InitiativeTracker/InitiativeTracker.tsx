@@ -81,7 +81,7 @@ export function InitiativeTracker() {
 
       setSavingIds((prev) => new Set(prev).add(rowId));
       try {
-        const full = await getCharacterById(characterId, token);
+        const full = await getCharacterById(characterId);
         if (!full) return;
 
         await updateCharacter(
@@ -93,7 +93,7 @@ export function InitiativeTracker() {
             armorClass: row.ac ?? full.armorClass,
             conditions: (row.conditions ?? []).map((c) => c.label),
           },
-          token
+
         );
       } catch {
         // silent for now
@@ -112,7 +112,7 @@ export function InitiativeTracker() {
     const summary = characters.find((c) => c.id === characterId);
     if (!summary || !token) return;
 
-    const full = await getCharacterById(characterId, token);
+    const full = await getCharacterById(characterId);
     if (!full) return;
 
     addCharacter({
@@ -169,7 +169,7 @@ export function InitiativeTracker() {
             }
           }
 
-          const full = await getCharacterById(summary.id!, token);
+          const full = await getCharacterById(summary.id!);
           if (!full) return;
 
           const nextFields = {
@@ -274,7 +274,7 @@ export function InitiativeTracker() {
     const characterId = row.characterId || row.id;
     setSavingIds((prev) => new Set(prev).add(rowId));
     try {
-      const full = await getCharacterById(characterId, token);
+      const full = await getCharacterById(characterId);
       if (!full) return;
 
       await updateCharacter(
@@ -286,7 +286,7 @@ export function InitiativeTracker() {
           armorClass: row.ac ?? full.armorClass,
           conditions: (row.conditions ?? []).map((c) => c.label),
         },
-        token
+
       );
       setEditingIds((prev) => {
         const next = new Set(prev);

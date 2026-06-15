@@ -63,7 +63,7 @@ export default function Home() {
       }
       if (!token) return;
       try {
-        const overview = await getCampaignOverviewByCharacter(character.id, token);
+        const overview = await getCampaignOverviewByCharacter(character.id);
         if (!overview) {
           showNotification({
             title: "No Campaign Found",

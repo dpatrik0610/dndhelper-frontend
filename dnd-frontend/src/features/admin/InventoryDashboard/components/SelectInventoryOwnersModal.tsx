@@ -1,4 +1,3 @@
-import { getAuthTokenSafe } from "@store/auth/authUtils";
 import {
   Stack,
   Group,
@@ -32,7 +31,7 @@ export function SelectInventoryOwnersModal({
 }) {
   const { characters, selectedId } = useAdminCharacterStore();
   const { selected, refreshInventories } = useAdminInventoryStore();
-  const token = getAuthTokenSafe()!;
+
   const [selectedOwners, setSelectedOwners] = useState<string[]>([]);
 
   useEffect(() => {
@@ -57,8 +56,8 @@ export function SelectInventoryOwnersModal({
       if (addedOwners.length > 0) {
         await Promise.all(
           addedOwners.map(async (ownerId) => {
-            await assignInventoryToCharacter(invId, ownerId, token);
-            await ensureInventoryLinkedToCharacter(ownerId, invId, token);
+            await assignInventoryToCharacter(invId, ownerId);
+            await ensureInventoryLinkedToCharacter(ownerId, invId);
           })
         );
       }
@@ -66,16 +65,12 @@ export function SelectInventoryOwnersModal({
       if (removedOwners.length > 0) {
         await Promise.all(
           removedOwners.map(async (ownerId) => {
-            await removeInventoryFromCharacter(ownerId, invId, token);
+            await removeInventoryFromCharacter(ownerId, invId);
           })
         );
       }
 
-      await updateInventory(
-        selected.id,
-        { ...selected, characterIds: selectedOwners },
-        token
-      );
+      await updateInventory(selected.id, { ...selected, characterIds: selectedOwners });
 
       if (targetRefreshCharacter) {
         await refreshInventories(targetRefreshCharacter);

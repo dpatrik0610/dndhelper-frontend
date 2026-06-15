@@ -1,4 +1,4 @@
-import { getAuthTokenSafe } from "@store/auth/authUtils";
+
 import { ActionIcon, Autocomplete, Button, Group, Stack, Switch, Text } from "@mantine/core";
 import { useSpellStore } from "@store/spell/spellStore";
 import { ExpandableSection } from "@components/ExpandableSection";
@@ -12,7 +12,7 @@ import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
 
 
 export function SpellsSection() {
-    const token = getAuthTokenSafe()!;
+
     const spellNames = useSpellStore((state) => state.spellNames);
     const setSpellNames = useSpellStore.getState().setSpellNames;
     const [selectedSpell, setSelectedSpell] = useState<string | null>(null);
@@ -26,7 +26,7 @@ export function SpellsSection() {
     useEffect(() => {
         if(!spellNames || spellNames.length == 0){
             const fetchSpells = async () => {
-                const spells = await getSpellNames(token);
+                const spells = await getSpellNames();
                 setSpellNames(spells);
             };
             fetchSpells();

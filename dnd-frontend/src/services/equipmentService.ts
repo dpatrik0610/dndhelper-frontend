@@ -7,8 +7,8 @@ const baseUrl = "/Equipment";
 /**
  * Fetch all equipment items.
  */
-export async function getAllEquipment(token: string): Promise<Equipment[]> {
-  return apiClient(baseUrl, { method: "GET", token });
+export async function getAllEquipment(): Promise<Equipment[]> {
+  return apiClient(baseUrl, { method: "GET" });
 }
 
 export async function getAllPaginatedEquipment(
@@ -17,8 +17,7 @@ export async function getAllPaginatedEquipment(
     tag: string, 
     tier: string, 
     damageType: string, 
-    name: string,
-    token: string
+    name: string
 ): Promise<PagedResult<Equipment>> {
     const query = new URLSearchParams({
         page: page.toString(),
@@ -28,37 +27,37 @@ export async function getAllPaginatedEquipment(
         damageType,
         name
     }).toString();
-    return apiClient(`${baseUrl}/paginated?${query}`, { method: "GET", token });
+    return apiClient(`${baseUrl}/paginated?${query}`, { method: "GET" });
 }
 
 /**
  * Fetch a single equipment item by its database ID.
  */
-export async function getEquipmentById(id: string, token: string): Promise<Equipment> {
-  return apiClient(`${baseUrl}/${id}`, { method: "GET", token });
+export async function getEquipmentById(id: string): Promise<Equipment> {
+  return apiClient(`${baseUrl}/${id}`, { method: "GET" });
 }
 
 /**
  * Fetch a single equipment item by its index (if different from ID).
  */
-export async function getEquipmentByIndex(index: string, token: string): Promise<Equipment> {
-  return apiClient(`${baseUrl}/index/${index}`, { method: "GET", token });
+export async function getEquipmentByIndex(index: string): Promise<Equipment> {
+  return apiClient(`${baseUrl}/index/${index}`, { method: "GET" });
 }
 
 /**
  * Search equipment items by name.
  */
-export async function searchEquipmentByName(name: string, token: string): Promise<Equipment[]> {
-  return apiClient(`${baseUrl}/search?name=${encodeURIComponent(name)}`, { method: "GET", token });
+export async function searchEquipmentByName(name: string): Promise<Equipment[]> {
+  return apiClient(`${baseUrl}/search?name=${encodeURIComponent(name)}`, { method: "GET" });
 }
 
 /**
  * Create a new equipment item.
  */
-export async function createEquipment(equipment: Equipment, token: string): Promise<Equipment> {
+export async function createEquipment(equipment: Equipment): Promise<Equipment> {
   return apiClient(baseUrl, {
     method: "POST",
-    token,
+
     body: equipment,
   });
 }
@@ -66,10 +65,10 @@ export async function createEquipment(equipment: Equipment, token: string): Prom
 /**
  * Create many equipment items at once.
  */
-export async function createManyEquipment(equipments: Equipment[], token: string): Promise<Equipment[]> {
+export async function createManyEquipment(equipments: Equipment[]): Promise<Equipment[]> {
   return apiClient(`${baseUrl}/many`, {
     method: "POST",
-    token,
+
     body: equipments,
   });
 }
@@ -77,11 +76,11 @@ export async function createManyEquipment(equipments: Equipment[], token: string
 /**
  * Update an equipment item by ID.
  */
-export async function updateEquipmentById(id: string, equipment: Equipment, token: string): Promise<Equipment> {
+export async function updateEquipmentById(id: string, equipment: Equipment): Promise<Equipment> {
   console.log(equipment);
   return apiClient(`${baseUrl}/${id}`, {
     method: "PUT",
-    token,
+
     body: equipment,
   });
 }
@@ -89,10 +88,10 @@ export async function updateEquipmentById(id: string, equipment: Equipment, toke
 /**
  * Update an equipment item by index.
  */
-export async function updateEquipmentByIndex(index: string, equipment: Equipment, token: string): Promise<Equipment> {
+export async function updateEquipmentByIndex(index: string, equipment: Equipment): Promise<Equipment> {
   return apiClient(`${baseUrl}/index/${index}`, {
     method: "PUT",
-    token,
+
     body: equipment,
   });
 }
@@ -100,22 +99,22 @@ export async function updateEquipmentByIndex(index: string, equipment: Equipment
 /**
  * Delete an equipment item by ID.
  */
-export async function deleteEquipment(id: string, token: string): Promise<void> {
-  return apiClient(`${baseUrl}/${id}`, { method: "DELETE", token });
+export async function deleteEquipment(id: string): Promise<void> {
+  return apiClient(`${baseUrl}/${id}`, { method: "DELETE" });
 }
 
-export async function getEquipmentByIds(ids: string[], token: string): Promise<Equipment[]> {
+export async function getEquipmentByIds(ids: string[]): Promise<Equipment[]> {
   return apiClient(`${baseUrl}/by-ids`, {
     method: 'POST',
     body: ids,
-    token,
+
   });
 }
 
-export async function getEquipmentByIdsForUser(ids: string[], token: string): Promise<EquipmentUserResponse[]> {
+export async function getEquipmentByIdsForUser(ids: string[]): Promise<EquipmentUserResponse[]> {
   return apiClient(`${baseUrl}/userview`, {
     method: 'POST',
     body: ids,
-    token,
+
   });
 }

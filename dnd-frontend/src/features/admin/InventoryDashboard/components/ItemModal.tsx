@@ -43,7 +43,7 @@ export function ItemModal({
       if (equipmentId) {
         setLoading(true);
         try {
-          const data = await getEquipmentById(equipmentId, token!);
+          const data = await getEquipmentById(equipmentId);
           setEquipment(data);
         } catch (err) {
           showNotification({

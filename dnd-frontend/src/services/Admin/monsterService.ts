@@ -4,25 +4,25 @@ import type { Monster } from "../../types/Monster";
 const BASE = "/monster";
 
 export const monsterService = {
-  getAll: async (token?: string): Promise<Monster[]> => {
-    return apiClient<Monster[]>(BASE, { token });
+  getAll: async (): Promise<Monster[]> => {
+    return apiClient<Monster[]>(BASE, {});
   },
 
-  getById: async (id: string, token?: string): Promise<Monster> => {
-    return apiClient<Monster>(`${BASE}/${id}`, { token });
+  getById: async (id: string): Promise<Monster> => {
+    return apiClient<Monster>(`${BASE}/${id}`, {});
   },
 
-  getByName: async (name: string, token?: string): Promise<Monster[]> => {
-    return apiClient<Monster[]>(`${BASE}/name/${encodeURIComponent(name)}`, { token });
+  getByName: async (name: string): Promise<Monster[]> => {
+    return apiClient<Monster[]>(`${BASE}/name/${encodeURIComponent(name)}`, {});
   },
 
-  getPaged: async (page = 1, pageSize = 10, token?: string) => {
+  getPaged: async (page = 1, pageSize = 10) => {
     const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
-    return apiClient<Monster[]>(`${BASE}/paged?${params.toString()}`, { token });
+    return apiClient<Monster[]>(`${BASE}/paged?${params.toString()}`, {});
   },
 
-  getCount: async (token?: string): Promise<{ Count: number }> => {
-    return apiClient<{ Count: number }>(`${BASE}/count`, { token });
+  getCount: async (): Promise<{ Count: number }> => {
+    return apiClient<{ Count: number }>(`${BASE}/count`, {});
   },
 
   search: async (
@@ -36,8 +36,7 @@ export const monsterService = {
       desc?: boolean;
       page?: number;
       pageSize?: number;
-    },
-    token?: string
+    }
   ) => {
     const params = new URLSearchParams();
     if (criteria.name) params.set("name", criteria.name);
@@ -52,35 +51,35 @@ export const monsterService = {
 
     return apiClient<{ Found: number; monsters: Monster[] }>(
       `${BASE}/search?${params.toString()}`,
-      { token }
+      {}
     );
   },
 
-  create: async (monster: Monster, token?: string): Promise<Monster> => {
-    return apiClient<Monster>(BASE, { method: "POST", body: monster, token });
+  create: async (monster: Monster): Promise<Monster> => {
+    return apiClient<Monster>(BASE, { method: "POST", body: monster });
   },
 
-  update: async (id: string, monster: Monster, token?: string): Promise<Monster> => {
-    return apiClient<Monster>(`${BASE}/${id}`, { method: "PUT", body: monster, token });
+  update: async (id: string, monster: Monster): Promise<Monster> => {
+    return apiClient<Monster>(`${BASE}/${id}`, { method: "PUT", body: monster });
   },
 
-  delete: async (id: string, token?: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/${id}`, { method: "DELETE", token });
+  delete: async (id: string): Promise<void> => {
+    await apiClient<void>(`${BASE}/${id}`, { method: "DELETE" });
   },
 
-  softDelete: async (id: string, token?: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/soft-delete/${id}`, { method: "PATCH", token });
+  softDelete: async (id: string): Promise<void> => {
+    await apiClient<void>(`${BASE}/soft-delete/${id}`, { method: "PATCH" });
   },
 
-  deleteOwn: async (id: string, token?: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/delete-own/${id}`, { method: "DELETE", token });
+  deleteOwn: async (id: string): Promise<void> => {
+    await apiClient<void>(`${BASE}/delete-own/${id}`, { method: "DELETE" });
   },
 
-  switchOwner: async (monsterId: string, newOwnerId: string, token?: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/${monsterId}/switch-owner/${newOwnerId}`, { method: "POST", token });
+  switchOwner: async (monsterId: string, newOwnerId: string): Promise<void> => {
+    await apiClient<void>(`${BASE}/${monsterId}/switch-owner/${newOwnerId}`, { method: "POST" });
   },
 
-  addOwner: async (monsterId: string, newOwnerId: string, token?: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/${monsterId}/addOwner/${newOwnerId}`, { method: "GET", token });
+  addOwner: async (monsterId: string, newOwnerId: string): Promise<void> => {
+    await apiClient<void>(`${BASE}/${monsterId}/addOwner/${newOwnerId}`, { method: "GET" });
   },
 };

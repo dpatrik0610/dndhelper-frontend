@@ -46,7 +46,7 @@ export function ItemCard({ itemId }: ItemCardProps) {
   useEffect(() => {
     const fetchEquipment = async () => {
       try {
-        const data = await getEquipmentById(itemId, token);
+        const data = await getEquipmentById(itemId);
         setEquipment(data ?? null);
       } catch {
         setEquipment(null);

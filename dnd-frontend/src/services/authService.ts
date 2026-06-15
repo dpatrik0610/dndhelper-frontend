@@ -31,18 +31,18 @@ export async function loginUser(request: AuthRequest): Promise<AuthResponse> {
     });
 }
 
-export async function changePassword(request: ChangePasswordRequest, token?: string) {
+export async function changePassword(request: ChangePasswordRequest) {
     return apiClient<{ message: string }>('/Auth/change-password', {
         method: 'POST',
         body: request,
-        token,
+
     });
 }
 
-export async function resetPassword(request: ResetPasswordRequest, token?: string) {
+export async function resetPassword(request: ResetPasswordRequest) {
     return apiClient<{ message: string }>('/Auth/reset-password', {
         method: 'POST',
         body: request,
-        token,
+
     });
 }

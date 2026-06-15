@@ -145,7 +145,7 @@ export function AdminEncounterEditor({
 
     setLoadingEnemyByIndex((current) => ({ ...current, [index]: true }));
     try {
-      const monsters = await monsterService.getByName(query.trim(), token);
+      const monsters = await monsterService.getByName(query.trim());
       const seen = new Set<string>();
       const options: Option[] = [];
       for (const monster of monsters) {
@@ -174,7 +174,7 @@ export function AdminEncounterEditor({
 
     setLoadingLootByIndex((current) => ({ ...current, [index]: true }));
     try {
-      const equipment = await searchEquipmentByName(query.trim(), token);
+      const equipment = await searchEquipmentByName(query.trim());
       const seen = new Set<string>();
       const options: Option[] = [];
       for (const item of equipment) {

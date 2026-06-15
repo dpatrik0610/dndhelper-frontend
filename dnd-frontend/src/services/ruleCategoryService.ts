@@ -11,12 +11,11 @@ export async function getRuleCategories(): Promise<RuleCategoryResponse[]> {
 
 export async function createRuleCategory(
   request: RuleCategoryResponse,
-  token: string,
 ): Promise<RuleCategoryResponse | null> {
   const res = await apiClient<RuleCategoryResponse | Record<string, unknown>>(baseUrl, {
     method: "POST",
     body: request,
-    token,
+
   });
   return (res as RuleCategoryResponse) ?? null;
 }

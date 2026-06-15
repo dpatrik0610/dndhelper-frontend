@@ -1,4 +1,3 @@
-import { useToken } from "@store/auth/authSelectors";
 import {
   Box,
   Group,
@@ -38,7 +37,7 @@ export function CampaignCharactersPanel() {
     allCharacters,
     loadAllCharacters,
   } = useAdminCampaignStore();
-  const token = useToken()!;
+
 
   const campaign = selectedCampaign();
   const [members, setMembers] = useState<Character[]>([]);
@@ -60,7 +59,7 @@ export function CampaignCharactersPanel() {
     if (!campaign?.id) return;
     setLoading(true);
     try {
-      const data = await getCampaignCharacters(campaign.id, token);
+      const data = await getCampaignCharacters(campaign.id);
       setMembers(data);
     } catch (err) {
       console.error(err);
@@ -78,13 +77,13 @@ export function CampaignCharactersPanel() {
     if (!campaign?.id || !selectedChar) return;
 
     // 1) Link in campaign table
-    await addCharacterToCampaign(campaign.id, selectedChar, token);
+    await addCharacterToCampaign(campaign.id, selectedChar);
 
     // 2) Patch character.campaignId in database
-    const charData = await getCharacterById(selectedChar, token);
+    const charData = await getCharacterById(selectedChar);
     if (charData) {
       charData.campaignId = campaign.id;
-      await updateCharacter(charData, token);
+      await updateCharacter(charData);
     }
 
     await fetchMembers();
@@ -108,13 +107,13 @@ const handleRemove = async (charId: string) => {
   if (!confirmDel) return;
 
   // 1) Unlink in campaign table
-  await removeCharacterFromCampaign(campaign.id, charId, token);
+  await removeCharacterFromCampaign(campaign.id, charId);
 
   // 2) Patch character.campaignId = null
-  const charData = await getCharacterById(charId, token);
+  const charData = await getCharacterById(charId);
   if (charData) {
     charData.campaignId = null;
-    await updateCharacter(charData, token);
+    await updateCharacter(charData);
   }
 
   await fetchMembers();

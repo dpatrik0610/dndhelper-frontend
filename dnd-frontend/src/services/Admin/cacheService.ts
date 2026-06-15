@@ -3,16 +3,16 @@ import type { CacheInfoResponse } from "../../types/Cache";
 import type { CacheClearResponse } from "../../types/Cache";
 const baseUrl = "/cache";
 
-export async function getCacheInfo(token: string): Promise<CacheInfoResponse> {
+export async function getCacheInfo(): Promise<CacheInfoResponse> {
   return apiClient<CacheInfoResponse>(`${baseUrl}/info`, {
     method: "GET",
-    token,
+
   });
 }
 
-export async function clearCache(token: string): Promise<CacheClearResponse> {
+export async function clearCache(): Promise<CacheClearResponse> {
   return apiClient<CacheClearResponse>(`${baseUrl}`, {
     method: "DELETE",
-    token,
+
   });
 }

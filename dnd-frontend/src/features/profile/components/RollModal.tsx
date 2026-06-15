@@ -17,7 +17,7 @@ import {
 import { IconX } from "@tabler/icons-react";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { showNotification } from "@components/Notification/Notification";
-import { useToken } from "@store/auth/authSelectors";
+
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { rollByDice, rollByExpression, subtleRoll } from "@services/rollService";
 import type { RollResult } from "@appTypes/Roll";
@@ -44,7 +44,7 @@ function getErrorStatus(error: unknown) {
 }
 
 function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant: RollModalVariant }) {
-  const token = useToken();
+
   const character = useCurrentCharacter();
 
   const [inputMode, setInputMode] = useState<InputMode>("manual");
@@ -118,8 +118,8 @@ function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant:
     try {
       if (variant === "public") {
         const roll = hasExpression
-          ? await rollByExpression(expression.trim(), token)
-          : await rollByDice(numberOfDice, sides, token);
+          ? await rollByExpression(expression.trim())
+          : await rollByDice(numberOfDice, sides);
         setResult(roll);
       } else {
         await subtleRoll(
@@ -130,7 +130,7 @@ function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant:
             sides: hasExpression ? undefined : sides,
             note: note.trim() || undefined,
           },
-          token
+
         );
 
         showNotification({

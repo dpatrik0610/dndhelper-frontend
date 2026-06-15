@@ -67,7 +67,7 @@ export function BackupManager() {
   useEffect(() => {
     const loadCollections = async () => {
       try {
-        const names = await listCollections(token);
+        const names = await listCollections();
         if (names?.length) {
           setCollections(names);
           if (!collectionName && names[0]) setCollectionName(names[0]);
@@ -88,7 +88,7 @@ export function BackupManager() {
     if (!validateCollection()) return;
     setDownloading(true);
     try {
-      const result = await exportCollection(normalizedCollection, token);
+      const result = await exportCollection(normalizedCollection);
       console.info(logPrefix, "Export success", {
         collection: normalizedCollection,
         fileName: result.fileName,
@@ -128,7 +128,7 @@ export function BackupManager() {
   const handleDownloadAll = async () => {
     setDownloading(true);
     try {
-      const result = await exportAllCollections(token!);
+      const result = await exportAllCollections();
       const blobUrl = URL.createObjectURL(result.blob);
       const fileName = result.fileName?.trim() || "backup.zip";
       const link = downloadLinkRef.current;
@@ -172,7 +172,7 @@ export function BackupManager() {
     }
     setUploading(true);
     try {
-      const response = await restoreCollection(targetCollection, file, token);
+      const response = await restoreCollection(targetCollection, file);
       console.info(logPrefix, "Restore success", {
         collection: targetCollection,
         fileName: file.name,

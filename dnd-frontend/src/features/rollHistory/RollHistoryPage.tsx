@@ -88,14 +88,8 @@ export default function RollHistoryPage() {
         return;
       }
 
-      const items = await getRollHistory(
-        {
-          page: pageToLoad,
-          pageSize,
-          campaignId: isAdmin ? campaignId ?? undefined : undefined,
-        },
-        token
-      );
+      const items = await getRollHistory({
+          page: pageToLoad, pageSize, campaignId: isAdmin ? campaignId ?? undefined : undefined, });
 
       setEntries(items ?? []);
       setPage(pageToLoad);

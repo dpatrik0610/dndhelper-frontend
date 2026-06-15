@@ -1,10 +1,10 @@
 import { getInventoriesByCharacter, getInventory } from "@services/inventoryService";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
 import { useCharacterStore } from "@store/character/characterStore";
-import { getAuthToken } from "@store/auth/authUtils";
 
-export async function loadInventories(tokenOverride?: string) {
-  const token = tokenOverride || getAuthToken();
+
+export async function loadInventories() {
+
   const character = useCharacterStore.getState().character;
   if (!character?.id) {
     console.warn("⚠️ No character selected — skipping inventory load.");
@@ -14,7 +14,7 @@ export async function loadInventories(tokenOverride?: string) {
   const {inventories, setInventories} = useInventoryStore.getState();
 
   try {
-    const response = await getInventoriesByCharacter(character.id, token);
+    const response = await getInventoriesByCharacter(character.id);
     setInventories(response);
 
     return inventories;
@@ -25,15 +25,15 @@ export async function loadInventories(tokenOverride?: string) {
   }
 }
 
-export async function loadInventoryById(inventoryId: string, tokenOverride?: string) {
-  const token = tokenOverride || getAuthToken();
+export async function loadInventoryById(inventoryId: string) {
+
   if (!inventoryId) {
     console.warn("⚠️ No inventoryId provided — skipping load.");
     return null;
   }
 
   try {
-    const inventory = await getInventory(inventoryId, token);
+    const inventory = await getInventory(inventoryId);
     if (!inventory) return null;
 
     const store = useInventoryStore.getState();

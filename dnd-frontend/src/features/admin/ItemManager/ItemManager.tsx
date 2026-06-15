@@ -36,7 +36,7 @@ export function ItemManager() {
 
   const loadAllData = useCallback(async () => {
     try {
-      const result = await getAllEquipment(token);
+      const result = await getAllEquipment();
       setAllData(result);
       setFilteredData(result);
       const tags = result.flatMap(item => item.tags || []);
@@ -97,7 +97,7 @@ export function ItemManager() {
   const handleDelete = async () => {
     if (!deleteId) return;
     try {
-      await deleteEquipment(deleteId, token);
+      await deleteEquipment(deleteId);
       loadAllData();
       setDeleteId(null);
       showNotification({ title: 'Deleted', message: 'Item removed', color: SectionColor.Green });

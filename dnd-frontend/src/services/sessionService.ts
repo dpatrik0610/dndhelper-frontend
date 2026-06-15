@@ -3,34 +3,34 @@ import type { Session } from "../types/Session";
 
 const baseUrl = "/Session";
 
-export async function getAllSessions(token: string): Promise<Session[]> {
-  return apiClient(baseUrl, { method: "GET", token });
+export async function getAllSessions(): Promise<Session[]> {
+  return apiClient(baseUrl, { method: "GET" });
 }
 
-export async function getSessionById(id: string, token: string): Promise<Session> {
-  return apiClient(`${baseUrl}/${id}`, { method: "GET", token });
+export async function getSessionById(id: string): Promise<Session> {
+  return apiClient(`${baseUrl}/${id}`, { method: "GET" });
 }
 
-export async function getSessionsByCampaign(campaignId: string, token: string): Promise<Session[]> {
-  return apiClient(`${baseUrl}/campaign/${campaignId}`, { method: "GET", token });
+export async function getSessionsByCampaign(campaignId: string): Promise<Session[]> {
+  return apiClient(`${baseUrl}/campaign/${campaignId}`, { method: "GET" });
 }
 
-export async function createSession(session: Session, token: string): Promise<Session> {
+export async function createSession(session: Session): Promise<Session> {
   return apiClient(baseUrl, {
     method: "POST",
-    token,
+
     body: session,
   });
 }
 
-export async function updateSession(id: string, session: Session, token: string): Promise<Session> {
+export async function updateSession(id: string, session: Session): Promise<Session> {
   return apiClient(`${baseUrl}/${id}`, {
     method: "PUT",
-    token,
+
     body: session,
   });
 }
 
-export async function deleteSession(id: string, token: string): Promise<void> {
-  return apiClient(`${baseUrl}/${id}`, { method: "DELETE", token });
+export async function deleteSession(id: string): Promise<void> {
+  return apiClient(`${baseUrl}/${id}`, { method: "DELETE" });
 }

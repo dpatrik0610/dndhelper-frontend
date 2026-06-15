@@ -16,7 +16,6 @@ import type { Spell } from "@appTypes/Spell";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { createSpell } from "@services/spellService";
-import { useToken } from "@store/auth/authSelectors";
 
 const DAMAGE_TYPES = [
   "Acid", "Cold", "Fire", "Force", "Lightning", "Necrotic",
@@ -38,7 +37,7 @@ const SCHOOLS = [
 ];
 
 export function SpellForm() {
-  const token = useToken();
+
 
   const [spell, setSpell] = useState<Spell>({
     index: "",
@@ -66,7 +65,7 @@ export function SpellForm() {
 
   const handleSubmit = async () => {
     try {
-      await createSpell(spell, token!);
+      await createSpell(spell);
       showNotification({
         title: "Spell Created",
         message: `${spell.name} has been added.`,

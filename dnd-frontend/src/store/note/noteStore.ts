@@ -8,7 +8,6 @@ import {
   updateNote,
   deleteNote,
 } from "@services/noteService";
-import { getAuthToken } from "@store/auth/authUtils";
 
 export interface NoteState {
   notes: Note[];
@@ -42,13 +41,11 @@ export const useNoteStore = create<NoteState & NoteActions>()(
         get().notes.filter((n) => n.id && noteIds.includes(n.id)),
 
       loadOne: async (id: string) => {
-        let token;
-        try { token = getAuthToken(); } catch { return null; }
 
         set({ loading: true });
 
         try {
-          const note = await getNoteById(id, token);
+          const note = await getNoteById(id);
 
           set((state) => ({
             notes: [...state.notes.filter((n) => n.id !== id), note],
@@ -62,13 +59,11 @@ export const useNoteStore = create<NoteState & NoteActions>()(
 
       loadMany: async (ids: string[]) => {
         if (ids.length === 0) return [];
-        let token;
-        try { token = getAuthToken(); } catch { return []; }
 
         set({ loading: true });
 
         try {
-          const fetched = await getManyNotes(ids, token);
+          const fetched = await getManyNotes(ids);
 
           set((state) => ({
             notes: [
@@ -85,15 +80,13 @@ export const useNoteStore = create<NoteState & NoteActions>()(
 
       loadForCharacter: async (noteIds: string[]) => {
         if (noteIds.length === 0) return [];
-        let token;
-        try { token = getAuthToken(); } catch { return []; }
 
         const uniqueIds = Array.from(new Set(noteIds)).filter(Boolean) as string[];
 
         set({ loading: true });
 
         try {
-          const fetched = await getManyNotes(uniqueIds, token);
+          const fetched = await getManyNotes(uniqueIds);
           const filtered = fetched.filter((n) => !n.isDeleted);
 
           set((state) => ({
@@ -110,11 +103,11 @@ export const useNoteStore = create<NoteState & NoteActions>()(
       },
 
       create: async (note: Partial<Note>) => {
-        const token = getAuthToken();
+
         set({ loading: true });
 
         try {
-          const created = await createNote(note, token);
+          const created = await createNote(note);
 
           set((state) => ({
             notes: [...state.notes, created],
@@ -127,7 +120,7 @@ export const useNoteStore = create<NoteState & NoteActions>()(
       },
 
       update: async (id: string, patch: Partial<Note>) => {
-        const token = getAuthToken();
+
         set({ loading: true });
 
         try {
@@ -141,7 +134,7 @@ export const useNoteStore = create<NoteState & NoteActions>()(
             ...patch,
           };
 
-          const updated = await updateNote(id, toSend, token);
+          const updated = await updateNote(id, toSend);
 
           set((state) => ({
             notes: state.notes.map((n) => (n.id === id ? updated : n)),
@@ -154,11 +147,11 @@ export const useNoteStore = create<NoteState & NoteActions>()(
       },
 
       remove: async (id: string) => {
-        const token = getAuthToken();
+
         set({ loading: true });
 
         try {
-          await deleteNote(id, token);
+          await deleteNote(id);
 
           set((state) => ({
             notes: state.notes.filter((n) => n.id !== id),

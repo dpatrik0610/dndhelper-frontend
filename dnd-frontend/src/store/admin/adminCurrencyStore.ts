@@ -1,4 +1,4 @@
-import { getAuthTokenSafe } from "@store/auth/authUtils";
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Currency } from "@appTypes/Currency";
@@ -59,10 +59,10 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
         })),
 
       loadCharacterById: async (characterId) => {
-        const token = getAuthTokenSafe()!;
+
         set({ loading: true });
         try {
-          const currencies = await getCharacterCurrencies(characterId, token);
+          const currencies = await getCharacterCurrencies(characterId);
           set({
             selectedCharacter: { id: characterId } as Character,
             currencies,
@@ -79,10 +79,10 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       loadInventoryById: async (inventoryId) => {
-        const token = getAuthTokenSafe()!;
+
         set({ loading: true });
         try {
-          const inv = await getInventory(inventoryId, token);
+          const inv = await getInventory(inventoryId);
           set({ selectedInventory: inv });
         } catch (err) {
           showNotification({
@@ -96,15 +96,15 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       refresh: async () => {
-        const token = getAuthTokenSafe()!;
+
         const { selectedCharacter, selectedInventory } = get();
         try {
           if (selectedCharacter?.id) {
-            const currencies = await getCharacterCurrencies(selectedCharacter.id, token);
+            const currencies = await getCharacterCurrencies(selectedCharacter.id);
             set({ currencies });
           }
           if (selectedInventory?.id) {
-            const inv = await getInventory(selectedInventory.id, token);
+            const inv = await getInventory(selectedInventory.id);
             set({ selectedInventory: inv });
           }
         } catch (err) {
@@ -117,40 +117,40 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       remove: async (characterId, currencies) => {
-        const token = getAuthTokenSafe()!;
-        await removeCurrencies(characterId, currencies, token);
+
+        await removeCurrencies(characterId, currencies);
         await get().refresh();
       },
 
       transfer: async (targetId, currencies) => {
-        const token = getAuthTokenSafe()!;
-        await transferCurrenciesToCharacter(targetId, currencies, token);
+
+        await transferCurrenciesToCharacter(targetId, currencies);
         await get().refresh();
       },
 
       addToCharacter: async (currencies, characterId) => {
-        const token = getAuthTokenSafe()!;
+
         const id = characterId ?? get().selectedCharacter?.id;
         if (!id) return;
-        await transferCurrenciesToCharacter(id, currencies, token);
+        await transferCurrenciesToCharacter(id, currencies);
         await get().refresh();
       },
 
       removeFromCharacter: async (currencies, characterId) => {
-        const token = getAuthTokenSafe()!;
+
         const id = characterId ?? get().selectedCharacter?.id;
         if (!id) return;
-        await removeCurrencies(id, currencies, token);
+        await removeCurrencies(id, currencies);
         await get().refresh();
       },
 
       addToInventory: async (currencies, inventoryId) => {
-        const token = getAuthTokenSafe()!;
+
         const id = inventoryId ?? get().selectedInventory?.id;
         if (!id) return;
 
         try {
-          await transferCurrenciesToInventory(id, currencies, token);
+          await transferCurrenciesToInventory(id, currencies);
           await get().refresh();
           showNotification({
             title: "Currencies Added",
@@ -167,13 +167,13 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
       },
 
       removeFromInventory: async (currencies, inventoryId) => {
-        const token = getAuthTokenSafe()!;
+
         const id = inventoryId ?? get().selectedInventory?.id;
         if (!id) return;
 
         try {
           for (const c of currencies) {
-            await transferCurrenciesToInventory(id, [{ ...c, amount: -Math.abs(c.amount) }], token);
+            await transferCurrenciesToInventory(id, [{ ...c, amount: -Math.abs(c.amount) }]);
           }
           await get().refresh();
           showNotification({

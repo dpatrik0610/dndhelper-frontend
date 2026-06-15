@@ -8,13 +8,11 @@ import { useNavigate } from "react-router-dom";
 import { deleteCharacter } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
 import { showNotification } from "@components/Notification/Notification";
-import { useToken } from "@store/auth/authSelectors";
 
 export function DeleteCharacterSection() {
   const character = useCurrentCharacter();
   const { clearStore } = useCharacterCoreActions();
-  const token = useToken();
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
   const [confirmText, setConfirmText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,7 +31,7 @@ export function DeleteCharacterSection() {
 
     setLoading(true);
     try {
-      await deleteCharacter(character.id!, token ?? "");
+      await deleteCharacter(character.id!);
       clearStore();
 
       showNotification({
@@ -43,7 +41,7 @@ export function DeleteCharacterSection() {
         icon: <IconTrash />,
       });
 
-      await loadCharacters(token ?? "");
+      await loadCharacters();
       navigate("/home");
     } catch (err) {
       console.error("Delete failed:", err);

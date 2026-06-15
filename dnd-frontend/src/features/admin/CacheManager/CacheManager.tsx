@@ -1,4 +1,3 @@
-import { useToken } from "@store/auth/authSelectors";
 import { useState, useEffect } from "react";
 import {
   Paper,
@@ -20,7 +19,7 @@ import type { CacheInfoResponse } from "@appTypes/Cache";
 import { clearCache, getCacheInfo } from "@services/Admin/cacheService";
 
 export function CacheManager() {
-  const token = useToken()!;
+
 
   const [loading, setLoading] = useState(true);
   const [info, setInfo] = useState<CacheInfoResponse | null>(null);
@@ -30,7 +29,7 @@ export function CacheManager() {
   async function loadCache() {
     setLoading(true);
     try {
-      const data = await getCacheInfo(token);
+      const data = await getCacheInfo();
       setInfo(data);
     } catch (err) {
       showNotification({
@@ -46,7 +45,7 @@ export function CacheManager() {
   async function purgeCache() {
     setClearing(true);
     try {
-      const result = await clearCache(token);
+      const result = await clearCache();
       showNotification({
         title: "Cache Cleared",
         message: `Removed ${result.count} entries.`,

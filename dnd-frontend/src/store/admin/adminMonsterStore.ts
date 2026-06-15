@@ -84,15 +84,15 @@ export const useAdminMonsterStore = create<AdminMonsterStore>((set, get) => ({
             minCR: applied.minCR,
             maxCR: applied.maxCR,
           },
-          token
+
         );
         list = res.monsters;
         const foundCount = (res as any).Found ?? (res as any).found;
         totalCount = foundCount ?? res.monsters.length;
       } else {
         const [paged, countRes] = await Promise.all([
-          monsterService.getPaged(targetPage, targetPageSize, token),
-          monsterService.getCount(token),
+          monsterService.getPaged(targetPage, targetPageSize),
+          monsterService.getCount(),
         ]);
         list = paged;
         const apiCount = (countRes as any).Count ?? (countRes as any).count;
@@ -141,7 +141,7 @@ export const useAdminMonsterStore = create<AdminMonsterStore>((set, get) => ({
   createMonster: async (monster) => {
     const token = getAuthTokenSafe();
     if (!token) return;
-    const created = await monsterService.create(monster, token);
+    const created = await monsterService.create(monster);
     set((state) => ({
       monsters: [created, ...state.monsters],
       total: state.total + 1,
@@ -151,7 +151,7 @@ export const useAdminMonsterStore = create<AdminMonsterStore>((set, get) => ({
   updateMonster: async (id, monster) => {
     const token = getAuthTokenSafe();
     if (!token) return;
-    const updated = await monsterService.update(id, monster, token);
+    const updated = await monsterService.update(id, monster);
     set((state) => ({
       monsters: state.monsters.map((m) => (m.id === updated.id ? updated : m)),
     }));
@@ -160,7 +160,7 @@ export const useAdminMonsterStore = create<AdminMonsterStore>((set, get) => ({
   deleteMonster: async (id) => {
     const token = getAuthTokenSafe();
     if (!token) return;
-    await monsterService.delete(id, token);
+    await monsterService.delete(id);
     set((state) => ({
       monsters: state.monsters.filter((m) => m.id !== id),
       total: Math.max(0, state.total - 1),

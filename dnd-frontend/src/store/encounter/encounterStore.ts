@@ -1,3 +1,4 @@
+import { getIsAdmin } from "@store/auth/authUtils";
 import { create } from "zustand";
 import type { Campaign } from "@appTypes/Campaign";
 import type { Encounter } from "@appTypes/Encounter";
@@ -16,7 +17,7 @@ import {
   updateEncounter,
 } from "@services/encounterService";
 import { getSessionsByCampaign } from "@services/sessionService";
-import { getAuthTokenSafe, getIsAdmin } from "@store/auth/authUtils";
+
 
 export interface EncounterState {
   campaign: Campaign | null;
@@ -40,13 +41,13 @@ export interface EncounterActions {
   clear: () => void;
 }
 
-const getToken = () => {
-  const token = getAuthTokenSafe();
-  if (!token) {
-    throw new Error("Authentication token is required.");
-  }
-  return token;
-};
+
+
+
+
+
+
+
 
 const resolveSelectedEncounterId = (
   encounters: Encounter[],
@@ -77,11 +78,11 @@ export const useEncounterStore = create<EncounterState & EncounterActions>((set,
     set({ loading: true, error: null });
 
     try {
-      const token = getToken();
+
       const [campaign, encounters, sessions] = await Promise.all([
-        getCampaignById(campaignId, token),
-        getEncountersByCampaign(campaignId, token),
-        getSessionsByCampaign(campaignId, token),
+        getCampaignById(campaignId),
+        getEncountersByCampaign(campaignId),
+        getSessionsByCampaign(campaignId),
       ]);
 
       set((state) => ({
@@ -119,8 +120,8 @@ export const useEncounterStore = create<EncounterState & EncounterActions>((set,
     set({ saving: true, error: null });
 
     try {
-      const token = getToken();
-      const created = await createEncounter(encounter, token);
+
+      const created = await createEncounter(encounter);
 
       set((state) => ({
         encounters: [...state.encounters, created],
@@ -156,8 +157,8 @@ export const useEncounterStore = create<EncounterState & EncounterActions>((set,
     set({ saving: true, error: null });
 
     try {
-      const token = getToken();
-      const updated = await updateEncounter(encounter.id, encounter, token);
+
+      const updated = await updateEncounter(encounter.id, encounter);
 
       set((state) => ({
         encounters: state.encounters.map((currentEncounter) =>
@@ -190,8 +191,8 @@ export const useEncounterStore = create<EncounterState & EncounterActions>((set,
     set({ saving: true, error: null });
 
     try {
-      const token = getToken();
-      await deleteEncounter(encounterId, token);
+
+      await deleteEncounter(encounterId);
 
       set((state) => {
         const encounters = state.encounters.filter((encounter) => encounter.id !== encounterId);
@@ -242,8 +243,8 @@ export const useEncounterStore = create<EncounterState & EncounterActions>((set,
     set({ saving: true, error: null });
 
     try {
-      const token = getToken();
-      await setActiveEncounterForCampaign(campaignId, encounterId, token);
+
+      await setActiveEncounterForCampaign(campaignId, encounterId);
 
       set((state) => ({
         campaign: state.campaign ? { ...state.campaign, activeEncounterId: encounterId } : null,
@@ -279,8 +280,8 @@ export const useEncounterStore = create<EncounterState & EncounterActions>((set,
     set({ saving: true, error: null });
 
     try {
-      const token = getToken();
-      await clearActiveEncounterForCampaign(campaignId, token);
+
+      await clearActiveEncounterForCampaign(campaignId);
 
       set((state) => ({
         campaign: state.campaign ? { ...state.campaign, activeEncounterId: null } : null,

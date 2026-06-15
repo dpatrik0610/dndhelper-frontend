@@ -8,40 +8,40 @@ import type {
 const baseUrl = "/encounterroom";
 
 export const encounterRoomService = {
-  createRoom: (request: CreateRoomRequest, token: string): Promise<EncounterRoom> =>
-    apiClient<EncounterRoom>(baseUrl, { method: "POST", body: request, token }),
+  createRoom: (request: CreateRoomRequest): Promise<EncounterRoom> =>
+    apiClient<EncounterRoom>(baseUrl, { method: "POST", body: request }),
 
-  getRoom: (roomId: string, token: string): Promise<EncounterRoom> =>
-    apiClient<EncounterRoom>(`${baseUrl}/${roomId}`, { token }),
+  getRoom: (roomId: string): Promise<EncounterRoom> =>
+    apiClient<EncounterRoom>(`${baseUrl}/${roomId}`, {}),
 
-  getMyRooms: (token: string): Promise<EncounterRoom[]> =>
-    apiClient<EncounterRoom[]>(`${baseUrl}/my`, { token }),
+  getMyRooms: (): Promise<EncounterRoom[]> =>
+    apiClient<EncounterRoom[]>(`${baseUrl}/my`, {}),
 
-  joinRoom: (joinCode: string, token: string): Promise<JoinRoomResponse> =>
+  joinRoom: (joinCode: string): Promise<JoinRoomResponse> =>
     apiClient<JoinRoomResponse>(`${baseUrl}/join`, {
       method: "POST",
       body: { joinCode },
-      token,
+
     }),
 
-  leaveRoom: (roomId: string, token: string): Promise<void> =>
-    apiClient<void>(`${baseUrl}/${roomId}/leave`, { method: "POST", token }),
+  leaveRoom: (roomId: string): Promise<void> =>
+    apiClient<void>(`${baseUrl}/${roomId}/leave`, { method: "POST" }),
 
-  deleteRoom: (roomId: string, token: string): Promise<void> =>
-    apiClient<void>(`${baseUrl}/${roomId}`, { method: "DELETE", token }),
+  deleteRoom: (roomId: string): Promise<void> =>
+    apiClient<void>(`${baseUrl}/${roomId}`, { method: "DELETE" }),
 
-  regenerateJoinCode: async (roomId: string, token: string): Promise<string> => {
+  regenerateJoinCode: async (roomId: string): Promise<string> => {
     const result = await apiClient<{ joinCode: string }>(`${baseUrl}/${roomId}/code`, {
       method: "POST",
-      token,
+
     });
     return result.joinCode;
   },
 
-  invitePlayers: (roomId: string, userIds: string[], token: string): Promise<void> =>
+  invitePlayers: (roomId: string, userIds: string[]): Promise<void> =>
     apiClient<void>(`${baseUrl}/${roomId}/invite`, {
       method: "POST",
       body: { roomId, userIds },
-      token,
+
     }),
 };

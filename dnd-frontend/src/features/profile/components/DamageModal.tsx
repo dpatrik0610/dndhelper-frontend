@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal, Button, Stack } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { useToken } from "@store/auth/authSelectors";
+
 import { updateCharacter } from "@services/characterService";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 
@@ -11,7 +11,7 @@ interface DamageModalProps {
 }
 
 export function DamageModal({ opened, onClose }: DamageModalProps) {
-  const token = useToken()!;
+
   const { updateCharacter: updateCharacterLocal } = useCharacterCoreActions();
   const character = useCurrentCharacter();
 
@@ -40,7 +40,7 @@ export function DamageModal({ opened, onClose }: DamageModalProps) {
     });
 
     // Persist updated character to API
-    await updateCharacter({ ...character, hitPoints: newHp, temporaryHitPoints: newTempHp }, token);
+    await updateCharacter({ ...character, hitPoints: newHp, temporaryHitPoints: newTempHp });
 
     onClose();
     setAmount(0);

@@ -77,12 +77,12 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
 
     setLoading(true);
     if (isAdmin) {
-      getEquipmentById(equipmentId, token!)
+      getEquipmentById(equipmentId)
         .then((data: Equipment) => setEquipment(data))
         .catch((err: unknown) => console.error("Failed to load equipment", err))
         .finally(() => setLoading(false));
     } else {
-        getEquipmentByIdsForUser([equipmentId], token!)
+        getEquipmentByIdsForUser([equipmentId])
         .then((data: EquipmentUserResponse[]) => setEquipment(data[0]))
         .catch((err: unknown) => console.error("Failed to load equipment", err))
         .finally(() => setLoading(false));

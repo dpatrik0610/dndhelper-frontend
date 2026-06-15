@@ -59,12 +59,12 @@ export async function getRuleDetail(slug: string): Promise<RuleDetail | null> {
   }
 }
 
-export async function createRule(rule: RuleDetail, token: string): Promise<RuleDetail | null> {
+export async function createRule(rule: RuleDetail): Promise<RuleDetail | null> {
   if (!rule) throw new Error("Rule payload is required");
   const res = await apiClient<RuleDetailResponse | Record<string, unknown>>(baseUrl, {
     method: "POST",
     body: rule,
-    token,
+
   });
   const detail = (res as RuleDetailResponse)?.rule ?? (res as { Rule?: unknown })?.Rule;
   return detail ? normalizeRuleDetailOrSnippet(detail) : null;

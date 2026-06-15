@@ -3,7 +3,7 @@ import { Modal, Button, Stack, Text, Select } from "@mantine/core";
 import { useCharacterStore } from "@store/character/characterStore";
 import { useCurrentCharacter, useCharacterCurrencyActions } from "@store/character/characterSelectors";
 import { updateCharacter } from "@services/characterService";
-import { useToken } from "@store/auth/authSelectors";
+
 import { FormNumberInput } from "@components/common/FormNumberInput";
 
 interface RemoveCurrencyModalProps {
@@ -14,7 +14,7 @@ interface RemoveCurrencyModalProps {
 export function RemoveCurrencyModal({ opened, onClose }: RemoveCurrencyModalProps) {
   const character = useCurrentCharacter();
   const { removeCurrency: removeCurrencyLocal } = useCharacterCurrencyActions();
-  const token = useToken()!;
+
 
   const [selected, setSelected] = useState<string | null>(null);
   const [amount, setAmount] = useState<number>(0);
@@ -28,7 +28,7 @@ export function RemoveCurrencyModal({ opened, onClose }: RemoveCurrencyModalProp
     if (!selected || !amount) return;
 
     removeCurrencyLocal(selected, amount);
-    await updateCharacter(useCharacterStore.getState().character!, token);
+    await updateCharacter(useCharacterStore.getState().character!);
 
     setSelected(null);
     setAmount(0);

@@ -29,7 +29,7 @@ export function TransferCurrencyModal({ opened, onClose }: Props) {
   useEffect(() => {
     async function load() {
       if (!character?.campaignId) return;
-      const data = await getCampaignCharacters(character.campaignId, token);
+      const data = await getCampaignCharacters(character.campaignId);
       setCharacters(data.filter((c) => c.id !== character.id));
     }
     if (opened) load();
@@ -55,18 +55,9 @@ export function TransferCurrencyModal({ opened, onClose }: Props) {
         return;
       }
 
-      await transferBetweenCharacters(
-        character.id!,
-        targetId,
-        [
+      await transferBetweenCharacters(character.id!, targetId, [
           {
-            type: sourceCurrency.type,
-            currencyCode: sourceCurrency.currencyCode,
-            amount,
-          },
-        ],
-        token
-      );
+            type: sourceCurrency.type, currencyCode: sourceCurrency.currencyCode, amount, }, ]);
 
       showNotification({ title: "Success", message: "Currency transferred." });
 
@@ -74,7 +65,7 @@ export function TransferCurrencyModal({ opened, onClose }: Props) {
       setAmount(0);
       setCurrencyType(null);
       setTargetId(null);
-      loadCharacters(token);
+      loadCharacters();
     } catch (err: any) {
       showNotification({
         title: "Error",

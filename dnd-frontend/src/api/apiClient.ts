@@ -1,3 +1,5 @@
+import { getAuthTokenSafe } from "@store/auth/authUtils"
+
 export interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   body?: any
@@ -5,8 +7,10 @@ export interface ApiOptions {
 }
 
 export async function apiClient<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
-  const { method = 'GET', body, token } = options
+  const { method = 'GET', body, token: explicitToken } = options
   const API_BASE = import.meta.env.VITE_API_BASE
+
+  const token = explicitToken ?? getAuthTokenSafe();
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',

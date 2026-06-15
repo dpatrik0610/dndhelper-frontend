@@ -19,7 +19,7 @@ export function InventoryPanel({ inventoryIds }: InventoryPanelProps) {
       return;
     }
     let active = true;
-    void Promise.all(inventoryIds.map((id) => getInventory(id, token))).then((items) => {
+    void Promise.all(inventoryIds.map((id) => getInventory(id))).then((items) => {
       if (active) setInventories(items);
     });
     return () => {

@@ -166,9 +166,9 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
       },
 
       loadAllCharacters: async () => {
-        const token = getAuthTokenSafe()!;
+
         try {
-          const chars = await getCharacters(token);
+          const chars = await getCharacters();
           set(
             {allCharacters: chars.map((c) => ({
                 id: c.id,

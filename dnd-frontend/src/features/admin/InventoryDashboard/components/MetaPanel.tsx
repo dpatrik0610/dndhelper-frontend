@@ -20,13 +20,12 @@ import { ensureInventoryLinkedToCharacter } from "@utils/inventorySync";
 import { SelectInventoryOwnersModal } from "./SelectInventoryOwnersModal";
 import { CurrencyModal } from "./CurrencyModal";
 import styles from "@styles/InventoryDashboard.module.css";
-import { getAuthTokenSafe } from "@store/auth/authUtils";
 
 export function MetaPanel() {
   const { selected, refreshSelected } = useAdminInventoryStore();
   const { characters } = useAdminCharacterStore();
   const { selectedInventory } = useAdminCurrencyStore();
-  const token = getAuthTokenSafe()!;
+
 
   const [ownerModal, setOwnerModal] = useState(false);
   const [currencyModal, setCurrencyModal] = useState(false);
@@ -78,7 +77,7 @@ export function MetaPanel() {
     try {
       await Promise.all(
         targets.map(async (c) => {
-          await ensureInventoryLinkedToCharacter(c.id!, invId, token);
+          await ensureInventoryLinkedToCharacter(c.id!, invId);
         })
       );
       showNotification({

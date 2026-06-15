@@ -5,7 +5,7 @@ export function useBootstrapCharacters(token: string | null, characterCount: num
   useEffect(() => {
     const fetchCharacters = async () => {
       if (token && characterCount === 0) {
-        await loadCharacters(token);
+        await loadCharacters();
       }
     };
     fetchCharacters();

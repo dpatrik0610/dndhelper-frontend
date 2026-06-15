@@ -51,7 +51,7 @@ function useCampaignName(campaignId: string | null) {
       let data: Campaign | null = null;
       try
       {
-        const campaign = await getCampaignById(campaignId, token);
+        const campaign = await getCampaignById(campaignId);
         if (campaign) data = campaign;
       }
       catch (err)

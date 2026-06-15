@@ -1,4 +1,4 @@
-import { getAuthTokenSafe } from "@store/auth/authUtils";
+
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
@@ -40,7 +40,7 @@ interface AdminEquipmentStore {
 export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
   persist(
     (set, get) => {
-      const getToken = () => getAuthTokenSafe()!;
+
 
       return {
         equipments: [],
@@ -50,7 +50,7 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
         loadAll: async () => {
           set({ loading: true });
           try {
-            const data = await getAllEquipment(getToken());
+            const data = await getAllEquipment();
             set({ equipments: data, selected: data[0] ?? null });
           } catch (err) {
             showNotification({
@@ -65,7 +65,7 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
 
         getById: async (id) => {
           try {
-            const eq = await getEquipmentById(id, getToken());
+            const eq = await getEquipmentById(id);
             set({ selected: eq });
             return eq;
           } catch (err) {
@@ -80,7 +80,7 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
 
         getByIndex: async (index) => {
           try {
-            const eq = await getEquipmentByIndex(index, getToken());
+            const eq = await getEquipmentByIndex(index);
             set({ selected: eq });
             return eq;
           } catch (err) {
@@ -96,7 +96,7 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
         searchByName: async (name) => {
           set({ loading: true });
           try {
-            const results = await searchEquipmentByName(name, getToken());
+            const results = await searchEquipmentByName(name);
             set({ equipments: results });
           } catch (err) {
             showNotification({
@@ -112,7 +112,7 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
         loadByIds: async (ids: string[]) => {
           set({ loading: true });
           try {
-            const data = await getEquipmentByIds(ids, getToken());
+            const data = await getEquipmentByIds(ids);
             set((s) => ({
               equipments: [...s.equipments, ...data],
             }));
@@ -134,7 +134,7 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
 
         create: async (equipment) => {
           try {
-            const created = await createEquipment(equipment, getToken());
+            const created = await createEquipment(equipment);
             set((s) => ({
               equipments: [...s.equipments, created],
               selected: created,
@@ -155,7 +155,7 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
 
         update: async (equipment) => {
           try {
-            const updated = await updateEquipmentById(equipment.id!, equipment, getToken());
+            const updated = await updateEquipmentById(equipment.id!, equipment);
             set((s) => ({
               equipments: s.equipments.map((e) => (e.id === updated.id ? updated : e)),
               selected: updated,
@@ -176,7 +176,7 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
 
         remove: async (id) => {
           try {
-            await deleteEquipment(id, getToken());
+            await deleteEquipment(id);
             set((s) => {
               const updated = s.equipments.filter((e) => e.id !== id);
               const newSelected =

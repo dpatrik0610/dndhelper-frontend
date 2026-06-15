@@ -42,7 +42,7 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
     const fetchIfMissing = async () => {
       if (!currentInventory && token) {
         setLoading(true);
-        await loadInventories(token);
+        await loadInventories();
         setLoading(false);
       }
     };
@@ -78,7 +78,7 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
 
     // Send to backend
     const request: ModifyEquipmentAmount = { equipmentId: selectedItem, amount };
-    apiDecreaseQuantity(currentInventory.id, request, token ?? "");
+    apiDecreaseQuantity(currentInventory.id, request);
 
     setSelectedItem(null);
     setRemoveModalOpened(false);
@@ -98,13 +98,13 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
     try {
       if (payload.targetCharacterId) {
         const request: MoveItemToCharacterRequest = { amount: payload.amount };
-        await moveItemToCharacter(currentInventory.id, moveItemId, payload.targetCharacterId, request, token);
+        await moveItemToCharacter(currentInventory.id, moveItemId, payload.targetCharacterId, request);
       } else if (payload.targetInventoryId) {
         const request : MoveItemRequest = {
           targetInventoryId: payload.targetInventoryId,
           amount: payload.amount,
         }
-        await moveItem(currentInventory.id, moveItemId, request, token);
+        await moveItem(currentInventory.id, moveItemId, request);
       }
     } catch (error) {
       console.error("Move failed:", error);

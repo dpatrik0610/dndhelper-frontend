@@ -62,7 +62,7 @@ export function MoveItemModal({
       if (!token) return;
 
       try {
-        const overview = await getCampaignOverviewByCharacter(currentCharacterId, token);
+        const overview = await getCampaignOverviewByCharacter(currentCharacterId);
         if (!overview) {
           setAvailableCharacters([]);
           showNotification({

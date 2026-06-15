@@ -64,7 +64,7 @@ export function ImportModal({
         return;
       }
 
-      await createManyEquipment(parsed, token);
+      await createManyEquipment(parsed);
       showNotification({ title: "Items imported", message: `${parsed.length} equipment added.`, color: SectionColor.Green });
       onChangePayload("");
       onClose();

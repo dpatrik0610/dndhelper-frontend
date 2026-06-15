@@ -1,11 +1,11 @@
 ﻿import { getCharacters } from "@services/characterService";
 import { useCharacterStore } from "@store/character/characterStore";
-import { getAuthToken } from "@store/auth/authUtils";
 
-export async function loadCharacters(tokenOverride?: string) {
-  const token = tokenOverride || getAuthToken();
+
+export async function loadCharacters() {
+
   const { setCharacter, setCharacters, character } = useCharacterStore.getState();
-  const characters = await getCharacters(token);
+  const characters = await getCharacters();
 
   setCharacters(characters);
 

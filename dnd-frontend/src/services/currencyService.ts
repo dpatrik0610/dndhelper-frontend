@@ -4,26 +4,26 @@ import type { Currency } from "../types/Currency";
 const baseUrl = "/currency";
 
 // GET: /api/currency/{characterId}
-export async function getCharacterCurrencies(characterId: string, token?: string): Promise<Currency[]> {
-  return apiClient<Currency[]>(`${baseUrl}/${characterId}`, { token })
+export async function getCharacterCurrencies(characterId: string): Promise<Currency[]> {
+  return apiClient<Currency[]>(`${baseUrl}/${characterId}`, {})
 }
 
 // PUT: /api/currency/remove/{characterId}
-export async function removeCurrencies(characterId: string, currencies: Currency[], token?: string): Promise<string> {
+export async function removeCurrencies(characterId: string, currencies: Currency[]): Promise<string> {
   return apiClient<string>(`${baseUrl}/remove/${characterId}`, {
     method: "PUT",
     body: currencies,
-    token,
+
   })
 }
 
 // PUT: /api/currency/transfer/{targetId}
-export async function transferCurrenciesToCharacter(characterId: string, currencies: Currency[], token?: string): Promise<void> {  
+export async function transferCurrenciesToCharacter(characterId: string, currencies: Currency[]): Promise<void> {  
   try {
     const response = await apiClient<string>(`${baseUrl}/transfer/${characterId}`, {
       method: "PUT",
       body: currencies,
-      token,
+
     });
     
     console.log('API call successful, response:', response);
@@ -36,29 +36,28 @@ export async function transferCurrenciesToCharacter(characterId: string, currenc
 
 export async function transferCurrenciesToInventory(
   inventoryId: string,
-  currencies: Currency[],
-  token?: string
+  currencies: Currency[]
 ): Promise<string> {
   return apiClient<string>(`${baseUrl}/inventory/${inventoryId}`, {
     method: "PUT",
     body: currencies,
-    token,
+
   });
 }
 
-export async function transferBetweenCharacters(fromCharacterId: string, toCharacterId: string, currencies: Currency[], token?: string): Promise<void> {
+export async function transferBetweenCharacters(fromCharacterId: string, toCharacterId: string, currencies: Currency[]): Promise<void> {
   return apiClient<void>(`${baseUrl}/transfer-between/${fromCharacterId}/${toCharacterId}`, {
     method: "PUT",
     body: currencies,
-    token,
+
   });
 }
 
 // PUT: /api/currency/claim/{characterId}/{inventoryId}
-export async function claimFromInventory( characterId: string, inventoryId: string, currencies: Currency[], token?: string ): Promise<void> {
+export async function claimFromInventory( characterId: string, inventoryId: string, currencies: Currency[] ): Promise<void> {
   return apiClient<void>(`${baseUrl}/claim/${characterId}/${inventoryId}`, {
     method: "PUT",
     body: currencies,
-    token,
+
   });
 }

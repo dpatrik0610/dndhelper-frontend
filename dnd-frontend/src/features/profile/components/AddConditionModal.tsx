@@ -5,7 +5,7 @@ import { IconSearch } from "@tabler/icons-react";
 import { getConditions } from "@services/conditionService";
 import { updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { useToken } from "@store/auth/authSelectors";
+
 
 interface AddConditionModalProps {
   opened: boolean;
@@ -15,7 +15,7 @@ interface AddConditionModalProps {
 export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
   const character = useCurrentCharacter();
   const { updateCharacter: updateCharacterLocal } = useCharacterCoreActions();
-  const token = useToken()!;
+
 
   const [list, setList] = useState<string[]>([]);
   const [search, setSearch] = useState("");          // NEW
@@ -64,7 +64,7 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     updateCharacterLocal({ conditions: updatedConditions });
 
     if (character) {
-      await apiUpdateCharacter({ ...character, conditions: updatedConditions }, token);
+      await apiUpdateCharacter({ ...character, conditions: updatedConditions });
     }
 
     setSelected(null);

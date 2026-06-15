@@ -24,7 +24,7 @@ export default function SpellPage() {
 
   useEffect(() => {
     const fetchSpells = async () => {
-      if (!spellList || spellList.length === 0) await loadSpells(token!);
+      if (!spellList || spellList.length === 0) await loadSpells();
     };
     void fetchSpells();
   }, [spellList, token]);
@@ -36,19 +36,19 @@ export default function SpellPage() {
       const found = spellList.find((s) => s.name === urlParam.spellName);
       if (!found) return;
 
-      const fetchedSpell = await getSpellById(found.id!, token!);
+      const fetchedSpell = await getSpellById(found.id!);
       setCurrentSpell(fetchedSpell);
     };
     void fetchSpell();
   }, [urlParam, spellList, setCurrentSpell, token]);
 
   async function reload() {
-    await loadSpells(token!);
+    await loadSpells();
     
     if (currentSpell) {
       const found = spellList.find((s) => s.id === currentSpell.id);
       if (found) {
-        const refreshed = await getSpellById(found.id!, token!);
+        const refreshed = await getSpellById(found.id!);
         setCurrentSpell(refreshed);
       }
     }

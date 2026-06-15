@@ -42,8 +42,8 @@ export function ActionBar() {
   if (!token || !character?.id) return null;
 
   async function handleLongrest() {
-    await longrest(character!.id!, token!);
-    await loadCharacters(token!);
+    await longrest(character!.id!);
+    await loadCharacters();
     showNotification({
       id: "longrest-success",
       title: "Success",

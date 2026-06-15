@@ -3,15 +3,14 @@ import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { createCharacter, updateCharacter } from "@services/characterService";
 import { assignInventoryToCharacter, createInventory } from "@services/inventoryService";
-import { useToken, useIsAdmin } from "@store/auth/authSelectors";
+import { useIsAdmin } from "@store/auth/authSelectors";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { loadCharacters } from "@utils/loadCharacter";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
 
 export function useCharacterForm(editMode: boolean) {
-  const token = useToken();
-  const isAdmin = useIsAdmin();
+    const isAdmin = useIsAdmin();
   const navigate = useNavigate()
   const { characterForm, replaceCharacterForm, resetCharacterForm } = useCharacterFormStore();
   const character = useCurrentCharacter();
@@ -31,16 +30,16 @@ export function useCharacterForm(editMode: boolean) {
     try {
       if (editMode && character) {
         updateInStore(characterForm);
-        await updateCharacter(characterForm, token!);
+        await updateCharacter(characterForm);
 
         showNotification({
           title: "Character Updated",
           message: `${characterForm.name} updated successfully!`,
           color: "teal",
         });
-        loadCharacters(token!)
+        loadCharacters()
       } else {
-        const newCharacter = await createCharacter(characterForm, token!);
+        const newCharacter = await createCharacter(characterForm);
         if (newCharacter) {
           const newInventory: Inventory = {
             name: `${newCharacter.name}'s Equipment`,
@@ -49,10 +48,10 @@ export function useCharacterForm(editMode: boolean) {
             currencies: [],
             items: [],
           };
-          const createdInventory = await createInventory(newInventory, token!);
+          const createdInventory = await createInventory(newInventory);
 
           if (createdInventory.id) {
-            await assignInventoryToCharacter(createdInventory.id, newCharacter.id!, token!);
+            await assignInventoryToCharacter(createdInventory.id, newCharacter.id!);
           }
 
           setCharacter(newCharacter);

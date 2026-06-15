@@ -51,7 +51,7 @@ export function SpellsPanel() {
         const fetched = await Promise.all(
           chSpells.map(async ({ spellId }) => ({
             spellId,
-            spell: await getSpellById(spellId, token),
+            spell: await getSpellById(spellId),
           }))
         );
         setSpellData(fetched);

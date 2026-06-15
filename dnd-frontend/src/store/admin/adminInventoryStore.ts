@@ -1,4 +1,4 @@
-import { getAuthTokenSafe } from "@store/auth/authUtils";
+
 import { create } from "zustand";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
@@ -61,7 +61,7 @@ interface AdminInventoryStore {
 }
 
 export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => {
-  const getToken = () => getAuthTokenSafe()!;
+
 
   const getEquipmentIdsFromInventories = (inventories: Inventory[]): string[] => {
     const equipmentIds = new Set<string>();
@@ -139,7 +139,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       if (!characterId) return;
       set({ loading: true });
       try {
-        const data = await getInventoriesByCharacter(characterId, getToken());
+        const data = await getInventoriesByCharacter(characterId);
         const owned = data.filter((i) => i.characterIds?.includes(characterId));
         set({ inventories: owned, selected: owned[0] ?? null });
 
@@ -162,7 +162,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     loadAll: async () => {
       set({ loading: true });
       try {
-        const data = await getAllInventories(getToken());
+        const data = await getAllInventories();
         set({ inventories: data, selected: data[0] ?? null });
 
         const equipmentIds = getEquipmentIdsFromInventories(data);
@@ -195,7 +195,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       }
 
       try {
-        const refreshed = await getInventoriesByCharacter(characterId, getToken());
+        const refreshed = await getInventoriesByCharacter(characterId);
         const owned = refreshed.filter((i) => i.characterIds?.includes(characterId));
         const sel = get().selected;
         set({
@@ -213,7 +213,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
 
     reloadInventory: async (id: string) => {
       try {
-        const updated = await getInventory(id, getToken());
+        const updated = await getInventory(id);
         set((state) => ({
           inventories: state.inventories.map((i) =>
             i.id === id ? updated : i
@@ -242,7 +242,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       const sel = get().selected;
       if (!sel?.id) return;
       try {
-        const updated = await getInventory(sel.id, getToken());
+        const updated = await getInventory(sel.id);
         set({ selected: updated });
 
         if (updated.items) {
@@ -266,7 +266,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
 
       const created = await createInventory(
         { name, characterIds, ownerIds: [], currencies: [] },
-        getToken()
+
       );
 
       get().applyInventoryUpdate(created);
@@ -298,7 +298,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       };
 
       try {
-        const created = await createInventory(payload, getToken());
+        const created = await createInventory(payload);
         get().linkInventoryToCharacters(created.id!, created.characterIds ?? []);
 
         get().applyInventoryUpdate(created);
@@ -323,7 +323,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       const current = inventories.find((i) => i.id === id);
       if (!current) return;
 
-      await updateInventory(id, { ...current, name }, getToken());
+      await updateInventory(id, { ...current, name });
       // No need to fetch entire list, just update the changed inventory
       await get().reloadInventory(id);
 
@@ -335,7 +335,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     },
 
     remove: async (id) => {
-      await deleteInventory(id, getToken());
+      await deleteInventory(id);
       await get().loadAll();
       showNotification({
         title: "Inventory deleted",
@@ -348,7 +348,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     addItem: async (equipment) => {
       const sel = get().selected;
       if (!sel?.id) return;
-      await addNewItem(sel.id, equipment, getToken());
+      await addNewItem(sel.id, equipment);
       await get().reloadInventory(sel.id);
       showNotification({
         title: "Item added",
@@ -360,11 +360,11 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     addExisting: async (equipmentId, amount) => {
       const sel = get().selected;
       if (!sel?.id) return;
-      const token = getToken();
+
       const request: ModifyEquipmentAmount = { equipmentId, amount };
 
       try {
-        await addOrIncrementExisting(sel.id, request, token);
+        await addOrIncrementExisting(sel.id, request);
         await get().reloadInventory(sel.id);
         showNotification({
           title: "Item added",
@@ -383,7 +383,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     updateItem: async (item) => {
       const sel = get().selected;
       if (!sel?.id || !item.equipmentId) return;
-      await updateItemService(sel.id, item.equipmentId, item, getToken());
+      await updateItemService(sel.id, item.equipmentId, item);
       await get().reloadInventory(sel.id);
       showNotification({
         title: "Item updated",
@@ -395,7 +395,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     deleteItem: async (item) => {
       const sel = get().selected;
       if (!sel?.id || !item.equipmentId) return;
-      await deleteItemService(sel.id, item.equipmentId, getToken());
+      await deleteItemService(sel.id, item.equipmentId);
       await get().reloadInventory(sel.id);
       showNotification({
         title: "Item removed",
@@ -407,9 +407,9 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     moveItem: async (equipmentId, targetInventoryId, amount) => {
       const sel = get().selected;
       if (!sel?.id) return;
-      const token = getToken();
+
       const request: MoveItemRequest = { targetInventoryId, amount };
-      await moveItemService(sel.id, equipmentId, request, token);
+      await moveItemService(sel.id, equipmentId, request);
       await get().reloadInventory(sel.id);
       showNotification({
         title: "Item moved",
@@ -419,7 +419,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     },
 
     updateEquipment: async (equipment) => {
-      const updated = await updateEquipmentById(equipment.id!, equipment, getToken());
+      const updated = await updateEquipmentById(equipment.id!, equipment);
       await get().refreshInventories();
       return updated;
     },
@@ -430,7 +430,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       const item = sel.items?.find((i) => i.equipmentId === equipmentId);
       if (!item) return;
       const updated = { ...item, quantity: (item.quantity ?? 0) + 1 };
-      await updateItemService(sel.id, equipmentId, updated, getToken());
+      await updateItemService(sel.id, equipmentId, updated);
       await get().reloadInventory(sel.id);
     },
 
@@ -440,7 +440,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       const item = sel.items?.find((i) => i.equipmentId === equipmentId);
       if (!item || item.quantity! <= 1) return;
       const updated = { ...item, quantity: item.quantity! - 1 };
-      await updateItemService(sel.id, equipmentId, updated, getToken());
+      await updateItemService(sel.id, equipmentId, updated);
       await get().reloadInventory(sel.id);
     },
 
@@ -457,7 +457,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       }
 
       try {
-        await Promise.all(characterIds.map((charId) => assignInventoryToCharacter(inventoryId, charId, getToken())));
+        await Promise.all(characterIds.map((charId) => assignInventoryToCharacter(inventoryId, charId)));
         showNotification({
           title: "Success",
           message: "Inventory linked to characters successfully.",

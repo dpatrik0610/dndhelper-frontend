@@ -1,4 +1,4 @@
-import { getAuthTokenSafe } from "@store/auth/authUtils";
+
 import { create } from "zustand";
 import { getCampaignCharacters } from "@services/campaignService";
 import { updateCharacter as updateCharacterService, longrest as longrestService, bulkLongRest } from "@services/characterService";
@@ -33,11 +33,11 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // LOAD ALL CHARACTERS
   // -------------------------
   loadAll: async (campaignId) => {
-    const token = getAuthTokenSafe()!;
+
     try {
       set({ loading: true });
 
-      const chars = await getCampaignCharacters(campaignId, token);
+      const chars = await getCampaignCharacters(campaignId);
 
       const normalized = chars.map(c => ({
         ...c,
@@ -67,7 +67,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // UPDATE CHARACTER
   // -------------------------
   updateCharacter: async (id, patch) => {
-    const token = getAuthTokenSafe()!;
+
     const existing = get().characters.find(c => c.id === id);
     if (!existing) return;
 
@@ -76,7 +76,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
 
       const fullCharacter = { ...existing, ...patch } as Character;
 
-      const updated = await updateCharacterService(fullCharacter, token);
+      const updated = await updateCharacterService(fullCharacter);
       if (!updated) throw new Error("Update returned null");
 
       set((state) => ({
@@ -98,12 +98,12 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // LONG REST CHARACTER
   // -------------------------
   longRestCharacter: async (id) => {
-    const token = getAuthTokenSafe()!;
+
     const existing = get().characters.find(c => c.id === id);
     if (!existing) return;
 
     try {
-      const response = await longrestService(id, token);
+      const response = await longrestService(id);
       if (response.success) {
         set((state) => ({
           characters: state.characters.map(c => 
@@ -133,13 +133,13 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // BULK LONG REST
   // -------------------------
   bulkLongRest: async (characterIds) => {
-    const token = getAuthTokenSafe()!;
+
     if (!characterIds.length) return;
 
     try {
       set({ loading: true });
 
-      const { successful, failed } = await bulkLongRest(characterIds, token);
+      const { successful, failed } = await bulkLongRest(characterIds);
 
       if (successful.length > 0) {
         set((state) => ({
@@ -185,7 +185,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   // MODIFY CURRENCY
   // -------------------------
   modifyCurrency: async (characterId, currencyCode, delta) => {
-    const token = getAuthTokenSafe()!;
+
     if (!delta) return;
 
     const payload: Currency[] = [
@@ -194,9 +194,9 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
 
     try {
       if (delta > 0) {
-        await transferCurrenciesToCharacter(characterId, payload, token);
+        await transferCurrenciesToCharacter(characterId, payload);
       } else {
-        await removeCurrencies(characterId, payload, token);
+        await removeCurrencies(characterId, payload);
       }
 
       // local optimistic update

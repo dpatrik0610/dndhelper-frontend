@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NumberInput, Stack, Text } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { useToken } from "@store/auth/authSelectors";
+
 import { updateCharacter } from "@services/characterService";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -15,7 +15,7 @@ interface HealModalProps {
 export function HealModal({ opened, onClose }: HealModalProps) {
   const character = useCurrentCharacter();
   const { setCharacter } = useCharacterCoreActions();
-  const token = useToken()!;
+
   const [amount, setAmount] = useState<number | string>(5);
   const [saving, setSaving] = useState(false);
 
@@ -31,13 +31,8 @@ export function HealModal({ opened, onClose }: HealModalProps) {
 
     setSaving(true);
     try {
-      const updated = await updateCharacter(
-        {
-          ...character,
-          hitPoints: nextHp,
-        },
-        token
-      );
+      const updated = await updateCharacter({
+          ...character, hitPoints: nextHp, });
 
       if (updated) setCharacter(updated);
       showNotification({

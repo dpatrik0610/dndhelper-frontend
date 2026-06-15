@@ -36,7 +36,7 @@ export function Inventory() {
   useEffect(() => {
     if (!character?.id) return;
 
-    getInventoriesByCharacter(character.id, token)
+    getInventoriesByCharacter(character.id)
       .then((data) => {
         if (!data || data.length <= 0) {
           showNotification({

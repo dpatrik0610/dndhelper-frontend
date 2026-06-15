@@ -110,7 +110,7 @@ export function RuleManager() {
 
     setSaving(true);
     try {
-      await createRule(payload, token);
+      await createRule(payload);
       showNotification({ message: `Rule "${payload.title}" created.`, color: "green", icon: <IconCheck size={16} /> });
       setRule({ ...defaultRule });
       setBodyText("");
@@ -140,7 +140,7 @@ export function RuleManager() {
     let failed = 0;
     for (const r of rules) {
       try {
-        await createRule(r, token);
+        await createRule(r);
         success += 1;
       } catch (error) {
         failed += 1;
@@ -196,7 +196,7 @@ export function RuleManager() {
     };
     setCreatingCategory(true);
     try {
-      const created = await createRuleCategory(payload, token);
+      const created = await createRuleCategory(payload);
       if (created) {
         setCategories((prev) => [...prev, created]);
         showNotification({ message: `Category "${created.name}" created.`, color: "green", icon: <IconCheck size={16} /> });

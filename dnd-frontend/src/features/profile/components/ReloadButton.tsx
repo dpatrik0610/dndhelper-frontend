@@ -30,7 +30,7 @@ export default function ReloadButton() {
       const sessionStore = useSessionStore.getState();
 
       // Characters
-      const characters = await getCharacters(token);
+      const characters = await getCharacters();
       characterStore.setCharacters(characters);
       if (characterStore.character) {
         const updated = characters.find((c) => c.id === characterStore.character?.id);
@@ -43,14 +43,14 @@ export default function ReloadButton() {
 
       // Inventories (if a character is selected)
       if (activeCharacter?.id) {
-        const inventories = await getInventoriesByCharacter(activeCharacter.id, token);
+        const inventories = await getInventoriesByCharacter(activeCharacter.id);
         inventoryStore.setInventories(inventories);
       } else {
         inventoryStore.clearInventories?.();
       }
 
       // Spells
-      const spellNames = await getSpellNames(token);
+      const spellNames = await getSpellNames();
       spellStore.setSpellNames(spellNames);
 
       // Notes for the active character
@@ -59,7 +59,7 @@ export default function ReloadButton() {
         if (noteStore.loadMany) {
           await noteStore.loadMany(uniqueIds);
         } else {
-          const fetchedNotes = await getManyNotes(uniqueIds, token);
+          const fetchedNotes = await getManyNotes(uniqueIds);
           useNoteStore.setState({ notes: fetchedNotes });
         }
       }

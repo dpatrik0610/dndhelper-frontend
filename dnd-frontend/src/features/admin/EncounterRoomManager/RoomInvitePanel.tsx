@@ -18,7 +18,7 @@ export function RoomInvitePanel({ room }: RoomInvitePanelProps) {
 
   useEffect(() => {
     if (!token) return;
-    void UserService.getAll(token).then(setUsers);
+    void UserService.getAll().then(setUsers);
   }, [token]);
 
   if (!room) return null;
@@ -39,7 +39,7 @@ export function RoomInvitePanel({ room }: RoomInvitePanelProps) {
           <Button
             size="xs"
             disabled={!token || selected.length === 0}
-            onClick={() => token && void encounterRoomService.invitePlayers(room.id, selected, token)}
+            onClick={() => token && void encounterRoomService.invitePlayers(room.id, selected)}
           >
             Send Invites
           </Button>

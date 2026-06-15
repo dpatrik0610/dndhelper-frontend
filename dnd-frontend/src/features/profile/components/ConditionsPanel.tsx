@@ -70,7 +70,7 @@ export function ConditionsPanel() {
       Promise.resolve().then(async () => {
         const updated = useCharacterStore.getState().character;
         if (updated) {
-          await updateCharacter(updated, token);
+          await updateCharacter(updated);
         }
       });
     } catch (err) {

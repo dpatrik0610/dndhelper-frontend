@@ -104,7 +104,7 @@ export default function EncounterPage({ embedded = false }: { embedded?: boolean
 
       setResolvingCampaign(true);
       try {
-        const overview = await getCampaignOverviewByCharacter(character.id, token);
+        const overview = await getCampaignOverviewByCharacter(character.id);
         setResolvedCampaignId(overview?.id ?? null);
       } finally {
         setResolvingCampaign(false);
@@ -141,7 +141,7 @@ export default function EncounterPage({ embedded = false }: { embedded?: boolean
 
     const loadSuggestions = async () => {
       try {
-        const allCharacters = await getCharacters(token);
+        const allCharacters = await getCharacters();
         const campaignCharacterIds = new Set(campaign.characterIds);
         const campaignOnlyCharacters = allCharacters.filter(
           (character) =>

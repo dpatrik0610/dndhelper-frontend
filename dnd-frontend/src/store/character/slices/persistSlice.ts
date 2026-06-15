@@ -18,7 +18,7 @@ export const createPersistSlice: StateCreator<
     if (!token) return null;
 
     try {
-      const saved = await updateCharacterApi(current, token);
+      const saved = await updateCharacterApi(current);
       if (saved) {
         get().setCharacter(saved);
         
