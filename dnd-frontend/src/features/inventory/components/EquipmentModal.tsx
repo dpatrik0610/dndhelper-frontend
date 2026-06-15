@@ -24,8 +24,8 @@ import {
   IconTags,
   IconWeight,
 } from "@tabler/icons-react";
-import { getEquipmentById } from "@services/equipmentService";
-import type { Equipment } from "@appTypes/Equipment/Equipment";
+import { getEquipmentById, getEquipmentByIdsForUser } from "@services/equipmentService";
+import type { Equipment, EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
 import { useAuthStore } from "@store/auth/authStore";
 import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import CustomBadge from "@components/common/CustomBadge";
@@ -50,7 +50,7 @@ function StatItem({ icon, label, value, color }: { icon: React.ReactNode; label:
         {icon}
       </ThemeIcon>
       <div>
-        <Text size="xs" tt="uppercase" c="dimmed" fw={700} style={{ letterSpacing: 0.5, lineHeight: 1 }}>
+        <Text size="xs" tt="uppercase" c="dimmed" fw={700} style={{ letterSpacing: 0.5, lineHeight: 1 }}>       
           {label}
         </Text>
         <Text size="sm" fw={500} style={{ wordBreak: "break-word", lineHeight: 1.2 }}>
@@ -68,7 +68,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
   const isAdmin = roles.includes("Admin");
   const { update } = useAdminEquipmentStore();
 
-  const [equipment, setEquipment] = useState<Equipment | null>(null);
+  const [equipment, setEquipment] = useState<Equipment | EquipmentUserResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
@@ -76,11 +76,18 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
     if (!opened || !equipmentId) return;
 
     setLoading(true);
-    getEquipmentById(equipmentId, token!)
-      .then((data: Equipment) => setEquipment(data))
-      .catch((err: unknown) => console.error("Failed to load equipment", err))
-      .finally(() => setLoading(false));
-  }, [opened, equipmentId, token]);
+    if (isAdmin) {
+      getEquipmentById(equipmentId, token!)
+        .then((data: Equipment) => setEquipment(data))
+        .catch((err: unknown) => console.error("Failed to load equipment", err))
+        .finally(() => setLoading(false));
+    } else {
+        getEquipmentByIdsForUser([equipmentId], token!)
+        .then((data: EquipmentUserResponse[]) => setEquipment(data[0]))
+        .catch((err: unknown) => console.error("Failed to load equipment", err))
+        .finally(() => setLoading(false));
+    }
+  }, [opened, equipmentId, token, isAdmin]);
 
   const handleEditSubmit = async (updatedItem: Equipment) => {
     await update(updatedItem);
@@ -89,7 +96,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
   };
 
   const descriptionContent = equipment?.description?.join("\n\n") ?? "";
-  const dmDescriptionContent = equipment?.dmDescription?.join("\n\n") ?? "";
+  const dmDescriptionContent = equipment && 'dmDescription' in equipment ? equipment.dmDescription?.join("\n\n") ?? "" : "";
 
   const tierTheme =
     equipment?.tier && equipmentTierTheme[equipment.tier as keyof typeof equipmentTierTheme]
@@ -111,8 +118,8 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 {equipment.name}
               </Text>
               <CustomBadge
-                label={equipment.isCustom ? "Custom" : "Official"}
-                color={equipment.isCustom ? SectionColor.Orange : SectionColor.Blue}
+                label={equipment && 'isCustom' in equipment && equipment.isCustom ? "Custom" : "Official"}
+                color={equipment && 'isCustom' in equipment && equipment.isCustom ? SectionColor.Orange : SectionColor.Blue}
                 variant="light"
                 size={isMobile ? "md" : "lg"}
               />
@@ -156,12 +163,12 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
           </Text>
         ) : (
           <Stack gap="xl" pt="md">
-            {(equipment.weight != null || (isAdmin && equipment.cost) || equipment.damage || equipment.range || equipment.tier) && (
+            {(equipment.weight != null || (isAdmin && 'cost' in equipment && equipment.cost) || equipment.damage || equipment.range || equipment.tier) && (
               <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
                 {equipment.weight != null && (
                   <StatItem icon={<IconWeight size={20} />} color={tierTheme.accent} label="Weight" value={`${equipment.weight} lb`} />
                 )}
-                {isAdmin && equipment.cost && (
+                {isAdmin && 'cost' in equipment && equipment.cost && (
                   <StatItem icon={<IconCoins size={20} />} color={tierTheme.accent} label="Cost" value={`${equipment.cost.quantity} ${equipment.cost.unit}`} />
                 )}
                 {equipment.damage && (
@@ -229,7 +236,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 <Text>Id: {equipment.id}</Text>
               </Tooltip>
               <Text>
-                Updated: {equipment.updatedAt ? new Date(equipment.updatedAt).toLocaleDateString() : "Unknown"}
+                Updated: {'updatedAt' in equipment && equipment.updatedAt ? new Date(equipment.updatedAt).toLocaleDateString() : "Unknown"}
               </Text>
             </Group>
           </Stack>
@@ -239,7 +246,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
       <Suspense fallback={null}>
         <EquipmentFormModal
           opened={editModalOpen}
-          initial={equipment}
+          initial={equipment && 'index' in equipment ? equipment as Equipment : null}
           onClose={() => setEditModalOpen(false)}
           onSubmit={handleEditSubmit}
         />

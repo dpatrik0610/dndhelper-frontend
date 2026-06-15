@@ -1,5 +1,5 @@
 import { apiClient } from "@api/apiClient";
-import type { Equipment } from "@appTypes/Equipment/Equipment";
+import type { Equipment, EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
 import type { PagedResult } from "@appTypes/PagedResult";
 
 const baseUrl = "/Equipment";
@@ -107,6 +107,14 @@ export async function deleteEquipment(id: string, token: string): Promise<void> 
 export async function getEquipmentByIds(ids: string[], token: string): Promise<Equipment[]> {
   return apiClient(`${baseUrl}/by-ids`, {
     method: 'POST',
+    body: ids,
+    token,
+  });
+}
+
+export async function getEquipmentByIdsForUser(ids: string[], token: string): Promise<EquipmentUserResponse[]> {
+  return apiClient(`${baseUrl}/userview`, {
+    method: 'GET',
     body: ids,
     token,
   });

@@ -35,6 +35,17 @@ export interface Range {
   long: number;
 }
 
+export interface EquipmentUserResponse {
+  id: string;
+  name: string;
+  description?: string[];
+  damage?: Damage;
+  range?: Range;
+  weight?: number;
+  tags?: string[];
+  tier?: string;
+}
+
 export const EQUIPMENT_TIERS = [
   "Common",
   "Uncommon",
