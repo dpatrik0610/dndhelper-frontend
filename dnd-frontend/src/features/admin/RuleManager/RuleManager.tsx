@@ -3,13 +3,13 @@ import { Button, Divider, FileInput, Group, MultiSelect, Paper, Select, Stack, T
 import { IconCheck, IconFileUpload, IconPlaylistAdd, IconUpload, IconX, IconPlus } from "@tabler/icons-react";
 import { RuleCategory, type RuleDetail, type RuleCategoryResponse } from "@appTypes/Rules/Rule";
 import { createRule } from "@services/ruleService";
-import { useAuthStore } from "@store/auth/authStore";
 import { showNotification } from "@components/Notification/Notification";
 import { mockRuleDetails } from "@features/rules/mockRules";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { createRuleCategory, getRuleCategories } from "@services/ruleCategoryService";
 import "./ruleManager.css";
 import { SectionColor } from "@appTypes/SectionColor";
+import { useToken } from "@store/auth/authSelectors";
 
 const fallbackCategoryOptions = Object.values(RuleCategory).map((c) => ({ value: c, label: c }));
 
@@ -22,7 +22,7 @@ const defaultRule: RuleDetail = {
 };
 
 export function RuleManager() {
-  const token = useAuthStore((s) => s.token);
+  const token = useToken();
   const [rule, setRule] = useState<RuleDetail>(() => ({ ...defaultRule }));
   const [bodyText, setBodyText] = useState("");
   const [sourceTitle, setSourceTitle] = useState("");

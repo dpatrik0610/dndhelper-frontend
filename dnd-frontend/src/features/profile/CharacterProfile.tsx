@@ -31,16 +31,15 @@ import { FeaturesPanel } from "./components/FeaturesPanel";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@store/auth/authStore";
 import { getCampaignById } from "@services/campaignService";
 import { ExperienceTableCard } from "./components/ExperienceTableCard";
-import { useIsAdmin } from "@store/auth/authSelectors";
+import { useIsAdmin, useToken } from "@store/auth/authSelectors";
 import type { Campaign } from "@appTypes/Campaign";
 import { useIsMobile } from "@hooks/useIsMobile";
 
 function useCampaignName(campaignId: string | null) {
   const [name, setName] = useState<string>("Loading...");
-  const token = useAuthStore((s) => s.token);
+  const token = useToken();
 
   useEffect(() => {
     if (!campaignId || !token) {

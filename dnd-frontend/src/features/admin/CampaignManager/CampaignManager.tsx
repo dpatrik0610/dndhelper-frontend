@@ -1,16 +1,16 @@
 ﻿import { Box, Paper, Stack, Loader, Text, Group } from "@mantine/core";
 import { useEffect } from "react";
 import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
-import { useAuthStore } from "@store/auth/authStore";
 import { CampaignHeader } from "./CampaignHeader";
 import { CampaignSelectPanel } from "./CampaignSelectHeader";
 import { CampaignCharactersPanel } from "./CampaignCharactersPanel";
 import { CampaignSessionsPanel } from "./CampaignSessionsPanel";
 import { CampaignNotesPanel } from "./CampaignNotesPanel";
+import { useToken } from "@store/auth/authSelectors";
 
 export function CampaignManager() {
   const { reload, loading, selectedId } = useAdminCampaignStore();
-  const token = useAuthStore((s) => s.token);
+  const token = useToken();
 
   useEffect(() => {
     if (token) void reload();

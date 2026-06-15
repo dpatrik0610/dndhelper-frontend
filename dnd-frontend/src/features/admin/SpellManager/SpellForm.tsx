@@ -12,11 +12,11 @@
   Divider,
 } from "@mantine/core";
 import { useState } from "react";
-import { useAuthStore } from "@store/auth/authStore";
 import type { Spell } from "@appTypes/Spell";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { createSpell } from "@services/spellService";
+import { useToken } from "@store/auth/authSelectors";
 
 const DAMAGE_TYPES = [
   "Acid", "Cold", "Fire", "Force", "Lightning", "Necrotic",
@@ -38,7 +38,7 @@ const SCHOOLS = [
 ];
 
 export function SpellForm() {
-  const token = useAuthStore((s) => s.token);
+  const token = useToken();
 
   const [spell, setSpell] = useState<Spell>({
     index: "",

@@ -4,16 +4,16 @@ import { IconTrash } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { useAuthStore } from "@store/auth/authStore";
 import { useNavigate } from "react-router-dom";
 import { deleteCharacter } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
 import { showNotification } from "@components/Notification/Notification";
+import { useToken } from "@store/auth/authSelectors";
 
 export function DeleteCharacterSection() {
   const character = useCurrentCharacter();
   const { clearStore } = useCharacterCoreActions();
-  const token = useAuthStore((s) => s.token);
+  const token = useToken();
   const navigate = useNavigate();
 
   const [confirmText, setConfirmText] = useState("");
