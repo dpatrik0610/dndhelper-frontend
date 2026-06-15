@@ -14,7 +14,6 @@ import { InventorySection } from "./InventorySection";
 import { InventoryItemsList } from "./InventoryItemsList";
 import { InventoryItemsGrid } from "./InventoryItemsGrid";
 import { useFilteredItems } from "@features/inventory/hooks/useFilteredItems";
-import { BaseTransition } from "@components/animations/BaseTransition";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 
 interface InventoryBoxProps {
@@ -169,24 +168,23 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
             : SectionColor.Grape
         }
       >
-          <BaseTransition show={viewMode === "list"}>
-            <InventoryItemsList
-              filteredItems={filteredItems}
-              totalItemsCount={currentInventory.items?.length ?? 0}
-              inventoryId={inventory.id!}
-              onRemove={handleRemoveClick}
-              onMove={handleMoveClick}
-              />
-          </BaseTransition>
-          <BaseTransition show={viewMode === "cards"}>
-            <InventoryItemsGrid
-              filteredItems={filteredItems}
-              totalItemsCount={currentInventory.items?.length ?? 0}
-              inventoryId={inventory.id!}
-              onRemove={handleRemoveClick}
-              onMove={handleMoveClick}
-              />
-          </BaseTransition>
+        {viewMode === "list" ? (
+          <InventoryItemsList
+            filteredItems={filteredItems}
+            totalItemsCount={currentInventory.items?.length ?? 0}
+            inventoryId={inventory.id!}
+            onRemove={handleRemoveClick}
+            onMove={handleMoveClick}
+          />
+        ) : (
+          <InventoryItemsGrid
+            filteredItems={filteredItems}
+            totalItemsCount={currentInventory.items?.length ?? 0}
+            inventoryId={inventory.id!}
+            onRemove={handleRemoveClick}
+            onMove={handleMoveClick}
+          />
+        )}
       </InventorySection>
     </>
   );
