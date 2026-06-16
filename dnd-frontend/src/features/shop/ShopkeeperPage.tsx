@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Container, Title, Text, SimpleGrid, Card, Group, Stack, Button, Select, NumberInput, Modal, Loader, Center, Box, Divider, Badge, ActionIcon, ThemeIcon, Menu, UnstyledButton } from "@mantine/core";
-import { IconBuildingStore, IconSearch, IconChevronDown, IconDotsVertical, IconPackage, IconCoins } from "@tabler/icons-react";
+import { IconBuildingStore, IconSearch, IconChevronDown, IconDotsVertical, IconPackage, IconCoins, IconRefresh } from "@tabler/icons-react";
 import { useShopStore } from "@store/shop/shopStore";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
@@ -108,6 +108,34 @@ export default function ShopkeeperPage() {
             });
         } catch (err) {
             console.error("Failed to refresh player inventories", err);
+        }
+    };
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    const handleRefresh = async () => {
+        if (!activeCharacter) return;
+        setRefreshing(true);
+        try {
+            if (activeCharacter.campaignId) {
+                await loadShops(activeCharacter.campaignId);
+            }
+            await refreshPlayerInventories();
+            if (activeShop?.inventoryId) {
+                const data = await getInventory(activeShop.inventoryId);
+                const exists = useInventoryStore.getState().inventories.some(i => i.id === data.id);
+                if (exists) {
+                    updateInventory({ ...data, id: data.id! });
+                } else {
+                    addInventory(data);
+                }
+            }
+            showNotification({ title: "Shopkeeper Refreshed", message: "Shops and inventories updated successfully.", color: SectionColor.Green });
+        } catch (err) {
+            console.error("Failed to refresh shopkeeper data", err);
+            showNotification({ title: "Refresh Failed", message: "Failed to update shops and inventories.", color: SectionColor.Red });
+        } finally {
+            setRefreshing(false);
         }
     };
 
@@ -239,108 +267,125 @@ export default function ShopkeeperPage() {
                             </div>
                         </Group>
 
-                        {/* SHOP SELECTOR DROPDOWN */}
-                        {visibleShops.length > 1 && (
-                            <Box style={{ minWidth: "160px", maxWidth: "240px" }}>
-                                <Menu shadow="md" width={240} position="bottom-end" styles={{
-                                    dropdown: {
-                                        backgroundColor: "#1c1917",
-                                        border: "1px solid rgba(245, 158, 11, 0.2)",
-                                        padding: "4px",
-                                        borderRadius: "8px",
-                                        boxShadow: "0 8px 24px rgba(0,0,0,0.5)"
-                                    },
-                                    item: {
-                                        backgroundColor: "transparent",
-                                        padding: 0,
-                                        "&[data-hovered]": {
-                                            backgroundColor: "transparent"
+                        <Group gap="xs" style={{ marginLeft: "auto" }}>
+                            
+                            {/* RELOAD ICON */}
+                            <ActionIcon 
+                                variant="light" 
+                                color="yellow" 
+                                size="lg" 
+                                onClick={handleRefresh} 
+                                loading={refreshing} 
+                                title="Refresh shops and inventories"
+                                style={{
+                                    border: "1px solid rgba(245, 158, 11, 0.25)",
+                                }}
+                            >
+                                <IconRefresh size={18} />
+                            </ActionIcon>
+                            {/* SHOP SELECTOR DROPDOWN */}
+                            {visibleShops.length > 1 && (
+                                <Box style={{ minWidth: "160px", maxWidth: "240px" }}>
+                                    <Menu shadow="md" width={240} position="bottom-end" styles={{
+                                        dropdown: {
+                                            backgroundColor: "#1c1917",
+                                            border: "1px solid rgba(245, 158, 11, 0.2)",
+                                            padding: "4px",
+                                            borderRadius: "8px",
+                                            boxShadow: "0 8px 24px rgba(0,0,0,0.5)"
+                                        },
+                                        item: {
+                                            backgroundColor: "transparent",
+                                            padding: 0,
+                                            "&[data-hovered]": {
+                                                backgroundColor: "transparent"
+                                            }
                                         }
-                                    }
-                                }}>
-                                    <Menu.Target>
-                                        <UnstyledButton style={{
-                                            backgroundColor: "rgba(245, 158, 11, 0.1)",
-                                            border: "1px solid rgba(245, 158, 11, 0.25)",
-                                            padding: "8px 12px",
-                                            borderRadius: "6px",
-                                            transition: "all 0.2s ease",
-                                            width: "100%",
-                                            display: "flex",
-                                            alignItems: "center"
-                                        }}>
-                                            <Group gap="xs" wrap="nowrap" align="center" justify="space-between" style={{ width: "100%" }}>
-                                                <div style={{ textAlign: "left", lineHeight: 1.1 }}>
-                                                    <Text fw={800} c="amber.5" style={{ letterSpacing: 0.8, fontSize: "9px", textTransform: "uppercase" }}>
-                                                        {activeShop ? "VISITING" : "SELECT SHOP"}
-                                                    </Text>
-                                                    <Text fw={700} size="xs" c="white" lineClamp={1}>
-                                                        {activeShop ? activeShop.name : "Choose Stall..."}
-                                                    </Text>
-                                                </div>
-                                                <IconChevronDown size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
-                                            </Group>
-                                        </UnstyledButton>
-                                    </Menu.Target>
+                                    }}>
+                                        <Menu.Target>
+                                            <UnstyledButton style={{
+                                                backgroundColor: "rgba(245, 158, 11, 0.1)",
+                                                border: "1px solid rgba(245, 158, 11, 0.25)",
+                                                padding: "8px 12px",
+                                                borderRadius: "6px",
+                                                transition: "all 0.2s ease",
+                                                width: "100%",
+                                                display: "flex",
+                                                alignItems: "center"
+                                            }}>
+                                                <Group gap="xs" wrap="nowrap" align="center" justify="space-between" style={{ width: "100%" }}>
+                                                    <div style={{ textAlign: "left", lineHeight: 1.1 }}>
+                                                        <Text fw={800} c="amber.5" style={{ letterSpacing: 0.8, fontSize: "9px", textTransform: "uppercase" }}>
+                                                            {activeShop ? "VISITING" : "SELECT SHOP"}
+                                                        </Text>
+                                                        <Text fw={700} size="xs" c="white" lineClamp={1}>
+                                                            {activeShop ? activeShop.name : "Choose Stall..."}
+                                                        </Text>
+                                                    </div>
+                                                    <IconChevronDown size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
+                                                </Group>
+                                            </UnstyledButton>
+                                        </Menu.Target>
 
-                                    <Menu.Dropdown>
-                                        <Stack gap="xs" p={4}>
-                                            {visibleShops.map(s => {
-                                                const isSelected = s.id === selectedShopId;
-                                                return (
-                                                    <Menu.Item key={s.id} onClick={() => setSelectedShopId(s.id!)}>
-                                                        <Card 
-                                                            p="xs"
-                                                            bg={isSelected ? "rgba(245, 158, 11, 0.15)" : "rgba(20, 17, 15, 0.5)"}
-                                                            style={{ 
-                                                                cursor: "pointer", 
-                                                                width: "100%",
-                                                                borderColor: isSelected ? "#f59e0b" : "rgba(255,255,255,0.05)",
-                                                                boxShadow: isSelected ? "0 0 10px rgba(245, 158, 11, 0.2)" : "none",
-                                                                transition: "all 0.2s ease",
-                                                                borderRadius: 6,
-                                                                border: "1px solid"
-                                                            }}
-                                                        >
-                                                            <Group justify="space-between" align="center" wrap="nowrap">
-                                                                <div style={{ overflow: "hidden" }}>
-                                                                    <Text fw={700} c="white" size="xs" lineClamp={1}>{s.name}</Text>
-                                                                    {s.description && (
-                                                                        <Text size="xxs" c="dimmed" lineClamp={1}>{s.description}</Text>
+                                        <Menu.Dropdown>
+                                            <Stack gap="xs" p={4}>
+                                                {visibleShops.map(s => {
+                                                    const isSelected = s.id === selectedShopId;
+                                                    return (
+                                                        <Menu.Item key={s.id} onClick={() => setSelectedShopId(s.id!)}>
+                                                            <Card 
+                                                                p="xs"
+                                                                bg={isSelected ? "rgba(245, 158, 11, 0.15)" : "rgba(20, 17, 15, 0.5)"}
+                                                                style={{ 
+                                                                    cursor: "pointer", 
+                                                                    width: "100%",
+                                                                    borderColor: isSelected ? "#f59e0b" : "rgba(255,255,255,0.05)",
+                                                                    boxShadow: isSelected ? "0 0 10px rgba(245, 158, 11, 0.2)" : "none",
+                                                                    transition: "all 0.2s ease",
+                                                                    borderRadius: 6,
+                                                                    border: "1px solid"
+                                                                }}
+                                                            >
+                                                                <Group justify="space-between" align="center" wrap="nowrap">
+                                                                    <div style={{ overflow: "hidden" }}>
+                                                                        <Text fw={700} c="white" size="xs" lineClamp={1}>{s.name}</Text>
+                                                                        {s.description && (
+                                                                            <Text size="xxs" c="dimmed" lineClamp={1}>{s.description}</Text>
+                                                                        )}
+                                                                    </div>
+                                                                    {isSelected && (
+                                                                        <Text fw={800} c="amber.5" style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                                                                            Visiting
+                                                                        </Text>
                                                                     )}
-                                                                </div>
-                                                                {isSelected && (
-                                                                    <Text fw={800} c="amber.5" style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: 0.5 }}>
-                                                                        Visiting
-                                                                    </Text>
-                                                                )}
-                                                            </Group>
-                                                        </Card>
-                                                    </Menu.Item>
-                                                );
-                                            })}
-                                        </Stack>
-                                    </Menu.Dropdown>
-                                </Menu>
-                            </Box>
-                        )}
+                                                                </Group>
+                                                            </Card>
+                                                        </Menu.Item>
+                                                    );
+                                                })}
+                                            </Stack>
+                                        </Menu.Dropdown>
+                                    </Menu>
+                                </Box>
+                            )}
 
-                        {/* SINGLE SHOP PLACARD */}
-                        {visibleShops.length === 1 && activeShop && (
-                            <Box style={{
-                                backgroundColor: "rgba(245, 158, 11, 0.08)",
-                                border: "1px solid rgba(245, 158, 11, 0.18)",
-                                padding: "8px 12px",
-                                borderRadius: "6px",
-                                minWidth: "120px",
-                                maxWidth: "240px"
-                            }}>
-                                <div style={{ textAlign: "left", lineHeight: 1.1 }}>
-                                    <Text fw={800} c="amber.5" style={{ letterSpacing: 0.8, fontSize: "9px", textTransform: "uppercase" }}>VISITING</Text>
-                                    <Text fw={700} size="xs" c="white">{activeShop.name}</Text>
-                                </div>
-                            </Box>
-                        )}
+                            {/* SINGLE SHOP PLACARD */}
+                            {visibleShops.length === 1 && activeShop && (
+                                <Box style={{
+                                    backgroundColor: "rgba(245, 158, 11, 0.08)",
+                                    border: "1px solid rgba(245, 158, 11, 0.18)",
+                                    padding: "8px 12px",
+                                    borderRadius: "6px",
+                                    minWidth: "120px",
+                                    maxWidth: "240px"
+                                }}>
+                                    <div style={{ textAlign: "left", lineHeight: 1.1 }}>
+                                        <Text fw={800} c="amber.5" style={{ letterSpacing: 0.8, fontSize: "9px", textTransform: "uppercase" }}>VISITING</Text>
+                                        <Text fw={700} size="xs" c="white">{activeShop.name}</Text>
+                                    </div>
+                                </Box>
+                            )}
+                        </Group>
                     </Group>
                 </Card>
 
