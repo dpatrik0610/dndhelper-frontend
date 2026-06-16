@@ -7,7 +7,7 @@ import { handleSellRequestChange } from "./handlers/sellRequestChangeHandler";
 
 export class EntitySyncManager {
   static handleEntityChange(event: EntityChangeEvent) {
-    console.log(`Entity sync: ${event.entityType} ${event.action} by ${event.changedBy}`);
+    // console.log(`Entity sync: ${event.entityType} ${event.action} by ${event.changedBy}`);
 
     switch (event.entityType) {
       case "Character":

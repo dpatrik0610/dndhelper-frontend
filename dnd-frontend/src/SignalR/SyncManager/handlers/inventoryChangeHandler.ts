@@ -3,6 +3,7 @@ import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
 import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
+import { useAuthStore } from "@store/auth/authStore";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 
@@ -14,6 +15,11 @@ export function handleInventoryChange(event: EntityChangeEvent) {
   const adminSelectedCharId = useAdminCharacterStore.getState().selectedId;
 
   const adminCurrencyStore = useAdminCurrencyStore.getState();
+
+  const currentUser = useAuthStore.getState();
+  const isCurrentUser =
+    event.changedBy &&
+    (event.changedBy === currentUser.username || event.changedBy === currentUser.id);
 
   switch (event.action) {
     case "created": {
@@ -45,12 +51,14 @@ export function handleInventoryChange(event: EntityChangeEvent) {
         adminCurrencyStore.applyInventoryUpdate(newInventory);
       }
 
-      showNotification({
-        title: "Inventory Created",
-        message: `${newInventory.name} was created by ${event.changedBy}`,
-        color: "green",
-        autoClose: 3000,
-      });
+      if (!isCurrentUser) {
+        showNotification({
+          title: "Inventory Created",
+          message: `${newInventory.name} was created by ${event.changedBy}`,
+          color: "green",
+          autoClose: 3000,
+        });
+      }
       break;
     }
 
@@ -86,12 +94,14 @@ export function handleInventoryChange(event: EntityChangeEvent) {
         adminCurrencyStore.applyInventoryUpdate(updatedInventory);
       }
 
-      showNotification({
-        title: "Inventory Updated",
-        message: `${updatedInventory.name} was updated by ${event.changedBy}`,
-        color: "blue",
-        autoClose: 3000,
-      });
+      if (!isCurrentUser) {
+        showNotification({
+          title: "Inventory Updated",
+          message: `${updatedInventory.name} was updated by ${event.changedBy}`,
+          color: "blue",
+          autoClose: 3000,
+        });
+      }
       break;
     }
 
@@ -106,19 +116,23 @@ export function handleInventoryChange(event: EntityChangeEvent) {
       inventoryStore.removeInventory(id);
       if (currentSelected?.id === id) {
         inventoryStore.selectInventory(null);
-        showNotification({
-          title: "Inventory Deleted",
-          message: `Your inventory was deleted by ${event.changedBy}`,
-          color: "red",
-          autoClose: 5000,
-        });
+        if (!isCurrentUser) {
+          showNotification({
+            title: "Inventory Deleted",
+            message: `Your inventory was deleted by ${event.changedBy}`,
+            color: "red",
+            autoClose: 5000,
+          });
+        }
       } else {
-        showNotification({
-          title: "Inventory Deleted",
-          message: `Inventory was deleted by ${event.changedBy}`,
-          color: "red",
-          autoClose: 3000,
-        });
+        if (!isCurrentUser) {
+          showNotification({
+            title: "Inventory Deleted",
+            message: `Inventory was deleted by ${event.changedBy}`,
+            color: "red",
+            autoClose: 3000,
+          });
+        }
       }
 
       // --- Admin inventory store ---

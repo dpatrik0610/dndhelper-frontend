@@ -1,14 +1,20 @@
 import { showNotification } from "@components/Notification/Notification";
 import { useShopStore } from "@store/shop/shopStore";
 import { useAdminShopStore } from "@store/admin/adminShopStore";
+import { useAuthStore } from "@store/auth/authStore";
 import type { Shop } from "@appTypes/Shop/Shop";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 
 export function handleShopChange(event: EntityChangeEvent) {
-  console.log("Shop change event received:", event);
+  // console.log("Shop change event received:", event);
 
   const shopStore = useShopStore.getState();
   const adminShopStore = useAdminShopStore.getState();
+
+  const currentUser = useAuthStore.getState();
+  const isCurrentUser =
+    event.changedBy &&
+    (event.changedBy === currentUser.username || event.changedBy === currentUser.id);
 
   // If action is deleted, or action is updated but data is null/undefined, treat as a deletion
   const isDeletion = event.action === "deleted" || (event.action === "updated" && !event.data);
@@ -23,12 +29,14 @@ export function handleShopChange(event: EntityChangeEvent) {
     // Update admin shop store
     adminShopStore.syncShopDeleted(id);
 
-    showNotification({
-      title: "Shop Deleted",
-      message: `A shop was deleted by ${event.changedBy}`,
-      color: "red",
-      autoClose: 3000,
-    });
+    if (!isCurrentUser) {
+      showNotification({
+        title: "Shop Deleted",
+        message: `A shop was deleted by ${event.changedBy}`,
+        color: "red",
+        autoClose: 3000,
+      });
+    }
     return;
   }
 
@@ -44,12 +52,14 @@ export function handleShopChange(event: EntityChangeEvent) {
       // Update admin shop store
       adminShopStore.syncShopUpdated(updatedShop);
 
-      showNotification({
-        title: event.action === "created" ? "Shop Created" : "Shop Updated",
-        message: `${updatedShop.name} was ${event.action} by ${event.changedBy}`,
-        color: "blue",
-        autoClose: 3000,
-      });
+      if (!isCurrentUser) {
+        showNotification({
+          title: event.action === "created" ? "Shop Created" : "Shop Updated",
+          message: `${updatedShop.name} was ${event.action} by ${event.changedBy}`,
+          color: "blue",
+          autoClose: 3000,
+        });
+      }
       break;
     }
   }

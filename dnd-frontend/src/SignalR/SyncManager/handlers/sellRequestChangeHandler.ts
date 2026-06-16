@@ -1,12 +1,18 @@
 import { showNotification } from "@components/Notification/Notification";
 import { useAdminShopStore } from "@store/admin/adminShopStore";
+import { useAuthStore } from "@store/auth/authStore";
 import type { SellRequest } from "@appTypes/Shop/Shop";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 
 export function handleSellRequestChange(event: EntityChangeEvent) {
-  console.log("SellRequest change event received:", event);
+  // console.log("SellRequest change event received:", event);
 
   const adminShopStore = useAdminShopStore.getState();
+
+  const currentUser = useAuthStore.getState();
+  const isCurrentUser =
+    event.changedBy &&
+    (event.changedBy === currentUser.username || event.changedBy === currentUser.id);
 
   switch (event.action) {
     case "created":
@@ -32,12 +38,14 @@ export function handleSellRequestChange(event: EntityChangeEvent) {
         notificationColor = "red";
       }
 
-      showNotification({
-        title: notificationTitle,
-        message: `Sell request was updated by ${event.changedBy}`,
-        color: notificationColor,
-        autoClose: 3000,
-      });
+      if (!isCurrentUser) {
+        showNotification({
+          title: notificationTitle,
+          message: `Sell request was updated by ${event.changedBy}`,
+          color: notificationColor,
+          autoClose: 3000,
+        });
+      }
       break;
     }
   }

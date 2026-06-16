@@ -1,5 +1,6 @@
-﻿import { useCharacterStore } from "@store/character/characterStore";
+import { useCharacterStore } from "@store/character/characterStore";
 import { useInitiativeTrackerStore } from "@store/admin/initiativeTrackerStore";
+import { useAuthStore } from "@store/auth/authStore";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 import type { Character } from "@appTypes/Character/Character";
 import { showNotification } from "@components/Notification/Notification";
@@ -10,6 +11,11 @@ export function handleCharacterChange(event: EntityChangeEvent) {
   const existing = characterStore.characters.find((c) => c.id === event.entityId);
   const hasSameTimestamp = (a?: Character | null, b?: Character | null) =>
     Boolean(a?.updatedAt && b?.updatedAt && a.updatedAt === b.updatedAt);
+
+  const currentUser = useAuthStore.getState();
+  const isCurrentUser =
+    event.changedBy &&
+    (event.changedBy === currentUser.username || event.changedBy === currentUser.id);
 
   const syncInitiativeTracker = (character: Character) => {
     const { rows, updateEntry } = useInitiativeTrackerStore.getState();
@@ -47,12 +53,14 @@ export function handleCharacterChange(event: EntityChangeEvent) {
 
       characterStore.setCharacters([...characterStore.characters, newCharacter]);
 
-      showNotification({
-        title: "Character Created",
-        message: `${newCharacter.name} was created by ${event.changedBy}`,
-        color: "green",
-        autoClose: 3000,
-      });
+      if (!isCurrentUser) {
+        showNotification({
+          title: "Character Created",
+          message: `${newCharacter.name} was created by ${event.changedBy}`,
+          color: "green",
+          autoClose: 3000,
+        });
+      }
       break;
     }
 
@@ -72,12 +80,14 @@ export function handleCharacterChange(event: EntityChangeEvent) {
         if (hasSameTimestamp(currentCharacter, updatedCharacter)) break;
         characterStore.setCharacter(updatedCharacter);
 
-        showNotification({
-          title: "Character Updated",
-          message: `${updatedCharacter.name} was updated by ${event.changedBy}`,
-          color: "blue",
-          autoClose: 3000,
-        });
+        if (!isCurrentUser) {
+          showNotification({
+            title: "Character Updated",
+            message: `${updatedCharacter.name} was updated by ${event.changedBy}`,
+            color: "blue",
+            autoClose: 3000,
+          });
+        }
       }
       break;
     }
@@ -92,12 +102,14 @@ export function handleCharacterChange(event: EntityChangeEvent) {
       if (currentCharacter?.id === event.entityId) {
         characterStore.setCharacter(null);
 
-        showNotification({
-          title: "Character Deleted",
-          message: `Your character was deleted by ${event.changedBy}`,
-          color: "red",
-          autoClose: 5000,
-        });
+        if (!isCurrentUser) {
+          showNotification({
+            title: "Character Deleted",
+            message: `Your character was deleted by ${event.changedBy}`,
+            color: "red",
+            autoClose: 5000,
+          });
+        }
       }
       break;
     }

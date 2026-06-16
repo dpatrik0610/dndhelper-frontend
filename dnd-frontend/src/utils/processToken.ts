@@ -12,10 +12,10 @@ import { decodeToken } from "./decodeToken";
                 username: decoded.username || "",
                 roles: decoded.roles || [],
             });
-            console.log(`Auth data stored in store.`)
+            // console.log(`Auth data stored in store.`)
         }
         catch(ex) {
-            console.log(`Error setting auth data: ${ex}`)
+            console.error(`Error setting auth data: ${ex}`)
             throw Error(`${ex}`);
         }
     }

@@ -41,10 +41,10 @@ export async function loadInventoryById(inventoryId: string) {
 
     if (existing) {
       store.updateInventory({ ...inventory, id: inventoryId });
-      console.log(`🔄 Updated inventory: ${inventory.name ?? inventoryId}`);
+      // console.log(`🔄 Updated inventory: ${inventory.name ?? inventoryId}`);
     } else {
       store.addInventory(inventory);
-      console.log(`Loaded single inventory: ${inventory.name ?? inventoryId}`);
+      // console.log(`Loaded single inventory: ${inventory.name ?? inventoryId}`);
     }
 
     return inventory;
