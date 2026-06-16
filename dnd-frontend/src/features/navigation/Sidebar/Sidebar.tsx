@@ -3,7 +3,7 @@ import { Drawer, Stack, useMantineTheme } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUsername, useIsAdmin } from "@store/auth/authSelectors";
 import { handleLogout } from "@utils/handleLogout";
-import { tabs, type Section, type TabItem } from "./SidebarTabs";
+import { tabs, type TabItem } from "./SidebarTabs";
 
 import { SidebarHeader } from "./components/SidebarHeader";
 import { NavSection } from "./components/NavSection";
@@ -26,13 +26,9 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
   const username = useUsername() ?? "NOT LOGGED IN";
   const isAdmin = useIsAdmin();
 
-  const [section] = useState<Section>("character");
-  const encounterLinks: TabItem[] = tabs.encounter;
-  const [adminOpen, setAdminOpen] = useState(true);
-
   const activeLabel = useMemo(() => {
     const normalizedPath = location.pathname === "/" ? "/home" : location.pathname;
-    const allTabs = [...tabs.character, ...tabs.encounter, ...tabs.admin, /*...tabs.settings*/];
+    const allTabs = [...tabs.home, ...tabs.admin, ...tabs.character, ...tabs.campaign];
     const match = allTabs.find((item) => normalizedPath.startsWith(item.link));
     return match?.label ?? "";
   }, [location.pathname]);
@@ -43,8 +39,10 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
   };
   const themeTokens = sidebarThemes[themeVariant] ?? sidebarThemes.midnight;
 
-  const currentLinks: TabItem[] = tabs[section];
+  const homeLinks: TabItem[] = tabs.home;
   const adminLinks: TabItem[] = tabs.admin;
+  const characterLinks: TabItem[] = tabs.character;
+  const campaignLinks: TabItem[] = tabs.campaign;
   // const settingsLinks: TabItem[] = tabs["settings"];
 
   const initials = username
@@ -94,15 +92,8 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
           />
 
           <NavSection
-            label="Character"
-            items={currentLinks}
-            activeLabel={activeLabel}
-            onNavigate={handleNavigate}
-          />
-
-          <NavSection
-            label="Encounter"
-            items={encounterLinks}
+            label=""
+            items={homeLinks}
             activeLabel={activeLabel}
             onNavigate={handleNavigate}
           />
@@ -113,10 +104,22 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
               items={adminLinks}
               activeLabel={activeLabel}
               onNavigate={handleNavigate}
-              open={adminOpen}
-              onToggle={() => setAdminOpen((o) => !o)}
             />
           )}
+
+          <NavSection
+            label="Character"
+            items={characterLinks}
+            activeLabel={activeLabel}
+            onNavigate={handleNavigate}
+          />
+
+          <NavSection
+            label="Campaign"
+            items={campaignLinks}
+            activeLabel={activeLabel}
+            onNavigate={handleNavigate}
+          />
 
           {/* <NavSection
             label="Settings (coming soon)"

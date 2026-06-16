@@ -1,6 +1,6 @@
-import { IconBook2, IconDashboard, IconHistory, IconHome, IconMessageChatbot, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore } from "@tabler/icons-react";
+import { IconBook2, IconDashboard, IconDice5, IconHome, IconMessageChatbot, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore } from "@tabler/icons-react";
 
-export type Section = "character" | "encounter" | "admin";
+export type Section = "home" | "admin" | "character" | "campaign";
 
 export interface TabItem {
   link: string;
@@ -10,21 +10,24 @@ export interface TabItem {
 }
 
 export const tabs: Record<Section, TabItem[]> = {
-  character: [
+  home: [
     { link: "/home", label: "Home", icon: IconHome },
-    { link: "/profile", label: "Profile", icon: IconUsers },
-    { link: "/spells", label: "Spellbook", icon: IconSparkles },
-    { link: "/rules", label: "Rules", icon: IconBook2 },
-    { link: "/shop", label: "Shopkeeper", icon: IconBuildingStore },
-    { link: "/notes", label: "Notes", icon: IconNotes },
-    { link: "/roll-history", label: "Roll History", icon: IconHistory },
-  ],
-  encounter: [
-    { link: "/encounter-room", label: "Encounter Rooms", icon: IconSwords },
   ],
   admin: [
     { link: "/dashboard", label: "Dashboard", icon: IconDashboard },
     { link: "/ai-assistant", label: "AI Assistant", icon: IconMessageChatbot },
   ],
+  character: [
+    { link: "/profile", label: "Profile", icon: IconUsers },
+    { link: "/spells", label: "Spellbook", icon: IconSparkles },
+    { link: "/notes", label: "Notes", icon: IconNotes },
+    { link: "/roll-history", label: "Rolls", icon: IconDice5 },
+  ],
+  campaign: [
+    { link: "/shop", label: "Shopkeeper", icon: IconBuildingStore },
+    { link: "/encounter-room", label: "Encounter", icon: IconSwords },
+    { link: "/rules", label: "Rules", icon: IconBook2 },
+  ],
   //settings: [],
 };
+

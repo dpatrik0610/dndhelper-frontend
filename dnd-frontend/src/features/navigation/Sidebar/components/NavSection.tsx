@@ -33,7 +33,7 @@ export function NavSection({ label, items, activeLabel, onNavigate, collapsible,
   if (!collapsible) {
     return (
       <Box>
-        <Text className={classes.sectionLabel}>{label}</Text>
+        {label && <Text className={classes.sectionLabel}>{label}</Text>}
         {sectionBody}
       </Box>
     );
