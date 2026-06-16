@@ -47,7 +47,7 @@ export function MetaPanel() {
       : currencies
           .slice(0, 3)
           .map((c) => `${c.amount} ${c.currencyCode}`)
-          .join(" Â· ");
+          .join(" ");
 
   const handleSyncLinks = async () => {
     if (!selected?.id) return;
@@ -105,14 +105,12 @@ export function MetaPanel() {
           <Text fw={700} size="sm" c="white" className={styles.metaBarTitle}>
             {selected.name || "Unnamed"}
           </Text>
-          <Text size="xs" c="dimmed" className={styles.metaBarDivider}>
-            Â·
-          </Text>
+          <IconUserCog size={14} color="rgba(255,255,255,0.75)" />
           <Text size="xs" c="dimmed" className={styles.metaBarSegment} title={ownerCharacters.map((c) => c.name).join(", ")}>
             {ownerSummary}
           </Text>
           <Text size="xs" c="dimmed" className={styles.metaBarDivider}>
-            Â·
+            <IconCoin size={14} color={SectionColor.Orange} />
           </Text>
           <Text size="xs" c="dimmed" className={styles.metaBarSegment}>
             {currencySummary}

@@ -25,7 +25,7 @@ export function BasicInfoSection() {
     </Group>
   );
 
-  // â­ Auto-compute proficiency bonus from level
+  // Auto-compute proficiency bonus from level
   useEffect(() => {
     const pb = Math.floor((characterForm.level - 1) / 4) + 2;
     if (pb !== characterForm.proficiencyBonus) {

@@ -29,6 +29,7 @@ export interface SellRequest {
     sourceInventoryId?: string;
     quantity: number;
     offeredPriceGp: number;
+    isSteal?: boolean;
     status?: SellRequestStatus;
     ownerIds?: string[];
     createdAt?: string;

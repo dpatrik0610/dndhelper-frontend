@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Container, Title, Text, SimpleGrid, Card, Group, Stack, Button, Select, NumberInput, Modal, Loader, Center, Box, Divider, Badge, ActionIcon, ThemeIcon } from "@mantine/core";
-import { IconBuildingStore, IconSearch, IconCoins } from "@tabler/icons-react";
+import { Container, Title, Text, SimpleGrid, Card, Group, Stack, Button, Select, NumberInput, Modal, Loader, Center, Box, Divider, Badge, ActionIcon, ThemeIcon, Menu, UnstyledButton } from "@mantine/core";
+import { IconBuildingStore, IconSearch, IconChevronDown, IconDotsVertical, IconPackage, IconCoins } from "@tabler/icons-react";
 import { useShopStore } from "@store/shop/shopStore";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
@@ -25,10 +25,12 @@ export default function ShopkeeperPage() {
     const [buyModalOpen, setBuyModalOpen] = useState(false);
     const [sellModalOpen, setSellModalOpen] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+    const [stealModalOpen, setStealModalOpen] = useState(false);
 
     const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(null);
     const [selectedDetailsEquipmentId, setSelectedDetailsEquipmentId] = useState<string | null>(null);
     const [buyQuantity, setBuyQuantity] = useState(1);
+    const [stealQuantity, setStealQuantity] = useState(1);
 
     const [sellQuantity, setSellQuantity] = useState(1);
     const [askedGp, setAskedGp] = useState<number>(0);
@@ -79,7 +81,7 @@ export default function ShopkeeperPage() {
     }, [activeCharacter?.inventoryIds, selectedInventoryId]);
 
     useEffect(() => {
-        if (visibleShops.length === 1 && selectedShopId !== visibleShops[0].id) {
+        if (visibleShops.length > 0 && !selectedShopId) {
             setSelectedShopId(visibleShops[0].id!);
         }
     }, [visibleShops, selectedShopId]);
@@ -174,6 +176,38 @@ export default function ShopkeeperPage() {
         setActionLoading(false);
     };
 
+    const handleStealOpen = (equipmentId: string) => {
+        setSelectedEquipmentId(equipmentId);
+        setStealQuantity(1);
+        setStealModalOpen(true);
+    };
+
+    const executeSteal = async () => {
+        if(!activeShop || !selectedEquipmentId || !activeCharacter) return;
+        setActionLoading(true);
+        try {
+            await submitSellRequest({
+                campaignId: activeCharacter.campaignId!,
+                shopId: activeShop.id!,
+                characterId: activeCharacter.id!,
+                equipmentId: selectedEquipmentId,
+                sourceInventoryId: selectedInventoryId || undefined,
+                quantity: stealQuantity,
+                offeredPriceGp: 0,
+                isSteal: true
+            });
+            showNotification({ title: "Steal Attempt Placed", message: "Your steal request has been logged. DM approval is required.", color: SectionColor.Orange });
+            setStealModalOpen(false);
+
+            if (activeShop?.inventoryId) {
+                getInventory(activeShop.inventoryId).then(data => updateInventory({ ...data, id: data.id! })).catch(console.error);
+            }
+        } catch(e) {
+            // Error handled in store
+        }
+        setActionLoading(false);
+    };
+
     if (!activeCharacter) {
         return <Center mt="20vh"><Text c="dimmed">No active character selected.</Text></Center>;
     }
@@ -204,20 +238,107 @@ export default function ShopkeeperPage() {
                                 <Text size="xs" c="amber.5">A quiet marketplace to trade your gear</Text>
                             </div>
                         </Group>
-                        {activeCharacter && (
-                            <Box bg="rgba(0,0,0,0.3)" p="xs" style={{ borderRadius: 6, border: "1px solid rgba(255,255,255,0.05)" }}>
-                                <Group gap="xs">
-                                    <IconCoins size={16} color="#fbbf24" />
-                                    <CharacterCurrencyArea
-                                        character={activeCharacter}
-                                        containerStyle={{
-                                            background: "transparent",
-                                            border: "none",
-                                            boxShadow: "none",
-                                            padding: 0,
-                                        }}
-                                    />
-                                </Group>
+
+                        {/* SHOP SELECTOR DROPDOWN */}
+                        {visibleShops.length > 1 && (
+                            <Box style={{ minWidth: "160px", maxWidth: "240px" }}>
+                                <Menu shadow="md" width={240} position="bottom-end" styles={{
+                                    dropdown: {
+                                        backgroundColor: "#1c1917",
+                                        border: "1px solid rgba(245, 158, 11, 0.2)",
+                                        padding: "4px",
+                                        borderRadius: "8px",
+                                        boxShadow: "0 8px 24px rgba(0,0,0,0.5)"
+                                    },
+                                    item: {
+                                        backgroundColor: "transparent",
+                                        padding: 0,
+                                        "&[data-hovered]": {
+                                            backgroundColor: "transparent"
+                                        }
+                                    }
+                                }}>
+                                    <Menu.Target>
+                                        <UnstyledButton style={{
+                                            backgroundColor: "rgba(245, 158, 11, 0.1)",
+                                            border: "1px solid rgba(245, 158, 11, 0.25)",
+                                            padding: "8px 12px",
+                                            borderRadius: "6px",
+                                            transition: "all 0.2s ease",
+                                            width: "100%",
+                                            display: "flex",
+                                            alignItems: "center"
+                                        }}>
+                                            <Group gap="xs" wrap="nowrap" align="center" justify="space-between" style={{ width: "100%" }}>
+                                                <div style={{ textAlign: "left", lineHeight: 1.1 }}>
+                                                    <Text fw={800} c="amber.5" style={{ letterSpacing: 0.8, fontSize: "9px", textTransform: "uppercase" }}>
+                                                        {activeShop ? "VISITING" : "SELECT SHOP"}
+                                                    </Text>
+                                                    <Text fw={700} size="xs" c="white" lineClamp={1}>
+                                                        {activeShop ? activeShop.name : "Choose Stall..."}
+                                                    </Text>
+                                                </div>
+                                                <IconChevronDown size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
+                                            </Group>
+                                        </UnstyledButton>
+                                    </Menu.Target>
+
+                                    <Menu.Dropdown>
+                                        <Stack gap="xs" p={4}>
+                                            {visibleShops.map(s => {
+                                                const isSelected = s.id === selectedShopId;
+                                                return (
+                                                    <Menu.Item key={s.id} onClick={() => setSelectedShopId(s.id!)}>
+                                                        <Card 
+                                                            p="xs"
+                                                            bg={isSelected ? "rgba(245, 158, 11, 0.15)" : "rgba(20, 17, 15, 0.5)"}
+                                                            style={{ 
+                                                                cursor: "pointer", 
+                                                                width: "100%",
+                                                                borderColor: isSelected ? "#f59e0b" : "rgba(255,255,255,0.05)",
+                                                                boxShadow: isSelected ? "0 0 10px rgba(245, 158, 11, 0.2)" : "none",
+                                                                transition: "all 0.2s ease",
+                                                                borderRadius: 6,
+                                                                border: "1px solid"
+                                                            }}
+                                                        >
+                                                            <Group justify="space-between" align="center" wrap="nowrap">
+                                                                <div style={{ overflow: "hidden" }}>
+                                                                    <Text fw={700} c="white" size="xs" lineClamp={1}>{s.name}</Text>
+                                                                    {s.description && (
+                                                                        <Text size="xxs" c="dimmed" lineClamp={1}>{s.description}</Text>
+                                                                    )}
+                                                                </div>
+                                                                {isSelected && (
+                                                                    <Text fw={800} c="amber.5" style={{ fontSize: "9px", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                                                                        Visiting
+                                                                    </Text>
+                                                                )}
+                                                            </Group>
+                                                        </Card>
+                                                    </Menu.Item>
+                                                );
+                                            })}
+                                        </Stack>
+                                    </Menu.Dropdown>
+                                </Menu>
+                            </Box>
+                        )}
+
+                        {/* SINGLE SHOP PLACARD */}
+                        {visibleShops.length === 1 && activeShop && (
+                            <Box style={{
+                                backgroundColor: "rgba(245, 158, 11, 0.08)",
+                                border: "1px solid rgba(245, 158, 11, 0.18)",
+                                padding: "8px 12px",
+                                borderRadius: "6px",
+                                minWidth: "120px",
+                                maxWidth: "240px"
+                            }}>
+                                <div style={{ textAlign: "left", lineHeight: 1.1 }}>
+                                    <Text fw={800} c="amber.5" style={{ letterSpacing: 0.8, fontSize: "9px", textTransform: "uppercase" }}>VISITING</Text>
+                                    <Text fw={700} size="xs" c="white">{activeShop.name}</Text>
+                                </div>
                             </Box>
                         )}
                     </Group>
@@ -236,42 +357,6 @@ export default function ShopkeeperPage() {
                             </Text>
                         </Stack>
                     </Center>
-                )}
-
-                {/* SHOP SELECTION TILES */}
-                {visibleShops.length > 1 && (
-                    <Box mb="sm">
-                        <Text size="xs" fw={700} c="amber.5" mb="xs" style={{ letterSpacing: 1, textTransform: "uppercase" }}>Select a Shop to Visit</Text>
-                        <SimpleGrid cols={{ base: 1, sm: 2, md: 3, lg: 4 }} spacing="xs">
-                            {shops.map(s => {
-                                const isSelected = s.id === selectedShopId;
-                                return (
-                                    <Card 
-                                        key={s.id}
-                                        p="xs"
-                                        bg={isSelected ? "rgba(245, 158, 11, 0.15)" : "rgba(20, 17, 15, 0.5)"}
-                                        onClick={() => setSelectedShopId(s.id!)}
-                                        withBorder
-                                        style={{ 
-                                            cursor: "pointer", 
-                                            borderColor: isSelected ? "#f59e0b" : "rgba(255,255,255,0.05)",
-                                            boxShadow: isSelected ? "0 0 10px rgba(245, 158, 11, 0.2)" : "none",
-                                            transition: "all 0.2s ease",
-                                            borderRadius: 6
-                                        }}
-                                    >
-                                        <Group justify="space-between" align="center" wrap="nowrap">
-                                            <div style={{ overflow: "hidden" }}>
-                                                <Text fw={600} c="white" size="xs" lineClamp={1}>{s.name}</Text>
-                                                <Text size="xs" c="dimmed" lineClamp={1}>{s.description || "Trade items on the shelf."}</Text>
-                                            </div>
-                                            {isSelected && <Badge color="yellow" variant="filled" size="xs">Visiting</Badge>}
-                                        </Group>
-                                    </Card>
-                                );
-                            })}
-                        </SimpleGrid>
-                    </Box>
                 )}
 
                 {!activeShop && selectedShopId && (
@@ -295,20 +380,64 @@ export default function ShopkeeperPage() {
 
                                         return (
                                             <Card key={item.equipmentId} bg="rgba(0,0,0,0.3)" p="xs" style={{ border: "1px solid rgba(255,255,255,0.05)", borderRadius: 6 }}>
-                                                <Group justify="space-between" wrap="nowrap" gap="xs">
-                                                    <div style={{ overflow: "hidden" }}>
-                                                        <Text fw={600} c="white" size="sm" lineClamp={1}>{item.equipmentName || eqData.name}</Text>
-                                                        <Group gap="xs">
-                                                            <Text size="xs" c="dimmed">Stock: {item.quantity}</Text>
-                                                            <Badge size="xs" color="yellow" variant="outline" style={{ border: "1px solid rgba(245,158,11,0.3)" }}>
+                                                <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+                                                    <Group gap="sm" style={{ flex: "1 1 200px", overflow: "hidden" }} wrap="nowrap" align="center">
+                                                        {/* [PRICE] Placard */}
+                                                        <Box 
+                                                            style={{ 
+                                                                minWidth: "75px", 
+                                                                textAlign: "center",
+                                                                backgroundColor: "rgba(245, 158, 11, 0.12)",
+                                                                border: "1px solid rgba(245, 158, 11, 0.25)",
+                                                                borderRadius: "6px",
+                                                                padding: "4px 8px",
+                                                                flexShrink: 0
+                                                            }}
+                                                        >
+                                                            <Text size="xs" fw={800} c="amber.5" style={{ whiteSpace: "nowrap" }}>
                                                                 {displayCost}
-                                                            </Badge>
-                                                        </Group>
-                                                    </div>
-                                                    <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+                                                            </Text>
+                                                        </Box>
+
+                                                        {/* [NAME] */}
+                                                        <div style={{ overflow: "hidden", flexGrow: 1 }}>
+                                                            <Text fw={700} c="white" size="sm" lineClamp={1}>
+                                                                {item.equipmentName || eqData.name}
+                                                            </Text>
+                                                        </div>
+
+                                                        {/* [QUANTITY] Stock Badge */}
+                                                        <Badge 
+                                                            size="md" 
+                                                            color="dark" 
+                                                            variant="filled" 
+                                                            style={{ 
+                                                                color: SectionColor.Orange,
+                                                                flexShrink: 0,
+                                                                fontWeight: 800,
+                                                                fontSize: "0.8rem",
+                                                                padding: "4px 10px"
+                                                            }}
+                                                        >
+                                                            {item.quantity} LEFT
+                                                        </Badge>
+                                                    </Group>
+
+                                                    {/* ACTIONS */}
+                                                    {/* Desktop Actions */}
+                                                    <Group gap="xs" wrap="nowrap" visibleFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
                                                         <ActionIcon size="md" variant="subtle" color="amber" onClick={() => handleDetailsOpen(item.equipmentId!)} title="Inspect properties">
                                                             <IconSearch size={18} />
                                                         </ActionIcon>
+                                                        <Button 
+                                                            size="xs" 
+                                                            variant="light" 
+                                                            color="red" 
+                                                            onClick={() => handleStealOpen(item.equipmentId!)}
+                                                            styles={{ root: { fontWeight: 700 } }}
+                                                        >
+                                                            Steal
+                                                        </Button>
                                                         <Button 
                                                             size="xs" 
                                                             variant="filled" 
@@ -319,6 +448,56 @@ export default function ShopkeeperPage() {
                                                             Buy
                                                         </Button>
                                                     </Group>
+
+                                                    {/* Mobile 3-Dots Menu */}
+                                                    <Box hiddenFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
+                                                        <Menu shadow="md" width={160} position="bottom-end" styles={{
+                                                            dropdown: {
+                                                                backgroundColor: "#1c1917",
+                                                                border: "1px solid rgba(245, 158, 11, 0.2)",
+                                                                padding: "4px",
+                                                                borderRadius: "8px"
+                                                            },
+                                                            item: {
+                                                                backgroundColor: "transparent",
+                                                                "&[data-hovered]": {
+                                                                    backgroundColor: "rgba(255, 255, 255, 0.05)"
+                                                                }
+                                                            }
+                                                        }}>
+                                                            <Menu.Target>
+                                                                <ActionIcon size="md" variant="subtle" color="amber">
+                                                                    <IconDotsVertical size={18} />
+                                                                </ActionIcon>
+                                                            </Menu.Target>
+
+                                                            <Menu.Dropdown>
+                                                                <Stack gap="xs" p={4}>
+                                                                    <Menu.Item 
+                                                                        leftSection={<IconSearch size={14} color="#f59e0b" />} 
+                                                                        onClick={() => handleDetailsOpen(item.equipmentId!)}
+                                                                        style={{ color: "white", fontWeight: 600, fontSize: "12px" }}
+                                                                    >
+                                                                        Inspect
+                                                                    </Menu.Item>
+                                                                    <Menu.Item 
+                                                                        leftSection={<IconPackage size={14} color="#ef4444" />} 
+                                                                        onClick={() => handleStealOpen(item.equipmentId!)}
+                                                                        style={{ color: "#f87171", fontWeight: 700, fontSize: "12px" }}
+                                                                    >
+                                                                        Steal
+                                                                    </Menu.Item>
+                                                                    <Menu.Item 
+                                                                        leftSection={<IconBuildingStore size={14} color="#fbbf24" />} 
+                                                                        onClick={() => handleBuyOpen(item.equipmentId!)}
+                                                                        style={{ color: "#fbbf24", fontWeight: 700, fontSize: "12px" }}
+                                                                    >
+                                                                        Buy
+                                                                    </Menu.Item>
+                                                                </Stack>
+                                                            </Menu.Dropdown>
+                                                        </Menu>
+                                                    </Box>
                                                 </Group>
                                             </Card>
                                         )
@@ -354,6 +533,23 @@ export default function ShopkeeperPage() {
                                      );
                                  })()}
                              </Group>
+
+                             {/* ACTIVE CHARACTER CURRENCY (Directly linked to their satchel/bag!) */}
+                             {activeCharacter && (
+                                <Box bg="rgba(0,0,0,0.22)" p="xs" mb="sm" style={{ borderRadius: 6, border: "1px solid rgba(255,255,255,0.04)" }}>
+                                    <Group gap="xs" justify="center">
+                                        <CharacterCurrencyArea
+                                            character={activeCharacter}
+                                            containerStyle={{
+                                                background: "transparent",
+                                                border: "none",
+                                                boxShadow: "none",
+                                                padding: 0,
+                                            }}
+                                        />
+                                    </Group>
+                                </Box>
+                             )}
                              {(!playerInventory || !playerInventory.items || playerInventory.items.length === 0) ? (
                                 <Text c="dimmed" size="xs" py="md">Your satchel is empty.</Text>
                             ) : (
@@ -363,12 +559,34 @@ export default function ShopkeeperPage() {
 
                                          return (
                                              <Card key={item.equipmentId} bg="rgba(0,0,0,0.3)" p="xs" style={{ border: "1px solid rgba(255,255,255,0.05)", borderRadius: 6 }}>
-                                                 <Group justify="space-between" wrap="nowrap" gap="xs">
-                                                     <div style={{ overflow: "hidden" }}>
-                                                         <Text fw={600} c="white" size="sm" lineClamp={1}>{item.equipmentName || eqData?.name}</Text>
-                                                         <Text size="xs" c="dimmed">Carried: {item.quantity}</Text>
-                                                     </div>
-                                                     <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+                                                 <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+                                                     <Group gap="sm" style={{ flex: "1 1 200px", overflow: "hidden" }} wrap="nowrap" align="center">
+                                                         {/* [QUANTITY] Owned Badge */}
+                                                         <Badge 
+                                                             size="md" 
+                                                             color="dark" 
+                                                             variant="filled"
+                                                             style={{ 
+                                                                 color: SectionColor.Orange,
+                                                                 flexShrink: 0,
+                                                                 fontWeight: 800,
+                                                                 fontSize: "0.8rem",
+                                                                 padding: "4px 10px"
+                                                             }}
+                                                         >
+                                                             {item.quantity} Owned
+                                                         </Badge>
+                                                         {/* [NAME] */}
+                                                         <div style={{ overflow: "hidden", flexGrow: 1 }}>
+                                                             <Text fw={700} c="white" size="sm" lineClamp={1}>
+                                                                 {item.equipmentName || eqData?.name}
+                                                             </Text>
+                                                         </div>
+                                                     </Group>
+
+                                                     {/* ACTIONS */}
+                                                     {/* Desktop Actions */}
+                                                     <Group gap="xs" wrap="nowrap" visibleFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
                                                          <ActionIcon size="md" variant="subtle" color="amber" onClick={() => handleDetailsOpen(item.equipmentId!)} title="Inspect properties">
                                                              <IconSearch size={18} />
                                                          </ActionIcon>
@@ -382,6 +600,49 @@ export default function ShopkeeperPage() {
                                                              Sell
                                                          </Button>
                                                      </Group>
+
+                                                     {/* Mobile 3-Dots Menu */}
+                                                     <Box hiddenFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
+                                                         <Menu shadow="md" width={140} position="bottom-end" styles={{
+                                                             dropdown: {
+                                                                 backgroundColor: "#1c1917",
+                                                                 border: "1px solid rgba(245, 158, 11, 0.2)",
+                                                                 padding: "4px",
+                                                                 borderRadius: "8px"
+                                                             },
+                                                             item: {
+                                                                 backgroundColor: "transparent",
+                                                                 "&[data-hovered]": {
+                                                                     backgroundColor: "rgba(255, 255, 255, 0.05)"
+                                                                 }
+                                                             }
+                                                         }}>
+                                                             <Menu.Target>
+                                                                 <ActionIcon size="md" variant="subtle" color="amber">
+                                                                     <IconDotsVertical size={18} />
+                                                                 </ActionIcon>
+                                                             </Menu.Target>
+
+                                                             <Menu.Dropdown>
+                                                                 <Stack gap="xs" p={4}>
+                                                                     <Menu.Item 
+                                                                         leftSection={<IconSearch size={14} color="#f59e0b" />} 
+                                                                         onClick={() => handleDetailsOpen(item.equipmentId!)}
+                                                                         style={{ color: "white", fontWeight: 600, fontSize: "12px" }}
+                                                                     >
+                                                                         Inspect
+                                                                     </Menu.Item>
+                                                                     <Menu.Item 
+                                                                         leftSection={<IconCoins size={14} color="#ea580c" />} 
+                                                                         onClick={() => handleSellOpen(item.equipmentId!)}
+                                                                         style={{ color: "#f97316", fontWeight: 700, fontSize: "12px" }}
+                                                                     >
+                                                                         Sell
+                                                                     </Menu.Item>
+                                                                 </Stack>
+                                                             </Menu.Dropdown>
+                                                         </Menu>
+                                                     </Box>
                                                  </Group>
                                              </Card>
                                          );
@@ -473,48 +734,142 @@ export default function ShopkeeperPage() {
                      }}
                  >
                      <Stack gap="md">
-                         <Text size="sm" c="gray.4">
-                             The item will be removed from your bag and placed in escrow until the DM approves or rejects the sale.
-                         </Text>
+                         {selectedEquipmentId && (() => {
+                             const eq = equipments.find(e => e.id === selectedEquipmentId);
+                             const maxQty = playerInventory?.items?.find(i => i.equipmentId === selectedEquipmentId)?.quantity ?? 1;
+                             return (
+                                 <>
+                                     <Text fw={700} c="white" style={{ textTransform: "uppercase", letterSpacing: 0.5 }}>
+                                         {eq?.name}
+                                     </Text>
+                                     <Text size="sm" c="gray.4">
+                                         The item will be removed from your bag and placed in escrow until the DM approves or rejects the sale.
+                                     </Text>
+                                     <Text size="xs" c="dimmed">
+                                         Max available to sell: {maxQty}
+                                     </Text>
 
-                         <Divider color="rgba(245, 158, 11, 0.15)" />
+                                     <Divider color="rgba(245, 158, 11, 0.15)" />
 
-                         <NumberInput 
-                             label="Quantity to Sell" 
-                             value={sellQuantity} 
-                             onChange={(v) => setSellQuantity(Number(v))} 
-                             min={1} 
-                             styles={{
-                                 input: { backgroundColor: "rgba(0,0,0,0.25)", color: "white", border: "1px solid rgba(245, 158, 11, 0.1)" }
-                             }}
-                         />
+                                     <NumberInput 
+                                         label="Quantity to Sell" 
+                                         value={sellQuantity} 
+                                         onChange={(v) => setSellQuantity(Number(v))} 
+                                         min={1} 
+                                         max={maxQty}
+                                         styles={{
+                                             input: { backgroundColor: "rgba(0,0,0,0.25)", color: "white", border: "1px solid rgba(245, 158, 11, 0.1)" }
+                                         }}
+                                     />
 
-                         <SimpleGrid cols={2} spacing="xs">
-                             <NumberInput 
-                                 label="Asked Gold (gp)" 
-                                 value={askedGp} 
-                                 onChange={(v) => setAskedGp(Number(v))} 
-                                 min={0}
-                                 styles={{
-                                     input: { backgroundColor: "rgba(0,0,0,0.25)", color: "white", border: "1px solid rgba(245, 158, 11, 0.1)" }
-                                 }}
-                             />
-                             <NumberInput 
-                                 label="Asked Silver (sp)" 
-                                 value={askedSp} 
-                                 onChange={(v) => setAskedSp(Number(v))} 
-                                 min={0}
-                                 max={99}
-                                 styles={{
-                                     input: { backgroundColor: "rgba(0,0,0,0.25)", color: "white", border: "1px solid rgba(245, 158, 11, 0.1)" }
-                                 }}
-                             />
-                         </SimpleGrid>
+                                     <SimpleGrid cols={2} spacing="xs">
+                                         <NumberInput 
+                                             label="Asked Gold (gp)" 
+                                             value={askedGp} 
+                                             onChange={(v) => setAskedGp(Number(v))} 
+                                             min={0}
+                                             styles={{
+                                                 input: { backgroundColor: "rgba(0,0,0,0.25)", color: "white", border: "1px solid rgba(245, 158, 11, 0.1)" }
+                                             }}
+                                         />
+                                         <NumberInput 
+                                             label="Asked Silver (sp)" 
+                                             value={askedSp} 
+                                             onChange={(v) => setAskedSp(Number(v))} 
+                                             min={0}
+                                             max={99}
+                                             styles={{
+                                                 input: { backgroundColor: "rgba(0,0,0,0.25)", color: "white", border: "1px solid rgba(245, 158, 11, 0.1)" }
+                                             }}
+                                         />
+                                     </SimpleGrid>
 
-                         <Button color="orange" onClick={executeSell} loading={actionLoading} mt="sm" styles={{ root: { backgroundColor: "#ea580c", color: "white", fontWeight: 700, "&:hover": { backgroundColor: "#c2410c" } } }}>
-                             Submit Offer
-                         </Button>
+                                     <Button color="orange" onClick={executeSell} loading={actionLoading} mt="sm" styles={{ root: { backgroundColor: "#ea580c", color: "white", fontWeight: 700, "&:hover": { backgroundColor: "#c2410c" } } }}>
+                                         Submit Offer
+                                     </Button>
+                                 </>
+                             );
+                         })()}
                      </Stack>
+                </Modal>
+
+                {/* STEAL MODAL */}
+                <Modal
+                    opened={stealModalOpen}
+                    onClose={() => setStealModalOpen(false)}
+                    title="Are you REALLY SURE?"
+                    centered
+                    styles={{
+                        content: {
+                            background: "rgba(24, 15, 15, 0.95)",
+                            backdropFilter: "blur(20px)",
+                            border: "1px solid rgba(239, 68, 68, 0.25)",
+                            boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.7)",
+                            color: "white"
+                        },
+                        header: {
+                            background: "transparent",
+                            color: "white"
+                        },
+                        title: {
+                            fontWeight: 700,
+                            fontSize: "1.1rem",
+                            color: "#f87171"
+                        },
+                        close: {
+                            color: "rgba(255, 255, 255, 0.5)",
+                            "&:hover": {
+                                color: "white",
+                                backgroundColor: "rgba(255, 255, 255, 0.05)"
+                            }
+                        }
+                    }}
+                >
+                    <Stack gap="md">
+                        {selectedEquipmentId && (() => {
+                            const eq = equipments.find(e => e.id === selectedEquipmentId);
+                            const maxQty = shopInventory?.items?.find(i => i.equipmentId === selectedEquipmentId)?.quantity ?? 1;
+                            return (
+                                <>
+                                    <Text size="sm" c="gray.3">
+                                        Are you REALLY SURE you want to attempt to steal 
+                                    </Text>
+                                    <Text fw={700} c="white" style={{ textTransform: "uppercase", letterSpacing: 1 }} >
+                                        {eq?.name} ?
+                                    </Text>
+                                    <Text size="xs" c="dimmed">
+                                        Max available to steal: {maxQty}
+                                    </Text>
+                                    <NumberInput
+                                        label="Quantity to Steal"
+                                        value={stealQuantity}
+                                        onChange={(v) => setStealQuantity(Number(v))}
+                                        min={1}
+                                        max={maxQty}
+                                        styles={{
+                                            input: { backgroundColor: "rgba(0,0,0,0.25)", color: "white", border: "1px solid rgba(239, 68, 68, 0.1)" }
+                                        }}
+                                    />
+                                    <Button 
+                                        color="red" 
+                                        onClick={executeSteal} 
+                                        loading={actionLoading} 
+                                        mt="sm" 
+                                        styles={{ 
+                                            root: { 
+                                                backgroundColor: "#ef4444", 
+                                                color: "white", 
+                                                fontWeight: 700, 
+                                                "&:hover": { backgroundColor: "#dc2626" } 
+                                            } 
+                                        }}
+                                    >
+                                        Attempt Steal
+                                    </Button>
+                                </>
+                            );
+                        })()}
+                    </Stack>
                 </Modal>
 
                 <EquipmentModal 

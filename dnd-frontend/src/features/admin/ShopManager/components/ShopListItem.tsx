@@ -1,7 +1,8 @@
 import { ActionIcon, Tooltip } from "@mantine/core";
-import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconCoin, IconEdit, IconTrash } from "@tabler/icons-react";
 import type { Shop } from "@appTypes/Shop/Shop";
 import styles from "@styles/InventoryDashboard.module.css";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface ShopListItemProps {
   shop: Shop;
@@ -39,7 +40,7 @@ export function ShopListItem({
         </span>
         <span className={styles.listItemMeta}>
           <span>{isOpened ? "Open" : "Closed"}</span>
-          <span>Â·</span>
+            <IconCoin size={14} color={SectionColor.Orange} />
           <span>x{shop.priceMultiplier.toFixed(2)}</span>
         </span>
       </div>

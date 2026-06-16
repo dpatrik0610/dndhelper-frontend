@@ -43,9 +43,6 @@ export function CharacterCurrencyArea({ character, containerStyle }: Props) {
       }}
     >
       <Group align="center" gap="xs" wrap="nowrap">
-        <ThemeIcon variant="light" color="yellow" size="sm" radius="md">
-          <IconCoin size={16} />
-        </ThemeIcon>
         <Text size="sm" fw={700} c="white">
           Owned Currency
         </Text>
