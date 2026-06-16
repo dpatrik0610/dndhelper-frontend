@@ -30,6 +30,7 @@ import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import CustomBadge from "@components/common/CustomBadge";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
+import { formatCostToDisplay } from "@utils/currencyConverter";
 import { equipmentTierTheme } from "./styles/equipmentTheme";
 import classes from "./EquipmentModal.module.css";
 import { useIsAdmin, useToken } from "@store/auth/authSelectors";
@@ -169,7 +170,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                   <StatItem icon={<IconWeight size={20} />} color={tierTheme.accent} label="Weight" value={`${equipment.weight} lb`} />
                 )}
                 {isAdmin && 'cost' in equipment && equipment.cost && (
-                  <StatItem icon={<IconCoins size={20} />} color={tierTheme.accent} label="Cost" value={`${equipment.cost.quantity} ${equipment.cost.unit}`} />
+                  <StatItem icon={<IconCoins size={20} />} color={tierTheme.accent} label="Cost" value={formatCostToDisplay(equipment.cost)} />
                 )}
                 {equipment.damage && (
                   <StatItem icon={<IconSwords size={20} />} color={tierTheme.accent} label="Damage" value={`${equipment.damage.damageDice} (${equipment.damage.damageType.name})`} />
@@ -230,15 +231,19 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
               </ExpandableSection>
             )}
 
-            <Divider variant="dashed" opacity={0.3} />
-            <Group justify="space-between" c="dimmed" fz="xs">
-              <Tooltip label="MongoDB document ID">
-                <Text>Id: {equipment.id}</Text>
-              </Tooltip>
-              <Text>
-                Updated: {'updatedAt' in equipment && equipment.updatedAt ? new Date(equipment.updatedAt).toLocaleDateString() : "Unknown"}
-              </Text>
-            </Group>
+            {isAdmin && (
+              <>
+                <Divider variant="dashed" opacity={0.3} />
+                <Group justify="space-between" c="dimmed" fz="xs">
+                  <Tooltip label="MongoDB document ID">
+                    <Text>Id: {equipment.id}</Text>
+                  </Tooltip>
+                  <Text>
+                    Updated: {'updatedAt' in equipment && equipment.updatedAt ? new Date(equipment.updatedAt).toLocaleDateString() : "Unknown"}
+                  </Text>
+                </Group>
+              </>
+            )}
           </Stack>
         )}
       </Modal>

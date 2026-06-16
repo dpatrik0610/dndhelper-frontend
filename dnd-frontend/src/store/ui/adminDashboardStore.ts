@@ -6,6 +6,7 @@ export type AdminSection =
   | "EncounterRoomManager"
   | "CharactersManager"
   | "InventoryDashboard"
+  | "ShopManager"
   | "UserManager"
   | "ItemManager"
   | "MonsterManager"

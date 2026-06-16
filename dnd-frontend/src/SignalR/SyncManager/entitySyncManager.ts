@@ -2,6 +2,8 @@ import { handleCampaignChange } from "./handlers/campaignChangeHandler";
 import { handleCharacterChange } from "./handlers/characterChangeHandler";
 import type { EntityChangeBatch, EntityChangeEvent } from "./handlers/entitySyncTypes";
 import { handleInventoryChange } from "./handlers/inventoryChangeHandler";
+import { handleShopChange } from "./handlers/shopChangeHandler";
+import { handleSellRequestChange } from "./handlers/sellRequestChangeHandler";
 
 export class EntitySyncManager {
   static handleEntityChange(event: EntityChangeEvent) {
@@ -18,6 +20,14 @@ export class EntitySyncManager {
 
       case "Campaign":
         handleCampaignChange(event);
+        break;
+
+      case "Shop":
+        handleShopChange(event);
+        break;
+
+      case "SellRequest":
+        handleSellRequestChange(event);
         break;
 
       case "Encounter":

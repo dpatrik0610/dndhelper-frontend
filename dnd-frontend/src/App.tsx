@@ -30,6 +30,7 @@ const RollHistoryPage = lazy(() => import("@features/rollHistory/RollHistoryPage
 const RulesPage = lazy(() => import("@features/rules/RulesPage"));
 const AiAssistantPage = lazy(() => import("@features/aiAssistant/AiAssistantPage"));
 const EncounterRoomPage = lazy(() => import("@features/encounterRoom/EncounterRoomPage"));
+const ShopkeeperPage = lazy(() => import("@features/shop/ShopkeeperPage"));
 
 function AppRoutes() {
   const location = useLocation();
@@ -83,6 +84,7 @@ function AppRoutes() {
                 <Route path="/newCharacter" element={<CharacterFormPage />} />
                 <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
                 <Route path="/rules" element={<RulesPage />} />
+                <Route path="/shop" element={<ShopkeeperPage />} />
                 <Route path="/notes" element={<NotesPage />} />
                 <Route path="/encounter" element={<Navigate to="/encounter-room" replace />} />
                 <Route path="/encounter-room" element={<EncounterRoomPage />} />
