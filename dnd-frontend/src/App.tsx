@@ -38,6 +38,9 @@ function AppRoutes() {
   const [opened, handlers] = useDisclosure(false);
   const sidebarTheme = useUiStore((s) => s.sidebarTheme) as SidebarThemeVariant;
 
+  const hideSidebarRoutes = useMemo(() => ["/login", "/register"], []);
+  const showSidebar = !hideSidebarRoutes.includes(location.pathname);
+
   const token = useToken();
   const characters = useCharacterList();
   const isAdmin = useIsAdmin();
@@ -52,8 +55,61 @@ function AppRoutes() {
     if (opened && location.pathname === "/login") handlers.close();
   }, [location.pathname, opened, handlers]);
 
-  const hideSidebarRoutes = ["/login", "/register"];
-  const showSidebar = !hideSidebarRoutes.includes(location.pathname);
+  // Swipe gesture support for mobile sidebar
+  useEffect(() => {
+    if (!isMobile || !showSidebar) return;
+
+    let startX = 0;
+    let startY = 0;
+    let startTime = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      startTime = Date.now();
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.changedTouches.length !== 1) return;
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const endTime = Date.now();
+
+      const diffX = endX - startX;
+      const diffY = endY - startY;
+      const timeDiff = endTime - startTime;
+
+      const minSwipeDistance = 50;
+      const maxVerticalDeviation = 40;
+      const maxTime = 350;
+
+      if (timeDiff <= maxTime && Math.abs(diffY) < maxVerticalDeviation) {
+        // Swipe Left (Right-to-Left) -> Open
+        if (diffX <= -minSwipeDistance) {
+          const isNearRightEdge = startX > window.innerWidth - 60;
+          if (!opened && isNearRightEdge) {
+            handlers.open();
+          }
+        }
+        // Swipe Right (Left-to-Right) -> Close
+        else if (diffX >= minSwipeDistance) {
+          if (opened) {
+            handlers.close();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isMobile, showSidebar, opened, handlers]);
+
   const togglePosition = useMemo(
     () => (isMobile ? { bottom: 20, right: 16 } : { bottom: 12, right: 12 }),
     [isMobile]
@@ -104,7 +160,7 @@ function AppRoutes() {
         </div>
       </AppShell.Main>
 
-      {showSidebar && (
+      {showSidebar && !isMobile && (
         <SidebarToggle
           opened={opened}
           onToggle={handlers.toggle}
