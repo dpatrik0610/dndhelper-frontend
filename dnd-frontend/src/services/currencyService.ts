@@ -20,7 +20,7 @@ export async function removeCurrencies(characterId: string, currencies: Currency
 // PUT: /api/currency/transfer/{targetId}
 export async function transferCurrenciesToCharacter(characterId: string, currencies: Currency[]): Promise<void> {  
   try {
-    const response = await apiClient<string>(`${baseUrl}/transfer/${characterId}`, {
+    await apiClient<string>(`${baseUrl}/transfer/${characterId}`, {
       method: "PUT",
       body: currencies,
 

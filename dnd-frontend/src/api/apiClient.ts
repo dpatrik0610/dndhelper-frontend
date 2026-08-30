@@ -2,19 +2,23 @@ import { getAuthTokenSafe } from "@store/auth/authUtils"
 
 export interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
-  body?: any
+  body?: unknown
   token?: string
 }
 
-export async function apiClient<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
+const API_BASE = import.meta.env.VITE_API_BASE
+export async function apiClient<T>(
+  endpoint: string, 
+  options: ApiOptions = {}
+): Promise<T> {
   const { method = 'GET', body, token: explicitToken } = options
-  const API_BASE = import.meta.env.VITE_API_BASE
-
   const token = explicitToken ?? getAuthTokenSafe();
+  const headers: Record<string, string> = {};
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+  if (body) {
+    headers["Content-Type"] = "application/json";
   }
+
   if (token) headers['Authorization'] = `Bearer ${token}`
 
   const res = await fetch(`${API_BASE}${endpoint}`, {
@@ -30,6 +34,10 @@ export async function apiClient<T>(endpoint: string, options: ApiOptions = {}): 
     const error = new Error(err.message || 'API request failed')
     ;(error as Error & { status?: number }).status = res.status
     throw error
+  }
+
+  if (res.status === 204) {
+    return null as T;
   }
 
   const text = await res.text()
