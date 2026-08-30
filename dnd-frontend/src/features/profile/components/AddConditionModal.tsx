@@ -6,7 +6,6 @@ import { getConditions } from "@services/conditionService";
 import { updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 
-
 interface AddConditionModalProps {
   opened: boolean;
   onClose: () => void;
@@ -16,11 +15,18 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
   const character = useCurrentCharacter();
   const { updateCharacter: updateCharacterLocal } = useCharacterCoreActions();
 
-
   const [list, setList] = useState<string[]>([]);
-  const [search, setSearch] = useState("");          // NEW
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (opened) {
+      setSelected(null);
+      setSearch("");
+    }
+  }, [opened]);
 
   // Load conditions on open
   useEffect(() => {
@@ -56,6 +62,11 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     );
   }, [search, list]);
 
+  // Check if search perfectly matches an existing condition
+  const exactMatchExists = useMemo(() => {
+    return list.some((c) => c.toLowerCase() === search.trim().toLowerCase());
+  }, [search, list]);
+
   const handleAdd = async () => {
     if (!character || !selected) return;
     if (character.conditions.includes(selected)) return;
@@ -68,113 +79,153 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     }
 
     setSelected(null);
+    setSearch("");
     onClose();
   };
 
   return (
-  <Modal
-    opened={opened}
-    onClose={onClose}
-    title="Add Condition"
-    centered
-    styles={{
-      header: { background: "transparent" },
-      content: {
-        background: "rgba(20,0,0,0.45)",
-        backdropFilter: "blur(12px)",
-        border: "1px solid rgba(255,100,100,0.2)",
-        boxShadow: "0 0 12px rgba(255,60,60,0.25)",
-      },
-      body: {
-        background: "transparent",
-        height: 420,
-        display: "flex",
-        flexDirection: "column",
-      },
-      title: {
-        color: "white",
-        textShadow: "0 0 6px rgba(255,80,80,0.7)",
-      },
-    }}
-  >
-    <Stack gap="md" style={{ height: "100%" }}>
-      
-      {/* SEARCH BAR */}
-      {!loading && (
-        <TextInput
-          placeholder="Search conditions..."
-          value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
-          leftSection={<IconSearch size={16} color="rgba(255,150,150,0.8)" />}
-          styles={{
-            input: {
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,100,100,0.25)",
-              color: "white",
-              backdropFilter: "blur(6px)",
-            },
-            wrapper: { width: "100%" },
-          }}
-        />
-      )}
-
-      {loading ? (
-        <Loader size="sm" />
-      ) : (
-        <Chip.Group value={selected} onChange={setSelected} multiple={false}>
-          <Stack
-            gap="xs"
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              paddingRight: 4,
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title="Add Condition"
+      centered
+      styles={{
+        header: { background: "transparent" },
+        content: {
+          background: "rgba(20,0,0,0.45)",
+          backdropFilter: "blur(12px)",
+          border: "1px solid rgba(255,100,100,0.2)",
+          boxShadow: "0 0 12px rgba(255,60,60,0.25)",
+        },
+        body: {
+          background: "transparent",
+          height: 420,
+          display: "flex",
+          flexDirection: "column",
+        },
+        title: {
+          color: "white",
+          textShadow: "0 0 6px rgba(255,80,80,0.7)",
+        },
+      }}
+    >
+      <Stack gap="md" style={{ height: "100%" }}>
+        {/* SEARCH BAR */}
+        {!loading && (
+          <TextInput
+            placeholder="Search or enter custom condition..."
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            leftSection={<IconSearch size={16} color="rgba(255,150,150,0.8)" />}
+            styles={{
+              input: {
+                background: "rgba(255,255,255,0.06)",
+                border: "1px solid rgba(255,100,100,0.25)",
+                color: "white",
+                backdropFilter: "blur(6px)",
+              },
+              wrapper: { width: "100%" },
             }}
-          >
-            {filteredList.map((cond) => (
-              <Chip
-                key={cond}
-                value={cond}
-                radius="sm"
-                styles={{
-                  root: {
-                    width: "100%",
-                    background: "transparent",
-                    marginLeft:"auto",
-                    marginRight:"auto",
-                  },
-                  label: {
-                    width: "100%",
-                    backdropFilter: "blur(6px)",
-                    background:
-                      selected === cond
-                        ? "linear-gradient(90deg, rgba(255,60,60,0.45), rgba(255,120,40,0.55))"
-                        : "rgba(255,255,255,0.06)",
-                    border:
-                      selected === cond
-                        ? "1px solid rgba(255,100,80,0.8)"
-                        : "1px solid rgba(255,255,255,0.15)",
-                    boxShadow:
-                      selected === cond
-                        ? "0 0 12px rgba(255,80,60,0.8)"
-                        : "0 0 4px rgba(255,60,60,0.3)",
-                    color: "white",
-                    padding: "8px 10px",
-                    borderRadius: 8,
-                    transition: "all .15s ease",
-                  },
-                }}
-              >
-                {cond}
-              </Chip>
-            ))}
-          </Stack>
-        </Chip.Group>
-      )}
+          />
+        )}
 
-      <Button onClick={handleAdd} disabled={!selected}>
-        Add
-      </Button>
-    </Stack>
-  </Modal>
+        {loading ? (
+          <Loader size="sm" />
+        ) : (
+          <Chip.Group value={selected} onChange={setSelected} multiple={false}>
+            <Stack
+              gap="xs"
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                paddingRight: 4,
+              }}
+            >
+              {/* CUSTOM CONDITION CHIP */}
+              {search.trim().length > 0 && !exactMatchExists && (
+                <Chip
+                  key="custom-condition-add"
+                  value={search.trim()}
+                  radius="sm"
+                  styles={{
+                    root: {
+                      width: "100%",
+                      background: "transparent",
+                      marginLeft: "auto",
+                      marginRight: "auto",
+                    },
+                    label: {
+                      width: "100%",
+                      backdropFilter: "blur(6px)",
+                      background:
+                        selected === search.trim()
+                          ? "linear-gradient(90deg, rgba(255,100,50,0.55), rgba(255,160,50,0.65))"
+                          : "rgba(255,100,50,0.15)",
+                      border:
+                        selected === search.trim()
+                          ? "1px solid rgba(255,100,50,0.8)"
+                          : "1px solid rgba(255,100,50,0.3)",
+                      boxShadow:
+                        selected === search.trim()
+                          ? "0 0 12px rgba(255,100,50,0.8)"
+                          : "0 0 4px rgba(255,100,50,0.3)",
+                      color: "white",
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      transition: "all .15s ease",
+                    },
+                  }}
+                >
+                  ✨ Add Custom: "{search.trim()}"
+                </Chip>
+              )}
+
+              {/* STANDARD CONDITIONS */}
+              {filteredList.map((cond) => (
+                <Chip
+                  key={cond}
+                  value={cond}
+                  radius="sm"
+                  styles={{
+                    root: {
+                      width: "100%",
+                      background: "transparent",
+                      marginLeft: "auto",
+                      marginRight: "auto",
+                    },
+                    label: {
+                      width: "100%",
+                      backdropFilter: "blur(6px)",
+                      background:
+                        selected === cond
+                          ? "linear-gradient(90deg, rgba(255,60,60,0.45), rgba(255,120,40,0.55))"
+                          : "rgba(255,255,255,0.06)",
+                      border:
+                        selected === cond
+                          ? "1px solid rgba(255,100,80,0.8)"
+                          : "1px solid rgba(255,255,255,0.15)",
+                      boxShadow:
+                        selected === cond
+                          ? "0 0 12px rgba(255,80,60,0.8)"
+                          : "0 0 4px rgba(255,60,60,0.3)",
+                      color: "white",
+                      padding: "8px 10px",
+                      borderRadius: 8,
+                      transition: "all .15s ease",
+                    },
+                  }}
+                >
+                  {cond}
+                </Chip>
+              ))}
+            </Stack>
+          </Chip.Group>
+        )}
+
+        <Button onClick={handleAdd} disabled={!selected}>
+          Add
+        </Button>
+      </Stack>
+    </Modal>
   );
 }

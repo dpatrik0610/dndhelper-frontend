@@ -18,6 +18,7 @@ interface ExpandableSectionProps {
   marginBottom?: number | string;
   animated?: boolean;
   expandable?: boolean;
+  rightSection?: ReactNode;
 }
 
 export function ExpandableSection({
@@ -34,6 +35,7 @@ export function ExpandableSection({
   marginBottom = "sm",
   animated = false,
   expandable = true,
+  rightSection,
 }: ExpandableSectionProps) {
   const [opened, setOpened] = useState(defaultOpen);
 
@@ -56,16 +58,17 @@ export function ExpandableSection({
       <Group
         justify="space-between"
         onClick={() => expandable && setOpened(!opened)}
-        style={{ cursor: expandable ? "pointer" : "default" }}
+        style={{ cursor: expandable ? "pointer" : "default", width: "100%", wrap: "nowrap" }}
       >
-        <Group gap="xs">
+        <Group gap="xs" style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
           {icon}
           {titleContent ?? (
-            <Text fw={600} c={color} size="sm" tt="uppercase">
+            <Text fw={600} c={color} size="sm" tt="uppercase" truncate="end" style={{ width: "100%" }}>
               {title}
             </Text>
           )}
         </Group>
+        {!expandable && rightSection}
         {expandable && (
           <ActionIcon color={color} variant="light" size="sm" radius="xl">
             {opened ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}

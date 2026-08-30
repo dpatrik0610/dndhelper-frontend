@@ -29,7 +29,6 @@ interface RollModalProps {
 }
 
 type RollModalVariant = "public" | "subtle";
-
 type InputMode = "expression" | "manual";
 
 const quickSides = [4, 6, 8, 10, 12, 20];
@@ -43,10 +42,10 @@ function getErrorStatus(error: unknown) {
   return null;
 }
 
-function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant: RollModalVariant }) {
-
+export function RollModal({ opened, onClose }: RollModalProps) {
   const character = useCurrentCharacter();
 
+  const [variant, setVariant] = useState<RollModalVariant>("public");
   const [inputMode, setInputMode] = useState<InputMode>("manual");
   const [expression, setExpression] = useState("");
   const [numberOfDice, setNumberOfDice] = useState(1);
@@ -57,7 +56,8 @@ function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant:
   const [showValidation, setShowValidation] = useState(false);
 
   useEffect(() => {
-    if (opened) return;
+    if (!opened) return;
+    setVariant("public");
     setInputMode("manual");
     setExpression("");
     setNumberOfDice(1);
@@ -122,16 +122,13 @@ function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant:
           : await rollByDice(numberOfDice, sides);
         setResult(roll);
       } else {
-        await subtleRoll(
-          {
-            characterId: character!.id!,
-            expression: hasExpression ? expression.trim() : undefined,
-            numberOfDice: hasExpression ? undefined : numberOfDice,
-            sides: hasExpression ? undefined : sides,
-            note: note.trim() || undefined,
-          },
-
-        );
+        await subtleRoll({
+          characterId: character!.id!,
+          expression: hasExpression ? expression.trim() : undefined,
+          numberOfDice: hasExpression ? undefined : numberOfDice,
+          sides: hasExpression ? undefined : sides,
+          note: note.trim() || undefined,
+        });
 
         showNotification({
           title: "Sent",
@@ -187,10 +184,12 @@ function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant:
       styles={{
         header: { display: "none" },
         content: {
-          background: "rgba(20,0,0,0.45)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,100,100,0.2)",
-          boxShadow: "0 0 12px rgba(255,60,60,0.25)",
+          background: "rgba(20,10,30,0.75)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+          color: "white",
         },
       }}
     >
@@ -201,241 +200,248 @@ function RollModalBase({ opened, onClose, variant }: RollModalProps & { variant:
         }}
       >
         <Stack gap="md">
-        <Group justify="space-between" align="center">
-          <Text fw={600} size="lg">
-            {variant === "public" ? "Roll Dice" : "Subtle Roll"}
-          </Text>
-          <ActionIcon
-            variant="subtle"
-            size="lg"
-            onClick={onClose}
-            aria-label="Close roll modal"
-          >
-            <IconX size={18} />
-          </ActionIcon>
-        </Group>
-
-        <Paper
-          p="sm"
-          radius="md"
-          withBorder
-          style={{
-            background: "rgba(0,0,0,0.22)",
-            borderColor: "rgba(255,255,255,0.08)",
-          }}
-        >
-          <Stack gap="xs">
-            <Text size="sm" fw={600}>
-              Roll input
+          <Group justify="space-between" align="center">
+            <Text fw={600} size="lg">
+              {variant === "public" ? "Roll Dice" : "Subtle Roll"}
             </Text>
-            <SegmentedControl
-              value={inputMode}
-              onChange={handleModeChange}
-              data={[
-                { label: "Expression", value: "expression" },
-                { label: "Quick", value: "manual" },
-              ]}
-              size="xs"
-              fullWidth
-            />
-          </Stack>
-        </Paper>
-
-        {inputMode === "expression" && (
-          <TextInput
-            label="Dice Expression"
-            placeholder="e.g., 2d20+5"
-            value={expression}
-            onChange={(e) => handleExpressionChange(e.currentTarget.value)}
-            rightSection={
-              expression ? (
-                <ActionIcon
-                  size="sm"
-                  variant="subtle"
-                  onClick={() => handleExpressionChange("")}
-                  aria-label="Clear expression"
-                >
-                  <IconX size={14} />
-                </ActionIcon>
-              ) : null
-            }
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-          />
-        )}
-
-        {inputMode === "manual" && (
-          <>
-            <Stack gap="xs">
-              <Text size="md" fw={500}>
-                Quick buttons
-              </Text>
-              <SimpleGrid cols={2} spacing="xs">
-                <Stack gap="xs">
-                  {quickDiceCounts.map((count) => (
-                    <Button
-                      key={`dice-${count}`}
-                      size="xs"
-                      variant="light"
-                      onClick={() => handleManualDiceChange(count)}
-                      fullWidth
-                    >
-                      {count} dice
-                    </Button>
-                  ))}
-                </Stack>
-                <Stack gap="xs">
-                  {quickSides.map((value) => (
-                    <Button
-                      key={`sides-${value}`}
-                      size="xs"
-                      variant="outline"
-                      onClick={() => handleManualSidesChange(value)}
-                      fullWidth
-                    >
-                      d{value}
-                    </Button>
-                  ))}
-                </Stack>
-              </SimpleGrid>
-            </Stack>
-
-            <Stack gap="sm">
-              <FormNumberInput
-                label="Number of Dice"
-                min={1}
-                value={numberOfDice}
-                onChange={handleManualDiceChange}
-                classNames={{ input: "glassy-input", label: "glassy-label" }}
-                hideControls
-                style={{ width: "100%" }}
-              />
-              <FormNumberInput
-                label="Sides"
-                min={2}
-                value={sides}
-                onChange={handleManualSidesChange}
-                classNames={{ input: "glassy-input", label: "glassy-label" }}
-                hideControls
-                style={{ width: "100%" }}
-              />
-            </Stack>
-          </>
-        )}
-
-        {showValidation && !canSubmit && (
-          <Text size="xs" c="red">
-            Provide either a dice expression or both number of dice and sides.
-          </Text>
-        )}
-
-        {variant === "subtle" && (
-          <Textarea
-            label="Note"
-            placeholder="Optional note for the DM"
-            value={note}
-            onChange={(e) => setNote(e.currentTarget.value)}
-            autosize
-            minRows={2}
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-          />
-        )}
-
-        {variant === "public" && result && (
-          <>
-            <Divider my="xs" />
-            <Paper
-              p="sm"
-              radius="md"
-              withBorder
-              style={{
-                background: "rgba(0,0,0,0.25)",
-                borderColor: "rgba(120,255,180,0.35)",
-                boxShadow: "0 0 14px rgba(120,255,180,0.22)",
-              }}
+            <ActionIcon
+              variant="subtle"
+              size="lg"
+              onClick={onClose}
+              aria-label="Close roll modal"
+              style={{ color: "rgba(255,255,255,0.7)" }}
             >
+              <IconX size={18} />
+            </ActionIcon>
+          </Group>
+
+          <SegmentedControl
+            value={variant}
+            onChange={(value) => {
+              setVariant(value as RollModalVariant);
+              setResult(null);
+            }}
+            data={[
+              { label: "Public Roll", value: "public" },
+              { label: "Subtle Roll (DM)", value: "subtle" },
+            ]}
+            size="xs"
+            fullWidth
+          />
+
+          <Paper
+            p="sm"
+            radius="md"
+            withBorder
+            style={{
+              background: "rgba(0,0,0,0.22)",
+              borderColor: "rgba(255,255,255,0.08)",
+            }}
+          >
+            <Stack gap="xs">
+              <Text size="sm" fw={600}>
+                Roll input
+              </Text>
+              <SegmentedControl
+                value={inputMode}
+                onChange={handleModeChange}
+                data={[
+                  { label: "Expression", value: "expression" },
+                  { label: "Quick", value: "manual" },
+                ]}
+                size="xs"
+                fullWidth
+              />
+            </Stack>
+          </Paper>
+
+          {inputMode === "expression" && (
+            <TextInput
+              label="Dice Expression"
+              placeholder="e.g., 2d20+5"
+              value={expression}
+              onChange={(e) => handleExpressionChange(e.currentTarget.value)}
+              rightSection={
+                expression ? (
+                  <ActionIcon
+                    size="sm"
+                    variant="subtle"
+                    onClick={() => handleExpressionChange("")}
+                    aria-label="Clear expression"
+                  >
+                    <IconX size={14} />
+                  </ActionIcon>
+                ) : null
+              }
+              classNames={{ input: "glassy-input", label: "glassy-label" }}
+            />
+          )}
+
+          {inputMode === "manual" && (
+            <>
               <Stack gap="xs">
-                <Group justify="space-between" align="center">
-                  <Text fw={600}>Result</Text>
-                  <Badge
-                    color="violet"
-                    variant="filled"
-                    size="lg"
+                <Text size="md" fw={500}>
+                  Quick buttons
+                </Text>
+                <SimpleGrid cols={2} spacing="xs">
+                  <Stack gap="xs">
+                    {quickDiceCounts.map((count) => (
+                      <Button
+                        key={`dice-${count}`}
+                        size="xs"
+                        variant="light"
+                        onClick={() => handleManualDiceChange(count)}
+                        fullWidth
+                      >
+                        {count} dice
+                      </Button>
+                    ))}
+                  </Stack>
+                  <Stack gap="xs">
+                    {quickSides.map((value) => (
+                      <Button
+                        key={`sides-${value}`}
+                        size="xs"
+                        variant="outline"
+                        onClick={() => handleManualSidesChange(value)}
+                        fullWidth
+                      >
+                        d{value}
+                      </Button>
+                    ))}
+                  </Stack>
+                </SimpleGrid>
+              </Stack>
+
+              <Stack gap="sm">
+                <FormNumberInput
+                  label="Number of Dice"
+                  min={1}
+                  value={numberOfDice}
+                  onChange={handleManualDiceChange}
+                  classNames={{ input: "glassy-input", label: "glassy-label" }}
+                  hideControls
+                  style={{ width: "100%" }}
+                />
+                <FormNumberInput
+                  label="Sides"
+                  min={2}
+                  value={sides}
+                  onChange={handleManualSidesChange}
+                  classNames={{ input: "glassy-input", label: "glassy-label" }}
+                  hideControls
+                  style={{ width: "100%" }}
+                />
+              </Stack>
+            </>
+          )}
+
+          {showValidation && !canSubmit && (
+            <Text size="xs" c="red">
+              Provide either a dice expression or both number of dice and sides.
+            </Text>
+          )}
+
+          {variant === "subtle" && (
+            <Textarea
+              label="Note"
+              placeholder="Optional note for the DM"
+              value={note}
+              onChange={(e) => setNote(e.currentTarget.value)}
+              autosize
+              minRows={2}
+              classNames={{ input: "glassy-input", label: "glassy-label" }}
+            />
+          )}
+
+          {variant === "public" && result && (
+            <>
+              <Divider my="xs" />
+              <Paper
+                p="sm"
+                radius="md"
+                withBorder
+                style={{
+                  background: "rgba(0,0,0,0.25)",
+                  borderColor: "rgba(120,255,180,0.35)",
+                  boxShadow: "0 0 14px rgba(120,255,180,0.22)",
+                }}
+              >
+                <Stack gap="xs">
+                  <Group justify="space-between" align="center">
+                    <Text fw={600}>Result</Text>
+                    <Badge
+                      color="violet"
+                      variant="filled"
+                      size="lg"
+                      style={{
+                        boxShadow: "0 0 12px rgba(128, 90, 255, 0.65)",
+                        border: "1px solid rgba(150,120,255,0.6)",
+                      }}
+                    >
+                      Total {result.total}
+                    </Badge>
+                  </Group>
+                  {resultExpression && <Text size="sm">Expression: {resultExpression}</Text>}
+                  <Stack gap={4}>
+                    <Text size="sm">Rolls:</Text>
+                    <Group wrap="wrap">
+                      {result.rolls.map((roll, idx) => (
+                        <Badge
+                          key={`roll-${idx}`}
+                          color="gray"
+                          variant="light"
+                          size="lg"
+                          radius="sm"
+                          style={{ fontSize: 16, fontWeight: 450, border: "none" }}
+                        >
+                          {roll}
+                        </Badge>
+                      ))}
+                    </Group>
+                  </Stack>
+                  <Group
+                    wrap="nowrap"
                     style={{
-                      boxShadow: "0 0 12px rgba(128, 90, 255, 0.65)",
-                      border: "1px solid rgba(150,120,255,0.6)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      borderRadius: 8,
+                      padding: "4px 8px",
+                      background: "rgba(255,255,255,0.02)",
                     }}
                   >
-                    Total {result.total}
-                  </Badge>
-                </Group>
-                {resultExpression && <Text size="sm">Expression: {resultExpression}</Text>}
-                <Stack gap={4}>
-                  <Text size="sm">Rolls:</Text>
-                  <Group wrap="wrap">
-                    {result.rolls.map((roll, idx) => (
-                      <Badge
-                        key={`roll-${idx}`}
-                        color="gray"
-                        variant="light"
-                        size="lg"
-                        radius="sm"
-                        style={{ fontSize: 16, fontWeight: 450, border: "none" }}
-                      >
-                        {roll}
-                      </Badge>
-                    ))}
+                    {typeof result.min === "number" && (
+                      <Text size="xs" c="dimmed" lineClamp={1}>
+                        Min {result.min}
+                      </Text>
+                    )}
+                    {typeof result.max === "number" && (
+                      <Text size="xs" c="dimmed" lineClamp={1}>
+                        Max {result.max}
+                      </Text>
+                    )}
+                    {typeof result.average === "number" && (
+                      <Text size="xs" c="dimmed" lineClamp={1}>
+                        Avg {result.average.toFixed(2)}
+                      </Text>
+                    )}
                   </Group>
                 </Stack>
-                <Group
-                  wrap="nowrap"
-                  style={{
-                    border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 8,
-                    padding: "4px 8px",
-                    background: "rgba(255,255,255,0.02)",
-                  }}
-                >
-                  {typeof result.min === "number" && (
-                    <Text size="xs" c="dimmed" lineClamp={1}>
-                      Min {result.min}
-                    </Text>
-                  )}
-                  {typeof result.max === "number" && (
-                    <Text size="xs" c="dimmed" lineClamp={1}>
-                      Max {result.max}
-                    </Text>
-                  )}
-                  {typeof result.average === "number" && (
-                    <Text size="xs" c="dimmed" lineClamp={1}>
-                      Avg {result.average.toFixed(2)}
-                    </Text>
-                  )}
-                </Group>
-              </Stack>
-            </Paper>
-          </>
-        )}
+              </Paper>
+            </>
+          )}
 
-        <Button
-          onClick={handleSubmit}
-          loading={loading}
-          disabled={!canSubmit}
-          variant="gradient"
-          gradient={{ from: "violet", to: "cyan", deg: 180 }}
-          type="submit"
-        >
-          {variant === "public" ? "Roll" : "Roll Subtle"}
-        </Button>
+          <Button
+            onClick={handleSubmit}
+            loading={loading}
+            disabled={!canSubmit}
+            variant="gradient"
+            gradient={{ from: "violet", to: "cyan", deg: 180 }}
+            type="submit"
+          >
+            {variant === "public" ? "Roll" : "Roll Subtle"}
+          </Button>
         </Stack>
       </form>
     </Modal>
   );
-}
-
-export function RollModal(props: RollModalProps) {
-  return <RollModalBase {...props} variant="public" />;
-}
-
-export function SubtleRollModal(props: RollModalProps) {
-  return <RollModalBase {...props} variant="subtle" />;
 }

@@ -20,7 +20,6 @@ import { CombatStats } from "./components/CombatStats";
 import { AbilityScores } from "./components/AbilityScores";
 import { ExtraInfo } from "./components/ExtraInfo";
 import { SpellCastingBlock } from "./components/SpellCastingBlock";
-import { ActionBar } from "./components/ActionsBar";
 import { ConditionsPanel } from "./components/ConditionsPanel";
 import { SpellsPanel } from "./components/SpellsPanel";
 
@@ -94,8 +93,7 @@ export default function CharacterProfile() {
   return (
     <Box p={isMobile ? "xs" : "md"} m={isMobile ? "" : "0 auto"} maw={isMobile ? "100%" : 900}>
       <CharacterHeader />
-      <ActionBar />
-    <ConditionsPanel />
+      <ConditionsPanel />
 
       <Tabs
         value={activeTab}
