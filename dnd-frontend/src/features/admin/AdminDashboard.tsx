@@ -48,7 +48,6 @@ import { BackupManager } from "./BackupManager/BackupManager";
 import { InitiativeTracker } from "./InitiativeTracker/InitiativeTracker";
 import { RuleManager } from "./RuleManager/RuleManager";
 import { DMCharacterDashboard } from "./DMCharacterManager/DMCharacterDashboard";
-import EncounterPage from "@features/encounters/EncounterPage";
 import { EncounterRoomManager } from "./EncounterRoomManager/EncounterRoomManager";
 import { ShopManager } from "./ShopManager/ShopManager";
 import styles from "@styles/AdminDashboard.module.css";
@@ -79,7 +78,6 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconUsers, label: "Users", key: "UserManager", component: <UserManager /> },
     { icon: IconGhost, label: "Monsters", key: "MonsterManager", component: <MonsterManager /> },
     { icon: IconCategory, label: "Items", key: "ItemManager", component: <ItemManager /> },
-    { icon: IconSwords, label: "Encounters", key: "EncounterBoard", component: <EncounterPage embedded /> },
     { icon: IconSwords, label: "Encounter Rooms", key: "EncounterRoomManager", component: <EncounterRoomManager /> },
     { icon: IconBuildingStore, label: "Shop Manager", key: "ShopManager", component: <ShopManager /> },
     { icon: IconSword, label: "Initiative", key: "InitiativeTracker", component: <InitiativeTracker /> },

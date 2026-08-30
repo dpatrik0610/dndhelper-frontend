@@ -59,8 +59,10 @@ function AppRoutes() {
     [isMobile]
   );
 
+  const isDashboardRoute = location.pathname === "/dashboard";
+
   return (
-    <AppShell header={{ height: 0 }} styles={getAppShellStyles(isMobile)} >
+    <AppShell header={{ height: 0 }} styles={getAppShellStyles(isMobile, isDashboardRoute)} >
       {showSidebar && <Sidebar opened={opened} onClose={handlers.close} position="right" themeVariant={sidebarTheme} />}
 
       <AppShell.Main>
@@ -70,7 +72,7 @@ function AppRoutes() {
           style={{
             position: "relative",
             zIndex: 2,
-            padding: isMobile ? 0 : "md",
+            padding: isDashboardRoute ? 0 : (isMobile ? 0 : "md"),
           }}
         >
           <Suspense fallback={<Center mt="20vh"><Loader color="indigo" /></Center>}>

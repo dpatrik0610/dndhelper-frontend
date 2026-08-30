@@ -1,6 +1,6 @@
 import type { AppShellProps } from "@mantine/core";
 
-export function getAppShellStyles(isMobile: boolean): AppShellProps["styles"] {
+export function getAppShellStyles(isMobile: boolean, isDashboardRoute = false): AppShellProps["styles"] {
   return {
     root: {
       background: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)",
@@ -11,7 +11,7 @@ export function getAppShellStyles(isMobile: boolean): AppShellProps["styles"] {
       minHeight: "100vh",
       overflow: "hidden",
       background: "transparent",
-      padding: isMobile ? 2 : 10,
+      padding: isDashboardRoute ? 0 : (isMobile ? 2 : 10),
     },
   };
 }
