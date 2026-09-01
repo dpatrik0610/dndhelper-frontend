@@ -6,17 +6,18 @@ import { useIsMobile } from "@hooks/useIsMobile";
  * AppBackground
  * 
  * The global living backdrop for the application.
- * Optimized with high-performance CSS hardware acceleration variables, 
- * lightweight blur radii, and minimal, GPU-composited particle arrays
- * to run at a locked, stutter-free 60FPS on both desktop and mobile devices.
+ * Fully optimized to run at locked, stutter-free 60FPS.
+ * On mobile devices, all active animations, particle generators, and costly blur filters 
+ * are disabled to conserve mobile CPU/GPU performance and battery life, while preserving
+ * a static theme-reactive visual style.
  */
 export function AppBackground() {
   const isMobile = useIsMobile();
 
-  // Optimized down to 14/5 particles to completely eliminate DOM layout calculation overhead
+  // Optimized particle generation for desktop devices only
   const particles = useMemo(() => {
-    const count = isMobile ? 5 : 14;
-    return Array.from({ length: count }).map((_, i) => ({
+    if (isMobile) return [];
+    return Array.from({ length: 14 }).map((_, i) => ({
       id: i,
       left: `${Math.random() * 100}%`,
       delay: `${Math.random() * 6}s`,
@@ -24,6 +25,32 @@ export function AppBackground() {
       size: `${2 + Math.random() * 2.5}px`,
     }));
   }, [isMobile]);
+
+  // High-performance static themed backdrop for mobile to completely bypass layout calculation, blurs, and animation threads
+  if (isMobile) {
+    return (
+      <Box
+        className="portal-background"
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "#050507",
+          zIndex: -1,
+          pointerEvents: "none",
+        }}
+      >
+        <Box
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "radial-gradient(circle at 50% 50%, var(--theme-bg-panel, rgba(124, 58, 237, 0.05)) 0%, #030305 100%)",
+            opacity: 0.8,
+            zIndex: 1,
+          }}
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box className="portal-background" style={{ position: "fixed", pointerEvents: "none" }}>
