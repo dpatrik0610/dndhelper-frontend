@@ -104,7 +104,6 @@ export function FeaturesSection({ noBox = false }: { noBox?: boolean }) {
             value={featureName}
             onChange={(e) => setFeatureName(e.currentTarget.value)}
             classNames={{ input: "glassy-input", label: "glassy-label" }}
-            required
           />
 
           {/* Large Description Textarea (Supports Markdown) */}
