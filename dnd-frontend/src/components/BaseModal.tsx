@@ -104,12 +104,13 @@ export const BaseModal: React.FC<BaseModalProps> = ({
       fullScreen={fullScreen}
       styles={{
         content: {
-          backdropFilter: "blur(24px) saturate(130%)",
-          WebkitBackdropFilter: "blur(24px) saturate(130%)",
-          background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.85))",
-          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1))",
-          boxShadow:
-            "0 15px 45px rgba(0, 0, 0, 0.5), var(--theme-glow-shadow-primary)",
+          backdropFilter: fullScreen ? "none" : "blur(24px) saturate(130%)",
+          WebkitBackdropFilter: fullScreen ? "none" : "blur(24px) saturate(130%)",
+          background: fullScreen ? "#0c0c0e" : "var(--theme-bg-panel, rgba(15, 15, 15, 0.85))",
+          border: fullScreen ? "none" : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1))",
+          boxShadow: fullScreen
+            ? "none"
+            : "0 15px 45px rgba(0, 0, 0, 0.5), var(--theme-glow-shadow-primary)",
           borderRadius: fullScreen ? "0" : "12px",
           color: "white",
           transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
