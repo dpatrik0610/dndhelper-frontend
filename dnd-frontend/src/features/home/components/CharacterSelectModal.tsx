@@ -88,13 +88,15 @@ export function CharacterSelectModal({
       overlayProps={{ blur: 12, backgroundOpacity: 0.4 }}
       styles={{
         content: {
-          background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
-          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
-          borderTop: "4px solid var(--theme-color-accent-primary, #f59e0b)",
-          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.5), var(--theme-glow-shadow-primary)",
-          backdropFilter: "blur(24px) saturate(130%)",
-          WebkitBackdropFilter: "blur(24px) saturate(130%)",
-          borderRadius: "16px",
+          background: isMobile
+            ? "var(--theme-bg-panel-opaque, var(--theme-bg-panel, rgba(15, 15, 15, 0.95)))"
+            : "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+          border: isMobile ? "none" : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+          borderTop: isMobile ? "none" : "4px solid var(--theme-color-accent-primary, #f59e0b)",
+          boxShadow: isMobile ? "none" : "0 20px 50px rgba(0, 0, 0, 0.5), var(--theme-glow-shadow-primary)",
+          backdropFilter: isMobile ? "none" : "blur(24px) saturate(130%)",
+          WebkitBackdropFilter: isMobile ? "none" : "blur(24px) saturate(130%)",
+          borderRadius: isMobile ? "0" : "16px",
           color: "var(--theme-color-text-primary, #fff)",
           fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
         },

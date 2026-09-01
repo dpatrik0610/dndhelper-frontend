@@ -2,6 +2,7 @@ import { Modal, Group, Button, Text } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useMemo, type ReactNode } from "react";
 import { useUiStore } from "@store/ui/uiStore";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface BaseModalProps {
   opened: boolean;
@@ -39,6 +40,8 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   hideHeader = false,
 }) => {
   const sidebarTheme = useUiStore((s) => s.sidebarTheme);
+  const isMobile = useIsMobile();
+  const isFullScreen = fullScreen || isMobile;
 
   const activeThemeClass = useMemo(() => {
     switch (sidebarTheme) {
@@ -59,7 +62,9 @@ export const BaseModal: React.FC<BaseModalProps> = ({
     ? { display: "none" }
     : {
         borderBottom: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-        background: "transparent",
+        background: isFullScreen
+          ? "var(--theme-bg-panel-opaque, var(--theme-bg-panel, rgba(15, 15, 15, 0.95)))"
+          : "transparent",
         paddingLeft: "1.25rem",
         paddingRight: "1.25rem",
         paddingTop: "1.25rem",
@@ -88,7 +93,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
           </Text>
         ) : undefined
       }
-      size={fullScreen ? "100%" : size}
+      size={isFullScreen ? "100%" : size}
       withCloseButton={headerVisible && withCloseButton}
       closeOnClickOutside={closeOnClickOutside && !loading}
       closeOnEscape={closeOnEscape && !loading}
@@ -101,22 +106,24 @@ export const BaseModal: React.FC<BaseModalProps> = ({
         duration: 200,
         timingFunction: "ease",
       }}
-      fullScreen={fullScreen}
+      fullScreen={isFullScreen}
       styles={{
         content: {
-          backdropFilter: fullScreen ? "none" : "blur(24px) saturate(130%)",
-          WebkitBackdropFilter: fullScreen ? "none" : "blur(24px) saturate(130%)",
-          background: fullScreen ? "#0c0c0e" : "var(--theme-bg-panel, rgba(15, 15, 15, 0.85))",
-          border: fullScreen ? "none" : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1))",
-          boxShadow: fullScreen
+          backdropFilter: isFullScreen ? "none" : "blur(24px) saturate(130%)",
+          WebkitBackdropFilter: isFullScreen ? "none" : "blur(24px) saturate(130%)",
+          background: isFullScreen
+            ? "var(--theme-bg-panel-opaque, var(--theme-bg-panel, rgba(15, 15, 15, 0.95)))"
+            : "var(--theme-bg-panel, rgba(15, 15, 15, 0.85))",
+          border: isFullScreen ? "none" : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1))",
+          boxShadow: isFullScreen
             ? "none"
             : "0 15px 45px rgba(0, 0, 0, 0.5), var(--theme-glow-shadow-primary)",
-          borderRadius: fullScreen ? "0" : "12px",
+          borderRadius: isFullScreen ? "0" : "12px",
           color: "white",
           transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
-          minHeight: fullScreen ? "100vh" : undefined,
-          margin: fullScreen ? 0 : undefined,
-          padding: fullScreen ? "5px" : undefined,
+          minHeight: isFullScreen ? "100vh" : undefined,
+          margin: isFullScreen ? 0 : undefined,
+          padding: isFullScreen ? "5px" : undefined,
           paddingTop: 0,
         },
         header: headerStyles,
@@ -125,6 +132,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
           paddingLeft: "1.25rem",
           paddingRight: "1.25rem",
           paddingBottom: "1.25rem",
+          background: "transparent",
         },
         close: {
           color: "var(--theme-color-text-secondary, rgba(255,255,255,0.6))",

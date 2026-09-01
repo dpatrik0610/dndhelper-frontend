@@ -3,6 +3,7 @@ import type { ModalProps } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useMemo, type ReactNode } from "react";
 import { useUiStore } from "@store/ui/uiStore";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 export type AdminGlassModalVariant = "default" | "danger";
 
@@ -62,6 +63,8 @@ export function AdminGlassModal({
   withCloseButton = true,
 }: AdminGlassModalProps) {
   const sidebarTheme = useUiStore((s) => s.sidebarTheme);
+  const isMobile = useIsMobile();
+  const isFullScreen = fullScreen || isMobile;
 
   const activeThemeClass = useMemo(() => {
     switch (sidebarTheme) {
@@ -79,16 +82,39 @@ export function AdminGlassModal({
 
   const theme = variantStyles[variant];
 
+  const modalContentStyles = useMemo(() => {
+    if (isFullScreen) {
+      return {
+        background: variant === "danger"
+          ? "rgb(40, 12, 18)"
+          : "var(--theme-bg-panel-opaque, var(--theme-bg-panel, rgba(15, 15, 15, 0.95)))",
+        border: "none",
+        backdropFilter: "none",
+        WebkitBackdropFilter: "none",
+        boxShadow: "none",
+        borderRadius: 0,
+        color: "white",
+        minHeight: "100vh",
+        margin: 0,
+      };
+    }
+    return {
+      ...theme.content,
+      borderRadius: 12,
+      color: "white",
+    };
+  }, [isFullScreen, variant, theme]);
+
   return (
     <Modal
       opened={opened}
       onClose={onClose}
       classNames={{
-        content: activeThemeClass,
+        content: `${activeThemeClass} ${variant === "danger" ? "modal-variant-danger" : ""}`,
       }}
       withCloseButton={false}
       centered={centered}
-      fullScreen={fullScreen}
+      fullScreen={isFullScreen}
       size={size}
       padding={padding}
       closeOnClickOutside={closeOnClickOutside && !loading}
@@ -97,12 +123,11 @@ export function AdminGlassModal({
       transitionProps={{ transition: "fade", duration: 180 }}
       styles={{
         header: { display: "none" },
-        body: { paddingTop: title || withCloseButton ? 0 : undefined },
-        content: {
-          ...theme.content,
-          borderRadius: fullScreen ? 0 : 12,
-          color: "white",
+        body: {
+          paddingTop: title || withCloseButton ? 0 : undefined,
+          background: "transparent",
         },
+        content: modalContentStyles,
       }}
     >
       {(title || withCloseButton) && (
