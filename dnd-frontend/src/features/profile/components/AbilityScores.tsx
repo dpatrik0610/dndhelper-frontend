@@ -6,7 +6,6 @@ import {
   Group,
   Text,
   Button,
-  Box,
   Badge,
   SimpleGrid,
 } from "@mantine/core";
@@ -14,13 +13,9 @@ import { RadarChart } from "@mantine/charts";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
-import { AbilityScore } from "./AbilityScore";
-import { StatBox } from "./StatBox";
 import AbilityScoreTooltip from "./AbilityScoreToolTip";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
-
-type AbilityKey = "str" | "dex" | "con" | "int" | "wis" | "cha";
 
 export function AbilityScores() {
   const character = useCurrentCharacter()!;
@@ -243,8 +238,8 @@ export function AbilityScores() {
                         {isProf ? (
                           <span
                             style={{
-                              color: "#121214",
-                              filter: "drop-shadow(0 0 3px rgba(0, 0, 0, 0.2))",
+                              color: "var(--theme-color-accent-primary, #f59e0b)",
+                              filter: "drop-shadow(0 0 4px var(--theme-color-accent-primary, rgba(245, 158, 11, 0.4)))",
                               fontSize: "14px",
                               cursor: "default",
                             }}
@@ -261,7 +256,7 @@ export function AbilityScores() {
                           truncate="end"
                           style={{
                             color: isProf
-                              ? "#121214"
+                              ? "var(--theme-color-text-primary, #ffffff)"
                               : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
                           }}
                         >
@@ -273,13 +268,9 @@ export function AbilityScores() {
                           size="xs"
                           variant="transparent"
                           style={{
-                            background: isProf ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.02)",
-                            border: isProf
-                              ? "1px solid rgba(0, 0, 0, 0.15)"
-                              : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
-                            color: isProf
-                              ? "#121214"
-                              : "var(--theme-color-text-secondary, #cbd5e1)",
+                            background: "rgba(255, 255, 255, 0.02)",
+                            border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
+                            color: "var(--theme-color-text-secondary, #cbd5e1)",
                             fontSize: "8px",
                             fontWeight: isProf ? 700 : 400,
                             padding: "2px 4px",
@@ -296,7 +287,7 @@ export function AbilityScores() {
                         fw={700}
                         style={{
                           color: isProf
-                            ? "#121214"
+                            ? "var(--theme-color-accent-primary, #f59e0b)"
                             : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
                         }}
                       >
