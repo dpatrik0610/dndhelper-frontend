@@ -26,7 +26,6 @@ export function ExpandableSection({
   children,
   titleContent,
   icon,
-  color = SectionColor.Blue,
   defaultOpen = false,
   transparent = true,
   style = {},
@@ -81,8 +80,30 @@ export function ExpandableSection({
         </Group>
         {!expandable && rightSection}
         {expandable && (
-          <ActionIcon color={color} variant="light" size="sm" radius="xl">
-            {opened ? <IconChevronUp size={18} /> : <IconChevronDown size={18} />}
+          <ActionIcon
+            size="sm"
+            radius="xl"
+            style={{
+              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.02))",
+              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+              color: "var(--theme-color-accent-primary, #f59e0b)",
+              transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
+              cursor: "pointer",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.08))";
+              e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(245, 158, 11, 0.3))";
+              e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary)";
+              e.currentTarget.style.transform = "scale(1.1)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.02))";
+              e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
+              e.currentTarget.style.boxShadow = "none";
+              e.currentTarget.style.transform = "scale(1)";
+            }}
+          >
+            {opened ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
           </ActionIcon>
         )}
       </Group>
