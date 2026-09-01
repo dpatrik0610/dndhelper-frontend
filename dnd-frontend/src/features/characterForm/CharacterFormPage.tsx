@@ -324,25 +324,6 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
               )}
             </Box>
           </Group>
-
-          {/* Bottom Save Action Button Group */}
-          <Group justify="flex-end" mt="xl">
-            <Button
-              type="submit"
-              className="glass-btn-primary"
-              size="md"
-              style={{
-                width: isMobile ? "100%" : "200px",
-                fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-                fontWeight: 300,
-                letterSpacing: "2px",
-                textTransform: "uppercase",
-                fontSize: "11px",
-              }}
-            >
-              {submitLabel}
-            </Button>
-          </Group>
         </form>
       </Paper>
     </Box>
