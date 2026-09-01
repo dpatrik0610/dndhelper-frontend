@@ -1,5 +1,5 @@
 ﻿import { useMemo } from "react";
-import { Drawer, Stack, useMantineTheme } from "@mantine/core";
+import { Drawer, Stack, useMantineTheme, Box, Group, Text, UnstyledButton, Select } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUsername, useIsAdmin } from "@store/auth/authSelectors";
 import { handleLogout } from "@utils/handleLogout";
@@ -10,6 +10,7 @@ import { NavSection } from "./components/NavSection";
 import classes from "./Sidebar.module.css";
 import { sidebarThemes, type SidebarThemeVariant } from "./sidebarThemes";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { useUiStore } from "@store/ui/uiStore";
 
 interface SidebarProps {
   opened: boolean;
@@ -52,6 +53,9 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
     .slice(0, 2)
     .toUpperCase();
 
+  const currentSidebarTheme = useUiStore((s) => s.sidebarTheme);
+  const setSidebarTheme = useUiStore((s) => s.setSidebarTheme);
+
   return (
     <Drawer
       opened={opened}
@@ -78,7 +82,7 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
         },
       }}
     >
-      <Stack justify="space-between" className={classes.drawerInner}>
+      <Stack justify="space-between" className={classes.drawerInner} style={{ height: "100%" }}>
         <Stack gap="md">
           <SidebarHeader
             username={username}
@@ -121,12 +125,61 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
             onNavigate={handleNavigate}
           />
 
-          {/* <NavSection
-            label="Settings (coming soon)"
-            items={settingsLinks}
-            activeLabel={activeLabel}
-            onNavigate={handleNavigate}
-          /> */}
+          {/* Theme Selector Block (Dropdown Select) */}
+          <Box mt="sm" pt="md" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
+            <Text className={classes.sectionLabel} mb="xs">
+              Visual Theme
+            </Text>
+            <Select
+              value={currentSidebarTheme}
+              onChange={(val) => {
+                if (val) setSidebarTheme(val as SidebarThemeVariant);
+              }}
+              data={[
+                { value: "sunset", label: "Cyber-Fantasy Noir" },
+                { value: "midnight", label: "Midnight Arcane" },
+                { value: "crimson-vampire", label: "Crimson Vampire" },
+                { value: "frost-glacier", label: "Frost Glacier" },
+              ]}
+              styles={{
+                input: {
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid var(--sidebar-border-strong, rgba(255,255,255,0.15))",
+                  color: "#fff",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  height: "36px",
+                  transition: "all 0.2s ease",
+                  cursor: "pointer",
+                },
+                dropdown: {
+                  background: "var(--sidebar-bg, #1a1a24)",
+                  border: "1px solid var(--sidebar-border-strong, rgba(255,255,255,0.15))",
+                  borderRadius: "8px",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                },
+                option: {
+                  color: "rgba(255,255,255,0.8)",
+                  fontSize: "13px",
+                  borderRadius: "6px",
+                  margin: "2px 4px",
+                  padding: "8px 10px",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                  "&[data-selected]": {
+                    background: "var(--sidebar-active, #7c3aed)",
+                    color: "#fff",
+                    fontWeight: 600,
+                  },
+                  "&[data-hovered]": {
+                    background: "rgba(255,255,255,0.06)",
+                    color: "#fff",
+                  },
+                },
+              }}
+            />
+          </Box>
         </Stack>
       </Stack>
     </Drawer>

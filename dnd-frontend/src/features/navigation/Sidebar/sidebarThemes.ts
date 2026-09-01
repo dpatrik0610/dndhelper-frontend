@@ -1,4 +1,4 @@
-export type SidebarThemeVariant = "midnight" | "emerald" | "sunset";
+export type SidebarThemeVariant = "midnight" | "sunset" | "crimson-vampire" | "frost-glacier";
 
 export interface SidebarThemeTokens {
   background: string;
@@ -20,22 +20,31 @@ export const sidebarThemes: Record<SidebarThemeVariant, SidebarThemeTokens> = {
     active: "linear-gradient(135deg, #6a4cff, #53d8ff)",
     activeBorder: "rgba(255, 255, 255, 0.2)",
   },
-  emerald: {
-    background: "linear-gradient(170deg, rgba(8, 34, 28, 0.9), rgba(5, 19, 21, 0.85))",
-    border: "rgba(135, 250, 214, 0.12)",
-    borderStrong: "rgba(135, 250, 214, 0.22)",
-    header: "linear-gradient(135deg, rgba(31, 138, 112, 0.4), rgba(19, 87, 94, 0.4))",
-    panel: "rgba(12, 44, 38, 0.4)",
-    active: "linear-gradient(135deg, #2fd2a8, #15a085)",
-    activeBorder: "rgba(135, 250, 214, 0.35)",
-  },
   sunset: {
-    background: "linear-gradient(160deg, rgba(47, 16, 28, 0.92), rgba(18, 10, 22, 0.82))",
-    border: "rgba(255, 179, 145, 0.12)",
-    borderStrong: "rgba(255, 179, 145, 0.2)",
-    header: "linear-gradient(135deg, rgba(255, 94, 98, 0.35), rgba(255, 174, 94, 0.3))",
-    panel: "rgba(255, 255, 255, 0.04)",
-    active: "linear-gradient(135deg, #ff6e72, #ffb36c)",
-    activeBorder: "rgba(255, 179, 145, 0.3)",
+    background: "linear-gradient(160deg, rgba(20, 20, 20, 0.92), rgba(10, 10, 10, 0.85))",
+    border: "rgba(255, 179, 145, 0.08)",
+    borderStrong: "rgba(255, 179, 145, 0.16)",
+    header: "linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(16, 185, 129, 0.2))",
+    panel: "rgba(255, 255, 255, 0.02)",
+    active: "linear-gradient(135deg, #f59e0b, #10b981)",
+    activeBorder: "rgba(245, 158, 11, 0.3)",
+  },
+  "crimson-vampire": {
+    background: "linear-gradient(160deg, rgba(30, 8, 8, 0.92), rgba(14, 4, 4, 0.85))",
+    border: "rgba(239, 68, 68, 0.08)",
+    borderStrong: "rgba(239, 68, 68, 0.16)",
+    header: "linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(217, 119, 6, 0.2))",
+    panel: "rgba(255, 255, 255, 0.02)",
+    active: "linear-gradient(135deg, #ef4444, #d97706)",
+    activeBorder: "rgba(239, 68, 68, 0.3)",
+  },
+  "frost-glacier": {
+    background: "linear-gradient(160deg, rgba(8, 18, 30, 0.92), rgba(4, 9, 16, 0.85))",
+    border: "rgba(56, 189, 248, 0.08)",
+    borderStrong: "rgba(56, 189, 248, 0.16)",
+    header: "linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(203, 213, 225, 0.2))",
+    panel: "rgba(255, 255, 255, 0.02)",
+    active: "linear-gradient(135deg, #38bdf8, #cbd5e1)",
+    activeBorder: "rgba(56, 189, 248, 0.3)",
   },
 };

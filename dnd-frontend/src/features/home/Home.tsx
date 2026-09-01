@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState} from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Stack } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-
 import dayjs from "dayjs";
 
 import { useCharacterList, useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
@@ -9,22 +8,13 @@ import { useToken } from "@store/auth/authSelectors";
 import { useSessionStore } from "@store/session/sessionStore";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
 import type { Character } from "@appTypes/Character/Character";
+import type { CampaignOverviewDto } from "@appTypes/CampaignOverview";
 import { quotes } from "./quotes";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { HeaderCard } from "./components/HeaderCard";
 import { ActiveSessionCard } from "./components/ActiveSessionCard";
 import { showNotification } from "@components/Notification/Notification";
 import { useIsMobile } from "@hooks/useIsMobile";
-
-const palette = {
-  accent: "#b197fc",
-  border: "rgba(140, 120, 255, 0.35)",
-  bg: "rgba(20, 18, 40, 0.55)",
-  cardBg: "rgba(20, 18, 40, 0.65)",
-  hoverBg: "rgba(180, 150, 255, 0.08)",
-  textMain: "#f2f2ff",
-  textDim: "rgba(220, 220, 255, 0.7)",
-};
 
 export default function Home() {
   const navigate = useNavigate();
@@ -35,7 +25,7 @@ export default function Home() {
 
   const [modalOpened, setModalOpened] = useState(false);
   const [quote, setQuote] = useState("");
-  const [campaignName, setCampaignName] = useState<string | null>(null);
+  const [campaign, setCampaign] = useState<CampaignOverviewDto | null>(null);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -46,19 +36,17 @@ export default function Home() {
     }
   }, []);
 
-  // Auto-select single character
   useEffect(() => {
     if (!character && characters.length === 1) {
       setCharacter(characters[0]);
     }
   }, [characters, character, setCharacter]);
 
-  // Load campaign + sessions for the active character
   const token = useToken();
   useEffect(() => {
     const load = async () => {
       if (!character?.id) {
-        setCampaignName(null);
+        setCampaign(null);
         return;
       }
       if (!token) return;
@@ -70,18 +58,24 @@ export default function Home() {
             message: "No campaign found for this character.",
             color: "yellow",
           });
-          setCampaignName(null);
+          setCampaign(null);
           return;
         }
-        setCampaignName(overview.name);
+        setCampaign(overview);
         void loadByCampaign(overview.id);
       } catch (error) {
         console.warn("[Home] Failed to load campaign overview", { characterId: character.id, error });
-        setCampaignName(null);
+        setCampaign(null);
       }
     };
     void load();
   }, [character?.id, loadByCampaign, token]);
+
+  const campaignCharacters = useMemo(() => {
+    if (!campaign) return characters;
+    const campaignCharIds = new Set(campaign.characters.map((c) => c.id).filter(Boolean));
+    return characters.filter((char) => campaignCharIds.has(char.id));
+  }, [characters, campaign]);
 
   const activeSession = useMemo(() => {
     const live = sessions.find((s) => s.isLive);
@@ -102,24 +96,32 @@ export default function Home() {
 
   return (
     <Stack
-      w={isMobile ? "100%" : "75%"}
-      m={isMobile ? "0 auto" : "20 auto"}
-      p={isMobile ? "0" : "md"}
-      style={isMobile ? { margin: "2px" } : undefined}
+      w="100%"
+      style={{
+        maxWidth: 960,
+        margin: "0 auto",
+        padding: isMobile ? "12px" : "24px",
+      }}
+      gap="xl"
     >
       <HeaderCard
-        campaignName={campaignName}
+        campaignName={campaign?.name ?? null}
         character={character ?? null}
         onSelectCharacter={() => setModalOpened(true)}
         onProfile={() => navigate("/profile")}
         quote={quote}
-        characterSelector={<CharacterSelectModal opened={modalOpened} onClose={() => setModalOpened(false)} characters={characters} onSelect={handleSelectCharacter} />}
+        characterSelector={
+          <CharacterSelectModal
+            opened={modalOpened}
+            onClose={() => setModalOpened(false)}
+            characters={campaignCharacters}
+            onSelect={handleSelectCharacter}
+          />
+        }
         isMobile={isMobile}
-        palette={{ bg: palette.cardBg, border: palette.border, textMain: palette.textMain, textDim: palette.textDim }}
       />
 
-      {/* Active Session */}
-      {activeSession && <ActiveSessionCard session={activeSession} palette={{ cardBg: palette.cardBg, border: palette.border, textMain: palette.textMain, textDim: palette.textDim }} />}
+      {activeSession && <ActiveSessionCard session={activeSession} />}
     </Stack>
   );
 }

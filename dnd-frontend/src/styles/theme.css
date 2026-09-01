@@ -1,0 +1,419 @@
+/* ==========================================================================
+   🌌 Centralized Theme CSS Variables
+   ========================================================================== */
+
+/* 💜 Candidate A: Midnight Arcane */
+.theme-midnight-arcane {
+  --theme-bg-base: rgba(15, 12, 35, 0.14);
+  --theme-bg-panel: rgba(24, 18, 48, 0.24);
+  --theme-bg-card: rgba(30, 24, 60, 0.20);
+  --theme-bg-hover: rgba(168, 85, 247, 0.14);
+  
+  --theme-border-glow: rgba(168, 85, 247, 0.35);
+  --theme-border-accent: rgba(6, 182, 212, 0.4);
+  --theme-border-subtle: rgba(168, 85, 247, 0.15); /* Gorgeous violet tinted edges! */
+  
+  --theme-color-accent-primary: #a855f7; /* Violet */
+  --theme-color-accent-secondary: #06b6d4; /* Teal/Cyan */
+  --theme-color-text-primary: #f3f4f6;
+  --theme-color-text-secondary: #c084fc; /* Tinted light purple text */
+  --theme-color-text-glow: #f3e8ff;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(168, 85, 247, 0.3);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(6, 182, 212, 0.3);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #a855f7, #06b6d4);
+  --theme-gradient-active: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(6, 182, 212, 0.25));
+}
+
+/* 💛 Candidate B: Cyber-Fantasy Noir */
+.theme-cyber-noir {
+  --theme-bg-base: rgba(20, 15, 8, 0.12);
+  --theme-bg-panel: rgba(32, 24, 16, 0.24);
+  --theme-bg-card: rgba(38, 28, 18, 0.18);
+  --theme-bg-hover: rgba(245, 158, 11, 0.12);
+  
+  --theme-border-glow: rgba(245, 158, 11, 0.4);
+  --theme-border-accent: rgba(16, 185, 129, 0.4);
+  --theme-border-subtle: rgba(245, 158, 11, 0.14); /* Gorgeous amber tinted edges! */
+  
+  --theme-color-accent-primary: #f59e0b; /* Amber */
+  --theme-color-accent-secondary: #10b981; /* Emerald */
+  --theme-color-text-primary: #f9fafb;
+  --theme-color-text-secondary: #fcd34d; /* Tinted light amber text */
+  --theme-color-text-glow: #fef3c7;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(245, 158, 11, 0.25);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(16, 185, 129, 0.25);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #f59e0b, #10b981);
+  --theme-gradient-active: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(16, 185, 129, 0.2));
+}
+
+/* 🌿 Druid Grove */
+.theme-druid-grove {
+  --theme-bg-base: rgba(12, 20, 14, 0.14);
+  --theme-bg-panel: rgba(20, 34, 24, 0.24);
+  --theme-bg-card: rgba(26, 42, 30, 0.18);
+  --theme-bg-hover: rgba(34, 197, 94, 0.14);
+  
+  --theme-border-glow: rgba(34, 197, 94, 0.4);
+  --theme-border-accent: rgba(234, 179, 8, 0.4);
+  --theme-border-subtle: rgba(34, 197, 94, 0.15); /* Gorgeous green tinted edges! */
+  
+  --theme-color-accent-primary: #22c55e; /* Vibrant Green */
+  --theme-color-accent-secondary: #eab308; /* Golden Oak */
+  --theme-color-text-primary: #f0fdf4;
+  --theme-color-text-secondary: #a7f3d0;
+  --theme-color-text-glow: #dcfce7;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(34, 197, 94, 0.25);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(234, 179, 8, 0.25);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #22c55e, #eab308);
+  --theme-gradient-active: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(234, 179, 8, 0.2));
+}
+
+/* 🩸 Crimson Vampire */
+.theme-crimson-vampire {
+  --theme-bg-base: rgba(25, 8, 8, 0.14);
+  --theme-bg-panel: rgba(38, 12, 12, 0.24);
+  --theme-bg-card: rgba(45, 16, 16, 0.18);
+  --theme-bg-hover: rgba(239, 68, 68, 0.14);
+  
+  --theme-border-glow: rgba(239, 68, 68, 0.45);
+  --theme-border-accent: rgba(217, 119, 6, 0.45);
+  --theme-border-subtle: rgba(239, 68, 68, 0.16); /* Gorgeous red tinted edges! */
+  
+  --theme-color-accent-primary: #ef4444; /* Blood Red */
+  --theme-color-accent-secondary: #d97706; /* Royal Gold */
+  --theme-color-text-primary: #fef2f2;
+  --theme-color-text-secondary: #fca5a5;
+  --theme-color-text-glow: #fee2e2;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(239, 68, 68, 0.3);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(217, 119, 6, 0.3);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #ef4444, #d97706);
+  --theme-gradient-active: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(217, 119, 6, 0.2));
+}
+
+/* ❄️ Frost Glacier */
+.theme-frost-glacier {
+  --theme-bg-base: rgba(8, 20, 35, 0.14);
+  --theme-bg-panel: rgba(14, 30, 52, 0.24);
+  --theme-bg-card: rgba(18, 38, 64, 0.18);
+  --theme-bg-hover: rgba(56, 189, 248, 0.14);
+  
+  --theme-border-glow: rgba(56, 189, 248, 0.4);
+  --theme-border-accent: rgba(226, 232, 240, 0.4);
+  --theme-border-subtle: rgba(56, 189, 248, 0.16); /* Gorgeous cyan tinted edges! */
+  
+  --theme-color-accent-primary: #38bdf8; /* Glacier Cyan */
+  --theme-color-accent-secondary: #cbd5e1; /* Silver */
+  --theme-color-text-primary: #f0f9ff;
+  --theme-color-text-secondary: #bae6fd;
+  --theme-color-text-glow: #e0f2fe;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(56, 189, 248, 0.25);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(226, 232, 240, 0.25);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #38bdf8, #cbd5e1);
+  --theme-gradient-active: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(226, 232, 240, 0.2));
+}
+
+/* Default styling helper fallbacks */
+.theme-preview-card--interactive {
+  cursor: pointer;
+}
+.theme-preview-tab {
+  color: var(--theme-color-text-secondary);
+  font-weight: 500;
+  padding: 8px 16px;
+  transition: all 0.2s ease;
+}
+.theme-preview-tab:hover {
+  background: var(--theme-bg-hover);
+  color: var(--theme-color-text-primary);
+}
+
+/* ==========================================================================
+   🛠️ Style System Variants
+   ========================================================================== */
+
+/* 🌌 Variant 1: Glassmorphic Modern */
+.style-variant-glass .theme-preview-container {
+  border-radius: 20px;
+  background: var(--theme-bg-base);
+  border: 1px solid var(--theme-border-subtle);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+.style-variant-glass .theme-preview-card {
+  background: var(--theme-bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--theme-border-subtle);
+  border-radius: 16px;
+  color: var(--theme-color-text-primary);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease-in-out;
+}
+.style-variant-glass .theme-preview-card--interactive:hover {
+  border-color: var(--theme-border-glow);
+  box-shadow: var(--theme-glow-shadow-primary);
+  transform: translateY(-2px);
+}
+.style-variant-glass .theme-preview-tabs-list {
+  background: var(--theme-bg-panel);
+  border: 1px solid var(--theme-border-subtle);
+  border-radius: 10px;
+  padding: 6px;
+}
+.style-variant-glass .theme-preview-tab {
+  border-radius: 8px;
+}
+.style-variant-glass .theme-preview-tab--active {
+  background: var(--theme-gradient-active);
+  color: var(--theme-color-text-primary);
+  border: 1px solid var(--theme-border-glow);
+  box-shadow: var(--theme-glow-shadow-primary);
+}
+
+/* ⚔️ Variant 2: Chiseled Rune Gothic */
+.style-variant-gothic .theme-preview-container {
+  border-radius: 6px;
+  background: rgba(10, 8, 14, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
+.style-variant-gothic .theme-preview-card {
+  background: rgba(18, 15, 25, 0.98); /* Solid dark stone background */
+  border: 2px solid var(--theme-color-accent-primary); /* Chiseled colored border */
+  border-radius: 4px; /* Classic sharp RPG corners */
+  color: var(--theme-color-text-primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(0, 0, 0, 0.9);
+  transition: all 0.2s ease;
+}
+.style-variant-gothic .theme-preview-card--interactive:hover {
+  border-color: var(--theme-color-accent-secondary);
+  box-shadow: 0 0 20px var(--theme-border-glow);
+  transform: translateY(-1px);
+}
+.style-variant-gothic .theme-preview-tabs-list {
+  background: rgba(8, 6, 12, 0.95);
+  border: 2px solid var(--theme-border-subtle);
+  border-radius: 2px;
+  padding: 4px;
+}
+.style-variant-gothic .theme-preview-tab {
+  border-radius: 2px;
+}
+.style-variant-gothic .theme-preview-tab--active {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--theme-color-text-primary);
+  border: 1.5px solid var(--theme-color-accent-primary);
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.8);
+}
+
+/* ⚡ Variant 3: Cyber-Glow Flat */
+.style-variant-neon .theme-preview-container {
+  border-radius: 0px;
+  background: #030303;
+  border: 3px double var(--theme-color-accent-primary);
+  transition: all 0.3s ease;
+}
+.style-variant-neon .theme-preview-card {
+  background: #060606; /* Flat pitch black background */
+  border: 2px solid var(--theme-color-accent-secondary); /* Neon outline */
+  border-radius: 0px; /* Completely square */
+  color: var(--theme-color-text-primary);
+  box-shadow: 5px 5px 0px var(--theme-color-accent-primary); /* Harsh neon shadow offset */
+  transition: all 0.15s ease;
+}
+.style-variant-neon .theme-preview-card--interactive:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px var(--theme-color-accent-primary), 0 0 15px var(--theme-color-accent-secondary);
+}
+.style-variant-neon .theme-preview-tabs-list {
+  background: #000;
+  border: 2px solid var(--theme-color-accent-primary);
+  border-radius: 0px;
+  padding: 2px;
+}
+.style-variant-neon .theme-preview-tab {
+  border-radius: 0px;
+}
+.style-variant-neon .theme-preview-tab--active {
+  background: #060606;
+  color: var(--theme-color-accent-secondary);
+  border: 2px solid var(--theme-color-accent-secondary);
+}
+
+.theme-preview-input {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--theme-border-subtle) !important;
+  color: var(--theme-color-text-primary) !important;
+  border-radius: 6px;
+  transition: all 0.25s ease;
+}
+
+.theme-preview-input:focus {
+  border-color: var(--theme-color-accent-primary) !important;
+  box-shadow: var(--theme-glow-shadow-primary) !important;
+}
+
+.theme-preview-btn-primary {
+  background: var(--theme-gradient-primary) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+  box-shadow: var(--theme-glow-shadow-primary);
+  transition: all 0.2s ease;
+}
+
+.theme-preview-btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: var(--theme-glow-shadow-primary), 0 4px 12px rgba(0,0,0,0.25);
+  transform: translateY(-1px);
+}
+
+.theme-preview-btn-secondary {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid var(--theme-border-subtle) !important;
+  color: var(--theme-color-text-primary) !important;
+  transition: all 0.2s ease;
+}
+
+.theme-preview-btn-secondary:hover {
+  background: var(--theme-bg-hover) !important;
+  border-color: var(--theme-border-glow) !important;
+}
+
+.theme-preview-progress {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.theme-preview-progress-bar {
+  height: 100%;
+  background: var(--theme-gradient-primary);
+  box-shadow: var(--theme-glow-shadow-primary);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.theme-preview-glow-text {
+  color: var(--theme-color-text-primary);
+  text-shadow: 0 0 10px var(--theme-border-glow);
+}
+
+/* ==========================================================================
+   💎 Unified Glassmorphic Style System (Core Utility Classes)
+   ========================================================================== */
+
+/* A beautiful, high-end translucent glass panel */
+.glass-panel {
+  border-radius: 20px;
+  background: var(--theme-bg-base);
+  border: 1px solid var(--theme-border-subtle);
+  backdrop-filter: blur(24px) saturate(130%);
+  -webkit-backdrop-filter: blur(24px) saturate(130%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+  color: var(--theme-color-text-primary);
+  transition: all 0.3s ease;
+}
+
+/* A premium glass card with interactive highlights */
+.glass-card {
+  background: var(--theme-bg-card);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  border: 1px solid var(--theme-border-subtle);
+  border-radius: 16px;
+  color: var(--theme-color-text-primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s ease-in-out;
+}
+
+.glass-card--interactive {
+  cursor: pointer;
+}
+
+.glass-card--interactive:hover {
+  border-color: var(--theme-border-glow);
+  box-shadow: var(--theme-glow-shadow-primary);
+  transform: translateY(-2px);
+}
+
+/* Glassmorphic Form Inputs */
+.glass-input {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--theme-border-subtle) !important;
+  color: var(--theme-color-text-primary) !important;
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
+}
+
+.glass-input:focus {
+  border-color: var(--theme-color-accent-primary) !important;
+  box-shadow: var(--theme-glow-shadow-primary) !important;
+}
+
+/* Premium Primary Button (Gradient fill with hover glow) */
+.glass-btn-primary {
+  background: var(--theme-gradient-primary) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: var(--theme-glow-shadow-primary);
+  transition: all 0.2s ease;
+}
+
+.glass-btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: var(--theme-glow-shadow-primary), 0 4px 12px rgba(0,0,0,0.2);
+  transform: translateY(-1px);
+}
+
+/* Premium Secondary Button (Transparent with subtle hover) */
+.glass-btn-secondary {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid var(--theme-border-subtle) !important;
+  color: var(--theme-color-text-primary) !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.glass-btn-secondary:hover {
+  background: var(--theme-bg-hover) !important;
+  border-color: var(--theme-border-glow) !important;
+}
+
+/* Glassmorphic progress tracker */
+.glass-progress {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.glass-progress-bar {
+  height: 100%;
+  background: var(--theme-gradient-primary);
+  box-shadow: var(--theme-glow-shadow-primary);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+/* Text glow effects */
+.glass-text-glow {
+  color: var(--theme-color-text-primary);
+  text-shadow: 0 0 10px var(--theme-border-glow);
+}

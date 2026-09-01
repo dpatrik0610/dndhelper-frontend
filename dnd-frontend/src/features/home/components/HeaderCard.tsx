@@ -11,7 +11,6 @@ interface Props {
   onProfile: () => void;
   isMobile?: boolean;
   characterSelector?: ReactNode;
-  palette: { bg: string; border: string; textMain: string; textDim: string };
   quote?: string;
 }
 
@@ -22,67 +21,129 @@ export function HeaderCard({
   onProfile,
   characterSelector,
   isMobile = false,
-  palette,
   quote,
 }: Props) {
   return (
-    <Paper radius="md" p="lg" withBorder style={{ background: palette.bg, borderColor: palette.border, backdropFilter: "blur(8px)", color: palette.textMain }}>
+    <Paper
+      radius="lg"
+      p="xl"
+      withBorder
+      style={{
+        background: "var(--theme-bg-panel, rgba(15,15,15,0.45))",
+        borderColor: "var(--theme-border-subtle, rgba(255,255,255,0.06))",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        color: "var(--theme-color-text-primary, #fff)",
+        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.25)",
+      }}
+    >
       {/* Line 1: campaign + status */}
       <Group justify="space-between" align="center" wrap={isMobile ? "wrap" : "nowrap"} gap="md">
-        <Title order={2} style={{ color: palette.textMain }}>
-          {campaignName || "Campaign"}
+        <Title
+          order={2}
+          style={{
+            color: "var(--theme-color-text-primary, #fff)",
+            fontSize: isMobile ? "1.4rem" : "1.8rem",
+            fontWeight: 800,
+            letterSpacing: "-0.5px",
+          }}
+        >
+          {campaignName || "Adventure Camp"}
         </Title>
         <ConnectionStatus />
       </Group>
+
       {quote && (
-        <Text size="sm" fs="italic" c={palette.textDim} mt={4}>
-          {quote}
+        <Text
+          size="sm"
+          fs="italic"
+          mt={6}
+          style={{
+            color: "var(--theme-color-text-secondary, rgba(255,255,255,0.65))",
+            borderLeft: "2px solid var(--theme-color-accent-secondary)",
+            paddingLeft: "10px",
+          }}
+        >
+          "{quote}"
         </Text>
       )}
 
       {/* Line 2: character + actions */}
       <Group
-        mt="sm"
+        mt="md"
         gap="md"
         justify="space-between"
         align={isMobile ? "flex-start" : "center"}
         wrap={isMobile ? "wrap" : "nowrap"}
       >
-        <Group align="center" gap="sm" style={{ flex: 1, minWidth: 0 }}>
-          <ThemeIcon size={56} radius="xl" variant="gradient" gradient={{ from: "grape", to: "indigo" }}>
-            <Text fw={800}>{character?.name?.charAt(0) ?? "?"}</Text>
-          </ThemeIcon>
-          <Stack gap={2}>
-            <Text fw={700} c={palette.textMain}>
-              {character?.name ?? "No character selected"}
+        <Group align="center" gap="md" style={{ flex: 1, minWidth: 0 }}>
+          <ThemeIcon
+            size={58}
+            radius="xl"
+            variant="gradient"
+            gradient={{
+              from: "var(--theme-color-accent-primary, #7c3aed)",
+              to: "var(--theme-color-accent-secondary, #06b6d4)",
+            }}
+            styles={{
+              root: {
+                boxShadow: "var(--theme-glow-shadow-primary)",
+              }
+            }}
+          >
+            <Text fw={900} size="xl" style={{ color: "#fff" }}>
+              {character?.name?.charAt(0) ?? "?"}
             </Text>
-            <Text size="sm" c={palette.textDim}>
-              {!character && "Select a character to view details"}
+          </ThemeIcon>
+          <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
+            <Text fw={800} size="lg" style={{ color: "var(--theme-color-text-primary, #fff)" }}>
+              {character?.name ?? "No Character Selected"}
+            </Text>
+            <Text size="xs" style={{ color: "var(--theme-color-text-secondary, rgba(255,255,255,0.6))" }}>
+              {character
+                ? `${character.race ?? ""} • ${character.className ?? ""} (Level ${character.level ?? 1})`
+                : "Select a character to initialize your adventure!"}
             </Text>
           </Stack>
         </Group>
 
         <Group
-          gap="sm"
+          gap="xs"
           style={{
             flexShrink: 0,
             width: isMobile ? "100%" : "auto",
             justifyContent: isMobile ? "flex-start" : "flex-end",
           }}
         >
-          <Button size="xs" variant="outline" onClick={onSelectCharacter} radius="md">
-            {character ? "Change Character" : "Select Character"}
+          <Button
+            size="xs"
+            variant="subtle"
+            onClick={onSelectCharacter}
+            styles={{
+              root: {
+                color: "var(--theme-color-accent-secondary)",
+                "&:hover": {
+                  background: "var(--theme-bg-hover, rgba(255,255,255,0.04))",
+                }
+              }
+            }}
+          >
+            {character ? "Change Hero" : "Select Character"}
           </Button>
           {character && (
-            <Button size="xs" variant="light" onClick={onProfile} radius="md">
-              View Profile
+            <Button
+              size="xs"
+              className="theme-preview-btn-primary"
+              onClick={onProfile}
+            >
+              Enter Profile
             </Button>
           )}
         </Group>
       </Group>
 
       {character && (
-        <Box mt="sm">
+        <Box mt="lg">
           <XpProgressCard experience={character.experience} />
         </Box>
       )}

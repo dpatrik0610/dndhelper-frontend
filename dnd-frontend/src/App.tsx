@@ -31,6 +31,7 @@ const RulesPage = lazy(() => import("@features/rules/RulesPage"));
 const AiAssistantPage = lazy(() => import("@features/aiAssistant/AiAssistantPage"));
 const EncounterRoomPage = lazy(() => import("@features/encounterRoom/EncounterRoomPage"));
 const ShopkeeperPage = lazy(() => import("@features/shop/ShopkeeperPage"));
+const ThemePreviewPage = lazy(() => import("@features/themePreview/ThemePreviewPage"));
 
 function AppRoutes() {
   const location = useLocation();
@@ -117,8 +118,26 @@ function AppRoutes() {
 
   const isDashboardRoute = location.pathname === "/dashboard";
 
+  const activeThemeClass = useMemo(() => {
+    switch (sidebarTheme) {
+      case "midnight":
+        return "theme-midnight-arcane";
+      case "crimson-vampire":
+        return "theme-crimson-vampire";
+      case "frost-glacier":
+        return "theme-frost-glacier";
+      case "sunset":
+      default:
+        return "theme-cyber-noir";
+    }
+  }, [sidebarTheme]);
+
   return (
-    <AppShell header={{ height: 0 }} styles={getAppShellStyles(isMobile, isDashboardRoute)} >
+    <AppShell 
+      header={{ height: 0 }} 
+      styles={getAppShellStyles(isMobile, isDashboardRoute)} 
+      className={isDashboardRoute ? "" : `${activeThemeClass} style-variant-glass`}
+    >
       {showSidebar && <Sidebar opened={opened} onClose={handlers.close} position="right" themeVariant={sidebarTheme} />}
 
       <AppShell.Main>
@@ -154,6 +173,7 @@ function AppRoutes() {
 
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/theme-preview" element={<ThemePreviewPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

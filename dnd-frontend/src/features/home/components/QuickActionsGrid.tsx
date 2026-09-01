@@ -2,58 +2,78 @@ import { Card, Grid, Group, Text, ThemeIcon, Tooltip } from "@mantine/core";
 import type { JSX } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface Action {
+export interface ActionItem {
   label: string;
   icon: JSX.Element;
   path: string;
+  description: string;
 }
 
 interface Props {
-  actions: Action[];
-  palette: { cardBg: string; border: string; hoverBg: string; textMain: string; accent: string };
+  actions: ActionItem[];
 }
 
-export function QuickActionsGrid({ actions, palette }: Props) {
+export function QuickActionsGrid({ actions }: Props) {
   const navigate = useNavigate();
 
   return (
-    <Grid mt="md" gutter="md" style={{ maxWidth: 960, width: "100%" }}>
+    <Grid mt="md" gutter="md" style={{ width: "100%" }}>
       {actions.map((action) => (
-        <Grid.Col key={action.label} span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
-          <Tooltip label={`Open ${action.label}`} withArrow>
+        <Grid.Col key={action.label} span={{ base: 12, sm: 6, md: 4 }}>
+          <Tooltip label={action.description} withArrow position="bottom" openDelay={400}>
             <Card
               withBorder
-              shadow="xl"
-              radius="lg"
+              shadow="lg"
+              radius="md"
               onClick={() => navigate(action.path)}
               style={{
                 cursor: "pointer",
-                background: "rgba(25,20,50,0.55)",
-                borderColor: palette.border,
-                transition: "transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease",
-                color: palette.textMain,
-                backdropFilter: "blur(10px)",
-                paddingTop: "12px",
-                paddingBottom: "12px",
+                background: "var(--theme-bg-card, rgba(255,255,255,0.03))",
+                borderColor: "var(--theme-border-subtle, rgba(255,255,255,0.06))",
+                transition: "all 0.22s ease-in-out",
+                color: "var(--theme-color-text-primary, #fff)",
+                backdropFilter: "blur(12px)",
+                WebkitBackdropFilter: "blur(12px)",
+                padding: "16px",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 12px 30px rgba(0,0,0,0.35)";
-                e.currentTarget.style.borderColor = palette.accent;
+                e.currentTarget.style.transform = "translateY(-3px)";
+                e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary, 0 8px 24px rgba(0,0,0,0.3))";
+                e.currentTarget.style.borderColor = "var(--theme-border-glow, var(--theme-color-accent-primary))";
+                e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255,255,255,0.06))";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "translateY(0)";
                 e.currentTarget.style.boxShadow = "";
-                e.currentTarget.style.borderColor = palette.border;
+                e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255,255,255,0.06))";
+                e.currentTarget.style.background = "var(--theme-bg-card, rgba(255,255,255,0.03))";
               }}
             >
-              <Group justify="center" align="center" gap="sm">
-                <ThemeIcon size={42} radius="lg" variant="gradient" gradient={{ from: palette.accent, to: "cyan" }}>
+              <Group wrap="nowrap" align="center" gap="md">
+                <ThemeIcon
+                  size={46}
+                  radius="md"
+                  variant="gradient"
+                  gradient={{
+                    from: "var(--theme-color-accent-primary, #7c3aed)",
+                    to: "var(--theme-color-accent-secondary, #06b6d4)",
+                  }}
+                  styles={{
+                    root: {
+                      boxShadow: "var(--theme-glow-shadow-secondary)",
+                    }
+                  }}
+                >
                   {action.icon}
                 </ThemeIcon>
-                <Text fw={700} c={palette.textMain} ta="center">
-                  {action.label}
-                </Text>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text fw={800} size="sm" style={{ color: "var(--theme-color-text-primary, #fff)" }}>
+                    {action.label}
+                  </Text>
+                  <Text size="xs" style={{ color: "var(--theme-color-text-secondary, rgba(255,255,255,0.6))" }} truncate="end">
+                    {action.description}
+                  </Text>
+                </div>
               </Group>
             </Card>
           </Tooltip>

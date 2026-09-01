@@ -3,7 +3,7 @@ import type { AppShellProps } from "@mantine/core";
 export function getAppShellStyles(isMobile: boolean, isDashboardRoute = false): AppShellProps["styles"] {
   return {
     root: {
-      background: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)",
+      background: "transparent",
       minHeight: "100vh",
     },
     main: {
