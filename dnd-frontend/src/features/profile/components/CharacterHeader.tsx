@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stack, Box, Group, Title, Text, Tooltip, Popover, Badge, Divider } from "@mantine/core";
-import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { longrest } from "@services/characterService";
+import { Stack, Box, Group, Title, Text, Tooltip, Popover, Badge, Divider, ActionIcon, Button } from "@mantine/core";
+import { useCurrentCharacter, useCharacterCoreActions, useCharacterCombatActions } from "@store/character/characterSelectors";
+import { longrest, updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
+import { useCharacterStore } from "@store/character/characterStore";
+import { getCondition } from "@services/conditionService";
 
 import { CharacterCurrencyArea } from "./CharacterCurrencyArea";
 import { showNotification } from "@components/Notification/Notification";
@@ -22,6 +24,7 @@ import {
   IconHeartPlus,
   IconCoin,
   IconAward,
+  IconTrash,
 } from "@tabler/icons-react";
 
 // Modals
@@ -30,10 +33,12 @@ import { HpModal } from "./HpModal";
 import { MoneyModal } from "./MoneyModal";
 import { RollModal } from "./RollModal";
 import { ActionBubble } from "./ActionBubble";
+import { ConditionDetailsModal } from "./ConditionDetailsModal";
 
 export function CharacterHeader() {
   const character = useCurrentCharacter();
   const { updateCharacter } = useCharacterCoreActions();
+  const { removeCondition } = useCharacterCombatActions();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
@@ -42,6 +47,14 @@ export function CharacterHeader() {
   const [hpOpened, setHpOpened] = useState(false);
   const [moneyOpened, setMoneyOpened] = useState(false);
   const [rollOpened, setRollOpened] = useState(false);
+
+  // Active Condition Detail Modal State
+  const [detailsOpened, setDetailsOpened] = useState(false);
+  const [selectedCondition, setSelectedCondition] = useState<string | null>(null);
+  const [conditionDesc, setConditionDesc] = useState<string[]>([]);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [removingDetails, setRemovingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
 
   if (!character) return null;
 
@@ -82,9 +95,81 @@ export function CharacterHeader() {
     }
   }
 
+  // Active conditions direct removal hook
+  const handleRemoveCondition = async (cond: string) => {
+    try {
+      removeCondition(cond);
+      // Wait for next tick to let the Zustand store update, then persist to database
+      await Promise.resolve();
+      const updated = useCharacterStore.getState().character;
+      if (updated) {
+        await apiUpdateCharacter(updated);
+      }
+      showNotification({
+        title: "Condition Removed",
+        message: `Successfully cured "${cond.toUpperCase()}"!`,
+        color: "green",
+      });
+    } catch (err) {
+      console.error(err);
+      showNotification({
+        title: "Cure Failed",
+        message: "Failed to remove active condition.",
+        color: "red",
+      });
+    }
+  };
+
+  // Active conditions details modal trigger
+  const handleOpenDetails = async (cond: string) => {
+    setSelectedCondition(cond);
+    setConditionDesc([]);
+    setDetailsError(null);
+    setLoadingDetails(true);
+    setDetailsOpened(true);
+
+    try {
+      const result = await getCondition(cond);
+      setConditionDesc(result);
+      if (!result.length) {
+        setDetailsError("No detailed description found.");
+      }
+    } catch (err) {
+      console.error(err);
+      setDetailsError("Failed to load condition details.");
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleRemoveFromModal = async () => {
+    if (!selectedCondition) return;
+    setRemovingDetails(true);
+    try {
+      removeCondition(selectedCondition);
+      setDetailsOpened(false);
+      await Promise.resolve();
+      const updated = useCharacterStore.getState().character;
+      if (updated) {
+        await apiUpdateCharacter(updated);
+      }
+      showNotification({
+        title: "Condition Removed",
+        message: `Successfully cured "${selectedCondition.toUpperCase()}"!`,
+        color: "green",
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRemovingDetails(false);
+    }
+  };
+
   // Construct meta text safely
   const metaItems = [character.race, character.characterClass, character.alignment].filter(Boolean);
   const metaString = metaItems.length > 0 ? metaItems.join(" • ") : "No details set";
+
+  const conditionsCount = character.conditions?.length ?? 0;
 
   return (
     <>
@@ -176,15 +261,6 @@ export function CharacterHeader() {
                   icon={<IconMoon size={isMobile ? 24 : 28} />}
                   onClick={handleLongrest}
                   color="rgba(103, 115, 250, 0.18)"
-                />
-              </Tooltip>
-
-              <Tooltip label="Add Condition" position="top" withArrow>
-                <ActionBubble
-                  label="Add Condition"
-                  icon={<IconFlame size={isMobile ? 24 : 28} />}
-                  onClick={() => setAddConditionOpened(true)}
-                  color="rgba(255, 90, 0, 0.18)"
                 />
               </Tooltip>
 
@@ -319,6 +395,136 @@ export function CharacterHeader() {
                   color="rgba(240, 140, 0, 0.18)"
                 />
               </Tooltip>
+
+              {/* NEW: Re-engineered Active Conditions Dropdown Bubble */}
+              <Popover position="bottom-end" withArrow shadow="md" trapFocus={false}>
+                <Popover.Target>
+                  <div style={{ position: "relative" }}>
+                    <Tooltip label="Active Conditions" position="top" withArrow>
+                      <ActionBubble
+                        label="Active Conditions"
+                        icon={<IconFlame size={isMobile ? 24 : 28} />}
+                        onClick={() => {}}
+                        color="rgba(239, 68, 68, 0.25)"
+                      />
+                    </Tooltip>
+                    
+                    {conditionsCount > 0 && (
+                      <Box
+                        style={{
+                          position: "absolute",
+                          top: -4,
+                          right: -4,
+                          width: 18,
+                          height: 18,
+                          borderRadius: "50%",
+                          background: "var(--theme-color-accent-primary, #f59e0b)",
+                          border: "1.5px solid #fff",
+                          color: "#fff",
+                          fontSize: "10px",
+                          fontWeight: 800,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          pointerEvents: "none",
+                          zIndex: 5,
+                          boxShadow: "0 0 8px var(--theme-color-accent-primary, #f59e0b)",
+                        }}
+                      >
+                        {conditionsCount}
+                      </Box>
+                    )}
+                  </div>
+                </Popover.Target>
+                <Popover.Dropdown
+                  style={{
+                    background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.92))",
+                    backdropFilter: "blur(24px) saturate(130%)",
+                    WebkitBackdropFilter: "blur(24px) saturate(130%)",
+                    border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+                    borderRadius: "12px",
+                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.45), var(--theme-glow-shadow-primary)",
+                    padding: "16px",
+                    color: "var(--theme-color-text-primary, #fff)",
+                    minWidth: "260px",
+                  }}
+                >
+                  <Stack gap="sm">
+                    <Group justify="space-between" align="center">
+                      <Text
+                        fw={700}
+                        size="xs"
+                        tt="uppercase"
+                        style={{
+                          letterSpacing: "2px",
+                          color: "var(--theme-color-text-primary, #fff)",
+                          fontFamily: 'var(--font-sans)',
+                        }}
+                      >
+                        Active Conditions
+                      </Text>
+                      <Button
+                        size="xs"
+                        variant="transparent"
+                        onClick={() => setAddConditionOpened(true)}
+                        style={{
+                          color: "var(--theme-color-accent-primary, #f59e0b)",
+                          fontWeight: 700,
+                          fontSize: "11px",
+                          padding: 0,
+                          height: "auto",
+                          fontFamily: "var(--font-sans)",
+                        }}
+                      >
+                        + Add
+                      </Button>
+                    </Group>
+
+                    <Divider color="rgba(255, 255, 255, 0.08)" />
+
+                    {conditionsCount > 0 ? (
+                      <Stack gap="xs">
+                        {character.conditions.map((cond, i) => (
+                          <Group key={i} justify="space-between" align="center" wrap="nowrap" style={{
+                            background: "rgba(255, 255, 255, 0.01)",
+                            border: "1px solid rgba(255, 255, 255, 0.04)",
+                            borderRadius: "8px",
+                            padding: "6px 12px",
+                          }}>
+                            <Text
+                              onClick={() => handleOpenDetails(cond)}
+                              style={{
+                                cursor: "pointer",
+                                fontSize: "13px",
+                                fontWeight: 600,
+                                fontFamily: "var(--font-sans)",
+                                color: "var(--theme-color-accent-primary, #f59e0b)",
+                                textDecoration: "underline",
+                                textTransform: "uppercase",
+                              }}
+                            >
+                              {cond}
+                            </Text>
+                            <ActionIcon
+                              size="xs"
+                              variant="transparent"
+                              color="red"
+                              onClick={() => handleRemoveCondition(cond)}
+                              title={`Remove ${cond}`}
+                            >
+                              <IconTrash size={14} />
+                            </ActionIcon>
+                          </Group>
+                        ))}
+                      </Stack>
+                    ) : (
+                      <Text size="xs" c="dimmed" style={{ fontStyle: "italic", textAlign: "center" }} py="xs">
+                        No active conditions
+                      </Text>
+                    )}
+                  </Stack>
+                </Popover.Dropdown>
+              </Popover>
             </Group>
           </Group>
         </Stack>
@@ -329,6 +535,17 @@ export function CharacterHeader() {
       <HpModal opened={hpOpened} onClose={() => setHpOpened(false)} />
       <MoneyModal opened={moneyOpened} onClose={() => setMoneyOpened(false)} />
       <RollModal opened={rollOpened} onClose={() => setRollOpened(false)} />
+
+      <ConditionDetailsModal
+        opened={detailsOpened}
+        onClose={() => setDetailsOpened(false)}
+        title={selectedCondition ? selectedCondition.toUpperCase() : "Condition"}
+        loading={loadingDetails}
+        desc={conditionDesc}
+        error={detailsError}
+        onRemove={handleRemoveFromModal}
+        saving={removingDetails}
+      />
     </>
   );
 }
