@@ -98,7 +98,6 @@ export function CombatStats() {
   return (
     <ExpandableSection
       title="Combat Statistics"
-      icon={<span style={{ fontSize: "1.2rem", display: "flex", alignItems: "center" }}><IconSword size={20} /></span>}
       color={SectionColor.Red}
       defaultOpen
       style={{

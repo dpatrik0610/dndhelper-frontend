@@ -12,7 +12,6 @@ export function ExtraInfo() {
   return (
     <ExpandableSection
       title="Additional Info"
-      icon={<IconInfoCircle size={18} />}
       color= {SectionColor.Teal}
       transparent
       defaultOpen={true}

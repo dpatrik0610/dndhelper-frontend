@@ -1,12 +1,11 @@
-import { ActionIcon, Autocomplete, Button, Group, Stack, Switch, Text, Box, Select, Divider } from "@mantine/core";
+import { ActionIcon, Autocomplete, Button, Group, Stack, Text, Box, Select, Divider } from "@mantine/core";
 import { useSpellStore } from "@store/spell/spellStore";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { useEffect, useMemo, useState } from "react";
 import { getSpellNames } from "@services/spellService";
 
-import { IconTrash, IconWand, IconStarFilled, IconBrain } from "@tabler/icons-react";
+import { IconTrash, IconWand, IconBrain, IconStarFilled } from "@tabler/icons-react";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
-import { SectionColor } from "@appTypes/SectionColor";
 import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { InfoIconPopover } from "@components/common/InfoIconPopover";

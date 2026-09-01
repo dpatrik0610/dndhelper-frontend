@@ -87,7 +87,6 @@ export function ConditionsPanel() {
     <>
       <ExpandableSection
         title="Active Conditions"
-        icon={<IconSparkles />}
         color={SectionColor.Red}
         defaultOpen
       >

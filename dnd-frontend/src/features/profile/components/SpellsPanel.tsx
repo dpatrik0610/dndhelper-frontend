@@ -91,7 +91,6 @@ export function SpellsPanel() {
     return (
       <ExpandableSection
         title="Spells"
-        icon={<IconSparkles />}
         color={SectionColor.Grape}
         style={{
           background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
@@ -112,7 +111,6 @@ export function SpellsPanel() {
     return (
       <ExpandableSection
         title="Spells"
-        icon={<IconSparkles />}
         color={SectionColor.Grape}
         style={{
           background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
@@ -133,7 +131,6 @@ export function SpellsPanel() {
     <>
       <ExpandableSection
         title="Spells"
-        icon={<IconSparkles />}
         color={SectionColor.Grape}
         defaultOpen
         style={{

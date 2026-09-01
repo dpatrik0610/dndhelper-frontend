@@ -1,7 +1,7 @@
 import { SimpleGrid, Tooltip, Divider, Text } from "@mantine/core";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { StatBox } from "./StatBox";
-import { IconExclamationCircle, IconWand } from "@tabler/icons-react";
+import { IconExclamationCircle } from "@tabler/icons-react";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { SpellSlot } from "@appTypes/Character/SpellSlot";
@@ -76,7 +76,6 @@ export function SpellCastingBlock() {
       <ExpandableSection
         title="Spellcasting"
         defaultOpen
-        icon={<IconWand size={18} />}
         color={SectionColor.Red}
         transparent
         style={{

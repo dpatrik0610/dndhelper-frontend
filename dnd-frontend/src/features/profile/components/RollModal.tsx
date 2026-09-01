@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActionIcon,
   Badge,
   Button,
   Divider,
   Group,
-  Modal,
   Paper,
   SimpleGrid,
   SegmentedControl,
@@ -14,7 +12,7 @@ import {
   TextInput,
   Textarea,
 } from "@mantine/core";
-import { IconX } from "@tabler/icons-react";
+import { IconX, IconDice5 } from "@tabler/icons-react";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { showNotification } from "@components/Notification/Notification";
 
@@ -22,6 +20,7 @@ import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { rollByDice, rollByExpression, subtleRoll } from "@services/rollService";
 import type { RollResult } from "@appTypes/Roll";
 import { formatRollExpression } from "@utils/rollFormat";
+import { BaseModal } from "@components/BaseModal";
 
 interface RollModalProps {
   opened: boolean;
@@ -176,22 +175,13 @@ export function RollModal({ opened, onClose }: RollModalProps) {
   };
 
   return (
-    <Modal
+    <BaseModal
       opened={opened}
       onClose={onClose}
-      withCloseButton={false}
-      centered
-      styles={{
-        header: { display: "none" },
-        content: {
-          background: "rgba(20,10,30,0.75)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-          color: "white",
-        },
-      }}
+      title={variant === "public" ? "Roll Dice" : "Subtle Roll (DM)"}
+      size="md"
+      showSaveButton={false}
+      showCancelButton={false}
     >
       <form
         onSubmit={(event) => {
@@ -200,21 +190,8 @@ export function RollModal({ opened, onClose }: RollModalProps) {
         }}
       >
         <Stack gap="md">
-          <Group justify="space-between" align="center">
-            <Text fw={600} size="lg">
-              {variant === "public" ? "Roll Dice" : "Subtle Roll"}
-            </Text>
-            <ActionIcon
-              variant="subtle"
-              size="lg"
-              onClick={onClose}
-              aria-label="Close roll modal"
-              style={{ color: "rgba(255,255,255,0.7)" }}
-            >
-              <IconX size={18} />
-            </ActionIcon>
-          </Group>
-
+          
+          {/* THEMED SEGMENTED CONTROLS */}
           <SegmentedControl
             value={variant}
             onChange={(value) => {
@@ -227,6 +204,27 @@ export function RollModal({ opened, onClose }: RollModalProps) {
             ]}
             size="xs"
             fullWidth
+            styles={{
+              root: {
+                background: "rgba(255, 255, 255, 0.01)",
+                border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+                borderRadius: "8px",
+                padding: "4px",
+              },
+              indicator: {
+                background: "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))",
+                boxShadow: "var(--theme-glow-shadow-primary)",
+                borderRadius: "6px",
+              },
+              label: {
+                color: "#fff",
+                fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                fontWeight: 400,
+                fontSize: "11px",
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+              }
+            }}
           />
 
           <Paper
@@ -234,23 +232,53 @@ export function RollModal({ opened, onClose }: RollModalProps) {
             radius="md"
             withBorder
             style={{
-              background: "rgba(0,0,0,0.22)",
-              borderColor: "rgba(255,255,255,0.08)",
+              background: "rgba(0, 0, 0, 0.12)",
+              borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
             }}
           >
             <Stack gap="xs">
-              <Text size="sm" fw={600}>
-                Roll input
+              <Text
+                size="xs"
+                fw={400}
+                style={{
+                  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                  color: "var(--theme-color-text-secondary)",
+                }}
+              >
+                Roll Input Mode
               </Text>
               <SegmentedControl
                 value={inputMode}
                 onChange={handleModeChange}
                 data={[
-                  { label: "Expression", value: "expression" },
-                  { label: "Quick", value: "manual" },
+                  { label: "Expression Input", value: "expression" },
+                  { label: "Quick Pick", value: "manual" },
                 ]}
                 size="xs"
                 fullWidth
+                styles={{
+                  root: {
+                    background: "rgba(255, 255, 255, 0.01)",
+                    border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+                    borderRadius: "8px",
+                    padding: "4px",
+                  },
+                  indicator: {
+                    background: "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))",
+                    boxShadow: "var(--theme-glow-shadow-primary)",
+                    borderRadius: "6px",
+                  },
+                  label: {
+                    color: "#fff",
+                    fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                    fontWeight: 400,
+                    fontSize: "11px",
+                    letterSpacing: "1px",
+                    textTransform: "uppercase",
+                  }
+                }}
               />
             </Stack>
           </Paper>
@@ -263,52 +291,95 @@ export function RollModal({ opened, onClose }: RollModalProps) {
               onChange={(e) => handleExpressionChange(e.currentTarget.value)}
               rightSection={
                 expression ? (
-                  <ActionIcon
-                    size="sm"
-                    variant="subtle"
+                  <Button
+                    size="xs"
+                    variant="unstyled"
                     onClick={() => handleExpressionChange("")}
                     aria-label="Clear expression"
+                    style={{ color: "rgba(255,255,255,0.5)", border: "none", background: "none", cursor: "pointer" }}
                   >
                     <IconX size={14} />
-                  </ActionIcon>
+                  </Button>
                 ) : null
               }
               classNames={{ input: "glassy-input", label: "glassy-label" }}
+              styles={{
+                label: {
+                  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                  fontWeight: 300,
+                  letterSpacing: "1.5px",
+                  textTransform: "uppercase",
+                  fontSize: "10px",
+                  color: "var(--theme-color-text-secondary)",
+                  marginBottom: "4px",
+                },
+              }}
             />
           )}
 
           {inputMode === "manual" && (
             <>
               <Stack gap="xs">
-                <Text size="md" fw={500}>
-                  Quick buttons
+                <Text
+                  size="xs"
+                  fw={400}
+                  style={{
+                    fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                    letterSpacing: "1px",
+                    textTransform: "uppercase",
+                    color: "var(--theme-color-text-secondary)",
+                  }}
+                >
+                  Quick Selector Matrix
                 </Text>
+                
                 <SimpleGrid cols={2} spacing="xs">
+                  {/* Dice counts column with active glass buttons */}
                   <Stack gap="xs">
-                    {quickDiceCounts.map((count) => (
-                      <Button
-                        key={`dice-${count}`}
-                        size="xs"
-                        variant="light"
-                        onClick={() => handleManualDiceChange(count)}
-                        fullWidth
-                      >
-                        {count} dice
-                      </Button>
-                    ))}
+                    {quickDiceCounts.map((count) => {
+                      const isSelected = numberOfDice === count;
+                      return (
+                        <Button
+                          key={`dice-${count}`}
+                          size="xs"
+                          className={isSelected ? "glass-btn-primary" : "glass-btn-secondary"}
+                          onClick={() => handleManualDiceChange(count)}
+                          fullWidth
+                          style={{
+                            fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                            fontSize: "11px",
+                            fontWeight: 400,
+                            letterSpacing: "1px",
+                          }}
+                        >
+                          {count} dice
+                        </Button>
+                      );
+                    })}
                   </Stack>
+
+                  {/* Sides counts column with active glass buttons */}
                   <Stack gap="xs">
-                    {quickSides.map((value) => (
-                      <Button
-                        key={`sides-${value}`}
-                        size="xs"
-                        variant="outline"
-                        onClick={() => handleManualSidesChange(value)}
-                        fullWidth
-                      >
-                        d{value}
-                      </Button>
-                    ))}
+                    {quickSides.map((value) => {
+                      const isSelected = sides === value;
+                      return (
+                        <Button
+                          key={`sides-${value}`}
+                          size="xs"
+                          className={isSelected ? "glass-btn-primary" : "glass-btn-secondary"}
+                          onClick={() => handleManualSidesChange(value)}
+                          fullWidth
+                          style={{
+                            fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                            fontSize: "11px",
+                            fontWeight: 400,
+                            letterSpacing: "1px",
+                          }}
+                        >
+                          d{value}
+                        </Button>
+                      );
+                    })}
                   </Stack>
                 </SimpleGrid>
               </Stack>
@@ -322,6 +393,17 @@ export function RollModal({ opened, onClose }: RollModalProps) {
                   classNames={{ input: "glassy-input", label: "glassy-label" }}
                   hideControls
                   style={{ width: "100%" }}
+                  styles={{
+                    label: {
+                      fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                      fontWeight: 300,
+                      letterSpacing: "1.5px",
+                      textTransform: "uppercase",
+                      fontSize: "10px",
+                      color: "var(--theme-color-text-secondary)",
+                      marginBottom: "4px",
+                    },
+                  }}
                 />
                 <FormNumberInput
                   label="Sides"
@@ -331,6 +413,17 @@ export function RollModal({ opened, onClose }: RollModalProps) {
                   classNames={{ input: "glassy-input", label: "glassy-label" }}
                   hideControls
                   style={{ width: "100%" }}
+                  styles={{
+                    label: {
+                      fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                      fontWeight: 300,
+                      letterSpacing: "1.5px",
+                      textTransform: "uppercase",
+                      fontSize: "10px",
+                      color: "var(--theme-color-text-secondary)",
+                      marginBottom: "4px",
+                    },
+                  }}
                 />
               </Stack>
             </>
@@ -351,77 +444,121 @@ export function RollModal({ opened, onClose }: RollModalProps) {
               autosize
               minRows={2}
               classNames={{ input: "glassy-input", label: "glassy-label" }}
+              styles={{
+                label: {
+                  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                  fontWeight: 300,
+                  letterSpacing: "1.5px",
+                  textTransform: "uppercase",
+                  fontSize: "10px",
+                  color: "var(--theme-color-text-secondary)",
+                  marginBottom: "4px",
+                },
+              }}
             />
           )}
 
+          {/* ACTIVE CAMPAIGN THEMED ROLL OUTCOMES CARD */}
           {variant === "public" && result && (
             <>
-              <Divider my="xs" />
+              <Divider color="rgba(255,255,255,0.03)" my="xs" />
               <Paper
                 p="sm"
                 radius="md"
                 withBorder
                 style={{
-                  background: "rgba(0,0,0,0.25)",
-                  borderColor: "rgba(120,255,180,0.35)",
-                  boxShadow: "0 0 14px rgba(120,255,180,0.22)",
+                  background: "rgba(0, 0, 0, 0.12)",
+                  borderColor: "var(--theme-border-glow, rgba(255, 255, 255, 0.15))",
+                  boxShadow: "0 8px 30px rgba(0, 0, 0, 0.3), var(--theme-glow-shadow-primary)",
                 }}
               >
                 <Stack gap="xs">
                   <Group justify="space-between" align="center">
-                    <Text fw={600}>Result</Text>
-                    <Badge
-                      color="violet"
-                      variant="filled"
-                      size="lg"
+                    <Text
+                      fw={400}
+                      className="narrative-title"
                       style={{
-                        boxShadow: "0 0 12px rgba(128, 90, 255, 0.65)",
-                        border: "1px solid rgba(150,120,255,0.6)",
+                        fontSize: "12px",
+                        letterSpacing: "1.5px",
+                        color: "var(--theme-color-text-primary, #fff)",
+                      }}
+                    >
+                      Roll Result
+                    </Text>
+                    <Badge
+                      size="lg"
+                      variant="transparent"
+                      style={{
+                        background: "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))",
+                        boxShadow: "var(--theme-glow-shadow-primary)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        color: "#fff",
+                        fontWeight: 600,
                       }}
                     >
                       Total {result.total}
                     </Badge>
                   </Group>
-                  {resultExpression && <Text size="sm">Expression: {resultExpression}</Text>}
+                  {resultExpression && <Text size="xs" c="dimmed">Expression: {resultExpression}</Text>}
+                  
                   <Stack gap={4}>
-                    <Text size="sm">Rolls:</Text>
-                    <Group wrap="wrap">
+                    <Text
+                      size="xs"
+                      fw={400}
+                      style={{
+                        fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                        color: "var(--theme-color-text-secondary)",
+                      }}
+                    >
+                      Individual Dice
+                    </Text>
+                    <Group wrap="wrap" gap="xs">
                       {result.rolls.map((roll, idx) => (
                         <Badge
                           key={`roll-${idx}`}
-                          color="gray"
-                          variant="light"
+                          variant="transparent"
                           size="lg"
                           radius="sm"
-                          style={{ fontSize: 16, fontWeight: 450, border: "none" }}
+                          style={{
+                            fontSize: 15,
+                            fontWeight: 600,
+                            background: "rgba(255, 255, 255, 0.02)",
+                            border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+                            color: "var(--theme-color-accent-primary, #fff)",
+                            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.05)",
+                          }}
                         >
                           {roll}
                         </Badge>
                       ))}
                     </Group>
                   </Stack>
+
                   <Group
                     wrap="nowrap"
+                    gap="sm"
                     style={{
-                      border: "1px solid rgba(255,255,255,0.08)",
+                      border: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.08))",
                       borderRadius: 8,
-                      padding: "4px 8px",
-                      background: "rgba(255,255,255,0.02)",
+                      padding: "6px 10px",
+                      background: "rgba(255,255,255,0.01)",
                     }}
                   >
                     {typeof result.min === "number" && (
-                      <Text size="xs" c="dimmed" lineClamp={1}>
-                        Min {result.min}
+                      <Text size="11px" c="dimmed" lineClamp={1}>
+                        Min: {result.min}
                       </Text>
                     )}
                     {typeof result.max === "number" && (
-                      <Text size="xs" c="dimmed" lineClamp={1}>
-                        Max {result.max}
+                      <Text size="11px" c="dimmed" lineClamp={1}>
+                        Max: {result.max}
                       </Text>
                     )}
                     {typeof result.average === "number" && (
-                      <Text size="xs" c="dimmed" lineClamp={1}>
-                        Avg {result.average.toFixed(2)}
+                      <Text size="11px" c="dimmed" lineClamp={1}>
+                        Avg: {result.average.toFixed(2)}
                       </Text>
                     )}
                   </Group>
@@ -430,18 +567,43 @@ export function RollModal({ opened, onClose }: RollModalProps) {
             </>
           )}
 
-          <Button
-            onClick={handleSubmit}
-            loading={loading}
-            disabled={!canSubmit}
-            variant="gradient"
-            gradient={{ from: "violet", to: "cyan", deg: 180 }}
-            type="submit"
-          >
-            {variant === "public" ? "Roll" : "Roll Subtle"}
-          </Button>
+          <Group justify="flex-end" mt="md" gap="sm">
+            <Button
+              type="button"
+              onClick={onClose}
+              className="glass-btn-secondary"
+              style={{
+                fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                fontWeight: 300,
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                fontSize: "11px",
+              }}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="submit"
+              onClick={handleSubmit}
+              loading={loading}
+              disabled={!canSubmit}
+              className="glass-btn-primary"
+              leftSection={<IconDice5 size={14} />}
+              style={{
+                fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                fontWeight: 300,
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                fontSize: "11px",
+              }}
+            >
+              {variant === "public" ? "Roll" : "Roll Subtle"}
+            </Button>
+          </Group>
+
         </Stack>
       </form>
-    </Modal>
+    </BaseModal>
   );
 }

@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { Modal, Button, Stack, TextInput, Textarea } from "@mantine/core";
+import { Stack, TextInput, Textarea } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { showNotification } from "@components/Notification/Notification";
+import { BaseModal } from "@components/BaseModal";
+import { useIsMobile } from "@hooks/useIsMobile";
 
 interface AddFeatureModalProps {
   opened: boolean;
@@ -12,6 +14,7 @@ interface AddFeatureModalProps {
 export function AddFeatureModal({ opened, onClose }: AddFeatureModalProps) {
   const character = useCurrentCharacter();
   const { updateCharacter: updateCharacterLocal } = useCharacterCoreActions();
+  const isMobile = useIsMobile();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -73,29 +76,29 @@ export function AddFeatureModal({ opened, onClose }: AddFeatureModalProps) {
     }
   };
 
+  const labelStyle = {
+    fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+    fontWeight: 300,
+    letterSpacing: "1.5px",
+    textTransform: "uppercase" as const,
+    fontSize: "10px",
+    color: "var(--theme-color-text-secondary)",
+    marginBottom: "4px",
+  };
+
   return (
-    <Modal
+    <BaseModal
       opened={opened}
       onClose={onClose}
-      centered
-      title="Add New Feature"
-      styles={{
-        header: { background: "transparent" },
-        content: {
-          background: "rgba(25, 10, 35, 0.75)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          border: "1px solid rgba(170, 90, 255, 0.2)",
-          boxShadow: "0 8px 32px rgba(170, 90, 255, 0.2)",
-          color: "white",
-        },
-        title: {
-          color: "white",
-          fontWeight: 700,
-        },
-      }}
+      title="Add Custom Feature"
+      size="xl"
+      fullScreen={isMobile}
+      onSave={handleAdd}
+      saveLabel="Add Feature"
+      loading={saving}
+      showSaveButton={!!name.trim()}
     >
-      <Stack gap="md">
+      <Stack gap="md" mt="sm">
         <TextInput
           label="Feature Name"
           placeholder="e.g., Relentless Endurance"
@@ -103,6 +106,7 @@ export function AddFeatureModal({ opened, onClose }: AddFeatureModalProps) {
           onChange={(e) => setName(e.currentTarget.value)}
           required
           classNames={{ input: "glassy-input", label: "glassy-label" }}
+          styles={{ label: labelStyle }}
         />
 
         <Textarea
@@ -110,22 +114,12 @@ export function AddFeatureModal({ opened, onClose }: AddFeatureModalProps) {
           placeholder="e.g., When you are reduced to 0 hit points but not killed outright..."
           value={description}
           onChange={(e) => setDescription(e.currentTarget.value)}
-          minRows={4}
+          minRows={isMobile ? 12 : 8}
           autosize
           classNames={{ input: "glassy-input", label: "glassy-label" }}
+          styles={{ label: labelStyle }}
         />
-
-        <Button
-          onClick={handleAdd}
-          loading={saving}
-          disabled={!name.trim()}
-          variant="gradient"
-          gradient={{ from: "grape", to: "violet", deg: 135 }}
-          fullWidth
-        >
-          Add Feature
-        </Button>
       </Stack>
-    </Modal>
+    </BaseModal>
   );
 }

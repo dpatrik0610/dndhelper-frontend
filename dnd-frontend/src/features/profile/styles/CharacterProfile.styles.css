@@ -35,8 +35,12 @@
   border: 1px solid rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(24px) saturate(140%);
   -webkit-backdrop-filter: blur(24px) saturate(140%);
+  flex: 1 !important;
   flex-shrink: 0 !important;
   white-space: nowrap !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
 @media (max-width: 768px) {
@@ -51,6 +55,7 @@
   .profile-tab {
     padding: 14px 20px !important;
     font-size: 14px !important;
+    flex: 1 !important;
   }
 }
 

@@ -104,12 +104,12 @@ export default function CharacterProfile() {
         }}
       >
         <Tabs.List>
-          <Tabs.Tab value="overview" leftSection={<IconUser size={16} />}>Skills</Tabs.Tab>
-          <Tabs.Tab value="stats" leftSection={<IconSword size={16} />}>Stats</Tabs.Tab>
-          <Tabs.Tab value="spellcasting" leftSection={<IconSparkles size={16} />}>Spellcasting</Tabs.Tab>
-          <Tabs.Tab value="features" leftSection={<IconSword size={16} />}>Features</Tabs.Tab>
-          <Tabs.Tab value="extras" leftSection={<IconInfoCircle size={16} />}>Extras</Tabs.Tab>
-          <Tabs.Tab value="inventories" leftSection={<IconBox size={16} />}>Inventories</Tabs.Tab>
+          <Tabs.Tab value="overview">Skills</Tabs.Tab>
+          <Tabs.Tab value="stats">Stats</Tabs.Tab>
+          <Tabs.Tab value="spellcasting">Spellcasting</Tabs.Tab>
+          <Tabs.Tab value="features">Features</Tabs.Tab>
+          <Tabs.Tab value="extras">Extras</Tabs.Tab>
+          <Tabs.Tab value="inventories">Inventories</Tabs.Tab>
         </Tabs.List>
 
         <AnimatePresence mode="wait">

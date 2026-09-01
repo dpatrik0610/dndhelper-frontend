@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Modal, Button, Stack, Text, Select, SegmentedControl } from "@mantine/core";
+import { useState, useEffect, useMemo } from "react";
+import { Button, Stack, Text, Select, SegmentedControl, Group } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCurrencyActions } from "@store/character/characterSelectors";
 import { useToken } from "@store/auth/authSelectors";
 import { useCharacterStore } from "@store/character/characterStore";
@@ -10,6 +10,8 @@ import { showNotification } from "@components/Notification/Notification";
 import { loadCharacters } from "@utils/loadCharacter";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import type { Character } from "@appTypes/Character/Character";
+import { BaseModal } from "@components/BaseModal";
+import { IconCoins } from "@tabler/icons-react";
 
 interface MoneyModalProps {
   opened: boolean;
@@ -137,28 +139,17 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
   };
 
   return (
-    <Modal
+    <BaseModal
       opened={opened}
       onClose={onClose}
-      centered
-      title={actionType === "send" ? "Send Money" : "Delete Money"}
-      styles={{
-        header: { background: "transparent" },
-        content: {
-          background: "rgba(20,10,30,0.75)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
-          color: "white",
-        },
-        title: {
-          color: "white",
-          fontWeight: 700,
-        },
-      }}
+      title={actionType === "send" ? "Send Currency" : "Remove Currency"}
+      size="md"
+      showSaveButton={false}
+      showCancelButton={false}
     >
       <Stack gap="md">
+        
+        {/* PREMIUM THEMED SEGMENTED CONTROL */}
         <SegmentedControl
           value={actionType}
           onChange={(v) => {
@@ -167,11 +158,32 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
             setAmount(0);
           }}
           data={[
-            { label: "Send Money", value: "send" },
-            { label: "Delete Money", value: "delete" },
+            { label: "Send Currency", value: "send" },
+            { label: "Remove Currency", value: "delete" },
           ]}
           fullWidth
           size="xs"
+          styles={{
+            root: {
+              background: "rgba(255, 255, 255, 0.01)",
+              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+              borderRadius: "8px",
+              padding: "4px",
+            },
+            indicator: {
+              background: "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))",
+              boxShadow: "var(--theme-glow-shadow-primary)",
+              borderRadius: "6px",
+            },
+            label: {
+              color: "#fff",
+              fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+              fontWeight: 400,
+              fontSize: "11px",
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+            }
+          }}
         />
 
         {currencies.length === 0 ? (
@@ -188,13 +200,21 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
                   dropdown: "glassy-dropdown",
                   option: "glassy-option",
                 }}
-                label="Send To"
+                label="Recipient Character"
                 placeholder="Choose character"
                 data={characters.map((c) => ({ value: c.id!, label: c.name }))}
                 value={targetId}
                 onChange={setTargetId}
                 styles={{
-                  label: { color: "rgba(255,255,255,0.85)" },
+                  label: {
+                    fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                    fontWeight: 300,
+                    letterSpacing: "1.5px",
+                    textTransform: "uppercase",
+                    fontSize: "10px",
+                    color: "var(--theme-color-text-secondary)",
+                    marginBottom: "4px",
+                  },
                 }}
               />
             )}
@@ -206,7 +226,7 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
                 dropdown: "glassy-dropdown",
                 option: "glassy-option",
               }}
-              label="Currency"
+              label="Select Currency type"
               placeholder="Choose a currency"
               value={selectedCurrency}
               onChange={(val) => {
@@ -218,7 +238,15 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
                 label: `${getCurrencyName(c.type)} (${c.amount} ${c.currencyCode})`,
               }))}
               styles={{
-                label: { color: "rgba(255,255,255,0.85)" },
+                label: {
+                  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                  fontWeight: 300,
+                  letterSpacing: "1.5px",
+                  textTransform: "uppercase",
+                  fontSize: "10px",
+                  color: "var(--theme-color-text-secondary)",
+                  marginBottom: "4px",
+                },
               }}
             />
 
@@ -231,26 +259,55 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
                 onChange={(v) => setAmount(v)}
                 hideControls
                 classNames={{ input: "glassy-input", label: "glassy-label" }}
+                styles={{
+                  label: {
+                    fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                    fontWeight: 300,
+                    letterSpacing: "1.5px",
+                    textTransform: "uppercase",
+                    fontSize: "10px",
+                    color: "var(--theme-color-text-secondary)",
+                    marginBottom: "4px",
+                  },
+                }}
               />
             )}
 
-            <Button
-              onClick={handleAction}
-              disabled={!selectedCurrency || !amount || (actionType === "send" && !targetId)}
-              loading={loading}
-              variant="gradient"
-              gradient={
-                actionType === "send"
-                  ? { from: "teal", to: "blue", deg: 135 }
-                  : { from: "red", to: "darkred", deg: 135 }
-              }
-              fullWidth
-            >
-              {actionType === "send" ? "Send" : "Delete"}
-            </Button>
+            <Group justify="flex-end" mt="xl" gap="sm">
+              <Button
+                onClick={onClose}
+                className="glass-btn-secondary"
+                style={{
+                  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                  fontWeight: 300,
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                  fontSize: "11px",
+                }}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                onClick={handleAction}
+                disabled={!selectedCurrency || !amount || (actionType === "send" && !targetId)}
+                loading={loading}
+                className="glass-btn-primary"
+                leftSection={<IconCoins size={14} />}
+                style={{
+                  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                  fontWeight: 300,
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                  fontSize: "11px",
+                }}
+              >
+                {actionType === "send" ? "Send" : "Remove"}
+              </Button>
+            </Group>
           </>
         )}
       </Stack>
-    </Modal>
+    </BaseModal>
   );
 }
