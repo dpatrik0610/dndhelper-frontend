@@ -21,11 +21,12 @@ export function InventorySection({
   const hasMatches = matchCount > 0;
   const sectionStyle = useMemo(() => {
     const defaultStyle = {
-      color,
-      background: "linear-gradient(20deg, rgba(40, 24, 12, 0.55), rgba(90, 18, 12, 0.45))",
-      borderColor: "rgba(148, 120, 104, 0.25)",
+      background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+      borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
       boxShadow: "none",
       borderRadius: 12,
+      backdropFilter: "blur(24px) saturate(130%)",
+      WebkitBackdropFilter: "blur(24px) saturate(130%)",
     };
 
     if (!hasFilters) return defaultStyle;
@@ -33,11 +34,11 @@ export function InventorySection({
 
     return {
       ...defaultStyle,
-      borderColor: "rgba(94, 234, 212, 0.2)",
-      boxShadow: "0 6px 18px rgba(6, 78, 59, 0.12)",
-      background: "linear-gradient(145deg, rgba(10, 60, 55, 0.35), rgba(4, 47, 40, 0.3))",
+      borderColor: "var(--theme-border-glow, rgba(255, 255, 255, 0.15))",
+      boxShadow: "0 8px 30px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)",
+      background: "rgba(255, 255, 255, 0.02)",
     };
-  }, [hasFilters, hasMatches, color]);
+  }, [hasFilters, hasMatches]);
 
   return (
     <ExpandableSection

@@ -1,7 +1,8 @@
 import { ActionIcon, Box, Group, Modal, Text } from "@mantine/core";
 import type { ModalProps } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
+import { useUiStore } from "@store/ui/uiStore";
 
 export type AdminGlassModalVariant = "default" | "danger";
 
@@ -27,12 +28,12 @@ const variantStyles: Record<
 > = {
   default: {
     content: {
-      background: "rgba(22, 24, 32, 0.96)",
-      border: "1px solid rgba(255, 255, 255, 0.08)",
-      backdropFilter: "blur(20px)",
-      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.35)",
+      background: "var(--theme-bg-panel, rgba(22, 24, 32, 0.96))",
+      border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+      backdropFilter: "blur(24px) saturate(130%)",
+      boxShadow: "0 15px 45px rgba(0, 0, 0, 0.5), var(--theme-glow-shadow-primary)",
     },
-    titleColor: "white",
+    titleColor: "var(--theme-color-text-primary, white)",
   },
   danger: {
     content: {
@@ -60,12 +61,31 @@ export function AdminGlassModal({
   loading = false,
   withCloseButton = true,
 }: AdminGlassModalProps) {
+  const sidebarTheme = useUiStore((s) => s.sidebarTheme);
+
+  const activeThemeClass = useMemo(() => {
+    switch (sidebarTheme) {
+      case "midnight":
+        return "theme-midnight-arcane";
+      case "crimson-vampire":
+        return "theme-crimson-vampire";
+      case "frost-glacier":
+        return "theme-frost-glacier";
+      case "sunset":
+      default:
+        return "theme-cyber-noir";
+    }
+  }, [sidebarTheme]);
+
   const theme = variantStyles[variant];
 
   return (
     <Modal
       opened={opened}
       onClose={onClose}
+      classNames={{
+        content: activeThemeClass,
+      }}
       withCloseButton={false}
       centered={centered}
       fullScreen={fullScreen}
@@ -73,14 +93,14 @@ export function AdminGlassModal({
       padding={padding}
       closeOnClickOutside={closeOnClickOutside && !loading}
       closeOnEscape={closeOnEscape && !loading}
-      overlayProps={{ backgroundOpacity: 0.35, blur: 6 }}
+      overlayProps={{ backgroundOpacity: 0.35, blur: 12 }}
       transitionProps={{ transition: "fade", duration: 180 }}
       styles={{
         header: { display: "none" },
         body: { paddingTop: title || withCloseButton ? 0 : undefined },
         content: {
           ...theme.content,
-          borderRadius: fullScreen ? 0 : 10,
+          borderRadius: fullScreen ? 0 : 12,
           color: "white",
         },
       }}
@@ -98,6 +118,7 @@ export function AdminGlassModal({
           ) : (
             <span />
           )}
+
           {withCloseButton && (
             <ActionIcon
               variant="subtle"
@@ -107,6 +128,18 @@ export function AdminGlassModal({
               onClick={onClose}
               disabled={loading}
               aria-label="Close modal"
+              style={{
+                color: "var(--theme-color-text-secondary, rgba(255,255,255,0.6))",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#fff";
+                e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255,255,255,0.04))";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "var(--theme-color-text-secondary, rgba(255,255,255,0.6))";
+                e.currentTarget.style.background = "transparent";
+              }}
             >
               <IconX size={16} />
             </ActionIcon>

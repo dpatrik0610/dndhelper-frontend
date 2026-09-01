@@ -14,6 +14,9 @@
   overflow-x: auto !important;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-bottom: 16px !important;
 }
 
 .profile-tabs-list::-webkit-scrollbar {
@@ -40,13 +43,14 @@
   .profile-tabs-list {
     display: flex !important;
     flex-wrap: nowrap !important;
-    gap: 6px;
-    width: 100%;
+    gap: 8px;
+    width: 100% !important;
+    padding: 10px !important;
   }
 
   .profile-tab {
-    padding: 10px 14px;
-    font-size: 12px;
+    padding: 14px 20px !important;
+    font-size: 14px !important;
   }
 }
 

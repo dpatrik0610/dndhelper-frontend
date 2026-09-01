@@ -102,7 +102,7 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
       maw={1000}
       mx={isMobile ? 0 : "auto"}
       mt={isMobile ? 0 : "xl"}
-      px={isMobile ? "xs" : "xl"}
+      px={0}
       pb="xl"
       w="100%"
       pos="relative"
@@ -110,9 +110,9 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
       <LoadingOverlay visible={loading} overlayProps={{ blur: 12, backgroundOpacity: 0.4 }} />
 
       <Paper
-        p={isMobile ? "md" : "xl"}
-        radius="lg"
-        withBorder
+        p={isMobile ? "sm" : "xl"}
+        radius={isMobile ? 0 : "lg"}
+        withBorder={!isMobile}
         className="glass-panel"
         style={{
           background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",

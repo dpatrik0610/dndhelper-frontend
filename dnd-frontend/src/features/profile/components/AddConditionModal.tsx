@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from "react";
-import { Modal, Button, Chip, Stack, Loader, TextInput } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+import { Button, Chip, Stack, Loader, TextInput, Group } from "@mantine/core";
+import { IconSearch, IconPlus } from "@tabler/icons-react";
 
 import { getConditions } from "@services/conditionService";
 import { updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
+import { BaseModal } from "@components/BaseModal";
 
 interface AddConditionModalProps {
   opened: boolean;
@@ -84,148 +85,152 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
   };
 
   return (
-    <Modal
+    <BaseModal
       opened={opened}
       onClose={onClose}
-      title="Add Condition"
-      centered
-      styles={{
-        header: { background: "transparent" },
-        content: {
-          background: "rgba(20,0,0,0.45)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,100,100,0.2)",
-          boxShadow: "0 0 12px rgba(255,60,60,0.25)",
-        },
-        body: {
-          background: "transparent",
-          height: 420,
-          display: "flex",
-          flexDirection: "column",
-        },
-        title: {
-          color: "white",
-          textShadow: "0 0 6px rgba(255,80,80,0.7)",
-        },
-      }}
+      title="Add Character Condition"
+      size="md"
+      showSaveButton={false}
+      showCancelButton={false}
     >
-      <Stack gap="md" style={{ height: "100%" }}>
-        {/* SEARCH BAR */}
-        {!loading && (
-          <TextInput
-            placeholder="Search or enter custom condition..."
-            value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
-            leftSection={<IconSearch size={16} color="rgba(255,150,150,0.8)" />}
-            styles={{
-              input: {
-                background: "rgba(255,255,255,0.06)",
-                border: "1px solid rgba(255,100,100,0.25)",
-                color: "white",
-                backdropFilter: "blur(6px)",
-              },
-              wrapper: { width: "100%" },
-            }}
-          />
-        )}
-
+      <Stack gap="md" style={{ height: 450 }}>
+        
+        {/* SEARCH BAR (Uses glassy-input class) */}
         {loading ? (
-          <Loader size="sm" />
+          <Stack justify="center" align="center" style={{ flex: 1 }}>
+            <Loader size="sm" />
+          </Stack>
         ) : (
-          <Chip.Group value={selected} onChange={setSelected} multiple={false}>
-            <Stack
-              gap="xs"
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                paddingRight: 4,
-              }}
-            >
-              {/* CUSTOM CONDITION CHIP */}
-              {search.trim().length > 0 && !exactMatchExists && (
-                <Chip
-                  key="custom-condition-add"
-                  value={search.trim()}
-                  radius="sm"
-                  styles={{
-                    root: {
-                      width: "100%",
-                      background: "transparent",
-                      marginLeft: "auto",
-                      marginRight: "auto",
-                    },
-                    label: {
-                      width: "100%",
-                      backdropFilter: "blur(6px)",
-                      background:
-                        selected === search.trim()
-                          ? "linear-gradient(90deg, rgba(255,100,50,0.55), rgba(255,160,50,0.65))"
-                          : "rgba(255,100,50,0.15)",
-                      border:
-                        selected === search.trim()
-                          ? "1px solid rgba(255,100,50,0.8)"
-                          : "1px solid rgba(255,100,50,0.3)",
-                      boxShadow:
-                        selected === search.trim()
-                          ? "0 0 12px rgba(255,100,50,0.8)"
-                          : "0 0 4px rgba(255,100,50,0.3)",
-                      color: "white",
-                      padding: "8px 10px",
-                      borderRadius: 8,
-                      transition: "all .15s ease",
-                    },
-                  }}
-                >
-                  ✨ Add Custom: "{search.trim()}"
-                </Chip>
-              )}
+          <>
+            <TextInput
+              placeholder="Search or enter custom condition..."
+              value={search}
+              onChange={(e) => setSearch(e.currentTarget.value)}
+              leftSection={<IconSearch size={16} style={{ color: "var(--theme-color-text-secondary, rgba(255,255,255,0.5))" }} />}
+              classNames={{ input: "glassy-input", label: "glassy-label" }}
+            />
 
-              {/* STANDARD CONDITIONS */}
-              {filteredList.map((cond) => (
-                <Chip
-                  key={cond}
-                  value={cond}
-                  radius="sm"
-                  styles={{
-                    root: {
-                      width: "100%",
-                      background: "transparent",
-                      marginLeft: "auto",
-                      marginRight: "auto",
-                    },
-                    label: {
-                      width: "100%",
-                      backdropFilter: "blur(6px)",
-                      background:
-                        selected === cond
-                          ? "linear-gradient(90deg, rgba(255,60,60,0.45), rgba(255,120,40,0.55))"
-                          : "rgba(255,255,255,0.06)",
-                      border:
-                        selected === cond
-                          ? "1px solid rgba(255,100,80,0.8)"
-                          : "1px solid rgba(255,255,255,0.15)",
-                      boxShadow:
-                        selected === cond
-                          ? "0 0 12px rgba(255,80,60,0.8)"
-                          : "0 0 4px rgba(255,60,60,0.3)",
-                      color: "white",
-                      padding: "8px 10px",
-                      borderRadius: 8,
-                      transition: "all .15s ease",
-                    },
-                  }}
-                >
-                  {cond}
-                </Chip>
-              ))}
-            </Stack>
-          </Chip.Group>
+            <Chip.Group value={selected} onChange={setSelected} multiple={false}>
+              <Stack
+                gap="xs"
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  paddingRight: 4,
+                  minHeight: 0,
+                }}
+              >
+                {/* CUSTOM CONDITION CHIP (Themed active glow pill) */}
+                {search.trim().length > 0 && !exactMatchExists && (
+                  <Chip
+                    key="custom-condition-add"
+                    value={search.trim()}
+                    radius="sm"
+                    styles={{
+                      root: {
+                        width: "100%",
+                        background: "transparent",
+                      },
+                      label: {
+                        width: "100%",
+                        backdropFilter: "blur(12px)",
+                        background:
+                          selected === search.trim()
+                            ? "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))"
+                            : "rgba(255, 255, 255, 0.02)",
+                        border:
+                          selected === search.trim()
+                            ? "1px solid rgba(255, 255, 255, 0.2)"
+                            : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+                        boxShadow:
+                          selected === search.trim()
+                            ? "var(--theme-glow-shadow-primary)"
+                            : "none",
+                        color: "white",
+                        padding: "10px 14px",
+                        borderRadius: 8,
+                        transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                      },
+                    }}
+                  >
+                    ✨ Add Custom: "{search.trim()}"
+                  </Chip>
+                )}
+
+                {/* STANDARD CONDITIONS (Themed glassy chips list) */}
+                {filteredList.map((cond) => {
+                  const isSelected = selected === cond;
+                  return (
+                    <Chip
+                      key={cond}
+                      value={cond}
+                      radius="sm"
+                      styles={{
+                        root: {
+                          width: "100%",
+                          background: "transparent",
+                        },
+                        label: {
+                          width: "100%",
+                          backdropFilter: "blur(12px)",
+                          background: isSelected
+                            ? "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))"
+                            : "rgba(255, 255, 255, 0.01)",
+                          border: isSelected
+                            ? "1px solid rgba(255, 255, 255, 0.25)"
+                            : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+                          boxShadow: isSelected
+                            ? "var(--theme-glow-shadow-primary)"
+                            : "none",
+                          color: isSelected ? "white" : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
+                          padding: "10px 14px",
+                          borderRadius: 8,
+                          transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                        },
+                      }}
+                    >
+                      {cond}
+                    </Chip>
+                  );
+                })}
+              </Stack>
+            </Chip.Group>
+          </>
         )}
 
-        <Button onClick={handleAdd} disabled={!selected}>
-          Add
-        </Button>
+        <Group justify="flex-end" mt="md" gap="sm">
+          <Button
+            onClick={onClose}
+            className="glass-btn-secondary"
+            style={{
+              fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+              fontWeight: 300,
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+              fontSize: "11px",
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            onClick={handleAdd}
+            disabled={!selected}
+            className="glass-btn-primary"
+            leftSection={<IconPlus size={14} />}
+            style={{
+              fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+              fontWeight: 300,
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+              fontSize: "11px",
+            }}
+          >
+            Add
+          </Button>
+        </Group>
+
       </Stack>
-    </Modal>
+    </BaseModal>
   );
 }

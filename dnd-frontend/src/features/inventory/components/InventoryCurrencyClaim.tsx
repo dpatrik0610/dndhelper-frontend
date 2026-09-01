@@ -67,11 +67,13 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
   return (
     <Box
       style={{
-        border: "1px solid rgba(255,255,255,0.12)",
+        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
         borderRadius: 10,
         padding: 12,
-        background: "linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02))",
-        boxShadow: "0 8px 16px rgba(0,0,0,0.25)",
+        background: "var(--theme-bg-card, rgba(255, 255, 255, 0.02))",
+        boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
       }}
     >
       <Text size="sm" fw={700} c="white" mb={6}>
