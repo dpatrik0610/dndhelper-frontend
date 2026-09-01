@@ -18,7 +18,7 @@ export function AbilityScore({ name, score }: { name: string; score: number }) {
           alignItems: "center",
           justifyContent: "center",
           fontWeight: 900,
-          color: "#fff",
+          color: "#121214",
           fontSize: "1.25rem",
           margin: "auto",
           boxShadow: "var(--theme-glow-shadow-primary, 0 0 10px rgba(255, 215, 0, 0.5)), inset 0 0 6px rgba(255, 255, 255, 0.25)",

@@ -217,12 +217,17 @@ export function RollModal({ opened, onClose }: RollModalProps) {
                 borderRadius: "6px",
               },
               label: {
-                color: "#fff",
+                color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
                 fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-                fontWeight: 400,
+                fontWeight: 500,
                 fontSize: "11px",
                 letterSpacing: "1px",
                 textTransform: "uppercase",
+                transition: "color 0.2s ease",
+                "&[data-active]": {
+                  color: "#121214 !important",
+                  fontWeight: 700,
+                }
               }
             }}
           />
@@ -271,12 +276,17 @@ export function RollModal({ opened, onClose }: RollModalProps) {
                     borderRadius: "6px",
                   },
                   label: {
-                    color: "#fff",
+                    color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
                     fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-                    fontWeight: 400,
+                    fontWeight: 500,
                     fontSize: "11px",
                     letterSpacing: "1px",
                     textTransform: "uppercase",
+                    transition: "color 0.2s ease",
+                    "&[data-active]": {
+                      color: "#121214 !important",
+                      fontWeight: 700,
+                    }
                   }
                 }}
               />
@@ -492,7 +502,7 @@ export function RollModal({ opened, onClose }: RollModalProps) {
                         background: "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))",
                         boxShadow: "var(--theme-glow-shadow-primary)",
                         border: "1px solid rgba(255,255,255,0.15)",
-                        color: "#fff",
+                        color: "#121214",
                         fontWeight: 600,
                       }}
                     >

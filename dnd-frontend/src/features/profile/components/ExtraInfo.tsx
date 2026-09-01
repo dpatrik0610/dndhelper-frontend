@@ -12,15 +12,17 @@ export function ExtraInfo() {
   return (
     <ExpandableSection
       title="Additional Info"
-      color= {SectionColor.Teal}
+      color={SectionColor.Teal}
       transparent
       defaultOpen={true}
       style={{
-        background: "linear-gradient(135deg, rgba(56, 27, 0, 0.36), rgba(0, 29, 66, 0.45))",
-        boxShadow: "0 0 10px rgba(100, 0, 158, 0.38), inset 0 0 6px rgba(199, 119, 15, 0.15)",
-        borderColor: "rgba(36, 158, 158, 0.23)",
-        borderRadius: "5px",
-        transition: "all 0.90s ease-in-out",
+        background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+        backdropFilter: "blur(24px) saturate(130%)",
+        WebkitBackdropFilter: "blur(24px) saturate(130%)",
+        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+        borderRadius: "16px",
+        boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
+        transition: "all 0.25s ease-in-out",
       }}
     >
       <Stack gap="sm">

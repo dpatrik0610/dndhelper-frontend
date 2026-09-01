@@ -121,7 +121,7 @@
 
 .glassy-date-day[data-selected] {
   background: var(--theme-gradient-primary-glass, var(--theme-gradient-primary)) !important;
-  color: #fff !important;
+  color: #121214 !important;
   box-shadow: var(--theme-glow-shadow-primary) !important;
 }
 
@@ -154,6 +154,7 @@
 .glassy-date-month[data-selected],
 .glassy-date-year[data-selected] {
   background: var(--theme-gradient-primary-glass, var(--theme-gradient-primary)) !important;
+  color: #121214 !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-shadow: var(--theme-glow-shadow-primary) !important;
 }
@@ -199,7 +200,7 @@
 
 .glassy-segmented__control[data-active] {
   background: var(--theme-gradient-primary-glass, var(--theme-gradient-primary)) !important;
-  color: #fff !important;
+  color: #121214 !important;
   box-shadow: var(--theme-glow-shadow-primary), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
 }
 

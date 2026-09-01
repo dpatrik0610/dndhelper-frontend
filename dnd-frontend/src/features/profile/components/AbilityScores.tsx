@@ -243,8 +243,8 @@ export function AbilityScores() {
                         {isProf ? (
                           <span
                             style={{
-                              color: "var(--theme-color-accent-primary, #f59e0b)",
-                              filter: "drop-shadow(0 0 3px var(--theme-border-glow, rgba(245, 158, 11, 0.4)))",
+                              color: "#121214",
+                              filter: "drop-shadow(0 0 3px rgba(0, 0, 0, 0.2))",
                               fontSize: "14px",
                               cursor: "default",
                             }}
@@ -261,7 +261,7 @@ export function AbilityScores() {
                           truncate="end"
                           style={{
                             color: isProf
-                              ? "var(--theme-color-text-primary, #fff)"
+                              ? "#121214"
                               : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
                           }}
                         >
@@ -273,11 +273,15 @@ export function AbilityScores() {
                           size="xs"
                           variant="transparent"
                           style={{
-                            background: "rgba(255, 255, 255, 0.02)",
-                            border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
-                            color: "var(--theme-color-text-secondary, #cbd5e1)",
+                            background: isProf ? "rgba(0, 0, 0, 0.12)" : "rgba(255, 255, 255, 0.02)",
+                            border: isProf
+                              ? "1px solid rgba(0, 0, 0, 0.15)"
+                              : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
+                            color: isProf
+                              ? "#121214"
+                              : "var(--theme-color-text-secondary, #cbd5e1)",
                             fontSize: "8px",
-                            fontWeight: 400,
+                            fontWeight: isProf ? 700 : 400,
                             padding: "2px 4px",
                             height: "auto",
                           }}
@@ -292,7 +296,7 @@ export function AbilityScores() {
                         fw={700}
                         style={{
                           color: isProf
-                            ? "var(--theme-color-accent-primary, #f59e0b)"
+                            ? "#121214"
                             : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
                         }}
                       >

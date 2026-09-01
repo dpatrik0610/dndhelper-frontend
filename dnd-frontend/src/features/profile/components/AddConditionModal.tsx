@@ -146,7 +146,7 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
                           selected === search.trim()
                             ? "var(--theme-glow-shadow-primary)"
                             : "none",
-                        color: "white",
+                        color: selected === search.trim() ? "#121214" : "white",
                         padding: "10px 14px",
                         borderRadius: 8,
                         transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
@@ -182,7 +182,7 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
                           boxShadow: isSelected
                             ? "var(--theme-glow-shadow-primary)"
                             : "none",
-                          color: isSelected ? "white" : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
+                          color: isSelected ? "#121214" : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
                           padding: "10px 14px",
                           borderRadius: 8,
                           transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",

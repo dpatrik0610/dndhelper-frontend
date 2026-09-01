@@ -87,7 +87,7 @@ export function InventoryItemCard({ item, onRemove, onMove }: InventoryItemCardP
                   background: "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))",
                   border: "1px solid rgba(255, 255, 255, 0.15)",
                   boxShadow: "var(--theme-glow-shadow-primary)",
-                  color: "#fff",
+                  color: "#121214",
                   fontWeight: 600,
                 }}
                 radius="sm"

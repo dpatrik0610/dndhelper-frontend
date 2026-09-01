@@ -9,14 +9,14 @@
 .rules-pagination__control[data-active] {
   background: linear-gradient(135deg, #a855f7, #6366f1);
   border-color: #c084fc;
-  color: white;
+  color: #121214;
   box-shadow: 0 0 0 1px #c084fc, 0 10px 35px rgba(99, 102, 241, 0.45);
   transform: translateY(-1px);
   font-weight: 800;
 }
 
 .rules-pagination__control[data-active] span {
-  color: white;
+  color: #121214;
   font-weight: 800;
 }
 

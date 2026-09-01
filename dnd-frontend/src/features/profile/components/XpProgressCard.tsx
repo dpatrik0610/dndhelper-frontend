@@ -42,10 +42,10 @@ export function XpProgressCard({ experience, containerStyle }: Props) {
           }}
         >
           <Stack gap={0} align="center" justify="center" h="100%">
-            <Text size="xs" fw={850} style={{ fontSize: "10px", opacity: 0.9, lineHeight: 1, marginTop: 4, color: "#fff" }}>
+            <Text size="xs" fw={850} style={{ fontSize: "10px", opacity: 0.9, lineHeight: 1, marginTop: 4, color: "#121214" }}>
               LEVEL
             </Text>
-            <Text fw={900} style={{ fontSize: "30px", lineHeight: 1.1, textShadow: "0 2px 4px rgba(0,0,0,0.4)", color: "#fff" }}>
+            <Text fw={900} style={{ fontSize: "30px", lineHeight: 1.1, textShadow: "0 2px 4px rgba(0,0,0,0.15)", color: "#121214" }}>
               {expProgress.current.level}
             </Text>
           </Stack>

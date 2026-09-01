@@ -230,7 +230,7 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
                         cursor: "pointer",
                         transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
                         color: isActive
-                          ? "white"
+                          ? "#121214"
                           : "var(--theme-color-text-secondary, rgba(255,255,255,0.6))",
                         background: isActive
                           ? "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))"

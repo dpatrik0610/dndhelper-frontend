@@ -83,7 +83,7 @@
   border: 2px solid var(--theme-color-accent-primary); /* Vibrant primary border */
   background: var(--theme-gradient-primary) !important; /* Glowing gradient */
   box-shadow: var(--theme-glow-shadow-primary);
-  color: #fff !important;
+  color: #121214 !important;
 }
 
 .badge {
@@ -97,7 +97,7 @@
 .newButton {
   background: var(--theme-gradient-primary) !important; /* Glowing primary action button */
   border: none !important;
-  color: white !important;
+  color: #121214 !important;
   box-shadow: var(--theme-glow-shadow-primary);
   transition: all 0.3s ease !important;
   backdrop-filter: blur(4px);
@@ -125,7 +125,7 @@
 .levelBadge {
   background: var(--theme-gradient-primary) !important; /* Vibrant Level tag matching active theme! */
   border: none !important;
-  color: #fff !important;
+  color: #121214 !important;
   font-weight: 800 !important;
   box-shadow: var(--theme-glow-shadow-primary);
 }

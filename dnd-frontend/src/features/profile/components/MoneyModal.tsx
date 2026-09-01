@@ -176,12 +176,17 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
               borderRadius: "6px",
             },
             label: {
-              color: "#fff",
+              color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
               fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-              fontWeight: 400,
+              fontWeight: 500,
               fontSize: "11px",
               letterSpacing: "1px",
               textTransform: "uppercase",
+              transition: "color 0.2s ease",
+              "&[data-active]": {
+                color: "#121214 !important",
+                fontWeight: 700,
+              }
             }
           }}
         />

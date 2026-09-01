@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Stack, Box, Group, Title, Text, Tooltip, Popover, Badge, Divider, ActionIcon, Button } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions, useCharacterCombatActions } from "@store/character/characterSelectors";
