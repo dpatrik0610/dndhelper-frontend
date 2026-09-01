@@ -544,5 +544,63 @@
   }
 }
 
+/* ==========================================================================
+   🌀 Themed Loaders (Global Style Overrides & Glow Effects)
+   ========================================================================== */
+
+/* Target any Mantine Loader root and its children (SVG paths, circles, rects) */
+.mantine-Loader-root {
+  filter: drop-shadow(0 0 6px var(--theme-color-accent-primary, rgba(245, 158, 11, 0.45)));
+}
+
+.mantine-Loader-root,
+.mantine-Loader-root * {
+  stroke: var(--theme-color-accent-primary, #f59e0b) !important;
+  fill: var(--theme-color-accent-primary, #f59e0b) !important;
+}
+
+/* Ensure oval and ring style loader interiors are transparent and not solid filled circles */
+.mantine-Loader-root svg circle[stroke],
+.mantine-Loader-root svg path[stroke],
+.mantine-Loader-root svg circle[stroke-width],
+.mantine-Loader-root svg path[stroke-width] {
+  fill: none !important;
+}
+
+/* ==========================================================================
+   📱 Mobile Performance Optimization (Disable Heavy Backdrop Filters & Shadows)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Completely disable expensive GPU-choking backdrop blurs on mobile */
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Reduce costly soft shadows and glows on mobile to prevent paint-lag during scroll/swipe */
+  .glass-panel,
+  .glass-card,
+  .profile-tabs-list,
+  .mantine-Modal-content,
+  .mantine-Drawer-content,
+  .mantine-Paper-root {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35) !important;
+    text-shadow: none !important;
+  }
+
+  /* Disable expensive glow filters on Loader on mobile viewports */
+  .mantine-Loader-root {
+    filter: none !important;
+  }
+
+  /* Make panel and card backgrounds slightly more opaque on mobile for crisp text readability */
+  :root {
+    --theme-bg-panel: rgba(12, 12, 14, 0.95) !important;
+    --theme-bg-card: rgba(255, 255, 255, 0.035) !important;
+  }
+}
+
 
 

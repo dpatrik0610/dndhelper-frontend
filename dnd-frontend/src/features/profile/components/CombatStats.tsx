@@ -1,4 +1,3 @@
-import type React from "react";
 import { SimpleGrid, Paper, Group, Text, Stack, Grid, ActionIcon } from "@mantine/core";
 import {
   IconShield,

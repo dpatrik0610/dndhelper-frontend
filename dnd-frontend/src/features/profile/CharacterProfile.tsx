@@ -3,28 +3,31 @@ import {
   Group,
   Tabs,
   Text,
+  Loader,
 } from "@mantine/core";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { CharacterHeader } from "./components/CharacterHeader";
-import { CombatStats } from "./components/CombatStats";
-import { AbilityScores } from "./components/AbilityScores";
-import { ExtraInfo } from "./components/ExtraInfo";
-import { SpellCastingBlock } from "./components/SpellCastingBlock";
-import { SpellsPanel } from "./components/SpellsPanel";
 
-import { Inventory } from "@features/inventory/Inventory";
 import "./styles/CharacterProfile.styles.css"
-import { FeaturesPanel } from "./components/FeaturesPanel";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
 import { getCampaignById } from "@services/campaignService";
-import { ExperienceTableCard } from "./components/ExperienceTableCard";
 import { useIsAdmin, useToken } from "@store/auth/authSelectors";
 import type { Campaign } from "@appTypes/Campaign";
 import { useIsMobile } from "@hooks/useIsMobile";
+
+// Lazy-loaded sub-panels to optimize initial bundle size, memory footprint, and rendering latency on mobile
+const AbilityScores = lazy(() => import("./components/AbilityScores").then(m => ({ default: m.AbilityScores })));
+const CombatStats = lazy(() => import("./components/CombatStats").then(m => ({ default: m.CombatStats })));
+const ExperienceTableCard = lazy(() => import("./components/ExperienceTableCard").then(m => ({ default: m.ExperienceTableCard })));
+const SpellsPanel = lazy(() => import("./components/SpellsPanel").then(m => ({ default: m.SpellsPanel })));
+const SpellCastingBlock = lazy(() => import("./components/SpellCastingBlock").then(m => ({ default: m.SpellCastingBlock })));
+const ExtraInfo = lazy(() => import("./components/ExtraInfo").then(m => ({ default: m.ExtraInfo })));
+const FeaturesPanel = lazy(() => import("./components/FeaturesPanel").then(m => ({ default: m.FeaturesPanel })));
+const Inventory = lazy(() => import("@features/inventory/Inventory").then(m => ({ default: m.Inventory })));
 
 function useCampaignName(campaignId: string | null) {
   const [name, setName] = useState<string>("Loading...");
@@ -103,46 +106,54 @@ export default function CharacterProfile() {
           <Tabs.Tab value="inventories">Inventories</Tabs.Tab>
         </Tabs.List>
 
-        <AnimatePresence mode="wait">
-          {activeTab === "overview" && (
-            <motion.div key="overview" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              <AbilityScores />
-            </motion.div>
-          )}
+        <Suspense
+          fallback={
+            <Group justify="center" py="xl" style={{ minHeight: "180px", width: "100%" }}>
+              <Loader size="md" />
+            </Group>
+          }
+        >
+          <AnimatePresence mode="wait">
+            {activeTab === "overview" && (
+              <motion.div key="overview" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+                <AbilityScores />
+              </motion.div>
+            )}
 
-          {activeTab === "stats" && (
-            <motion.div key="stats" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              {/* <AbilityScores /> */}
-              <CombatStats />
-              <ExperienceTableCard />
-            </motion.div>
-          )}
+            {activeTab === "stats" && (
+              <motion.div key="stats" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+                {/* <AbilityScores /> */}
+                <CombatStats />
+                <ExperienceTableCard />
+              </motion.div>
+            )}
 
-          {activeTab === "spellcasting" && (
-            <motion.div key="spellcasting" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              <SpellsPanel />
-              <SpellCastingBlock />
-            </motion.div>
-          )}
+            {activeTab === "spellcasting" && (
+              <motion.div key="spellcasting" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+                <SpellsPanel />
+                <SpellCastingBlock />
+              </motion.div>
+            )}
 
-          {activeTab === "extras" && (
-            <motion.div key="extras" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              <ExtraInfo />
-            </motion.div>
-          )}
+            {activeTab === "extras" && (
+              <motion.div key="extras" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+                <ExtraInfo />
+              </motion.div>
+            )}
 
-          {activeTab === "features" && (
-            <motion.div key="features" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              <FeaturesPanel />
-            </motion.div>
-          )}
+            {activeTab === "features" && (
+              <motion.div key="features" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+                <FeaturesPanel />
+              </motion.div>
+            )}
 
-          {activeTab === "inventories" && (
-            <motion.div key="inventories" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-              <Inventory />
-            </motion.div>
-          )}
-        </AnimatePresence>
+            {activeTab === "inventories" && (
+              <motion.div key="inventories" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+                <Inventory />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Suspense>
       </Tabs>
       {isAdmin && (
         <Group mb={10} gap={10} align="center" wrap="wrap">
