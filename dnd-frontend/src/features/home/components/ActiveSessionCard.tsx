@@ -37,11 +37,10 @@ export function ActiveSessionCard({ session }: Props) {
         <Stack gap="lg">
           <Title
             order={2}
+            className="narrative-title"
             style={{
               color: "var(--theme-color-text-primary, #fff)",
-              fontSize: "1.8rem",
-              fontWeight: 800,
-              letterSpacing: "-0.5px",
+              fontSize: "1.25rem",
             }}
           >
             {session.name}

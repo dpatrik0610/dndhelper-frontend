@@ -56,11 +56,10 @@ export function CombatStats() {
 
   const deathSavePaperBase: React.CSSProperties = {
     cursor: "pointer",
-    borderRadius: 10,
-    border: "1px solid rgba(255,255,255,0.15)",
-    background:
-      "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,0,0,0.08))",
-    transition: "all 0.2s ease",
+    borderRadius: 12,
+    border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+    background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
+    transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
     backdropFilter: "blur(8px)",
     padding: "4px 6px",
   };
@@ -69,14 +68,12 @@ export function CombatStats() {
     (type: "success" | "failure", entering: boolean) =>
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (entering) {
-        const color =
-          type === "success"
-            ? "0,200,160"
-            : "255,90,90";
         e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.boxShadow = `0 0 10px rgba(${color},0.3), inset 0 0 6px rgba(${color},0.25)`;
+        e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
+        e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)";
       } else {
-        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.transform = "none";
+        e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
         e.currentTarget.style.boxShadow = "none";
       }
     };
@@ -86,14 +83,14 @@ export function CombatStats() {
       type: "success" as const,
       iconColor: "teal",
       label: "Death Saves - Successes",
-      labelColor: "#0fbba0",
+      labelColor: "var(--theme-color-accent-secondary, #06b6d4)",
       value: `${character.deathSavesSuccesses ?? 0} / 3`,
     },
     {
       type: "failure" as const,
       iconColor: "red",
       label: "Death Saves - Failures",
-      labelColor: "#ff6b6b",
+      labelColor: "var(--theme-color-accent-primary, #ef4444)",
       value: `${character.deathSavesFailures ?? 0} / 3`,
     },
   ];
@@ -101,22 +98,21 @@ export function CombatStats() {
   return (
     <ExpandableSection
       title="Combat Statistics"
-      icon={<span style={{ fontSize: "1.2rem" }}><IconSword size={20} /></span>}
+      icon={<span style={{ fontSize: "1.2rem", display: "flex", alignItems: "center" }}><IconSword size={20} /></span>}
       color={SectionColor.Red}
       defaultOpen
       style={{
-        background:
-          "linear-gradient(145deg, rgba(48,0,0,0.35) 0%, rgba(90,0,40,0.4) 50%, rgba(25,0,40,0.4) 100%)",
-        borderRadius: 12,
-        border: "1px solid rgba(255, 70, 70, 0.25)",
-        boxShadow:
-          "inset 0 0 10px rgba(255,0,0,0.15), 0 0 18px rgba(255,70,70,0.2)",
+        background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+        backdropFilter: "blur(24px) saturate(130%)",
+        WebkitBackdropFilter: "blur(24px) saturate(130%)",
+        borderRadius: 16,
+        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+        boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
         transition: "all 0.25s ease",
         overflow: "hidden",
       }}
       expandable={false}
     >
-      {/* Death Saves on top (using StatBox) */}
       <SimpleGrid
         cols={2}
         spacing="xs"
@@ -133,7 +129,7 @@ export function CombatStats() {
           >
             <Group gap="xs" justify="center" align="center">
               <StatBox
-                icon= {<IconHeart size={16} />}
+                icon={<IconHeart size={16} />}
                 variant="glass"
                 label={ds.label}
                 labelColor={ds.labelColor}
@@ -154,7 +150,6 @@ export function CombatStats() {
         ))}
       </SimpleGrid>
 
-      {/* Other combat stats */}
       <SimpleGrid
         cols={isMobile ? 2 : 3}
         spacing="xs"
@@ -169,30 +164,30 @@ export function CombatStats() {
             radius="md"
             p="xs"
             style={{
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,0,0,0.08))",
-              border: "1px solid rgba(255,70,70,0.2)",
-              boxShadow: "inset 0 0 4px rgba(255,80,80,0.15)",
+              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
+              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+              boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
               transition: "all 0.2s ease",
               backdropFilter: "blur(8px)",
+              borderRadius: "12px",
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 0 12px rgba(255,90,90,0.3), inset 0 0 6px rgba(255,90,90,0.25)";
+              e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
+              e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow =
-                "inset 0 0 4px rgba(255,80,80,0.15)";
+              e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
+              e.currentTarget.style.boxShadow = "none";
             }}
           >
             <Group gap="xs" justify="center" align="center">
               <StatBox
-              icon={stat.icon}
+                icon={stat.icon}
                 variant="elevated"
                 label={stat.label}
-                labelColor="#e66a05ff"
+                labelColor="var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))"
                 value={stat.value}
                 color={stat.color}
                 background="transparent"

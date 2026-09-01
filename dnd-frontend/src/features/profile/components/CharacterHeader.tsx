@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stack, Box, Group, Title, Text, Tooltip } from "@mantine/core";
+import { Stack, Box, Group, Title, Text, Tooltip, Popover, Badge, Divider } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { longrest } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
@@ -21,6 +21,7 @@ import {
   IconDice5,
   IconHeartPlus,
   IconCoin,
+  IconAward,
 } from "@tabler/icons-react";
 
 // Modals
@@ -90,13 +91,13 @@ export function CharacterHeader() {
       <Box
         mb="xl"
         style={{
-          background: "rgba(20, 15, 35, 0.4)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
+          background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+          backdropFilter: "blur(24px) saturate(130%)",
+          WebkitBackdropFilter: "blur(24px) saturate(130%)",
+          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
           borderRadius: 16,
           padding: isMobile ? "16px" : "24px",
-          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
         }}
       >
         <Stack gap="lg">
@@ -111,13 +112,22 @@ export function CharacterHeader() {
             <Stack gap="xs" style={{ flex: 1, minWidth: isMobile ? "100%" : 0, textAlign: isMobile ? "center" : "left" }}>
               
               <Group gap="sm" wrap="nowrap" justify={isMobile ? "center" : "flex-start"} align="center">
-                <Title order={1} c="white" style={{ fontSize: isMobile ? "24px" : "32px", lineHeight: 1.1, textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>
+                <Title
+                  order={1}
+                  className="narrative-title"
+                  style={{
+                    color: "#fff",
+                    fontSize: isMobile ? "20px" : "26px",
+                    textShadow: "0 2px 4px rgba(0,0,0,0.5)",
+                    lineHeight: 1.2,
+                  }}
+                >
                   {character.name || "Unnamed"}
                 </Title>
                 <SwitchCharacterButton />
               </Group>
 
-              <Text size="sm" c="dimmed" fw={700} lts={0.5} style={{ textTransform: "uppercase" }}>
+              <Text size="sm" style={{ color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))", fontWeight: 700, letterSpacing: "0.5px", textTransform: "uppercase" }}>
                 {metaString}
               </Text>
 
@@ -177,6 +187,108 @@ export function CharacterHeader() {
                   color="rgba(255, 90, 0, 0.18)"
                 />
               </Tooltip>
+
+              <Popover position="bottom" withArrow shadow="md" trapFocus={false}>
+                <Popover.Target>
+                  <div>
+                    <Tooltip label="Proficiencies" position="top" withArrow>
+                      <ActionBubble
+                        label="Proficiencies"
+                        icon={<IconAward size={isMobile ? 24 : 28} />}
+                        onClick={() => {}}
+                        color="var(--theme-color-accent-secondary, rgba(6, 182, 212, 0.18))"
+                      />
+                    </Tooltip>
+                  </div>
+                </Popover.Target>
+                <Popover.Dropdown
+                  style={{
+                    background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.9))",
+                    backdropFilter: "blur(24px) saturate(130%)",
+                    WebkitBackdropFilter: "blur(24px) saturate(130%)",
+                    border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+                    borderRadius: "12px",
+                    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.45), var(--theme-glow-shadow-primary)",
+                    padding: "16px",
+                    color: "var(--theme-color-text-primary, #fff)",
+                    maxWidth: "280px",
+                  }}
+                >
+                  <Stack gap="xs">
+                    <Text
+                      fw={300}
+                      size="xs"
+                      tt="uppercase"
+                      style={{
+                        letterSpacing: "2px",
+                        color: "var(--theme-color-text-secondary, #cbd5e1)",
+                        fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                      }}
+                    >
+                      Weapons & Tools
+                    </Text>
+                    {character.proficiencies?.length ? (
+                      <Group gap={6}>
+                        {character.proficiencies.map((p, i) => (
+                          <Badge
+                            key={i}
+                            radius="sm"
+                            style={{
+                              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
+                              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+                              color: "var(--theme-color-text-primary, #fff)",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {p}
+                          </Badge>
+                        ))}
+                      </Group>
+                    ) : (
+                      <Text size="xs" c="dimmed" style={{ fontStyle: "italic" }}>
+                        None
+                      </Text>
+                    )}
+
+                    <Divider color="rgba(255, 255, 255, 0.08)" my={4} />
+
+                    <Text
+                      fw={300}
+                      size="xs"
+                      tt="uppercase"
+                      style={{
+                        letterSpacing: "2px",
+                        color: "var(--theme-color-text-secondary, #cbd5e1)",
+                        fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                      }}
+                    >
+                      Languages
+                    </Text>
+                    {character.languages?.length ? (
+                      <Group gap={6}>
+                        {character.languages.map((l, i) => (
+                          <Badge
+                            key={i}
+                            radius="sm"
+                            style={{
+                              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
+                              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+                              color: "var(--theme-color-text-primary, #fff)",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {l}
+                          </Badge>
+                        ))}
+                      </Group>
+                    ) : (
+                      <Text size="xs" c="dimmed" style={{ fontStyle: "italic" }}>
+                        None
+                      </Text>
+                    )}
+                  </Stack>
+                </Popover.Dropdown>
+              </Popover>
             </Group>
 
             {/* Right: Rolled/Combat Actions */}

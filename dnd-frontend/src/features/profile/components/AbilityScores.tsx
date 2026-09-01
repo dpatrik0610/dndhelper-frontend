@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   Grid,
   Paper,
@@ -94,14 +94,13 @@ export function AbilityScores() {
       color={SectionColor.Violet}
       defaultOpen
       transparent
-      icon={<span style={{ fontSize: "1.2rem" }}>💪</span>}
       style={{
-        background:
-          "linear-gradient(135deg, rgba(36, 0, 33, 0.23), rgba(56, 27, 0, 0.36))",
-        boxShadow:
-          "0 0 10px rgba(51, 0, 73, 0.2), inset 0 0 6px rgba(51, 17, 82, 0.56)",
-        borderColor: "rgba(185, 30, 216, 0.34)",
-        borderRadius: "10px",
+        background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+        backdropFilter: "blur(24px) saturate(130%)",
+        WebkitBackdropFilter: "blur(24px) saturate(130%)",
+        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+        borderRadius: "16px",
+        boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
         transition: "all 0.25s ease-in-out",
       }}
       expandable={false}
@@ -121,14 +120,12 @@ export function AbilityScores() {
               radius="md"
               p="sm"
               style={{
-                background:
-                  "linear-gradient(135deg, rgba(12,10,25,0.85), rgba(25,10,25,0.8))",
-                border: "1px solid rgba(200,150,255,0.25)",
-                boxShadow: "0 0 10px rgba(120,60,200,0.25)",
+                background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
+                borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+                boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
               }}
             >
               <Grid align="stretch" gutter="md">
-                {/* Left: ability card */}
                 <Grid.Col span={{ base: 12, md: 4 }}>
                   <Stack gap={6}>
                     <AbilityScore
@@ -147,7 +144,6 @@ export function AbilityScores() {
                   </Stack>
                 </Grid.Col>
 
-                {/* Right: related skills bars */}
                 <Grid.Col span={{ base: 12, md: 8 }}>
                   {relatedSkills.length ? (
                     <Stack gap={6}>
@@ -157,8 +153,8 @@ export function AbilityScores() {
                         const isProf = !!skill.proficient;
 
                         const barGradient = isProf
-                          ? "linear-gradient(90deg, #ffb347, #ff0844)"
-                          : "linear-gradient(90deg, #a19361ff, #816a29ff)";
+                          ? "var(--theme-gradient-primary)"
+                          : "linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.15))";
 
                         return (
                           <Box
@@ -189,9 +185,9 @@ export function AbilityScores() {
                                 {isProf && (
                                   <span
                                     style={{
-                                      color: "#FFD43B",
+                                      color: "var(--theme-color-accent-primary, #FFD43B)",
                                       filter:
-                                        "drop-shadow(0 0 3px #FFD43B90)",
+                                        "drop-shadow(0 0 3px var(--theme-border-glow, #FFD43B90))",
                                     }}
                                   >
                                     ★
@@ -204,8 +200,8 @@ export function AbilityScores() {
                                 fw={600}
                                 style={{
                                   color: isProf
-                                    ? theme.colors.cyan[4]
-                                    : theme.colors.gray[5],
+                                    ? "var(--theme-color-accent-primary, #06b6d4)"
+                                    : "var(--theme-color-text-secondary, #cbd5e1)",
                                 }}
                               >
                                 {skill.value >= 0
@@ -220,12 +216,12 @@ export function AbilityScores() {
                               value={percent}
                               styles={{
                                 root: {
-                                  background: "rgba(255,255,255,0.06)",
+                                  background: "rgba(0, 0, 0, 0.25)",
                                 },
                                 section: {
                                   background: barGradient,
                                   boxShadow: isProf
-                                    ? "0 0 6px rgba(255, 0, 0, 0.6)"
+                                    ? "var(--theme-glow-shadow-primary)"
                                     : "none",
                                   transition: "width .4s ease",
                                 },
@@ -246,13 +242,27 @@ export function AbilityScores() {
           );
         })}
 
-        {/* Radar chart toggle */}
         <Button
           fullWidth
           mt="md"
           variant="light"
           color={SectionColor.Cyan}
           onClick={() => setOpened((o) => !o)}
+          style={{
+            background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
+            border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+            color: "var(--theme-color-accent-primary, #fff)",
+            fontWeight: 700,
+            transition: "all 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.08))";
+            e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.04))";
+            e.currentTarget.style.boxShadow = "none";
+          }}
         >
           {opened ? "Hide Chart" : "Show Chart"}
         </Button>
@@ -264,25 +274,25 @@ export function AbilityScores() {
               w="100%"
               data={radarData}
               dataKey="ability"
-              series={[{ name: "score", color: "cyan.6", opacity: 0 }]}
+              series={[{ name: "score", color: "var(--theme-color-accent-primary)", opacity: 0.15 }]}
               withDots
-              textColor="white.0"
+              textColor="rgba(255, 255, 255, 0.8)"
               withTooltip
               tooltipProps={{ content: <AbilityScoreTooltip /> }}
               radarProps={{
-                stroke: "cyan",
-                fill: "linear-gradient(135deg, rgba(0,255,255,0.2), rgba(0,128,128,0.4))",
+                stroke: "var(--theme-color-accent-primary)",
+                fill: "var(--theme-gradient-active)",
                 filter:
-                  "drop-shadow(0 0 6px rgba(0, 255, 255, 0.26))",
+                  "drop-shadow(0 0 6px var(--theme-border-glow))",
                 strokeWidth: 2,
               }}
               dotProps={{
                 r: 6,
-                stroke: "white",
+                stroke: "#fff",
                 strokeWidth: 2,
-                fill: "cyan",
+                fill: "var(--theme-color-accent-primary)",
               }}
-              gridColor="gray.5"
+              gridColor="rgba(255, 255, 255, 0.15)"
               withPolarAngleAxis
             />
           </div>

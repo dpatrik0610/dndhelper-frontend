@@ -41,11 +41,10 @@ export function HeaderCard({
       <Group justify="space-between" align="center" wrap={isMobile ? "wrap" : "nowrap"} gap="md">
         <Title
           order={2}
+          className="narrative-title"
           style={{
             color: "var(--theme-color-text-primary, #fff)",
-            fontSize: isMobile ? "1.4rem" : "1.8rem",
-            fontWeight: 800,
-            letterSpacing: "-0.5px",
+            fontSize: isMobile ? "1.1rem" : "1.25rem",
           }}
         >
           {campaignName || "Adventure Camp"}
@@ -96,7 +95,13 @@ export function HeaderCard({
             </Text>
           </ThemeIcon>
           <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-            <Text fw={800} size="lg" style={{ color: "var(--theme-color-text-primary, #fff)" }}>
+            <Text
+              size="md"
+              className="narrative-title"
+              style={{
+                color: "var(--theme-color-text-primary, #fff)",
+              }}
+            >
               {character?.name ?? "No Character Selected"}
             </Text>
             <Text size="xs" style={{ color: "var(--theme-color-text-secondary, rgba(255,255,255,0.6))" }}>

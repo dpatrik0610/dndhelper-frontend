@@ -63,7 +63,18 @@ export function ExpandableSection({
         <Group gap="xs" style={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
           {icon}
           {titleContent ?? (
-            <Text fw={600} c={color} size="sm" tt="uppercase" truncate="end" style={{ width: "100%" }}>
+            <Text
+              fw={300}
+              size="sm"
+              tt="uppercase"
+              truncate="end"
+              style={{
+                width: "100%",
+                letterSpacing: "4px",
+                color: "var(--theme-color-text-primary, #fff)",
+                fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+              }}
+            >
               {title}
             </Text>
           )}

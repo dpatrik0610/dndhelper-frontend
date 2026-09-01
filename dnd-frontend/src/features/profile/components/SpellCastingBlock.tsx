@@ -1,135 +1,140 @@
-import { SimpleGrid, Tooltip } from "@mantine/core";
+import { SimpleGrid, Tooltip, Divider, Text } from "@mantine/core";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { StatBox } from "./StatBox";
 import { IconExclamationCircle, IconWand } from "@tabler/icons-react";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { SectionColor } from "@appTypes/SectionColor";
-import { DividerWithLabel } from "@components/common/DividerWithLabel";
 import type { SpellSlot } from "@appTypes/Character/SpellSlot";
 import { showNotification } from "@components/Notification/Notification";
 import { updateCharacter } from "@services/characterService";
 
-
 export function SpellCastingBlock() {
-    const character = useCurrentCharacter()!;
-    const { updateCharacter : updateStore } = useCharacterCoreActions();
+  const character = useCurrentCharacter()!;
+  const { updateCharacter: updateStore } = useCharacterCoreActions();
 
-    const abilityLabelMap: Record<string, string> = {
-        wis: "Wisdom",
-        int: "Intelligence",
-        cha: "Charisma",
-        con: "Constitution",
-        str: "Strength",
-        dex: "Dexterity",
-        none: "None",
-    };
-    const spellcastingAbilityLabel =
-        character?.spellcastingAbility !== undefined
-            ? abilityLabelMap[character.spellcastingAbility.toLowerCase?.() ?? ""] ??
-              character.spellcastingAbility
-            : "Unknown";
+  const abilityLabelMap: Record<string, string> = {
+    wis: "Wisdom",
+    int: "Intelligence",
+    cha: "Charisma",
+    con: "Constitution",
+    str: "Strength",
+    dex: "Dexterity",
+    none: "None",
+  };
+  
+  const spellcastingAbilityLabel =
+    character?.spellcastingAbility !== undefined
+      ? abilityLabelMap[character.spellcastingAbility.toLowerCase?.() ?? ""] ??
+        character.spellcastingAbility
+      : "Unknown";
 
-    const spellSlotHandler = (slot : SpellSlot) => {
-        const all = character.spellSlots;
-        const foundIndex = all.findIndex(x => x.level == slot.level);
-        if (foundIndex === -1) return;
+  const spellSlotHandler = (slot: SpellSlot) => {
+    const all = character.spellSlots;
+    const foundIndex = all.findIndex(x => x.level == slot.level);
+    if (foundIndex === -1) return;
 
-        const found = all[foundIndex];
+    const found = all[foundIndex];
 
-        if (!found?.current || found?.current <= 0) {
-            showNotification({id: "spellslot-used", title:"", message: "Spell Level Depleted.", color: SectionColor.Yellow, icon: <IconExclamationCircle/>})
-            return;
-        }
-
-        const updatedSlots = [...all];
-        updatedSlots[foundIndex] = { ...found, current: found.current - 1 };
-
-        updateStore({spellSlots: updatedSlots});
-        
-        const updatedCharacter = { ...character, spellSlots: updatedSlots };
-        updateCharacter(updatedCharacter);
+    if (!found?.current || found?.current <= 0) {
+      showNotification({
+        id: "spellslot-used",
+        title: "",
+        message: "Spell Level Depleted.",
+        color: SectionColor.Yellow,
+        icon: <IconExclamationCircle />
+      });
+      return;
     }
 
-    function generateSpellSlots() {
-        if (!character?.spellSlots) return [];
-        return character.spellSlots.map((slot, index) => (
-        <StatBox
-            variant="galaxy"
-            key={index}
-            label={`${slot.level}. Level`}
-            value={`${slot.current} / ${slot.max}`}
-            size="sm"
-            color="grape.5"
-            background="transparent"
-            onClick={() => spellSlotHandler(slot)}
-        />
-        ));
-    }
+    const updatedSlots = [...all];
+    updatedSlots[foundIndex] = { ...found, current: found.current - 1 };
 
-    return <>
-    <ExpandableSection
+    updateStore({ spellSlots: updatedSlots });
+    
+    const updatedCharacter = { ...character, spellSlots: updatedSlots };
+    updateCharacter(updatedCharacter);
+  };
+
+  function generateSpellSlots() {
+    if (!character?.spellSlots) return [];
+    return character.spellSlots.map((slot, index) => (
+      <StatBox
+        variant="galaxy"
+        key={index}
+        label={`${slot.level}. Level`}
+        value={`${slot.current} / ${slot.max}`}
+        size="sm"
+        color="grape.5"
+        background="transparent"
+        onClick={() => spellSlotHandler(slot)}
+      />
+    ));
+  }
+
+  return (
+    <>
+      <ExpandableSection
         title="Spellcasting"
         defaultOpen
         icon={<IconWand size={18} />}
-        color= {SectionColor.Red}
+        color={SectionColor.Red}
         transparent
         style={{
-            background: "linear-gradient(180deg, rgba(29, 0, 66, 0.45), rgba(36, 0, 33, 0.23))",
-            boxShadow: "0 0 10px rgba(0, 25, 53, 0.58), inset 0 0 6px rgba(74, 25, 119, 0.15)",
-            borderColor: "rgba(119, 0, 255, 0.34)",
-            transition: "all 0.25s ease-in-out",
-            borderRadius: "12px",
+          background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+          backdropFilter: "blur(24px) saturate(130%)",
+          WebkitBackdropFilter: "blur(24px) saturate(130%)",
+          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+          borderRadius: "16px",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
+          transition: "all 0.25s ease-in-out",
         }}
-    >
-    <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="sm" mt="md" mb="md" >
-
-        {/* Spell Save DC */}
-        <Tooltip
+      >
+        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="sm" mt="md" mb="md">
+          <Tooltip
             label={
-            <>
+              <>
                 <strong>Spell Save DC</strong> = 8 + your <em>Proficiency Bonus</em> + your <em>Spellcasting Ability Modifier</em>.<br />
                 Determines how hard it is for enemies to resist your spells.
-            </>
+              </>
             }
             color="dark"
             withArrow
             multiline
             maw={260}
-        >
-        <StatBox
-        fullWidth
-        label="Spell Save DC"
-        value={character?.spellSaveDc ?? "-"}
-        size="xs"
-        color="red"
-        background="dark"
-        />
-        </Tooltip>
+          >
+            <StatBox
+              fullWidth
+              label="Spell Save DC"
+              value={character?.spellSaveDc ?? "-"}
+              size="xs"
+              color="red"
+              background="dark"
+            />
+          </Tooltip>
 
-        {/* Spell Attack Bonus */}
-        <Tooltip
+          <Tooltip
             label={
-            <>
+              <>
                 <strong>Spell Attack Bonus</strong> = your <em>Proficiency Bonus</em> + your <em>Spellcasting Ability Modifier</em>.<br />
                 Used for attack rolls with spells (e.g., Fire Bolt, Guiding Bolt).
-            </>
+              </>
             }
             color="dark"
             withArrow
             multiline
             maw={260}
-        >{
-        <StatBox
-        fullWidth
-        label="Spell Attack Bonus"
-        value={character?.spellAttackBonus ? `+${character.spellAttackBonus}` : "-"}
-        size="xs"
-        color="red"
-        background="dark"
-        />}
-        </Tooltip>
+          >
+            <StatBox
+              fullWidth
+              label="Spell Attack Bonus"
+              value={character?.spellAttackBonus ? `+${character.spellAttackBonus}` : "-"}
+              size="xs"
+              color="red"
+              background="dark"
+            />
+          </Tooltip>
 
-        <StatBox
+          <StatBox
             variant="bordered"
             fullWidth
             label="Spellcasting Ability"
@@ -137,18 +142,34 @@ export function SpellCastingBlock() {
             size="xs"
             color="red"
             background="dark"
+          />
+        </SimpleGrid>
+
+        <Divider
+          my="md"
+          color="rgba(255, 255, 255, 0.08)"
+          label={
+            <Text
+              size="xs"
+              fw={300}
+              style={{
+                textTransform: "uppercase",
+                letterSpacing: "4px",
+                color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
+                fontSize: "11px",
+                fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+              }}
+            >
+              Spell Slots
+            </Text>
+          }
+          labelPosition="center"
         />
-    </SimpleGrid>
 
-    <DividerWithLabel
-    label="Spell Slots"
-    thickness="2px"
-    color={SectionColor.Pink}
-    />
-
-    <SimpleGrid cols={3}>
-        {generateSpellSlots()}
-    </SimpleGrid>
-    </ExpandableSection>
+        <SimpleGrid cols={3}>
+          {generateSpellSlots()}
+        </SimpleGrid>
+      </ExpandableSection>
     </>
+  );
 }

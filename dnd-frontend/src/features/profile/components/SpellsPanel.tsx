@@ -40,7 +40,6 @@ export function SpellsPanel() {
 
   const { setCurrentSpell } = useSpellActions();
 
-  // Load spells
   useEffect(() => {
     const load = async () => {
       if (!chSpells.length || !token) {
@@ -71,7 +70,6 @@ export function SpellsPanel() {
     [chSpells]
   );
 
-  // Filter + group
   const grouped = useMemo(() => {
     const g: Record<number, Array<{ spellId: string; spell: Spell }>> = {};
     for (let lvl = 0; lvl <= 9; lvl++) g[lvl] = [];
@@ -89,18 +87,45 @@ export function SpellsPanel() {
     return g;
   }, [spellData, search, levelFilter, preparedFilter, preparedMap]);
 
-  // UI states
   if (!chSpells.length)
     return (
-      <ExpandableSection title="Spells" icon={<IconSparkles />} color={SectionColor.Grape}>
-        <Center>No spells known.</Center>
+      <ExpandableSection
+        title="Spells"
+        icon={<IconSparkles />}
+        color={SectionColor.Grape}
+        style={{
+          background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+          backdropFilter: "blur(24px) saturate(130%)",
+          WebkitBackdropFilter: "blur(24px) saturate(130%)",
+          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+          borderRadius: "16px",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
+        }}
+      >
+        <Center py="xl">
+          <Text c="dimmed">No spells known.</Text>
+        </Center>
       </ExpandableSection>
     );
 
   if (loading)
     return (
-      <ExpandableSection title="Spells" icon={<IconSparkles />} color={SectionColor.Grape}>
-        <Center><Loader /></Center>
+      <ExpandableSection
+        title="Spells"
+        icon={<IconSparkles />}
+        color={SectionColor.Grape}
+        style={{
+          background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+          backdropFilter: "blur(24px) saturate(130%)",
+          WebkitBackdropFilter: "blur(24px) saturate(130%)",
+          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+          borderRadius: "16px",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
+        }}
+      >
+        <Center py="xl">
+          <Loader color="var(--theme-color-accent-primary)" />
+        </Center>
       </ExpandableSection>
     );
 
@@ -111,11 +136,16 @@ export function SpellsPanel() {
         icon={<IconSparkles />}
         color={SectionColor.Grape}
         defaultOpen
-        style={{ background: "linear-gradient(180deg, #11001a99, #36004faa)" }}
+        style={{
+          background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+          backdropFilter: "blur(24px) saturate(130%)",
+          WebkitBackdropFilter: "blur(24px) saturate(130%)",
+          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+          borderRadius: "16px",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
+        }}
       >
-        <Stack>
-
-          {/* SEARCH + LEVEL FILTER */}
+        <Stack gap="md">
           <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="sm" mb="sm">
             <TextInput
               classNames={glassyInputClasses}
@@ -157,31 +187,34 @@ export function SpellsPanel() {
             />
           </SimpleGrid>
 
-          {/* SPELL GROUPS */}
           {Object.entries(grouped).map(([lvl, spells]) =>
             spells.length === 0 ? null : (
               <Stack key={lvl} mb="md" gap="xs">
-
-                {/* Category Header */}
                 <Box
                   px="sm"
-                  py={4}
+                  py={8}
                   style={{
-                    borderRadius: 6,
-                    background:
-                      lvl === "0"
-                        ? "linear-gradient(90deg, #6d00b855, #d200ff55)"
-                        : "linear-gradient(140deg, #6d00b855, #80286be0)",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    backdropFilter: "blur(4px)",
+                    borderRadius: "8px",
+                    background: "rgba(0, 0, 0, 0.15)",
+                    border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+                    boxShadow: "inset 0 0 8px rgba(0, 0, 0, 0.1)",
                   }}
                 >
-                  <Text fw={700} ta="center" c="white" fz="sm">
-                    {lvl === "0" ? "✨ Cantrips" : `🪄 Level ${lvl}`}
+                  <Text
+                    ta="center"
+                    c="var(--theme-color-text-primary, #fff)"
+                    style={{
+                      textTransform: "uppercase",
+                      letterSpacing: "4px",
+                      fontWeight: 300,
+                      fontSize: "11px",
+                      fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                    }}
+                  >
+                    {lvl === "0" ? "Cantrips" : `Level ${lvl}`}
                   </Text>
                 </Box>
 
-                {/* Spell Grid */}
                 <SimpleGrid cols={isMobile ? 2 : 4}>
                   {spells.map(({ spellId, spell }) => {
                     const isPrepared = preparedMap[spellId] ?? false;
@@ -198,7 +231,9 @@ export function SpellsPanel() {
                         }}
                       >
                         <Stack ta="center" align="center" gap={6} style={{ width: "100%" }}>
-                          <Text>{spell.name}</Text>
+                          <Text fw={700} style={{ color: "var(--theme-color-text-primary, #fff)" }}>
+                            {spell.name}
+                          </Text>
                           <CustomBadge
                             label={spell.level === 0 ? "Cantrip" : `Level ${spell.level}`}
                             color={spell.level === 0 ? SectionColor.Grape : SectionColor.Lime}
@@ -212,13 +247,14 @@ export function SpellsPanel() {
                               px={6}
                               py={2}
                               style={{
-                                background: "linear-gradient(90deg, #6d4ed8, #956deb)",
+                                background: "var(--theme-gradient-active, rgba(255, 255, 255, 0.08))",
                                 borderRadius: 6,
-                                border: "1px solid rgba(100,22,255,0.1)",
+                                border: "1px solid var(--theme-color-accent-primary, #f59e0b)",
+                                boxShadow: "var(--theme-glow-shadow-primary)",
                               }}
                             >
-                              <Text size="10px" fw={700} c="white" lts={1.5} lh="14px">
-                                Prepared
+                              <Text size="10px" fw={900} style={{ color: "var(--theme-color-text-glow, #fff)" }} lts={1.5} lh="14px">
+                                PREPARED
                               </Text>
                             </Box>
                           )}
@@ -230,7 +266,6 @@ export function SpellsPanel() {
               </Stack>
             )
           )}
-
         </Stack>
       </ExpandableSection>
 

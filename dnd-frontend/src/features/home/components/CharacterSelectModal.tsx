@@ -74,13 +74,11 @@ export function CharacterSelectModal({
         <Group gap={10}>
           <Title
             order={3}
-            bg="transparent"
+            className="narrative-title"
             style={{
               color: "var(--theme-color-text-primary, #fff)",
               textShadow: "0 0 12px var(--theme-border-glow, rgba(255,255,255,0.15))",
-              fontWeight: 900,
-              fontSize: "1.5rem",
-              fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+              fontSize: "1.10rem",
             }}
           >
             Choose Your Character

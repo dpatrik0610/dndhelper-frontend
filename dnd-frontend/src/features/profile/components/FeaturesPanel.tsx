@@ -26,35 +26,38 @@ export function FeaturesPanel() {
     return (
       <Box
         onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "translateY(-1px)";
-          const paper = e.currentTarget.firstElementChild as HTMLElement;
-          if (paper) {
-            paper.style.borderColor = "rgba(170, 90, 255, 0.3)";
-          }
+          e.currentTarget.style.transform = "translateY(-1.5px)";
+          e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
+          e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.2), var(--theme-glow-shadow-primary)";
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "translateY(0)";
-          const paper = e.currentTarget.firstElementChild as HTMLElement;
-          if (paper) {
-            paper.style.borderColor = "rgba(170, 90, 255, 0.15)";
-          }
+          e.currentTarget.style.transform = "none";
+          e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
+          e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.15)";
         }}
         style={{
-          transition: "transform 0.2s ease",
+          transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
+          background: "var(--theme-bg-card, rgba(255, 255, 255, 0.02))",
+          borderRadius: "0 12px 12px 0",
+          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+          borderLeft: "4px solid var(--theme-color-accent-primary, #f59e0b)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
         }}
       >
         <ExpandableSection
           title={name}
           titleContent={
             <Text
-              fw={750}
+              fw={300}
               size="sm"
-              c="violet.1"
-              lts={0.5}
-              truncate="end"
               style={{
                 textTransform: "uppercase",
                 maxWidth: "100%",
+                color: "var(--theme-color-text-primary, #fff)",
+                letterSpacing: "3px",
+                fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
               }}
             >
               {name}
@@ -67,19 +70,15 @@ export function FeaturesPanel() {
           marginTop={0}
           marginBottom={0}
           style={{
-            background: "rgba(255, 255, 255, 0.02)",
-            borderRadius: "0 8px 8px 0",
-            border: "1px solid rgba(170, 90, 255, 0.15)",
-            borderLeft: "3px solid rgba(170, 90, 255, 0.65)",
-            backdropFilter: "blur(6px)",
-            boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
-            transition: "border-color 0.2s ease",
+            background: "transparent",
+            border: "none",
+            boxShadow: "none",
           }}
         >
           {description && (
             <MarkdownRenderer
               content={description}
-              textColor="gray.2"
+              textColor="rgba(255, 255, 255, 0.8)"
             />
           )}
         </ExpandableSection>
@@ -95,10 +94,22 @@ export function FeaturesPanel() {
         defaultOpen
         rightSection={
           <ActionIcon
-            size="sm"
+            size="md"
             radius="xl"
-            variant="subtle"
-            color="grape.1"
+            style={{
+              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
+              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+              color: "var(--theme-color-accent-primary, #fff)",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.08))";
+              e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.04))";
+              e.currentTarget.style.boxShadow = "none";
+            }}
             onClick={(e) => {
               e.stopPropagation();
               setAddModalOpened(true);
@@ -108,9 +119,12 @@ export function FeaturesPanel() {
           </ActionIcon>
         }
         style={{
-          background: "linear-gradient(175deg, #2a002a7e 0%, rgba(15, 0, 30, 0.7) 100%)",
-          borderRadius: 10,
-          boxShadow: "0 0 12px rgba(170, 90, 255, 0.25)",
+          background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+          backdropFilter: "blur(24px) saturate(130%)",
+          WebkitBackdropFilter: "blur(24px) saturate(130%)",
+          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+          borderRadius: "16px",
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
           padding: "16px",
         }}
         expandable={false}
