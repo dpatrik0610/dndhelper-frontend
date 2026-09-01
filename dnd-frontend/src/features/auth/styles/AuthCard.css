@@ -1,54 +1,222 @@
-.login-card {
+/* ==========================================================================
+   D&D REFORGED — MINIMAL CINEMATIC PORTAL ENTRANCE AESTHETIC STYLESHEET
+   ========================================================================== */
+
+/* Full Screen Portal Root Wrapper */
+.portal-container {
   position: relative;
-  width: 360px;
-  border-radius: 12px;
-  padding: 3px; /* space for border */
-  background: rgba(0, 0, 0, 0.88);
-  z-index: 0;
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
-.login-card::before {
-  content: '';
+/* Layered Living Background Container */
+.portal-background {
   position: absolute;
   inset: 0;
-  padding: 2px;
-  border-radius: 12px;
-  background: linear-gradient(
-    45deg,
-    red,
-    orange,
-    yellow,
-    green,
-    blue,
-    indigo,
-    violet,
-    red
-  );
-  background-size: 400% 400%;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  animation: border-shift 8s linear infinite alternate;
-  z-index: -1;
+  z-index: 0;
+  overflow: hidden;
+  background: #060608;
 }
 
-@keyframes border-shift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.login-card-inner {
-  position: relative;
+/* Topographic Radial Fluid Gradients (Layer 3) */
+.portal-backdrop-glow {
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  top: -25%;
+  left: -25%;
+  background: 
+    radial-gradient(circle at 20% 30%, var(--theme-bg-panel, rgba(124, 58, 237, 0.15)) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, var(--theme-border-glow, rgba(6, 182, 212, 0.15)) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(10, 10, 12, 1) 0%, #030305 100%);
+  filter: blur(80px);
+  animation: slow-drift 30s ease-in-out infinite alternate;
   z-index: 1;
-  border-radius: 10px;
-  background: rgb(0, 0, 0);
-  padding: 2rem;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slow-drift {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(5deg) scale(1.05); }
+}
+
+/* Floating Particles (Layer 2) */
+.portal-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.portal-particle {
+  position: absolute;
+  background: radial-gradient(circle, var(--theme-color-accent-primary, #f59e0b) 0%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  animation: floatUp infinite linear;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(105vh) translateX(0) scale(0.3);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.35;
+  }
+  90% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(-5vh) translateX(50px) scale(1.2);
+    opacity: 0;
+  }
+}
+
+/* Portal Content Layer (Layer 4) */
+.portal-content-layer {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Premium Glassmorphic Portal Card */
+.reforged-portal-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--theme-bg-panel, rgba(15, 15, 15, 0.45)) !important;
+  backdrop-filter: blur(32px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(140%) !important;
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 20px !important;
+  box-shadow: 
+    0 30px 70px rgba(0, 0, 0, 0.55),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05),
+    var(--theme-glow-shadow-primary, 0 0 0 transparent) !important;
+  padding: 36px !important;
+  box-sizing: border-box;
+  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+/* Form Titles & Subtitles */
+.portal-header-title {
+  font-family: '"Plus Jakarta Sans", "Inter", sans-serif' !important;
+  color: var(--theme-color-text-primary, #ffffff) !important;
+  text-transform: uppercase;
+  letter-spacing: 5px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.portal-header-subtitle {
+  font-family: '"Plus Jakarta Sans", "Inter", sans-serif' !important;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7)) !important;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  font-size: 10px !important;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* Premium Glowing inputs */
+.portal-glassy-input {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 8px !important;
+  color: #fff !important;
+  padding: 10px 14px !important;
+  font-family: '"Plus Jakarta Sans", "Inter", sans-serif' !important;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.portal-glassy-input:focus, 
+.portal-glassy-input:focus-within {
+  border-color: var(--theme-border-glow, rgba(245, 158, 11, 0.4)) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 
+    0 0 16px var(--theme-border-glow, rgba(245, 158, 11, 0.25)),
+    inset 0 1px 1px rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Floating Runes theme switcher (Bottom Center) */
+.runes-theme-switcher {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 15, 15, 0.55);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
+  border-radius: 50px;
+  padding: 8px 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  z-index: 100;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.runes-theme-switcher:hover {
+  border-color: var(--theme-border-glow, rgba(255, 255, 255, 0.12));
+  box-shadow: 0 12px 45px rgba(0, 0, 0, 0.6), var(--theme-glow-shadow-primary);
+}
+
+.magic-rune-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.magic-rune-button:hover {
+  transform: scale(1.15) translateY(-2px);
+  border-color: var(--theme-color-accent-primary, #fff);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: var(--theme-glow-shadow-primary);
+}
+
+.magic-rune-button.active {
+  transform: scale(1.1) translateY(-1px);
+  background: var(--theme-gradient-primary-glass, rgba(255,255,255,0.08));
+  border-color: var(--theme-color-accent-primary, #f59e0b);
+  box-shadow: var(--theme-glow-shadow-primary), inset 0 1px 1px rgba(255,255,255,0.1);
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 768px) {
+  .runes-theme-switcher {
+    bottom: 16px;
+    width: calc(100% - 24px);
+    justify-content: space-around;
+    padding: 6px;
+  }
+
+  .reforged-portal-card {
+    max-width: 100%;
+    margin-top: 20px;
+    padding: 24px 20px !important;
+  }
 }

@@ -31,7 +31,6 @@ const RulesPage = lazy(() => import("@features/rules/RulesPage"));
 const AiAssistantPage = lazy(() => import("@features/aiAssistant/AiAssistantPage"));
 const EncounterRoomPage = lazy(() => import("@features/encounterRoom/EncounterRoomPage"));
 const ShopkeeperPage = lazy(() => import("@features/shop/ShopkeeperPage"));
-const ThemePreviewPage = lazy(() => import("@features/themePreview/ThemePreviewPage"));
 
 function AppRoutes() {
   const location = useLocation();
@@ -173,7 +172,6 @@ function AppRoutes() {
 
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/theme-preview" element={<ThemePreviewPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

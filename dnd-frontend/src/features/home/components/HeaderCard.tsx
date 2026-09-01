@@ -113,35 +113,46 @@ export function HeaderCard({
         </Group>
 
         <Group
-          gap="xs"
+          gap="sm"
           style={{
             flexShrink: 0,
             width: isMobile ? "100%" : "auto",
             justifyContent: isMobile ? "flex-start" : "flex-end",
           }}
         >
-          <Button
-            size="xs"
-            variant="subtle"
-            onClick={onSelectCharacter}
-            styles={{
-              root: {
-                color: "var(--theme-color-accent-secondary)",
-                "&:hover": {
-                  background: "var(--theme-bg-hover, rgba(255,255,255,0.04))",
-                }
-              }
-            }}
-          >
-            {character ? "Change Hero" : "Select Character"}
-          </Button>
-          {character && (
+          {character ? (
+            <>
+              <Button
+                size="sm"
+                className="glass-btn-secondary"
+                onClick={onSelectCharacter}
+                style={{ height: "38px" }}
+              >
+                Change Hero
+              </Button>
+              <Button
+                size="sm"
+                className="glass-btn-primary"
+                onClick={onProfile}
+                style={{ height: "38px" }}
+              >
+                Enter Profile
+              </Button>
+            </>
+          ) : (
             <Button
-              size="xs"
-              className="theme-preview-btn-primary"
-              onClick={onProfile}
+              size="md"
+              className="glass-btn-primary"
+              onClick={onSelectCharacter}
+              style={{
+                height: "44px",
+                fontWeight: 700,
+                letterSpacing: "0.5px",
+                paddingLeft: "24px",
+                paddingRight: "24px",
+              }}
             >
-              Enter Profile
+              Select Character
             </Button>
           )}
         </Group>

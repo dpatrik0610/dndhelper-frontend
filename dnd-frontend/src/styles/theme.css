@@ -429,3 +429,120 @@
   letter-spacing: 4px !important;
   text-transform: uppercase !important;
 }
+
+/* ==========================================================================
+   🔮 Magic Theme Selector Runes System
+   ========================================================================== */
+
+.runes-theme-switcher-inline {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 4px 0;
+}
+
+.magic-rune-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.magic-rune-button:hover {
+  transform: scale(1.15) translateY(-2px);
+  border-color: var(--theme-color-accent-primary, #fff);
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: var(--theme-glow-shadow-primary);
+}
+
+.magic-rune-button.active {
+  transform: scale(1.1) translateY(-1px);
+  background: var(--theme-gradient-primary-glass, rgba(255,255,255,0.08));
+  border-color: var(--theme-color-accent-primary, #f59e0b);
+  box-shadow: var(--theme-glow-shadow-primary), inset 0 1px 1px rgba(255,255,255,0.1);
+}
+
+/* ==========================================================================
+   🌌 Living Cinematic Backdrop System (Global Application Background)
+   ========================================================================== */
+
+/* Full Screen Base Obsidian Background */
+.portal-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #050507;
+}
+
+/* Topographic Radial Fluid Gradients - Highly Hardware Accelerated */
+.portal-backdrop-glow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, var(--theme-bg-panel, rgba(124, 58, 237, 0.12)) 0%, transparent 60%),
+    radial-gradient(circle at 80% 70%, var(--theme-border-glow, rgba(6, 182, 212, 0.12)) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(8, 8, 10, 1) 0%, #030305 100%);
+  filter: blur(40px); /* Reduced from 80px to save massive pixel fill-rate overhead */
+  transform: translate3d(0, 0, 0) scale(1.2); /* Scale up here cheaper than larger DOM sizes */
+  will-change: transform;
+  backface-visibility: hidden;
+  z-index: 1;
+  animation: slow-drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes slow-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1.15); }
+  100% { transform: translate3d(0, 0, 0) scale(1.3); }
+}
+
+/* Floating Particles (Layer 2) */
+.portal-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Flat, hardware-accelerated glowing circle embers */
+.portal-particle {
+  position: absolute;
+  background: var(--theme-color-accent-primary, #f59e0b);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--theme-color-accent-primary, rgba(245, 158, 11, 0.5));
+  opacity: 0;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  animation: floatUp infinite linear;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translate3d(0, 105vh, 0) scale(0.4);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.3;
+  }
+  85% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate3d(40px, -5vh, 0) scale(1.1);
+    opacity: 0;
+  }
+}
+
+
+
