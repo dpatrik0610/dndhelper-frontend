@@ -1,5 +1,5 @@
+import type React from "react";
 import {
-  Modal,
   Box,
   Group,
   Text,
@@ -8,6 +8,7 @@ import {
   Button,
 } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
+import { BaseModal } from "@components/BaseModal";
 
 interface Props {
   opened: boolean;
@@ -20,9 +21,6 @@ interface Props {
   saving: boolean;
 }
 
-const REMOVE_BUTTON_BASE = "0 0 6px rgba(255,100,100,0.5)";
-const REMOVE_BUTTON_HOVER = "0 0 14px rgba(255,150,80,0.8)";
-
 export function ConditionDetailsModal({
   opened,
   onClose,
@@ -34,79 +32,97 @@ export function ConditionDetailsModal({
   saving,
 }: Props) {
   return (
-    <Modal
+    <BaseModal
       opened={opened}
       onClose={onClose}
-      centered
       title={title}
-      overlayProps={{ backgroundOpacity: 0.6, blur: 4 }}
-      transitionProps={{ transition: "fade", duration: 200 }}
-      styles={{
-        header: {
-          fontWeight: "bold",
-          background: "transparent",
-          letterSpacing: "1px",
-        },
-        content: {
-          background:
-            "linear-gradient(145deg, rgba(40,0,0,0.9), rgba(20,0,0,0.65))",
-          border: "1px solid rgba(255,0,0,0.25)",
-          boxShadow:
-            "0 0 15px rgba(255,60,60,0.2), inset 0 0 10px rgba(255,0,0,0.1)",
-        },
-        title: { color: "white" },
-      }}
+      size="md"
+      showSaveButton={false}
+      showCancelButton={false}
     >
-      <Box p="sm">
+      <Box style={{ position: "relative" }}>
         {loading ? (
-          <Group justify="center" py="md">
-            <Loader color="red" />
+          <Group justify="center" py="xl">
+            <Loader color="var(--theme-color-accent-primary, #f59e0b)" size="md" />
           </Group>
         ) : (
           <>
             {error && (
-              <Text size="sm" c="red.4" mb="xs">
+              <Text size="sm" c="red.4" mb="sm" fw={500} ta="center">
                 {error}
               </Text>
             )}
 
             {desc.length > 0 && (
-              <Stack gap="xs">
-                {desc.map((line, idx) => (
-                  <Text key={idx} size="sm" c="gray.1">
-                    {line}
-                  </Text>
-                ))}
-              </Stack>
+              <Box
+                p="md"
+                style={{
+                  background: "rgba(255, 255, 255, 0.015)",
+                  border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.05))",
+                  borderRadius: "10px",
+                  boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.01)",
+                }}
+              >
+                <Stack gap="sm">
+                  {desc.map((line, idx) => (
+                    <Text
+                      key={idx}
+                      size="sm"
+                      lh={1.6}
+                      style={{
+                        color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.8))",
+                        fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                      }}
+                    >
+                      {line}
+                    </Text>
+                  ))}
+                </Stack>
+              </Box>
             )}
           </>
         )}
 
-        {onRemove && (
-          <Group justify="flex-end" mt="md">
+        {onRemove && !loading && (
+          <Group justify="flex-end" mt="lg">
             <Button
-              variant="gradient"
-              gradient={{ from: "red", to: "orange", deg: 45 }}
-              size="xs"
+              variant="subtle"
+              color="red"
               onClick={onRemove}
-              leftSection={<IconTrash size={14} />}
+              loading={saving}
               disabled={saving}
+              leftSection={<IconTrash size={14} />}
               style={{
-                boxShadow: REMOVE_BUTTON_BASE,
-                transition: "all 0.25s ease",
+                background: "rgba(239, 68, 68, 0.08)",
+                border: "1px solid rgba(239, 68, 68, 0.25)",
+                color: "#f87171",
+                fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                fontWeight: 600,
+                letterSpacing: "1px",
+                textTransform: "uppercase",
+                fontSize: "11px",
+                borderRadius: "8px",
+                transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                boxShadow: "0 2px 8px rgba(239, 68, 68, 0.05)",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.boxShadow = REMOVE_BUTTON_HOVER)
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.boxShadow = REMOVE_BUTTON_BASE)
-              }
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
+                e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.5)";
+                e.currentTarget.style.boxShadow = "0 0 12px rgba(239, 68, 68, 0.25), 0 4px 15px rgba(0, 0, 0, 0.15)";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)";
+                e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.25)";
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(239, 68, 68, 0.05)";
+                e.currentTarget.style.transform = "none";
+              }}
             >
               {saving ? "Removing..." : "Remove Condition"}
             </Button>
           </Group>
         )}
       </Box>
-    </Modal>
+    </BaseModal>
   );
 }

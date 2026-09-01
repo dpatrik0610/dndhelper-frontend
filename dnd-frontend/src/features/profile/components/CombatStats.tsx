@@ -1,15 +1,14 @@
 import type React from "react";
-import { SimpleGrid, Paper, Group } from "@mantine/core";
+import { SimpleGrid, Paper, Group, Text, Stack, Grid, ActionIcon } from "@mantine/core";
 import {
   IconShield,
-  IconHeart,
   IconTarget,
   IconRun,
   IconSword,
   IconArrowUp,
   IconEye,
+  IconRefresh,
 } from "@tabler/icons-react";
-import { StatBox } from "./StatBox";
 import { ExpandableSection } from "@components/ExpandableSection";
 
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
@@ -21,79 +20,155 @@ export function CombatStats() {
   const { updateCharacter } = useCharacterCoreActions();
   const isMobile = useIsMobile();
 
-  const stats = [
-    { label: "Armor Class", value: character.armorClass, color: "blue", icon: <IconShield size={18} /> },
-    { label: "Initiative", value: `+${character.initiative}`, color: "orange", icon: <IconTarget size={18} /> },
-    { label: "Speed", value: `${character.speed} ft`, color: "green", icon: <IconRun size={18} /> },
-    { label: "Proficiency", value: `+${character.proficiencyBonus}`, color: "grape", icon: <IconSword size={18} /> },
-    { label: "Size", value: character.size, color: "gray", icon: <IconArrowUp size={18} /> },
-    { label: "Hit Dice", value: `${character.hitDice}`, color: "teal", icon: <IconSword size={18} /> },
-    { label: "Passive Perception", value: `${character.passivePerception}`, color: "teal", icon: <IconEye size={18} /> },
-    { label: "Passive Investigation", value: `${character.passiveInvestigation}`, color: "teal", icon: <IconEye size={18} /> },
-    { label: "Passive Insight", value: `${character.passiveInsight}`, color: "teal", icon: <IconEye size={18} /> },
+  // Core Combat Stats (The Holy Trinity: AC, Initiative, Speed)
+  const coreStats = [
+    {
+      label: "Armor Class",
+      value: character.armorClass,
+      color: "var(--theme-color-accent-secondary, #06b6d4)",
+      icon: <IconShield size={isMobile ? 22 : 26} />,
+      glowColor: "rgba(6, 182, 212, 0.15)",
+    },
+    {
+      label: "Initiative",
+      value: character.initiative >= 0 ? `+${character.initiative}` : character.initiative,
+      color: "var(--theme-color-accent-primary, #f59e0b)",
+      icon: <IconTarget size={isMobile ? 22 : 26} />,
+      glowColor: "rgba(245, 158, 11, 0.15)",
+    },
+    {
+      label: "Speed",
+      value: `${character.speed} ft`,
+      color: "var(--theme-color-accent-secondary, #10b981)",
+      icon: <IconRun size={isMobile ? 22 : 26} />,
+      glowColor: "rgba(16, 185, 129, 0.15)",
+    },
   ];
 
-  const handleDeathSaveClick = (type: "success" | "failure") => {
-    const label = type === "success" ? "success" : "failure";
-    if (!window.confirm(`Add 1 death save ${label}?`)) return;
+  // Secondary & Passive Senses Stats
+  const secondaryStats = [
+    {
+      label: "Proficiency",
+      value: `+${character.proficiencyBonus}`,
+      color: "var(--theme-color-accent-primary, #f59e0b)",
+      icon: <IconSword size={16} />,
+    },
+    {
+      label: "Passive Investigation",
+      value: character.passiveInvestigation ?? 10,
+      color: "var(--theme-color-accent-secondary, #a855f7)",
+      icon: <IconEye size={16} />,
+    },
+    {
+      label: "Size",
+      value: character.size || "Medium",
+      color: "var(--theme-color-text-secondary, #94a3b8)",
+      icon: <IconArrowUp size={16} />,
+    },
+    {
+      label: "Passive Perception",
+      value: character.passivePerception ?? 10,
+      color: "var(--theme-color-accent-secondary, #a855f7)",
+      icon: <IconEye size={16} />,
+    },
+    {
+      label: "Hit Dice",
+      value: character.hitDice || "—",
+      color: "var(--theme-color-accent-secondary, #06b6d4)",
+      icon: <IconSword size={16} />,
+    },
+    {
+      label: "Passive Insight",
+      value: character.passiveInsight ?? 10,
+      color: "var(--theme-color-accent-secondary, #a855f7)",
+      icon: <IconEye size={16} />,
+    },
+  ];
 
-    const updated = { ...character };
-
-    if (type === "success") {
-      updated.deathSavesSuccesses = Math.min(
-        3,
-        (character.deathSavesSuccesses ?? 0) + 1
-      );
-    } else {
-      updated.deathSavesFailures = Math.min(
-        3,
-        (character.deathSavesFailures ?? 0) + 1
-      );
+  // Interactive Death Saves Click handlers
+  const handleSuccessCircleClick = (index: number) => {
+    const current = character.deathSavesSuccesses ?? 0;
+    let next = index;
+    if (current === index) {
+      next = index - 1;
     }
-
-    updateCharacter(updated);
+    updateCharacter({
+      ...character,
+      deathSavesSuccesses: next,
+    });
   };
 
-  const deathSavePaperBase: React.CSSProperties = {
-    cursor: "pointer",
-    borderRadius: 12,
-    border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
-    background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
-    transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
-    backdropFilter: "blur(8px)",
-    padding: "4px 6px",
+  const handleFailureCircleClick = (index: number) => {
+    const current = character.deathSavesFailures ?? 0;
+    let next = index;
+    if (current === index) {
+      next = index - 1;
+    }
+    updateCharacter({
+      ...character,
+      deathSavesFailures: next,
+    });
   };
 
-  const handleDeathSaveHover =
-    (type: "success" | "failure", entering: boolean) =>
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (entering) {
-        e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
-        e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)";
-      } else {
-        e.currentTarget.style.transform = "none";
-        e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
-        e.currentTarget.style.boxShadow = "none";
-      }
-    };
+  const handleResetDeathSaves = () => {
+    updateCharacter({
+      ...character,
+      deathSavesSuccesses: 0,
+      deathSavesFailures: 0,
+    });
+  };
 
-  const deathSaveConfigs = [
-    {
-      type: "success" as const,
-      iconColor: "teal",
-      label: "Death Saves - Successes",
-      labelColor: "var(--theme-color-accent-secondary, #06b6d4)",
-      value: `${character.deathSavesSuccesses ?? 0} / 3`,
-    },
-    {
-      type: "failure" as const,
-      iconColor: "red",
-      label: "Death Saves - Failures",
-      labelColor: "var(--theme-color-accent-primary, #ef4444)",
-      value: `${character.deathSavesFailures ?? 0} / 3`,
-    },
-  ];
+  // Helper to render beautiful glowing indicator bubbles for Death Saves
+  const renderDeathSaveBubbles = (
+    type: "success" | "failure",
+    count: number,
+    onClick: (index: number) => void
+  ) => {
+    const isSuccess = type === "success";
+    const activeColor = isSuccess
+      ? "var(--theme-color-accent-secondary, #06b6d4)"
+      : "var(--theme-color-accent-primary, #ef4444)";
+
+    return (
+      <Group gap="xs" justify="center" wrap="nowrap">
+        {[1, 2, 3].map((index) => {
+          const isActive = count >= index;
+          return (
+            <div
+              key={index}
+              onClick={() => onClick(index)}
+              style={{
+                width: isMobile ? "16px" : "18px",
+                height: isMobile ? "16px" : "18px",
+                borderRadius: "50%",
+                cursor: "pointer",
+                transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                background: isActive ? activeColor : "rgba(255, 255, 255, 0.03)",
+                border: isActive
+                  ? `2px solid ${activeColor}`
+                  : "2px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.12))",
+                boxShadow: isActive
+                  ? `0 0 10px ${activeColor}, inset 0 1px 1px rgba(255, 255, 255, 0.2)`
+                  : "inset 0 1px 1px rgba(255, 255, 255, 0.02)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.2)";
+                if (!isActive) {
+                  e.currentTarget.style.borderColor = activeColor;
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1.0)";
+                if (!isActive) {
+                  e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.12))";
+                }
+              }}
+            />
+          );
+        })}
+      </Group>
+    );
+  };
 
   return (
     <ExpandableSection
@@ -112,97 +187,248 @@ export function CombatStats() {
       }}
       expandable={false}
     >
-      <SimpleGrid
-        cols={2}
-        spacing="xs"
-        mb="xs"
-        style={{ paddingInline: isMobile ? 4 : 8, paddingTop: 4 }}
-      >
-        {deathSaveConfigs.map((ds) => (
-          <Paper
-            key={ds.type}
-            style={deathSavePaperBase}
-            onClick={() => handleDeathSaveClick(ds.type)}
-            onMouseEnter={handleDeathSaveHover(ds.type, true)}
-            onMouseLeave={handleDeathSaveHover(ds.type, false)}
-          >
-            <Group gap="xs" justify="center" align="center">
-              <StatBox
-                icon={<IconHeart size={16} />}
-                variant="glass"
-                label={ds.label}
-                labelColor={ds.labelColor}
-                value={ds.value}
-                color={ds.iconColor}
-                background="transparent"
-                size="sm"
-                hoverEffect={false}
-                fullWidth
+      <Stack gap="md" style={{ padding: isMobile ? "0px" : "4px" }}>
+        
+        {/* TOP SECTION: The Core Combat Trinity (AC, Initiative, Speed) */}
+        <SimpleGrid cols={3} spacing="xs">
+          {coreStats.map((stat) => (
+            <Paper
+              key={stat.label}
+              withBorder
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
+                e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.04))";
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)";
+                e.currentTarget.style.transform = "translateY(-3px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
+                e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.015))";
+                e.currentTarget.style.boxShadow = "inset 0 1px 1px rgba(255, 255, 255, 0.05)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+              style={{
+                background: "var(--theme-bg-card, rgba(255, 255, 255, 0.015))",
+                border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+                borderRadius: "14px",
+                boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.05)",
+                transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "relative",
+                overflow: "hidden",
+                padding: isMobile ? "10px 4px" : "18px 12px",
+              }}
+            >
+              {/* Radial backdrop highlight */}
+              <div
                 style={{
-                  textAlign: "center",
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
+                  position: "absolute",
+                  top: "-50%",
+                  left: "-50%",
+                  width: "200%",
+                  height: "200%",
+                  background: `radial-gradient(circle, ${stat.glowColor} 0%, transparent 60%)`,
+                  opacity: 0.15,
+                  pointerEvents: "none",
                 }}
               />
-            </Group>
-          </Paper>
-        ))}
-      </SimpleGrid>
 
-      <SimpleGrid
-        cols={isMobile ? 2 : 3}
-        spacing="xs"
-        verticalSpacing="xs"
-        style={{
-          padding: isMobile ? "4px" : "8px",
-        }}
-      >
-        {stats.map((stat) => (
-          <Paper
-            key={stat.label}
-            radius="md"
-            p="xs"
-            style={{
-              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
-              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
-              boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
-              transition: "all 0.2s ease",
-              backdropFilter: "blur(8px)",
-              borderRadius: "12px",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
-              e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-          >
-            <Group gap="xs" justify="center" align="center">
-              <StatBox
-                icon={stat.icon}
-                variant="elevated"
-                label={stat.label}
-                labelColor="var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))"
-                value={stat.value}
-                color={stat.color}
-                background="transparent"
-                size="sm"
-                hoverEffect={false}
-                fullWidth
+              {/* Icon */}
+              <span style={{ color: stat.color, marginBottom: isMobile ? "4px" : "6px", display: "flex", alignItems: "center" }}>
+                {stat.icon}
+              </span>
+
+              {/* Stat Value */}
+              <Text
+                fw={900}
                 style={{
-                  textAlign: "center",
-                  fontWeight: 600,
-                  fontSize: "0.9rem",
+                  fontSize: isMobile ? "18px" : "26px",
+                  color: stat.color,
+                  lineHeight: 1.1,
+                  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                  textShadow: "0 2px 10px rgba(0, 0, 0, 0.3)",
                 }}
-              />
-            </Group>
-          </Paper>
-        ))}
-      </SimpleGrid>
+              >
+                {stat.value}
+              </Text>
+
+              {/* Label */}
+              <Text
+                size="9px"
+                fw={700}
+                tt="uppercase"
+                ta="center"
+                style={{
+                  color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.6))",
+                  letterSpacing: "0.5px",
+                  marginTop: "4px",
+                }}
+              >
+                {stat.label}
+              </Text>
+            </Paper>
+          ))}
+        </SimpleGrid>
+
+        {/* MIDDLE SECTION: Split Layout with Interactive Death Saves & Secondary details */}
+        <Grid gutter="xs" align="stretch">
+          
+          {/* Death Saves Control Block */}
+          <Grid.Col span={{ base: 12, md: 5 }}>
+            <Paper
+              withBorder
+              p="md"
+              style={{
+                background: "var(--theme-bg-card, rgba(255, 255, 255, 0.015))",
+                border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+                borderRadius: "14px",
+                boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.05)",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                height: "100%",
+                minHeight: isMobile ? "auto" : "154px",
+              }}
+            >
+              {/* Block Header */}
+              <Group justify="space-between" align="center" mb="xs" wrap="nowrap">
+                <Text
+                  size="xs"
+                  fw={800}
+                  style={{
+                    color: "var(--theme-color-text-primary, #fff)",
+                    letterSpacing: "1px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Death Saves
+                </Text>
+                
+                {/* Reset Trigger */}
+                {((character.deathSavesSuccesses ?? 0) > 0 || (character.deathSavesFailures ?? 0) > 0) && (
+                  <ActionIcon
+                    size="sm"
+                    variant="subtle"
+                    color="gray"
+                    onClick={handleResetDeathSaves}
+                    title="Reset Death Saves"
+                    style={{ transition: "transform 0.2s ease" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.transform = "rotate(90deg)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.transform = "rotate(0deg)")}
+                  >
+                    <IconRefresh size={14} />
+                  </ActionIcon>
+                )}
+              </Group>
+
+              {/* Rows stack */}
+              <Stack gap="sm" style={{ flex: 1, justifyContent: "center" }}>
+                
+                {/* Successes row */}
+                <Group justify="space-between" align="center" wrap="nowrap">
+                  <Text
+                    size="xs"
+                    fw={700}
+                    style={{
+                      color: "var(--theme-color-accent-secondary, #06b6d4)",
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Successes
+                  </Text>
+                  {renderDeathSaveBubbles("success", character.deathSavesSuccesses ?? 0, handleSuccessCircleClick)}
+                </Group>
+
+                {/* Micro divider */}
+                <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.04)" }} />
+
+                {/* Failures row */}
+                <Group justify="space-between" align="center" wrap="nowrap">
+                  <Text
+                    size="xs"
+                    fw={700}
+                    style={{
+                      color: "var(--theme-color-accent-primary, #ef4444)",
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Failures
+                  </Text>
+                  {renderDeathSaveBubbles("failure", character.deathSavesFailures ?? 0, handleFailureCircleClick)}
+                </Group>
+              </Stack>
+            </Paper>
+          </Grid.Col>
+
+          {/* Secondary Stats & Senses list (Flat List Table style) */}
+          <Grid.Col span={{ base: 12, md: 7 }}>
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs" style={{ height: "100%" }}>
+              {secondaryStats.map((stat) => (
+                <Paper
+                  key={stat.label}
+                  withBorder
+                  p="xs"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.12))";
+                    e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.03))";
+                    e.currentTarget.style.transform = "translateY(-1px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.04))";
+                    e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.01))";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
+                  style={{
+                    background: "var(--theme-bg-card, rgba(255, 255, 255, 0.01))",
+                    border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
+                    borderRadius: "10px",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "10px 14px",
+                  }}
+                >
+                  <Group gap="xs" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
+                    <span style={{ color: stat.color, display: "flex", alignItems: "center" }}>
+                      {stat.icon}
+                    </span>
+                    <Text
+                      size="xs"
+                      fw={700}
+                      truncate="end"
+                      style={{
+                        color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.65))",
+                        letterSpacing: "0.5px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {stat.label}
+                    </Text>
+                  </Group>
+
+                  <Text
+                    size="sm"
+                    fw={800}
+                    style={{
+                      color: stat.color,
+                      fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                    }}
+                  >
+                    {stat.value}
+                  </Text>
+                </Paper>
+              ))}
+            </SimpleGrid>
+          </Grid.Col>
+
+        </Grid>
+      </Stack>
     </ExpandableSection>
   );
 }

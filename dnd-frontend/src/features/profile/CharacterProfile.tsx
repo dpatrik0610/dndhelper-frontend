@@ -4,13 +4,6 @@ import {
   Tabs,
   Text,
 } from "@mantine/core";
-import {
-  IconUser,
-  IconSword,
-  IconInfoCircle,
-  IconSparkles,
-  IconBox,
-} from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
