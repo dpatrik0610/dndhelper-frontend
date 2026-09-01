@@ -1,11 +1,11 @@
-﻿import { Stack, Group, Text, Box } from "@mantine/core";
+import { Stack, Group, Text, Box, SimpleGrid } from "@mantine/core";
 import { IconWand } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 
-export function SpellSlotsSection() {
+export function SpellSlotsSection({ noBox = false }: { noBox?: boolean }) {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
   const slots = characterForm.spellSlots ?? [];
 
@@ -39,6 +39,84 @@ export function SpellSlotsSection() {
     });
   };
 
+  const content = (
+    <Stack gap="md">
+      <Group justify="space-between" align="center" px="xs">
+        <Text
+          className="narrative-title"
+          style={{ fontSize: "11px", letterSpacing: "1.5px", color: "var(--theme-color-text-secondary)" }}
+        >
+          Spell Level
+        </Text>
+        <Text
+          className="narrative-title"
+          style={{ fontSize: "11px", letterSpacing: "1.5px", color: "var(--theme-color-text-secondary)" }}
+        >
+          Current / Max Slots
+        </Text>
+      </Group>
+
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+        {slots.map((slot) => (
+          <Group
+            key={slot.level}
+            justify="space-between"
+            align="center"
+            style={{
+              padding: "10px 16px",
+              borderRadius: "10px",
+              background: "rgba(255, 255, 255, 0.01)",
+              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
+            }}
+          >
+            {/* Spell Level Identifier */}
+            <Group gap="xs">
+              <IconWand size={14} style={{ opacity: 0.35, color: "var(--theme-color-accent-secondary)" }} />
+              <Text
+                className="narrative-title"
+                style={{
+                  fontSize: "11px",
+                  letterSpacing: "2px",
+                  color: "var(--theme-color-text-primary, #fff)",
+                }}
+              >
+                Level {slot.level}
+              </Text>
+            </Group>
+
+            {/* Current / Max Input Group */}
+            <Group gap="xs" align="center">
+              <FormNumberInput
+                hideControls
+                min={0}
+                max={slot.max}
+                value={slot.current}
+                classNames={{ input: "glassy-input" }}
+                style={{ width: 55 }}
+                onChange={(v) => handleChange(slot.level, "current", v ?? 0)}
+                styles={{ input: { textAlign: "center", padding: 0 } }}
+                aria-label={`Level ${slot.level} Current Slots`}
+              />
+              <Text size="sm" style={{ opacity: 0.35, fontWeight: 300 }}>/</Text>
+              <FormNumberInput
+                hideControls
+                min={0}
+                value={slot.max}
+                classNames={{ input: "glassy-input" }}
+                style={{ width: 55 }}
+                onChange={(v) => handleChange(slot.level, "max", v ?? 0)}
+                styles={{ input: { textAlign: "center", padding: 0 } }}
+                aria-label={`Level ${slot.level} Max Slots`}
+              />
+            </Group>
+          </Group>
+        ))}
+      </SimpleGrid>
+    </Stack>
+  );
+
+  if (noBox) return content;
+
   return (
     <ExpandableSection
       title="Spell Slots"
@@ -46,62 +124,7 @@ export function SpellSlotsSection() {
       color={SectionColor.Teal}
       defaultOpen
     >
-      <Stack gap="xs">
-      {slots.map((slot) => (
-      <Stack
-        key={slot.level}
-        gap={6}
-        style={{
-          padding: "10px 12px",
-          borderRadius: 10,
-          background: "rgba(255,255,255,0.03)",
-          border: "1px solid rgba(255,255,255,0.08)",
-          backdropFilter: "blur(6px)",
-        }}
-      >
-        {/* Highlighted level ribbon */}
-        <Box
-          style={{
-            padding: "2px 0px",
-            textAlign: "center",
-            color: "#eaffff",
-            fontWeight: 700,
-            letterSpacing: 0.5,
-            fontSize: 16,
-          }}
-        >
-          Level {slot.level}
-        </Box>
-
-        {/* CURRENT */}
-        <Group justify="space-between" align="center">
-          <Text size="sm" c="gray.3">Current</Text>
-          <FormNumberInput
-            hideControls
-            min={0}
-            max={slot.max}
-            value={slot.current}
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-            style={{ width: 70 }}
-            onChange={(v) => handleChange(slot.level, "current", v ?? 0)}
-          />
-        </Group>
-
-        {/* MAX */}
-        <Group justify="space-between" align="center">
-          <Text size="sm" c="gray.3">Max</Text>
-          <FormNumberInput
-            hideControls
-            min={0}
-            value={slot.max}
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-            style={{ width: 70 }}
-            onChange={(v) => handleChange(slot.level, "max", v ?? 0)}
-          />
-        </Group>
-      </Stack>
-      ))}
-      </Stack>
+      {content}
     </ExpandableSection>
   );
 }

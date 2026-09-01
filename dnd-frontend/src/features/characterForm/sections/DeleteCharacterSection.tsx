@@ -9,7 +9,7 @@ import { deleteCharacter } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
 import { showNotification } from "@components/Notification/Notification";
 
-export function DeleteCharacterSection() {
+export function DeleteCharacterSection({ noBox = false }: { noBox?: boolean }) {
   const character = useCurrentCharacter();
   const { clearStore } = useCharacterCoreActions();
     const navigate = useNavigate();
@@ -55,35 +55,41 @@ export function DeleteCharacterSection() {
     }
   };
 
+  const content = (
+    <Paper p="md" radius="md" style={{ background: "rgba(255,0,0,0.05)", border: "1px solid rgba(255,0,0,0.2)" }}>
+      <Stack gap="xs">
+        <Text size="sm" c="red.4" fw={500}>Warning: This action is irreversible!</Text>
+        <Text size="sm" c="dimmed">To confirm, type your character's name below:</Text>
+
+        <TextInput
+          placeholder={`Type "${character.name}" to confirm`}
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.currentTarget.value)}
+          styles={{ input: { backgroundColor: "rgba(255,255,255,0.05)" } }}
+        />
+
+        <Group justify="flex-end" mt="sm">
+          <Button
+            color="red"
+            variant="gradient"
+            gradient={{ from: "red", to: "orange" }}
+            leftSection={<IconTrash size={16} />}
+            onClick={handleDelete}
+            loading={loading}
+            disabled={confirmText.trim() !== character.name}
+          >
+            Delete Character
+          </Button>
+        </Group>
+      </Stack>
+    </Paper>
+  );
+
+  if (noBox) return content;
+
   return (
     <ExpandableSection title="Delete Character" icon={<IconTrash />} color={SectionColor.Red}>
-      <Paper p="md" radius="md" style={{ background: "rgba(255,0,0,0.05)", border: "1px solid rgba(255,0,0,0.2)" }}>
-        <Stack gap="xs">
-          <Text size="sm" c="red.4" fw={500}>Warning: This action is irreversible!</Text>
-          <Text size="sm" c="dimmed">To confirm, type your character's name below:</Text>
-
-          <TextInput
-            placeholder={`Type "${character.name}" to confirm`}
-            value={confirmText}
-            onChange={(e) => setConfirmText(e.currentTarget.value)}
-            styles={{ input: { backgroundColor: "rgba(255,255,255,0.05)" } }}
-          />
-
-          <Group justify="flex-end" mt="sm">
-            <Button
-              color="red"
-              variant="gradient"
-              gradient={{ from: "red", to: "orange" }}
-              leftSection={<IconTrash size={16} />}
-              onClick={handleDelete}
-              loading={loading}
-              disabled={confirmText.trim() !== character.name}
-            >
-              Delete Character
-            </Button>
-          </Group>
-        </Stack>
-      </Paper>
+      {content}
     </ExpandableSection>
   );
 }

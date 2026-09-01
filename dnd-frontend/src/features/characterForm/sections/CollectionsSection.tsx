@@ -5,7 +5,7 @@ import { IconBook2 } from "@tabler/icons-react";
 import { ListEditor } from "@features/characterForm/components/ListEditor";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 
-export function CollectionsSection() {
+export function CollectionsSection({ noBox = false }: { noBox?: boolean }) {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
 
   const formAdapter = {
@@ -13,13 +13,18 @@ export function CollectionsSection() {
     setFieldValue: (field: string, value: unknown) => setCharacterForm({ [field]: value }),
   };
 
-  return (
-    <ExpandableSection title="Collections" icon={<IconBook2 />} color={SectionColor.Blue} defaultOpen>
-    <Stack>
+  const content = (
+    <Stack gap="md">
       <ListEditor form={formAdapter} field="languages" label="Languages" placeholder="Add language..." />
       <ListEditor form={formAdapter} field="proficiencies" label="Proficiencies" placeholder="Add proficiency..." />
-      <ListEditor form={formAdapter} field="features" label="Features" placeholder="Add feature..." type="feature" />
     </Stack>
+  );
+
+  if (noBox) return content;
+
+  return (
+    <ExpandableSection title="Collections" icon={<IconBook2 />} color={SectionColor.Blue} defaultOpen>
+      {content}
     </ExpandableSection>
   );
 }
