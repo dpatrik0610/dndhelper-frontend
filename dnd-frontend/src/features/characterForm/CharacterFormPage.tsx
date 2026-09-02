@@ -37,6 +37,7 @@ import { SpellsSection } from "./sections/SpellsSection";
 import { FeaturesSection } from "./sections/FeaturesSection";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
+import { getActiveThemeClass } from "@features/navigation/Sidebar/sidebarThemes";
 
 interface CharacterFormPageProps {
   editMode?: boolean;
@@ -61,19 +62,7 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
 
   const sidebarTheme = useUiStore((s) => s.sidebarTheme);
 
-  const activeThemeClass = useMemo(() => {
-    switch (sidebarTheme) {
-      case "midnight":
-        return "theme-midnight-arcane";
-      case "crimson-vampire":
-        return "theme-crimson-vampire";
-      case "frost-glacier":
-        return "theme-frost-glacier";
-      case "sunset":
-      default:
-        return "theme-cyber-noir";
-    }
-  }, [sidebarTheme]);
+  const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
   const submitLabel = editMode ? "Save Changes" : "Create Character";
 

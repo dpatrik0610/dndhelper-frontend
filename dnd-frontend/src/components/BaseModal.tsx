@@ -3,6 +3,7 @@ import { IconX } from "@tabler/icons-react";
 import { useMemo, type ReactNode } from "react";
 import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { getActiveThemeClass } from "@features/navigation/Sidebar/sidebarThemes";
 
 interface BaseModalProps {
   opened: boolean;
@@ -43,19 +44,7 @@ export const BaseModal: React.FC<BaseModalProps> = ({
   const isMobile = useIsMobile();
   const isFullScreen = fullScreen || isMobile;
 
-  const activeThemeClass = useMemo(() => {
-    switch (sidebarTheme) {
-      case "midnight":
-        return "theme-midnight-arcane";
-      case "crimson-vampire":
-        return "theme-crimson-vampire";
-      case "frost-glacier":
-        return "theme-frost-glacier";
-      case "sunset":
-      default:
-        return "theme-cyber-noir";
-    }
-  }, [sidebarTheme]);
+  const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
   const headerVisible = !hideHeader;
   const headerStyles = hideHeader

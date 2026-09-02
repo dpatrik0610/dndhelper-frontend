@@ -141,6 +141,162 @@
   --theme-gradient-active: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(226, 232, 240, 0.2));
 }
 
+/* 🌸 Feywild Bloom */
+.theme-feywild-bloom {
+  --theme-bg-base: rgba(28, 12, 24, 0.14);
+  --theme-bg-panel: rgba(45, 18, 38, 0.24);
+  --theme-bg-panel-opaque: #291022;
+  --theme-bg-card: rgba(55, 24, 48, 0.18);
+  --theme-bg-hover: rgba(244, 114, 182, 0.14);
+  
+  --theme-border-glow: rgba(244, 114, 182, 0.4);
+  --theme-border-accent: rgba(251, 191, 36, 0.4);
+  --theme-border-subtle: rgba(244, 114, 182, 0.16);
+  
+  --theme-color-accent-primary: #f472b6e6; /* Sakura Pink with 10% transparency */
+  --theme-color-accent-secondary: #fbbf24e6; /* Sun Gold with 10% transparency */
+  --theme-color-text-primary: #fff1f2;
+  --theme-color-text-secondary: #fbcfe8; /* Tinted fey pink */
+  --theme-color-text-glow: #fdf2f8;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(244, 114, 182, 0.25);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(251, 191, 36, 0.25);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #f472b6, #fbbf24);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(244, 114, 182, 0.85), rgba(251, 191, 36, 0.85));
+  --theme-gradient-active: linear-gradient(135deg, rgba(244, 114, 182, 0.2), rgba(251, 191, 36, 0.2));
+}
+
+/* 💚 Toxic Spore */
+.theme-toxic-spore {
+  --theme-bg-base: rgba(5, 18, 8, 0.14);
+  --theme-bg-panel: rgba(10, 32, 16, 0.24);
+  --theme-bg-panel-opaque: #06140b;
+  --theme-bg-card: rgba(14, 42, 22, 0.18);
+  --theme-bg-hover: rgba(34, 197, 94, 0.14);
+  
+  --theme-border-glow: rgba(34, 197, 94, 0.45);
+  --theme-border-accent: rgba(250, 204, 21, 0.45);
+  --theme-border-subtle: rgba(34, 197, 94, 0.16);
+  
+  --theme-color-accent-primary: #22c55ee6; /* Toxic Green with 10% transparency */
+  --theme-color-accent-secondary: #facc15e6; /* Sulfuric Gold with 10% transparency */
+  --theme-color-text-primary: #f0fdf4;
+  --theme-color-text-secondary: #86efac; /* Minty green */
+  --theme-color-text-glow: #dcfce7;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(34, 197, 94, 0.25);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(250, 204, 21, 0.25);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #22c55e, #facc15);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(34, 197, 94, 0.85), rgba(250, 204, 21, 0.85));
+  --theme-gradient-active: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(250, 204, 21, 0.2));
+}
+
+/* 🔮 Eldritch Void */
+.theme-eldritch-void {
+  --theme-bg-base: rgba(5, 3, 20, 0.14);
+  --theme-bg-panel: rgba(10, 6, 32, 0.24);
+  --theme-bg-panel-opaque: #060416;
+  --theme-bg-card: rgba(15, 10, 45, 0.18);
+  --theme-bg-hover: rgba(217, 70, 239, 0.14);
+  
+  --theme-border-glow: rgba(217, 70, 239, 0.45);
+  --theme-border-accent: rgba(99, 102, 241, 0.45);
+  --theme-border-subtle: rgba(217, 70, 239, 0.16);
+  
+  --theme-color-accent-primary: #d946efe6; /* Eldritch Magenta with 10% transparency */
+  --theme-color-accent-secondary: #6366f1e6; /* Cosmic Indigo with 10% transparency */
+  --theme-color-text-primary: #fafafa;
+  --theme-color-text-secondary: #f5d0fe; /* Cosmic Lilac */
+  --theme-color-text-glow: #fdf4ff;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(217, 70, 239, 0.25);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(99, 102, 241, 0.25);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #d946ef, #6366f1);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(217, 70, 239, 0.85), rgba(99, 102, 241, 0.85));
+  --theme-gradient-active: linear-gradient(135deg, rgba(217, 70, 239, 0.2), rgba(99, 102, 241, 0.2));
+}
+
+/* ⚙️ Clockwork Brass */
+.theme-clockwork-brass {
+  --theme-bg-base: rgba(18, 19, 22, 0.14);
+  --theme-bg-panel: rgba(30, 31, 36, 0.24);
+  --theme-bg-panel-opaque: #141518;
+  --theme-bg-card: rgba(38, 39, 46, 0.18);
+  --theme-bg-hover: rgba(234, 88, 12, 0.14);
+  
+  --theme-border-glow: rgba(234, 88, 12, 0.4);
+  --theme-border-accent: rgba(13, 148, 136, 0.4);
+  --theme-border-subtle: rgba(234, 88, 12, 0.15);
+  
+  --theme-color-accent-primary: #ea580ce6; /* Copper Orange with 10% transparency */
+  --theme-color-accent-secondary: #0d9488e6; /* Weathered Turquoise with 10% transparency */
+  --theme-color-text-primary: #f8fafc;
+  --theme-color-text-secondary: #fde047; /* Bright Brass Secondary */
+  --theme-color-text-glow: #fef9c3;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(234, 88, 12, 0.25);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(13, 148, 136, 0.25);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #ea580c, #0d9488);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(234, 88, 12, 0.85), rgba(13, 148, 136, 0.85));
+  --theme-gradient-active: linear-gradient(135deg, rgba(234, 88, 12, 0.2), rgba(13, 148, 136, 0.2));
+}
+
+/* 🌊 Deep Ocean */
+.theme-deep-ocean {
+  --theme-bg-base: rgba(1, 4, 15, 0.14);
+  --theme-bg-panel: rgba(2, 8, 28, 0.24);
+  --theme-bg-panel-opaque: #01061c;
+  --theme-bg-card: rgba(3, 14, 45, 0.18);
+  --theme-bg-hover: rgba(2, 132, 199, 0.14);
+  
+  --theme-border-glow: rgba(2, 132, 199, 0.4);
+  --theme-border-accent: rgba(13, 148, 136, 0.4);
+  --theme-border-subtle: rgba(2, 132, 199, 0.16);
+  
+  --theme-color-accent-primary: #0284c7e6; /* Bioluminescent Blue with 10% transparency */
+  --theme-color-accent-secondary: #0d9488e6; /* Deep Coral Teal with 10% transparency */
+  --theme-color-text-primary: #f0fdfa;
+  --theme-color-text-secondary: #99f6e4; /* Pale aquamarine */
+  --theme-color-text-glow: #ccfbf1;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(2, 132, 199, 0.25);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(13, 148, 136, 0.25);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #0284c7, #0d9488);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(2, 132, 199, 0.85), rgba(13, 148, 136, 0.85));
+  --theme-gradient-active: linear-gradient(135deg, rgba(2, 132, 199, 0.2), rgba(13, 148, 136, 0.2));
+}
+
+/* 👁️ Darkvision (Monochromatic Monolith) */
+.theme-darkvision {
+  --theme-bg-base: rgba(8, 8, 8, 0.14);
+  --theme-bg-panel: rgba(16, 16, 16, 0.24);
+  --theme-bg-panel-opaque: #080808;
+  --theme-bg-card: rgba(24, 24, 24, 0.18);
+  --theme-bg-hover: rgba(255, 255, 255, 0.12);
+  
+  --theme-border-glow: rgba(255, 255, 255, 0.4);
+  --theme-border-accent: rgba(156, 163, 175, 0.4);
+  --theme-border-subtle: rgba(255, 255, 255, 0.16);
+  
+  --theme-color-accent-primary: #ffffffe6; /* Pure White with 10% transparency */
+  --theme-color-accent-secondary: #9ca3afe6; /* Ash Silver with 10% transparency */
+  --theme-color-text-primary: #ffffff;
+  --theme-color-text-secondary: #d1d5db; /* Light gray */
+  --theme-color-text-glow: #f3f4f6;
+  
+  --theme-glow-shadow-primary: 0 0 15px rgba(255, 255, 255, 0.25);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(156, 163, 175, 0.25);
+  
+  --theme-gradient-primary: linear-gradient(135deg, #ffffff, #9ca3af);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(156, 163, 175, 0.85));
+  --theme-gradient-active: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(156, 163, 175, 0.15));
+}
+
 /* Default styling helper fallbacks */
 .theme-preview-card--interactive {
   cursor: pointer;
@@ -641,6 +797,30 @@
     0% { background: #030305 !important; }
     100% { background: #0e1e34 !important; }
   }
+  @keyframes modalThemeFadeFeywild {
+    0% { background: #030305 !important; }
+    100% { background: #291022 !important; }
+  }
+  @keyframes modalThemeFadeToxic {
+    0% { background: #030305 !important; }
+    100% { background: #06140b !important; }
+  }
+  @keyframes modalThemeFadeEldritch {
+    0% { background: #030305 !important; }
+    100% { background: #060416 !important; }
+  }
+  @keyframes modalThemeFadeClockwork {
+    0% { background: #030305 !important; }
+    100% { background: #141518 !important; }
+  }
+  @keyframes modalThemeFadeDeepOcean {
+    0% { background: #030305 !important; }
+    100% { background: #01061c !important; }
+  }
+  @keyframes modalThemeFadeDarkvision {
+    0% { background: #030305 !important; }
+    100% { background: #080808 !important; }
+  }
   @keyframes modalThemeFadeDanger {
     0% { background: #030305 !important; }
     100% { background: rgb(40, 12, 18) !important; }
@@ -665,6 +845,24 @@
   }
   .mantine-Modal-content.theme-frost-glacier {
     animation: modalThemeFadeFrost 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-feywild-bloom {
+    animation: modalThemeFadeFeywild 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-toxic-spore {
+    animation: modalThemeFadeToxic 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-eldritch-void {
+    animation: modalThemeFadeEldritch 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-clockwork-brass {
+    animation: modalThemeFadeClockwork 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-deep-ocean {
+    animation: modalThemeFadeDeepOcean 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-darkvision {
+    animation: modalThemeFadeDarkvision 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .mantine-Modal-content.modal-variant-danger {
     animation: modalThemeFadeDanger 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;

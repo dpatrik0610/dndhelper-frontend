@@ -12,7 +12,7 @@ import { AppBackground } from "@components/layout/AppBackground";
 import { SidebarToggle } from "@components/layout/SidebarToggle";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
 import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal";
-import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
+import { type SidebarThemeVariant, getActiveThemeClass } from "@features/navigation/Sidebar/sidebarThemes";
 import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 
@@ -129,19 +129,7 @@ function AppRoutes() {
 
   const isDashboardRoute = location.pathname === "/dashboard";
 
-  const activeThemeClass = useMemo(() => {
-    switch (sidebarTheme) {
-      case "midnight":
-        return "theme-midnight-arcane";
-      case "crimson-vampire":
-        return "theme-crimson-vampire";
-      case "frost-glacier":
-        return "theme-frost-glacier";
-      case "sunset":
-      default:
-        return "theme-cyber-noir";
-    }
-  }, [sidebarTheme]);
+  const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
   return (
     <AppShell 

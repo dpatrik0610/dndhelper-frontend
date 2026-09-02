@@ -4,6 +4,7 @@ import { Box } from "@mantine/core";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUiStore } from "@store/ui/uiStore";
 import { MagicThemeSelector } from "@components/common/MagicThemeSelector";
+import { getActiveThemeClass } from "@features/navigation/Sidebar/sidebarThemes";
 
 // Existing service and store dependencies
 import { loginUser, registerUser } from "@services/authService";
@@ -137,19 +138,7 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
   };
 
   // Theme styling helpers
-  const activeThemeClass = useMemo(() => {
-    switch (sidebarTheme) {
-      case "midnight":
-        return "theme-midnight-arcane";
-      case "crimson-vampire":
-        return "theme-crimson-vampire";
-      case "frost-glacier":
-        return "theme-frost-glacier";
-      case "sunset":
-      default:
-        return "theme-cyber-noir";
-    }
-  }, [sidebarTheme]);
+  const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
   if (token && !isRedirecting) {
     return (

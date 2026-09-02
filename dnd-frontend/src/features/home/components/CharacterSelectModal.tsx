@@ -17,6 +17,7 @@ import type { Character } from "@appTypes/Character/Character";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
+import { getActiveThemeClass } from "@features/navigation/Sidebar/sidebarThemes";
 
 interface CharacterSelectModalProps {
   opened: boolean;
@@ -37,19 +38,7 @@ export function CharacterSelectModal({
 
   const sidebarTheme = useUiStore((s) => s.sidebarTheme);
 
-  const activeThemeClass = useMemo(() => {
-    switch (sidebarTheme) {
-      case "midnight":
-        return "theme-midnight-arcane";
-      case "crimson-vampire":
-        return "theme-crimson-vampire";
-      case "frost-glacier":
-        return "theme-frost-glacier";
-      case "sunset":
-      default:
-        return "theme-cyber-noir";
-    }
-  }, [sidebarTheme]);
+  const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
   const handleSelect = (char: Character) => {
     setSelected(char.id ?? null);
