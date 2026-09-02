@@ -1,5 +1,6 @@
 import { Text } from "@mantine/core";
 import { StatBox } from "./StatBox";
+import CustomBadge from "@components/common/CustomBadge";
 
 export function AbilityScore({ name, score }: { name: string; score: number }) {
   const modifier = Math.floor((score - 10) / 2);
@@ -30,21 +31,16 @@ export function AbilityScore({ name, score }: { name: string; score: number }) {
         {score}
       </div>
 
-      <Text
+      <CustomBadge
+        label={modifierStr}
+        variant="themed"
         mt="xs"
-        size="xs"
-        fw={700}
         style={{
-          display: "inline-block",
+          fontSize: "12px",
           padding: "2px 8px",
-          borderRadius: "6px",
-          background: "rgba(255, 255, 255, 0.08)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
-          boxShadow: "0 0 6px rgba(255, 255, 255, 0.1)",
+          height: "auto",
         }}
-      >
-        {modifierStr}
-      </Text>
+      />
     </StatBox>
   );
 }

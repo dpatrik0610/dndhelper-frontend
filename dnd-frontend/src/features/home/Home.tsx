@@ -9,7 +9,6 @@ import { useSessionStore } from "@store/session/sessionStore";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
 import type { Character } from "@appTypes/Character/Character";
 import type { CampaignOverviewDto } from "@appTypes/CampaignOverview";
-import { quotes } from "./quotes";
 import { CharacterSelectModal } from "./components/CharacterSelectModal";
 import { HeaderCard } from "./components/HeaderCard";
 import { ActiveSessionCard } from "./components/ActiveSessionCard";
@@ -24,17 +23,8 @@ export default function Home() {
   const { sessions, loadByCampaign } = useSessionStore();
 
   const [modalOpened, setModalOpened] = useState(false);
-  const [quote, setQuote] = useState("");
   const [campaign, setCampaign] = useState<CampaignOverviewDto | null>(null);
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    if (quotes?.length) {
-      setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
-    } else {
-      setQuote("");
-    }
-  }, []);
 
   useEffect(() => {
     if (!character && characters.length === 1) {
@@ -109,7 +99,6 @@ export default function Home() {
         character={character ?? null}
         onSelectCharacter={() => setModalOpened(true)}
         onProfile={() => navigate("/profile")}
-        quote={quote}
         characterSelector={
           <CharacterSelectModal
             opened={modalOpened}

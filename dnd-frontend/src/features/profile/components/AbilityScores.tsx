@@ -6,7 +6,6 @@ import {
   Group,
   Text,
   Button,
-  Badge,
   SimpleGrid,
 } from "@mantine/core";
 import { RadarChart } from "@mantine/charts";
@@ -16,6 +15,7 @@ import { useCurrentCharacter } from "@store/character/characterSelectors";
 import AbilityScoreTooltip from "./AbilityScoreToolTip";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
+import CustomBadge from "@components/common/CustomBadge";
 
 export function AbilityScores() {
   const character = useCurrentCharacter()!;
@@ -264,21 +264,17 @@ export function AbilityScores() {
                         </Text>
 
                         {/* Small attribute tag badge */}
-                        <Badge
+                        <CustomBadge
                           size="xs"
-                          variant="transparent"
+                          variant="themed"
+                          label={skill.ability}
                           style={{
-                            background: "rgba(255, 255, 255, 0.02)",
-                            border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
-                            color: "var(--theme-color-text-secondary, #cbd5e1)",
                             fontSize: "8px",
                             fontWeight: isProf ? 700 : 400,
                             padding: "2px 4px",
                             height: "auto",
                           }}
-                        >
-                          {skill.ability}
-                        </Badge>
+                        />
                       </Group>
 
                       {/* Right side modifier text */}

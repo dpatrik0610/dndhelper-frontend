@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stack, Box, Group, Title, Text, Tooltip, Popover, Badge, Divider, ActionIcon, Button } from "@mantine/core";
+import { Stack, Box, Group, Title, Text, Tooltip, Popover, Divider, ActionIcon, Button } from "@mantine/core";
+import CustomBadge from "@components/common/CustomBadge";
 import { useCurrentCharacter, useCharacterCoreActions, useCharacterCombatActions } from "@store/character/characterSelectors";
 import { longrest, updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
@@ -306,18 +307,12 @@ export function CharacterHeader() {
                     {character.proficiencies?.length ? (
                       <Group gap={6}>
                         {character.proficiencies.map((p, i) => (
-                          <Badge
+                          <CustomBadge
                             key={i}
+                            label={p}
+                            variant="themed"
                             radius="sm"
-                            style={{
-                              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
-                              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
-                              color: "var(--theme-color-text-primary, #fff)",
-                              fontWeight: 700,
-                            }}
-                          >
-                            {p}
-                          </Badge>
+                          />
                         ))}
                       </Group>
                     ) : (
@@ -343,18 +338,12 @@ export function CharacterHeader() {
                     {character.languages?.length ? (
                       <Group gap={6}>
                         {character.languages.map((l, i) => (
-                          <Badge
+                          <CustomBadge
                             key={i}
+                            label={l}
+                            variant="themed"
                             radius="sm"
-                            style={{
-                              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
-                              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
-                              color: "var(--theme-color-text-primary, #fff)",
-                              fontWeight: 700,
-                            }}
-                          >
-                            {l}
-                          </Badge>
+                          />
                         ))}
                       </Group>
                     ) : (

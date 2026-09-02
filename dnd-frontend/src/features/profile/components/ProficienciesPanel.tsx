@@ -3,13 +3,13 @@ import {
   Stack,
   Text,
   Divider,
-  Badge,
   ThemeIcon,
 } from "@mantine/core";
 import { IconLanguage, IconSword } from "@tabler/icons-react";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
+import CustomBadge from "@components/common/CustomBadge";
 
 export function ProficienciesPanel() {
   const character = useCurrentCharacter();
@@ -19,20 +19,12 @@ export function ProficienciesPanel() {
     items?.length ? (
       <Group>
         {items.map((item, i) => (
-          <Badge
+          <CustomBadge
             key={i}
+            label={item}
+            variant="themed"
             radius="sm"
-            style={{
-              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
-              backdropFilter: "blur(6px)",
-              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1))",
-              color: "var(--theme-color-text-primary, #fff)",
-              textShadow: "0 0 6px var(--theme-border-glow)",
-              fontWeight: 700,
-            }}
-          >
-            {item}
-          </Badge>
+          />
         ))}
       </Group>
     ) : (

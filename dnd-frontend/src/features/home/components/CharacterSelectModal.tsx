@@ -173,20 +173,21 @@ export function CharacterSelectModal({
                   }}
                 >
                   <Group wrap="nowrap" align="center">
-                    <Avatar
-                      radius="md"
-                      size={64}
-                      style={{
-                        border: "2px solid var(--theme-color-accent-primary)",
-                        background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
-                        boxShadow: "var(--theme-glow-shadow-primary)",
-                        color: "#fff",
-                        fontWeight: 900,
-                        fontSize: "1.5rem",
-                      }}
-                    >
-                      {char.name.charAt(0).toUpperCase()}
-                    </Avatar>
+                   <Avatar
+                     src={char.imageUrl || undefined}
+                     radius="md"
+                     size={64}
+                     style={{
+                       border: "2px solid var(--theme-color-accent-primary)",
+                       background: char.imageUrl ? "transparent" : "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
+                       boxShadow: "var(--theme-glow-shadow-primary)",
+                       color: "#fff",
+                       fontWeight: 900,
+                       fontSize: "1.5rem",
+                     }}
+                   >
+                     {char.name.charAt(0).toUpperCase()}
+                   </Avatar>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <Text

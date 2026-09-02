@@ -1,8 +1,20 @@
-import { Button, Group, Paper, Stack, Text, ThemeIcon, Title, Box } from "@mantine/core";
-import { ConnectionStatus } from "@components/ConnectionStatus";
+import {
+  Button,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  ThemeIcon,
+  Title,
+  Box,
+  Avatar,
+  Grid,
+  Divider,
+} from "@mantine/core";
 import type { ReactNode } from "react";
 import type { Character } from "@appTypes/Character/Character";
 import { XpProgressCard } from "@features/profile/components/XpProgressCard";
+import CustomBadge from "@components/common/CustomBadge";
 
 interface Props {
   campaignName: string | null;
@@ -11,17 +23,14 @@ interface Props {
   onProfile: () => void;
   isMobile?: boolean;
   characterSelector?: ReactNode;
-  quote?: string;
 }
 
 export function HeaderCard({
-  campaignName,
   character,
   onSelectCharacter,
   onProfile,
   characterSelector,
   isMobile = false,
-  quote,
 }: Props) {
   return (
     <Paper
@@ -29,140 +38,169 @@ export function HeaderCard({
       p="xl"
       withBorder
       style={{
-        background: "var(--theme-bg-panel, rgba(15,15,15,0.45))",
-        borderColor: "var(--theme-border-subtle, rgba(255,255,255,0.06))",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
+        background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+        borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+        backdropFilter: "blur(24px) saturate(130%)",
+        WebkitBackdropFilter: "blur(24px) saturate(130%)",
         color: "var(--theme-color-text-primary, #fff)",
-        boxShadow: "0 10px 30px rgba(0, 0, 0, 0.25)",
+        boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
       }}
     >
-      {/* Line 1: campaign + status */}
-      <Group justify="space-between" align="center" wrap={isMobile ? "wrap" : "nowrap"} gap="md">
-        <Title
-          order={2}
-          className="narrative-title"
-          style={{
-            color: "var(--theme-color-text-primary, #fff)",
-            fontSize: isMobile ? "1.1rem" : "1.25rem",
-          }}
-        >
-          {campaignName || "Adventure Camp"}
-        </Title>
-        <ConnectionStatus />
-      </Group>
+      {/* Main Character Row Split: Info vs XP Bar */}
+      <Grid gutter="xl" align="center">
+        {/* Left/Center side: Avatar, Name, Metadata, Core Stat Pills */}
+        <Grid.Col span={{ base: 12, md: character ? 7 : 12 }}>
+          <Group align="center" gap="lg" wrap="nowrap">
+            {character?.imageUrl ? (
+              <Avatar
+                src={character.imageUrl}
+                size={84}
+                radius="xl"
+                style={{
+                  border: "none", // Display without border!
+                }}
+              />
+            ) : (
+              <ThemeIcon
+                size={84}
+                radius="xl"
+                variant="gradient"
+                gradient={{
+                  from: "var(--theme-color-accent-primary, #f59e0b)",
+                  to: "var(--theme-color-accent-secondary, #10b981)",
+                }}
+                styles={{
+                  root: {
+                    boxShadow: "var(--theme-glow-shadow-primary)",
+                    border: "none", // Display without border!
+                  },
+                }}
+              >
+                <Text fw={900} size="2rem" style={{ color: "#fff" }}>
+                  {character?.name?.charAt(0) ?? "?"}
+                </Text>
+              </ThemeIcon>
+            )}
 
-      {quote && (
-        <Text
-          size="sm"
-          fs="italic"
-          mt={6}
-          style={{
-            color: "var(--theme-color-text-secondary, rgba(255,255,255,0.65))",
-            borderLeft: "2px solid var(--theme-color-accent-secondary)",
-            paddingLeft: "10px",
-          }}
-        >
-          "{quote}"
-        </Text>
-      )}
+            <Stack gap={6} style={{ flex: 1, minWidth: 0 }}>
+              <Title
+                order={2}
+                className="narrative-title"
+                style={{
+                  color: "var(--theme-color-text-primary, #fff)",
+                  fontSize: isMobile ? "1.25rem" : "1.5rem",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                {character?.name ?? "No Character Selected"}
+              </Title>
+              <Text
+                size="xs"
+                style={{
+                  color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.6))",
+                  fontWeight: 600,
+                }}
+              >
+                {character
+                  ? `${character.race ?? ""} • ${character.characterClass || character.className || ""} (Level ${character.level ?? 1})`
+                  : "Select a character to initialize your adventure!"}
+              </Text>
 
-      {/* Line 2: character + actions */}
+              {/* Core Stat Pills Deck (only if character is selected) */}
+              {character && (
+                <Group gap="xs" mt={4} wrap="wrap">
+                  {/* HP Pill */}
+                  <CustomBadge label={`HP ${character.hitPoints}/${character.maxHitPoints}`} variant="outline" color="red" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
+                  {/* AC Pill */}
+                  <CustomBadge label={`AC ${character.armorClass}`} variant="outline" color="yellow" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
+                  {/* Inspiration Pill */}
+                  <CustomBadge label={`Inspirations: ${character.inspiration ?? 0}`} variant="outline" color="violet" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
+                </Group>
+              )}
+            </Stack>
+          </Group>
+        </Grid.Col>
+
+        {/* Right side: XP progress card (only if character is selected) */}
+        {character && (
+          <Grid.Col span={{ base: 12, md: 5 }}>
+            <Box style={{ width: "100%" }}>
+              <XpProgressCard
+                experience={character.experience}
+                containerStyle={{
+                  background: "rgba(255, 255, 255, 0.015)",
+                  border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.05))",
+                  borderRadius: "12px",
+                  padding: "12px 16px",
+                }}
+              />
+            </Box>
+          </Grid.Col>
+        )}
+      </Grid>
+
+      {/* Subtle Divider before actions */}
+      <Divider
+        my="lg"
+        style={{
+          borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+        }}
+      />
+
+      {/* Bottom Actions Row */}
       <Group
-        mt="md"
         gap="md"
-        justify="space-between"
-        align={isMobile ? "flex-start" : "center"}
+        justify={isMobile ? "stretch" : "flex-end"}
         wrap={isMobile ? "wrap" : "nowrap"}
+        style={{ width: "100%" }}
       >
-        <Group align="center" gap="md" style={{ flex: 1, minWidth: 0 }}>
-          <ThemeIcon
-            size={58}
-            radius="xl"
-            variant="gradient"
-            gradient={{
-              from: "var(--theme-color-accent-primary, #7c3aed)",
-              to: "var(--theme-color-accent-secondary, #06b6d4)",
-            }}
-            styles={{
-              root: {
-                boxShadow: "var(--theme-glow-shadow-primary)",
-              }
-            }}
-          >
-            <Text fw={900} size="xl" style={{ color: "#fff" }}>
-              {character?.name?.charAt(0) ?? "?"}
-            </Text>
-          </ThemeIcon>
-          <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-            <Text
-              size="md"
-              className="narrative-title"
-              style={{
-                color: "var(--theme-color-text-primary, #fff)",
-              }}
-            >
-              {character?.name ?? "No Character Selected"}
-            </Text>
-            <Text size="xs" style={{ color: "var(--theme-color-text-secondary, rgba(255,255,255,0.6))" }}>
-              {character
-                ? `${character.race ?? ""} • ${character.className ?? ""} (Level ${character.level ?? 1})`
-                : "Select a character to initialize your adventure!"}
-            </Text>
-          </Stack>
-        </Group>
-
-        <Group
-          gap="sm"
-          style={{
-            flexShrink: 0,
-            width: isMobile ? "100%" : "auto",
-            justifyContent: isMobile ? "flex-start" : "flex-end",
-          }}
-        >
-          {character ? (
-            <>
-              <Button
-                size="sm"
-                className="glass-btn-secondary"
-                onClick={onSelectCharacter}
-                style={{ height: "38px" }}
-              >
-                Change Hero
-              </Button>
-              <Button
-                size="sm"
-                className="glass-btn-primary"
-                onClick={onProfile}
-                style={{ height: "38px" }}
-              >
-                Enter Profile
-              </Button>
-            </>
-          ) : (
+        {character ? (
+          <>
             <Button
-              size="md"
-              className="glass-btn-primary"
+              size="sm"
+              className="glass-btn-secondary"
               onClick={onSelectCharacter}
               style={{
-                height: "44px",
-                fontWeight: 700,
-                letterSpacing: "0.5px",
-                paddingLeft: "24px",
-                paddingRight: "24px",
+                height: "40px",
+                borderRadius: "8px",
+                flex: isMobile ? 1 : "unset",
               }}
             >
-              Select Character
+              Change Hero
             </Button>
-          )}
-        </Group>
+            <Button
+              size="sm"
+              className="glass-btn-primary"
+              onClick={onProfile}
+              style={{
+                height: "40px",
+                borderRadius: "8px",
+                flex: isMobile ? 1 : "unset",
+                fontWeight: 700,
+              }}
+            >
+              Enter Profile
+            </Button>
+          </>
+        ) : (
+          <Button
+            size="md"
+            className="glass-btn-primary"
+            onClick={onSelectCharacter}
+            style={{
+              height: "44px",
+              fontWeight: 700,
+              letterSpacing: "0.5px",
+              paddingLeft: "24px",
+              paddingRight: "24px",
+              width: isMobile ? "100%" : "auto",
+              borderRadius: "8px",
+            }}
+          >
+            Select Character
+          </Button>
+        )}
       </Group>
-
-      {character && (
-        <Box mt="lg">
-          <XpProgressCard experience={character.experience} />
-        </Box>
-      )}
 
       {characterSelector}
     </Paper>
