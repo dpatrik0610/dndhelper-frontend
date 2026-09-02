@@ -8,7 +8,7 @@ import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/c
 import { SectionColor } from "@appTypes/SectionColor";
 import { useNoteStore } from "@store/note/noteStore";
 import type { Note } from "@appTypes/Note";
-import { AddNoteModal } from "@features/profile/components/AddNoteModal";
+import { AddNoteModal } from "@features/notes/components/AddNoteModal";
 import { EditNoteModal } from "./components/EditNoteModal";
 import { NotesPanel } from "./components/NotesPanel";
 import { useIsMobile } from "@hooks/useIsMobile";

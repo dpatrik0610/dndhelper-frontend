@@ -47,7 +47,6 @@ import { SessionManager } from "./SessionManager/SessionManager";
 import { BackupManager } from "./BackupManager/BackupManager";
 import { InitiativeTracker } from "./InitiativeTracker/InitiativeTracker";
 import { RuleManager } from "./RuleManager/RuleManager";
-import { DMCharacterDashboard } from "./DMCharacterManager/DMCharacterDashboard";
 import { EncounterRoomManager } from "./EncounterRoomManager/EncounterRoomManager";
 import { ShopManager } from "./ShopManager/ShopManager";
 import styles from "@styles/AdminDashboard.module.css";
@@ -70,7 +69,6 @@ export const AdminDashboard: React.FC = () => {
   }, [selectedCampaignId]);
 
   const navItems: NavItem[] = [
-    { icon: IconUsersGroup, label: "Characters", key: "CharactersManager", component: <DMCharacterDashboard /> },
     { icon: IconBox, label: "Inventories", key: "InventoryDashboard", component: <InventoryDashboard /> },
     { icon: IconSettings, label: "Campaigns", key: "CampaignManager", component: <CampaignManager /> },
     { icon: IconWand, label: "Spells", key: "SpellsManager", component: <SpellForm /> },
