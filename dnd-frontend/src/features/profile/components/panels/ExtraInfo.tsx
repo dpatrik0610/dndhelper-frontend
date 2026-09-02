@@ -1,6 +1,5 @@
 import { ExpandableSection } from "@components/ExpandableSection";
-import { StatBox } from "./StatBox";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { StatBox } from "@features/profile/components/StatBox";
 import { Group, Stack, Text } from "@mantine/core";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useCurrentCharacter } from "@store/character/characterSelectors";

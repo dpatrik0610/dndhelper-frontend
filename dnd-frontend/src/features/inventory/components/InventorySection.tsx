@@ -1,13 +1,11 @@
 import { useMemo, type ReactNode } from "react";
 import { Badge, Group, Text } from "@mantine/core";
 import { ExpandableSection } from "@components/ExpandableSection";
-import { SectionColor } from "@appTypes/SectionColor";
 
 interface InventorySectionProps {
   title: string;
   matchCount: number;
   hasFilters: boolean;
-  color?: SectionColor;
   children: ReactNode;
 }
 
@@ -15,7 +13,6 @@ export function InventorySection({
   title,
   matchCount,
   hasFilters,
-  color = SectionColor.Grape,
   children,
 }: InventorySectionProps) {
   const hasMatches = matchCount > 0;

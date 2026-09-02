@@ -2,7 +2,7 @@ import { Card, Group, Title, Select, Box, Stack, Badge, Text, ActionIcon, Button
 import { IconSearch, IconDotsVertical, IconCoins } from "@tabler/icons-react";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { SectionColor } from "@appTypes/SectionColor";
-import { CharacterCurrencyArea } from "@features/profile/components/CharacterCurrencyArea";
+import { CharacterCurrencyArea } from "@features/profile/components/header/CharacterCurrencyArea";
 
 interface AdventureBagProps {
     activeCharacter: any;

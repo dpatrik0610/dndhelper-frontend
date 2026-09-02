@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box } from "@mantine/core";
 import { motion, AnimatePresence } from "framer-motion";
-import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
 import { MagicThemeSelector } from "@components/common/MagicThemeSelector";
 
@@ -27,10 +26,9 @@ interface ReforgedPortalPageProps {
 
 export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const token = useToken();
 
-  const { sidebarTheme, setSidebarTheme } = useUiStore();
+  const { sidebarTheme } = useUiStore();
 
   // Unified panel toggler state
   const [activePanel, setActivePanel] = useState<"login" | "register">(mode);

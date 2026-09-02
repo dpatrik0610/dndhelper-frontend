@@ -1,6 +1,6 @@
 import { SimpleGrid, Tooltip, Divider, Text } from "@mantine/core";
 import { ExpandableSection } from "@components/ExpandableSection";
-import { StatBox } from "./StatBox";
+import { StatBox } from "@features/profile/components/StatBox";
 import { IconExclamationCircle } from "@tabler/icons-react";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { SectionColor } from "@appTypes/SectionColor";

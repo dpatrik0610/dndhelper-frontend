@@ -20,7 +20,7 @@ const getInitialSidebarTheme = (): SidebarThemeVariant => {
   return stored ?? "sunset";
 };
 
-export const useUiStore = create<UiState & UiActions>((set, get) => ({
+export const useUiStore = create<UiState & UiActions>((set) => ({
   sidebarTheme: getInitialSidebarTheme(),
   loadingSettings: false,
 

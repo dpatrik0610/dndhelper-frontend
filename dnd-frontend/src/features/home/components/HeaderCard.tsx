@@ -102,7 +102,7 @@ export function HeaderCard({
                 }}
               >
                 {character
-                  ? `${character.race ?? ""} • ${character.characterClass || character.className || ""} (Level ${character.level ?? 1})`
+                  ? `${character.race ?? ""} • ${character.characterClass || ""} (Level ${character.level ?? 1})`
                   : "Select a character to initialize your adventure!"}
               </Text>
 

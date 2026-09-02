@@ -1,8 +1,7 @@
 import { Card, Grid, Text, ActionIcon, Group, Badge } from "@mantine/core";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import CustomBadge from "@components/common/CustomBadge";
-import { SectionColor } from "@appTypes/SectionColor";
-import { IconTrash, IconArrowsRightLeft, IconZoom, IconStarFilled } from "@tabler/icons-react";
+import { IconTrash, IconArrowsRightLeft, IconZoom } from "@tabler/icons-react";
 import { useState } from "react";
 import { EquipmentModal } from "./EquipmentModal";
 import { useIsMobile } from "@hooks/useIsMobile";

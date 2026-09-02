@@ -10,7 +10,7 @@ import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { MarkdownRenderer } from "@components/MarkdownRender";
-import { AddFeatureModal } from "./AddFeatureModal";
+import { AddFeatureModal } from "../modals/AddFeatureModal";
 
 export function FeaturesPanel() {
   const character = useCurrentCharacter();

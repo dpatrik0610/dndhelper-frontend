@@ -163,11 +163,6 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
         title={currentInventory.name || "Undefined Inventory"}
         matchCount={filteredItems.length}
         hasFilters={hasFilters}
-        color={
-          currentInventory.name?.includes("Equipment")
-            ? SectionColor.Orange
-            : SectionColor.Grape
-        }
       >
         {viewMode === "list" ? (
           <InventoryItemsList

@@ -22,10 +22,8 @@ import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { MarkdownRenderer } from "@components/MarkdownRender";
-import { useIsMobile } from "@hooks/useIsMobile";
 
 export function FeaturesSection({ noBox = false }: { noBox?: boolean }) {
-  const isMobile = useIsMobile();
   const { characterForm, setCharacterForm } = useCharacterFormStore();
 
   const features = useMemo(() => characterForm.features ?? [], [characterForm.features]);

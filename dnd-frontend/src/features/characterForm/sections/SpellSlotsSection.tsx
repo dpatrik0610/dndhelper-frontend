@@ -1,4 +1,4 @@
-import { Stack, Group, Text, Box, SimpleGrid } from "@mantine/core";
+import { Stack, Group, Text, SimpleGrid } from "@mantine/core";
 import { IconWand } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";

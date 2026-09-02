@@ -1,8 +1,8 @@
-import { AddConditionModal } from "./AddConditionModal";
-import { HpModal } from "./HpModal";
-import { MoneyModal } from "./MoneyModal";
-import { RollModal } from "./RollModal";
-import { ConditionDetailsModal } from "./ConditionDetailsModal";
+import { AddConditionModal } from "@features/profile/components/modals/AddConditionModal";
+import { HpModal } from "@features/profile/components/modals/HpModal";
+import { MoneyModal } from "@features/profile/components/modals/MoneyModal";
+import { RollModal } from "@features/profile/components/modals/RollModal";
+import { ConditionDetailsModal } from "@features/profile/components/modals/ConditionDetailsModal";
 
 interface HeaderModalsProps {
   addConditionOpened: boolean;

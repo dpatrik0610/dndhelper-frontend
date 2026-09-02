@@ -1,7 +1,7 @@
-import { IconSparkles, IconSearch } from "@tabler/icons-react";
+import { IconSearch } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
-import { StatBox } from "./StatBox";
+import { StatBox } from "@features/profile/components/StatBox";
 import {
   SimpleGrid,
   Loader,
@@ -20,7 +20,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSpellActions } from "@store/spell/spellSelectors";
 import CustomBadge from "@components/common/CustomBadge";
 
-import { SpellModal } from "./SpellModal";
+import { SpellModal } from "@features/profile/components/modals/SpellModal";
 import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
 import { useIsMobile } from "@hooks/useIsMobile";
 

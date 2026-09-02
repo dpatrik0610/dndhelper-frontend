@@ -514,7 +514,7 @@ export default function SettingsPage() {
                                       )}
                                     </Group>
                                     <Text size="xs" c="dimmed" truncate>
-                                      Lvl {char.level} • {char.race} • {char.characterClass || char.className}
+                                      Lvl {char.level} • {char.race} • {char.characterClass}
                                     </Text>
                                   </Stack>
                                 </Group>

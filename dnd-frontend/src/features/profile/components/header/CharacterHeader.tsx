@@ -9,7 +9,6 @@ import { getCondition } from "@services/conditionService";
 
 import { CharacterCurrencyArea } from "./CharacterCurrencyArea";
 import { showNotification } from "@components/Notification/Notification";
-import { SwitchCharacterButton } from "./SwitchCharacterButton";
 import { useIsMobile } from "@hooks/useIsMobile";
 
 import { AvatarHpCrest } from "./AvatarHpCrest";

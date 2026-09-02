@@ -1,6 +1,5 @@
 import { Box, Avatar, ThemeIcon } from "@mantine/core";
 import { IconAward } from "@tabler/icons-react";
-import { useIsMobile } from "@hooks/useIsMobile";
 
 interface AvatarHpCrestProps {
   character: any;

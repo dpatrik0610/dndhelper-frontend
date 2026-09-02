@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Button, Stack, Text, Select, SegmentedControl, Group } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCurrencyActions } from "@store/character/characterSelectors";
 import { useToken } from "@store/auth/authSelectors";

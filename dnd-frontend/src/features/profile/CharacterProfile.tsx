@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
-import { CharacterHeader } from "./components/CharacterHeader";
+import { CharacterHeader } from "./components/header/CharacterHeader";
 
 import "./styles/CharacterProfile.styles.css"
 import { SectionColor } from "@appTypes/SectionColor";
@@ -20,13 +20,13 @@ import type { Campaign } from "@appTypes/Campaign";
 import { useIsMobile } from "@hooks/useIsMobile";
 
 // Lazy-loaded sub-panels to optimize initial bundle size, memory footprint, and rendering latency on mobile
-const AbilityScores = lazy(() => import("./components/AbilityScores").then(m => ({ default: m.AbilityScores })));
-const CombatStats = lazy(() => import("./components/CombatStats").then(m => ({ default: m.CombatStats })));
-const ExperienceTableCard = lazy(() => import("./components/ExperienceTableCard").then(m => ({ default: m.ExperienceTableCard })));
-const SpellsPanel = lazy(() => import("./components/SpellsPanel").then(m => ({ default: m.SpellsPanel })));
-const SpellCastingBlock = lazy(() => import("./components/SpellCastingBlock").then(m => ({ default: m.SpellCastingBlock })));
-const ExtraInfo = lazy(() => import("./components/ExtraInfo").then(m => ({ default: m.ExtraInfo })));
-const FeaturesPanel = lazy(() => import("./components/FeaturesPanel").then(m => ({ default: m.FeaturesPanel })));
+const AbilityScores = lazy(() => import("./components/panels/AbilityScores").then(m => ({ default: m.AbilityScores })));
+const CombatStats = lazy(() => import("./components/panels/CombatStats").then(m => ({ default: m.CombatStats })));
+const ExperienceTableCard = lazy(() => import("./components/panels/ExperienceTableCard").then(m => ({ default: m.ExperienceTableCard })));
+const SpellsPanel = lazy(() => import("./components/panels/SpellsPanel").then(m => ({ default: m.SpellsPanel })));
+const SpellCastingBlock = lazy(() => import("./components/panels/SpellCastingBlock").then(m => ({ default: m.SpellCastingBlock })));
+const ExtraInfo = lazy(() => import("./components/panels/ExtraInfo").then(m => ({ default: m.ExtraInfo })));
+const FeaturesPanel = lazy(() => import("./components/panels/FeaturesPanel").then(m => ({ default: m.FeaturesPanel })));
 const Inventory = lazy(() => import("@features/inventory/Inventory").then(m => ({ default: m.Inventory })));
 
 function useCampaignName(campaignId: string | null) {

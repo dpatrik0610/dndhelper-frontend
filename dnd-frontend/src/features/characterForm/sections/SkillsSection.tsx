@@ -1,10 +1,10 @@
 import {
-  Group, Stack, TextInput, ActionIcon, Text, Switch, Box, Divider, Button
+  Group, Stack, TextInput, ActionIcon, Text, Box, Divider, Button
 } from "@mantine/core";
 import { useState, useEffect, useMemo } from "react";
 
 import {
-  IconAutomaticGearbox, IconTrash, IconPlus, IconStarFilled, IconX,
+  IconAutomaticGearbox, IconTrash, IconPlus, IconStarFilled,
 } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
