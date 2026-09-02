@@ -734,100 +734,187 @@
   pointer-events: none;
 }
 
-/* Flat, hardware-accelerated glowing circle embers */
+/* Flat, hardware-accelerated base particle containers (invisible wrappers) */
 .portal-particle {
   position: absolute;
-  background: var(--theme-color-accent-primary, #f59e0b);
-  border-radius: 50%;
-  box-shadow: 0 0 6px var(--theme-color-accent-primary, rgba(245, 158, 11, 0.5));
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
   opacity: 0;
   will-change: transform, opacity;
   backface-visibility: hidden;
   animation: floatUp infinite linear;
-  transition: background 0.5s ease, border-radius 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Pseudo-element carrying the actual procedurally generated CSS shapes */
+.portal-particle::after {
+  content: "" !important;
+  display: block;
+  width: 6px;
+  height: 6px;
+  box-sizing: border-box;
 }
 
 /* 🌀 Theme-Specific Background Particle Customizations (Desktop Only) */
 
-/* 🌌 Midnight Arcane: Classic rising purple magical stars */
+/* 🌌 Midnight Arcane: Twinkling 4-point magical stars (Custom clip-path polygon) */
 .theme-midnight-arcane .portal-particle {
   animation-name: floatUp;
-  background: var(--theme-color-accent-primary);
-  box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+}
+.theme-midnight-arcane .portal-particle::after {
+  width: 8px;
+  height: 8px;
+  background: #a855f7;
+  clip-path: polygon(50% 0%, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0% 50%, 39% 35%);
+  filter: drop-shadow(0 0 5px #06b6d4);
 }
 
-/* 💛 Cyber-Noir / Sunset: Fast-rising amber circuit spark nodes */
+/* 💛 Cyber-Noir / Sunset: Glowing 3D rotated cyber diamonds */
 .theme-cyber-noir .portal-particle {
   animation-name: floatUp;
+}
+.theme-cyber-noir .portal-particle::after {
+  width: 5px;
+  height: 5px;
   background: #f59e0b;
-  box-shadow: 0 0 6px #f59e0b;
+  transform: rotate(45deg);
+  filter: drop-shadow(0 0 4px #10b981);
 }
 
-/* 🌿 Druid Grove: Gently swaying forest pollen spores */
+/* 🌿 Druid Grove: Swirling organic curved forest leaves */
 .theme-druid-grove .portal-particle {
   animation-name: floatSway;
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+.theme-druid-grove .portal-particle::after {
+  width: 8px;
+  height: 5px;
+  background: linear-gradient(135deg, #10b981, #22c55e);
+  border-radius: 80% 0 55% 50%; /* Curved organic leaf shape! */
+  transform: rotate(-15deg);
+  filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.4));
 }
 
-/* 🩸 Crimson Vampire: Blood embers floating slowly up */
+/* 🩸 Crimson Vampire: Rising blood droplets (Teardrop curves) */
 .theme-crimson-vampire .portal-particle {
   animation-name: floatUp;
+}
+.theme-crimson-vampire .portal-particle::after {
+  width: 6px;
+  height: 6px;
   background: #ef4444;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+  border-radius: 0 50% 50% 50%; /* Teardrop shape! */
+  transform: rotate(-45deg); /* Point straight up! */
+  filter: drop-shadow(0 0 6px #ef4444);
 }
 
-/* ❄️ Frost Glacier: Falling crystalline snowflakes */
+/* ❄️ Frost Glacier: Falling crystalline snowflakes (Soft translucent emojis) */
 .theme-frost-glacier .portal-particle {
   animation-name: floatDown;
-  background: #ffffff;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+.theme-frost-glacier .portal-particle::after {
+  content: "❄️" !important;
+  font-size: 14px;
+  width: auto;
+  height: auto;
+  background: transparent !important;
+  border-radius: unset !important;
+  clip-path: none !important;
+  opacity: 0.50; /* Beautiful soft snow opacity! */
+  filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.5));
 }
 
-/* 🌸 Feywild Bloom: Gently swaying cherry blossom petals (Elongated custom border radius) */
+/* 🌸 Feywild Bloom: Gently swaying falling cherry blossom petals (Soft translucent emojis) */
 .theme-feywild-bloom .portal-particle {
   animation-name: floatSway;
-  background: #f472b6;
-  box-shadow: 0 0 6px rgba(244, 114, 182, 0.5);
-  border-radius: 50% 0 50% 0 !important; /* Petal shape! */
+}
+.theme-feywild-bloom .portal-particle::after {
+  content: "🌸" !important;
+  font-size: 14px;
+  width: auto;
+  height: auto;
+  background: transparent !important;
+  border-radius: unset !important;
+  clip-path: none !important;
+  opacity: 0.55; /* Gorgeous, subtle transparency! */
+  filter: drop-shadow(0 0 4px rgba(244, 114, 182, 0.45));
 }
 
-/* 💚 Toxic Spore: Swirling poisonous fungal spores */
+/* 💚 Toxic Spore: Highly glowing radio-acid spores */
 .theme-toxic-spore .portal-particle {
   animation-name: floatSway;
-  background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
+}
+.theme-toxic-spore .portal-particle::after {
+  width: 5px;
+  height: 5px;
+  background: #a3e635;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 6px #22c55e) drop-shadow(0 0 12px #22c55e);
 }
 
-/* 🔮 Eldritch Void: Twinkling void anomalies drifting slowly */
+/* 🔮 Eldritch Void: Twinkling cosmic alien fading spirals drifting slowly */
 .theme-eldritch-void .portal-particle {
   animation-name: floatSway;
-  background: #d946ef;
-  box-shadow: 0 0 10px #d946ef;
+}
+.theme-eldritch-void .portal-particle::after {
+  width: 14px;
+  height: 14px;
+  background: conic-gradient(from 0deg, transparent 0%, #d946ef 45%, transparent 55%, #6366f1 90%, transparent 100%) !important;
+  border-radius: 50%;
+  animation: spinSpiral 6s linear infinite, fadeSpirals 8s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 6px #d946ef);
 }
 
-/* ⚙️ Clockwork Brass: Fast-rising mechanical fire sparks (Square/ash-like cogs) */
+@keyframes spinSpiral {
+  100% { transform: rotate(-360deg); }
+}
+
+@keyframes fadeSpirals {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.95; }
+}
+
+/* ⚙️ Clockwork Brass: Whirring, spinning mechanical cogs (8-point mechanical gear cogs) */
 .theme-clockwork-brass .portal-particle {
   animation-name: floatUp;
+}
+.theme-clockwork-brass .portal-particle::after {
+  width: 8px;
+  height: 8px;
   background: #ea580c;
-  box-shadow: 0 0 8px #ea580c;
-  border-radius: 1px !important; /* Square spark embers! */
+  clip-path: polygon(30% 0%, 70% 0%, 70% 30%, 100% 30%, 100% 70%, 70% 70%, 70% 100%, 30% 100%, 30% 70%, 0% 70%, 0% 30%, 30% 30%); /* Mechanical cross cog shape! */
+  animation: spinClockwork 8s linear infinite;
+  filter: drop-shadow(0 0 5px #ea580c);
 }
 
-/* 🌊 Deep Ocean: Wobbling bioluminescent hollow air bubbles */
+@keyframes spinClockwork {
+  100% { transform: rotate(360deg); }
+}
+
+/* 🌊 Deep Ocean: Bioluminescent rising undersea air bubbles (Hollow reflection rings) */
 .theme-deep-ocean .portal-particle {
   animation-name: floatSway;
+}
+.theme-deep-ocean .portal-particle::after {
+  width: 9px;
+  height: 9px;
   background: transparent !important;
-  border: 1px solid #0284c7;
-  box-shadow: 0 0 6px rgba(2, 132, 199, 0.6);
+  border: 1px solid #38bdf8;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.5));
+  box-shadow: inset 0 0 3px rgba(2, 132, 199, 0.5);
 }
 
-/* 🕶️ Darkvision: Monochromatic ash flakes drifting listlessly */
+/* 🕶️ Darkvision: Spectral monochromatic ash shards drifting listlessly */
 .theme-darkvision .portal-particle {
   animation-name: floatSway;
-  background: #9ca3af;
-  box-shadow: 0 0 4px rgba(156, 163, 175, 0.4);
-  border-radius: 30% 70% 70% 30% / 50% 60% 40% 50% !important; /* Ragged ash/smoke shape! */
+}
+.theme-darkvision .portal-particle::after {
+  width: 5px;
+  height: 5px;
+  background: #6b7280;
+  clip-path: polygon(20% 0%, 80% 20%, 100% 80%, 40% 100%, 0% 50%); /* Irregular geometric shard! */
+  opacity: 0.5;
+  filter: drop-shadow(0 0 4px rgba(156, 163, 175, 0.3));
 }
 
 
@@ -889,6 +976,90 @@
     opacity: 0;
   }
 }
+
+/* ==========================================================================
+   ⚙️ Fixed Rotating Background Cogs (Clockwork Brass Theme Desktop Only)
+   ========================================================================== */
+
+.fixed-cogs-container {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* Sits subtly behind panels and cards but on top of the backdrop glow */
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.12; /* Soft background overlay that doesn't distract from the character sheet */
+}
+
+/* ⚙️ High-Poly Circular Gears (No jagged low-poly clip-paths!) */
+.fixed-cog {
+  position: absolute;
+  background: transparent !important;
+  border: 14px dashed #ea580c; /* Generates perfectly rounded, smooth teeth! */
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+/* Connect the inner half of the dashes into a solid circular gear rim */
+.fixed-cog::before {
+  content: "";
+  position: absolute;
+  inset: -10px; /* Fits exactly with the dashed border teeth */
+  background: transparent !important;
+  border: 10px solid #ea580c; /* Solid outer metal rim */
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+/* Hollow out the gear interior and render an 8-spoke inner wheel and center hub shaft */
+.fixed-cog::after {
+  content: "";
+  position: absolute;
+  inset: 4px; /* Plushed cleanly inside the inner gear rim */
+  border-radius: 50%;
+  border: 4px solid #ea580c; /* Inner rim */
+  background: 
+    radial-gradient(circle at center, #050507 0%, #050507 18%, #ea580c 18%, #ea580c 32%, transparent 32%), /* Central Hub & axle void */
+    linear-gradient(90deg, transparent 46%, #ea580c 46%, #ea580c 54%, transparent 54%), /* 8-spoke cross bars */
+    linear-gradient(0deg, transparent 46%, #ea580c 46%, #ea580c 54%, transparent 54%),
+    linear-gradient(45deg, transparent 47%, #ea580c 47%, #ea580c 53%, transparent 53%),
+    linear-gradient(-45deg, transparent 47%, #ea580c 47%, #ea580c 53%, transparent 53%),
+    #050507; /* Dark hollow window background */
+  box-sizing: border-box;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8);
+}
+
+.cog-large {
+  width: 320px;
+  height: 320px;
+  left: -80px;
+  bottom: -80px;
+  animation: spinClockwise 45s linear infinite;
+}
+
+.cog-medium {
+  width: 200px;
+  height: 200px;
+  left: 192px; /* Positioned to mesh perfectly with large gear rotating in the opposite direction! */
+  bottom: -50px;
+  animation: spinCounterClockwise 30s linear infinite;
+}
+
+.cog-small {
+  width: 140px;
+  height: 140px;
+  right: -30px;
+  top: -30px;
+  animation: spinClockwise 20s linear infinite;
+}
+
+@keyframes spinClockwise {
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spinCounterClockwise {
+  100% { transform: rotate(-360deg); }
+}
+
 
 /* ==========================================================================
    🌀 Themed Loaders (Global Style Overrides & Glow Effects)

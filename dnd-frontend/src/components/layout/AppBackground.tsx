@@ -59,6 +59,16 @@ export function AppBackground() {
   return (
     <Box className={`portal-background ${activeThemeClass}`} style={{ position: "fixed", pointerEvents: "none" }}>
       <Box className="portal-backdrop-glow" />
+      
+      {/* Fixed background gears spinning in place (Steampunk Theme Desktop Only) */}
+      {sidebarTheme === "steampunk" && !isMobile && (
+        <Box className="fixed-cogs-container">
+          <Box className="fixed-cog cog-large" />
+          <Box className="fixed-cog cog-medium" />
+          <Box className="fixed-cog cog-small" />
+        </Box>
+      )}
+
       <Box className="portal-particles">
         {particles.map((p) => (
           <Box
