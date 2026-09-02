@@ -234,7 +234,7 @@ export default function SettingsPage() {
                           : "transparent",
                         border: `1px solid ${isActive ? "var(--theme-border-glow, rgba(255, 255, 255, 0.15))" : "transparent"}`,
                         color: isActive
-                          ? "var(--theme-color-accent-primary, #f59e0b)"
+                          ? "#121214"
                           : "var(--theme-color-text-secondary, rgba(255,255,255,0.7))",
                         borderRadius: "8px",
                         fontWeight: isActive ? 700 : 500,
@@ -269,7 +269,7 @@ export default function SettingsPage() {
                           ? "var(--theme-border-glow, rgba(255, 255, 255, 0.15))"
                           : "transparent",
                         color: isActive
-                          ? "var(--theme-color-accent-primary, #f59e0b)"
+                          ? "#121214"
                           : "var(--theme-color-text-secondary, rgba(255,255,255,0.7))",
                         borderRadius: "10px",
                         fontWeight: isActive ? 700 : 500,

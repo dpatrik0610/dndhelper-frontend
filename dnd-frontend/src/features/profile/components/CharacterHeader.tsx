@@ -202,7 +202,7 @@ export function CharacterHeader() {
                   order={1}
                   className="narrative-title"
                   style={{
-                    color: "#fff",
+                    color: "var(--theme-color-text-primary, #ffffff)",
                     fontSize: isMobile ? "20px" : "26px",
                     textShadow: "0 2px 4px rgba(0,0,0,0.5)",
                     lineHeight: 1.2,
@@ -409,7 +409,7 @@ export function CharacterHeader() {
                           borderRadius: "50%",
                           background: "var(--theme-color-accent-primary, #f59e0b)",
                           border: "1.5px solid #fff",
-                          color: "#fff",
+                          color: "#121214",
                           fontSize: "10px",
                           fontWeight: 800,
                           display: "flex",

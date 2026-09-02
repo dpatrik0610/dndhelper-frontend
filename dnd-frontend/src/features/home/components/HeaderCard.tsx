@@ -76,7 +76,7 @@ export function HeaderCard({
                   },
                 }}
               >
-                <Text fw={900} size="2rem" style={{ color: "#fff" }}>
+                <Text fw={900} size="2rem" style={{ color: "var(--theme-color-text-primary, #ffffff)" }}>
                   {character?.name?.charAt(0) ?? "?"}
                 </Text>
               </ThemeIcon>

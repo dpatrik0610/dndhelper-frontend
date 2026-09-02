@@ -238,8 +238,8 @@ export function AbilityScores() {
                         {isProf ? (
                           <span
                             style={{
-                              color: "var(--theme-color-accent-primary, #f59e0b)",
-                              filter: "drop-shadow(0 0 4px var(--theme-color-accent-primary, rgba(245, 158, 11, 0.4)))",
+                              color: "#121214",
+                              filter: "drop-shadow(0 0 2px rgba(0, 0, 0, 0.2))",
                               fontSize: "14px",
                               cursor: "default",
                             }}
@@ -256,7 +256,7 @@ export function AbilityScores() {
                           truncate="end"
                           style={{
                             color: isProf
-                              ? "var(--theme-color-text-primary, #ffffff)"
+                              ? "#121214"
                               : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
                           }}
                         >
@@ -273,6 +273,13 @@ export function AbilityScores() {
                             fontWeight: isProf ? 700 : 400,
                             padding: "2px 4px",
                             height: "auto",
+                            ...(isProf ? {
+                              background: "rgba(18, 18, 20, 0.15)",
+                              border: "1px solid rgba(18, 18, 20, 0.18)",
+                              color: "#121214",
+                              textShadow: "none",
+                              boxShadow: "none",
+                            } : undefined),
                           }}
                         />
                       </Group>
@@ -283,7 +290,7 @@ export function AbilityScores() {
                         fw={700}
                         style={{
                           color: isProf
-                            ? "var(--theme-color-accent-primary, #f59e0b)"
+                            ? "#121214"
                             : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
                         }}
                       >

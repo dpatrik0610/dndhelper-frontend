@@ -2,6 +2,15 @@
    🌌 Centralized Theme CSS Variables
    ========================================================================== */
 
+/* 
+   ⚠️ ACCESSIBILITY MANDATE:
+   If any future themes employ light backgrounds, you must override:
+   - --theme-color-text-primary to be a dark, highly-contrasting color (e.g., #111827)
+   - --theme-color-text-secondary to be a dark, readable tone (e.g., #4b5563)
+   - --theme-text-shadow (or remove it via "none") to prevent illegible neon halo effects.
+   This guarantees that light backgrounds never suffer from unreadable light text.
+*/
+
 /* 💜 Candidate A: Midnight Arcane */
 .theme-midnight-arcane {
   --theme-bg-base: rgba(15, 12, 35, 0.14);
@@ -128,6 +137,7 @@
   --theme-glow-shadow-secondary: 0 0 15px rgba(226, 232, 240, 0.25);
   
   --theme-gradient-primary: linear-gradient(135deg, #38bdf8, #cbd5e1);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(56, 189, 248, 0.85), rgba(226, 232, 240, 0.85)); /* Gorgeous 15% transparent highlight */
   --theme-gradient-active: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(226, 232, 240, 0.2));
 }
 

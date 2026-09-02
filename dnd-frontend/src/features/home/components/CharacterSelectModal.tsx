@@ -114,7 +114,7 @@ export function CharacterSelectModal({
           transition: "all 0.2s ease",
           "&:hover": {
             background: "var(--theme-bg-hover, rgba(255, 255, 255, 0.1))",
-            color: "#fff",
+            color: "var(--theme-color-text-primary, #ffffff)",
           }
         }
       }}
@@ -181,7 +181,7 @@ export function CharacterSelectModal({
                        border: "2px solid var(--theme-color-accent-primary)",
                        background: char.imageUrl ? "transparent" : "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
                        boxShadow: "var(--theme-glow-shadow-primary)",
-                       color: "#fff",
+                       color: "#121214",
                        fontWeight: 900,
                        fontSize: "1.5rem",
                      }}
@@ -198,8 +198,8 @@ export function CharacterSelectModal({
                           letterSpacing: "0.3px",
                           fontSize: "1.25rem",
                           color: isSelected
-                            ? "var(--theme-color-text-glow, #fff)"
-                            : "var(--theme-color-text-primary, #fff)",
+                            ? "var(--theme-color-text-glow, #ffffff)"
+                            : "var(--theme-color-text-primary, #ffffff)",
                           textShadow: isSelected
                             ? "0 0 10px var(--theme-border-glow)"
                             : "none",
@@ -216,7 +216,7 @@ export function CharacterSelectModal({
                           style={{
                             background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
                             border: "none",
-                            color: "#fff",
+                            color: "#121214",
                             fontWeight: 800,
                             boxShadow: "var(--theme-glow-shadow-primary)",
                           }}
@@ -280,7 +280,7 @@ export function CharacterSelectModal({
           style={{
             background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
             border: "none",
-            color: "#fff",
+            color: "#121214",
             boxShadow: "var(--theme-glow-shadow-primary)",
             fontWeight: 700,
             transition: "all 0.2s ease",
