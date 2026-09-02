@@ -5,8 +5,6 @@ import type { SellRequest } from "@appTypes/Shop/Shop";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 
 export function handleSellRequestChange(event: EntityChangeEvent) {
-  // console.log("SellRequest change event received:", event);
-
   const adminShopStore = useAdminShopStore.getState();
 
   const currentUser = useAuthStore.getState();

@@ -26,7 +26,6 @@ export async function transferCurrenciesToCharacter(characterId: string, currenc
 
     });
     
-    // console.log('API call successful, response:', response);
     return;
   } catch (error) {
     console.error('API call failed:', error);

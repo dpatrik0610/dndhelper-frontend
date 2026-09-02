@@ -6,8 +6,6 @@ import type { Shop } from "@appTypes/Shop/Shop";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 
 export function handleShopChange(event: EntityChangeEvent) {
-  // console.log("Shop change event received:", event);
-
   const shopStore = useShopStore.getState();
   const adminShopStore = useAdminShopStore.getState();
 

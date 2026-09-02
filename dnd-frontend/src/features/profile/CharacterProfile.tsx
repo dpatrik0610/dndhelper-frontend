@@ -49,7 +49,7 @@ function useCampaignName(campaignId: string | null) {
       catch (err)
       {
         data = null;
-        console.log(err);
+        console.error("Error fetching campaign name in CharacterProfile:", err);
       }
 
       setName(data?.name ?? "Unknown Campaign");

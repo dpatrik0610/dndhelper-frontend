@@ -30,7 +30,7 @@ export async function apiClient<T>(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ message: res.statusText }))
-    console.log('API Request failed at apiClient.ts.')
+    console.error('API Request failed at apiClient.ts:', err)
     const error = new Error(err.message || 'API request failed')
     ;(error as Error & { status?: number }).status = res.status
     throw error

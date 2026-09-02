@@ -77,7 +77,6 @@ export async function createManyEquipment(equipments: Equipment[]): Promise<Equi
  * Update an equipment item by ID.
  */
 export async function updateEquipmentById(id: string, equipment: Equipment): Promise<Equipment> {
-  // console.log(equipment);
   return apiClient(`${baseUrl}/${id}`, {
     method: "PUT",
 

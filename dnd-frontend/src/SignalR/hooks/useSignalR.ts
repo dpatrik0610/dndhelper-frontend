@@ -72,8 +72,6 @@ export const useSignalR = () => {
 
     // Register event handlers BEFORE starting connection so we don't miss early messages
     newConnection.on("ReceiveNotification", (message: SignalRMessage) => {
-      // console.log("📩 Received notification:", message);
-
       showNotification({
         title: `Message from ${message.sender}`,
         message: message.content,
@@ -83,7 +81,6 @@ export const useSignalR = () => {
     });
 
     newConnection.on("EntityChanged", (event: EntityChangeEvent) => {
-      // console.log("🧩 EntityChanged received:", event);
       EntitySyncManager.handleEntityChange(event);
     });
 
@@ -94,7 +91,6 @@ export const useSignalR = () => {
         timestamp: string;
         changes: EntityChangeEvent[];
       }) => {
-        // console.log("📦 EntityBatchChanged received:", batch);
         batch.changes.forEach((event) => {
           EntitySyncManager.handleEntityChange(event);
         });
@@ -103,8 +99,6 @@ export const useSignalR = () => {
 
     newConnection.on("SubtleRoll", (payload: SubtleRollEvent) => {
       if (!isAdminRef.current) return;
-
-      // console.log("SubtleRoll received:", payload);
 
       showNotification({
         title: `Subtle roll from ${payload.characterName}`,

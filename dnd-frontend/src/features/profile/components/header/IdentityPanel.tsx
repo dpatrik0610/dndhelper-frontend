@@ -1,13 +1,11 @@
 import { Box, Stack, Text } from "@mantine/core";
-import { InspirationBox } from "./InspirationBox";
 
 interface IdentityPanelProps {
   character: any;
   isMobile: boolean;
-  onUseInspiration: () => void;
 }
 
-export function IdentityPanel({ character, isMobile, onUseInspiration }: IdentityPanelProps) {
+export function IdentityPanel({ character, isMobile }: IdentityPanelProps) {
   const currentHp = character.hitPoints ?? 0;
   const maxHp = character.maxHitPoints ?? 100;
   const tempHp = character.temporaryHitPoints ?? 0;
@@ -38,11 +36,6 @@ export function IdentityPanel({ character, isMobile, onUseInspiration }: Identit
         >
           {totalHpStr}
         </Text>
-
-        {/* Row 2: Interactive Predefined Inspiration Component */}
-        <Box>
-          <InspirationBox value={character.inspiration} onClick={onUseInspiration} />
-        </Box>
       </Stack>
     </Box>
   );

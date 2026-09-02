@@ -4,8 +4,6 @@ import { useAuthStore } from "@store/auth/authStore";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 
 export function handleCampaignChange(event: EntityChangeEvent) {
-  // console.log("Campaign change:", event);
-
   if (event.action === "activeEncounterChanged") {
     const payload = event.data as { campaignId?: string; activeEncounterId?: string | null };
 

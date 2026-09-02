@@ -167,7 +167,6 @@ export function CharacterHeader() {
             <IdentityPanel
               character={character}
               isMobile={isMobile}
-              onUseInspiration={handleUseInspiration}
             />
             
             <Stack gap="xs" style={{ width: isMobile ? "100%" : "260px", flexShrink: 0 }}>

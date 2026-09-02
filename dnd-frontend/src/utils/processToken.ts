@@ -12,8 +12,6 @@ export const processToken = (token: string) =>{
             username: decoded.username || "",
             roles: decoded.roles || [],
         });
-        
-        // console.log(`Auth data stored in store.`)
     }
     catch(ex) {
         console.error(`Error setting auth data: ${ex}`)
