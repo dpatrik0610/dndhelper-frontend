@@ -37,7 +37,7 @@ import { SpellsSection } from "./sections/SpellsSection";
 import { FeaturesSection } from "./sections/FeaturesSection";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
-import { getActiveThemeClass } from "@features/navigation/Sidebar/sidebarThemes";
+import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 
 interface CharacterFormPageProps {
   editMode?: boolean;

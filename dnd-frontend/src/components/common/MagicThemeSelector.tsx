@@ -1,6 +1,6 @@
 import { Box } from "@mantine/core";
 import { useUiStore } from "@store/ui/uiStore";
-import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
+import { type SidebarThemeVariant } from "@appTypes/ThemeTypes";
 
 interface MagicThemeSelectorProps {
   variant?: "floating" | "inline";

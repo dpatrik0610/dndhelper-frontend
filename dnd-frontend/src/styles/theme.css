@@ -11,7 +11,44 @@
    This guarantees that light backgrounds never suffer from unreadable light text.
 */
 
-/* 💜 Candidate A: Midnight Arcane */
+/* 
+   THEME CSS VARIABLE CHEAT SHEET
+   --------------------------------------------------------------------------
+   All active themes MUST define this exact set of reactive design tokens.
+   Bind custom elements directly to these central CSS variables rather than
+   hardcoding hex colors to preserve dynamic magic-theme reactivity.
+
+   1. BACKGROUND BACKDROPS & CONTAINER FILLS
+   --theme-bg-base          : Backing translucent fill of main page containers/paper blocks.
+   --theme-bg-panel         : Backing translucent fill of floating portals, drawers, & modals.
+   --theme-bg-panel-opaque  : Solid equivalent of panel color (used on mobile where blurs are disabled).
+   --theme-bg-card          : Micro-backdrops for inner cards, list items, grids, & badges.
+   --theme-bg-hover         : Subtle hover highlighted fill.
+
+   2. FRAMING BORDERS & GLOW STATES
+   --theme-border-subtle    : Low-density bordering lines.
+   --theme-border-glow      : High-vibrancy border outline used for active or hover focus outlines.
+   --theme-border-accent    : Secondary accent bordering color.
+   --theme-glow-shadow-primary   : Intense outer drop-shadow glow matching primary accent color.
+   --theme-glow-shadow-secondary : Outer drop-shadow glow matching secondary accent color.
+
+   3. ACCENTS & RADIAL SPECTRUMS
+   --theme-color-accent-primary   : The main theme signature color (e.g. violet, amber, toxic green, white).
+   --theme-color-accent-secondary : Supporting secondary accent color (e.g. teal, emerald, silver).
+   --theme-gradient-primary       : Solid linear gradient combining primary and secondary accents.
+   --theme-gradient-primary-glass : Translucent (85%) highlight version of the primary gradient.
+   --theme-gradient-active        : Low-opacity (15%-25%) gradient used as background for active selections.
+
+   4. CONTRAST-SAFE TYPOGRAPHY (TEXT)
+   --theme-color-text-primary     : Headings, stat values, and heavy-contrast text (usually white).
+   --theme-color-text-secondary   : Supporting descriptions, subheadings, and metadata.
+   --theme-color-text-glow        : Pale, tinted shade of white with light text shadow readability.
+   --theme-color-text-on-accent   : High-contrast text color sitting DIRECTLY on top of bright primary backgrounds,
+                                    active gradients, or primary buttons (e.g. #ffffff on dark, #000000 on light/white bases).
+   --------------------------------------------------------------------------
+*/
+
+/* 💜 Midnight Arcane */
 .theme-midnight-arcane {
   --theme-bg-base: rgba(15, 12, 35, 0.14);
   --theme-bg-panel: rgba(24, 18, 48, 0.24);
@@ -28,6 +65,7 @@
   --theme-color-text-primary: #f3f4f6;
   --theme-color-text-secondary: #c084fc; /* Tinted light purple text */
   --theme-color-text-glow: #f3e8ff;
+  --theme-color-text-on-accent: #ffffff;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(168, 85, 247, 0.3);
   --theme-glow-shadow-secondary: 0 0 15px rgba(6, 182, 212, 0.3);
@@ -37,7 +75,7 @@
   --theme-gradient-active: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(6, 182, 212, 0.25));
 }
 
-/* 💛 Candidate B: Cyber-Fantasy Noir */
+/* 💛 Cyber-Fantasy Noir */
 .theme-cyber-noir {
   --theme-bg-base: rgba(20, 15, 8, 0.12);
   --theme-bg-panel: rgba(32, 24, 16, 0.24);
@@ -54,6 +92,7 @@
   --theme-color-text-primary: #f9fafb;
   --theme-color-text-secondary: #fcd34d; /* Tinted light amber text */
   --theme-color-text-glow: #fef3c7;
+  --theme-color-text-on-accent: #121214;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(245, 158, 11, 0.25);
   --theme-glow-shadow-secondary: 0 0 15px rgba(16, 185, 129, 0.25);
@@ -80,6 +119,7 @@
   --theme-color-text-primary: #f0fdf4;
   --theme-color-text-secondary: #a7f3d0;
   --theme-color-text-glow: #dcfce7;
+  --theme-color-text-on-accent: #07120a;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(34, 197, 94, 0.25);
   --theme-glow-shadow-secondary: 0 0 15px rgba(234, 179, 8, 0.25);
@@ -106,6 +146,7 @@
   --theme-color-text-primary: #fef2f2;
   --theme-color-text-secondary: #fca5a5;
   --theme-color-text-glow: #fee2e2;
+  --theme-color-text-on-accent: #ffffff;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(239, 68, 68, 0.3);
   --theme-glow-shadow-secondary: 0 0 15px rgba(217, 119, 6, 0.3);
@@ -132,6 +173,7 @@
   --theme-color-text-primary: #f0f9ff;
   --theme-color-text-secondary: #bae6fd;
   --theme-color-text-glow: #e0f2fe;
+  --theme-color-text-on-accent: #0e1e34;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(56, 189, 248, 0.25);
   --theme-glow-shadow-secondary: 0 0 15px rgba(226, 232, 240, 0.25);
@@ -158,6 +200,7 @@
   --theme-color-text-primary: #fff1f2;
   --theme-color-text-secondary: #fbcfe8; /* Tinted fey pink */
   --theme-color-text-glow: #fdf2f8;
+  --theme-color-text-on-accent: #291022;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(244, 114, 182, 0.25);
   --theme-glow-shadow-secondary: 0 0 15px rgba(251, 191, 36, 0.25);
@@ -184,6 +227,7 @@
   --theme-color-text-primary: #f0fdf4;
   --theme-color-text-secondary: #86efac; /* Minty green */
   --theme-color-text-glow: #dcfce7;
+  --theme-color-text-on-accent: #06140b;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(34, 197, 94, 0.25);
   --theme-glow-shadow-secondary: 0 0 15px rgba(250, 204, 21, 0.25);
@@ -210,6 +254,7 @@
   --theme-color-text-primary: #fafafa;
   --theme-color-text-secondary: #f5d0fe; /* Cosmic Lilac */
   --theme-color-text-glow: #fdf4ff;
+  --theme-color-text-on-accent: #ffffff;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(217, 70, 239, 0.25);
   --theme-glow-shadow-secondary: 0 0 15px rgba(99, 102, 241, 0.25);
@@ -236,6 +281,7 @@
   --theme-color-text-primary: #f8fafc;
   --theme-color-text-secondary: #fde047; /* Bright Brass Secondary */
   --theme-color-text-glow: #fef9c3;
+  --theme-color-text-on-accent: #141518;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(234, 88, 12, 0.25);
   --theme-glow-shadow-secondary: 0 0 15px rgba(13, 148, 136, 0.25);
@@ -262,6 +308,7 @@
   --theme-color-text-primary: #f0fdfa;
   --theme-color-text-secondary: #99f6e4; /* Pale aquamarine */
   --theme-color-text-glow: #ccfbf1;
+  --theme-color-text-on-accent: #ffffff;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(2, 132, 199, 0.25);
   --theme-glow-shadow-secondary: 0 0 15px rgba(13, 148, 136, 0.25);
@@ -287,7 +334,8 @@
   --theme-color-accent-secondary: #9ca3afe6; /* Ash Silver with 10% transparency */
   --theme-color-text-primary: #ffffff;
   --theme-color-text-secondary: #d1d5db; /* Light gray */
-  --theme-color-text-glow: #f3f4f6;
+  --theme-color-text-glow: #f3f4f617;
+  --theme-color-text-on-accent: #000000;
   
   --theme-glow-shadow-primary: 0 0 15px rgba(255, 255, 255, 0.25);
   --theme-glow-shadow-secondary: 0 0 15px rgba(156, 163, 175, 0.25);
@@ -441,7 +489,7 @@
 
 .theme-preview-btn-primary {
   background: var(--theme-gradient-primary) !important;
-  color: #121214 !important;
+  color: var(--theme-color-text-on-accent, #121214) !important;
   border: none !important;
   font-weight: 600;
   box-shadow: var(--theme-glow-shadow-primary);
@@ -543,7 +591,7 @@
 /* Premium Primary Button (Gradient fill with hover glow) */
 .glass-btn-primary {
   background: var(--theme-gradient-primary) !important;
-  color: #121214 !important;
+  color: var(--theme-color-text-on-accent, #121214) !important;
   border: none !important;
   font-weight: 600;
   border-radius: 8px;

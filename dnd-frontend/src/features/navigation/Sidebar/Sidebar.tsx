@@ -8,7 +8,7 @@ import { tabs, type TabItem } from "./SidebarTabs";
 import { SidebarHeader } from "./components/SidebarHeader";
 import { NavSection } from "./components/NavSection";
 import classes from "./Sidebar.module.css";
-import { sidebarThemes, type SidebarThemeVariant } from "./sidebarThemes";
+import { sidebarThemes, type SidebarThemeVariant } from "@appTypes/ThemeTypes";
 import { useIsMobile } from "@hooks/useIsMobile";
 
 interface SidebarProps {
@@ -75,6 +75,7 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
           ["--sidebar-border-strong" as string]: themeTokens.borderStrong,
           ["--sidebar-active" as string]: themeTokens.active,
           ["--sidebar-active-border" as string]: themeTokens.activeBorder,
+          ["--sidebar-active-text" as string]: themeTokens.activeText,
         },
       }}
     >

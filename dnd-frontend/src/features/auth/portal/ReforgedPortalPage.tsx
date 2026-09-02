@@ -4,7 +4,7 @@ import { Box } from "@mantine/core";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUiStore } from "@store/ui/uiStore";
 import { MagicThemeSelector } from "@components/common/MagicThemeSelector";
-import { getActiveThemeClass } from "@features/navigation/Sidebar/sidebarThemes";
+import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 
 // Existing service and store dependencies
 import { loginUser, registerUser } from "@services/authService";

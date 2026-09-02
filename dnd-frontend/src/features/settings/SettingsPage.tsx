@@ -24,7 +24,7 @@ import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
-import { type SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
+import { type SidebarThemeVariant } from "@appTypes/ThemeTypes";
 import {
   useCharacterList,
   useCurrentCharacter,
@@ -426,8 +426,8 @@ export default function SettingsPage() {
                                   }}
                                 >
                                   <Group gap={4} align="center">
-                                    <IconCheck size={12} color="var(--theme-color-accent-primary, #f59e0b)" />
-                                    <Text fw={600} size="xs" c="var(--theme-color-accent-primary, #f59e0b)">
+                                    <IconCheck size={12} color="var(--theme-color-text-on-accent , #f59e0b)" />
+                                    <Text fw={600} size="xs" c="var(--theme-color-text-on-accent , #f59e0b)">
                                       ACTIVE
                                     </Text>
                                   </Group>

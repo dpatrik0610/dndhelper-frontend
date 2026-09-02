@@ -81,15 +81,27 @@
 
 .navButtonActive {
   background: var(--sidebar-active, linear-gradient(135deg, rgba(106, 76, 255, 0.9), rgba(83, 216, 255, 0.8)));
-  color: var(--mantine-color-white);
+  color: var(--sidebar-active-text, var(--mantine-color-white)) !important;
   border-color: var(--sidebar-active-border, rgba(255, 255, 255, 0.12));
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.navButtonActive p,
+.navButtonActive span,
+.navButtonActive div {
+  color: inherit !important;
 }
 
 .navButtonInactive {
   background: var(--sidebar-panel, rgba(255, 255, 255, 0.02));
   color: var(--mantine-color-gray-0);
   border-color: var(--sidebar-border, rgba(255, 255, 255, 0.04));
+}
+
+.navButtonInactive p,
+.navButtonInactive span,
+.navButtonInactive div {
+  color: inherit !important;
 }
 
 .navButtonDisabled {

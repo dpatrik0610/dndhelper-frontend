@@ -4,7 +4,7 @@ import { IconX } from "@tabler/icons-react";
 import { useMemo, type ReactNode } from "react";
 import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
-import { getActiveThemeClass } from "@features/navigation/Sidebar/sidebarThemes";
+import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 
 export type AdminGlassModalVariant = "default" | "danger";
 

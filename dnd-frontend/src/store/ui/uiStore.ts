@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SidebarThemeVariant } from "@features/navigation/Sidebar/sidebarThemes";
+import type { SidebarThemeVariant } from "@appTypes/ThemeTypes";
 import { getSelf, getAuthMe, getAuthUser, getUserById, getUserSettings, updateUserSettings } from "@services/userService";
 import { useAuthStore } from "@store/auth/authStore";
 

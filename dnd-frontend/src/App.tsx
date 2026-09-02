@@ -12,7 +12,7 @@ import { AppBackground } from "@components/layout/AppBackground";
 import { SidebarToggle } from "@components/layout/SidebarToggle";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
 import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal";
-import { type SidebarThemeVariant, getActiveThemeClass } from "@features/navigation/Sidebar/sidebarThemes";
+import { type SidebarThemeVariant, getActiveThemeClass } from "@appTypes/ThemeTypes";
 import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 
