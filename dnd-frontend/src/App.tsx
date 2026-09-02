@@ -31,6 +31,7 @@ const RulesPage = lazy(() => import("@features/rules/RulesPage"));
 const AiAssistantPage = lazy(() => import("@features/aiAssistant/AiAssistantPage"));
 const EncounterRoomPage = lazy(() => import("@features/encounterRoom/EncounterRoomPage"));
 const ShopkeeperPage = lazy(() => import("@features/shop/ShopkeeperPage"));
+const SettingsPage = lazy(() => import("@features/settings/SettingsPage"));
 
 function AppRoutes() {
   const location = useLocation();
@@ -45,11 +46,22 @@ function AppRoutes() {
   const characters = useCharacterList();
   const isAdmin = useIsAdmin();
 
-  const localToken = useMemo(() => localStorage.getItem("authToken"), []);
+  const localToken = useMemo(() => {
+    if (!token) return null;
+    return localStorage.getItem("authToken");
+  }, [token]);
   const activeToken = token ?? localToken ?? null;
+
+  const fetchSettings = useUiStore((s) => s.fetchSettings);
 
   useTokenExpiryGuard(token, localToken);
   useBootstrapCharacters(activeToken, characters.length);
+
+  useEffect(() => {
+    if (activeToken) {
+      void fetchSettings();
+    }
+  }, [activeToken, fetchSettings]);
 
   useEffect(() => {
     if (opened && location.pathname === "/login") handlers.close();
@@ -166,6 +178,7 @@ function AppRoutes() {
                 <Route path="/encounter-room" element={<EncounterRoomPage />} />
                 <Route path="/encounter-room/:roomId" element={<EncounterRoomPage />} />
                 <Route path="/roll-history" element={<RollHistoryPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
                 {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
                 {isAdmin && <Route path="/ai-assistant" element={<AiAssistantPage />} />}
               </Route>

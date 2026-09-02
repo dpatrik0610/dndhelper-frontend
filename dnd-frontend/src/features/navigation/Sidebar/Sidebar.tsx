@@ -1,5 +1,5 @@
 ﻿import { useMemo } from "react";
-import { Drawer, Stack, useMantineTheme, Box, Group, Text, UnstyledButton } from "@mantine/core";
+import { Drawer, Stack, useMantineTheme } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUsername, useIsAdmin } from "@store/auth/authSelectors";
 import { handleLogout } from "@utils/handleLogout";
@@ -10,8 +10,6 @@ import { NavSection } from "./components/NavSection";
 import classes from "./Sidebar.module.css";
 import { sidebarThemes, type SidebarThemeVariant } from "./sidebarThemes";
 import { useIsMobile } from "@hooks/useIsMobile";
-import { useUiStore } from "@store/ui/uiStore";
-import { MagicThemeSelector } from "@components/common/MagicThemeSelector";
 
 interface SidebarProps {
   opened: boolean;
@@ -53,9 +51,6 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
     .join("")
     .slice(0, 2)
     .toUpperCase();
-
-  const currentSidebarTheme = useUiStore((s) => s.sidebarTheme);
-  const setSidebarTheme = useUiStore((s) => s.setSidebarTheme);
 
   return (
     <Drawer
@@ -125,14 +120,6 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
             activeLabel={activeLabel}
             onNavigate={handleNavigate}
           />
-
-          {/* Theme Selector Block */}
-          <Box mt="sm" pt="md" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
-            <Text className={classes.sectionLabel} mb="xs">
-              Visual Theme
-            </Text>
-            <MagicThemeSelector variant="inline" />
-          </Box>
         </Stack>
       </Stack>
     </Drawer>

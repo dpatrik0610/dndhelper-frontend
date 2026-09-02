@@ -60,6 +60,7 @@ export function PasswordStrength({ value, onChange }: PasswordStrengthProps) {
         placeholder="Your password"
         label="Password"
         required
+        classNames={{ input: 'glassy-input', label: 'glassy-label' }}
       />
       <Group gap={5} grow mt="xs" mb="md">{bars}</Group>
       <PasswordRequirement label="Has at least 6 characters" meets={value.length > 5} />

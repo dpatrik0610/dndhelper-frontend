@@ -1,4 +1,5 @@
 import { useToken } from "@store/auth/authSelectors";
+import { useUiStore } from "@store/ui/uiStore";
 import {  useState } from 'react'
 import { TextInput, PasswordInput, Button, Title, Text } from '@mantine/core'
 import type { AuthRequest } from '@appTypes/AuthTypes'
@@ -41,6 +42,9 @@ export default function LoginForm() {
             localStorage.setItem("authToken", response.token);
             localStorage.setItem("username", username);
             processToken(response.token);
+
+            // Fetch and apply the user settings before closing notification and navigating
+            await useUiStore.getState().fetchSettings();
 
             toggleNotification(false, true); // success
             navigate("/");

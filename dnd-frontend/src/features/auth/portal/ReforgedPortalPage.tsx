@@ -1,16 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Group,
-  Stack,
-  Text,
-  Title,
-  Button,
-  TextInput,
-  PasswordInput,
-  Tooltip,
-} from "@mantine/core";
+import { Box } from "@mantine/core";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
@@ -24,7 +14,10 @@ import { useToken } from "@store/auth/authSelectors";
 import AlreadyLoggedIn from "@features/auth/login/components/AlreadyLoggedIn";
 import { validateRegisterForm } from "@validations/registerValidation";
 import { showNotification } from "@components/Notification/Notification";
-import { PasswordStrength } from "../register/PasswordRequirement";
+
+// Modularized form components
+import { LoginPanel } from "./components/LoginPanel";
+import { RegisterPanel } from "./components/RegisterPanel";
 
 import "../styles/AuthCard.css";
 
@@ -100,6 +93,9 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
       localStorage.setItem("username", loginUserVal.trim());
       processToken(response.token);
 
+      // Fetch and apply user settings before closing notification and navigating
+      await useUiStore.getState().fetchSettings();
+
       toggleLoginNotification(false, true);
       navigate("/");
     } catch {
@@ -137,10 +133,6 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
     }
   };
 
-  if (token) {
-    return <AlreadyLoggedIn />;
-  }
-
   // Theme styling helpers
   const activeThemeClass = useMemo(() => {
     switch (sidebarTheme) {
@@ -156,15 +148,9 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
     }
   }, [sidebarTheme]);
 
-  // Unified Label styles
-  const inputLabelStyle = {
-    fontFamily: "var(--font-sans)",
-    fontWeight: 500,
-    letterSpacing: "0.5px",
-    fontSize: "13px",
-    color: "var(--theme-color-text-primary, #ffffff)",
-    marginBottom: "6px",
-  };
+  if (token) {
+    return <AlreadyLoggedIn />;
+  }
 
   return (
     <Box className={`portal-container ${activeThemeClass} style-variant-glass`}>
@@ -180,93 +166,14 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
                 exit={{ opacity: 0, x: 30 }}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
               >
-                {/* LOGIN PANEL VIEW */}
-                <Title order={1} className="portal-header-title">
-                  D&D Reforged
-                </Title>
-                <Text className="portal-header-subtitle">
-                  Login
-                </Text>
-
-                <Stack gap="md">
-                  <TextInput
-                    label="Username"
-                    placeholder="Enter your username..."
-                    value={loginUserVal}
-                    onChange={(e) => setLoginUserVal(e.currentTarget.value)}
-                    required
-                    classNames={{ input: "portal-glassy-input", label: "glassy-label" }}
-                    styles={{
-                      label: inputLabelStyle,
-                      input: {
-                        fontFamily: "var(--font-sans)",
-                        fontSize: "14px",
-                        height: "44px",
-                      },
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") void handleLoginSubmit();
-                    }}
-                  />
-
-                  <PasswordInput
-                    label="Password"
-                    placeholder="Enter your password..."
-                    value={loginPassVal}
-                    onChange={(e) => setLoginPasswordVal(e.currentTarget.value)}
-                    required
-                    classNames={{ input: "portal-glassy-input", label: "glassy-label" }}
-                    styles={{
-                      label: inputLabelStyle,
-                      input: {
-                        fontFamily: "var(--font-sans)",
-                        fontSize: "14px",
-                        height: "44px",
-                      },
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") void handleLoginSubmit();
-                    }}
-                  />
-
-                  <Button
-                    fullWidth
-                    onClick={handleLoginSubmit}
-                    variant="gradient"
-                    gradient={{ from: "var(--theme-color-accent-primary, #f59e0b)", to: "var(--theme-border-glow, #3b82f6)", deg: 135 }}
-                    style={{
-                      marginTop: "16px",
-                      height: "46px",
-                      fontWeight: 700,
-                      letterSpacing: "1px",
-                      textTransform: "uppercase",
-                      fontSize: "14px",
-                      fontFamily: "var(--font-sans)",
-                      boxShadow: "var(--theme-glow-shadow-primary)",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    Login
-                  </Button>
-
-                  <Group justify="center" mt="md">
-                    <Text size="sm" style={{ fontFamily: "var(--font-sans)", color: "var(--theme-color-text-secondary, rgba(255,255,255,0.7))" }}>
-                      Don't have an account?{" "}
-                      <Text
-                        component="span"
-                        fw={700}
-                        style={{
-                          color: "var(--theme-color-accent-primary)",
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                        }}
-                        onClick={() => setActivePanel("register")}
-                      >
-                        Register
-                      </Text>
-                    </Text>
-                  </Group>
-                </Stack>
+                <LoginPanel
+                  loginUserVal={loginUserVal}
+                  setLoginUserVal={setLoginUserVal}
+                  loginPassVal={loginPassVal}
+                  setLoginPasswordVal={setLoginPasswordVal}
+                  onSubmit={handleLoginSubmit}
+                  onSwitchToRegister={() => setActivePanel("register")}
+                />
               </motion.div>
             ) : (
               <motion.div
@@ -276,84 +183,15 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
                 exit={{ opacity: 0, x: -30 }}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
               >
-                {/* REGISTRATION PANEL VIEW */}
-                <Title order={1} className="portal-header-title">
-                  Register
-                </Title>
-                <Text className="portal-header-subtitle">
-                  Create an Account
-                </Text>
-
-                <Stack gap="sm">
-                  <TextInput
-                    label="Username"
-                    placeholder="Choose a username..."
-                    value={regUserVal}
-                    onChange={(e) => setRegUserVal(e.currentTarget.value)}
-                    required
-                    error={errors.username}
-                    classNames={{ input: "portal-glassy-input", label: "glassy-label" }}
-                    styles={{
-                      label: inputLabelStyle,
-                      input: {
-                        fontFamily: "var(--font-sans)",
-                        fontSize: "14px",
-                        height: "44px",
-                      },
-                    }}
-                  />
-
-                  <Box>
-                    <Text style={inputLabelStyle}>
-                      Password Strength
-                    </Text>
-                    <PasswordStrength value={regPassVal} onChange={setRegPassVal} />
-                  </Box>
-
-                  {errors.password && (
-                    <Text color="red" size="sm" mt={4} style={{ fontFamily: "var(--font-sans)" }}>
-                      {errors.password}
-                    </Text>
-                  )}
-
-                  <Button
-                    fullWidth
-                    onClick={handleRegisterSubmit}
-                    variant="gradient"
-                    gradient={{ from: "var(--theme-color-accent-primary, #f59e0b)", to: "var(--theme-border-glow, #3b82f6)", deg: 135 }}
-                    style={{
-                      marginTop: "20px",
-                      height: "46px",
-                      fontWeight: 700,
-                      letterSpacing: "1px",
-                      textTransform: "uppercase",
-                      fontSize: "14px",
-                      fontFamily: "var(--font-sans)",
-                      boxShadow: "var(--theme-glow-shadow-primary)",
-                      borderRadius: "8px",
-                    }}
-                  >
-                    Register
-                  </Button>
-
-                  <Group justify="center" mt="md">
-                    <Text size="sm" style={{ fontFamily: "var(--font-sans)", color: "var(--theme-color-text-secondary, rgba(255,255,255,0.7))" }}>
-                      Already have an account?{" "}
-                      <Text
-                        component="span"
-                        fw={700}
-                        style={{
-                          color: "var(--theme-color-accent-primary)",
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                        }}
-                        onClick={() => setActivePanel("login")}
-                      >
-                        Login
-                      </Text>
-                    </Text>
-                  </Group>
-                </Stack>
+                <RegisterPanel
+                  regUserVal={regUserVal}
+                  setRegUserVal={setRegUserVal}
+                  regPassVal={regPassVal}
+                  setRegPassVal={setRegPassVal}
+                  errors={errors}
+                  onSubmit={handleRegisterSubmit}
+                  onSwitchToLogin={() => setActivePanel("login")}
+                />
               </motion.div>
             )}
           </AnimatePresence>

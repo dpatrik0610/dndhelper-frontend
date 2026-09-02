@@ -95,61 +95,56 @@
 /* Premium Glassmorphic Portal Card */
 .reforged-portal-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
   background: var(--theme-bg-panel, rgba(15, 15, 15, 0.45)) !important;
   backdrop-filter: blur(32px) saturate(140%) !important;
   -webkit-backdrop-filter: blur(32px) saturate(140%) !important;
   border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08)) !important;
-  border-radius: 20px !important;
+  border-radius: 24px !important;
   box-shadow: 
     0 30px 70px rgba(0, 0, 0, 0.55),
     inset 0 1px 1px rgba(255, 255, 255, 0.05),
     var(--theme-glow-shadow-primary, 0 0 0 transparent) !important;
-  padding: 36px !important;
+  padding: 48px !important;
   box-sizing: border-box;
   transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
 /* Form Titles & Subtitles */
 .portal-header-title {
-  font-family: '"Plus Jakarta Sans", "Inter", sans-serif' !important;
+  font-family: var(--font-sans) !important;
   color: var(--theme-color-text-primary, #ffffff) !important;
   text-transform: uppercase;
-  letter-spacing: 5px !important;
-  font-weight: 800 !important;
+  letter-spacing: 6px !important;
+  font-weight: 300 !important;
+  font-size: 32px !important;
   text-shadow: 0 2px 10px rgba(0,0,0,0.5);
   text-align: center;
   margin-bottom: 4px;
 }
 
 .portal-header-subtitle {
-  font-family: '"Plus Jakarta Sans", "Inter", sans-serif' !important;
+  font-family: var(--font-sans) !important;
   color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7)) !important;
   text-transform: uppercase;
-  letter-spacing: 2.5px;
-  font-size: 10px !important;
+  letter-spacing: 3px !important;
+  font-weight: 300 !important;
+  font-size: 11px !important;
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px !important;
 }
 
-/* Premium Glowing inputs */
-.portal-glassy-input {
-  background: rgba(0, 0, 0, 0.25) !important;
-  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08)) !important;
-  border-radius: 8px !important;
-  color: #fff !important;
-  padding: 10px 14px !important;
-  font-family: '"Plus Jakarta Sans", "Inter", sans-serif' !important;
-  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+/* Portal Specific Input & Label Upscaling */
+.reforged-portal-card .glassy-input {
+  height: 48px !important;
+  font-size: 15px !important;
+  padding: 12px 16px !important;
 }
 
-.portal-glassy-input:focus, 
-.portal-glassy-input:focus-within {
-  border-color: var(--theme-border-glow, rgba(245, 158, 11, 0.4)) !important;
-  background: rgba(0, 0, 0, 0.4) !important;
-  box-shadow: 
-    0 0 16px var(--theme-border-glow, rgba(245, 158, 11, 0.25)),
-    inset 0 1px 1px rgba(255, 255, 255, 0.02) !important;
+.reforged-portal-card .glassy-label {
+  font-size: 11px !important;
+  letter-spacing: 2.5px !important;
+  margin-bottom: 8px !important;
 }
 
 /* Floating Runes theme switcher (Bottom Center) */
@@ -175,34 +170,6 @@
 .runes-theme-switcher:hover {
   border-color: var(--theme-border-glow, rgba(255, 255, 255, 0.12));
   box-shadow: 0 12px 45px rgba(0, 0, 0, 0.6), var(--theme-glow-shadow-primary);
-}
-
-.magic-rune-button {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 14px;
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.magic-rune-button:hover {
-  transform: scale(1.15) translateY(-2px);
-  border-color: var(--theme-color-accent-primary, #fff);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: var(--theme-glow-shadow-primary);
-}
-
-.magic-rune-button.active {
-  transform: scale(1.1) translateY(-1px);
-  background: var(--theme-gradient-primary-glass, rgba(255,255,255,0.08));
-  border-color: var(--theme-color-accent-primary, #f59e0b);
-  box-shadow: var(--theme-glow-shadow-primary), inset 0 1px 1px rgba(255,255,255,0.1);
 }
 
 /* Mobile responsive fixes */
