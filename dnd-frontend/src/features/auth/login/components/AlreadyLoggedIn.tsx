@@ -1,4 +1,4 @@
-import { Button, Text } from '@mantine/core';
+import { Button, Text, Title, Stack } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { handleLogout } from '@utils/handleLogout';
 
@@ -6,27 +6,36 @@ export default function AlreadyLoggedIn() {
   const navigate = useNavigate();
 
   return (
-    <>
-      <Text>You are already logged in.</Text>
-      <Button
-        mt="md"
-        fullWidth
-        onClick={() => {
-          handleLogout();
-        }}
-      >
-        Logout
-      </Button>
+    <Stack gap="lg" align="center">
+      <Title order={1} className="portal-header-title">
+        D&D Reforged
+      </Title>
+      
+      <Text className="portal-header-subtitle" style={{ marginBottom: "8px" }}>
+        You Are Already Logged In
+      </Text>
 
-      <Button
-      mt="md"
-      fullWidth
-      onClick={() => {
-        navigate('/home');
-      }}
-      >
-        Home
-      </Button>
-    </>
+      <Stack gap="md" style={{ width: '100%', marginTop: '12px' }}>
+        <Button
+          fullWidth
+          onClick={() => navigate('/')}
+          className="glass-btn-primary"
+          h={50}
+          style={{ textTransform: "uppercase", letterSpacing: "1.5px", fontSize: "15px" }}
+        >
+          Enter Campaign
+        </Button>
+
+        <Button
+          fullWidth
+          onClick={() => handleLogout()}
+          className="glass-btn-secondary"
+          h={50}
+          style={{ textTransform: "uppercase", letterSpacing: "1.5px", fontSize: "15px" }}
+        >
+          Logout
+        </Button>
+      </Stack>
+    </Stack>
   );
 }

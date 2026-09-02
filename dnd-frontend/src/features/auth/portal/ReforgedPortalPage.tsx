@@ -35,6 +35,9 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
   // Unified panel toggler state
   const [activePanel, setActivePanel] = useState<"login" | "register">(mode);
 
+  // Prevents brief "already logged in" page flash before redirect navigates
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   // Sync state if routing changes
   useEffect(() => {
     setActivePanel(mode);
@@ -91,6 +94,7 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
 
       localStorage.setItem("authToken", response.token);
       localStorage.setItem("username", loginUserVal.trim());
+      setIsRedirecting(true);
       processToken(response.token);
 
       // Fetch and apply user settings before closing notification and navigating
@@ -125,6 +129,7 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
       });
       if (!response?.token) throw new Error("No token returned");
 
+      setIsRedirecting(true);
       processToken(response.token);
       toggleRegNotification(false, true);
       navigate("/");
@@ -148,8 +153,17 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
     }
   }, [sidebarTheme]);
 
-  if (token) {
-    return <AlreadyLoggedIn />;
+  if (token && !isRedirecting) {
+    return (
+      <Box className={`portal-container ${activeThemeClass} style-variant-glass`}>
+        <Box className="portal-content-layer">
+          <Box className="reforged-portal-card">
+            <AlreadyLoggedIn />
+          </Box>
+        </Box>
+        <MagicThemeSelector variant="floating" />
+      </Box>
+    );
   }
 
   return (
