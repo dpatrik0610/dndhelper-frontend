@@ -22,10 +22,7 @@ export function InspirationBox({ value, onClick, containerStyle }: Props) {
           ? "1px solid var(--theme-border-glow, rgba(245, 158, 11, 0.25))"
           : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
         padding: "8px 16px",
-        borderRadius: "24px",
-        boxShadow: hasInspiration
-          ? "0 4px 20px rgba(0, 0, 0, 0.15), var(--theme-glow-shadow-primary)"
-          : "0 4px 20px rgba(0, 0, 0, 0.15)",
+        borderRadius: "12px",
         transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
         userSelect: "none",
         ...containerStyle,
@@ -57,14 +54,11 @@ export function InspirationBox({ value, onClick, containerStyle }: Props) {
           color: hasInspiration
             ? "var(--theme-color-accent-primary, #f59e0b)"
             : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
-          fontWeight: 800,
+          fontWeight: 600,
           textTransform: "uppercase",
           letterSpacing: "1.2px",
-          fontSize: "11px",
+          fontSize: "14px",
           transition: "color 0.25s ease",
-          textShadow: hasInspiration
-            ? "0 0 8px rgba(245, 158, 11, 0.3)"
-            : "none",
         }}
       >
         Inspiration

@@ -78,7 +78,7 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
         alignItems: "center",
         justifyContent: "center",
         flexShrink: 0,
-        margin: isMobile ? "0 auto" : 0,
+        margin: 0,
       }}
     >
       {/* 1. Concentric SVG HP Rings (Enlarged canvas to accommodate drop-shadow blur without clipping) */}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stack, Box, Group } from "@mantine/core";
+import { Stack, Box, Group, Divider } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions, useCharacterCombatActions } from "@store/character/characterSelectors";
 import { longrest, updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
@@ -11,8 +11,6 @@ import { CharacterCurrencyArea } from "./CharacterCurrencyArea";
 import { showNotification } from "@components/Notification/Notification";
 import { useIsMobile } from "@hooks/useIsMobile";
 
-import { AvatarHpCrest } from "./AvatarHpCrest";
-import { TopPanel } from "./TopPanel";
 import { IdentityPanel } from "./IdentityPanel";
 import { ActionRibbonPanel } from "./ActionRibbonPanel";
 import { HeaderModals } from "./HeaderModals";
@@ -147,7 +145,7 @@ export function CharacterHeader() {
   return (
     <>
       <Box
-        mb="xl"
+        mb="md"
         style={{
           background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
           backdropFilter: "blur(24px) saturate(130%)",
@@ -158,25 +156,21 @@ export function CharacterHeader() {
           boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
         }}
       >
-        <Stack gap="lg">
-          <TopPanel character={character} isMobile={isMobile} />
-          
-          <Group wrap={isMobile ? "wrap" : "nowrap"} align="center" gap="xl" style={{ width: "100%" }}>
-            <AvatarHpCrest character={character} isMobile={isMobile} />
-            
+        <Stack gap="md">          
+          <Group wrap={isMobile ? "wrap" : "nowrap"} align="stretch" gap="md" style={{ width: "100%" }}>
             <IdentityPanel
               character={character}
               isMobile={isMobile}
             />
             
-            <Stack gap="xs" style={{ width: isMobile ? "100%" : "260px", flexShrink: 0 }}>
-              <InspirationBox value={character.inspiration} onClick={handleUseInspiration} />
+            <Stack gap="xs" style={{ width: isMobile ? "100%" : "260px", flexShrink: 0, justifyContent: isMobile ? "flex-start" : "space-between" }}>
+              <InspirationBox value={character?.inspiration} onClick={handleUseInspiration} containerStyle={{ flexGrow: 1, justifyContent: "center" }} />
               <Box style={{ width: "100%", height: "auto", flexShrink: 0 }}>
                 <CharacterCurrencyArea character={character} />
               </Box>
             </Stack>
           </Group>
-
+          <Divider style={{ borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.08))" }} />
           <ActionRibbonPanel
             character={character}
             conditionsCount={conditionsCount}
