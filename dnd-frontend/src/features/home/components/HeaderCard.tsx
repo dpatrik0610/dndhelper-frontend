@@ -13,7 +13,7 @@ import {
 } from "@mantine/core";
 import type { ReactNode } from "react";
 import type { Character } from "@appTypes/Character/Character";
-import { XpProgressCard } from "@features/profile/components/XpProgressCard";
+import { XpProgressCard } from "@components/common/XpProgressCard";
 import CustomBadge from "@components/common/CustomBadge";
 
 interface Props {
