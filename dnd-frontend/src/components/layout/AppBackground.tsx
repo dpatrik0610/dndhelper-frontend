@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { Box } from "@mantine/core";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { useUiStore } from "@store/ui/uiStore";
+import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 
 /**
  * AppBackground
@@ -13,6 +15,8 @@ import { useIsMobile } from "@hooks/useIsMobile";
  */
 export function AppBackground() {
   const isMobile = useIsMobile();
+  const sidebarTheme = useUiStore((s) => s.sidebarTheme);
+  const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
   // Optimized particle generation for desktop devices only
   const particles = useMemo(() => {
@@ -30,7 +34,7 @@ export function AppBackground() {
   if (isMobile) {
     return (
       <Box
-        className="portal-background"
+        className={`portal-background ${activeThemeClass}`}
         style={{
           position: "fixed",
           inset: 0,
@@ -53,7 +57,7 @@ export function AppBackground() {
   }
 
   return (
-    <Box className="portal-background" style={{ position: "fixed", pointerEvents: "none" }}>
+    <Box className={`portal-background ${activeThemeClass}`} style={{ position: "fixed", pointerEvents: "none" }}>
       <Box className="portal-backdrop-glow" />
       <Box className="portal-particles">
         {particles.map((p) => (

@@ -149,7 +149,7 @@ function AppRoutes() {
             padding: isDashboardRoute ? 0 : (isMobile ? 0 : "md"),
           }}
         >
-          <Suspense fallback={<Center mt="20vh"><Loader color="indigo" /></Center>}>
+          <Suspense fallback={<Center mt="20vh"><Loader color="var(--theme-color-accent-primary)" /></Center>}>
             <Routes>
               <Route element={<PrivateRoute />}>
                 <Route path="/" element={<Home />} />

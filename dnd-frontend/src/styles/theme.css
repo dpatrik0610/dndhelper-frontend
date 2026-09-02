@@ -744,7 +744,94 @@
   will-change: transform, opacity;
   backface-visibility: hidden;
   animation: floatUp infinite linear;
+  transition: background 0.5s ease, border-radius 0.5s ease, box-shadow 0.5s ease;
 }
+
+/* 🌀 Theme-Specific Background Particle Customizations (Desktop Only) */
+
+/* 🌌 Midnight Arcane: Classic rising purple magical stars */
+.theme-midnight-arcane .portal-particle {
+  animation-name: floatUp;
+  background: var(--theme-color-accent-primary);
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.6);
+}
+
+/* 💛 Cyber-Noir / Sunset: Fast-rising amber circuit spark nodes */
+.theme-cyber-noir .portal-particle {
+  animation-name: floatUp;
+  background: #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
+}
+
+/* 🌿 Druid Grove: Gently swaying forest pollen spores */
+.theme-druid-grove .portal-particle {
+  animation-name: floatSway;
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+
+/* 🩸 Crimson Vampire: Blood embers floating slowly up */
+.theme-crimson-vampire .portal-particle {
+  animation-name: floatUp;
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+}
+
+/* ❄️ Frost Glacier: Falling crystalline snowflakes */
+.theme-frost-glacier .portal-particle {
+  animation-name: floatDown;
+  background: #ffffff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+/* 🌸 Feywild Bloom: Gently swaying cherry blossom petals (Elongated custom border radius) */
+.theme-feywild-bloom .portal-particle {
+  animation-name: floatSway;
+  background: #f472b6;
+  box-shadow: 0 0 6px rgba(244, 114, 182, 0.5);
+  border-radius: 50% 0 50% 0 !important; /* Petal shape! */
+}
+
+/* 💚 Toxic Spore: Swirling poisonous fungal spores */
+.theme-toxic-spore .portal-particle {
+  animation-name: floatSway;
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+}
+
+/* 🔮 Eldritch Void: Twinkling void anomalies drifting slowly */
+.theme-eldritch-void .portal-particle {
+  animation-name: floatSway;
+  background: #d946ef;
+  box-shadow: 0 0 10px #d946ef;
+}
+
+/* ⚙️ Clockwork Brass: Fast-rising mechanical fire sparks (Square/ash-like cogs) */
+.theme-clockwork-brass .portal-particle {
+  animation-name: floatUp;
+  background: #ea580c;
+  box-shadow: 0 0 8px #ea580c;
+  border-radius: 1px !important; /* Square spark embers! */
+}
+
+/* 🌊 Deep Ocean: Wobbling bioluminescent hollow air bubbles */
+.theme-deep-ocean .portal-particle {
+  animation-name: floatSway;
+  background: transparent !important;
+  border: 1px solid #0284c7;
+  box-shadow: 0 0 6px rgba(2, 132, 199, 0.6);
+}
+
+/* 🕶️ Darkvision: Monochromatic ash flakes drifting listlessly */
+.theme-darkvision .portal-particle {
+  animation-name: floatSway;
+  background: #9ca3af;
+  box-shadow: 0 0 4px rgba(156, 163, 175, 0.4);
+  border-radius: 30% 70% 70% 30% / 50% 60% 40% 50% !important; /* Ragged ash/smoke shape! */
+}
+
+
+/* Keyframe Animations */
 
 @keyframes floatUp {
   0% {
@@ -752,13 +839,53 @@
     opacity: 0;
   }
   15% {
-    opacity: 0.3;
+    opacity: 0.35;
   }
   85% {
-    opacity: 0.3;
+    opacity: 0.35;
   }
   100% {
     transform: translate3d(40px, -5vh, 0) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes floatDown {
+  0% {
+    transform: translate3d(0, -5vh, 0) scale(0.4);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.4;
+  }
+  85% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate3d(-40px, 105vh, 0) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes floatSway {
+  0% {
+    transform: translate3d(0, 105vh, 0) scale(0.4);
+    opacity: 0;
+  }
+  20% {
+    transform: translate3d(20px, 80vh, 0) scale(0.6);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(-20px, 50vh, 0) scale(0.8);
+    opacity: 0.55;
+  }
+  80% {
+    transform: translate3d(15px, 20vh, 0) scale(1.0);
+    opacity: 0.45;
+  }
+  100% {
+    transform: translate3d(0, -5vh, 0) scale(1.1);
     opacity: 0;
   }
 }
