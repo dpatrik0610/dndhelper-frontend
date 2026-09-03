@@ -19,6 +19,7 @@ import {
   ThemeIcon,
   Tooltip,
   MultiSelect,
+  Checkbox,
 } from "@mantine/core";
 import {
   IconPlus,
@@ -908,14 +909,27 @@ export function QuestManager() {
                               }}
                             >
                               <Group gap="xs" style={{ flex: 1 }} wrap="nowrap">
-                                <ActionIcon
-                                  size="xs"
-                                  variant="subtle"
-                                  color={obj.isCompleted ? "green" : "gray"}
-                                  onClick={() => handleToggleObjComplete(obj.id)}
-                                >
-                                  <IconCheck size={12} />
-                                </ActionIcon>
+                                {obj.completionThreshold === 1 ? (
+                                  <Checkbox
+                                    checked={obj.isCompleted}
+                                    onChange={() => handleToggleObjComplete(obj.id)}
+                                    size="xs"
+                                    styles={{
+                                      input: {
+                                        cursor: "pointer",
+                                      },
+                                    }}
+                                  />
+                                ) : (
+                                  <ActionIcon
+                                    size="xs"
+                                    variant="subtle"
+                                    color={obj.isCompleted ? "green" : "gray"}
+                                    onClick={() => handleToggleObjComplete(obj.id)}
+                                  >
+                                    <IconCheck size={12} />
+                                  </ActionIcon>
+                                )}
                                 <Box style={{ flex: 1 }}>
                                   <Text
                                     size="xs"
