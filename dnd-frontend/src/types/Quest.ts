@@ -35,7 +35,7 @@ export interface Quest {
   status: QuestStatus;                // Current state
   type: QuestType;                    // Type of quest
   rewardItemIds: string[];            // Loot items awarded
-  rewardCurrency: Currency[];         // Cash rewards list
+  rewardCurrencies: Currency[];         // Cash rewards list
   createdAt?: string;                 // ISO Date String (audited)
   updatedAt?: string;                 // ISO Date String (audited)
 }

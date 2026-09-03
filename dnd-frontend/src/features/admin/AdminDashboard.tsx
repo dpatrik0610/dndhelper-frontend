@@ -29,6 +29,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconBuildingStore,
+  IconCompass,
 } from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
 import { AdminNavItem } from "./components/AdminNavItem";
@@ -49,6 +50,7 @@ import { InitiativeTracker } from "./InitiativeTracker/InitiativeTracker";
 import { RuleManager } from "./RuleManager/RuleManager";
 import { EncounterRoomManager } from "./EncounterRoomManager/EncounterRoomManager";
 import { ShopManager } from "./ShopManager/ShopManager";
+import { QuestManager } from "./QuestManager/QuestManager";
 import styles from "@styles/AdminDashboard.module.css";
 
 type NavItem = {
@@ -82,6 +84,7 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconUsersGroup, label: "Sessions", key: "SessionManager", component: <SessionManager /> },
     { icon: IconCloudDownload, label: "Backups", key: "BackupManager", component: <BackupManager /> },
     { icon: IconBook2, label: "Rules", key: "RuleManager", component: <RuleManager /> },
+    { icon: IconCompass, label: "Quests", key: "QuestManager", component: <QuestManager /> },
   ];
 
   const currentItem = navItems.find((n) => n.key === activeSection);

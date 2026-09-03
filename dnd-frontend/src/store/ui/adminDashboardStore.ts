@@ -14,7 +14,8 @@ export type AdminSection =
   | "CacheManager"
   | "SessionManager"
   | "BackupManager"
-  | "RuleManager";
+  | "RuleManager"
+  | "QuestManager";
 
 export interface AdminDashboardState {
   activeSection: AdminSection;

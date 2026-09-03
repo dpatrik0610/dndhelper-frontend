@@ -112,6 +112,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
         centered
         size="xl"
         fullScreen={isMobile}
+        zIndex={2100}
         title={
           equipment && (
             <Group align="center" gap="sm">
