@@ -532,7 +532,7 @@ export function QuestManager() {
                   setActiveCategory("campaign");
                   setSelectedQuestId(null);
                 }}
-                className={activeCategory === "campaign" ? "glass-btn-primary" : "glass-btn-secondary"}
+                className={activeCategory === "campaign" ? "theme-preview-btn-secondary" : "theme-preview-btn-secondary"}
                 styles={{
                   root: {
                     background: activeCategory === "campaign" ? "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.15))" : "transparent",
@@ -553,7 +553,7 @@ export function QuestManager() {
                   setActiveCategory("personal");
                   setSelectedQuestId(null);
                 }}
-                className={activeCategory === "personal" ? "glass-btn-primary" : "glass-btn-secondary"}
+                className={activeCategory === "personal" ? "theme-preview-btn-secondary" : "theme-preview-btn-secondary"}
                 styles={{
                   root: {
                     background: activeCategory === "personal" ? "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.15))" : "transparent",
@@ -719,14 +719,9 @@ export function QuestManager() {
                   </Box>
                   <Button
                     size="xs"
-                    className="glass-btn-primary"
+                    className="theme-preview-btn-secondary"
                     onClick={handleSaveQuestDetails}
                     leftSection={<IconCheck size={14} />}
-                    styles={{
-                      label: {
-                        color: "white !important",
-                      },
-                    }}
                     style={{ fontWeight: 700 }}
                   >
                     Save Changes
@@ -881,7 +876,7 @@ export function QuestManager() {
                               control: { display: "none" },
                             }}
                           />
-                          <ActionIcon size="md" className="glass-btn-primary" onClick={handleAddObjective} style={{ height: "32px", width: "32px" }}>
+                          <ActionIcon size="md" className="theme-preview-btn-secondary" onClick={handleAddObjective} style={{ height: "32px", width: "32px" }}>
                             <IconPlus size={14} />
                           </ActionIcon>
                         </Group>
@@ -1088,7 +1083,7 @@ export function QuestManager() {
                               control: { display: "none" },
                             }}
                           />
-                          <ActionIcon size="md" className="glass-btn-primary" onClick={handleAddCustomCurrency} style={{ height: "32px", width: "32px" }}>
+                          <ActionIcon size="md" className="theme-preview-btn-secondary" onClick={handleAddCustomCurrency} style={{ height: "32px", width: "32px" }}>
                             <IconPlus size={14} />
                           </ActionIcon>
                         </Group>
