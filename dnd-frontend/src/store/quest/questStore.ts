@@ -93,7 +93,11 @@ export const useQuestStore = create<QuestState & QuestActions>()(
       addObjective: async (questId: string, obj) => {
         set({ loading: true });
         try {
-          return await addObjective(questId, obj);
+          const updated = await addObjective(questId, obj);
+          set((state) => ({
+            quests: state.quests.map((q) => (q.id === updated.id ? updated : q)),
+          }));
+          return updated;
         } finally {
           set({ loading: false });
         }
@@ -102,7 +106,11 @@ export const useQuestStore = create<QuestState & QuestActions>()(
       updateObjective: async (questId, obj) => {
         set({ loading: true });
         try {
-          return await updateObjective(questId, obj);
+          const updated = await updateObjective(questId, obj);
+          set((state) => ({
+            quests: state.quests.map((q) => (q.id === updated.id ? updated : q)),
+          }));
+          return updated;
         } finally {
           set({ loading: false });
         }
@@ -111,7 +119,11 @@ export const useQuestStore = create<QuestState & QuestActions>()(
       deleteObjective: async (questId, objId) => {
         set({ loading: true });
         try {
-          return await deleteObjective(questId, objId);
+          const updated = await deleteObjective(questId, objId);
+          set((state) => ({
+            quests: state.quests.map((q) => (q.id === updated.id ? updated : q)),
+          }));
+          return updated;
         } finally {
           set({ loading: false });
         }

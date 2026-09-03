@@ -53,6 +53,15 @@ import { MarkdownRenderer } from "@components/MarkdownRender";
 import { CustomSelect } from "@components/common/CustomSelect";
 import styles from "@styles/InventoryDashboard.module.css";
 
+function generateObjectId(): string {
+  const chars = "0123456789abcdef";
+  let result = "";
+  for (let i = 0; i < 24; i++) {
+    result += chars[Math.floor(Math.random() * 16)];
+  }
+  return result;
+}
+
 export function QuestManager() {
   const { selectedId: campaignId, characters, loadCharacters } = useAdminCampaignStore();
 
@@ -243,6 +252,16 @@ export function QuestManager() {
       return;
     }
 
+    // Clean up objectives payload: strip out client-side temporary IDs (temp-) so the backend receives clean new objectives with no ID
+    const cleanedObjectives = objectives.map((obj) => {
+      if (obj.id && obj.id.startsWith("temp-")) {
+        const copy = { ...obj };
+        delete (copy as any).id;
+        return copy;
+      }
+      return obj;
+    });
+
     const updatedQuest: Quest = {
       ...activeQuest,
       title: editTitle,
@@ -253,7 +272,7 @@ export function QuestManager() {
       involvedCharacterIds: editInvolvedIds,
       rewardCurrencies: rewardCurrencies,
       rewardItemIds,
-      objectives,
+      objectives: cleanedObjectives,
     };
 
     try {
@@ -300,7 +319,7 @@ export function QuestManager() {
   const handleAddObjective = () => {
     if (!newObjDesc.trim()) return;
     const newObj: QuestObjective = {
-      id: `temp-${Date.now()}`,
+      id: generateObjectId(),
       description: newObjDesc,
       completionThreshold: newObjThreshold,
       currentProgress: 0,
@@ -796,12 +815,15 @@ export function QuestManager() {
                         </Box>
                       ) : (
                         <Textarea
+                          __staticSelector="true"
                           placeholder="Provide the background details, clues, and context for this quest journal..."
                           value={editDesc}
                           onChange={(e) => setEditDesc(e.currentTarget.value)}
-                          minRows={5}
+                          minRows={10}
+                          autosize={true}
+                          resize="vertical"
                           styles={{
-                            input: { background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.06)", color: "white", fontSize: "13px" },
+                            input: { background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.06)", color: "white", fontSize: "14px" },
                           }}
                         />
                       )}
