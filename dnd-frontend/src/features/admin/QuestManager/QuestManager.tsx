@@ -363,6 +363,20 @@ export function QuestManager() {
     );
   };
 
+  const handleSetProgress = (objId: string, value: number) => {
+    setObjectives((prev) =>
+      prev.map((o) => {
+        if (o.id !== objId) return o;
+        const nextProgress = Math.max(0, Math.min(o.completionThreshold, value));
+        return {
+          ...o,
+          currentProgress: nextProgress,
+          isCompleted: nextProgress >= o.completionThreshold,
+        };
+      })
+    );
+  };
+
   // 5. Dynamic Currency Board Add/Remove handlers
   const handleAddCustomCurrency = () => {
     const code = addCurrencyCode.trim().toLowerCase();
@@ -911,9 +925,36 @@ export function QuestManager() {
                                     {obj.description}
                                   </Text>
                                   {obj.completionThreshold > 1 && (
-                                    <Text size="10px" c="var(--theme-color-accent-primary)" style={{ fontWeight: 600 }}>
-                                      Progress: {obj.currentProgress} / {obj.completionThreshold}
-                                    </Text>
+                                    <Group gap="xs" mt={4} align="center">
+                                      <Text size="10px" c="var(--theme-color-accent-primary)" style={{ fontWeight: 600 }}>
+                                        Progress:
+                                      </Text>
+                                      <NumberInput
+                                        size="xs"
+                                        min={0}
+                                        max={obj.completionThreshold}
+                                        value={obj.currentProgress}
+                                        onChange={(val) => handleSetProgress(obj.id, Number(val) || 0)}
+                                        style={{ width: "65px" }}
+                                        styles={{
+                                          input: {
+                                            background: "rgba(0,0,0,0.25)",
+                                            border: "1px solid rgba(255,255,255,0.05)",
+                                            color: "white",
+                                            fontSize: "11px",
+                                            height: "22px",
+                                            minHeight: "22px",
+                                            paddingLeft: "6px",
+                                            paddingRight: "6px",
+                                            textAlign: "center",
+                                          },
+                                          control: { display: "none" },
+                                        }}
+                                      />
+                                      <Text size="10px" c="rgba(255,255,255,0.5)" style={{ fontWeight: 600 }}>
+                                        / {obj.completionThreshold}
+                                      </Text>
+                                    </Group>
                                   )}
                                 </Box>
                               </Group>
