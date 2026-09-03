@@ -1,4 +1,4 @@
-import { IconBook2, IconDashboard, IconDice5, IconHome, IconMessageChatbot, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconSettings } from "@tabler/icons-react";
+import { IconBook2, IconDashboard, IconDice5, IconHome, IconMessageChatbot, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconSettings, IconCompass } from "@tabler/icons-react";
 
 export type Section = "home" | "admin" | "character" | "campaign";
 
@@ -22,6 +22,7 @@ export const tabs: Record<Section, TabItem[]> = {
     { link: "/profile", label: "Profile", icon: IconUsers },
     { link: "/spells", label: "Spellbook", icon: IconSparkles },
     { link: "/notes", label: "Notes", icon: IconNotes },
+    { link: "/quests", label: "Quests", icon: IconCompass },
     { link: "/roll-history", label: "Rolls", icon: IconDice5 },
   ],
   campaign: [

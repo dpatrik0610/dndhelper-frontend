@@ -4,10 +4,14 @@ import type { EntityChangeBatch, EntityChangeEvent } from "./handlers/entitySync
 import { handleInventoryChange } from "./handlers/inventoryChangeHandler";
 import { handleShopChange } from "./handlers/shopChangeHandler";
 import { handleSellRequestChange } from "./handlers/sellRequestChangeHandler";
+import { handleQuestChange } from "./handlers/questChangeHandler";
 
 export class EntitySyncManager {
   static handleEntityChange(event: EntityChangeEvent) {
     switch (event.entityType) {
+      case "Quest":
+        handleQuestChange(event);
+        break;
       case "Character":
         handleCharacterChange(event);
         break;

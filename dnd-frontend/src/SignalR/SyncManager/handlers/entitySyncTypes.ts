@@ -1,5 +1,5 @@
 export interface EntityChangeEvent {
-  entityType: "Character" | "Inventory" | "Campaign" | "Encounter" | "Shop" | "SellRequest";
+  entityType: "Character" | "Inventory" | "Campaign" | "Encounter" | "Shop" | "SellRequest" | "Quest";
   entityId?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;

@@ -26,6 +26,7 @@ const SpellPage = lazy(() => import("@features/spells/SpellPage"));
 const CharacterFormPage = lazy(() => import("@features/characterForm/CharacterFormPage").then(m => ({ default: m.CharacterFormPage })));
 const AdminDashboard = lazy(() => import("@features/admin/AdminDashboard").then(m => ({ default: m.AdminDashboard })));
 const NotesPage = lazy(() => import("@features/notes/NotesPage"));
+const QuestsPage = lazy(() => import("@features/quests/QuestsPage"));
 const RollHistoryPage = lazy(() => import("@features/rollHistory/RollHistoryPage"));
 const RulesPage = lazy(() => import("@features/rules/RulesPage"));
 const AiAssistantPage = lazy(() => import("@features/aiAssistant/AiAssistantPage"));
@@ -162,6 +163,7 @@ function AppRoutes() {
                 <Route path="/rules" element={<RulesPage />} />
                 <Route path="/shop" element={<ShopkeeperPage />} />
                 <Route path="/notes" element={<NotesPage />} />
+                <Route path="/quests" element={<QuestsPage />} />
                 <Route path="/encounter" element={<Navigate to="/encounter-room" replace />} />
                 <Route path="/encounter-room" element={<EncounterRoomPage />} />
                 <Route path="/encounter-room/:roomId" element={<EncounterRoomPage />} />

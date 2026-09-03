@@ -4,6 +4,7 @@ import { useInventoryStore } from "@store/inventory/inventoryStore";
 import { useNoteStore } from "@store/note/noteStore";
 import { useSpellStore } from "@store/spell/spellStore";
 import { useSessionStore } from "@store/session/sessionStore";
+import { useQuestStore } from "@store/quest/questStore";
 import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
@@ -44,6 +45,10 @@ export const registerAuthStoreGuards = () => {
     // Session store
     useSessionStore.getState().clear();
     useSessionStore.persist?.clearStorage?.();
+
+    // Quest store
+    useQuestStore.getState().clearStore();
+    useQuestStore.persist?.clearStorage?.();
 
     // Admin stores
     useAdminCampaignStore.getState().reset();
