@@ -51,6 +51,7 @@ import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { MarkdownRenderer } from "@components/MarkdownRender";
 import { CustomSelect } from "@components/common/CustomSelect";
+import { GlassyTextInput } from "@components/common/GlassyTextInput";
 import styles from "@styles/InventoryDashboard.module.css";
 
 function generateObjectId(): string {
@@ -454,9 +455,14 @@ export function QuestManager() {
 
   const inputStyle = {
     input: {
-      backgroundColor: "rgba(0,0,0,0.25)",
-      border: "1px solid rgba(255,255,255,0.06)",
-      color: "white",
+      backgroundColor: "rgba(0,0,0,0.25) !important",
+      border: "1.5px solid var(--theme-border-subtle, rgba(255,255,255,0.08)) !important",
+      color: "var(--theme-color-text-primary, #ffffff) !important",
+      transition: "all 0.2s ease",
+      "&:focus": {
+        borderColor: "var(--theme-border-glow, rgba(255, 255, 255, 0.25)) !important",
+        boxShadow: "var(--theme-glow-shadow-primary, none) !important",
+      },
     },
   };
 
@@ -549,14 +555,13 @@ export function QuestManager() {
             </Group>
 
             {/* Search Input */}
-            <TextInput
+            <GlassyTextInput
               placeholder="Search quests..."
               leftSection={<IconSearch size={14} />}
               value={search}
               onChange={(e) => setSearch(e.currentTarget.value)}
               size="xs"
               mb="xs"
-              styles={inputStyle}
             />
 
             {/* Quick Filters */}

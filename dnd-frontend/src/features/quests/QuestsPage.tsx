@@ -4,14 +4,12 @@ import {
   Text,
   Group,
   Button,
-  TextInput,
   MultiSelect,
   Paper,
   Stack,
   Loader,
   Center,
   SimpleGrid,
-  Textarea,
 } from "@mantine/core";
 import {
   IconPlus,
@@ -32,6 +30,8 @@ import { QuestCard } from "./components/QuestCard";
 import { EquipmentModal } from "@features/inventory/components/EquipmentModal";
 import { QuestDetailsModal } from "./components/QuestDetailsModal";
 import { CustomSelect } from "@components/common/CustomSelect";
+import { GlassyTextInput } from "@components/common/GlassyTextInput";
+import { GlassyTextarea } from "@components/common/GlassyTextarea";
 
 export default function QuestsPage() {
   const character = useCurrentCharacter();
@@ -369,18 +369,11 @@ export default function QuestsPage() {
           {/* Search and Filters panel */}
           <Paper withBorder p="md" style={panelStyle}>
             <Group gap="md" grow={!isMobile}>
-              <TextInput
+              <GlassyTextInput
                 placeholder="Search quests by title, description..."
                 value={search}
                 onChange={(e) => setSearch(e.currentTarget.value)}
-                leftSection={<IconSearch size={16} color="rgba(255, 255, 255, 0.4)" />}
-                styles={{
-                  input: {
-                    background: "rgba(255, 255, 255, 0.02)",
-                    border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-                    color: "white",
-                  },
-                }}
+                leftSection={<IconSearch size={16} color="var(--theme-color-accent-primary, rgba(255, 255, 255, 0.4))" />}
               />
               <CustomSelect
                 placeholder="Quest Category"
@@ -452,7 +445,7 @@ export default function QuestsPage() {
         saveLabel={questModal.editId ? "Save Changes" : "Create Quest"}
       >
         <Stack gap="md">
-          <TextInput
+          <GlassyTextInput
             label="Quest Title"
             placeholder="e.g. Find the Lost Scepter"
             required
@@ -461,12 +454,8 @@ export default function QuestsPage() {
               const val = e.currentTarget.value;
               setQuestModal((prev) => ({ ...prev, title: val }));
             }}
-            styles={{
-              label: { color: "var(--theme-color-text-secondary, rgba(255,255,255,0.7))", fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px" },
-              input: { background: "rgba(255,255,255,0.02)", border: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.08))", color: "white" },
-            }}
           />
-          <Textarea
+          <GlassyTextarea
             label="Description / Lore Notes"
             placeholder="Detail any background information, clues, or thoughts on this quest..."
             minRows={4}
@@ -475,22 +464,14 @@ export default function QuestsPage() {
               const val = e.currentTarget.value;
               setQuestModal((prev) => ({ ...prev, description: val }));
             }}
-            styles={{
-              label: { color: "var(--theme-color-text-secondary, rgba(255,255,255,0.7))", fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px" },
-              input: { background: "rgba(255,255,255,0.02)", border: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.08))", color: "white" },
-            }}
           />
-          <TextInput
+          <GlassyTextInput
             label="Location"
             placeholder="e.g. Neverwinter, Sword Coast"
             value={questModal.location}
             onChange={(e) => {
               const val = e.currentTarget.value;
               setQuestModal((prev) => ({ ...prev, location: val }));
-            }}
-            styles={{
-              label: { color: "var(--theme-color-text-secondary, rgba(255,255,255,0.7))", fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px" },
-              input: { background: "rgba(255,255,255,0.02)", border: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.08))", color: "white" },
             }}
           />
 
@@ -506,29 +487,22 @@ export default function QuestsPage() {
               onChange={(val) =>
                 setQuestModal((prev) => ({ ...prev, involvedCharacterIds: val }))
               }
+              classNames={{
+                input: "glassy-input",
+                label: "glassy-label",
+              }}
               styles={{
-                label: {
-                  color: "var(--theme-color-text-secondary, rgba(255,255,255,0.7))",
-                  fontSize: "12px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.5px",
-                },
-                input: {
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-                  color: "white",
-                },
                 dropdown: {
-                  background: "var(--theme-bg-panel-opaque, #140f28)",
-                  border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1))",
+                  background: "var(--theme-bg-panel-opaque, #140f28) !important",
+                  border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1)) !important",
                 },
                 option: {
-                  color: "white",
+                  color: "white !important",
                   "&[data-hovered]": {
-                    background: "var(--theme-bg-hover, rgba(168, 85, 247, 0.14))",
+                    background: "var(--theme-bg-hover, rgba(168, 85, 247, 0.14)) !important",
                   },
                   "&[data-selected]": {
-                    background: "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.2))",
+                    background: "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.2)) !important",
                   },
                 },
               }}

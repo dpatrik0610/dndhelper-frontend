@@ -18,6 +18,7 @@ import {
 import type { Quest } from "@appTypes/Quest";
 import { QuestCardHeader } from "./QuestCardHeader";
 import { MarkdownRenderer } from "@components/MarkdownRender";
+import { useMemo } from "react";
 
 interface QuestCardProps {
   quest: Quest;
@@ -49,23 +50,64 @@ export function QuestCard({
   const remainingCount = Math.max(totalObjectives - 3, 0);
   const isCompleted = quest.status?.toLowerCase() === "completed";
 
+  // Dynamic Type-based Color Coding Theme Spec using Campaign CSS Variables (Adapts automatically to Feywild, Steampunk, Toxic, Glacier, etc.)
+  const typeTheme = useMemo(() => {
+    switch (quest.type?.toLowerCase()) {
+      case "main":
+        return {
+          color: "var(--theme-color-accent-primary, rgba(168, 85, 247, 0.8))",
+          bg: "var(--theme-gradient-primary-glass, rgba(168, 85, 247, 0.015))",
+          border: "var(--theme-border-glow, rgba(168, 85, 247, 0.12))",
+          shadow: "var(--theme-glow-shadow-primary, rgba(168, 85, 247, 0.05))",
+        };
+      case "side":
+        return {
+          color: "var(--theme-color-accent-secondary, rgba(59, 130, 246, 0.8))",
+          bg: "rgba(59, 130, 246, 0.015)",
+          border: "rgba(59, 130, 246, 0.12)",
+          shadow: "rgba(59, 130, 246, 0.05)",
+        };
+      case "faction":
+        return {
+          color: "var(--theme-color-text-secondary, rgba(13, 148, 136, 0.8))",
+          bg: "rgba(13, 148, 136, 0.015)",
+          border: "rgba(13, 148, 136, 0.12)",
+          shadow: "rgba(13, 148, 136, 0.05)",
+        };
+      case "personal":
+        return {
+          color: "var(--theme-color-text-glow, rgba(245, 158, 11, 0.8))",
+          bg: "rgba(245, 158, 11, 0.055)",
+          border: "rgba(245, 158, 11, 0.12)",
+          shadow: "rgba(245, 158, 11, 0.05)",
+        };
+      default:
+        return {
+          color: "var(--theme-border-subtle, rgba(255, 255, 255, 0.25))",
+          bg: "rgba(255, 255, 255, 0.5)",
+          border: "var(--theme-border-subtle, rgba(255, 255, 255, 0.07))",
+          shadow: "rgba(0, 0, 0, 0.1)",
+        };
+    }
+  }, [quest.type]);
+
   return (
     <Paper
       component="article"
       withBorder
       radius="md"
-      p={0}
       className="quest-card"
       style={{
         height: "100%",
         minHeight: 300,
         overflow: "hidden",
-        background:
-          "var(--theme-bg-card, rgba(255, 255, 255, 0.02))",
-        borderColor:
-          "var(--theme-border-subtle, rgba(255, 255, 255, 0.07))",
-        transition:
-          "transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease",
+        background: `linear-gradient(135deg, ${typeTheme.bg} 0%, rgba(255, 255, 255, 0.01) 100%)`,
+        borderLeft: `4px solid ${typeTheme.color}`,
+        borderTop: `1.5px solid ${typeTheme.border}`,
+        borderRight: `0.5px solid ${typeTheme.border}`,
+        borderBottom: `0.5px solid ${typeTheme.border}`,
+        boxShadow: `0 4px 24px rgba(0, 0, 0, 0.22), 0 0 15px ${typeTheme.shadow}, inset 0 1px 1px rgba(255, 255, 255, 0.03)`,
+        transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
       }}
     >
       <Box
@@ -79,12 +121,12 @@ export function QuestCard({
         <Stack gap="md" style={{ flex: 1 }}>
           {/* Title */}
           <Text 
-          size="md" 
-          fw={800} 
+          size="lg" 
+          fw={900} 
           c="var(--theme-color-text-primary)" 
           lineClamp={1} 
           className="narrative-title" 
-          style={{ textTransform: "capitalize" }}>
+          style={{ textTransform: "capitalize", letterSpacing: "0.2px" }}>
             {quest.title}
           </Text>
 
@@ -98,10 +140,18 @@ export function QuestCard({
             />
 
           {/* Description (Markdown) */}
-          
-
           {quest.description && (
-            <MarkdownRenderer content={quest.description || ""} style={{ lineHeight: 1.5, color: "var(--theme-color-text-secondary)", lineClamp: 3 }} />
+            <Box
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              <MarkdownRenderer content={quest.description || ""} style={{ lineHeight: 1.5, color: "var(--theme-color-text-secondary)"}} />
+            </Box>
           )}
 
           {/* Progress */}
@@ -288,10 +338,13 @@ export function QuestCard({
 
       <style>
         {`
+          .quest-card {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.03);
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+          }
+
           .quest-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--theme-border-glow, rgba(255,255,255,0.15));
-            box-shadow: var(--theme-glow-shadow-primary);
+            transform: translateY(-6px);
           }
 
           .quest-card-details:hover {
