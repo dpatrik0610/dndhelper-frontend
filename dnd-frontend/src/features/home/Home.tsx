@@ -61,12 +61,6 @@ export default function Home() {
     void load();
   }, [character?.id, loadByCampaign, token]);
 
-  const campaignCharacters = useMemo(() => {
-    if (!campaign) return characters;
-    const campaignCharIds = new Set(campaign.characters.map((c) => c.id).filter(Boolean));
-    return characters.filter((char) => campaignCharIds.has(char.id));
-  }, [characters, campaign]);
-
   const activeSession = useMemo(() => {
     const live = sessions.find((s) => s.isLive);
     if (live) return live;
@@ -103,7 +97,7 @@ export default function Home() {
           <CharacterSelectModal
             opened={modalOpened}
             onClose={() => setModalOpened(false)}
-            characters={campaignCharacters}
+            characters={characters}
             onSelect={handleSelectCharacter}
           />
         }
