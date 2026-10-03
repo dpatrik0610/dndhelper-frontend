@@ -189,6 +189,45 @@ export function AbilityScores() {
                   color: "var(--theme-color-text-secondary)",
                 }}
               >
+                Saving Throws
+              </Text>
+
+              <SimpleGrid cols={{ base: 3, sm: 6 }} spacing="xs" style={{ width: "100%" }}>
+                {abilities.map((ab) => {
+                  const save = character.savingThrows?.[ab.saveKey] ?? 0;
+                  return (
+                    <Group
+                      key={ab.saveKey}
+                      justify="space-between"
+                      wrap="nowrap"
+                      p="6px 10px"
+                      style={{
+                        background: "rgba(255, 255, 255, 0.01)",
+                        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <Text size="xs" fw={700} style={{ color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))", letterSpacing: "1px" }}>
+                        {ab.short}
+                      </Text>
+                      <Text size="sm" fw={700} style={{ color: "var(--theme-color-accent-primary, #f59e0b)" }}>
+                        {save >= 0 ? `+${save}` : save}
+                      </Text>
+                    </Group>
+                  );
+                })}
+              </SimpleGrid>
+
+              <Text
+                size="xs"
+                fw={400}
+                style={{
+                  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                  letterSpacing: "1.5px",
+                  textTransform: "uppercase",
+                  color: "var(--theme-color-text-secondary)",
+                }}
+              >
                 Character Skills Modifiers
               </Text>
 
