@@ -1,7 +1,7 @@
 ﻿import { ActionIcon, Badge, Divider, Group, Modal, Paper, Stack, Text } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useSubtleRollStore } from "@store/ui/subtleRollStore";
-import { formatRollExpression, formatRollsList } from "@utils/rollFormat";
+import { DiceResult } from "./Dice";
 
 export function SubtleRollDetailsModal() {
   const { activeRoll, opened, close } = useSubtleRollStore();
@@ -9,7 +9,6 @@ export function SubtleRollDetailsModal() {
   if (!activeRoll) return null;
 
   const timestamp = new Date(activeRoll.timestampUtc);
-  const expression = formatRollExpression(activeRoll);
 
   return (
     <Modal
@@ -77,33 +76,13 @@ export function SubtleRollDetailsModal() {
             borderColor: "rgba(255,255,255,0.12)",
           }}
         >
-          <Stack gap="xs">
-            <Group justify="space-between" align="center">
-              <Text fw={600}>Result</Text>
-              <Badge color="violet" variant="light" size="lg">
-                Total {activeRoll.total}
-              </Badge>
-            </Group>
-            <Text size="sm">Expression: {expression}</Text>
-            <Text size="sm">Rolls: {formatRollsList(activeRoll)}</Text>
-            <Group gap="xs" wrap="wrap">
-              {typeof activeRoll.min === "number" && (
-                <Badge color="gray" variant="light">
-                  Min {activeRoll.min}
-                </Badge>
-              )}
-              {typeof activeRoll.max === "number" && (
-                <Badge color="gray" variant="light">
-                  Max {activeRoll.max}
-                </Badge>
-              )}
-              {typeof activeRoll.average === "number" && (
-                <Badge color="gray" variant="light">
-                  Avg {activeRoll.average.toFixed(2)}
-                </Badge>
-              )}
-            </Group>
-          </Stack>
+          {/* key: replay the landing animation for each new subtle roll */}
+          <DiceResult
+            key={activeRoll.rollId}
+            result={activeRoll}
+            sides={activeRoll.sides}
+            count={activeRoll.numberOfDice}
+          />
         </Paper>
 
         {(activeRoll.rolledByUsername || activeRoll.rolledByUserId) && (

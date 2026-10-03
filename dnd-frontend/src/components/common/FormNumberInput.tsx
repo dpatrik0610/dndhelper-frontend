@@ -46,7 +46,8 @@ export function FormNumberInput({
       }}
       onBlur={() => {
         if (typeof editing === "string" && editing.trim() === "") {
-          const fallback = min ?? 0;
+          // 0, clamped into [min, max] (so min={-999} doesn't jump to -999)
+          const fallback = Math.min(Math.max(0, min ?? 0), max ?? Infinity);
           setEditing(fallback);
           onChange(fallback);
         }
