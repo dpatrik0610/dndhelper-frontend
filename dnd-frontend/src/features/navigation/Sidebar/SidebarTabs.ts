@@ -1,4 +1,4 @@
-import { IconBook2, IconDashboard, IconDice5, IconHome, IconMessageChatbot, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconSettings, IconCompass } from "@tabler/icons-react";
+import { IconBook2, IconDashboard, IconDice5, IconHome, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconSettings, IconCompass } from "@tabler/icons-react";
 
 export type Section = "home" | "admin" | "character" | "campaign";
 
@@ -16,7 +16,6 @@ export const tabs: Record<Section, TabItem[]> = {
   ],
   admin: [
     { link: "/dashboard", label: "Dashboard", icon: IconDashboard },
-    { link: "/ai-assistant", label: "AI Assistant", icon: IconMessageChatbot },
   ],
   character: [
     { link: "/profile", label: "Profile", icon: IconUsers },

@@ -54,7 +54,7 @@ export function QuestDetailsModal({
     setShowForm(true);
   };
 
-  const handleEditClick = (questId: string, obj: QuestObjective) => {
+  const handleEditClick = (_questId: string, obj: QuestObjective) => {
     setEditingObjectiveId(obj.id);
     setObjectiveDesc(obj.description || "");
     setObjectiveThreshold(obj.completionThreshold);

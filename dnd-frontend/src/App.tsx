@@ -29,7 +29,6 @@ const NotesPage = lazy(() => import("@features/notes/NotesPage"));
 const QuestsPage = lazy(() => import("@features/quests/QuestsPage"));
 const RollHistoryPage = lazy(() => import("@features/rollHistory/RollHistoryPage"));
 const RulesPage = lazy(() => import("@features/rules/RulesPage"));
-const AiAssistantPage = lazy(() => import("@features/aiAssistant/AiAssistantPage"));
 const EncounterRoomPage = lazy(() => import("@features/encounterRoom/EncounterRoomPage"));
 const ShopkeeperPage = lazy(() => import("@features/shop/ShopkeeperPage"));
 const SettingsPage = lazy(() => import("@features/settings/SettingsPage"));
@@ -170,7 +169,6 @@ function AppRoutes() {
                 <Route path="/roll-history" element={<RollHistoryPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
-                {isAdmin && <Route path="/ai-assistant" element={<AiAssistantPage />} />}
               </Route>
 
               <Route path="/login" element={<Login />} />

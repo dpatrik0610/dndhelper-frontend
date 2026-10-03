@@ -1,4 +1,3 @@
-import React from "react";
 import { Select, type SelectProps } from "@mantine/core";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
@@ -12,13 +11,6 @@ export function CustomSelect(props: SelectProps) {
       allowDeselect={false}
       {...props}
       className={`${activeThemeClass} ${props.className || ""}`}
-      comboboxProps={{
-        popoverProps: {
-          className: `${activeThemeClass} ${props.comboboxProps?.popoverProps?.className || ""}`,
-          ...props.comboboxProps?.popoverProps,
-        },
-        ...props.comboboxProps,
-      }}
       styles={{
         input: {
           background: "rgba(255, 255, 255, 0.02) !important",

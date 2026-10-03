@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Group, Text, Progress, ActionIcon } from "@mantine/core";
 import {
   IconCircle,

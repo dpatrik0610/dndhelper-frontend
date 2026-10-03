@@ -1,9 +1,0 @@
-.itemCard {
-  transition: transform 150ms ease, box-shadow 150ms ease;
-  box-shadow: 0 0 10px rgba(150, 50, 255, 0.15);
-}
-
-.itemCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(150, 50, 255, 0.3);
-}
