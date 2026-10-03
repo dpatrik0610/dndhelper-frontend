@@ -140,12 +140,6 @@ export function CharacterSelectModal({
           mb="md"
           label="Campaign"
           allowDeselect={false}
-          classNames={{
-            input: "glassy-input",
-            label: "glassy-label",
-            dropdown: "glassy-dropdown",
-            option: "glassy-option",
-          }}
           value={campaignFilter}
           onChange={(v) => setCampaignFilter(v ?? ALL)}
           data={[

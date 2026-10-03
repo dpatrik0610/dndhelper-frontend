@@ -1,0 +1,33 @@
+import {
+  createTheme,
+  Autocomplete,
+  Modal,
+  MultiSelect,
+  NumberInput,
+  Paper,
+  PasswordInput,
+  Select,
+  TagsInput,
+  Textarea,
+  TextInput,
+} from "@mantine/core";
+
+// Default look for every Mantine input / dropdown / modal / paper.
+// Styles live in glassyInput.css; theme CSS variables come from the theme class on <html> (see App.tsx).
+const input = { input: "glassy-input", label: "glassy-label" };
+const combobox = { ...input, dropdown: "glassy-dropdown", option: "glassy-option" };
+
+export const mantineTheme = createTheme({
+  components: {
+    TextInput: TextInput.extend({ classNames: input }),
+    NumberInput: NumberInput.extend({ classNames: input }),
+    PasswordInput: PasswordInput.extend({ classNames: input }),
+    Textarea: Textarea.extend({ classNames: input }),
+    Select: Select.extend({ classNames: combobox }),
+    MultiSelect: MultiSelect.extend({ classNames: combobox }),
+    Autocomplete: Autocomplete.extend({ classNames: combobox }),
+    TagsInput: TagsInput.extend({ classNames: combobox }),
+    Modal: Modal.extend({ classNames: { content: "glass-modal" } }),
+    Paper: Paper.extend({ classNames: { root: "glass-paper" } }),
+  },
+});

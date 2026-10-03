@@ -131,6 +131,15 @@ function AppRoutes() {
 
   const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
+  // Mantine portals (dropdowns, modals, popovers) render on <body>, outside AppShell,
+  // so the theme class must also sit on <html> for them to get the theme variables.
+  useEffect(() => {
+    if (isDashboardRoute) return;
+    const root = document.documentElement;
+    root.classList.add(activeThemeClass);
+    return () => root.classList.remove(activeThemeClass);
+  }, [activeThemeClass, isDashboardRoute]);
+
   return (
     <AppShell 
       header={{ height: 0 }} 

@@ -11,12 +11,13 @@ import './styles/index.css'
 import './styles/theme.css'
 import { SignalRProvider } from './SignalR/SignalRProvider.tsx'
 import { registerAuthStoreGuards } from '@store/authStoreGuards'
+import { mantineTheme } from './styles/mantineTheme'
 
 registerAuthStoreGuards();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <MantineProvider defaultColorScheme="dark">
+    <MantineProvider defaultColorScheme="dark" theme={mantineTheme}>
         <Notifications position="bottom-right" />
         <SignalRProvider>
           <App />
