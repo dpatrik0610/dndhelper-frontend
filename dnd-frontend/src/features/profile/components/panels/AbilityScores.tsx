@@ -231,7 +231,7 @@ export function AbilityScores() {
                 Character Skills Modifiers
               </Text>
 
-              <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs" style={{ width: "100%" }}>
+              <div style={{ width: "100%", columns: isMobile ? 1 : 2, columnGap: "var(--mantine-spacing-xs)" }}>
                 {enrichedSkills.map((skill) => {
                   const isProf = !!skill.proficient;
 
@@ -258,6 +258,8 @@ export function AbilityScores() {
                         borderRadius: "8px",
                         boxShadow: rowShadow,
                         transition: "all 0.15s ease",
+                        breakInside: "avoid",
+                        marginBottom: "var(--mantine-spacing-xs)",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = isProf
@@ -338,7 +340,7 @@ export function AbilityScores() {
                     </Group>
                   );
                 })}
-              </SimpleGrid>
+              </div>
             </Stack>
           </Grid.Col>
 
