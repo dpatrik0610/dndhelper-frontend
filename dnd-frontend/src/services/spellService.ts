@@ -7,7 +7,7 @@ export interface SpellNameResponse {
     id: string
     name: string
     level: number
-    school: string
+    school: { name: string | null } | null
 }
 
 export async function getSpellNames(): Promise<SpellNameResponse[]>{

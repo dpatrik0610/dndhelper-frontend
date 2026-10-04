@@ -1,4 +1,31 @@
-export type SidebarThemeVariant = "midnight" | "sunset" | "crimson-vampire" | "frost-glacier" | "feywild" | "toxic" | "void" | "steampunk" | "deep-ocean" | "darkvision";
+export type SidebarThemeVariant = "midnight" | "sunset" | "crimson-vampire" | "frost-glacier" | "feywild" | "toxic" | "void" | "steampunk" | "deep-ocean" | "darkvision" | "cyberpunk";
+
+/** Display data for theme pickers (settings page, sidebar theme bubble). Order = display order. */
+export interface ThemeOption {
+  key: SidebarThemeVariant;
+  name: string;
+  icon: string;
+  accent: string;
+  accentSecondary: string;
+  glow: string;
+}
+
+export const themeOptions: ThemeOption[] = [
+  { key: "midnight", name: "Midnight", icon: "🌌", accent: "#a855f7", accentSecondary: "#06b6d4", glow: "0 0 15px rgba(168, 85, 247, 0.3)" },
+  { key: "sunset", name: "Cyber-Fantasy", icon: "💛", accent: "#f59e0b", accentSecondary: "#10b981", glow: "0 0 15px rgba(245, 158, 11, 0.25)" },
+  { key: "crimson-vampire", name: "Crimson Dynasty", icon: "🩸", accent: "#ef4444", accentSecondary: "#d97706", glow: "0 0 15px rgba(239, 68, 68, 0.3)" },
+  { key: "frost-glacier", name: "Frost Glacier", icon: "❄️", accent: "#7dd3fc", accentSecondary: "#5eead4", glow: "0 0 15px rgba(125, 211, 252, 0.4)" },
+  { key: "feywild", name: "Feywild Bloom", icon: "🌸", accent: "#f472b6", accentSecondary: "#fbbf24", glow: "0 0 15px rgba(244, 114, 182, 0.25)" },
+  { key: "toxic", name: "Toxic Spore", icon: "🧪", accent: "#22c55e", accentSecondary: "#facc15", glow: "0 0 15px rgba(34, 197, 94, 0.25)" },
+  { key: "void", name: "Eldritch Void", icon: "👁️", accent: "#d946ef", accentSecondary: "#6366f1", glow: "0 0 15px rgba(217, 70, 239, 0.25)" },
+  { key: "steampunk", name: "Clockwork Brass", icon: "⚙️", accent: "#ea580c", accentSecondary: "#0d9488", glow: "0 0 15px rgba(234, 88, 12, 0.25)" },
+  { key: "deep-ocean", name: "Deep Ocean", icon: "🌊", accent: "#0284c7", accentSecondary: "#0d9488", glow: "0 0 15px rgba(2, 132, 199, 0.25)" },
+  { key: "darkvision", name: "Darkvision", icon: "🕶️", accent: "#ffffff", accentSecondary: "#9ca3af", glow: "0 0 15px rgba(255, 255, 255, 0.25)" },
+  { key: "cyberpunk", name: "Cyberpunk", icon: "🌃", accent: "#fcee0a", accentSecondary: "#00f0ff", glow: "0 0 15px rgba(252, 238, 10, 0.45)" },
+];
+
+export const getThemeOption = (key: SidebarThemeVariant): ThemeOption =>
+  themeOptions.find((t) => t.key === key) ?? themeOptions[1];
 
 export interface SidebarThemeTokens {
   background: string;
@@ -43,14 +70,14 @@ export const sidebarThemes: Record<SidebarThemeVariant, SidebarThemeTokens> = {
     activeText: "#ffffff",
   },
   "frost-glacier": {
-    background: "linear-gradient(160deg, rgba(8, 18, 30, 0.92), rgba(4, 9, 16, 0.85))",
-    border: "rgba(56, 189, 248, 0.08)",
-    borderStrong: "rgba(56, 189, 248, 0.16)",
-    header: "linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(203, 213, 225, 0.2))",
-    panel: "rgba(255, 255, 255, 0.02)",
-    active: "linear-gradient(135deg, #38bdf8, #cbd5e1)",
-    activeBorder: "rgba(56, 189, 248, 0.3)",
-    activeText: "#0e1e34",
+    background: "linear-gradient(170deg, rgba(10, 30, 56, 0.94), rgba(3, 10, 22, 0.9))",
+    border: "rgba(186, 230, 253, 0.1)",
+    borderStrong: "rgba(186, 230, 253, 0.22)",
+    header: "linear-gradient(135deg, rgba(125, 211, 252, 0.28), rgba(94, 234, 212, 0.18), rgba(167, 139, 250, 0.16))",
+    panel: "rgba(186, 230, 253, 0.03)",
+    active: "linear-gradient(135deg, #e0f2fe, #7dd3fc 55%, #5eead4)",
+    activeBorder: "rgba(224, 242, 254, 0.45)",
+    activeText: "#04182e",
   },
   feywild: {
     background: "linear-gradient(160deg, rgba(40, 15, 35, 0.92), rgba(18, 6, 16, 0.85))",
@@ -112,6 +139,16 @@ export const sidebarThemes: Record<SidebarThemeVariant, SidebarThemeTokens> = {
     activeBorder: "rgba(255, 255, 255, 0.25)",
     activeText: "rgba(0, 0, 0, 0.9)",
   },
+  cyberpunk: {
+    background: "linear-gradient(160deg, rgba(8, 6, 14, 0.96), rgba(3, 2, 8, 0.92))",
+    border: "rgba(0, 240, 255, 0.14)",
+    borderStrong: "rgba(252, 238, 10, 0.35)",
+    header: "linear-gradient(135deg, rgba(252, 238, 10, 0.22), rgba(255, 0, 60, 0.18))",
+    panel: "rgba(0, 240, 255, 0.03)",
+    active: "linear-gradient(135deg, #fcee0a, #f5d300)",
+    activeBorder: "rgba(0, 240, 255, 0.7)",
+    activeText: "#0a0a0f",
+  },
 };
 
 /**
@@ -137,6 +174,8 @@ export function getActiveThemeClass(theme: SidebarThemeVariant): string {
       return "theme-deep-ocean";
     case "darkvision":
       return "theme-darkvision";
+    case "cyberpunk":
+      return "theme-cyberpunk";
     case "sunset":
     default:
       return "theme-cyber-noir";

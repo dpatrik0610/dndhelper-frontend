@@ -24,7 +24,7 @@ import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
-import { type SidebarThemeVariant } from "@appTypes/ThemeTypes";
+import { type SidebarThemeVariant, themeOptions } from "@appTypes/ThemeTypes";
 import {
   useCharacterList,
   useCurrentCharacter,
@@ -33,97 +33,7 @@ import {
 import { updateCharacter as updateCharacterApi } from "@services/characterService";
 import type { Character } from "@appTypes/Character/Character";
 
-interface ThemeOption {
-  key: SidebarThemeVariant;
-  name: string;
-  icon: string;
-  accent: string;
-  accentSecondary: string;
-  glow: string;
-}
-
-const THEMES: ThemeOption[] = [
-  {
-    key: "midnight",
-    name: "Midnight",
-    icon: "🌌",
-    accent: "#a855f7",
-    accentSecondary: "#06b6d4",
-    glow: "0 0 15px rgba(168, 85, 247, 0.3)",
-  },
-  {
-    key: "sunset",
-    name: "Cyber-Fantasy",
-    icon: "💛",
-    accent: "#f59e0b",
-    accentSecondary: "#10b981",
-    glow: "0 0 15px rgba(245, 158, 11, 0.25)",
-  },
-  {
-    key: "crimson-vampire",
-    name: "Crimson Dynasty",
-    icon: "🩸",
-    accent: "#ef4444",
-    accentSecondary: "#d97706",
-    glow: "0 0 15px rgba(239, 68, 68, 0.3)",
-  },
-  {
-    key: "frost-glacier",
-    name: "Frost Glacier",
-    icon: "❄️",
-    accent: "#38bdf8",
-    accentSecondary: "#cbd5e1",
-    glow: "0 0 15px rgba(56, 189, 248, 0.25)",
-  },
-  {
-    key: "feywild",
-    name: "Feywild Bloom",
-    icon: "🌸",
-    accent: "#f472b6",
-    accentSecondary: "#fbbf24",
-    glow: "0 0 15px rgba(244, 114, 182, 0.25)",
-  },
-  {
-    key: "toxic",
-    name: "Toxic Spore",
-    icon: "🧪",
-    accent: "#22c55e",
-    accentSecondary: "#facc15",
-    glow: "0 0 15px rgba(34, 197, 94, 0.25)",
-  },
-  {
-    key: "void",
-    name: "Eldritch Void",
-    icon: "👁️",
-    accent: "#d946ef",
-    accentSecondary: "#6366f1",
-    glow: "0 0 15px rgba(217, 70, 239, 0.25)",
-  },
-  {
-    key: "steampunk",
-    name: "Clockwork Brass",
-    icon: "⚙️",
-    accent: "#ea580c",
-    accentSecondary: "#0d9488",
-    glow: "0 0 15px rgba(234, 88, 12, 0.25)",
-  },
-  {
-    key: "deep-ocean",
-    name: "Deep Ocean",
-    icon: "🌊",
-    accent: "#0284c7",
-    accentSecondary: "#0d9488",
-    glow: "0 0 15px rgba(2, 132, 199, 0.25)",
-  },
-  {
-    key: "darkvision",
-    name: "Darkvision",
-    icon: "🕶️",
-    accent: "#ffffff",
-    accentSecondary: "#9ca3af",
-    glow: "0 0 15px rgba(255, 255, 255, 0.25)",
-  },
-];
+const THEMES = themeOptions;
 
 type SettingsSection = "appearance" | "tokens";
 

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Box } from "@mantine/core";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUiStore } from "@store/ui/uiStore";
-import { MagicThemeSelector } from "@components/common/MagicThemeSelector";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 
 // Existing service and store dependencies
@@ -148,7 +147,6 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
             <AlreadyLoggedIn />
           </Box>
         </Box>
-        <MagicThemeSelector variant="floating" />
       </Box>
     );
   }
@@ -198,9 +196,6 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
           </AnimatePresence>
         </Box>
       </Box>
-
-      {/* 3. RUNES OF POWER THEME SWITCHER BAR (BOTTOM CENTER) */}
-      <MagicThemeSelector variant="floating" />
     </Box>
   );
 }

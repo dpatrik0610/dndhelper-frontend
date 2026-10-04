@@ -1,0 +1,316 @@
+/* ==========================================================================
+   🌃 Cyberpunk theme: signature UI + backdrop
+   Variables live in theme.css (.theme-cyberpunk). The theme class sits on <html>,
+   so these rules also reach portaled modals and dropdowns.
+   ========================================================================== */
+
+/* ---------- Backdrop: skyline + traffic + grid + scanlines (CyberpunkBackdrop.tsx) ----------
+   Layer order (bottom → top): sky glow, far skyline, near skyline, traffic, horizon line, grid, scanlines.
+   The horizon sits at 52%: the city stands on it, the grid floor starts from it. */
+
+.cp-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Horizon glow where the grid meets the skyline */
+.cp-overlay::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 52%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ff003c 20%, #fcee0a 50%, #00f0ff 80%, transparent);
+  box-shadow: 0 0 30px 6px rgba(255, 0, 60, 0.35), 0 0 80px 20px rgba(0, 240, 255, 0.12);
+  opacity: 0.55;
+}
+
+/* Light pollution: magenta/violet glow rising off the city */
+.cp-sky {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 52%;
+  background:
+    radial-gradient(ellipse 70% 55% at 30% 100%, rgba(255, 42, 109, 0.22), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 75% 100%, rgba(185, 103, 255, 0.2), transparent 70%),
+    linear-gradient(to top, rgba(40, 10, 60, 0.45), transparent 80%);
+}
+
+/* City block standing on the horizon */
+.cp-city {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 48%;
+  height: 40%;
+}
+
+/* Neon fog at street level */
+.cp-city::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30%;
+  background: linear-gradient(to top, rgba(255, 0, 60, 0.18), rgba(0, 240, 255, 0.05) 60%, transparent);
+}
+
+/* A strip of 3 identical tiles scrolling by one tile = seamless loop */
+.cp-skyline {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  width: max-content;
+  will-change: transform;
+  animation: cpDrift linear infinite;
+}
+
+.cp-skyline__tile {
+  display: block;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 2000 / 400;
+  flex-shrink: 0;
+}
+
+.cp-skyline--far {
+  height: 100%;
+  opacity: 0.85;
+  filter: blur(0.6px);
+  animation-duration: 260s;
+}
+
+.cp-skyline--near {
+  height: 78%;
+  animation-duration: 150s;
+}
+
+/* Flickering neon signs: mostly on, with a couple of hard dropouts per cycle */
+.cp-neon {
+  filter: drop-shadow(0 0 3px var(--c)) drop-shadow(0 0 8px var(--c));
+  animation: cpNeonFlicker 9s step-end infinite;
+}
+
+.cp-beacon {
+  fill: #ff003c;
+  filter: drop-shadow(0 0 4px #ff003c);
+  animation: cpBeacon 2.2s ease-in-out infinite;
+}
+
+/* Flying traffic: a light with a glowing trail */
+.cp-traffic {
+  position: absolute;
+  inset: 0;
+}
+
+.cp-car {
+  position: absolute;
+  left: 0;
+  width: 70px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--c));
+  box-shadow: 0 0 8px var(--c);
+  opacity: 0;
+  animation: cpFly linear infinite;
+}
+
+.cp-car--rtl {
+  background: linear-gradient(270deg, transparent, var(--c));
+  animation-name: cpFlyRtl;
+}
+
+/* Mobile / static: keep the scene, stop everything moving */
+.cp-overlay--static,
+.cp-overlay--static * {
+  animation: none !important;
+}
+
+.cp-overlay--static .cp-scanlines::after {
+  display: none;
+}
+
+@keyframes cpDrift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.3333%); }
+}
+
+@keyframes cpNeonFlicker {
+  0%    { opacity: 1; }
+  41%   { opacity: 0.25; }
+  42%   { opacity: 1; }
+  43.5% { opacity: 0.4; }
+  44.5% { opacity: 1; }
+  78%   { opacity: 0.15; }
+  80%   { opacity: 1; }
+}
+
+@keyframes cpBeacon {
+  0%, 100% { opacity: 0.2; }
+  50%      { opacity: 1; }
+}
+
+@keyframes cpFly {
+  0%   { transform: translateX(-10vw); opacity: 0; }
+  5%   { opacity: 0.9; }
+  95%  { opacity: 0.9; }
+  100% { transform: translateX(110vw); opacity: 0; }
+}
+
+@keyframes cpFlyRtl {
+  0%   { transform: translateX(110vw); opacity: 0; }
+  5%   { opacity: 0.9; }
+  95%  { opacity: 0.9; }
+  100% { transform: translateX(-10vw); opacity: 0; }
+}
+
+.cp-grid {
+  position: absolute;
+  left: -50%;
+  right: -50%;
+  top: 52%;
+  height: 70%;
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 60, 0.35) 1px, transparent 1px);
+  background-size: 64px 64px;
+  transform: perspective(420px) rotateX(68deg);
+  transform-origin: 50% 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
+  mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
+  opacity: 0.32;
+  animation: cpGridScroll 2.4s linear infinite;
+  will-change: background-position;
+}
+
+.cp-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 3px);
+}
+
+/* Slow scanning band, like a CRT refresh */
+.cp-scanlines::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 140px;
+  background: linear-gradient(to bottom, transparent, rgba(0, 240, 255, 0.07), transparent);
+  animation: cpScan 7s linear infinite;
+}
+
+@keyframes cpGridScroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 64px; }
+}
+
+@keyframes cpScan {
+  from { transform: translateY(-140px); }
+  to   { transform: translateY(100vh); }
+}
+
+/* ---------- UI signature ---------- */
+
+.theme-cyberpunk ::selection {
+  background: #fcee0a;
+  color: #0a0a0f;
+}
+
+/* HUD headings: Orbitron with a red/cyan chromatic split */
+.theme-cyberpunk .narrative-title {
+  font-family: "Orbitron", "Plus Jakarta Sans", sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 3px !important;
+  text-shadow: -1px 0 rgba(255, 0, 60, 0.75), 1px 0 rgba(0, 240, 255, 0.75) !important;
+}
+
+.theme-cyberpunk .narrative-title:hover {
+  animation: cpGlitch 0.35s steps(2, end) 1;
+}
+
+/* Hard-edged, chamfered buttons */
+.theme-cyberpunk .mantine-Button-root {
+  border-radius: 0 !important;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+/* Square HUD panels with a neon edge */
+.theme-cyberpunk .mantine-Paper-root,
+.theme-cyberpunk .mantine-Modal-content {
+  border-radius: 2px !important;
+}
+
+.theme-cyberpunk .mantine-Modal-content {
+  border-top: 2px solid #fcee0a !important;
+}
+
+.theme-cyberpunk .glassy-input {
+  border-radius: 2px !important;
+  border-left: 2px solid var(--theme-color-accent-secondary) !important;
+}
+
+.theme-cyberpunk .glassy-input:focus-within,
+.theme-cyberpunk .glassy-input:focus {
+  border-left-color: #fcee0a !important;
+}
+
+.theme-cyberpunk .glassy-dropdown {
+  border-radius: 2px !important;
+}
+
+.theme-cyberpunk .magic-rune-button {
+  border-radius: 4px;
+}
+
+/* Ambient panel glitch: outermost panels only (nested ones stay still), ~0.3s every 9s.
+   step-end = hard frame jumps; outside the glitch frames the panel's own transform/shadow apply. */
+.theme-cyberpunk .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root) {
+  animation: cpPanelGlitch 9s step-end infinite;
+}
+.theme-cyberpunk .mantine-Paper-root:nth-child(3n + 1) { animation-delay: -3s; }
+.theme-cyberpunk .mantine-Paper-root:nth-child(3n + 2) { animation-delay: -6.5s; }
+
+/* Frames sit at the very end: the last one holds until 100%, then the panel's own styles return. */
+@keyframes cpPanelGlitch {
+  97% {
+    transform: translateX(-2px) skewX(-0.6deg);
+    box-shadow: -2px 0 0 rgba(255, 0, 60, 0.55), 2px 0 0 rgba(0, 240, 255, 0.55);
+  }
+  98% {
+    transform: translateX(2px) skewX(0.4deg);
+    box-shadow: 2px 0 0 rgba(255, 0, 60, 0.55), -2px 0 0 rgba(0, 240, 255, 0.55);
+  }
+  99% {
+    transform: translateX(-1px);
+    box-shadow: -1px 0 0 rgba(0, 240, 255, 0.4);
+  }
+}
+
+@keyframes cpGlitch {
+  0%   { transform: translate(0); }
+  25%  { transform: translate(-2px, 1px); text-shadow: -3px 0 #ff003c, 3px 0 #00f0ff; }
+  50%  { transform: translate(2px, -1px); text-shadow: 3px 0 #ff003c, -3px 0 #00f0ff; }
+  75%  { transform: translate(-1px, 0); }
+  100% { transform: translate(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-overlay *,
+  .cp-overlay *::after,
+  .theme-cyberpunk .mantine-Paper-root,
+  .theme-cyberpunk .narrative-title:hover {
+    animation: none !important;
+  }
+}

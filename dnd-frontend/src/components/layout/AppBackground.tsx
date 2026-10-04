@@ -3,6 +3,8 @@ import { Box } from "@mantine/core";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
+import { CyberpunkBackdrop } from "./CyberpunkBackdrop";
+import { FrostBackdrop } from "./FrostBackdrop";
 
 /**
  * AppBackground
@@ -52,6 +54,8 @@ export function AppBackground() {
             zIndex: 1,
           }}
         />
+        {sidebarTheme === "cyberpunk" && <CyberpunkBackdrop isStatic />}
+        {sidebarTheme === "frost-glacier" && <FrostBackdrop isStatic />}
       </Box>
     );
   }
@@ -68,6 +72,9 @@ export function AppBackground() {
           <Box className="fixed-cog cog-small" />
         </Box>
       )}
+
+      {sidebarTheme === "cyberpunk" && <CyberpunkBackdrop />}
+      {sidebarTheme === "frost-glacier" && <FrostBackdrop />}
 
       <Box className="portal-particles">
         {particles.map((p) => (

@@ -1,118 +1,143 @@
-import { getAuthTokenSafe } from "@store/auth/authUtils";
-import { Box, Group, Title, Text, Container, ActionIcon } from "@mantine/core";
+import { useEffect, useState } from "react";
+import { ActionIcon, Box, Button, Grid, Group, Skeleton, Stack, Text, Title, Tooltip } from "@mantine/core";
+import { IconArrowLeft, IconBook2, IconRefresh } from "@tabler/icons-react";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { useSpellStore } from "@store/spell/spellStore";
-import { useEffect } from "react";
 import { loadSpells } from "@utils/loadSpells";
-import { SpellSelect } from "./components/SpellSelect";
-import { SpellCard } from "./components/SpellCard";
-import { IconDatabase, IconRefresh } from "@tabler/icons-react";
-
-import { useParams } from "react-router-dom";
 import { getSpellById } from "@services/spellService";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { SpellIndex } from "./components/SpellIndex";
+import { SpellCard } from "./components/SpellCard";
+import classes from "./Spellbook.module.css";
 
 export default function SpellPage() {
-  const token = getAuthTokenSafe();
-  const urlParam = useParams<{ spellName?: string }>();
-
-  const spellList = useSpellStore((state) => state.spellNames);
-  const currentSpell = useSpellStore((state) => state.currentSpell);
-  const setCurrentSpell = useSpellStore((state) => state.setCurrentSpell);
-
+  const { spellName } = useParams<{ spellName?: string }>();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    const fetchSpells = async () => {
-      if (!spellList || spellList.length === 0) await loadSpells();
-    };
-    void fetchSpells();
-  }, [spellList, token]);
+  const spellNames = useSpellStore((s) => s.spellNames);
+  const currentSpell = useSpellStore((s) => s.currentSpell);
+  const setCurrentSpell = useSpellStore((s) => s.setCurrentSpell);
+
+  const [loading, setLoading] = useState(false);
+  const [reloading, setReloading] = useState(false);
 
   useEffect(() => {
-    const fetchSpell = async () => {
-      if (!urlParam || !spellList?.length) return;
+    if (spellNames.length === 0) void loadSpells();
+  }, [spellNames.length]);
 
-      const found = spellList.find((s) => s.name === urlParam.spellName);
-      if (!found) return;
+  // URL is the source of truth for which spell is open.
+  const urlSpell = spellName ? spellNames.find((s) => s.name === spellName) : undefined;
+  const currentId = currentSpell?.id;
 
-      const fetchedSpell = await getSpellById(found.id!);
-      setCurrentSpell(fetchedSpell);
+  useEffect(() => {
+    if (!urlSpell || urlSpell.id === currentId) return;
+    let cancelled = false;
+    setLoading(true);
+    getSpellById(urlSpell.id)
+      .then((spell) => !cancelled && setCurrentSpell(spell))
+      .catch((err) => console.error(`Failed to load spell ${urlSpell.name}`, err))
+      .finally(() => !cancelled && setLoading(false));
+    return () => {
+      cancelled = true;
+      setLoading(false);
     };
-    void fetchSpell();
-  }, [urlParam, spellList, setCurrentSpell, token]);
+  }, [urlSpell, currentId, setCurrentSpell]);
 
-  async function reload() {
-    await loadSpells();
-    
-    if (currentSpell) {
-      const found = spellList.find((s) => s.id === currentSpell.id);
-      if (found) {
-        const refreshed = await getSpellById(found.id!);
-        setCurrentSpell(refreshed);
-      }
+  const reload = async () => {
+    setReloading(true);
+    try {
+      await loadSpells();
+      if (currentId) setCurrentSpell(await getSpellById(currentId));
+    } finally {
+      setReloading(false);
     }
-  }
+  };
+
+  const openSpell = (name: string) => navigate(`/spells/${encodeURIComponent(name)}`);
+
+  const notFound = !!spellName && spellNames.length > 0 && !urlSpell;
+  const showingSpell = spellName ? currentSpell?.name === spellName : !!currentSpell;
+
+  const detail = notFound ? (
+    <div className={classes.empty}>
+      <IconBook2 size={40} stroke={1.2} />
+      <Text fw={600}>“{spellName}” isn't in the spellbook.</Text>
+    </div>
+  ) : loading || (spellName && !showingSpell) ? (
+    <Stack gap="md" className={classes.card}>
+      <Group gap="md">
+        <Skeleton h={52} w={52} radius="md" />
+        <Stack gap={6} style={{ flex: 1 }}>
+          <Skeleton h={24} w="60%" />
+          <Skeleton h={14} w="35%" />
+        </Stack>
+      </Group>
+      <Skeleton h={64} />
+      <Skeleton h={14} />
+      <Skeleton h={14} />
+      <Skeleton h={14} w="80%" />
+    </Stack>
+  ) : showingSpell ? (
+    <SpellCard />
+  ) : (
+    <div className={classes.empty}>
+      <IconBook2 size={44} stroke={1.2} style={{ color: "var(--theme-color-accent-primary)" }} />
+      <Text fw={600} c="var(--theme-color-text-primary)">
+        Open a spell
+      </Text>
+      <Text size="sm" maw={280}>
+        Search by name, or narrow the list by level and school of magic.
+      </Text>
+    </div>
+  );
 
   return (
-    <Box m={isMobile ? 0 : "0 auto"} maw={isMobile ? "100%" : 900} w={isMobile ? "100%" : undefined}>
-      <Group bg={"transparent"} justify="space-between" mb={"md"} align="center">
-        <Title order={2}>
-          <IconDatabase size={18} /> Spell Database
-        </Title>
-
-        <Group gap="xs" align="center">
-          <SpellSelect />
-
-          {/* 📦 Reload Button */}
-          <ActionIcon
-            variant="light"
-            radius="xl"
-            size="md"
-            onClick={reload}
-            style={{
-              background: "rgba(255, 0, 0, 0.25)",
-              border: "1px solid rgba(255, 80, 80, 0.4)",
-              backdropFilter: "blur(6px)",
-              color: "rgba(255, 180, 180, 0.9)",
-              transition: "0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.45)";
-              e.currentTarget.style.color = "white";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,0,0,0.25)";
-              e.currentTarget.style.color = "rgba(255,180,180,0.9)";
-            }}
-          >
+    <Box maw={1600} mx="auto" w="100%" p={isMobile ? "sm" : undefined}>
+      <Group justify="space-between" mb="md" wrap="nowrap">
+        <Group gap="sm" wrap="nowrap">
+          <IconBook2 size={28} stroke={1.5} style={{ color: "var(--theme-color-accent-primary)" }} />
+          <div>
+            <Title order={1} className="narrative-title" fz={20} c="var(--theme-color-text-primary)">
+              Spellbook
+            </Title>
+            <Text size="xs" c="var(--theme-color-text-secondary)">
+              {spellNames.length} spells
+            </Text>
+          </div>
+        </Group>
+        <Tooltip label="Reload spells" withArrow>
+          <ActionIcon variant="subtle" size="lg" onClick={reload} loading={reloading} aria-label="Reload spells">
             <IconRefresh size={18} />
           </ActionIcon>
-        </Group>
+        </Tooltip>
       </Group>
 
-      {!currentSpell ? (
-        <Container
-          mih={150}
-          p={10}
-          mt={10}
-          w={"100%"}
-          lts={2}
-          ta={"center"}
-          style={{
-            borderRadius: 5,
-            border: "1px solid #0000001f",
-            background: "linear-gradient(175deg, #0009336b 0%, rgba(48, 0, 0, 0.37) 100%)",
-          }}
-        >
-          <Title>No spell selected.</Title>
-          <Text>Please search for a spell via the box above.</Text>
-          <Text>You can also filter them by spell level.</Text>
-        </Container>
+      {isMobile ? (
+        spellName ? (
+          <Stack gap="sm">
+            <Button
+              variant="subtle"
+              leftSection={<IconArrowLeft size={16} />}
+              onClick={() => navigate("/spells")}
+              w="fit-content"
+              px={4}
+            >
+              All spells
+            </Button>
+            {detail}
+          </Stack>
+        ) : (
+          <SpellIndex onSelect={openSpell} activeName={currentSpell?.name} />
+        )
       ) : (
-        <Box miw={"100%"} flex={1}>
-          <SpellCard />
-        </Box>
+        <Grid gutter="lg" align="flex-start">
+          <Grid.Col span={{ base: 12, md: 4, xl: 3 }} style={{ position: "sticky", top: 16 }}>
+            <SpellIndex onSelect={openSpell} activeName={spellName} scrollHeight="calc(100vh - 290px)" />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 8, xl: 9 }}>{detail}</Grid.Col>
+        </Grid>
       )}
     </Box>
   );

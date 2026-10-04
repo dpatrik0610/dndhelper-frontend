@@ -7,6 +7,7 @@ import { tabs, type TabItem } from "./SidebarTabs";
 
 import { SidebarHeader } from "./components/SidebarHeader";
 import { NavSection } from "./components/NavSection";
+import { ThemeBubble } from "./components/ThemeBubble";
 import classes from "./Sidebar.module.css";
 import { sidebarThemes, type SidebarThemeVariant } from "@appTypes/ThemeTypes";
 import { useIsMobile } from "@hooks/useIsMobile";
@@ -122,6 +123,8 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
             onNavigate={handleNavigate}
           />
         </Stack>
+
+        <ThemeBubble />
       </Stack>
     </Drawer>
   );

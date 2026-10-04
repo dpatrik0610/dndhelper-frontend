@@ -156,31 +156,31 @@
   --theme-gradient-active: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(217, 119, 6, 0.2));
 }
 
-/* ❄️ Frost Glacier */
+/* ❄️ Frost Glacier (glacier ice + aurora teal; scene + UI in frost.css) */
 .theme-frost-glacier {
-  --theme-bg-base: rgba(8, 20, 35, 0.14);
-  --theme-bg-panel: rgba(14, 30, 52, 0.24);
-  --theme-bg-panel-opaque: #0e1e34;
-  --theme-bg-card: rgba(18, 38, 64, 0.18);
-  --theme-bg-hover: rgba(56, 189, 248, 0.14);
-  
-  --theme-border-glow: rgba(56, 189, 248, 0.4);
-  --theme-border-accent: rgba(226, 232, 240, 0.4);
-  --theme-border-subtle: rgba(56, 189, 248, 0.16); /* Gorgeous cyan tinted edges! */
-  
-  --theme-color-accent-primary: #38bdf8e6; /* Glacier Cyan with 10% transparency */
-  --theme-color-accent-secondary: #cbd5e1e6; /* Silver with 10% transparency */
+  --theme-bg-base: rgba(8, 22, 40, 0.16);
+  --theme-bg-panel: rgba(14, 34, 60, 0.32);
+  --theme-bg-panel-opaque: #0b1c33;
+  --theme-bg-card: rgba(186, 230, 253, 0.04);
+  --theme-bg-hover: rgba(125, 211, 252, 0.12);
+
+  --theme-border-glow: rgba(125, 211, 252, 0.5);
+  --theme-border-accent: rgba(94, 234, 212, 0.45);
+  --theme-border-subtle: rgba(186, 230, 253, 0.16);
+
+  --theme-color-accent-primary: #7dd3fc; /* Glacier ice */
+  --theme-color-accent-secondary: #5eead4; /* Aurora teal */
   --theme-color-text-primary: #f0f9ff;
   --theme-color-text-secondary: #bae6fd;
   --theme-color-text-glow: #e0f2fe;
-  --theme-color-text-on-accent: #0e1e34;
-  
-  --theme-glow-shadow-primary: 0 0 15px rgba(56, 189, 248, 0.25);
-  --theme-glow-shadow-secondary: 0 0 15px rgba(226, 232, 240, 0.25);
-  
-  --theme-gradient-primary: linear-gradient(135deg, #38bdf8, #cbd5e1);
-  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(56, 189, 248, 0.85), rgba(226, 232, 240, 0.85)); /* Gorgeous 15% transparent highlight */
-  --theme-gradient-active: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(226, 232, 240, 0.2));
+  --theme-color-text-on-accent: #04182e;
+
+  --theme-glow-shadow-primary: 0 0 16px rgba(125, 211, 252, 0.35);
+  --theme-glow-shadow-secondary: 0 0 16px rgba(94, 234, 212, 0.3);
+
+  --theme-gradient-primary: linear-gradient(135deg, #e0f2fe, #7dd3fc 50%, #5eead4);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(224, 242, 254, 0.9), rgba(125, 211, 252, 0.88) 50%, rgba(94, 234, 212, 0.85));
+  --theme-gradient-active: linear-gradient(135deg, rgba(125, 211, 252, 0.2), rgba(94, 234, 212, 0.14));
 }
 
 /* 🌸 Feywild Bloom */
@@ -343,6 +343,33 @@
   --theme-gradient-primary: linear-gradient(135deg, #ffffff, #9ca3af);
   --theme-gradient-primary-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(156, 163, 175, 0.85));
   --theme-gradient-active: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(156, 163, 175, 0.15));
+}
+
+/* 🌃 Cyberpunk (Night City: neon yellow / netrunner cyan / glitch red) */
+.theme-cyberpunk {
+  --theme-bg-base: rgba(8, 6, 16, 0.2);
+  --theme-bg-panel: rgba(7, 6, 14, 0.5);
+  --theme-bg-panel-opaque: #07060d;
+  --theme-bg-card: rgba(0, 240, 255, 0.035);
+  --theme-bg-hover: rgba(252, 238, 10, 0.1);
+
+  --theme-border-glow: rgba(0, 240, 255, 0.55);
+  --theme-border-accent: rgba(255, 0, 60, 0.55);
+  --theme-border-subtle: rgba(0, 240, 255, 0.18);
+
+  --theme-color-accent-primary: #fcee0a; /* Arasaka-warning yellow */
+  --theme-color-accent-secondary: #00f0ff; /* Netrunner cyan */
+  --theme-color-text-primary: #eefcff;
+  --theme-color-text-secondary: #5ef1ff;
+  --theme-color-text-glow: #fffbd1;
+  --theme-color-text-on-accent: #0a0a0f;
+
+  --theme-glow-shadow-primary: 0 0 14px rgba(252, 238, 10, 0.45);
+  --theme-glow-shadow-secondary: 0 0 14px rgba(0, 240, 255, 0.45);
+
+  --theme-gradient-primary: linear-gradient(120deg, #fcee0a 0%, #f8e602 60%, #00f0ff 100%);
+  --theme-gradient-primary-glass: linear-gradient(120deg, rgba(252, 238, 10, 0.92) 0%, rgba(248, 230, 2, 0.9) 60%, rgba(0, 240, 255, 0.85) 100%);
+  --theme-gradient-active: linear-gradient(135deg, rgba(252, 238, 10, 0.18), rgba(0, 240, 255, 0.12));
 }
 
 /* Default styling helper fallbacks */
@@ -655,6 +682,7 @@
 
 .runes-theme-switcher-inline {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   align-items: center;
   justify-content: flex-start;
@@ -671,8 +699,15 @@
   cursor: pointer;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  color: inherit;
+  padding: 0;
   font-size: 14px;
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.magic-rune-button:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #f59e0b);
+  outline-offset: 2px;
 }
 
 .magic-rune-button:hover {
@@ -807,20 +842,17 @@
   filter: drop-shadow(0 0 6px #ef4444);
 }
 
-/* ❄️ Frost Glacier: Falling crystalline snowflakes (Soft translucent emojis) */
+/* ❄️ Frost Glacier: drifting ice crystals (the snowfall itself lives in FrostBackdrop) */
 .theme-frost-glacier .portal-particle {
   animation-name: floatDown;
 }
 .theme-frost-glacier .portal-particle::after {
-  content: "❄️" !important;
-  font-size: 14px;
-  width: auto;
-  height: auto;
-  background: transparent !important;
-  border-radius: unset !important;
-  clip-path: none !important;
-  opacity: 0.50; /* Beautiful soft snow opacity! */
-  filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.5));
+  width: 7px;
+  height: 7px;
+  background: #e0f2fe;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  opacity: 0.7;
+  filter: drop-shadow(0 0 4px rgba(125, 211, 252, 0.8));
 }
 
 /* 🌸 Feywild Bloom: Gently swaying falling cherry blossom petals (Soft translucent emojis) */
@@ -915,6 +947,33 @@
   clip-path: polygon(20% 0%, 80% 20%, 100% 80%, 40% 100%, 0% 50%); /* Irregular geometric shard! */
   opacity: 0.5;
   filter: drop-shadow(0 0 4px rgba(156, 163, 175, 0.3));
+}
+
+/* 🌃 Cyberpunk: falling data-rain streaks (cyan, every third one glitch-red) */
+.theme-cyberpunk .portal-particle {
+  animation-name: cpRain;
+  animation-timing-function: linear;
+  animation-duration: 3.2s !important;
+}
+.theme-cyberpunk .portal-particle:nth-child(even) {
+  animation-duration: 4.6s !important;
+}
+.theme-cyberpunk .portal-particle::after {
+  width: 2px;
+  height: 56px;
+  background: linear-gradient(to bottom, transparent, #00f0ff);
+  filter: drop-shadow(0 0 4px #00f0ff);
+}
+.theme-cyberpunk .portal-particle:nth-child(3n)::after {
+  background: linear-gradient(to bottom, transparent, #ff003c);
+  filter: drop-shadow(0 0 4px #ff003c);
+}
+
+@keyframes cpRain {
+  0%   { transform: translate3d(0, -10vh, 0); opacity: 0; }
+  10%  { opacity: 0.7; }
+  90%  { opacity: 0.7; }
+  100% { transform: translate3d(0, 105vh, 0); opacity: 0; }
 }
 
 
@@ -1141,7 +1200,7 @@
   }
   @keyframes modalThemeFadeFrost {
     0% { background: #030305 !important; }
-    100% { background: #0e1e34 !important; }
+    100% { background: #0b1c33 !important; }
   }
   @keyframes modalThemeFadeFeywild {
     0% { background: #030305 !important; }
@@ -1166,6 +1225,10 @@
   @keyframes modalThemeFadeDarkvision {
     0% { background: #030305 !important; }
     100% { background: #080808 !important; }
+  }
+  @keyframes modalThemeFadeCyberpunk {
+    0% { background: #030305 !important; }
+    100% { background: #07060d !important; }
   }
   @keyframes modalThemeFadeDanger {
     0% { background: #030305 !important; }
@@ -1209,6 +1272,9 @@
   }
   .mantine-Modal-content.theme-darkvision {
     animation: modalThemeFadeDarkvision 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-cyberpunk {
+    animation: modalThemeFadeCyberpunk 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .mantine-Modal-content.modal-variant-danger {
     animation: modalThemeFadeDanger 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;

@@ -1,368 +1,157 @@
-import {
-  Card,
-  Group,
-  Stack,
-  Text,
-  Divider,
-  Table,
-  SimpleGrid,
-  Box,
-} from "@mantine/core";
-import { useSpellStore } from "@store/spell/spellStore";
-import CustomBadge from "@components/common/CustomBadge";
-import { IconWand, IconFlame, IconBook, IconSparkles } from "@tabler/icons-react";
-import { SectionColor } from "@appTypes/SectionColor";
-import { DividerWithLabel } from "@components/common/DividerWithLabel";
-import { getDamageInfo } from "@utils/getDamageInfo";
+import type { CSSProperties, ReactNode } from "react";
+import { Group, Text } from "@mantine/core";
+import { IconFlame, IconShield, IconSparkles, IconTarget, type Icon } from "@tabler/icons-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useSpellStore } from "@store/spell/spellStore";
+import { getDamageInfo } from "@utils/getDamageInfo";
+import { getSchool, spellSubtitle } from "@features/spells/spellMeta";
+import classes from "@features/spells/Spellbook.module.css";
 
 interface SpellCardProps {
+  /** No frame / aura: for use inside a modal. */
   flat?: boolean;
 }
 
-export function SpellCard({ flat = false }: SpellCardProps) {  
-  const currentSpell = useSpellStore((state) => state.currentSpell);
+/** Markdown tables arrive split across description lines; join consecutive table lines into one block. */
+function groupTables(lines: string[]) {
+  const blocks: string[] = [];
+  let table: string[] = [];
+  lines.forEach((line, i) => {
+    if (line.startsWith("|") || (line.includes("#####") && lines[i + 1]?.startsWith("|"))) {
+      table.push(line);
+      return;
+    }
+    if (table.length) blocks.push(table.join("\n"));
+    table = [];
+    blocks.push(line);
+  });
+  if (table.length) blocks.push(table.join("\n"));
+  return blocks;
+}
 
-  if (!currentSpell)
+const COMPONENT_NAMES: Record<string, string> = { V: "Verbal", S: "Somatic", M: "Material" };
+
+export function SpellCard({ flat = false }: SpellCardProps) {
+  const spell = useSpellStore((state) => state.currentSpell);
+
+  if (!spell) {
     return (
       <Text ta="center" c="dimmed" mt="lg">
-        No Spell Selected yet.
+        No spell selected yet.
       </Text>
     );
-
-  const getSchoolColor = (school: string) => {
-    const colors: Record<string, string> = {
-      Evocation: "red",
-      Abjuration: "blue",
-      Conjuration: "green",
-      Divination: "indigo",
-      Enchantment: "pink",
-      Illusion: "grape",
-      Necromancy: "dark",
-      Transmutation: "orange",
-    };
-    return colors[school] || "gray";
-  };
-
-  function switchComponentText(comp: string): string{
-    switch(comp){
-        case "V": return "Verbal";
-        case "S": return "Somatic";
-        case "M": return "Material";
-        default: return "";
-    }
   }
 
-  function processDescription(descArray: string[]) {
-    const result = [];
-    let currentTable: string[] = [];
-    
-    for (let i = 0; i < descArray.length; i++) {
-      const line = descArray[i];
-      
-      // Check if this line starts a table or is part of a table
-      if (line.startsWith('|') || (line.includes('#####') && descArray[i + 1]?.startsWith('|'))) {
-        currentTable.push(line);
-      } else {
-        // If we were building a table, push it first
-        if (currentTable.length > 0) {
-          result.push(currentTable.join('\n'));
-          currentTable = [];
-        }
-        result.push(line);
-      }
-    }
-    
-    // Don't forget the last table
-    if (currentTable.length > 0) {
-      result.push(currentTable.join('\n'));
-    }
-    
-    return result;
+  const school = getSchool(spell.school.name);
+  const damage = getDamageInfo(spell.damage);
+
+  const effects: { icon: Icon; color: string; label: string }[] = [];
+  if (spell.attackType) {
+    effects.push({ icon: IconTarget, color: "#fb923c", label: `${capitalize(spell.attackType)} spell attack` });
   }
-
-  // Unified Details & Effects List (Flat layout to prevent cluttered nested boxes)
-  const detailsList = [
-    { label: "Casting Time", value: currentSpell.castingTime ?? "Instantaneous", color: "var(--theme-color-text-primary, #fff)" },
-    { label: "Range", value: currentSpell.range, color: "var(--theme-color-text-primary, #fff)" },
-    { label: "Duration", value: currentSpell.duration, color: "var(--theme-color-text-primary, #fff)" },
-  ];
-
-  // Dynamically inject special effects into the flat grid if they exist
-  const damageInfo = getDamageInfo(currentSpell.damage);
-  if (damageInfo) {
-    detailsList.push({ label: "Damage", value: damageInfo.label, color: "#f87171" });
+  if (damage) effects.push({ icon: IconFlame, color: "#f87171", label: damage.label });
+  if (spell.dc?.dcType?.name) {
+    const half = spell.dc.dcSuccess?.toLowerCase() === "half" ? " · half on success" : "";
+    effects.push({ icon: IconShield, color: "#fcd34d", label: `${spell.dc.dcType.name} save${half}` });
   }
-  if (currentSpell.dc?.dcType?.name && currentSpell.dc.dcSuccess) {
-    detailsList.push({ label: "Saving Throw", value: `${currentSpell.dc.dcType.name} (Success: ${currentSpell.dc.dcSuccess})`, color: "#fcd34d" });
-  }
-  if (currentSpell.areaOfEffect?.type && currentSpell.areaOfEffect?.size) {
-    detailsList.push({ label: "Area of Effect", value: `${currentSpell.areaOfEffect.size}ft ${currentSpell.areaOfEffect.type}`, color: "#67e8f9" });
-  }
-
-  const cardContent = (
-    <>
-      {/* Header */}
-      <Group justify="space-between" mb="xs" wrap="wrap">
-        <Text
-          size="lg"
-          fw={900}
-          tt="uppercase"
-          style={{
-            color: "var(--theme-color-text-primary, #fff)",
-            fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-            letterSpacing: "1px",
-            textShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          {currentSpell.name}
-        </Text>
-
-        {/* Magic School */}
-        <CustomBadge
-          variant="transparent"
-          size="lg"
-          label={currentSpell.school.name}
-          color={getSchoolColor(currentSpell.school.name)}
-          icon={<IconBook size={15} />}
-        />
-      </Group>
-
-      {currentSpell.material && (
-        <Text
-          component="span"
-          size="xs"
-          fs="italic"
-          style={{
-            color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.55))",
-            display: "block",
-            marginBottom: "12px",
-            lineHeight: 1.4,
-          }}
-        >
-          ({currentSpell.material})
-        </Text>
-      )}
-
-      <DividerWithLabel label="Spell Details" color={SectionColor.Violet} />
-
-      {/* Meta Badges */}
-      <Group mb="md" gap="xs" style={{ marginTop: "12px" }}>
-        <CustomBadge
-          size="lg"
-          variant="light"
-          label={currentSpell.level === 0 ? "Cantrip" : `Level ${currentSpell.level}`}
-          color={currentSpell.level === 0 ? "violet" : "blue"}
-          icon={<IconWand size={14} />}
-        />
-        {currentSpell.ritual && (
-          <CustomBadge label="Ritual" color="teal" icon={<IconSparkles size={14} />} />
-        )}
-        {currentSpell.concentration && (
-          <CustomBadge label="Concentration" color="orange" icon={<IconFlame size={14} />} />
-        )}
-
-        {/* Components */}
-        {currentSpell.components.map((comp, index) => (
-          <CustomBadge 
-            key={index} 
-            size="lg" 
-            label={switchComponentText(comp)} 
-            color={SectionColor.Orange} 
-            variant="dot" 
-          />
-        ))}
-      </Group>
-
-      {/* Unified Core Details & Effects Flat Grid */}
-      <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="sm" style={{ marginTop: "16px", marginBottom: "16px", paddingLeft: "4px" }}>
-        {detailsList.map((detail) => (
-          <div key={detail.label} style={{ padding: "4px 0" }}>
-            <Text
-              size="9px"
-              fw={800}
-              style={{
-                color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.5))",
-                letterSpacing: "1px",
-                textTransform: "uppercase",
-                marginBottom: "4px",
-              }}
-            >
-              {detail.label}
-            </Text>
-            <Text
-              size="sm"
-              fw={700}
-              style={{
-                color: detail.color,
-                lineHeight: 1.3,
-              }}
-            >
-              {detail.value}
-            </Text>
-          </div>
-        ))}
-      </SimpleGrid>
-
-      {/* Flat Description Panel */}
-      <Text
-        fw={800}
-        size="xs"
-        style={{
-          color: "var(--theme-color-accent-primary, #f59e0b)",
-          letterSpacing: "1.5px",
-          textTransform: "uppercase",
-          marginBottom: "8px",
-          marginTop: "16px",
-        }}
-      >
-        Description
-      </Text>
-      <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.05)", marginBottom: "12px" }} />
-      
-      <Stack gap="sm" style={{ paddingLeft: "4px" }}>  
-        {
-          processDescription(currentSpell.description).map((content, i) => (
-            <ReactMarkdown 
-              key={i} 
-              remarkPlugins={[remarkGfm]}
-              components={{
-                p: ({node, ...props}) => (void node, (
-                  <Text 
-                    size="sm" 
-                    {...props} 
-                    style={{ 
-                      margin: 0, 
-                      lineHeight: 1.6,
-                      color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.8))",
-                      fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-                    }} 
-                  />
-                )),
-                h1: ({node, ...props}) => (void node, <Text component="h1" size="xl" fw={800} tt={"uppercase"} {...props} style={{ margin: '8px 0', lineHeight: 1.2, color: 'var(--theme-color-text-primary, #fff)' }} />),
-                h2: ({node, ...props}) => (void node, <Text component="h2" size="lg" fw={700} tt={"uppercase"} {...props} style={{ margin: '8px 0', lineHeight: 1.2, color: 'var(--theme-color-text-primary, #fff)' }} />),
-                h3: ({node, ...props}) => (void node, <Text component="h3" size="md" fw={700} tt={"uppercase"} {...props} style={{ margin: '6px 0', lineHeight: 1.2, color: 'var(--theme-color-text-primary, #fff)' }} />),
-                h4: ({node, ...props}) => (void node, <Text component="h4" size="md" fw={700} tt={"uppercase"} {...props} style={{ margin: '6px 0', lineHeight: 1.2, color: 'var(--theme-color-text-primary, #fff)' }} />),
-                h5: ({node, ...props}) => (void node, <Text component="h5" size="sm" fw={700} tt={"uppercase"} {...props} style={{ margin: '4px 0', lineHeight: 1.2, color: 'var(--theme-color-text-primary, #fff)' }} />),
-                h6: ({node, ...props}) => (void node, <Text component="h6" size="sm" fw={700} tt={"uppercase"} {...props} style={{ margin: '4px 0', lineHeight: 1.2, color: 'var(--theme-color-text-primary, #fff)' }} />),
-                table: ({node, ...props}) => (void node, (
-                  <Table 
-                    striped 
-                    highlightOnHover 
-                    withTableBorder 
-                    withColumnBorders
-                    style={{ 
-                      margin: '12px 0',
-                      background: 'rgba(255, 255, 255, 0.01)',
-                      border: '1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))',
-                      borderRadius: '8px',
-                    }} 
-                    {...props}
-                  />
-                )),
-                th: ({node, ...props}) => (void node, (
-                  <Table.Th 
-                    style={{ 
-                      textAlign: 'left',
-                      padding: '6px 10px',
-                      fontWeight: 700,
-                      fontSize: '11px',
-                      textTransform: 'uppercase',
-                      color: 'var(--theme-color-text-primary, #fff)',
-                      borderBottom: '1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1))',
-                    }} 
-                    {...props} 
-                  />
-                )),
-                td: ({node, ...props}) => (void node, (
-                  <Table.Td 
-                    style={{ 
-                      textAlign: 'left',
-                      padding: '6px 10px',
-                      fontSize: '12px',
-                      color: 'var(--theme-color-text-secondary, rgba(255, 255, 255, 0.75))',
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.02)',
-                    }} 
-                    {...props} 
-                  />
-                )),
-              }}
-            >
-              {content}
-            </ReactMarkdown>
-          ))
-        }
-
-        {currentSpell.higherLevel?.length > 0 && (
-          <>
-            <Divider my="sm" style={{ borderColor: "rgba(255,255,255,0.06)" }} />
-            <Text fw={700} size="xs" style={{ marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.5px", color: "var(--theme-color-accent-primary, #f59e0b)" }}>
-              At Higher Levels:
-            </Text>
-
-            {currentSpell.higherLevel.map((hl, i) => (
-              <Text 
-                key={i} 
-                size="sm" 
-                lh={1.5}
-                style={{ 
-                  margin: 0,
-                  color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.75))",
-                  fontStyle: "italic"
-                }}
-              >
-                {hl}
-              </Text>
-            ))}
-          </>
-        )}
-      </Stack>
-
-      {/* Flat Classes Panel */}
-      <Text
-        fw={800}
-        size="xs"
-        style={{
-          color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.45))",
-          letterSpacing: "1.5px",
-          textTransform: "uppercase",
-          marginBottom: "8px",
-          marginTop: "24px",
-        }}
-      >
-        Available To
-      </Text>
-      <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.05)", marginBottom: "12px" }} />
-      <Group gap="xs" wrap="wrap" style={{ paddingLeft: "4px" }}>
-        {currentSpell.classes.map((cls, i) => (
-          <CustomBadge key={i} label={cls.name} color="blue" variant="light" />
-        ))}
-      </Group>
-    </>
-  );
-
-  if (flat) {
-    return (
-      <Box style={{ background: "transparent", border: "none", boxShadow: "none", padding: 0 }}>
-        {cardContent}
-      </Box>
-    );
+  if (spell.areaOfEffect?.type && spell.areaOfEffect.size) {
+    effects.push({ icon: IconSparkles, color: "#67e8f9", label: `${spell.areaOfEffect.size}-ft ${spell.areaOfEffect.type}` });
   }
 
   return (
-    <Card 
-      p="md" 
-      withBorder 
-      mb="md" 
-      style={{ 
-        background: "var(--theme-bg-card, rgba(255, 255, 255, 0.015))",
-        borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
-        boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.03)",
-        borderRadius: "14px",
-      }}
+    <article
+      className={`${classes.card} ${flat ? classes.cardFlat : ""}`}
+      style={{ "--school": school.color } as CSSProperties}
     >
-      {cardContent}
-    </Card>
+      <Group wrap="nowrap" gap="md" align="center">
+        <div className={classes.sigil} aria-hidden>
+          <school.icon size={28} />
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <h2 className={classes.spellName}>{spell.name}</h2>
+          <div className={classes.subtitle}>{spellSubtitle(spell.level, spell.school.name, spell.ritual)}</div>
+        </div>
+      </Group>
+
+      <div className={classes.stats}>
+        <Stat label="Casting Time">{spell.castingTime || "—"}</Stat>
+        <Stat label="Range">{spell.range || "—"}</Stat>
+        <Stat label="Components">
+          <span title={spell.components.map((c) => COMPONENT_NAMES[c] ?? c).join(", ")}>
+            {spell.components.join(", ") || "—"}
+          </span>
+        </Stat>
+        <Stat label="Duration">
+          {spell.duration || "—"}
+          {spell.concentration && <span className={classes.tag}>Conc.</span>}
+        </Stat>
+      </div>
+
+      {spell.material && (
+        <Text size="xs" fs="italic" mt={-8} mb="md" style={{ color: "var(--theme-color-text-secondary)" }}>
+          M: {spell.material}
+        </Text>
+      )}
+
+      {effects.length > 0 && (
+        <Group gap="xs" mb="xs">
+          {effects.map((fx) => (
+            <span key={fx.label} className={classes.effect} style={{ "--fx": fx.color } as CSSProperties}>
+              <fx.icon size={14} aria-hidden />
+              {fx.label}
+            </span>
+          ))}
+        </Group>
+      )}
+
+      <div className={classes.sectionLabel}>Description</div>
+      <div className={classes.description}>
+        {groupTables(spell.description).map((block, i) => (
+          <ReactMarkdown key={i} remarkPlugins={[remarkGfm]}>
+            {block}
+          </ReactMarkdown>
+        ))}
+      </div>
+
+      {spell.higherLevel?.length > 0 && (
+        <div className={classes.higher}>
+          <div className={classes.sectionLabel} style={{ margin: "0 0 6px", color: school.color }}>
+            At Higher Levels
+          </div>
+          {spell.higherLevel.map((text, i) => (
+            <p key={i}>{text}</p>
+          ))}
+        </div>
+      )}
+
+      {spell.classes.length > 0 && (
+        <>
+          <div className={classes.sectionLabel}>Available To</div>
+          <Group gap="xs">
+            {spell.classes.map((cls) => (
+              <span
+                key={cls.name}
+                className={classes.effect}
+                style={{ "--fx": "var(--theme-color-accent-primary, #f59e0b)" } as CSSProperties}
+              >
+                {cls.name}
+              </span>
+            ))}
+          </Group>
+        </>
+      )}
+    </article>
   );
 }
+
+function Stat({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className={classes.stat}>
+      <div className={classes.statLabel}>{label}</div>
+      <div className={classes.statValue}>{children}</div>
+    </div>
+  );
+}
+
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
