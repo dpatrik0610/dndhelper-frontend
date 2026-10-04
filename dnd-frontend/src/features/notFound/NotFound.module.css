@@ -1,0 +1,128 @@
+/* No backdrop of its own: the theme's animated scene shows through, dimmed behind the text by a soft vignette. */
+
+.page {
+  min-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--theme-color-text-primary, #fff);
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--theme-bg-panel-opaque, #140f28) 80%, transparent),
+    transparent
+  );
+}
+
+/* The d20 tumbles in, lands on its 1, then hovers */
+.die {
+  margin-bottom: 28px;
+  animation: tumble 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both, hover 4s ease-in-out 0.9s infinite;
+}
+
+.die > span {
+  color: var(--theme-color-text-on-accent, #121214);
+  filter: drop-shadow(0 0 22px var(--theme-border-glow, rgba(168, 85, 247, 0.35)));
+}
+
+@keyframes tumble {
+  from {
+    opacity: 0;
+    transform: translateY(-60px) rotate(-200deg) scale(0.6);
+  }
+  70% {
+    transform: translateY(6px) rotate(10deg) scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes hover {
+  50% { transform: translateY(-8px); }
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--theme-color-accent-primary, #a855f7);
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  text-shadow: 0 0 18px var(--theme-border-glow, rgba(168, 85, 247, 0.35));
+}
+
+.text {
+  max-width: 440px;
+  margin: 14px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--theme-color-text-primary, #fff) 70%, transparent);
+}
+
+.path {
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--theme-bg-card, rgba(30, 24, 60, 0.5));
+  color: var(--theme-color-text-secondary, #c084fc);
+  font-size: 0.9em;
+  word-break: break-all;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 20px;
+  border: 1px solid var(--theme-border-glow, rgba(168, 85, 247, 0.35));
+  border-radius: 12px;
+  background: var(--theme-bg-card, rgba(30, 24, 60, 0.5));
+  color: var(--theme-color-text-primary, #fff);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.button:hover {
+  background: var(--theme-bg-hover, rgba(168, 85, 247, 0.14));
+  box-shadow: var(--theme-glow-shadow-primary, 0 0 15px rgba(168, 85, 247, 0.3));
+  transform: translateY(-1px);
+}
+
+.primary,
+.primary:hover {
+  border-color: transparent;
+  background: var(--theme-gradient-primary, linear-gradient(135deg, #a855f7, #06b6d4));
+  color: var(--theme-color-text-on-accent, #fff);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #a855f7);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .die { animation: none; }
+  .button { transition: none; }
+}
