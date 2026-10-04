@@ -82,6 +82,8 @@ export const tabletop = {
     call("UpsertToken", { characterId, x, y, color: "#60a5fa", layer: "Token" }),
   removeToken: (tokenId: string) => call("RemoveToken", tokenId),
   setEconomy: (tokenId: string, economy: TurnEconomy) => call("SetEconomy", tokenId, economy),
+  /** Typed value, or null to roll d20 + the character's initiative bonus on the server. */
+  setInitiative: (tokenId: string, value: number | null) => invoke<TableLogEntry | null>("SetInitiative", [tokenId, value]),
   updateGrid: (grid: GridSettings) => call("UpdateGrid", grid),
   updateMap: (map: MapLayer) => call("UpdateMap", map),
   startCombat: () => call("StartCombat"),

@@ -37,6 +37,7 @@ import { Board } from "./board/Board";
 import { TabletopLobby } from "./TabletopLobby";
 import { CharacterBubble } from "./CharacterBubble";
 import { SpellSearch } from "./SpellSearch";
+import { JoinCombat } from "./JoinCombat";
 import { Toolbar } from "./Toolbar";
 import { LAYERS, TOOLS } from "./tools";
 import { InitiativePanel } from "./panels/InitiativePanel";
@@ -282,7 +283,12 @@ function TurnBar() {
   const dmView = useDmView();
   const [endingFor, setEndingFor] = useState<string | null>(null);
 
-  if (!turn.active) return null;
+  if (!turn.active)
+    return (
+      <div className="tt-turnbar">
+        <JoinCombat />
+      </div>
+    );
   const mine = !!current && current.ownerIds.includes(me);
   const order = initiativeOrder(dmView ? tokens : tokens.filter((t) => t.layer !== "Dm"));
   const index = order.findIndex((t) => t.id === turn.currentTokenId);
@@ -311,6 +317,7 @@ function TurnBar() {
 
     return (
       <div className="tt-turnbar">
+        <JoinCombat />
         {/* Keyed by turn so the card pops in again whenever the turn comes back to you */}
         <div key={turn.currentTokenId} className="tt-turncard mine tt-glass tt-pop-in" style={{ "--token": current.color } as CSSProperties}>
           <div className="tt-turncard-avatar">{avatar(52)}</div>
@@ -357,6 +364,7 @@ function TurnBar() {
 
   return (
     <div className="tt-turnbar">
+      <JoinCombat />
       <div key={turn.currentTokenId ?? "none"} className="tt-turncard tt-glass tt-pop-in" style={{ "--token": current?.color ?? "#64748b" } as CSSProperties}>
         <div className="tt-turncard-avatar small">{avatar(36)}</div>
         <div className="tt-turncard-info">

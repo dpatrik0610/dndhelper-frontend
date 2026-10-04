@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { RollResult } from "@appTypes/Roll";
+import type { TableLogEntry } from "@appTypes/Tabletop";
 import { tabletop } from "./useTabletopHub";
 
 /** Short enough to feel instant, long enough for the dice to visibly tumble. */
@@ -24,13 +25,17 @@ export function useTableRoll() {
     count: 1,
   });
 
-  const roll = async (request: RollRequest, sides: number, count = 1) => {
+  /** Animates any server roll that resolves to a log entry. */
+  const animate = async (rolling: Promise<TableLogEntry | null | undefined>, sides: number, count = 1) => {
     setState({ result: null, rolling: true, sides, count });
-    const [entry] = await Promise.all([tabletop.roll(request), new Promise((r) => setTimeout(r, MIN_TUMBLE_MS))]);
+    const [entry] = await Promise.all([rolling, new Promise((r) => setTimeout(r, MIN_TUMBLE_MS))]);
     setState({ result: entry?.rolls[0] ?? null, rolling: false, sides, count });
+    return entry ?? null;
   };
 
-  return { ...state, roll };
+  const roll = (request: RollRequest, sides: number, count = 1) => animate(tabletop.roll(request), sides, count);
+
+  return { ...state, roll, animate };
 }
 
 /** "1d20+3" / "1d20-1" / "1d20". */
