@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Container, SimpleGrid, Text, Center, Loader } from "@mantine/core";
+import { Container, SimpleGrid, Text, Center, Skeleton, Stack } from "@mantine/core";
+import { CardGridSkeleton } from "@components/common/Skeletons";
 import { useShopStore } from "@store/shop/shopStore";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
@@ -248,7 +249,12 @@ export default function ShopkeeperPage() {
     }
 
     if (loading && shops.length === 0) {
-        return <Center mt="20vh"><Loader color="indigo" /></Center>;
+        return (
+            <Stack gap="md" p="xs">
+                <Skeleton h={72} radius="md" />
+                <CardGridSkeleton count={2} cols={{ base: 1, md: 2 }} height={420} />
+            </Stack>
+        );
     }
 
     return (
@@ -268,7 +274,7 @@ export default function ShopkeeperPage() {
                 {visibleShops.length === 0 && <EmptyMarketplace />}
 
                 {!activeShop && selectedShopId && (
-                     <Text c="amber.5" size="xs" ta="center" py="xl">Loading shop stock...</Text>
+                    <CardGridSkeleton count={2} cols={{ base: 1, md: 2 }} height={420} />
                 )}
 
                 {activeShop && (

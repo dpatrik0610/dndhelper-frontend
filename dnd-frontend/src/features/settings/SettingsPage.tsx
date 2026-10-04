@@ -8,7 +8,6 @@ import {
   Stack,
   Paper,
   Center,
-  Loader,
   TextInput,
   Button,
   Avatar,
@@ -23,6 +22,7 @@ import {
 import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { showNotification } from "@components/Notification/Notification";
+import { CardGridSkeleton, ListSkeleton } from "@components/common/Skeletons";
 import { SectionColor } from "@appTypes/SectionColor";
 import { type SidebarThemeVariant, themeOptions } from "@appTypes/ThemeTypes";
 import {
@@ -120,9 +120,16 @@ export default function SettingsPage() {
 
   if (loadingSettings) {
     return (
-      <Center style={{ height: "60vh" }}>
-        <Loader size="lg" color="indigo" />
-      </Center>
+      <Box m="0 auto" maw={1100} p="md">
+        <Grid gutter="lg">
+          <Grid.Col span={{ base: 12, md: 3 }}>
+            <ListSkeleton rows={2} height={44} />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 9 }}>
+            <CardGridSkeleton count={6} cols={{ base: 2, sm: 3 }} height={110} />
+          </Grid.Col>
+        </Grid>
+      </Box>
     );
   }
 

@@ -4,7 +4,6 @@ import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { StatBox } from "@features/profile/components/StatBox";
 import {
   SimpleGrid,
-  Loader,
   Center,
   Stack,
   Text,
@@ -19,6 +18,7 @@ import type { Spell } from "@appTypes/Spell";
 import { useEffect, useMemo, useState } from "react";
 import { useSpellActions } from "@store/spell/spellSelectors";
 import CustomBadge from "@components/common/CustomBadge";
+import { ListSkeleton } from "@components/common/Skeletons";
 
 import { SpellModal } from "@features/profile/components/modals/SpellModal";
 import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
@@ -121,9 +121,7 @@ export function SpellsPanel() {
           boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
         }}
       >
-        <Center py="xl">
-          <Loader color="var(--theme-color-accent-primary)" />
-        </Center>
+        <ListSkeleton rows={5} height={52} />
       </ExpandableSection>
     );
 

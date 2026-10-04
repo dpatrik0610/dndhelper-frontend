@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { AppShell, Loader, Center } from "@mantine/core";
+import { AppShell } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useMemo, lazy, Suspense } from "react";
 import Sidebar from "@features/navigation/Sidebar/Sidebar";
@@ -15,23 +15,56 @@ import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal"
 import { type SidebarThemeVariant, getActiveThemeClass } from "@appTypes/ThemeTypes";
 import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { PageSkeleton } from "@components/common/Skeletons";
 
-// Lazy load route components for code splitting
-const Home = lazy(() => import("@features/home/Home"));
+// Route chunks: each import is shared by lazy() and the idle-time prefetch below.
+const pages = {
+  home: () => import("@features/home/Home"),
+  profile: () => import("@features/profile/CharacterProfile"),
+  spells: () => import("@features/spells/SpellPage"),
+  characterForm: () => import("@features/characterForm/CharacterFormPage").then((m) => ({ default: m.CharacterFormPage })),
+  notes: () => import("@features/notes/NotesPage"),
+  quests: () => import("@features/quests/QuestsPage"),
+  rollHistory: () => import("@features/rollHistory/RollHistoryPage"),
+  rules: () => import("@features/rules/RulesPage"),
+  encounterRoom: () => import("@features/encounterRoom/EncounterRoomPage"),
+  shop: () => import("@features/shop/ShopkeeperPage"),
+  settings: () => import("@features/settings/SettingsPage"),
+};
+const adminPage = () => import("@features/admin/AdminDashboard").then((m) => ({ default: m.AdminDashboard }));
+
+const Home = lazy(pages.home);
+const CharacterProfile = lazy(pages.profile);
+const SpellPage = lazy(pages.spells);
+const CharacterFormPage = lazy(pages.characterForm);
+const NotesPage = lazy(pages.notes);
+const QuestsPage = lazy(pages.quests);
+const RollHistoryPage = lazy(pages.rollHistory);
+const RulesPage = lazy(pages.rules);
+const EncounterRoomPage = lazy(pages.encounterRoom);
+const ShopkeeperPage = lazy(pages.shop);
+const SettingsPage = lazy(pages.settings);
+const AdminDashboard = lazy(adminPage);
 const Login = lazy(() => import("@features/auth/login/Login"));
 const Register = lazy(() => import("@features/auth/register/Register"));
 const NotFound = lazy(() => import("@features/notFound/NotFound"));
-const CharacterProfile = lazy(() => import("@features/profile/CharacterProfile"));
-const SpellPage = lazy(() => import("@features/spells/SpellPage"));
-const CharacterFormPage = lazy(() => import("@features/characterForm/CharacterFormPage").then(m => ({ default: m.CharacterFormPage })));
-const AdminDashboard = lazy(() => import("@features/admin/AdminDashboard").then(m => ({ default: m.AdminDashboard })));
-const NotesPage = lazy(() => import("@features/notes/NotesPage"));
-const QuestsPage = lazy(() => import("@features/quests/QuestsPage"));
-const RollHistoryPage = lazy(() => import("@features/rollHistory/RollHistoryPage"));
-const RulesPage = lazy(() => import("@features/rules/RulesPage"));
-const EncounterRoomPage = lazy(() => import("@features/encounterRoom/EncounterRoomPage"));
-const ShopkeeperPage = lazy(() => import("@features/shop/ShopkeeperPage"));
-const SettingsPage = lazy(() => import("@features/settings/SettingsPage"));
+
+/** After login, fetch every page chunk while the browser is idle, so later navigation never waits on the network. */
+function usePrefetchPages(enabled: boolean, includeAdmin: boolean) {
+  useEffect(() => {
+    if (!enabled) return;
+    const prefetch = () => {
+      Object.values(pages).forEach((load) => void load().catch(() => {}));
+      if (includeAdmin) void adminPage().catch(() => {});
+    };
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(prefetch, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = setTimeout(prefetch, 1500);
+    return () => clearTimeout(id);
+  }, [enabled, includeAdmin]);
+}
 
 function AppRoutes() {
   const location = useLocation();
@@ -56,6 +89,14 @@ function AppRoutes() {
 
   useTokenExpiryGuard(token, localToken);
   useBootstrapCharacters(activeToken, characters.length);
+  usePrefetchPages(!!activeToken, isAdmin);
+
+  // Top-level section ("spells" for /spells/Fireball). Changing it replays the page enter animation
+  // and scrolls to top; moving within a section (e.g. between spells) does neither.
+  const section = location.pathname.split("/")[1] || "home";
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [section]);
 
   useEffect(() => {
     if (activeToken) {
@@ -158,7 +199,8 @@ function AppRoutes() {
             padding: isDashboardRoute ? 0 : (isMobile ? 0 : "md"),
           }}
         >
-          <Suspense fallback={<Center mt="20vh"><Loader color="var(--theme-color-accent-primary)" /></Center>}>
+          <Suspense fallback={<div className="route-fallback"><PageSkeleton /></div>}>
+            <div key={section} className="route-enter">
             <Routes>
               <Route element={<PrivateRoute />}>
                 <Route path="/" element={<Home />} />
@@ -184,6 +226,7 @@ function AppRoutes() {
               <Route path="/register" element={<Register />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </div>
           </Suspense>
         </div>
       </AppShell.Main>

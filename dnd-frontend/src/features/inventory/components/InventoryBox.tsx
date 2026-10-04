@@ -2,7 +2,8 @@ import { getAuthTokenSafe } from "@store/auth/authUtils";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { useEffect, useState } from "react";
 import { RemoveItemModal } from "@appTypes/Inventory/components/RemoveItemModal";
-import { Text, Loader, Center } from "@mantine/core";
+import { Text } from "@mantine/core";
+import { ListSkeleton } from "@components/common/Skeletons";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
 
@@ -120,12 +121,7 @@ export default function InventoryBox({ inventory, searchTerm, viewMode }: Invent
     }
   };
 
-  if (loading)
-    return (
-      <Center py="md">
-        <Loader size="sm" />
-      </Center>
-    );
+  if (loading) return <ListSkeleton rows={4} height={48} />;
 
   if (!currentInventory)
     return (

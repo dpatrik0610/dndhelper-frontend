@@ -1,0 +1,131 @@
+/* ==========================================================================
+   ⏳ Loading UI: rune loader, themed skeletons, route transitions
+   ========================================================================== */
+
+/* ---------- Rune loader (RuneLoader.tsx) ----------
+   Root = unmasked box. ::before = comet arc on the outer ring (spins),
+   ::after = ring of 12 rune ticks (counter-spins), child = pulsing core. */
+
+.rune-loader {
+  --rune-a: var(--theme-color-accent-primary, #f59e0b);
+  --rune-b: var(--theme-color-accent-secondary, #10b981);
+  --rune-w: max(2px, calc(var(--loader-size) * 0.08));
+  --rune-ring: radial-gradient(farthest-side, transparent calc(100% - var(--rune-w)), #000 calc(100% - var(--rune-w) + 0.5px));
+
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: var(--loader-size);
+  height: var(--loader-size);
+}
+
+/* Inside buttons / action icons: follow the control's text colour so it stays visible on accent fills */
+.mantine-Button-loader .rune-loader,
+.mantine-ActionIcon-loader .rune-loader {
+  --rune-a: var(--loader-color, currentColor);
+  --rune-b: var(--loader-color, currentColor);
+}
+
+.rune-loader::before,
+.rune-loader::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  -webkit-mask: var(--rune-ring);
+  mask: var(--rune-ring);
+}
+
+.rune-loader::before {
+  inset: 0;
+  background: conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb, var(--rune-a) 20%, transparent) 140deg, var(--rune-a) 340deg, transparent 341deg);
+  filter: drop-shadow(0 0 calc(var(--loader-size) * 0.1) var(--rune-a));
+  animation: runeSpin 1s linear infinite;
+}
+
+.rune-loader::after {
+  inset: 24%;
+  background: repeating-conic-gradient(var(--rune-b) 0deg 8deg, transparent 8deg 30deg);
+  opacity: 0.85;
+  animation: runeSpin 2.4s linear infinite reverse;
+}
+
+.rune-loader__core {
+  position: absolute;
+  inset: 42%;
+  border-radius: 50%;
+  background: var(--rune-a);
+  box-shadow: 0 0 calc(var(--loader-size) * 0.18) var(--rune-a);
+  animation: runePulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes runeSpin {
+  to { transform: rotate(1turn); }
+}
+
+@keyframes runePulse {
+  from { transform: scale(0.6); opacity: 0.6; }
+  to   { transform: scale(1.15); opacity: 1; }
+}
+
+/* ---------- Skeletons: themed shimmer instead of a grey pulse ---------- */
+
+.mantine-Skeleton-root[data-visible]::before {
+  background-color: transparent;
+}
+
+.mantine-Skeleton-root[data-visible]::after {
+  background-color: var(--theme-bg-card, rgba(255, 255, 255, 0.05));
+  background-image: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in srgb, var(--theme-color-accent-primary, #fff) 14%, transparent) 50%,
+    transparent 80%
+  );
+  background-size: 220% 100%;
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
+  border-radius: inherit;
+}
+
+.mantine-Skeleton-root[data-animate]::after {
+  animation: skeletonShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeletonShimmer {
+  from { background-position: 120% 0; }
+  to   { background-position: -120% 0; }
+}
+
+/* ---------- Route transitions (App.tsx) ----------
+   The page wrapper is keyed by the top-level section, so this enter animation plays on each section change. */
+
+.route-enter {
+  animation: routeEnter 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Route-level skeleton: only fades in if loading takes longer than 150ms, so fast loads don't flash */
+.route-fallback {
+  animation: routeFallbackIn 0.25s ease 0.15s both;
+}
+
+@keyframes routeFallbackIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes routeEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rune-loader::before,
+  .rune-loader::after,
+  .rune-loader__core {
+    animation-duration: 3s;
+  }
+  .route-enter,
+  .route-fallback,
+  .mantine-Skeleton-root[data-animate]::after {
+    animation: none;
+  }
+}

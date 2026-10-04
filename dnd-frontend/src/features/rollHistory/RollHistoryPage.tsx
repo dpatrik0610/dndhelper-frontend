@@ -5,7 +5,6 @@ import {
   Box,
   Button,
   Group,
-  Loader,
   Modal,
   Paper,
   Pagination,
@@ -17,6 +16,7 @@ import {
 import { IconX } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
+import { ListSkeleton } from "@components/common/Skeletons";
 import { useToken, useIsAdmin } from "@store/auth/authSelectors";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { getRollHistory } from "@services/rollService";
@@ -298,7 +298,7 @@ export default function RollHistoryPage() {
         </Group>
 
         {loading && entries.length === 0 ? (
-          <Loader />
+          <ListSkeleton rows={8} height={64} />
         ) : entries.length === 0 ? (
           <Text c="dimmed">No rolls found.</Text>
         ) : (

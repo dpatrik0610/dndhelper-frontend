@@ -7,7 +7,6 @@ import {
   MultiSelect,
   Paper,
   Stack,
-  Loader,
   Center,
   SimpleGrid,
 } from "@mantine/core";
@@ -30,6 +29,7 @@ import { QuestCard } from "./components/QuestCard";
 import { EquipmentModal } from "@features/inventory/components/EquipmentModal";
 import { QuestDetailsModal } from "./components/QuestDetailsModal";
 import { CustomSelect } from "@components/common/CustomSelect";
+import { CardGridSkeleton } from "@components/common/Skeletons";
 import { GlassyTextInput } from "@components/common/GlassyTextInput";
 import { GlassyTextarea } from "@components/common/GlassyTextarea";
 
@@ -402,9 +402,7 @@ export default function QuestsPage() {
           {/* Quests Content */}
           <Paper withBorder p={isMobile ? "sm" : "lg"} style={panelStyle}>
             {loading ? (
-              <Center p="xl">
-                <Loader color="var(--theme-color-accent-primary)" />
-              </Center>
+              <CardGridSkeleton count={4} cols={{ base: 1, md: 2, lg: 4 }} height={190} />
             ) : filteredQuests.length === 0 ? (
               <Center p="xl">
                 <Stack align="center" gap="sm">

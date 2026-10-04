@@ -3,8 +3,9 @@ import {
   Group,
   Tabs,
   Text,
-  Loader,
+  Stack,
 } from "@mantine/core";
+import { CardGridSkeleton, LinesSkeleton } from "@components/common/Skeletons";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
@@ -108,9 +109,10 @@ export default function CharacterProfile() {
 
         <Suspense
           fallback={
-            <Group justify="center" py="xl" style={{ minHeight: "180px", width: "100%" }}>
-              <Loader size="md" />
-            </Group>
+            <Stack gap="md" py="md">
+              <CardGridSkeleton count={3} cols={{ base: 1, sm: 3 }} height={110} />
+              <LinesSkeleton lines={4} />
+            </Stack>
           }
         >
           <AnimatePresence mode="wait">

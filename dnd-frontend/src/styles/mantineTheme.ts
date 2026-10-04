@@ -1,6 +1,7 @@
 import {
   createTheme,
   Autocomplete,
+  Loader,
   Modal,
   MultiSelect,
   NumberInput,
@@ -11,6 +12,7 @@ import {
   Textarea,
   TextInput,
 } from "@mantine/core";
+import { RuneLoader } from "@components/common/RuneLoader";
 
 // Default look for every Mantine input / dropdown / modal / paper.
 // Styles live in glassyInput.css; theme CSS variables come from the theme class on <html> (see App.tsx).
@@ -29,5 +31,7 @@ export const mantineTheme = createTheme({
     TagsInput: TagsInput.extend({ classNames: combobox }),
     Modal: Modal.extend({ classNames: { content: "glass-modal" } }),
     Paper: Paper.extend({ classNames: { root: "glass-paper" } }),
+    // Every <Loader /> (and Button/ActionIcon `loading`) renders the themed rune circle.
+    Loader: Loader.extend({ defaultProps: { loaders: { ...Loader.defaultLoaders, rune: RuneLoader }, type: "rune" } }),
   },
 });
