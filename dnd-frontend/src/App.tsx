@@ -138,15 +138,14 @@ function AppRoutes() {
       const maxTime = 350;
 
       if (timeDiff <= maxTime && Math.abs(diffY) < maxVerticalDeviation) {
-        // Swipe Left (Right-to-Left) -> Open
-        if (diffX <= -minSwipeDistance) {
-          const isNearRightEdge = startX > window.innerWidth - 60;
-          if (!opened && isNearRightEdge) {
+        // Swipe right from the left edge -> open
+        if (diffX >= minSwipeDistance) {
+          if (!opened && startX < 60) {
             handlers.open();
           }
         }
-        // Swipe Right (Left-to-Right) -> Close
-        else if (diffX >= minSwipeDistance) {
+        // Swipe left -> close
+        else if (diffX <= -minSwipeDistance) {
           if (opened) {
             handlers.close();
           }
@@ -182,8 +181,7 @@ function AppRoutes() {
       styles={getAppShellStyles(isMobile, isDashboardRoute, showSidebar)} 
       className={isDashboardRoute ? "" : `${activeThemeClass} style-variant-glass`}
     >
-      {/* Right on mobile (thumb + edge swipe), left on desktop (clear of the scrollbar) */}
-      {showSidebar && <Sidebar opened={opened} onClose={handlers.close} position={isMobile ? "right" : "left"} themeVariant={sidebarTheme} />}
+      {showSidebar && <Sidebar opened={opened} onClose={handlers.close} themeVariant={sidebarTheme} />}
 
       <AppShell.Main>
         <AppBackground />

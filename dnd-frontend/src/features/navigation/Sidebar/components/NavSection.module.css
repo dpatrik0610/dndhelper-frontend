@@ -1,0 +1,27 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Small caps label trailed by a hairline that fades out in the theme's glow color */
+.label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  padding-inline: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.65));
+  opacity: 0.75;
+}
+
+.label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--theme-border-glow, rgba(168, 85, 247, 0.35)), transparent);
+}

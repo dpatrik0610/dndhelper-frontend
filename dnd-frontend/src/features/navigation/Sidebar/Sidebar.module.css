@@ -1,257 +1,35 @@
-.drawerContent {
-  height: 100%;
-  backdrop-filter: blur(4px);
-  background: var(--sidebar-bg, linear-gradient(160deg, rgba(23, 20, 45, 0.82), rgba(14, 14, 34, 0.78)));
-  border-inline: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.05)); /* left drawer on desktop, right on mobile */
-}
+/* Drawer shell: character card / scrolling nav / footer. Colors come from the --theme-* tokens
+   (styles/theme.css); fallbacks are Midnight's.
+   The drawer is a Paper, so it also carries the global .glass-paper (translucent card tint) and Mantine's
+   Paper background, both loaded after this module: the doubled class outranks them. Body padding is the
+   Drawer's `padding` prop for the same reason. */
 
-.drawerInner {
-  height: 100%;
-}
-
-.headerCard {
-  width: 100%;
-  background: var(--sidebar-header, linear-gradient(135deg, rgba(103, 65, 217, 0.3), rgba(29, 110, 180, 0.25)));
-  border: 1px solid var(--sidebar-border-strong, rgba(255, 255, 255, 0.07));
-  border-radius: 12px;
-  padding: var(--mantine-spacing-md);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-}
-
-.headerTopRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.headerInfoRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.userBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: radial-gradient(circle at 30% 30%, #c3fffb, #6b8cff 60%, #8058ff 100%);
-  color: #0d0b1a;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.sectionLabel {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 11px;
-  color: var(--mantine-color-gray-5);
-}
-
-.navGroup {
-  border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
-  border-radius: 12px;
-  padding: 6px;
-  background: var(--sidebar-panel, rgba(255, 255, 255, 0.02));
-}
-
-.navButton {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--mantine-spacing-sm);
-  padding: 10px 12px;
-  border-radius: 10px;
-  transition: transform 120ms ease, box-shadow 180ms ease, background 180ms ease;
-  border: 1px solid transparent;
-}
-
-.navButton::before {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border-radius: 8px;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
-  opacity: 0;
-  transition: opacity 180ms ease;
-}
-
-.navButtonActive {
-  background: var(--sidebar-active, linear-gradient(135deg, rgba(106, 76, 255, 0.9), rgba(83, 216, 255, 0.8)));
-  color: var(--sidebar-active-text, var(--mantine-color-white)) !important;
-  border-color: var(--sidebar-active-border, rgba(255, 255, 255, 0.12));
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
-}
-
-.navButtonActive p,
-.navButtonActive span,
-.navButtonActive div {
-  color: inherit !important;
-}
-
-.navButtonInactive {
-  background: var(--sidebar-panel, rgba(255, 255, 255, 0.02));
-  color: var(--mantine-color-gray-0);
-  border-color: var(--sidebar-border, rgba(255, 255, 255, 0.04));
-}
-
-.navButtonInactive p,
-.navButtonInactive span,
-.navButtonInactive div {
-  color: inherit !important;
-}
-
-.navButtonDisabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  pointer-events: none;
-  filter: grayscale(0.25);
-}
-
-.navButton:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-}
-
-.navButton:hover::before {
-  opacity: 1;
-}
-
-.adminToggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: var(--mantine-spacing-xs);
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: var(--sidebar-panel, rgba(255, 255, 255, 0.02));
-}
-
-.logoutButton {
-  display: flex;
-  align-items: center;
-  gap: var(--mantine-spacing-sm);
-  padding: var(--mantine-spacing-xs);
-  border-radius: 10px;
-  color: var(--mantine-color-red-5);
-  border: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.06));
-  background: var(--sidebar-panel, rgba(255, 255, 255, 0.02));
-  transition: background 150ms ease, transform 120ms ease;
-}
-
-.logoutButton:hover {
-  background: rgba(255, 95, 109, 0.1);
-  transform: translateY(-1px);
-}
-
-/* 🫧 Theme bubble: 46px circle → full-width panel.
-   The content box is always full width, so Collapse measures the real (wrapped) height of the runes.
-   Only the decorative ::before surface animates its width; animating the box itself made Collapse
-   measure the runes stacked in a 46px column, overshoot, then snap back. */
-.themeBubble {
-  position: relative;
-  width: 100%;
-  flex-shrink: 0;
-  pointer-events: none; /* empty area beside the closed bubble isn't clickable/hoverable */
-}
-
-.themeBubble::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 46px;
-  border-radius: 23px;
-  border: 1px solid var(--sidebar-border-strong, rgba(255, 255, 255, 0.12));
-  background: var(--sidebar-panel, rgba(255, 255, 255, 0.03));
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-  transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-radius 0.3s ease, box-shadow 0.3s ease;
-}
-
-.themeBubble:not([data-open]):hover::before {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3), var(--theme-glow-shadow-primary);
-}
-
-.themeBubble[data-open]::before {
-  width: 100%;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), var(--theme-glow-shadow-primary);
-}
-
-.themeBubble > * {
-  position: relative; /* above ::before */
-  pointer-events: auto;
-}
-
-.themeBubblePanel {
-  padding: 12px 10px 2px;
-}
-
-.themeBubbleToggle {
-  display: flex;
-  align-items: center;
-  width: 46px;
-  height: 46px;
-  overflow: hidden;
+.drawer:global(.mantine-Drawer-content) {
+  border-right: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
+  background:
+    radial-gradient(120% 40% at 50% 0%, color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 14%, transparent), transparent 70%),
+    radial-gradient(100% 30% at 50% 100%, color-mix(in srgb, var(--theme-color-accent-secondary, #06b6d4) 8%, transparent), transparent 70%),
+    var(--theme-bg-panel-opaque, #140f28);
   color: var(--theme-color-text-primary, #fff);
+  overflow: hidden; /* only .nav scrolls */
 }
 
-.themeBubble[data-open] .themeBubbleToggle {
-  width: 100%;
+.body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
-.themeBubbleIcon {
-  transition: transform 0.2s ease;
-}
-
-.themeBubble:not([data-open]) .themeBubbleToggle:hover .themeBubbleIcon {
-  transform: scale(1.15);
-}
-
-.themeBubbleIcon {
-  width: 46px;
-  height: 46px;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.themeBubbleName,
-.themeBubbleChevron {
-  opacity: 0;
-  white-space: nowrap;
-  transition: opacity 0.2s ease, transform 0.3s ease;
-}
-
-.themeBubbleName {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-
-.themeBubbleChevron {
-  margin-left: auto;
-  margin-right: 14px;
-  flex-shrink: 0;
-}
-
-.themeBubble[data-open] .themeBubbleName { opacity: 0.85; }
-.themeBubble[data-open] .themeBubbleChevron { opacity: 0.7; transform: rotate(180deg); }
-
-.themeBubbleToggle:focus-visible {
-  outline: 2px solid var(--theme-color-accent-primary, #f59e0b);
-  outline-offset: -2px;
-  border-radius: 23px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .themeBubble::before, .themeBubbleIcon, .themeBubbleName, .themeBubbleChevron { transition: none; }
+.nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-inline: -6px; /* let item focus rings breathe without clipping */
+  padding-inline: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-border-glow, rgba(168, 85, 247, 0.35)) transparent;
 }

@@ -1,132 +1,51 @@
-﻿import { useMemo } from "react";
-import { Drawer, Stack, useMantineTheme } from "@mantine/core";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useUsername, useIsAdmin } from "@store/auth/authSelectors";
-import { handleLogout } from "@utils/handleLogout";
-import { tabs, type TabItem } from "./SidebarTabs";
-
-import { SidebarHeader } from "./components/SidebarHeader";
+import { Drawer } from "@mantine/core";
+import { useLocation } from "react-router-dom";
+import { useIsAdmin } from "@store/auth/authSelectors";
+import { getActiveThemeClass, type SidebarThemeVariant } from "@appTypes/ThemeTypes";
+import { navSections } from "./navItems";
+import { CharacterCard } from "./components/CharacterCard";
 import { NavSection } from "./components/NavSection";
-import { ThemeBubble } from "./components/ThemeBubble";
+import { SidebarFooter } from "./components/SidebarFooter";
 import classes from "./Sidebar.module.css";
-import { sidebarThemes, type SidebarThemeVariant } from "@appTypes/ThemeTypes";
-import { useIsMobile } from "@hooks/useIsMobile";
 
 interface SidebarProps {
   opened: boolean;
   onClose: () => void;
-  position?: "left" | "right";
   themeVariant?: SidebarThemeVariant;
 }
 
-export default function Sidebar({ opened, onClose, position = "left", themeVariant = "midnight" }: SidebarProps) {
-  const isMobile = useIsMobile();
-  const theme = useMantineTheme();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const username = useUsername() ?? "NOT LOGGED IN";
+export default function Sidebar({ opened, onClose, themeVariant = "midnight" }: SidebarProps) {
   const isAdmin = useIsAdmin();
+  const { pathname } = useLocation();
 
-  const activeLabel = useMemo(() => {
-    const normalizedPath = location.pathname === "/" ? "/home" : location.pathname;
-    const allTabs = [...tabs.home, ...tabs.admin, ...tabs.character, ...tabs.campaign];
-    const match = allTabs.find((item) => normalizedPath.startsWith(item.link));
-    return match?.label ?? "";
-  }, [location.pathname]);
-
-  const handleNavigate = (link: string) => {
-    navigate(link);
-    onClose();
-  };
-  const themeTokens = sidebarThemes[themeVariant] ?? sidebarThemes.midnight;
-
-  const homeLinks: TabItem[] = tabs.home;
-  const adminLinks: TabItem[] = tabs.admin;
-  const characterLinks: TabItem[] = tabs.character;
-  const campaignLinks: TabItem[] = tabs.campaign;
-  // const settingsLinks: TabItem[] = tabs["settings"];
-
-  const initials = username
-    .split(" ")
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  // "/" renders Home; "/spells/Fireball" belongs to "/spells"
+  const path = pathname === "/" ? "/home" : pathname;
+  const activeLink = navSections.flatMap((s) => s.items).find((item) => path.startsWith(item.link))?.link;
 
   return (
     <Drawer
       opened={opened}
       onClose={onClose}
-      position={position}
-      padding="md"
-      size={isMobile ? "100%" : "280px"}
-      overlayProps={{
-        color: theme.colors.dark[9],
-        opacity: 0.5,
-        blur: 4,
-      }}
+      position="left"
+      padding={14}
+      size="280px" // SidebarToggle's DRAWER_WIDTH rides this edge; phones too, so the page stays visible beside it
+      overlayProps={{ color: "#000", backgroundOpacity: 0.5, blur: 4 }}
       withCloseButton={false}
       zIndex={198} // just under SidebarToggle (199), which closes it
-      classNames={{ content: classes.drawerContent }}
-      styles={{
-        content: {
-          ["--sidebar-bg" as string]: themeTokens.background,
-          ["--sidebar-header" as string]: themeTokens.header,
-          ["--sidebar-panel" as string]: themeTokens.panel,
-          ["--sidebar-border" as string]: themeTokens.border,
-          ["--sidebar-border-strong" as string]: themeTokens.borderStrong,
-          ["--sidebar-active" as string]: themeTokens.active,
-          ["--sidebar-active-border" as string]: themeTokens.activeBorder,
-          ["--sidebar-active-text" as string]: themeTokens.activeText,
-        },
-      }}
+      // The theme class sits here too: /dashboard renders without one on <html>
+      classNames={{ content: `${classes.drawer} ${getActiveThemeClass(themeVariant)}`, body: classes.body }}
     >
-      <Stack justify="space-between" className={classes.drawerInner} style={{ height: "100%" }}>
-        <Stack gap="md">
-          <SidebarHeader
-            username={username}
-            roleLabel={isAdmin ? "Administrator" : "Player"}
-            initials={initials}
-            onLogout={() => {
-              handleLogout();
-              onClose();
-              navigate("/login");
-            }}
-          />
+      <CharacterCard />
 
-          <NavSection
-            label=""
-            items={homeLinks}
-            activeLabel={activeLabel}
-            onNavigate={handleNavigate}
-          />
+      <nav className={classes.nav} aria-label="Main">
+        {navSections
+          .filter((section) => !section.adminOnly || isAdmin)
+          .map((section) => (
+            <NavSection key={section.label ?? "root"} section={section} activeLink={activeLink} onNavigate={onClose} />
+          ))}
+      </nav>
 
-          {isAdmin && (
-            <NavSection
-              label="Admin"
-              items={adminLinks}
-              activeLabel={activeLabel}
-              onNavigate={handleNavigate}
-            />
-          )}
-
-          <NavSection
-            label="Character"
-            items={characterLinks}
-            activeLabel={activeLabel}
-            onNavigate={handleNavigate}
-          />
-
-          <NavSection
-            label="Campaign"
-            items={campaignLinks}
-            activeLabel={activeLabel}
-            onNavigate={handleNavigate}
-          />
-        </Stack>
-
-        <ThemeBubble />
-      </Stack>
+      <SidebarFooter onNavigate={onClose} />
     </Drawer>
   );
 }

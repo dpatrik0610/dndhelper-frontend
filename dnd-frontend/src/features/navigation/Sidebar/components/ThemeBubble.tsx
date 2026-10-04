@@ -4,7 +4,7 @@ import { IconChevronUp } from "@tabler/icons-react";
 import { MagicThemeSelector } from "@components/common/MagicThemeSelector";
 import { useUiStore } from "@store/ui/uiStore";
 import { getThemeOption } from "@appTypes/ThemeTypes";
-import classes from "@features/navigation/Sidebar/Sidebar.module.css";
+import classes from "./ThemeBubble.module.css";
 
 /** Round bubble showing the active theme's icon; expands into the theme selector. */
 export function ThemeBubble() {
@@ -12,25 +12,25 @@ export function ThemeBubble() {
   const theme = getThemeOption(useUiStore((s) => s.sidebarTheme));
 
   return (
-    <div className={classes.themeBubble} data-open={open || undefined}>
+    <div className={classes.bubble} data-open={open || undefined}>
       <Collapse in={open} transitionDuration={250}>
-        <div className={classes.themeBubblePanel} id="theme-bubble-panel">
+        <div className={classes.panel} id="theme-bubble-panel">
           <MagicThemeSelector />
         </div>
       </Collapse>
 
       <UnstyledButton
-        className={classes.themeBubbleToggle}
+        className={classes.toggle}
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-controls="theme-bubble-panel"
         aria-label={open ? "Close theme selector" : `Theme: ${theme.name}. Change theme`}
       >
-        <span className={classes.themeBubbleIcon} aria-hidden>
+        <span className={classes.icon} aria-hidden>
           {theme.icon}
         </span>
-        <span className={classes.themeBubbleName}>{theme.name}</span>
-        <IconChevronUp size={14} className={classes.themeBubbleChevron} aria-hidden />
+        <span className={classes.name}>{theme.name}</span>
+        <IconChevronUp size={14} className={classes.chevron} aria-hidden />
       </UnstyledButton>
     </div>
   );

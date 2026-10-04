@@ -1,6 +1,5 @@
-/* Sidebar pull-tab. Desktop: left screen edge, in its own lane (appShellStyles.ts pads the page by
-   TOGGLE_LANE), rides the 280px drawer's edge when open. Mobile: right edge, slim, stays put over the
-   full-width drawer as its close control.
+/* Sidebar pull-tab on the left screen edge; rides the 280px drawer's edge when open. Desktop: in its own
+   lane (appShellStyles.ts pads the page by TOGGLE_LANE). Mobile: slimmer, over the page's edge.
    --drag: live mouse-drag offset set by SidebarToggle.tsx.
    z-index 199: above the drawer (zIndex 198 in Sidebar.tsx), below Mantine modals (200),
    popovers (300) and notifications (400).
@@ -83,7 +82,7 @@
   outline-offset: -4px;
 }
 
-/* Open: ride the drawer's right edge (desktop drawer is 280px in Sidebar.tsx); chevron points "close" */
+/* Open: ride the drawer's right edge (280px in Sidebar.tsx); chevron points "close" */
 .tab[aria-expanded="true"] {
   --offset: 280px;
 }
@@ -94,32 +93,11 @@
 
 @media (max-width: 768px) {
   .tab {
-    left: auto;
-    right: 0;
     width: 22px;
     height: 64px;
     margin-top: -32px;
-    border-left: 1px solid var(--theme-border-glow, rgba(168, 85, 247, 0.35));
-    border-right: none;
-    border-radius: 12px 0 0 12px;
     cursor: pointer;
-    background:
-      linear-gradient(90deg, var(--theme-bg-hover, rgba(168, 85, 247, 0.14)), transparent),
-      var(--theme-bg-panel-opaque, #140f28);
   }
-
-  .tab::before {
-    right: auto;
-    left: 0;
-  }
-
-  .tab[aria-expanded="true"] {
-    --offset: 0px;
-  }
-
-  /* Right edge: closed points left (open), open points right (close) */
-  .chevron { rotate: 180deg; }
-  .tab[aria-expanded="true"] .chevron { rotate: 0deg; }
 }
 
 @media (prefers-reduced-motion: reduce) {

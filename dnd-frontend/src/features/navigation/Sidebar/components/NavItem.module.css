@@ -1,0 +1,73 @@
+/* Flat row; the active page gets a glowing accent spine on the inner edge and a soft theme wash. */
+
+.item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  color: color-mix(in srgb, var(--theme-color-text-primary, #fff) 70%, transparent); /* neutral; the theme color marks the active page */
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 3px;
+  height: 0;
+  border-radius: 0 3px 3px 0;
+  background: var(--theme-gradient-primary, linear-gradient(180deg, #a855f7, #06b6d4));
+  box-shadow: var(--theme-glow-shadow-primary, 0 0 10px rgba(168, 85, 247, 0.5));
+  translate: 0 -50%;
+  transition: height 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.icon {
+  flex-shrink: 0;
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item:hover {
+  background: var(--theme-bg-hover, rgba(168, 85, 247, 0.14));
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.item:hover .icon {
+  transform: translateX(1px) scale(1.08);
+}
+
+.item[aria-current="page"] {
+  background: var(--theme-gradient-active, linear-gradient(90deg, rgba(168, 85, 247, 0.2), rgba(6, 182, 212, 0.08)));
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.item[aria-current="page"]::before {
+  height: 60%;
+}
+
+.item[aria-current="page"] .icon {
+  color: var(--theme-color-accent-primary, #a855f7);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #a855f7);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item, .item::before, .icon { transition: none; }
+}

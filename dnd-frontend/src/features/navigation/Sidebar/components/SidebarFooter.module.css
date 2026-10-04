@@ -1,0 +1,60 @@
+/* Bubble and actions share one grid cell: the closed bubble is a 46px circle on the left (the rest of
+   its box lets clicks through), the actions sit bottom-right. The opened bubble takes the full width,
+   so the actions step aside. */
+
+.footer {
+  flex-shrink: 0;
+  display: grid;
+  padding-top: 12px;
+  border-top: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.footer > * {
+  grid-area: 1 / 1;
+}
+
+.actions {
+  align-self: end;
+  justify-self: end;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s ease, visibility 0.2s;
+}
+
+.footer:has([data-open]) .actions {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.action {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: color-mix(in srgb, var(--theme-color-text-primary, #fff) 70%, transparent); /* neutral; the theme color marks the active page */
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.action:hover,
+.action[aria-current="page"] {
+  background: var(--theme-bg-hover, rgba(168, 85, 247, 0.14));
+  color: var(--theme-color-accent-primary, #a855f7);
+}
+
+.logout:hover {
+  background: rgba(239, 68, 68, 0.14);
+  color: #f87171;
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #a855f7);
+  outline-offset: 1px;
+}

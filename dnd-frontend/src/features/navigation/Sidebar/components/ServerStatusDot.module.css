@@ -1,0 +1,34 @@
+.hitArea {
+  width: 22px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  opacity: 0.75;
+  animation: offlinePulse 2s ease-in-out infinite;
+}
+
+.dot[data-online] {
+  background: #22c55e;
+  opacity: 0.35;
+  animation: none;
+}
+
+.hitArea:hover .dot {
+  opacity: 1;
+}
+
+@keyframes offlinePulse {
+  50% { opacity: 0.3; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot { animation: none; }
+}

@@ -8,14 +8,13 @@ interface SidebarToggleProps {
   onOpenedChange: (opened: boolean) => void;
 }
 
-/** Desktop drawer width (Sidebar.tsx); the tab rides its edge and a drag can pull it at most this far. */
+/** Drawer width (Sidebar.tsx); the tab rides its edge and a drag can pull it at most this far. */
 const DRAWER_WIDTH = 280;
 /** Same distance the mobile swipe needs (App.tsx). */
 const DRAG_COMMIT = 50;
 
 /**
- * Pull-tab on the screen edge the sidebar drawer slides in from: left on desktop, right on mobile
- * (see the `position` App.tsx passes to Sidebar). Click, Ctrl/⌘+B, or drag it with the mouse:
+ * Pull-tab on the left screen edge, where the sidebar drawer slides in from. Click, Ctrl/⌘+B, or drag it with the mouse:
  * outward to open, back to close. Touch drags are left to App.tsx's swipe handler.
  * Not portaled: its z-index sits between the drawer and Mantine's modals/popovers/notifications.
  */
