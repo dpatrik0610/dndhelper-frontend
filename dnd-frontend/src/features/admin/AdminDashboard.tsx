@@ -23,9 +23,7 @@ import {
   IconRefresh,
   IconUsersGroup,
   IconCloudDownload,
-  IconSword,
   IconBook2,
-  IconSwords,
   IconChevronLeft,
   IconChevronRight,
   IconBuildingStore,
@@ -46,9 +44,7 @@ import { MonsterManager } from "./MonsterManager/MonsterManager";
 import { ItemManager } from "./ItemManager/ItemManager";
 import { SessionManager } from "./SessionManager/SessionManager";
 import { BackupManager } from "./BackupManager/BackupManager";
-import { InitiativeTracker } from "./InitiativeTracker/InitiativeTracker";
 import { RuleManager } from "./RuleManager/RuleManager";
-import { EncounterRoomManager } from "./EncounterRoomManager/EncounterRoomManager";
 import { ShopManager } from "./ShopManager/ShopManager";
 import { QuestManager } from "./QuestManager/QuestManager";
 import styles from "@styles/AdminDashboard.module.css";
@@ -78,9 +74,7 @@ export const AdminDashboard: React.FC = () => {
     { icon: IconUsers, label: "Users", key: "UserManager", component: <UserManager /> },
     { icon: IconGhost, label: "Monsters", key: "MonsterManager", component: <MonsterManager /> },
     { icon: IconCategory, label: "Items", key: "ItemManager", component: <ItemManager /> },
-    { icon: IconSwords, label: "Encounter Rooms", key: "EncounterRoomManager", component: <EncounterRoomManager /> },
     { icon: IconBuildingStore, label: "Shop Manager", key: "ShopManager", component: <ShopManager /> },
-    { icon: IconSword, label: "Initiative", key: "InitiativeTracker", component: <InitiativeTracker /> },
     { icon: IconUsersGroup, label: "Sessions", key: "SessionManager", component: <SessionManager /> },
     { icon: IconCloudDownload, label: "Backups", key: "BackupManager", component: <BackupManager /> },
     { icon: IconBook2, label: "Rules", key: "RuleManager", component: <RuleManager /> },

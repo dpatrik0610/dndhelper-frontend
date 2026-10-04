@@ -30,7 +30,7 @@ export const navSections: NavSectionData[] = [
     label: "Campaign",
     items: [
       { link: "/shop", label: "Shopkeeper", icon: IconBuildingStore },
-      { link: "/encounter-room", label: "Encounter", icon: IconSwords },
+      { link: "/table", label: "Tabletop", icon: IconSwords },
       { link: "/rules", label: "Rules", icon: IconBook2 },
     ],
   },

@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { MotionConfig } from "framer-motion";
@@ -29,7 +29,7 @@ const pages = {
   quests: () => import("@features/quests/QuestsPage"),
   rollHistory: () => import("@features/rollHistory/RollHistoryPage"),
   rules: () => import("@features/rules/RulesPage"),
-  encounterRoom: () => import("@features/encounterRoom/EncounterRoomPage"),
+  tabletop: () => import("@features/tabletop/TabletopPage"),
   shop: () => import("@features/shop/ShopkeeperPage"),
   settings: () => import("@features/settings/SettingsPage"),
 };
@@ -43,7 +43,7 @@ const NotesPage = lazy(pages.notes);
 const QuestsPage = lazy(pages.quests);
 const RollHistoryPage = lazy(pages.rollHistory);
 const RulesPage = lazy(pages.rules);
-const EncounterRoomPage = lazy(pages.encounterRoom);
+const TabletopPage = lazy(pages.tabletop);
 const ShopkeeperPage = lazy(pages.shop);
 const SettingsPage = lazy(pages.settings);
 const AdminDashboard = lazy(adminPage);
@@ -75,7 +75,9 @@ function AppRoutes() {
   const sidebarTheme = useUiStore((s) => s.sidebarTheme) as SidebarThemeVariant;
 
   const hideSidebarRoutes = useMemo(() => ["/login", "/register"], []);
-  const showSidebar = !hideSidebarRoutes.includes(location.pathname);
+  // The tabletop is a full-screen app of its own: no sidebar, no animated background.
+  const isTableRoute = location.pathname === "/table" || location.pathname.startsWith("/table/");
+  const showSidebar = !hideSidebarRoutes.includes(location.pathname) && !isTableRoute;
 
   const token = useToken();
   const characters = useCharacterList();
@@ -196,17 +198,18 @@ function AppRoutes() {
       {showSidebar && <Sidebar opened={opened} onClose={handlers.close} themeVariant={sidebarTheme} />}
 
       <AppShell.Main>
-        <AppBackground />
+        {!isTableRoute && <AppBackground />}
         <SubtleRollDetailsModal />
         <div
           style={{
             position: "relative",
             zIndex: 2,
-            padding: isDashboardRoute ? 0 : (isMobile ? 0 : "md"),
+            padding: isDashboardRoute || isTableRoute ? 0 : (isMobile ? 0 : "md"),
           }}
         >
           <Suspense fallback={<div className="route-fallback"><PageSkeleton /></div>}>
-            <div key={section} className="route-enter">
+            {/* No enter animation on the table: a transform would break its position: fixed full-screen layout */}
+            <div key={section} className={isTableRoute ? undefined : "route-enter"}>
             <Routes>
               <Route element={<PrivateRoute />}>
                 <Route path="/" element={<Home />} />
@@ -220,9 +223,8 @@ function AppRoutes() {
                 <Route path="/shop" element={<ShopkeeperPage />} />
                 <Route path="/notes" element={<NotesPage />} />
                 <Route path="/quests" element={<QuestsPage />} />
-                <Route path="/encounter" element={<Navigate to="/encounter-room" replace />} />
-                <Route path="/encounter-room" element={<EncounterRoomPage />} />
-                <Route path="/encounter-room/:roomId" element={<EncounterRoomPage />} />
+                <Route path="/table" element={<TabletopPage />} />
+                <Route path="/table/:code" element={<TabletopPage />} />
                 <Route path="/roll-history" element={<RollHistoryPage />} />
                 <Route path="/settings/:tab?" element={<SettingsPage />} />
                 {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
@@ -248,11 +250,9 @@ export default function App() {
   const notificationPosition = useUiStore((s) => s.prefs.notificationPosition);
   const reduceMotion = useUiStore((s) => s.prefs.reduceMotion);
   return (
-    <BrowserRouter>
-      <MotionConfig reducedMotion={reduceMotion ? "always" : "user"}>
-        <Notifications position={notificationPosition} />
-        <AppRoutes />
-      </MotionConfig>
-    </BrowserRouter>
+    <MotionConfig reducedMotion={reduceMotion ? "always" : "user"}>
+      <Notifications position={notificationPosition} />
+      <AppRoutes />
+    </MotionConfig>
   );
 }

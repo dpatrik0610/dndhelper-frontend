@@ -4,6 +4,8 @@ import {
   HubConnectionBuilder,
   LogLevel,
 } from "@microsoft/signalr";
+import { useNavigate } from "react-router-dom";
+import { notifications } from "@mantine/notifications";
 import { showNotification } from "@components/Notification/Notification";
 import { useToken, useCurrentUserId, useIsAdmin } from "@store/auth/authSelectors";
 import { useSubtleRollStore } from "@store/ui/subtleRollStore";
@@ -27,6 +29,9 @@ export const useSignalR = () => {
   const userId = useCurrentUserId();
   const isAdmin = useIsAdmin();
   const openSubtleRoll = useSubtleRollStore((state) => state.openRoll);
+  const navigate = useNavigate();
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
 
   // Keep latest values in refs to avoid recreating the connection/listeners when they change
   const isAdminRef = useRef(isAdmin);
@@ -108,6 +113,24 @@ export const useSignalR = () => {
         onClick: () => openSubtleRollRef.current(payload),
       });
     });
+
+    newConnection.on(
+      "TableInvite",
+      (invite: { code: string; campaignName: string; invitedBy: string }) => {
+        const id = `table-invite-${invite.code}`;
+        showNotification({
+          id,
+          title: `${invite.invitedBy} opened the ${invite.campaignName} table`,
+          message: "Click to join the tabletop",
+          color: "violet",
+          autoClose: false,
+          onClick: () => {
+            notifications.hide(id);
+            navigateRef.current(`/table/${invite.code}`);
+          },
+        });
+      }
+    );
 
     // Connection state listeners
     newConnection.onreconnecting((error) => {

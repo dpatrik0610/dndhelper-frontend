@@ -1,5 +1,4 @@
 import { useCharacterStore } from "@store/character/characterStore";
-import { useInitiativeTrackerStore } from "@store/admin/initiativeTrackerStore";
 import { useAuthStore } from "@store/auth/authStore";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 import type { Character } from "@appTypes/Character/Character";
@@ -16,34 +15,6 @@ export function handleCharacterChange(event: EntityChangeEvent) {
   const isCurrentUser =
     event.changedBy &&
     (event.changedBy === currentUser.username || event.changedBy === currentUser.id);
-
-  const syncInitiativeTracker = (character: Character) => {
-    const { rows, updateEntry } = useInitiativeTrackerStore.getState();
-    const target = rows.find(
-      (row) => row.characterId === character.id || row.id === character.id
-    );
-    if (!target) return;
-
-    const byLabel = new Map(
-      (target.conditions ?? []).map((cond) => [cond.label.toLowerCase(), cond])
-    );
-    const mergedConditions = (character.conditions ?? []).map((label) => {
-      const match = byLabel.get(label.toLowerCase());
-      return {
-        id: match?.id ?? `${character.id}-${label}`,
-        label,
-        remaining: match?.remaining ?? null,
-      };
-    });
-
-    updateEntry(target.id, {
-      name: character.name,
-      hp: character.hitPoints,
-      tempHp: character.temporaryHitPoints,
-      ac: character.armorClass,
-      conditions: mergedConditions,
-    });
-  };
 
   switch (event.action) {
     case "created": {
@@ -74,7 +45,6 @@ export function handleCharacterChange(event: EntityChangeEvent) {
           c.id === updatedCharacter.id ? updatedCharacter : c
         )
       );
-      syncInitiativeTracker(updatedCharacter);
 
       if (currentCharacter?.id === updatedCharacter.id) {
         if (hasSameTimestamp(currentCharacter, updatedCharacter)) break;
