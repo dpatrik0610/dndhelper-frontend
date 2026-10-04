@@ -51,7 +51,12 @@ export type FxKind =
   | "Explosion"
   | "Healing"
   | "Vortex"
-  | "Acid";
+  | "Acid"
+  | "Thunder"
+  | "Necrotic"
+  | "Web"
+  | "Entangle"
+  | "Wind";
 
 export interface TableToken {
   id: string;

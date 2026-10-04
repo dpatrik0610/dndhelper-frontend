@@ -245,6 +245,15 @@
 
 .fx-flicker,
 .fx-rise,
+.fx-ember,
+.fx-fall,
+.fx-spiral,
+.fx-orbit,
+.fx-stream,
+.fx-pop,
+.fx-travel,
+.fx-slide,
+.fx-sway,
 .fx-breathe,
 .fx-breathe-soft,
 .fx-pulse,
@@ -338,6 +347,51 @@
 
 .fx-travel {
   animation: fx-travel 1.4s linear infinite;
+}
+
+.fx-ember {
+  animation: fx-ember 2.6s ease-out infinite;
+}
+
+.fx-fall {
+  animation: fx-fall 5s linear infinite;
+}
+
+.fx-spiral {
+  animation: fx-spiral 3s ease-in infinite;
+}
+
+.fx-orbit {
+  animation: fx-orbit 6s linear infinite;
+}
+
+.fx-stream {
+  animation: fx-stream 1.5s ease-out infinite;
+}
+
+.fx-pop {
+  animation: fx-pop 2.4s ease-out infinite;
+}
+
+.fx-slide {
+  animation: fx-slide 0.8s linear infinite;
+}
+
+.fx-flare {
+  animation: fx-flare 1.3s steps(1) infinite;
+}
+
+.fx-sway {
+  animation: fx-sway 4s ease-in-out infinite alternate;
+}
+
+@keyframes fx-sway {
+  from {
+    transform: rotate(-3deg);
+  }
+  to {
+    transform: rotate(3deg);
+  }
 }
 
 /* Lightning: three bolt shapes take turns; the first stays when motion is off. */
@@ -449,8 +503,121 @@
     opacity: 1;
   }
   to {
-    transform: translateY(-35px);
+    transform: translateY(calc(var(--d, 35px) * -1));
     opacity: 0;
+  }
+}
+
+@keyframes fx-ember {
+  from {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx, 0px), -80px) scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes fx-fall {
+  from {
+    transform: translate(0, -20px);
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 0.9;
+  }
+  to {
+    transform: translate(var(--dx, 0px), 20px);
+    opacity: 0;
+  }
+}
+
+/* Particles sit at the centre (0,0) and are thrown out by the transform, so they can circle it. */
+@keyframes fx-spiral {
+  from {
+    transform: rotate(var(--a)) translateX(var(--r)) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    transform: rotate(calc(var(--a) + 320deg)) translateX(0px) scale(0.2);
+    opacity: 0;
+  }
+}
+
+@keyframes fx-orbit {
+  from {
+    transform: rotate(var(--a)) translateX(var(--r));
+  }
+  to {
+    transform: rotate(calc(var(--a) + 360deg)) translateX(var(--r));
+  }
+}
+
+@keyframes fx-stream {
+  from {
+    transform: translateX(0) scale(0.15);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0.6;
+  }
+  to {
+    transform: translateX(var(--len)) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Timed with fx-bubble: the ring flashes out as the bubble bursts. */
+@keyframes fx-pop {
+  0%,
+  84% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  88% {
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+@keyframes fx-slide {
+  to {
+    transform: translateX(var(--len));
+  }
+}
+
+@keyframes fx-flare {
+  0% {
+    opacity: 1;
+  }
+  12% {
+    opacity: 0.35;
+  }
+  20% {
+    opacity: 0.9;
+  }
+  45% {
+    opacity: 0.5;
+  }
+  52% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.6;
   }
 }
 
@@ -523,6 +690,11 @@
 :root[data-performance] .tt-root .fx * {
   animation: none !important;
   transition: none !important;
+}
+
+/* Turbulence and blur filters are the expensive part of the effects. */
+:root[data-performance] .tt-root .fx [filter] {
+  filter: none !important;
 }
 
 /* ── Chrome ── */
@@ -671,6 +843,29 @@
 .tt-action:hover {
   background: rgba(167, 139, 250, 0.1);
   border-color: rgba(167, 139, 250, 0.4);
+}
+
+/* Inventory modal: item details on the left, attack roll on the right. */
+.tt-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--tt-line, rgba(255, 255, 255, 0.08)) /* the modal portals outside .tt-root */;
+  background: rgba(255, 255, 255, 0.02);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tt-item:hover {
+  background: rgba(167, 139, 250, 0.08);
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.tt-item-main {
+  flex: 1;
+  min-width: 0;
+  color: inherit;
 }
 
 .tt-log-entry {

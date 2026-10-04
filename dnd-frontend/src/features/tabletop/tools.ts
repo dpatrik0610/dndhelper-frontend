@@ -37,20 +37,26 @@ export const FX: { kind: FxKind; color: string }[] = [
   { kind: "Lightning", color: "#a5b4fc" },
   { kind: "Beam", color: "#f472b6" },
   { kind: "Ray", color: "#facc15" },
+  { kind: "Wind", color: "#99f6e4" },
+  { kind: "Thunder", color: "#38bdf8" },
   { kind: "Frost", color: "#67e8f9" },
   { kind: "Bubble", color: "#60a5fa" },
   { kind: "Cloud", color: "#84cc16" },
   { kind: "Acid", color: "#a3e635" },
+  { kind: "Entangle", color: "#65a30d" },
+  { kind: "Web", color: "#e7e5e4" },
   { kind: "Darkness", color: "#a855f7" },
+  { kind: "Necrotic", color: "#be123c" },
   { kind: "Light", color: "#fde68a" },
   { kind: "Arcane", color: "#a78bfa" },
   { kind: "Healing", color: "#4ade80" },
   { kind: "Vortex", color: "#22d3ee" },
 ];
 
+const LINE_FX: FxKind[] = ["Beam", "Ray", "Lightning", "Wind"];
+
 /** Beams run along a line, breath fills a cone, everything else is a circle. */
-export const fxShape = (kind: FxKind): AoeKind =>
-  kind === "Beam" || kind === "Ray" || kind === "Lightning" ? "Line" : kind === "Breath" ? "Cone" : "Circle";
+export const fxShape = (kind: FxKind): AoeKind => (LINE_FX.includes(kind) ? "Line" : kind === "Breath" ? "Cone" : "Circle");
 
 /** dataTransfer type for dragging a campaign character from the settings drawer onto the board. */
 export const CHARACTER_DRAG_TYPE = "application/x-tabletop-character";

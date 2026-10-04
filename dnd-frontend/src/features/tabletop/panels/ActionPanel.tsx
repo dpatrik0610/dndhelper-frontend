@@ -1,18 +1,20 @@
 import { useState } from "react";
-import { Badge, Chip, Group, Loader, Select, Stack, Switch, Text, UnstyledButton } from "@mantine/core";
-import { IconSword } from "@tabler/icons-react";
+import { Badge, Button, Chip, Group, Loader, Select, Stack, Switch, Text, UnstyledButton } from "@mantine/core";
+import { IconBackpack, IconWand } from "@tabler/icons-react";
 import { Die, DiceResult } from "@components/roll/Dice";
 import { useTableRoll } from "@features/tabletop/useTableRoll";
 import { useCurrentUserId } from "@store/auth/authSelectors";
 import { useCharacterList } from "@store/character/characterSelectors";
 import { useDmView, useTabletopStore } from "@store/tabletop/tabletopStore";
+import type { Character } from "@appTypes/Character/Character";
 import type { TableToken } from "@appTypes/Tabletop";
 import { tabletop } from "@features/tabletop/useTabletopHub";
-import { useCharacterAttacks } from "./useCharacterAttacks";
+import { InventoryModal } from "./InventoryModal";
+import { useSpellAttacks } from "./tableActions";
 
 const DICE = [4, 6, 8, 10, 12, 20, 100];
 
-/** Dice, the active token's attacks/spells and its action economy. */
+/** Dice, the active token's spells, inventory and action economy. */
 export function ActionPanel() {
   const me = useCurrentUserId() ?? "";
   const session = useTabletopStore((s) => s.session);
@@ -21,6 +23,7 @@ export function ActionPanel() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const dice = useTableRoll();
   const [isPrivate, setIsPrivate] = useState(false);
+  const [inventoryOpen, setInventoryOpen] = useState(false);
   const dmView = useDmView();
 
   if (!session || !snapshot) return null;
@@ -57,7 +60,15 @@ export function ActionPanel() {
 
       {token && <Economy token={token} turnActive={turn.active} isCurrent={turn.currentTokenId === token.id} />}
 
-      {character && <Attacks character={character} onRoll={roll} />}
+      {character && (
+        <>
+          <Button variant="light" color="violet" size="xs" leftSection={<IconBackpack size={14} />} onClick={() => setInventoryOpen(true)}>
+            Inventory
+          </Button>
+          <InventoryModal opened={inventoryOpen} onClose={() => setInventoryOpen(false)} character={character} onRoll={roll} />
+          <Spells character={character} onRoll={roll} />
+        </>
+      )}
 
       <Stack gap={6}>
         <Text size="xs" fw={600} tt="uppercase" c="dimmed">
@@ -113,32 +124,22 @@ function Economy({ token, turnActive, isCurrent }: { token: TableToken; turnActi
   );
 }
 
-function Attacks({
-  character,
-  onRoll,
-}: {
-  character: Parameters<typeof useCharacterAttacks>[0];
-  onRoll: (expressions: string[], label?: string) => void;
-}) {
-  const { actions, loading } = useCharacterAttacks(character);
+function Spells({ character, onRoll }: { character: Character; onRoll: (expressions: string[], label?: string) => void }) {
+  const { actions, loading } = useSpellAttacks(character);
+  if (!loading && actions.length === 0) return null;
 
   return (
     <Stack gap={6}>
       <Group gap={6}>
         <Text size="xs" fw={600} tt="uppercase" c="dimmed">
-          Attacks & spells
+          Spells
         </Text>
         {loading && <Loader size={12} />}
       </Group>
-      {!loading && actions.length === 0 && (
-        <Text size="xs" c="dimmed">
-          No weapons with damage or damaging spells on this character.
-        </Text>
-      )}
       <Stack gap={4}>
         {actions.map((a) => (
           <UnstyledButton key={a.key} className="tt-action" onClick={() => onRoll(a.expressions, a.name)}>
-            <IconSword size={14} />
+            <IconWand size={14} />
             <div>
               <Text size="sm" fw={600} lh={1.2}>
                 {a.name}

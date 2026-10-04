@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import type { Character } from "@appTypes/Character/Character";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import type { Spell } from "@appTypes/Spell";
-import { getInventoriesByCharacter } from "@services/inventoryService";
-import { getEquipmentById } from "@services/equipmentService";
 import { getSpellById } from "@services/spellService";
 
 export interface TableAction {
@@ -45,7 +43,8 @@ function spellDice(spell: Spell, level: number): string | null {
   return null;
 }
 
-function weaponAction(weapon: Equipment, c: Character): TableAction | null {
+/** Attack roll for a weapon with damage dice; null for anything else. */
+export function weaponAction(weapon: Pick<Equipment, "id" | "name" | "damage" | "range" | "tags">, c: Character): TableAction | null {
   if (!weapon.damage?.damageDice) return null;
   const tags = (weapon.tags ?? []).map((t) => t.toLowerCase());
   const ranged = (weapon.range?.normal ?? 5) > 10 || tags.some((t) => t.includes("ranged"));
@@ -57,7 +56,7 @@ function weaponAction(weapon: Equipment, c: Character): TableAction | null {
   const damage = addModifier(weapon.damage.damageDice, ability);
   if (!damage) return null;
   return {
-    key: `w-${weapon.id ?? weapon.index}`,
+    key: `w-${weapon.id ?? weapon.name}`,
     name: weapon.name,
     detail: `${signed(toHit)} to hit · ${damage} ${weapon.damage.damageType?.name ?? ""}`.trim(),
     expressions: [`1d20${signed(toHit)}`, damage],
@@ -86,51 +85,39 @@ function spellAction(spell: Spell, c: Character): TableAction | null {
   };
 }
 
-/** Weapons from the character's inventories and damaging spells, as one-click rolls. */
-export function useCharacterAttacks(character: Character | null | undefined) {
-  const [weapons, setWeapons] = useState<Equipment[]>([]);
+/** The character's damaging spells as one-click rolls. Weapons roll from the inventory modal. */
+export function useSpellAttacks(character: Character | null | undefined) {
   const [spells, setSpells] = useState<Spell[]>([]);
   const [loading, setLoading] = useState(false);
-  const characterId = character?.id;
   const spellIds = (character?.spells ?? []).map((s) => s.spellId).slice(0, LIMIT).join(",");
 
   useEffect(() => {
-    if (!characterId) {
-      setWeapons([]);
+    if (!spellIds) {
       setSpells([]);
       return;
     }
     let cancelled = false;
     setLoading(true);
 
-    (async () => {
-      const [inventories, spellList] = await Promise.all([
-        getInventoriesByCharacter(characterId).catch(() => []),
-        Promise.all(spellIds.split(",").filter(Boolean).map((id) => getSpellById(id).catch(() => null))),
-      ]);
-      const equipmentIds = [
-        ...new Set(inventories.flatMap((inv) => inv.items ?? []).map((item) => item.equipmentId).filter((id): id is string => !!id)),
-      ].slice(0, LIMIT);
-      const equipment = await Promise.all(equipmentIds.map((id) => getEquipmentById(id).catch(() => null)));
-
-      if (cancelled) return;
-      setWeapons(equipment.filter((e): e is Equipment => !!e?.damage?.damageDice));
-      setSpells(spellList.filter((s): s is Spell => !!s?.damage));
-    })().finally(() => {
-      if (!cancelled) setLoading(false);
-    });
+    Promise.all(spellIds.split(",").map((id) => getSpellById(id).catch(() => null)))
+      .then((list) => {
+        if (!cancelled) setSpells(list.filter((s): s is Spell => !!s?.damage));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
     return () => {
       cancelled = true;
     };
-  }, [characterId, spellIds]);
+  }, [spellIds]);
 
   // Bonuses come from the live character, so level-ups and stat changes show without refetching.
   const actions = character
-    ? [
-        ...weapons.map((w) => weaponAction(w, character)),
-        ...[...spells].sort((a, b) => a.level - b.level).map((s) => spellAction(s, character)),
-      ].filter((a): a is TableAction => a !== null)
+    ? [...spells]
+        .sort((a, b) => a.level - b.level)
+        .map((s) => spellAction(s, character))
+        .filter((a): a is TableAction => a !== null)
     : [];
 
   return { actions, loading };
