@@ -6,6 +6,7 @@ import { useCharacterList, useCurrentCharacter } from "@store/character/characte
 import type { Character } from "@appTypes/Character/Character";
 import { TokenSection } from "@features/settings/characters/TokenSection";
 import { DangerZone } from "@features/settings/characters/DangerZone";
+import { settingsPanelBg } from "@features/settings/SettingsSection";
 
 const characterSummary = (c: Character) => `Lvl ${c.level} • ${c.race} • ${c.characterClass}`;
 
@@ -56,7 +57,7 @@ export function CharacterSettings() {
 
   if (!selected) {
     return (
-      <Paper p="xl" style={{ borderRadius: 20 }}>
+      <Paper p="xl" style={{ borderRadius: 20, background: settingsPanelBg }}>
         <Stack align="center" gap="md" py="lg">
           <IconUserCircle size={56} style={{ opacity: 0.35, color: "var(--theme-color-accent-primary)" }} />
           <Text c="dimmed" fs="italic">

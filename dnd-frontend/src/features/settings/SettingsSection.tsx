@@ -2,6 +2,9 @@ import type { ReactNode } from "react";
 import { Group, Paper, Stack, Text } from "@mantine/core";
 import { useIsMobile } from "@hooks/useIsMobile";
 
+/** Near-solid themed surface so the animated backdrop doesn't show through settings panels. */
+export const settingsPanelBg = "color-mix(in srgb, var(--theme-bg-panel-opaque, #140f28) 96%, transparent)";
+
 interface SettingsSectionProps {
   icon: ReactNode;
   title: string;
@@ -19,7 +22,7 @@ export function SettingsSection({ icon, title, description, danger = false, chil
     <Paper
       p={isMobile ? "md" : "xl"}
       style={{
-        background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+        background: settingsPanelBg,
         border: danger ? "1px solid rgba(239, 68, 68, 0.35)" : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
         borderRadius: isMobile ? 12 : 20,
         backdropFilter: "blur(24px) saturate(130%)",

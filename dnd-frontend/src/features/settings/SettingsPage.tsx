@@ -1,15 +1,18 @@
 import { Box, Title, Text, Stack, Tabs } from "@mantine/core";
-import { IconAdjustments, IconUserCircle } from "@tabler/icons-react";
+import { IconAdjustments, IconShieldLock, IconUserCircle } from "@tabler/icons-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { InterfaceSettings } from "./tabs/InterfaceSettings";
 import { CharacterSettings } from "./tabs/CharacterSettings";
+import { settingsPanelBg } from "./SettingsSection";
+import { AccountSettings } from "./tabs/AccountSettings";
 import "@features/profile/styles/CharacterProfile.styles.css";
 
 /** Each tab is its own URL (/settings/<value>), so tabs can be linked and survive reloads. */
 const tabs = [
   { value: "interface", label: "Interface", icon: IconAdjustments, panel: InterfaceSettings },
   { value: "characters", label: "Characters", icon: IconUserCircle, panel: CharacterSettings },
+  { value: "account", label: "Account", icon: IconShieldLock, panel: AccountSettings },
 ];
 
 export default function SettingsPage() {
@@ -43,7 +46,7 @@ export default function SettingsPage() {
             Settings
           </Title>
           <Text c="dimmed" size="sm" mt="xs">
-            Site preferences and your characters. The theme lives in the sidebar.
+            Site preferences, your characters, and your account. The theme lives in the sidebar.
           </Text>
         </Box>
 
@@ -54,6 +57,7 @@ export default function SettingsPage() {
           radius="md"
           keepMounted={false}
           classNames={{ list: "profile-tabs-list", tab: "profile-tab" }}
+          styles={{ list: { background: settingsPanelBg } }}
         >
           <Tabs.List>
             {tabs.map(({ value, label, icon: Icon }) => (
