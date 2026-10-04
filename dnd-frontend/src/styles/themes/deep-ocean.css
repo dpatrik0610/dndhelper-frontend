@@ -1,0 +1,208 @@
+/* ==========================================================================
+   🌊 Deep Ocean (.theme-deep-ocean): dark open water, kelp, jellyfish, manta
+   Scene: backdrops/DeepOceanBackdrop.tsx. Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+/* Dark open water: faint surface glow fading to near-black */
+.do-water {
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 35% at 50% -5%, rgba(56, 140, 190, 0.28), transparent 70%),
+    linear-gradient(to bottom, #03192b 0%, #021220 25%, #010b16 55%, #00060d 80%, #000308 100%);
+}
+
+/* Soft volumetric light from the surface (no hard edges) */
+.do-rays {
+  inset: 0;
+}
+
+.do-ray {
+  position: absolute;
+  top: -12%;
+  width: 14vw;
+  height: 85%;
+  background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(120, 190, 230, 0.16), transparent 75%);
+  transform: skewX(-10deg);
+  transform-origin: top;
+  animation: doRay 11s ease-in-out infinite alternate;
+}
+
+.do-bed {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Manta: far away, so low contrast + slight blur; glides across, wings flexing */
+.do-manta {
+  top: 34%;
+  left: 0;
+  opacity: 0.45;
+  filter: blur(1.5px);
+  will-change: transform;
+  animation: doManta 140s linear infinite;
+}
+
+.do-manta svg {
+  display: block;
+  animation: doFlex 6s ease-in-out infinite alternate;
+}
+
+/* Giant kelp: own layer each, swaying from the base */
+.do-kelp {
+  bottom: -6px;
+  transform-origin: 50% 100%;
+  will-change: transform;
+  animation: doSway 8s ease-in-out infinite alternate;
+}
+
+.do-kelp svg {
+  display: block;
+}
+
+.do-kelp--far {
+  opacity: 0.55;
+  filter: blur(2px);
+  animation-duration: 11s;
+}
+
+/* Jellyfish: rise slowly; the whole little svg pulses (composited, no per-frame redraw) */
+.do-jelly {
+  bottom: -40vh;
+  will-change: transform, opacity;
+  animation: doFloat linear infinite;
+}
+
+.do-jelly--far {
+  opacity: 0.6;
+  filter: blur(1.5px);
+}
+
+.do-jelly__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  transform-origin: 50% 20%;
+  animation: doPulse 3.4s ease-in-out infinite;
+}
+
+/* Static (mobile): place the jellyfish at staggered heights instead of below the screen */
+.theme-scene--static .do-jelly {
+  transform: translateY(calc(-55vh - var(--i) * 12vh));
+}
+
+/* Depth haze over the seabed */
+.do-depth-fog {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 35%;
+  background: linear-gradient(to top, rgba(0, 4, 10, 0.75), transparent);
+}
+
+@keyframes doRay {
+  from { opacity: 0.4; }
+  to   { opacity: 1; }
+}
+
+@keyframes doManta {
+  from { transform: translateX(-300px); }
+  to   { transform: translateX(110vw); }
+}
+
+@keyframes doFlex {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0.84); }
+}
+
+@keyframes doSway {
+  from { transform: rotate(-2.5deg); }
+  to   { transform: rotate(2.5deg); }
+}
+
+@keyframes doFloat {
+  0%   { transform: translateY(0); opacity: 0; }
+  8%   { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { transform: translateY(-150vh); opacity: 0; }
+}
+
+@keyframes doPulse {
+  0%, 100% { transform: scale(1, 1); }
+  45%      { transform: scale(0.9, 1.07); }
+}
+
+/* Particles: rising bubbles */
+.theme-deep-ocean .portal-particle {
+  animation-name: floatSway;
+}
+.theme-deep-ocean .portal-particle::after {
+  width: 9px;
+  height: 9px;
+  background: transparent !important;
+  border: 1px solid #38bdf8;
+  border-radius: 50%;
+  box-shadow: inset 0 0 3px rgba(2, 132, 199, 0.5);
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-deep-ocean {
+  scrollbar-color: rgba(56, 189, 248, 0.5) transparent;
+}
+
+.theme-deep-ocean ::selection {
+  background: #0ea5e9;
+  color: #001424;
+}
+
+.theme-deep-ocean .narrative-title {
+  background: linear-gradient(180deg, #e0f2fe 0%, #38bdf8 60%, #2dd4bf 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+}
+
+/* Panels: aqua sheen behind the content… */
+.theme-deep-ocean .mantine-Paper-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.07), transparent 45%);
+  box-shadow: inset 0 1px 0 rgba(186, 230, 253, 0.2);
+}
+
+/* …and soft surface light glowing along the top edge (pure gradients, no line pattern),
+   growing in, then gently breathing */
+.theme-deep-ocean .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 45% 38px at 28% 0, rgba(125, 211, 252, 0.28), transparent 75%),
+    radial-gradient(ellipse 35% 30px at 74% 0, rgba(45, 212, 191, 0.2), transparent 75%);
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent calc(var(--panel-reveal) * 46px));
+  mask-image: linear-gradient(to bottom, #000, transparent calc(var(--panel-reveal) * 46px));
+  opacity: 0.8;
+  animation: panelReveal 1.4s ease-out both;
+}
+
+
+.theme-deep-ocean .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.45), 0 0 18px rgba(14, 165, 233, 0.4) !important;
+}
+
+.theme-deep-ocean .glassy-input:focus-within,
+.theme-deep-ocean .glassy-input:focus {
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35), 0 0 14px rgba(45, 212, 191, 0.3) !important;
+}

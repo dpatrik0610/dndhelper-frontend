@@ -1,0 +1,195 @@
+/* ==========================================================================
+   ⚙️ Clockwork Brass (.theme-clockwork-brass): minimal steampunk — brass line-art on dark paper
+   Scene: backdrops/ClockworkBackdrop.tsx (+ gearTrain.ts). Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+/* Dark paper: flat, with only a gentle falloff to the edges */
+.cw-paper {
+  inset: 0;
+  background: radial-gradient(ellipse 85% 75% at 50% 50%, #17110b 0%, #0d0906 70%, #080604 100%);
+}
+
+/* Engraving ink: fine brass strokes, no fills */
+.cw-ink {
+  fill: none;
+  stroke: #c9a24a;
+  stroke-width: 1.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.8;
+}
+
+.cw-ink--faint {
+  opacity: 0.35;
+}
+
+.cw-ink--dash {
+  stroke-dasharray: 2 5;
+}
+
+.cw-label {
+  fill: #c9a24a;
+  opacity: 0.6;
+  font-family: "IM Fell English SC", serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.cw-label--plate {
+  font-size: 13px;
+  opacity: 0.5;
+}
+
+/* Gear trains: origin = the first gear's centre (px) */
+.cw-train {
+  width: 0;
+  height: 0;
+}
+
+.cw-train--bl {
+  left: 80px;
+  bottom: 40px;
+}
+
+.cw-train--tr {
+  right: 100px;
+  top: 50px;
+}
+
+.cw-gear {
+  position: absolute;
+}
+
+.cw-gear svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(var(--start));
+  will-change: transform;
+  animation: cwTurn var(--period) linear infinite;
+}
+
+/* Plumbing + gauge: fixed px, anchored top-right so it registers with the gears */
+.cw-plumbing {
+  top: 0;
+  right: 0;
+  width: 560px;
+  height: 900px;
+  overflow: visible;
+}
+
+/* Needle twitching in mechanical steps around ~half pressure */
+.cw-needle {
+  transform: rotate(-60deg);
+  animation: cwNeedle 7s steps(1, end) infinite;
+}
+
+/* Thin steam wisp drawing itself upward and fading */
+.cw-steam {
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+  animation: cwSteam 4.5s ease-out infinite;
+}
+
+.theme-scene--static .cw-steam {
+  stroke-dashoffset: 0;
+}
+
+.cw-annotation {
+  left: 197px;
+  bottom: 200px;
+  width: 300px;
+  height: 70px;
+  overflow: visible;
+}
+
+@keyframes cwTurn {
+  from { transform: rotate(var(--start)); }
+  to   { transform: rotate(calc(var(--start) + var(--turn))); }
+}
+
+@keyframes cwNeedle {
+  0%   { transform: rotate(-62deg); }
+  14%  { transform: rotate(-55deg); }
+  26%  { transform: rotate(-66deg); }
+  41%  { transform: rotate(-48deg); }
+  55%  { transform: rotate(-58deg); }
+  68%  { transform: rotate(-44deg); }
+  83%  { transform: rotate(-60deg); }
+}
+
+@keyframes cwSteam {
+  0%   { stroke-dashoffset: 160; opacity: 0; }
+  20%  { opacity: 0.45; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+/* The line-art is the whole picture: hide the shared glow + particles */
+.theme-clockwork-brass .portal-backdrop-glow,
+.theme-clockwork-brass .portal-particles {
+  display: none;
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-clockwork-brass {
+  scrollbar-color: rgba(201, 162, 74, 0.5) transparent;
+}
+
+.theme-clockwork-brass ::selection {
+  background: #c9a24a;
+  color: #120d08;
+}
+
+/* Typewriter headings in brass ink */
+.theme-clockwork-brass .narrative-title {
+  font-family: "Special Elite", "Plus Jakarta Sans", serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 2.5px !important;
+  color: #e3c47a !important;
+  text-shadow: none !important;
+}
+
+/* Panels: a single brass hairline frame drawn around the panel like a pen stroke, plus an inner
+   rule — no fills, no glow */
+.theme-clockwork-brass .mantine-Paper-root::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(201, 162, 74, 0.16);
+}
+
+.theme-clockwork-brass .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(201, 162, 74, 0.55), rgba(201, 162, 74, 0.55)) no-repeat 0 0,
+    linear-gradient(rgba(201, 162, 74, 0.55), rgba(201, 162, 74, 0.55)) no-repeat 100% 0,
+    linear-gradient(rgba(201, 162, 74, 0.55), rgba(201, 162, 74, 0.55)) no-repeat 100% 100%,
+    linear-gradient(rgba(201, 162, 74, 0.55), rgba(201, 162, 74, 0.55)) no-repeat 0 100%;
+  /* top → right → bottom → left, each growing from its starting corner */
+  background-size:
+    calc(var(--panel-reveal) * 100%) 1px,
+    1px calc(var(--panel-reveal) * 100%),
+    calc(var(--panel-reveal) * 100%) 1px,
+    1px calc(var(--panel-reveal) * 100%);
+  animation: panelReveal 1.1s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.theme-clockwork-brass .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(201, 162, 74, 0.6) !important;
+}
+
+.theme-clockwork-brass .glassy-input:focus-within,
+.theme-clockwork-brass .glassy-input:focus {
+  border-color: #c9a24a !important;
+  box-shadow: 0 0 0 1px rgba(201, 162, 74, 0.35) !important;
+}

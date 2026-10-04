@@ -5,7 +5,7 @@
    ========================================================================== */
 
 /* ---------- Backdrop (FrostBackdrop.tsx) ----------
-   Layers (bottom → top): sky, stars, aurora, mountains, lake, glints, snow, corner frost. */
+   Layers (bottom → top): sky + aurora (shader), stars, mountains, lake, glints, snow, corner frost. */
 
 .fr-overlay {
   position: absolute;
@@ -43,57 +43,10 @@
   animation: frTwinkle 3.5s ease-in-out infinite alternate;
 }
 
-/* Aurora borealis: blurred curtain bands that sway and breathe */
+/* Night sky + aurora borealis: a fragment shader on a canvas (FrostBackdrop.tsx), drawn over
+   .fr-sky (the fallback without WebGL), under the stars. */
 .fr-aurora {
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 62%;
-  mix-blend-mode: screen;
-}
-
-.fr-aurora__band {
-  position: absolute;
-  left: -20%;
-  width: 140%;
-  height: 55%;
-  border-radius: 50%;
-  background:
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.09) 0 2px, transparent 2px 13px),
-    linear-gradient(to bottom, transparent 0%, var(--a1) 45%, var(--a2) 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
-  filter: blur(22px);
-  will-change: transform, opacity;
-  animation: frAurora ease-in-out infinite alternate;
-}
-
-.fr-aurora__band--1 {
-  top: 6%;
-  --a1: rgba(52, 211, 153, 0.35);
-  --a2: rgba(34, 211, 238, 0.55);
-  transform: rotate(-7deg);
-  animation-duration: 22s;
-}
-
-.fr-aurora__band--2 {
-  top: 18%;
-  --a1: rgba(167, 139, 250, 0.25);
-  --a2: rgba(52, 211, 153, 0.45);
-  transform: rotate(5deg);
-  animation-duration: 31s;
-  animation-delay: -9s;
-}
-
-.fr-aurora__band--3 {
-  top: 2%;
-  left: 10%;
-  width: 90%;
-  --a1: rgba(34, 211, 238, 0.2);
-  --a2: rgba(167, 139, 250, 0.4);
-  transform: rotate(-2deg);
-  animation-duration: 27s;
-  animation-delay: -15s;
+  inset: 0;
 }
 
 /* Glacier ranges, standing on the lake shore */
@@ -130,7 +83,6 @@
   top: 0;
   height: 70%;
   background: radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.18), rgba(34, 211, 238, 0.08) 40%, transparent 70%);
-  filter: blur(14px);
 }
 
 .fr-cracks {
@@ -179,7 +131,7 @@
 
 .fr-flake--d0 { opacity: 0.4; }
 .fr-flake--d1 { opacity: 0.7; }
-.fr-flake--d2 { opacity: 0.85; filter: blur(1.5px); }
+.fr-flake--d2 { opacity: 0.85; }
 
 /* Frost creeping in from the four corners (noise texture, drawn once) */
 .fr-frost {
@@ -187,7 +139,6 @@
   width: 100%;
   height: 100%;
   opacity: 0.5;
-  mix-blend-mode: screen;
   -webkit-mask-image:
     radial-gradient(ellipse 30% 40% at 0 0, #000, transparent),
     radial-gradient(ellipse 30% 40% at 100% 0, #000, transparent),
@@ -219,12 +170,6 @@
 @keyframes frTwinkle {
   from { opacity: 0.2; }
   to   { opacity: 1; }
-}
-
-@keyframes frAurora {
-  0%   { transform: translateX(-4%) rotate(-6deg) skewX(-10deg) scaleY(0.9); opacity: 0.55; }
-  50%  { opacity: 0.95; }
-  100% { transform: translateX(5%) rotate(3deg) skewX(8deg) scaleY(1.15); opacity: 0.7; }
 }
 
 @keyframes frGlint {
@@ -263,13 +208,7 @@ html.theme-frost-glacier {
   filter: drop-shadow(0 0 8px rgba(125, 211, 252, 0.35));
 }
 
-/* Frosted-glass panels with an ice rim. isolation + z-index:-1 keeps the rim between
-   the panel background and its content (otherwise it would haze over the text). */
-.theme-frost-glacier .mantine-Paper-root {
-  position: relative;
-  isolation: isolate;
-}
-
+/* Panels with an ice rim (behind the content; see themes/shared.css). */
 .theme-frost-glacier .mantine-Paper-root::before {
   content: "";
   position: absolute;
@@ -279,13 +218,6 @@ html.theme-frost-glacier {
   pointer-events: none;
   background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), transparent 38%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 0 24px rgba(186, 230, 253, 0.06);
-}
-
-@media (min-width: 769px) {
-  .theme-frost-glacier .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root) {
-    backdrop-filter: blur(14px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
-  }
 }
 
 /* ---------- Frozen panels ----------

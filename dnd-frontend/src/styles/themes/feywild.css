@@ -1,0 +1,192 @@
+/* ==========================================================================
+   🌸 Feywild Bloom (.theme-feywild-bloom): enchanted twilight forest
+   Scene: backdrops/FeywildBackdrop.tsx. Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+.fw-sky {
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 45% at 45% 40%, rgba(244, 114, 182, 0.16), transparent 70%),
+    linear-gradient(to bottom, #12071c 0%, #2a0f33 35%, #351640 55%, #142019 85%, #060b08 100%);
+}
+
+.fw-world {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Mushroom light spill breathing: whole layers fade (composited), not the ellipses inside them */
+.fw-halos {
+  animation: fwGlow 4s ease-in-out infinite alternate;
+}
+
+/* Soft volumetric light through the canopy */
+.fw-shafts {
+  inset: 0;
+}
+
+.fw-shaft {
+  position: absolute;
+  top: -15%;
+  width: 11vw;
+  height: 115%;
+  background: radial-gradient(ellipse 50% 100% at 50% 0%, rgba(253, 230, 138, 0.2), rgba(244, 114, 182, 0.06) 55%, transparent 80%);
+  transform: rotate(16deg);
+  transform-origin: top;
+  animation: fwShaft 9s ease-in-out infinite alternate;
+}
+
+/* Out-of-focus lights in the foreground (depth of field) */
+.fw-bokeh {
+  inset: 0;
+}
+
+.fw-bokeh__dot {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+  animation: fwBokeh ease-in-out infinite alternate;
+}
+
+/* Fireflies: x and y wander on different periods, light blinks on its own */
+.fw-fireflies {
+  inset: 0;
+}
+
+.fw-firefly {
+  position: absolute;
+  animation: fwWanderX ease-in-out infinite alternate;
+}
+
+.fw-firefly__y {
+  display: block;
+  animation: fwWanderY ease-in-out infinite alternate;
+}
+
+.fw-firefly__light {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fef08a;
+  box-shadow: 0 0 6px 2px rgba(250, 204, 21, 0.7), 0 0 14px 4px rgba(250, 204, 21, 0.25);
+  animation: fwBlink ease-in-out infinite alternate;
+}
+
+@keyframes fwShaft {
+  from { opacity: 0.4; }
+  to   { opacity: 1; }
+}
+
+@keyframes fwGlow {
+  from { opacity: 0.55; }
+  to   { opacity: 1; }
+}
+
+@keyframes fwBokeh {
+  from { transform: translate(-14px, 10px); }
+  to   { transform: translate(14px, -10px); }
+}
+
+@keyframes fwWanderX {
+  from { transform: translateX(calc(var(--dx) * -1)); }
+  to   { transform: translateX(var(--dx)); }
+}
+
+@keyframes fwWanderY {
+  from { transform: translateY(calc(var(--dy) * -1)); }
+  to   { transform: translateY(var(--dy)); }
+}
+
+@keyframes fwBlink {
+  from { opacity: 0.15; }
+  to   { opacity: 1; }
+}
+
+/* Particles: spinning petals (replacing the old emoji) */
+.theme-feywild-bloom .portal-particle {
+  animation-name: floatSway;
+}
+.theme-feywild-bloom .portal-particle::after {
+  width: 8px;
+  height: 7px;
+  border-radius: 70% 0 70% 30%;
+  background: linear-gradient(135deg, #fbcfe8, #f472b6);
+  box-shadow: 0 0 5px rgba(244, 114, 182, 0.5);
+  animation: fwPetalSpin 3.5s linear infinite;
+}
+
+@keyframes fwPetalSpin {
+  from { transform: rotate(0deg) rotateX(0deg); }
+  to   { transform: rotate(360deg) rotateX(360deg); }
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-feywild-bloom {
+  scrollbar-color: rgba(244, 114, 182, 0.5) transparent;
+}
+
+.theme-feywild-bloom ::selection {
+  background: #f472b6;
+  color: #2a0a1f;
+}
+
+.theme-feywild-bloom .narrative-title {
+  font-family: "Cormorant Garamond", "Plus Jakarta Sans", serif !important;
+  font-style: italic;
+  font-weight: 600 !important;
+  letter-spacing: 2px !important;
+  background: linear-gradient(100deg, #fbcfe8 0%, #f472b6 40%, #fde68a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 0 8px rgba(244, 114, 182, 0.4));
+}
+
+/* Panels: soft pink bloom behind the content… */
+.theme-feywild-bloom .mantine-Paper-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(244, 114, 182, 0.08), transparent 45%);
+  box-shadow: inset 0 1px 0 rgba(251, 207, 232, 0.22);
+}
+
+/* …and a flowering vine growing out from the top-left and bottom-right corners
+   (drawn once for top-left, mirrored for bottom-right; each revealed by a radial mask from its corner) */
+.theme-feywild-bloom .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' fill='none'%3E%3Cpath d='M4 88C6 52 6 22 20 9C40 -1 92 4 158 6' stroke='%2365a30d' stroke-width='1.6' stroke-linecap='round'/%3E%3Cg fill='%2384cc16'%3E%3Cellipse cx='46' cy='2' rx='6' ry='2.4' transform='rotate(-20 46 2)'/%3E%3Cellipse cx='100' cy='9' rx='6' ry='2.4' transform='rotate(18 100 9)'/%3E%3Cellipse cx='132' cy='3' rx='5' ry='2' transform='rotate(-14 132 3)'/%3E%3Cellipse cx='11' cy='34' rx='2.4' ry='6' transform='rotate(-18 11 34)'/%3E%3Cellipse cx='2' cy='66' rx='2.4' ry='6' transform='rotate(16 2 66)'/%3E%3C/g%3E%3Cg fill='%23f9a8d4'%3E%3Ccircle cx='24' cy='5' r='3'/%3E%3Ccircle cx='29' cy='9' r='3'/%3E%3Ccircle cx='27' cy='15' r='3'/%3E%3Ccircle cx='21' cy='15' r='3'/%3E%3Ccircle cx='19' cy='9' r='3'/%3E%3Ccircle cx='74' cy='2' r='2.4'/%3E%3Ccircle cx='78' cy='5.5' r='2.4'/%3E%3Ccircle cx='76.5' cy='10' r='2.4'/%3E%3Ccircle cx='71.5' cy='10' r='2.4'/%3E%3Ccircle cx='70' cy='5.5' r='2.4'/%3E%3C/g%3E%3Ccircle cx='24' cy='10' r='2' fill='%23fde68a'/%3E%3Ccircle cx='74' cy='6.5' r='1.6' fill='%23fde68a'/%3E%3C/svg%3E") no-repeat 0 0 / 160px 90px,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' fill='none'%3E%3Cg transform='translate(160 90) scale(-1 -1)'%3E%3Cpath d='M4 88C6 52 6 22 20 9C40 -1 92 4 158 6' stroke='%2365a30d' stroke-width='1.6' stroke-linecap='round'/%3E%3Cg fill='%2384cc16'%3E%3Cellipse cx='46' cy='2' rx='6' ry='2.4' transform='rotate(-20 46 2)'/%3E%3Cellipse cx='100' cy='9' rx='6' ry='2.4' transform='rotate(18 100 9)'/%3E%3Cellipse cx='132' cy='3' rx='5' ry='2' transform='rotate(-14 132 3)'/%3E%3Cellipse cx='11' cy='34' rx='2.4' ry='6' transform='rotate(-18 11 34)'/%3E%3Cellipse cx='2' cy='66' rx='2.4' ry='6' transform='rotate(16 2 66)'/%3E%3C/g%3E%3Cg fill='%23f9a8d4'%3E%3Ccircle cx='24' cy='5' r='3'/%3E%3Ccircle cx='29' cy='9' r='3'/%3E%3Ccircle cx='27' cy='15' r='3'/%3E%3Ccircle cx='21' cy='15' r='3'/%3E%3Ccircle cx='19' cy='9' r='3'/%3E%3Ccircle cx='74' cy='2' r='2.4'/%3E%3Ccircle cx='78' cy='5.5' r='2.4'/%3E%3Ccircle cx='76.5' cy='10' r='2.4'/%3E%3Ccircle cx='71.5' cy='10' r='2.4'/%3E%3Ccircle cx='70' cy='5.5' r='2.4'/%3E%3C/g%3E%3Ccircle cx='24' cy='10' r='2' fill='%23fde68a'/%3E%3Ccircle cx='74' cy='6.5' r='1.6' fill='%23fde68a'/%3E%3C/g%3E%3C/svg%3E") no-repeat 100% 100% / 160px 90px;
+  -webkit-mask:
+    radial-gradient(circle at 0 0, #000 calc(var(--panel-reveal) * 170px), transparent calc(var(--panel-reveal) * 170px + 24px)) no-repeat 0 0 / 160px 90px,
+    radial-gradient(circle at 100% 100%, #000 calc(var(--panel-reveal) * 170px), transparent calc(var(--panel-reveal) * 170px + 24px)) no-repeat 100% 100% / 160px 90px;
+  mask:
+    radial-gradient(circle at 0 0, #000 calc(var(--panel-reveal) * 170px), transparent calc(var(--panel-reveal) * 170px + 24px)) no-repeat 0 0 / 160px 90px,
+    radial-gradient(circle at 100% 100%, #000 calc(var(--panel-reveal) * 170px), transparent calc(var(--panel-reveal) * 170px + 24px)) no-repeat 100% 100% / 160px 90px;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 3px rgba(244, 114, 182, 0.4));
+  animation: panelReveal 1.8s cubic-bezier(0.3, 0.7, 0.3, 1) both;
+}
+
+.theme-feywild-bloom .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(249, 168, 212, 0.5), 0 0 18px rgba(244, 114, 182, 0.4) !important;
+}
+
+.theme-feywild-bloom .glassy-input:focus-within,
+.theme-feywild-bloom .glassy-input:focus {
+  border-color: #f9a8d4 !important;
+  box-shadow: 0 0 0 1px rgba(249, 168, 212, 0.35), 0 0 14px rgba(251, 191, 36, 0.25) !important;
+}

@@ -1,10 +1,9 @@
-import { useMemo } from "react";
+import { Suspense, useMemo } from "react";
 import { Box } from "@mantine/core";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
-import { CyberpunkBackdrop } from "./CyberpunkBackdrop";
-import { FrostBackdrop } from "./FrostBackdrop";
+import { themeBackdrops } from "./backdrops";
 
 /**
  * AppBackground
@@ -19,6 +18,12 @@ export function AppBackground() {
   const isMobile = useIsMobile();
   const sidebarTheme = useUiStore((s) => s.sidebarTheme);
   const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
+  const Backdrop = themeBackdrops[sidebarTheme];
+  const scene = Backdrop && (
+    <Suspense fallback={null}>
+      <Backdrop isStatic={isMobile} />
+    </Suspense>
+  );
 
   // Optimized particle generation for desktop devices only
   const particles = useMemo(() => {
@@ -54,8 +59,7 @@ export function AppBackground() {
             zIndex: 1,
           }}
         />
-        {sidebarTheme === "cyberpunk" && <CyberpunkBackdrop isStatic />}
-        {sidebarTheme === "frost-glacier" && <FrostBackdrop isStatic />}
+        {scene}
       </Box>
     );
   }
@@ -63,18 +67,7 @@ export function AppBackground() {
   return (
     <Box className={`portal-background ${activeThemeClass}`} style={{ position: "fixed", pointerEvents: "none" }}>
       <Box className="portal-backdrop-glow" />
-      
-      {/* Fixed background gears spinning in place (Steampunk Theme Desktop Only) */}
-      {sidebarTheme === "steampunk" && !isMobile && (
-        <Box className="fixed-cogs-container">
-          <Box className="fixed-cog cog-large" />
-          <Box className="fixed-cog cog-medium" />
-          <Box className="fixed-cog cog-small" />
-        </Box>
-      )}
-
-      {sidebarTheme === "cyberpunk" && <CyberpunkBackdrop />}
-      {sidebarTheme === "frost-glacier" && <FrostBackdrop />}
+      {scene}
 
       <Box className="portal-particles">
         {particles.map((p) => (

@@ -1,0 +1,69 @@
+/* ==========================================================================
+   🔮 Eldritch Void (.theme-eldritch-void): shader black-hole portal under a still, twinkling starfield
+   Scene: backdrops/VoidBackdrop.tsx. Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+/* The whole scene is a fragment shader on a canvas (VoidBackdrop.tsx); this is the backing colour
+   shown before the first frame or if WebGL is unavailable. */
+.ev-scene {
+  background: radial-gradient(ellipse 60% 55% at 50% 46%, #150729 0%, #07031a 45%, #020008 85%), #010005;
+}
+
+/* The shader is the whole picture: hide the shared glow + particles over it */
+.theme-eldritch-void .portal-backdrop-glow,
+.theme-eldritch-void .portal-particles {
+  display: none;
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-eldritch-void {
+  scrollbar-color: rgba(217, 70, 239, 0.5) transparent;
+}
+
+.theme-eldritch-void ::selection {
+  background: #c026d3;
+  color: #fff;
+}
+
+/* Headings: magenta/indigo split glow; a brief warp on hover */
+.theme-eldritch-void .narrative-title {
+  font-family: "Cinzel", "Plus Jakarta Sans", serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 3px !important;
+  text-shadow: -1px 0 rgba(217, 70, 239, 0.7), 1px 0 rgba(99, 102, 241, 0.7), 0 0 14px rgba(217, 70, 239, 0.45) !important;
+}
+
+.theme-eldritch-void .narrative-title:hover {
+  animation: evWarp 0.7s ease-in-out;
+}
+
+@keyframes evWarp {
+  0%, 100% { transform: none; }
+  30%      { transform: skewX(-6deg) scaleX(1.03); }
+  60%      { transform: skewX(4deg) scaleX(0.98); }
+}
+
+/* Panels: violet depth behind the content */
+.theme-eldritch-void .mantine-Paper-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 120%, rgba(134, 25, 143, 0.12), transparent 60%);
+  box-shadow: inset 0 1px 0 rgba(240, 171, 252, 0.15), inset 0 0 30px rgba(10, 0, 20, 0.5);
+}
+
+.theme-eldritch-void .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(240, 171, 252, 0.45), 0 0 18px rgba(217, 70, 239, 0.45) !important;
+}
+
+.theme-eldritch-void .glassy-input:focus-within,
+.theme-eldritch-void .glassy-input:focus {
+  border-color: #e879f9 !important;
+  box-shadow: 0 0 0 1px rgba(232, 121, 249, 0.35), 0 0 14px rgba(99, 102, 241, 0.3) !important;
+}

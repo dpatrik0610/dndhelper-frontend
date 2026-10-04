@@ -1,0 +1,265 @@
+/* ==========================================================================
+   ☣️ Toxic Spore (.theme-toxic-spore): atmospheric toxic sewer — light, fog and motion only
+   Scene: backdrops/ToxicBackdrop.tsx. Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+.tx-base {
+  inset: 0;
+  background:
+    radial-gradient(ellipse 120% 70% at 50% 112%, #12300b 0%, #071407 42%, #020402 78%),
+    #010201;
+}
+
+/* Glow breathing up from the unseen sludge */
+.tx-glow {
+  border-radius: 50%;
+  will-change: transform, opacity;
+}
+
+.tx-glow--main {
+  left: -20%;
+  right: -20%;
+  bottom: -38%;
+  height: 85%;
+  background: radial-gradient(ellipse at 50% 100%, rgba(163, 230, 53, 0.42) 0%, rgba(101, 163, 13, 0.2) 30%, rgba(54, 83, 20, 0.07) 55%, transparent 70%);
+  animation: txBreathe 7s ease-in-out infinite alternate;
+}
+
+.tx-glow--left,
+.tx-glow--right {
+  bottom: -20%;
+  width: 55%;
+  height: 55%;
+  background: radial-gradient(ellipse at 50% 100%, rgba(217, 249, 157, 0.18), rgba(132, 204, 22, 0.06) 45%, transparent 70%);
+}
+
+.tx-glow--left {
+  left: -10%;
+  animation: txSway 13s ease-in-out infinite alternate;
+}
+
+.tx-glow--right {
+  right: -10%;
+  background: radial-gradient(ellipse at 50% 100%, rgba(253, 224, 71, 0.12), rgba(163, 230, 53, 0.05) 45%, transparent 70%);
+  animation: txSway 17s ease-in-out infinite alternate-reverse;
+}
+
+/* Liquid reflections rippling across the dark above */
+.tx-reflections {
+  inset: 0;
+}
+
+.tx-reflection {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(190, 242, 100, 0.22), rgba(132, 204, 22, 0.07) 45%, transparent 70%);
+  will-change: transform, opacity;
+  animation: txRipple ease-in-out infinite alternate;
+}
+
+/* Pale shaft of light from an overhead grate */
+.tx-shaft {
+  top: -6%;
+  left: 57%;
+  width: 16vw;
+  height: 88%;
+  background: linear-gradient(to bottom, rgba(220, 240, 200, 0.15), rgba(190, 230, 150, 0.05) 60%, transparent);
+  transform: rotate(8deg) skewX(-6deg);
+  transform-origin: top;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 40%, #000 60%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 40%, #000 60%, transparent);
+  animation: txFlicker 9s linear infinite;
+}
+
+/* Fog banks drifting at different speeds and depths */
+.tx-fog {
+  left: -30%;
+  right: -30%;
+  height: 40%;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.tx-fog--1 {
+  bottom: 42%;
+  background: radial-gradient(ellipse, rgba(132, 204, 22, 0.08), transparent 70%);
+  animation: txDrift 48s ease-in-out infinite alternate;
+}
+
+.tx-fog--2 {
+  bottom: 22%;
+  background: radial-gradient(ellipse, rgba(163, 230, 53, 0.11), transparent 70%);
+  animation: txDrift 36s ease-in-out infinite alternate-reverse;
+}
+
+.tx-fog--3 {
+  bottom: 4%;
+  background: radial-gradient(ellipse, rgba(190, 242, 100, 0.14), transparent 70%);
+  animation: txDrift 27s ease-in-out infinite alternate;
+}
+
+.tx-fog--4 {
+  bottom: -14%;
+  background: radial-gradient(ellipse, rgba(101, 163, 13, 0.22), transparent 70%);
+  animation: txDrift 20s ease-in-out infinite alternate-reverse;
+}
+
+/* Out-of-focus motes rising */
+.tx-bokeh {
+  inset: 0;
+}
+
+.tx-mote {
+  position: absolute;
+  bottom: -15%;
+  border-radius: 50%;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: txRise linear infinite;
+}
+
+.tx-mote--green {
+  background: radial-gradient(circle, rgba(217, 249, 157, 0.5), rgba(132, 204, 22, 0.14) 50%, transparent 70%);
+}
+
+.tx-mote--yellow {
+  background: radial-gradient(circle, rgba(253, 224, 71, 0.42), rgba(234, 179, 8, 0.12) 50%, transparent 70%);
+}
+
+/* Static (mobile): some motes shown mid-rise */
+.theme-scene--static .tx-mote:nth-child(odd) {
+  opacity: 0.45;
+  transform: translateY(-55vh);
+}
+
+/* Bubbles bursting in the sludge: soft flares near the bottom */
+.tx-flares {
+  inset: 0;
+}
+
+.tx-flare {
+  position: absolute;
+  bottom: 0;
+  width: 22vw;
+  height: 18vh;
+  margin-left: -11vw;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 100%, rgba(217, 249, 157, 0.4), transparent 70%);
+  opacity: 0;
+  animation: txFlare ease-out infinite;
+}
+
+.tx-vignette {
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 55%, transparent 42%, rgba(0, 0, 0, 0.78) 100%);
+}
+
+@keyframes txBreathe {
+  from { transform: scale(1); opacity: 0.75; }
+  to   { transform: scale(1.06); opacity: 1; }
+}
+
+@keyframes txSway {
+  from { transform: translateX(-6%); opacity: 0.6; }
+  to   { transform: translateX(6%); opacity: 1; }
+}
+
+@keyframes txRipple {
+  0%   { transform: translateX(calc(var(--dx) * -1)) scale(1, 1); opacity: 0.3; }
+  50%  { transform: translateX(0) scale(1.25, 0.8); opacity: 0.8; }
+  100% { transform: translateX(var(--dx)) scale(0.9, 1.15); opacity: 0.4; }
+}
+
+@keyframes txFlicker {
+  0%, 46%, 100% { opacity: 0.85; }
+  48%           { opacity: 0.5; }
+  50%           { opacity: 0.9; }
+  78%           { opacity: 0.7; }
+}
+
+@keyframes txDrift {
+  from { transform: translateX(-8%); }
+  to   { transform: translateX(8%); }
+}
+
+@keyframes txRise {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  15%  { opacity: 0.7; }
+  80%  { opacity: 0.45; }
+  100% { transform: translate3d(var(--sway), -125vh, 0) scale(0.7); opacity: 0; }
+}
+
+@keyframes txFlare {
+  0%, 70% { opacity: 0; transform: scale(0.6); }
+  78%     { opacity: 1; transform: scale(1); }
+  100%    { opacity: 0; transform: scale(1.3); }
+}
+
+/* Particles: fine toxic motes */
+.theme-toxic-spore .portal-particle {
+  animation-name: floatSway;
+}
+.theme-toxic-spore .portal-particle::after {
+  width: 3px;
+  height: 3px;
+  background: #d9f99d;
+  border-radius: 50%;
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-toxic-spore {
+  scrollbar-color: rgba(132, 204, 22, 0.55) transparent;
+}
+
+.theme-toxic-spore ::selection {
+  background: #a3e635;
+  color: #0a1a05;
+}
+
+.theme-toxic-spore .narrative-title {
+  font-family: "Allerta Stencil", "Plus Jakarta Sans", sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 3px !important;
+  color: #d9f99d !important;
+  text-shadow: 0 0 10px rgba(132, 204, 22, 0.55) !important;
+}
+
+/* Panels: lit from below by the sludge — green rim along the bottom edge, faint highlight on top… */
+.theme-toxic-spore .mantine-Paper-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(132, 204, 22, 0.1), transparent 45%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03), transparent 30%);
+  box-shadow: inset 0 -1px 0 rgba(190, 242, 100, 0.35), inset 0 1px 0 rgba(220, 240, 200, 0.08);
+}
+
+/* …and a soft glow that rises up from the bottom edge when the panel appears */
+.theme-toxic-spore .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(ellipse 75% 55% at 50% 100%, rgba(163, 230, 53, 0.2), transparent 70%);
+  -webkit-mask-image: linear-gradient(to top, #000 calc(var(--panel-reveal) * 100%), transparent calc(var(--panel-reveal) * 100% + 25%));
+  mask-image: linear-gradient(to top, #000 calc(var(--panel-reveal) * 100%), transparent calc(var(--panel-reveal) * 100% + 25%));
+  animation: panelReveal 1.6s ease-out both;
+}
+
+.theme-toxic-spore .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(190, 242, 100, 0.45), 0 0 18px rgba(132, 204, 22, 0.45) !important;
+}
+
+.theme-toxic-spore .glassy-input:focus-within,
+.theme-toxic-spore .glassy-input:focus {
+  border-color: #a3e635 !important;
+  box-shadow: 0 0 0 1px rgba(163, 230, 53, 0.35), 0 0 14px rgba(132, 204, 22, 0.3) !important;
+}

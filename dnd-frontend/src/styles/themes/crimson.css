@@ -1,0 +1,235 @@
+/* ==========================================================================
+   🗡️ Crimson Dynasty (.theme-crimson-vampire): assassin over a Renaissance city at night
+   Scene: backdrops/CrimsonBackdrop.tsx. Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+.cr-sky {
+  inset: 0;
+  background: linear-gradient(to bottom, #050102 0%, #12030a 35%, #2a060c 58%, #5c0a12 72%, #1a0305 100%);
+}
+
+.cr-moon {
+  top: 14%;
+  right: 22%;
+  width: min(34vmin, 380px);
+  height: min(34vmin, 380px);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 62% 38%, rgba(70, 8, 10, 0.3) 0 8%, transparent 9%),
+    radial-gradient(circle at 36% 62%, rgba(70, 8, 10, 0.25) 0 12%, transparent 13%),
+    radial-gradient(circle at 38% 36%, #ffb3a1, #dc2626 52%, #7f1d1d 88%);
+  box-shadow: 0 0 90px 24px rgba(220, 38, 38, 0.4);
+}
+
+.cr-clouds {
+  inset: 0;
+}
+
+.cr-cloud {
+  position: absolute;
+  left: 0;
+  width: 48vw;
+  height: 6vh;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(10, 2, 4, 0.9), rgba(50, 6, 10, 0.5) 50%, transparent 72%);
+  will-change: transform;
+  animation: crCloud linear infinite;
+}
+
+.cr-world {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cr-far {
+  fill: #2a070c;
+}
+
+.cr-tower,
+.cr-assassin {
+  fill: #0a0204;
+}
+
+/* moonlit belfry openings */
+.cr-belfry {
+  fill: #5c0a12;
+}
+
+.cr-banner {
+  fill: #991b1b;
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: crBanner 4s ease-in-out infinite alternate;
+}
+
+.cr-banner--2 {
+  animation-delay: -2s;
+}
+
+.cr-assassin__cape {
+  transform-box: fill-box;
+  transform-origin: 0 0;
+  animation: crCape 1.4s ease-in-out infinite alternate;
+}
+
+/* hidden blade: catches the moonlight now and then */
+.cr-blade {
+  stroke: #fecaca;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0;
+  filter: drop-shadow(0 0 3px #fecaca);
+  animation: crGlint 7s ease-in-out infinite;
+}
+
+.cr-orbit-x {
+  animation: crOrbitX 9s ease-in-out infinite alternate;
+}
+
+.cr-orbit-y {
+  animation: crOrbitY 9s ease-in-out infinite alternate;
+  animation-delay: -4.5s;
+}
+
+.cr-eagle {
+  fill: #0a0204;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: crWing 1.8s ease-in-out infinite alternate;
+}
+
+.cr-near {
+  fill: #040102;
+}
+
+.cr-near .cr-window {
+  fill: #f59e0b;
+  filter: drop-shadow(0 0 4px #ea580c);
+  animation: crWindow 6s steps(2, end) infinite;
+}
+
+.cr-near .cr-smoke {
+  fill: rgba(70, 24, 28, 0.5);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: crSmoke 6s ease-out infinite;
+}
+
+@keyframes crCloud {
+  from { transform: translateX(-50vw); }
+  to   { transform: translateX(110vw); }
+}
+
+@keyframes crBanner {
+  from { transform: skewX(-5deg); }
+  to   { transform: skewX(5deg); }
+}
+
+@keyframes crCape {
+  from { transform: rotate(-6deg) scaleX(0.95); }
+  to   { transform: rotate(5deg) scaleX(1.12); }
+}
+
+@keyframes crGlint {
+  0%, 88%, 100% { opacity: 0; }
+  92%           { opacity: 1; }
+}
+
+@keyframes crOrbitX {
+  from { transform: translateX(-180px); }
+  to   { transform: translateX(180px); }
+}
+
+@keyframes crOrbitY {
+  from { transform: translateY(-55px); }
+  to   { transform: translateY(55px); }
+}
+
+@keyframes crWing {
+  from { transform: scaleY(1); }
+  to   { transform: scaleY(0.7); }
+}
+
+@keyframes crWindow {
+  0%  { opacity: 1; }
+  90% { opacity: 0.5; }
+}
+
+@keyframes crSmoke {
+  from { transform: translate(0, 0) scale(0.5); opacity: 0.6; }
+  to   { transform: translate(14px, -70px) scale(2.2); opacity: 0; }
+}
+
+/* Particles: drifting ash */
+.theme-crimson-vampire .portal-particle {
+  animation-name: floatDown;
+}
+.theme-crimson-vampire .portal-particle::after {
+  width: 4px;
+  height: 3px;
+  border-radius: 40% 60% 50% 50%;
+  background: #6b1d1d;
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-crimson-vampire {
+  scrollbar-color: rgba(220, 38, 38, 0.55) transparent;
+}
+
+.theme-crimson-vampire ::selection {
+  background: #b91c1c;
+  color: #fff;
+}
+
+.theme-crimson-vampire .narrative-title {
+  font-family: "IM Fell English SC", "Plus Jakarta Sans", serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 3px !important;
+  text-shadow: 0 2px 0 #450a0a, 0 0 10px rgba(220, 38, 38, 0.55) !important;
+}
+
+/* Panels: dark steel with a crimson hairline, and a short crimson mark at the bottom-left */
+.theme-crimson-vampire .mantine-Paper-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, #dc2626, transparent) no-repeat 0 100% / 44px 2px,
+    linear-gradient(180deg, rgba(220, 38, 38, 0.06), transparent 40%);
+  box-shadow: inset 0 1px 0 rgba(254, 202, 202, 0.12), inset 0 0 0 1px rgba(127, 29, 29, 0.25);
+}
+
+/* Blade slash across the top-right corner, cut in along its own direction (135deg mask sweep) */
+.theme-crimson-vampire .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(120px, 45%);
+  aspect-ratio: 1;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3ClinearGradient id='s' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237f1d1d'/%3E%3Cstop offset='.55' stop-color='%23ef4444'/%3E%3Cstop offset='1' stop-color='%23fecaca'/%3E%3C/linearGradient%3E%3Cpath fill='url(%23s)' d='M26 4C58 28 90 58 116 94C94 70 62 42 26 4Z'/%3E%3Cpath fill='url(%23s)' fill-opacity='.6' d='M44 2C70 22 94 46 116 74C98 54 74 32 44 2Z'/%3E%3C/svg%3E") no-repeat 0 0 / 100% 100%;
+  -webkit-mask-image: linear-gradient(135deg, #000 calc(var(--panel-reveal) * 100%), transparent calc(var(--panel-reveal) * 100% + 8%));
+  mask-image: linear-gradient(135deg, #000 calc(var(--panel-reveal) * 100%), transparent calc(var(--panel-reveal) * 100% + 8%));
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6));
+  opacity: 0.85;
+  animation: panelReveal 0.45s cubic-bezier(0.7, 0, 0.3, 1) 0.15s both;
+}
+
+.theme-crimson-vampire .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.45), 0 0 18px rgba(220, 38, 38, 0.45) !important;
+}
+
+.theme-crimson-vampire .glassy-input:focus-within,
+.theme-crimson-vampire .glassy-input:focus {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.35), 0 0 14px rgba(220, 38, 38, 0.35) !important;
+}

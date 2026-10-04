@@ -85,7 +85,6 @@
 .cp-skyline--far {
   height: 100%;
   opacity: 0.85;
-  filter: blur(0.6px);
   animation-duration: 260s;
 }
 
@@ -131,7 +130,8 @@
 
 /* Mobile / static: keep the scene, stop everything moving */
 .cp-overlay--static,
-.cp-overlay--static * {
+.cp-overlay--static *,
+.cp-overlay--static *::after {
   animation: none !important;
 }
 
@@ -179,17 +179,28 @@
   right: -50%;
   top: 52%;
   height: 70%;
-  background-image:
-    linear-gradient(rgba(0, 240, 255, 0.4) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 0, 60, 0.35) 1px, transparent 1px);
-  background-size: 64px 64px;
+  overflow: hidden;
   transform: perspective(420px) rotateX(68deg);
   transform-origin: 50% 0;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
   mask-image: linear-gradient(to bottom, transparent 0%, #000 35%);
   opacity: 0.32;
+}
+
+/* The grid lines scroll toward the viewer: one cell taller than the floor, moved by one cell with a
+   transform (composited) instead of animating background-position (a full repaint every frame). */
+.cp-grid::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -64px;
+  bottom: 0;
+  background-image:
+    linear-gradient(rgba(0, 240, 255, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 0, 60, 0.35) 1px, transparent 1px);
+  background-size: 64px 64px;
   animation: cpGridScroll 2.4s linear infinite;
-  will-change: background-position;
 }
 
 .cp-scanlines {
@@ -210,8 +221,8 @@
 }
 
 @keyframes cpGridScroll {
-  from { background-position: 0 0; }
-  to   { background-position: 0 64px; }
+  from { transform: translateY(0); }
+  to   { transform: translateY(64px); }
 }
 
 @keyframes cpScan {

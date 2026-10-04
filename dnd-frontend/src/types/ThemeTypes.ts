@@ -13,10 +13,10 @@ export interface ThemeOption {
 export const themeOptions: ThemeOption[] = [
   { key: "midnight", name: "Midnight", icon: "🌌", accent: "#a855f7", accentSecondary: "#06b6d4", glow: "0 0 15px rgba(168, 85, 247, 0.3)" },
   { key: "sunset", name: "Cyber-Fantasy", icon: "💛", accent: "#f59e0b", accentSecondary: "#10b981", glow: "0 0 15px rgba(245, 158, 11, 0.25)" },
-  { key: "crimson-vampire", name: "Crimson Dynasty", icon: "🩸", accent: "#ef4444", accentSecondary: "#d97706", glow: "0 0 15px rgba(239, 68, 68, 0.3)" },
+  { key: "crimson-vampire", name: "Crimson Dynasty", icon: "🗡️", accent: "#ef4444", accentSecondary: "#d97706", glow: "0 0 15px rgba(239, 68, 68, 0.3)" },
   { key: "frost-glacier", name: "Frost Glacier", icon: "❄️", accent: "#7dd3fc", accentSecondary: "#5eead4", glow: "0 0 15px rgba(125, 211, 252, 0.4)" },
   { key: "feywild", name: "Feywild Bloom", icon: "🌸", accent: "#f472b6", accentSecondary: "#fbbf24", glow: "0 0 15px rgba(244, 114, 182, 0.25)" },
-  { key: "toxic", name: "Toxic Spore", icon: "🧪", accent: "#22c55e", accentSecondary: "#facc15", glow: "0 0 15px rgba(34, 197, 94, 0.25)" },
+  { key: "toxic", name: "Toxic Spore", icon: "☣️", accent: "#22c55e", accentSecondary: "#facc15", glow: "0 0 15px rgba(34, 197, 94, 0.25)" },
   { key: "void", name: "Eldritch Void", icon: "👁️", accent: "#d946ef", accentSecondary: "#6366f1", glow: "0 0 15px rgba(217, 70, 239, 0.25)" },
   { key: "steampunk", name: "Clockwork Brass", icon: "⚙️", accent: "#ea580c", accentSecondary: "#0d9488", glow: "0 0 15px rgba(234, 88, 12, 0.25)" },
   { key: "deep-ocean", name: "Deep Ocean", icon: "🌊", accent: "#0284c7", accentSecondary: "#0d9488", glow: "0 0 15px rgba(2, 132, 199, 0.25)" },

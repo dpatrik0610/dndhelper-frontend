@@ -1,0 +1,79 @@
+/* ==========================================================================
+   Shared base for theme stylesheets
+   ==========================================================================
+
+   Panel decoration convention (outer panels = .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)):
+   - ::before = rim/sheen BEHIND the content (z-index: -1)
+   - ::after  = the theme's edge decoration ON TOP of the content (pointer-events: none)
+   Only one theme class is active at a time (on <html>), so theme files never collide.
+
+   position + isolation make both pseudo layers anchor to the panel, and let ::before's
+   z-index:-1 sit between the panel background and its content instead of behind the panel. */
+
+:root[class*="theme-"] .mantine-Paper-root {
+  position: relative;
+  isolation: isolate;
+}
+
+/* No frosted glass on in-page panels: over an animated scene, every blurred panel has to re-blur the
+   scene behind it on every frame (on a page full of panels that is most of the GPU load). Panels use
+   the denser --theme-bg-* tints instead. Modals, dropdowns and notifications (few at a time) keep it.
+   !important beats the inline backdropFilter styles many components set. */
+:root[class*="theme-"] .mantine-Paper-root:not(.mantine-Modal-content),
+:root[class*="theme-"] [style*="backdrop-filter"]:not(.mantine-Modal-content):not(.mantine-Overlay-root) {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* The sidebar drawer is a Paper that scrolls: absolutely positioned pseudo layers scroll away with
+   its content, leaving a decoration edge cutting across the middle. No panel decorations there. */
+:root[class*="theme-"] .mantine-Drawer-content::before,
+:root[class*="theme-"] .mantine-Drawer-content::after {
+  content: none !important;
+}
+
+/* Panel decoration reveal: theme ::after rules scale their mask/size by --panel-reveal and run
+   `animation: panelReveal <duration> ease-out both`. Registered so it can animate; browsers without
+   @property show the finished decoration (initial-value 1). */
+@property --panel-reveal {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+@keyframes panelReveal {
+  from { --panel-reveal: 0; }
+  to   { --panel-reveal: 1; }
+}
+
+/* ---------- Scene base for backdrops/<Theme>Backdrop.tsx ----------
+   Root: className="theme-scene" (+ "theme-scene--static" on mobile). Children are absolutely
+   positioned layers. Static / reduced motion keep the scene and stop every animation in it. */
+
+.theme-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.theme-scene > * {
+  position: absolute;
+}
+
+.theme-scene--static,
+.theme-scene--static * {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-scene,
+  .theme-scene * {
+    animation: none !important;
+  }
+
+  :root[class*="theme-"] .mantine-Paper-root::after {
+    animation: none !important;
+  }
+}

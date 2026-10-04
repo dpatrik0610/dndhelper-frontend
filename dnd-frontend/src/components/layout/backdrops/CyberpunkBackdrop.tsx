@@ -1,8 +1,9 @@
 import { useMemo, type CSSProperties } from "react";
+import { seededRandom as rng } from "@utils/seededRandom";
 
 /**
  * Cyberpunk backdrop: neon skyline (2 parallax layers), flying traffic, perspective grid, CRT scanlines.
- * Styles in styles/cyberpunk.css. `isStatic` = no animation (mobile).
+ * Styles in styles/themes/cyberpunk.css. `isStatic` = no animation (mobile).
  *
  * The skyline is generated from a fixed seed, so it is identical on every load. Windows are SVG
  * patterns (one fill per building) instead of individual rects to keep the DOM small.
@@ -12,15 +13,6 @@ const TILE_W = 2000;
 const TILE_H = 400;
 const NEON = ["#ff2a6d", "#00f0ff", "#fcee0a", "#b967ff", "#05ffa1"];
 
-// mulberry32: tiny deterministic PRNG
-function rng(seed: number) {
-  return () => {
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 interface Building { x: number; y: number; w: number; h: number }
 interface Sign { x: number; y: number; w: number; h: number; color: string; delay: number }

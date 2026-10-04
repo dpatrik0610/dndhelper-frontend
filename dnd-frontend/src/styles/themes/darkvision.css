@@ -1,0 +1,60 @@
+/* ==========================================================================
+   🕶️ Darkvision (.theme-darkvision): 1-bit dithered dungeon corridor, seen without light
+   Scene: backdrops/DarkvisionBackdrop.tsx. Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+/* The scene is a 1-bit dithered shader on a canvas (DarkvisionBackdrop.tsx); this is the backing
+   colour before the first frame or without WebGL. */
+.dv-scene {
+  background: #090908;
+}
+
+/* The dithered corridor is the whole picture: hide the shared glow + particles over it */
+.theme-darkvision .portal-backdrop-glow,
+.theme-darkvision .portal-particles {
+  display: none;
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-darkvision {
+  scrollbar-color: rgba(209, 213, 219, 0.4) transparent;
+}
+
+.theme-darkvision ::selection {
+  background: #e5e7eb;
+  color: #000;
+}
+
+/* Precise, monochrome headings */
+.theme-darkvision .narrative-title {
+  font-family: "JetBrains Mono", "Plus Jakarta Sans", monospace !important;
+  font-weight: 400 !important;
+  letter-spacing: 4px !important;
+  color: #e5e7eb !important;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Panels: faint grey inner light behind the content */
+.theme-darkvision .mantine-Paper-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.theme-darkvision .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(229, 231, 235, 0.45), 0 0 14px rgba(255, 255, 255, 0.18) !important;
+}
+
+.theme-darkvision .glassy-input:focus-within,
+.theme-darkvision .glassy-input:focus {
+  border-color: #e5e7eb !important;
+  box-shadow: 0 0 0 1px rgba(229, 231, 235, 0.3), 0 0 12px rgba(255, 255, 255, 0.15) !important;
+}

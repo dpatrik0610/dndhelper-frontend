@@ -1,0 +1,230 @@
+/* ==========================================================================
+   💜 Midnight Arcane (.theme-midnight-arcane): night sky + turning arcane circle
+   Scene: backdrops/MidnightBackdrop.tsx. Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+.ma-sky {
+  inset: 0;
+  background: radial-gradient(ellipse 90% 70% at 50% 0%, #1e1145 0%, #0b0720 55%, #04030c 100%);
+}
+
+.ma-nebula {
+  width: 70vw;
+  height: 60vh;
+  opacity: 0.35;
+  will-change: transform, opacity;
+  animation: maBreathe 18s ease-in-out infinite alternate;
+}
+
+.ma-nebula--1 {
+  top: -12%;
+  left: -12%;
+  background: radial-gradient(closest-side, #7c3aed, transparent);
+}
+
+.ma-nebula--2 {
+  bottom: -18%;
+  right: -12%;
+  background: radial-gradient(closest-side, #0891b2, transparent);
+  opacity: 0.25;
+  animation-delay: -9s;
+}
+
+.ma-stars {
+  inset: 0;
+}
+
+.ma-star {
+  position: absolute;
+  border-radius: 50%;
+  background: #f5f3ff;
+  opacity: 0.75;
+  animation: maTwinkle 3.5s ease-in-out infinite alternate;
+}
+
+/* Bright stars get a cross-shaped flare */
+.ma-star--bright {
+  box-shadow: 0 0 6px #e9d5ff;
+}
+
+.ma-star--bright::before,
+.ma-star--bright::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 1px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(90deg, transparent, #e9d5ff, transparent);
+}
+
+.ma-star--bright::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* Constellations fade in, hold, then fade out (each staggered via animation-delay) */
+.ma-constellation {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: maConstellation 21s ease-in-out infinite;
+}
+
+.ma-constellation polyline {
+  fill: none;
+  stroke: rgba(196, 181, 253, 0.55);
+  stroke-width: 1;
+}
+
+.ma-constellation circle {
+  fill: #e9d5ff;
+}
+
+/* No motion: show the constellations */
+.theme-scene--static .ma-constellation {
+  opacity: 0.9;
+}
+
+/* The arcane circle */
+.ma-circle {
+  left: 50%;
+  top: 50%;
+  width: min(115vmin, 1150px);
+  height: min(115vmin, 1150px);
+  transform: translate(-50%, -50%);
+  color: #c4b5fd;
+  opacity: 0.22;
+}
+
+.ma-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ma-circle :is(circle, path, polygon, line) {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+}
+
+.ma-ring--outer    { animation: maSpin 260s linear infinite; }
+.ma-ring--ticks    { animation: maSpin 180s linear infinite reverse; }
+.ma-ring--hexagram { animation: maSpin 340s linear infinite; }
+.ma-ring--inner    { animation: maSpin 120s linear infinite reverse; }
+
+/* Shooting stars: mostly idle, a quick streak near the end of each cycle */
+.ma-meteors {
+  inset: 0;
+}
+
+.ma-meteor {
+  position: absolute;
+  width: 140px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #e9d5ff);
+  opacity: 0;
+  animation: maMeteor 13s linear infinite;
+}
+
+@keyframes maBreathe {
+  from { transform: scale(1); opacity: 0.25; }
+  to   { transform: scale(1.12); opacity: 0.42; }
+}
+
+@keyframes maTwinkle {
+  from { opacity: 0.2; }
+  to   { opacity: 0.95; }
+}
+
+@keyframes maConstellation {
+  0%        { opacity: 0; }
+  12%       { opacity: 0.9; }
+  75%       { opacity: 0.9; }
+  90%, 100% { opacity: 0; }
+}
+
+@keyframes maSpin {
+  to { transform: rotate(1turn); }
+}
+
+@keyframes maMeteor {
+  0%, 88% { opacity: 0; transform: translate(0, 0) rotate(155deg); }
+  89%     { opacity: 1; }
+  96%     { opacity: 0; transform: translate(-320px, 150px) rotate(155deg); }
+  100%    { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ma-constellation {
+    opacity: 0.9;
+  }
+}
+
+/* Particles: twinkling 4-point stars */
+.theme-midnight-arcane .portal-particle {
+  animation-name: floatUp;
+}
+.theme-midnight-arcane .portal-particle::after {
+  width: 8px;
+  height: 8px;
+  background: #a855f7;
+  clip-path: polygon(50% 0%, 61% 35%, 100% 50%, 61% 65%, 50% 100%, 39% 65%, 0% 50%, 39% 35%);
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-midnight-arcane {
+  scrollbar-color: rgba(168, 85, 247, 0.55) transparent;
+}
+
+.theme-midnight-arcane ::selection {
+  background: #a855f7;
+  color: #fff;
+}
+
+.theme-midnight-arcane .narrative-title {
+  font-family: "Cormorant Garamond", "Plus Jakarta Sans", serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 2.5px !important;
+  text-shadow: 0 0 2px rgba(233, 213, 255, 0.6), 0 0 14px rgba(168, 85, 247, 0.65) !important;
+}
+
+/* Panels: violet sheen behind the content… */
+.theme-midnight-arcane .mantine-Paper-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(168, 85, 247, 0.07), transparent 45%);
+  box-shadow: inset 0 1px 0 rgba(216, 180, 254, 0.2);
+}
+
+/* …and an arcane rule across the top that grows in when the panel appears */
+.theme-midnight-arcane .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.6), transparent) no-repeat 50% 0;
+  background-size: calc(var(--panel-reveal) * 55%) 1px;
+  animation: panelReveal 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.theme-midnight-arcane .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(192, 132, 252, 0.5), 0 0 18px rgba(168, 85, 247, 0.4) !important;
+}
+
+.theme-midnight-arcane .glassy-input:focus-within,
+.theme-midnight-arcane .glassy-input:focus {
+  border-color: #c084fc !important;
+  box-shadow: 0 0 0 1px rgba(192, 132, 252, 0.35), 0 0 14px rgba(6, 182, 212, 0.25) !important;
+}

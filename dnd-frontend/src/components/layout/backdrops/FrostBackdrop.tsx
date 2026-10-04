@@ -1,25 +1,69 @@
 import { useMemo, type CSSProperties } from "react";
+import { seededRandom as rng } from "@utils/seededRandom";
+import { ShaderCanvas } from "./ShaderCanvas";
 
 /**
- * Frost Glacier backdrop: polar night sky, twinkling stars, aurora borealis, layered glacier
+ * Frost Glacier backdrop: polar night sky with an aurora borealis (shader), twinkling stars, layered glacier
  * ranges with snowcaps, a frozen lake reflecting the aurora, ice glints, 3-depth snowfall and
- * frost creeping in from the corners. Styles in styles/frost.css. `isStatic` = no motion (mobile).
+ * frost creeping in from the corners. Styles in styles/themes/frost.css. `isStatic` = no motion (mobile).
  *
  * Everything is generated from fixed seeds, so the scene is identical on every load.
  */
 
+/**
+ * Night sky with the aurora: three curtains of light, each hanging from a lower edge that waves
+ * slowly along its length. Bright and green at the edge, fading upward into violet, broken into
+ * drifting patches and fine shimmering rays. The sky gradient matches .fr-sky (the no-WebGL fallback).
+ */
+const AURORA = /* glsl */ `
+precision highp float;
+uniform vec2 uResolution;
+uniform float uTime;
+
+float hash(float n) { return fract(sin(n) * 43758.5453); }
+float noise(float x) { float i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f); return mix(hash(i), hash(i + 1.0), f); }
+
+vec3 sky(vec2 uv) {
+  float y = 1.0 - uv.y; // 0 at the top
+  vec3 c = mix(vec3(0.008, 0.031, 0.086), vec3(0.020, 0.082, 0.188), smoothstep(0.0, 0.4, y));
+  c = mix(c, vec3(0.043, 0.165, 0.302), smoothstep(0.4, 0.68, y));
+  c = mix(c, vec3(0.082, 0.275, 0.420), smoothstep(0.68, 0.8, y));
+  c = mix(c, vec3(0.039, 0.114, 0.212), smoothstep(0.8, 1.0, y));
+  vec2 g = (vec2(uv.x, y) - vec2(0.5, 0.78)) / vec2(0.8, 0.4);
+  return c + vec3(0.22, 0.74, 0.97) * 0.18 * (1.0 - smoothstep(0.0, 0.7, length(g)));
+}
+
+// One curtain: light above a waving lower edge at height base, decaying upward over height.
+vec3 curtain(vec2 uv, float aspect, float base, float seed, float height, vec3 low, vec3 high, float speed) {
+  float x = uv.x * aspect;
+  float t = uTime * speed;
+  float edge = base
+    + 0.06 * sin(x * 1.7 + seed + t * 0.5)
+    + 0.035 * sin(x * 3.9 - seed * 1.3 - t * 0.8)
+    + 0.04 * (noise(x * 2.5 + seed * 7.0 + t * 0.3) - 0.5);
+  float d = uv.y - edge;
+  float lower = smoothstep(-0.015, 0.01, d);                 // soft lower border
+  float fade = exp(-max(d, 0.0) / height);                   // dims as it rises
+  float glow = exp(-abs(d) / 0.012) * 0.6;                   // the bright seam along the edge
+  float rays = 0.55 + 0.45 * noise(x * 26.0 + seed * 3.0 + t * 1.2) * noise(x * 7.0 - t * 0.6 + seed);
+  float patches = smoothstep(0.2, 0.8, noise(x * 1.1 + seed * 5.0 + t * 0.2));
+  float a = (lower * fade * rays + glow) * (0.25 + 0.75 * patches);
+  return mix(low, high, smoothstep(0.0, height * 2.2, d)) * a;
+}
+
+void main() {
+  vec2 uv = gl_FragCoord.xy / uResolution;
+  float aspect = uResolution.x / uResolution.y;
+  vec3 au = curtain(uv, aspect, 0.58, 0.0, 0.2, vec3(0.25, 1.0, 0.55), vec3(0.5, 0.25, 0.9), 0.25)
+          + curtain(uv, aspect, 0.70, 4.1, 0.15, vec3(0.2, 0.9, 0.75), vec3(0.6, 0.3, 0.95), 0.2) * 0.65
+          + curtain(uv, aspect, 0.82, 9.7, 0.11, vec3(0.35, 0.95, 0.6), vec3(0.4, 0.35, 1.0), 0.3) * 0.4;
+  gl_FragColor = vec4(sky(uv) + au * 0.65, 1.0);
+}
+`;
+
 const W = 1600;
 const H = 400;
 
-// mulberry32: tiny deterministic PRNG
-function rng(seed: number) {
-  return () => {
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 type Pt = [number, number];
 const lerp = (a: Pt, b: Pt, t: number): Pt => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
@@ -93,6 +137,9 @@ export function FrostBackdrop({ isStatic = false }: { isStatic?: boolean }) {
   return (
     <div className={`fr-overlay ${isStatic ? "fr-overlay--static" : ""}`}>
       <div className="fr-sky" />
+      <div className="fr-aurora">
+        <ShaderCanvas fragment={AURORA} scale={0.5} fps={30} isStatic={isStatic} staticTime={30} />
+      </div>
 
       <div className="fr-stars">
         {scene.stars.map((s, i) => (
@@ -102,12 +149,6 @@ export function FrostBackdrop({ isStatic = false }: { isStatic?: boolean }) {
             style={{ left: `${s.left}%`, top: `${s.top}%`, width: s.size, height: s.size, animationDelay: `${s.delay}s` }}
           />
         ))}
-      </div>
-
-      <div className="fr-aurora">
-        <div className="fr-aurora__band fr-aurora__band--1" />
-        <div className="fr-aurora__band fr-aurora__band--2" />
-        <div className="fr-aurora__band fr-aurora__band--3" />
       </div>
 
       <svg className="fr-mountains" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden>
