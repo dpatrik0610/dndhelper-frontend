@@ -1,19 +1,130 @@
-.button {
-  cursor: pointer;
-  padding: 5px;
-  background-color: #26224eff;
-  border: 3px solid;
-  border-image-slice: 1;
-  border-width: 3px;
-  border-image-source: linear-gradient(45deg, #ff6ec4, #7873f5, #42e695);
-  transition: all 0.3s ease;
+/* Sidebar pull-tab. Desktop: left screen edge, in its own lane (appShellStyles.ts pads the page by
+   TOGGLE_LANE), rides the 280px drawer's edge when open. Mobile: right edge, slim, stays put over the
+   full-width drawer as its close control.
+   --drag: live mouse-drag offset set by SidebarToggle.tsx.
+   z-index 199: above the drawer (zIndex 198 in Sidebar.tsx), below Mantine modals (200),
+   popovers (300) and notifications (400).
+   Fallbacks are Midnight's values: /dashboard renders without a theme class. */
+
+.tab {
+  --offset: 0px;
+
+  position: fixed;
+  top: 50%;
+  left: 0;
+  z-index: 199;
+  width: 32px;
+  height: 72px;
+  margin-top: -36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--theme-border-glow, rgba(168, 85, 247, 0.35));
+  border-left: none;
+  border-radius: 0 12px 12px 0;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  color: var(--theme-color-accent-primary, #a855f7);
+  background:
+    linear-gradient(270deg, var(--theme-bg-hover, rgba(168, 85, 247, 0.14)), transparent),
+    var(--theme-bg-panel-opaque, #140f28);
+  box-shadow: 4px 0 14px rgba(0, 0, 0, 0.4);
+  translate: calc(var(--offset) + var(--drag, 0px)) 0;
+  transition:
+    translate 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
-.icon {
-  transition: transform 0.3s ease;
+.tab[data-dragging] {
+  cursor: grabbing;
+  transition: none;
 }
 
-.iconOpen {
-  transform: rotate(180deg);
-  transition: transform 0.3s ease;
+/* Theme-gradient spine along the open edge */
+.tab::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  right: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--theme-gradient-primary, linear-gradient(135deg, #a855f7, #06b6d4));
+}
+
+.chevron {
+  opacity: 0.8;
+  transition: opacity 0.2s ease, rotate 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), translate 0.2s ease;
+}
+
+.tab:hover,
+.tab[data-dragging],
+.tab[aria-expanded="true"] {
+  border-color: var(--theme-color-accent-primary, #a855f7);
+  box-shadow: 4px 0 18px rgba(0, 0, 0, 0.45), var(--theme-glow-shadow-primary, 0 0 15px rgba(168, 85, 247, 0.3));
+}
+
+.tab:hover .chevron,
+.tab[data-dragging] .chevron,
+.tab[aria-expanded="true"] .chevron {
+  opacity: 1;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* Nudge toward the direction the drawer will move */
+.tab:hover .chevron { translate: 2px 0; }
+.tab[aria-expanded="true"]:hover .chevron { translate: -2px 0; }
+
+.tab:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #a855f7);
+  outline-offset: -4px;
+}
+
+/* Open: ride the drawer's right edge (desktop drawer is 280px in Sidebar.tsx); chevron points "close" */
+.tab[aria-expanded="true"] {
+  --offset: 280px;
+}
+
+.tab[aria-expanded="true"] .chevron {
+  rotate: 180deg;
+}
+
+@media (max-width: 768px) {
+  .tab {
+    left: auto;
+    right: 0;
+    width: 22px;
+    height: 64px;
+    margin-top: -32px;
+    border-left: 1px solid var(--theme-border-glow, rgba(168, 85, 247, 0.35));
+    border-right: none;
+    border-radius: 12px 0 0 12px;
+    cursor: pointer;
+    background:
+      linear-gradient(90deg, var(--theme-bg-hover, rgba(168, 85, 247, 0.14)), transparent),
+      var(--theme-bg-panel-opaque, #140f28);
+  }
+
+  .tab::before {
+    right: auto;
+    left: 0;
+  }
+
+  .tab[aria-expanded="true"] {
+    --offset: 0px;
+  }
+
+  /* Right edge: closed points left (open), open points right (close) */
+  .chevron { rotate: 180deg; }
+  .tab[aria-expanded="true"] .chevron { rotate: 0deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab,
+  .chevron {
+    transition: none;
+  }
 }

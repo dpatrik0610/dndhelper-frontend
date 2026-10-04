@@ -2,7 +2,7 @@
   height: 100%;
   backdrop-filter: blur(4px);
   background: var(--sidebar-bg, linear-gradient(160deg, rgba(23, 20, 45, 0.82), rgba(14, 14, 34, 0.78)));
-  border-left: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.05));
+  border-inline: 1px solid var(--sidebar-border, rgba(255, 255, 255, 0.05)); /* left drawer on desktop, right on mobile */
 }
 
 .drawerInner {

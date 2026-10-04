@@ -163,11 +163,6 @@ function AppRoutes() {
     };
   }, [isMobile, showSidebar, opened, handlers]);
 
-  const togglePosition = useMemo(
-    () => (isMobile ? { bottom: 20, right: 16 } : { bottom: 12, right: 12 }),
-    [isMobile]
-  );
-
   const isDashboardRoute = location.pathname === "/dashboard";
 
   const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
@@ -184,10 +179,11 @@ function AppRoutes() {
   return (
     <AppShell 
       header={{ height: 0 }} 
-      styles={getAppShellStyles(isMobile, isDashboardRoute)} 
+      styles={getAppShellStyles(isMobile, isDashboardRoute, showSidebar)} 
       className={isDashboardRoute ? "" : `${activeThemeClass} style-variant-glass`}
     >
-      {showSidebar && <Sidebar opened={opened} onClose={handlers.close} position="right" themeVariant={sidebarTheme} />}
+      {/* Right on mobile (thumb + edge swipe), left on desktop (clear of the scrollbar) */}
+      {showSidebar && <Sidebar opened={opened} onClose={handlers.close} position={isMobile ? "right" : "left"} themeVariant={sidebarTheme} />}
 
       <AppShell.Main>
         <AppBackground />
@@ -231,13 +227,8 @@ function AppRoutes() {
         </div>
       </AppShell.Main>
 
-      {showSidebar && !isMobile && (
-        <SidebarToggle
-          opened={opened}
-          onToggle={handlers.toggle}
-          isMobile={isMobile}
-          affixPosition={togglePosition}
-        />
+      {showSidebar && (
+        <SidebarToggle opened={opened} onOpenedChange={(open) => (open ? handlers.open() : handlers.close())} />
       )}
     </AppShell>
   );

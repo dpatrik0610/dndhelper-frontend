@@ -66,6 +66,7 @@ export default function Sidebar({ opened, onClose, position = "left", themeVaria
         blur: 4,
       }}
       withCloseButton={false}
+      zIndex={198} // just under SidebarToggle (199), which closes it
       classNames={{ content: classes.drawerContent }}
       styles={{
         content: {

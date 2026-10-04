@@ -1,6 +1,10 @@
 import type { AppShellProps } from "@mantine/core";
 
-export function getAppShellStyles(isMobile: boolean, isDashboardRoute = false): AppShellProps["styles"] {
+/** Left-side lane kept free for the sidebar toggle tab on desktop (tab is 32px wide in SidebarToggle.module.css). */
+const TOGGLE_LANE = 44;
+
+export function getAppShellStyles(isMobile: boolean, isDashboardRoute: boolean, showToggle: boolean): AppShellProps["styles"] {
+  const padding = isDashboardRoute ? 0 : (isMobile ? 2 : 10);
   return {
     root: {
       background: "transparent",
@@ -11,7 +15,8 @@ export function getAppShellStyles(isMobile: boolean, isDashboardRoute = false): 
       minHeight: "100vh",
       overflow: "hidden",
       background: "transparent",
-      padding: isDashboardRoute ? 0 : (isMobile ? 2 : 10),
+      padding,
+      paddingLeft: showToggle && !isMobile ? TOGGLE_LANE : padding,
     },
   };
 }

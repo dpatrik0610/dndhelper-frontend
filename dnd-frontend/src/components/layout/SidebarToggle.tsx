@@ -1,22 +1,76 @@
-import { ActionIcon, Affix } from "@mantine/core";
+import { useRef, useState, type PointerEvent } from "react";
+import { useHotkeys } from "@mantine/hooks";
 import { IconChevronRight } from "@tabler/icons-react";
 import styles from "./SidebarToggle.module.css";
 
 interface SidebarToggleProps {
   opened: boolean;
-  onToggle: () => void;
-  isMobile: boolean;
-  affixPosition?: { top?: number; bottom?: number; left?: number; right?: number };
+  onOpenedChange: (opened: boolean) => void;
 }
 
-export function SidebarToggle({ opened, onToggle, isMobile, affixPosition }: SidebarToggleProps) {
-  const position = affixPosition ?? { top: isMobile ? 14 : 12, right: isMobile ? 14 : 12 };
+/** Desktop drawer width (Sidebar.tsx); the tab rides its edge and a drag can pull it at most this far. */
+const DRAWER_WIDTH = 280;
+/** Same distance the mobile swipe needs (App.tsx). */
+const DRAG_COMMIT = 50;
+
+/**
+ * Pull-tab on the screen edge the sidebar drawer slides in from: left on desktop, right on mobile
+ * (see the `position` App.tsx passes to Sidebar). Click, Ctrl/⌘+B, or drag it with the mouse:
+ * outward to open, back to close. Touch drags are left to App.tsx's swipe handler.
+ * Not portaled: its z-index sits between the drawer and Mantine's modals/popovers/notifications.
+ */
+export function SidebarToggle({ opened, onOpenedChange }: SidebarToggleProps) {
+  const [dragX, setDragX] = useState<number | null>(null);
+  const startX = useRef(0);
+  const dragged = useRef(false);
+
+  useHotkeys([["mod+B", () => onOpenedChange(!opened)]]);
+
+  const handlePointerDown = (e: PointerEvent<HTMLButtonElement>) => {
+    if (e.pointerType === "touch" || e.button !== 0) return;
+    startX.current = e.clientX;
+    dragged.current = false;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setDragX(0);
+  };
+
+  const handlePointerMove = (e: PointerEvent<HTMLButtonElement>) => {
+    if (dragX === null) return;
+    const dx = e.clientX - startX.current;
+    if (Math.abs(dx) > 4) dragged.current = true;
+    // Closed: can only be pulled out (right); open: only pushed back (left).
+    setDragX(opened ? Math.max(-DRAWER_WIDTH, Math.min(0, dx)) : Math.max(0, Math.min(DRAWER_WIDTH, dx)));
+  };
+
+  const handlePointerUp = () => {
+    if (dragX === null) return;
+    if (Math.abs(dragX) >= DRAG_COMMIT) onOpenedChange(!opened);
+    setDragX(null);
+  };
+
+  const label = opened ? "Close navigation" : "Open navigation";
 
   return (
-    <Affix position={position} zIndex={1000}>
-      <ActionIcon variant="light" size="lg" onClick={onToggle} className={styles.button}>
-        <IconChevronRight size={24} className={opened ? styles.iconOpen : styles.icon} />
-      </ActionIcon>
-    </Affix>
+    <button
+      type="button"
+      className={styles.tab}
+      data-dragging={dragX !== null || undefined}
+      style={dragX ? { ["--drag" as string]: `${dragX}px` } : undefined}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={() => setDragX(null)}
+      onClick={() => {
+        // A drag ends with a click on the tab (it follows the pointer); the drag already decided.
+        if (dragged.current) dragged.current = false;
+        else onOpenedChange(!opened);
+      }}
+      aria-label={label}
+      aria-expanded={opened}
+      aria-keyshortcuts="Control+B Meta+B"
+      title={`${label} (Ctrl+B, or drag)`}
+    >
+      <IconChevronRight size={18} stroke={2.4} className={styles.chevron} aria-hidden="true" />
+    </button>
   );
 }
