@@ -3,13 +3,67 @@ import type { SidebarThemeVariant } from "@appTypes/ThemeTypes";
 import { getSelf, getAuthMe, getAuthUser, getUserById, getUserSettings, updateUserSettings } from "@services/userService";
 import { useAuthStore } from "@store/auth/authStore";
 
+export const UI_SCALES = [90, 100, 110, 120] as const;
+export const NOTIFICATION_POSITIONS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
+export type NotificationPosition = (typeof NOTIFICATION_POSITIONS)[number];
+
+/** Site preferences. Stored as flat string keys next to sidebarTheme, both in localStorage and the backend. */
+export interface SitePrefs {
+  /** Root font size in percent; scales all rem-based UI. */
+  uiScale: number;
+  animatedBackground: boolean;
+  diceAnimation: boolean;
+  notificationPosition: NotificationPosition;
+  /** Forces reduced motion even when the OS doesn't ask for it. */
+  reduceMotion: boolean;
+  /** Drops glass blur and the animated background for weaker devices. */
+  performanceMode: boolean;
+}
+
+export const defaultPrefs: SitePrefs = {
+  uiScale: 100,
+  animatedBackground: true,
+  diceAnimation: true,
+  notificationPosition: "bottom-right",
+  reduceMotion: false,
+  performanceMode: false,
+};
+
+const PREFS_STORAGE_KEY = "sitePrefs";
+
+const prefsToRecord = (prefs: SitePrefs): Record<string, string> => ({
+  uiScale: String(prefs.uiScale),
+  animatedBackground: String(prefs.animatedBackground),
+  diceAnimation: String(prefs.diceAnimation),
+  notificationPosition: prefs.notificationPosition,
+  reduceMotion: String(prefs.reduceMotion),
+  performanceMode: String(prefs.performanceMode),
+});
+
+/** Parses untrusted strings (localStorage, backend); anything unknown falls back to the default. */
+export const prefsFromRecord = (record: Record<string, string | undefined>): SitePrefs => {
+  const scale = Number(record.uiScale);
+  const position = record.notificationPosition as NotificationPosition;
+  return {
+    uiScale: (UI_SCALES as readonly number[]).includes(scale) ? scale : defaultPrefs.uiScale,
+    animatedBackground: record.animatedBackground !== "false",
+    diceAnimation: record.diceAnimation !== "false",
+    notificationPosition: NOTIFICATION_POSITIONS.includes(position) ? position : defaultPrefs.notificationPosition,
+    reduceMotion: record.reduceMotion === "true",
+    performanceMode: record.performanceMode === "true",
+  };
+};
+
 export interface UiState {
   sidebarTheme: SidebarThemeVariant;
+  prefs: SitePrefs;
   loadingSettings: boolean;
 }
 
 export interface UiActions {
   setSidebarTheme: (theme: SidebarThemeVariant) => void;
+  setPref: <K extends keyof SitePrefs>(key: K, value: SitePrefs[K]) => void;
+  resetPrefs: () => void;
   fetchSettings: () => Promise<void>;
   saveSettings: (settings: Record<string, string>) => Promise<void>;
 }
@@ -20,8 +74,32 @@ const getInitialSidebarTheme = (): SidebarThemeVariant => {
   return stored ?? "sunset";
 };
 
-export const useUiStore = create<UiState & UiActions>((set) => ({
+const getInitialPrefs = (): SitePrefs => {
+  if (typeof window === "undefined") return defaultPrefs;
+  try {
+    return prefsFromRecord(JSON.parse(window.localStorage.getItem(PREFS_STORAGE_KEY) ?? "{}"));
+  } catch {
+    return defaultPrefs;
+  }
+};
+
+/** Sends every key, not just the changed one, so the PUT is safe whether the backend merges or replaces. */
+const syncSettingsToBackend = (state: UiState) => {
+  if (!useAuthStore.getState().token) return;
+  updateUserSettings({ sidebarTheme: state.sidebarTheme, ...prefsToRecord(state.prefs) }).catch((err) => {
+    console.warn("Failed to sync settings to backend", err);
+  });
+};
+
+const storePrefs = (prefs: SitePrefs) => {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(PREFS_STORAGE_KEY, JSON.stringify(prefsToRecord(prefs)));
+  }
+};
+
+export const useUiStore = create<UiState & UiActions>((set, get) => ({
   sidebarTheme: getInitialSidebarTheme(),
+  prefs: getInitialPrefs(),
   loadingSettings: false,
 
   setSidebarTheme: (theme) => {
@@ -29,16 +107,20 @@ export const useUiStore = create<UiState & UiActions>((set) => ({
       window.localStorage.setItem("sidebarTheme", theme);
     }
     set({ sidebarTheme: theme });
+    syncSettingsToBackend(get());
+  },
 
-    // Sync to backend if authenticated
-    const token = useAuthStore.getState().token;
-    if (token) {
-      updateUserSettings({ 
-        sidebarTheme: theme
-      }).catch((err) => {
-        console.warn("Failed to sync sidebarTheme to backend", err);
-      });
-    }
+  setPref: (key, value) => {
+    const prefs = { ...get().prefs, [key]: value };
+    storePrefs(prefs);
+    set({ prefs });
+    syncSettingsToBackend(get());
+  },
+
+  resetPrefs: () => {
+    storePrefs(defaultPrefs);
+    set({ prefs: defaultPrefs });
+    syncSettingsToBackend(get());
   },
 
   fetchSettings: async () => {
@@ -108,7 +190,7 @@ export const useUiStore = create<UiState & UiActions>((set) => ({
 
       // 6. Apply settings if found
       if (settings) {
-        let updatedState: Partial<UiState> = {};
+        const updatedState: Partial<UiState> = {};
         
         // Safely extract theme with either camelCase or PascalCase keys
         const sidebarThemeVal = settings.sidebarTheme || settings.SidebarTheme;
@@ -120,6 +202,10 @@ export const useUiStore = create<UiState & UiActions>((set) => ({
             window.localStorage.setItem("sidebarTheme", theme);
           }
         }
+
+        // Backend keys win; keys it doesn't have yet keep the local value.
+        updatedState.prefs = prefsFromRecord({ ...prefsToRecord(get().prefs), ...settings });
+        storePrefs(updatedState.prefs);
 
         set(updatedState);
       }
@@ -137,7 +223,7 @@ export const useUiStore = create<UiState & UiActions>((set) => ({
     try {
       const updated = await updateUserSettings(settings);
       if (updated) {
-        let updatedState: Partial<UiState> = {};
+        const updatedState: Partial<UiState> = {};
         
         const sidebarThemeVal = updated.sidebarTheme || updated.SidebarTheme;
 

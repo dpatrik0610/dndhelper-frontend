@@ -1,5 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
+import { MotionConfig } from "framer-motion";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useMemo, lazy, Suspense } from "react";
 import Sidebar from "@features/navigation/Sidebar/Sidebar";
@@ -86,6 +88,16 @@ function AppRoutes() {
   const activeToken = token ?? localToken ?? null;
 
   const fetchSettings = useUiStore((s) => s.fetchSettings);
+  const { uiScale, reduceMotion, performanceMode } = useUiStore((s) => s.prefs);
+
+  // Site prefs on <html>: rem-based Mantine sizes follow the root font size; the data flags drive
+  // the global overrides in styles/sitePrefs.css (and reach Mantine portals too).
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.fontSize = `${uiScale}%`;
+    root.toggleAttribute("data-reduce-motion", reduceMotion);
+    root.toggleAttribute("data-performance", performanceMode);
+  }, [uiScale, reduceMotion, performanceMode]);
 
   useTokenExpiryGuard(token, localToken);
   useBootstrapCharacters(activeToken, characters.length);
@@ -212,7 +224,7 @@ function AppRoutes() {
                 <Route path="/encounter-room" element={<EncounterRoomPage />} />
                 <Route path="/encounter-room/:roomId" element={<EncounterRoomPage />} />
                 <Route path="/roll-history" element={<RollHistoryPage />} />
-                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/settings/:tab?" element={<SettingsPage />} />
                 {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
               </Route>
 
@@ -233,9 +245,14 @@ function AppRoutes() {
 }
 
 export default function App() {
+  const notificationPosition = useUiStore((s) => s.prefs.notificationPosition);
+  const reduceMotion = useUiStore((s) => s.prefs.reduceMotion);
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <MotionConfig reducedMotion={reduceMotion ? "always" : "user"}>
+        <Notifications position={notificationPosition} />
+        <AppRoutes />
+      </MotionConfig>
     </BrowserRouter>
   );
 }

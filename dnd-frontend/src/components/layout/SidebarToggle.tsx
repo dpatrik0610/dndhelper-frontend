@@ -8,8 +8,11 @@ interface SidebarToggleProps {
   onOpenedChange: (opened: boolean) => void;
 }
 
-/** Drawer width (Sidebar.tsx); the tab rides its edge and a drag can pull it at most this far. */
+/** Drawer width (Sidebar.tsx) at the default 16px root font; the tab rides its edge and a drag can pull it at most this far. */
 const DRAWER_WIDTH = 280;
+
+/** Mantine sizes the drawer in rem, so its real width follows the root font size (text size setting). */
+const drawerWidthPx = () => (DRAWER_WIDTH * parseFloat(getComputedStyle(document.documentElement).fontSize)) / 16;
 /** Same distance the mobile swipe needs (App.tsx). */
 const DRAG_COMMIT = 50;
 
@@ -22,6 +25,7 @@ export function SidebarToggle({ opened, onOpenedChange }: SidebarToggleProps) {
   const [dragX, setDragX] = useState<number | null>(null);
   const startX = useRef(0);
   const dragged = useRef(false);
+  const maxDrag = useRef(DRAWER_WIDTH);
 
   useHotkeys([["mod+B", () => onOpenedChange(!opened)]]);
 
@@ -29,6 +33,7 @@ export function SidebarToggle({ opened, onOpenedChange }: SidebarToggleProps) {
     if (e.pointerType === "touch" || e.button !== 0) return;
     startX.current = e.clientX;
     dragged.current = false;
+    maxDrag.current = drawerWidthPx();
     e.currentTarget.setPointerCapture(e.pointerId);
     setDragX(0);
   };
@@ -38,7 +43,7 @@ export function SidebarToggle({ opened, onOpenedChange }: SidebarToggleProps) {
     const dx = e.clientX - startX.current;
     if (Math.abs(dx) > 4) dragged.current = true;
     // Closed: can only be pulled out (right); open: only pushed back (left).
-    setDragX(opened ? Math.max(-DRAWER_WIDTH, Math.min(0, dx)) : Math.max(0, Math.min(DRAWER_WIDTH, dx)));
+    setDragX(opened ? Math.max(-maxDrag.current, Math.min(0, dx)) : Math.max(0, Math.min(maxDrag.current, dx)));
   };
 
   const handlePointerUp = () => {

@@ -126,3 +126,6 @@
 @media (prefers-reduced-motion: reduce) {
   .die, .die--rolling, .die--landed, .roll-total--pulse, .roll-banner, .die-btn__count { animation: none !important; transition: none !important; }
 }
+
+/* Dice animation turned off in settings */
+.dice-still :is(.die, .die--rolling, .die--landed, .roll-total--pulse, .roll-banner) { animation: none !important; transition: none !important; }

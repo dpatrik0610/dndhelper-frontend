@@ -1,6 +1,7 @@
 import { Suspense, useMemo } from "react";
 import { Box } from "@mantine/core";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { useReduceMotion } from "@hooks/useReduceMotion";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 import { themeBackdrops } from "./backdrops";
@@ -17,17 +18,20 @@ import { themeBackdrops } from "./backdrops";
 export function AppBackground() {
   const isMobile = useIsMobile();
   const sidebarTheme = useUiStore((s) => s.sidebarTheme);
+  const reduceMotion = useReduceMotion();
+  const { animatedBackground, performanceMode } = useUiStore((s) => s.prefs);
+  const animated = animatedBackground && !performanceMode && !reduceMotion && !isMobile;
   const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
   const Backdrop = themeBackdrops[sidebarTheme];
   const scene = Backdrop && (
     <Suspense fallback={null}>
-      <Backdrop isStatic={isMobile} />
+      <Backdrop isStatic={!animated} />
     </Suspense>
   );
 
-  // Optimized particle generation for desktop devices only
+  // Optimized particle generation for animated desktop backgrounds only
   const particles = useMemo(() => {
-    if (isMobile) return [];
+    if (!animated) return [];
     return Array.from({ length: 14 }).map((_, i) => ({
       id: i,
       left: `${Math.random() * 100}%`,
@@ -35,7 +39,7 @@ export function AppBackground() {
       duration: `${15 + Math.random() * 15}s`, // Slower, more calming drift speeds
       size: `${2 + Math.random() * 2.5}px`,
     }));
-  }, [isMobile]);
+  }, [animated]);
 
   // High-performance static themed backdrop for mobile to completely bypass layout calculation, blurs, and animation threads
   if (isMobile) {

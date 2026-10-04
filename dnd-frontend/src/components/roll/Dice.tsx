@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Group, Stack, Text } from "@mantine/core";
-import { useReducedMotion } from "@mantine/hooks";
+import { useReduceMotion } from "@hooks/useReduceMotion";
+import { useUiStore } from "@store/ui/uiStore";
 import type { RollResult } from "@appTypes/Roll";
 import { formatRollExpression } from "@utils/rollFormat";
 import "./dice.css";
@@ -39,7 +40,8 @@ interface DiceResultProps {
 }
 
 export function DiceResult({ result, rolling = false, sides, count }: DiceResultProps) {
-  const reduceMotion = useReducedMotion();
+  const diceAnimation = useUiStore((s) => s.prefs.diceAnimation);
+  const reduceMotion = useReduceMotion() || !diceAnimation;
   const [faces, setFaces] = useState<number[]>([]);
   const [shownTotal, setShownTotal] = useState(0);
   const [settled, setSettled] = useState(false);
@@ -95,7 +97,7 @@ export function DiceResult({ result, rolling = false, sides, count }: DiceResult
   const dieSize = visible <= 3 ? 64 : visible <= 8 ? 48 : 36;
 
   return (
-    <Stack align="center" gap="sm" py="xs">
+    <Stack align="center" gap="sm" py="xs" className={reduceMotion ? "dice-still" : undefined}>
       <Group justify="center" gap="sm" wrap="wrap">
         {faces.map((face, i) => (
           <Die

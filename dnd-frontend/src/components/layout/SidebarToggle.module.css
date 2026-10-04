@@ -82,9 +82,10 @@
   outline-offset: -4px;
 }
 
-/* Open: ride the drawer's right edge (280px in Sidebar.tsx); chevron points "close" */
+/* Open: ride the drawer's right edge; chevron points "close". Mantine turns the drawer's size="280px" into
+   17.5rem, so this must be rem too or the tab drifts off the edge when the text size setting changes. */
 .tab[aria-expanded="true"] {
-  --offset: 280px;
+  --offset: 17.5rem;
 }
 
 .tab[aria-expanded="true"] .chevron {

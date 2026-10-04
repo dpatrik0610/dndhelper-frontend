@@ -6,7 +6,6 @@ import {
   Paper,
   Stack,
   Title,
-  Divider,
   Select,
 } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +30,6 @@ import { CollectionsSection } from "./sections/CollectionsSection";
 import { AdminSection } from "./sections/AdminSection";
 import { AbilitiesSection } from "./sections/AbilitiesSection";
 import { LoreSection } from "./sections/LoreSection";
-import { DeleteCharacterSection } from "./sections/DeleteCharacterSection";
 import { SpellSlotsSection } from "./sections/SpellSlotsSection";
 import { SpellsSection } from "./sections/SpellsSection";
 import { FeaturesSection } from "./sections/FeaturesSection";
@@ -78,12 +76,12 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
       { id: "features" as TabType, label: "Features", icon: <IconBookmark size={16} /> },
       { id: "collections" as TabType, label: "Proficiencies", icon: <IconBook2 size={16} /> },
     ];
-    // Show settings if admin or editing (which contains delete option)
-    if (isAdmin || editMode) {
+    // Admin-only; deleting a character lives in Settings → Characters
+    if (isAdmin) {
       items.push({ id: "settings" as TabType, label: "Settings", icon: <IconLock size={16} /> });
     }
     return items;
-  }, [isAdmin, editMode]);
+  }, [isAdmin]);
 
   return (
     <Box
@@ -300,17 +298,7 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
                 <CollectionsSection noBox />
               )}
 
-              {activeTab === "settings" && (
-                <Stack gap="xl">
-                  {isAdmin && (
-                    <>
-                      <AdminSection noBox />
-                      <Divider color="rgba(255, 255, 255, 0.06)" />
-                    </>
-                  )}
-                  {editMode && <DeleteCharacterSection noBox />}
-                </Stack>
-              )}
+              {activeTab === "settings" && <AdminSection noBox />}
             </Box>
           </Group>
         </form>

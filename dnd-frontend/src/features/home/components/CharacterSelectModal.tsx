@@ -12,7 +12,7 @@ import {
   Box,
   Select,
 } from "@mantine/core";
-import { IconPlus, IconUserCircle } from "@tabler/icons-react";
+import { IconUserCircle, IconUserCog } from "@tabler/icons-react";
 import { useState, useMemo, useEffect } from "react";
 import { useIsAdmin } from "@store/auth/authSelectors";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
@@ -300,10 +300,10 @@ export function CharacterSelectModal({
         style={{ borderTop: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.05))" }}
       >
         <Button
-          leftSection={<IconPlus size={16} />}
+          leftSection={<IconUserCog size={16} />}
           onClick={() => {
             onClose();
-            navigate("/newCharacter");
+            navigate("/settings/characters");
           }}
           size="md"
           radius="md"
@@ -326,7 +326,7 @@ export function CharacterSelectModal({
             e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary)";
           }}
         >
-          New Character
+          Manage Characters
         </Button>
       </Group>
     </Modal>

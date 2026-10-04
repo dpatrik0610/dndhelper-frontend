@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, Group, SegmentedControl, SimpleGrid, Stack, Text, TextInput, Textarea } from "@mantine/core";
-import { useReducedMotion } from "@mantine/hooks";
+import { useReduceMotion } from "@hooks/useReduceMotion";
+import { useUiStore } from "@store/ui/uiStore";
 import { IconDice5, IconX } from "@tabler/icons-react";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { showNotification } from "@components/Notification/Notification";
@@ -43,7 +44,8 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function RollModal({ opened, onClose }: RollModalProps) {
   const character = useCurrentCharacter();
-  const reduceMotion = useReducedMotion();
+  const diceAnimation = useUiStore((s) => s.prefs.diceAnimation);
+  const reduceMotion = useReduceMotion() || !diceAnimation;
 
   const [variant, setVariant] = useState<RollModalVariant>("public");
   const [sides, setSides] = useState(20);

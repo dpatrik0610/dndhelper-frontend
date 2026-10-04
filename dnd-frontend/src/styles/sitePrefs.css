@@ -1,0 +1,21 @@
+/* ---------- Site preference overrides (flags set on <html> by App.tsx) ---------- */
+
+/* Reduce motion: settle every CSS animation/transition at its end state. Loaders keep spinning so
+   loading is still visible. JS animations read the same pref via useReduceMotion / MotionConfig. */
+:root[data-reduce-motion] :not(.rune-loader, .rune-loader *, .mantine-Loader-root, .mantine-Loader-root *),
+:root[data-reduce-motion] :not(.rune-loader, .rune-loader *, .mantine-Loader-root, .mantine-Loader-root *)::before,
+:root[data-reduce-motion] :not(.rune-loader, .rune-loader *, .mantine-Loader-root, .mantine-Loader-root *)::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Performance mode: backdrop blur is the most expensive effect on the site. The animated
+   background is switched off in AppBackground. */
+:root[data-performance] *,
+:root[data-performance] *::before,
+:root[data-performance] *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
