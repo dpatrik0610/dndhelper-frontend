@@ -13,18 +13,10 @@ import {
   Avatar,
   Badge,
 } from "@mantine/core";
-import {
-  IconCheck,
-  IconPalette,
-  IconUserCircle,
-  IconDeviceFloppy,
-} from "@tabler/icons-react";
-import { useUiStore } from "@store/ui/uiStore";
+import { IconUserCircle, IconDeviceFloppy } from "@tabler/icons-react";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { showNotification } from "@components/Notification/Notification";
-import { CardGridSkeleton, ListSkeleton } from "@components/common/Skeletons";
 import { SectionColor } from "@appTypes/SectionColor";
-import { type SidebarThemeVariant, themeOptions } from "@appTypes/ThemeTypes";
 import {
   useCharacterList,
   useCurrentCharacter,
@@ -33,18 +25,12 @@ import {
 import { updateCharacter as updateCharacterApi } from "@services/characterService";
 import type { Character } from "@appTypes/Character/Character";
 
-const THEMES = themeOptions;
-
-type SettingsSection = "appearance" | "tokens";
-
 export default function SettingsPage() {
   const isMobile = useIsMobile();
-  const { sidebarTheme, setSidebarTheme, loadingSettings } = useUiStore();
   const characters = useCharacterList();
   const character = useCurrentCharacter();
   const { setCharacters, setCharacter } = useCharacterCoreActions();
 
-  const [activeTab, setActiveTab] = useState<SettingsSection>("appearance");
   const [draftUrls, setDraftUrls] = useState<Record<string, string>>({});
   const [savingCharId, setSavingCharId] = useState<string | null>(null);
 
@@ -58,23 +44,6 @@ export default function SettingsPage() {
     });
     setDraftUrls((prev) => ({ ...initial, ...prev }));
   }, [characters]);
-
-  const handleSelectTheme = (themeKey: SidebarThemeVariant) => {
-    try {
-      setSidebarTheme(themeKey);
-      showNotification({
-        title: "Theme Updated",
-        message: `Successfully aligned with the forces of ${THEMES.find((t) => t.key === themeKey)?.name}.`,
-        color: SectionColor.Green,
-      });
-    } catch (err) {
-      showNotification({
-        title: "Error updating theme",
-        message: String(err),
-        color: SectionColor.Red,
-      });
-    }
-  };
 
   const handleUrlChange = (charId: string, value: string) => {
     setDraftUrls((prev) => ({ ...prev, [charId]: value }));
@@ -118,26 +87,6 @@ export default function SettingsPage() {
     }
   };
 
-  if (loadingSettings) {
-    return (
-      <Box m="0 auto" maw={1100} p="md">
-        <Grid gutter="lg">
-          <Grid.Col span={{ base: 12, md: 3 }}>
-            <ListSkeleton rows={2} height={44} />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 9 }}>
-            <CardGridSkeleton count={6} cols={{ base: 2, sm: 3 }} height={110} />
-          </Grid.Col>
-        </Grid>
-      </Box>
-    );
-  }
-
-  const SECTIONS = [
-    { id: "appearance", label: "Visual Themes", icon: <IconPalette size={18} /> },
-    { id: "tokens", label: "Character Tokens", icon: <IconUserCircle size={18} /> },
-  ] as const;
-
   return (
     <Box
       m="0 auto"
@@ -163,381 +112,173 @@ export default function SettingsPage() {
             Settings
           </Title>
           <Text c="dimmed" size="sm" mt="xs">
-            Manage your visual themes, character token assets, and interface preferences.
+            Manage your character token assets. The theme lives in the sidebar.
           </Text>
         </Box>
 
-        {/* Layout Grid */}
-        <Grid gutter="xl">
-          {/* Sidebar (Desktop) / Horizontal navigation (Mobile) */}
-          <Grid.Col span={{ base: 12, md: 3 }}>
-            {isMobile ? (
-              <Group
-                wrap="nowrap"
+        <Paper
+          p={isMobile ? "md" : "xl"}
+          style={{
+            background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
+            border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+            borderRadius: isMobile ? 12 : 20,
+            backdropFilter: "blur(24px) saturate(130%)",
+            WebkitBackdropFilter: "blur(24px) saturate(130%)",
+            boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
+          }}
+        >
+          <Stack gap="md">
+            <Group gap="xs" align="center">
+              <IconUserCircle size={20} color="var(--theme-color-accent-primary, #f59e0b)" />
+              <Text
+                fw={600}
+                size="md"
+                tt="uppercase"
                 style={{
-                  overflowX: "auto",
-                  paddingBottom: "8px",
-                  borderBottom: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-                  scrollbarWidth: "none",
-                  msOverflowStyle: "none",
+                  letterSpacing: "2px",
+                  color: "var(--theme-color-text-primary, #fff)",
                 }}
-                gap="sm"
               >
-                {SECTIONS.map((sec) => {
-                  const isActive = activeTab === sec.id;
-                  return (
-                    <Button
-                      key={sec.id}
-                      onClick={() => setActiveTab(sec.id)}
-                      variant="subtle"
-                      size="sm"
-                      leftSection={sec.icon}
-                      style={{
-                        flexShrink: 0,
-                        background: isActive
-                          ? "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.08))"
-                          : "transparent",
-                        border: `1px solid ${isActive ? "var(--theme-border-glow, rgba(255, 255, 255, 0.15))" : "transparent"}`,
-                        color: isActive
-                          ? "#121214"
-                          : "var(--theme-color-text-secondary, rgba(255,255,255,0.7))",
-                        borderRadius: "8px",
-                        fontWeight: isActive ? 700 : 500,
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      {sec.label}
-                    </Button>
-                  );
-                })}
-              </Group>
+                Character Tokens
+              </Text>
+            </Group>
+            <Text size="xs" c="dimmed">
+              Assign custom artwork URLs to represent your heroes on character lists, headers, and encounter maps.
+            </Text>
+
+            {characters.length === 0 ? (
+              <Center py="xl">
+                <Paper
+                  p="lg"
+                  style={{
+                    background: "var(--theme-bg-card, rgba(255,255,255,0.015))",
+                    border: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.06))",
+                    borderRadius: "12px",
+                  }}
+                >
+                  <Text size="sm" c="dimmed" fs="italic">
+                    No characters found. Create an adventurer first to configure their token artwork.
+                  </Text>
+                </Paper>
+              </Center>
             ) : (
-              <Stack gap="sm">
-                {SECTIONS.map((sec) => {
-                  const isActive = activeTab === sec.id;
+              <Stack gap="sm" mt="xs">
+                {characters.map((char) => {
+                  if (!char.id) return null;
+                  const isSaving = savingCharId === char.id;
+                  const imageUrl = draftUrls[char.id] ?? "";
+                  const isCurrentUser = character?.id === char.id;
+
                   return (
-                    <Button
-                      key={sec.id}
-                      onClick={() => setActiveTab(sec.id)}
-                      variant="subtle"
-                      justify="flex-start"
-                      size="md"
-                      leftSection={sec.icon}
-                      fullWidth
+                    <Paper
+                      key={char.id}
+                      p="md"
                       style={{
-                        height: "48px",
-                        background: isActive
-                          ? "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.06))"
-                          : "transparent",
-                        border: "1px solid",
-                        borderColor: isActive
-                          ? "var(--theme-border-glow, rgba(255, 255, 255, 0.15))"
-                          : "transparent",
-                        color: isActive
-                          ? "#121214"
-                          : "var(--theme-color-text-secondary, rgba(255,255,255,0.7))",
-                        borderRadius: "10px",
-                        fontWeight: isActive ? 700 : 500,
-                        boxShadow: isActive ? "var(--theme-glow-shadow-primary)" : "none",
-                        transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                        background: "var(--theme-bg-card, rgba(255, 255, 255, 0.015))",
+                        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+                        borderRadius: 12,
+                        transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
                       }}
                       onMouseEnter={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.background = "var(--theme-bg-card, rgba(255,255,255,0.015))";
-                          e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255,255,255,0.06))";
-                        }
+                        e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.12))";
+                        e.currentTarget.style.transform = "translateY(-1px)";
                       }}
                       onMouseLeave={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.background = "transparent";
-                          e.currentTarget.style.borderColor = "transparent";
-                        }
+                        e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
+                        e.currentTarget.style.transform = "none";
                       }}
                     >
-                      {sec.label}
-                    </Button>
+                      <Grid gutter="md" align="center">
+                        {/* Character Avatar & Info */}
+                        <Grid.Col span={{ base: 12, sm: 5 }}>
+                          <Group gap="md" wrap="nowrap">
+                            <Avatar
+                              src={imageUrl || undefined}
+                              size={72}
+                              radius="md"
+                              style={{
+                                border: `2px solid ${isCurrentUser ? "var(--theme-color-accent-primary, #f59e0b)" : "var(--theme-border-subtle, rgba(255,255,255,0.15))"}`,
+                                background: imageUrl ? "transparent" : "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
+                                boxShadow: isCurrentUser ? "var(--theme-glow-shadow-primary)" : "none",
+                                fontWeight: 800,
+                                color: "#fff",
+                              }}
+                            >
+                              {char.name.charAt(0).toUpperCase()}
+                            </Avatar>
+                            <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+                              <Group gap="xs" wrap="nowrap">
+                                <Text
+                                  fw={700}
+                                  size="sm"
+                                  truncate
+                                  style={{ color: "var(--theme-color-text-primary, #fff)" }}
+                                >
+                                  {char.name}
+                                </Text>
+                                {isCurrentUser && (
+                                  <Badge size="xs" color="violet" variant="light">
+                                    ACTIVE
+                                  </Badge>
+                                )}
+                              </Group>
+                              <Text size="xs" c="dimmed" truncate>
+                                Lvl {char.level} • {char.race} • {char.characterClass}
+                              </Text>
+                            </Stack>
+                          </Group>
+                        </Grid.Col>
+
+                        {/* Input URL field & Save Button */}
+                        <Grid.Col span={{ base: 12, sm: 7 }}>
+                          <Group gap="xs" wrap="nowrap" align="center">
+                            <TextInput
+                              placeholder="Image or Token URL (https://...)"
+                              value={imageUrl}
+                              onChange={(e) => handleUrlChange(char.id!, e.currentTarget.value)}
+                              style={{ flex: 1 }}
+                              styles={{
+                                input: {
+                                  background: "rgba(0, 0, 0, 0.25)",
+                                  border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+                                  color: "var(--theme-color-text-primary, #fff)",
+                                  borderRadius: "8px",
+                                  height: "36px",
+                                  fontSize: "13px",
+                                  "&:focus": {
+                                    borderColor: "var(--theme-border-glow, rgba(255, 255, 255, 0.2))",
+                                  },
+                                },
+                              }}
+                            />
+                            <Button
+                              size="xs"
+                              onClick={() => handleSaveImageUrl(char)}
+                              loading={isSaving}
+                              leftSection={<IconDeviceFloppy size={14} />}
+                              style={{
+                                height: "36px",
+                                borderRadius: "8px",
+                                background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
+                                border: "none",
+                                color: "#fff",
+                                boxShadow: "var(--theme-glow-shadow-primary)",
+                                fontWeight: 600,
+                                flexShrink: 0,
+                              }}
+                            >
+                              Save
+                            </Button>
+                          </Group>
+                        </Grid.Col>
+                      </Grid>
+                    </Paper>
                   );
                 })}
               </Stack>
             )}
-          </Grid.Col>
-
-          {/* Content Pane */}
-          <Grid.Col span={{ base: 12, md: 9 }}>
-            <Paper
-              p={isMobile ? "md" : "xl"}
-              style={{
-                background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
-                border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-                borderRadius: isMobile ? 12 : 20,
-                backdropFilter: "blur(24px) saturate(130%)",
-                WebkitBackdropFilter: "blur(24px) saturate(130%)",
-                boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
-              }}
-            >
-              {activeTab === "appearance" ? (
-                <Stack gap="md">
-                  <Group gap="xs" align="center">
-                    <IconPalette size={20} color="var(--theme-color-accent-primary, #f59e0b)" />
-                    <Text
-                      fw={600}
-                      size="md"
-                      tt="uppercase"
-                      style={{
-                        letterSpacing: "2px",
-                        color: "var(--theme-color-text-primary, #fff)",
-                      }}
-                    >
-                      Visual Themes
-                    </Text>
-                  </Group>
-                  <Text size="xs" c="dimmed">
-                    Align your character sheet with the cosmic energies of your campaign theme.
-                  </Text>
-
-                  <Grid gutter="md" mt="xs">
-                    {THEMES.map((theme) => {
-                      const isActive = sidebarTheme === theme.key;
-                      return (
-                        <Grid.Col span={{ base: 12, sm: 6 }} key={theme.key}>
-                          <Paper
-                            p="md"
-                            onClick={() => handleSelectTheme(theme.key)}
-                            style={{
-                              cursor: "pointer",
-                              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.015))",
-                              border: `1px solid ${isActive ? "var(--theme-border-glow, rgba(255, 255, 255, 0.15))" : "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))"}`,
-                              borderRadius: 12,
-                              boxShadow: isActive ? "var(--theme-glow-shadow-primary)" : "none",
-                              transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                              transform: isActive ? "scale(1.01)" : "none",
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
-                              e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary)";
-                              e.currentTarget.style.transform = "translateY(-2px)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = isActive
-                                ? "var(--theme-border-glow, rgba(255, 255, 255, 0.15))"
-                                : "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
-                              e.currentTarget.style.boxShadow = isActive ? "var(--theme-glow-shadow-primary)" : "none";
-                              e.currentTarget.style.transform = isActive ? "scale(1.01)" : "none";
-                            }}
-                          >
-                            <Group justify="space-between" align="center" mb="xs">
-                              <Group gap="xs">
-                                <Text size="lg">{theme.icon}</Text>
-                                <Text fw={600} size="sm" style={{ color: "var(--theme-color-text-primary, #fff)" }}>
-                                  {theme.name}
-                                </Text>
-                              </Group>
-                              {isActive && (
-                                <Paper
-                                  px="xs"
-                                  py={2}
-                                  style={{
-                                    background: "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.08))",
-                                    border: "1px solid var(--theme-border-glow, rgba(255, 255, 255, 0.15))",
-                                    borderRadius: 20,
-                                  }}
-                                >
-                                  <Group gap={4} align="center">
-                                    <IconCheck size={12} color="var(--theme-color-text-on-accent , #f59e0b)" />
-                                    <Text fw={600} size="xs" c="var(--theme-color-text-on-accent , #f59e0b)">
-                                      ACTIVE
-                                    </Text>
-                                  </Group>
-                                </Paper>
-                              )}
-                            </Group>
-
-                            {/* Accent Previews */}
-                            <Group gap="xs">
-                              <Box
-                                style={{
-                                  width: 12,
-                                  height: 12,
-                                  borderRadius: "50%",
-                                  background: theme.accent,
-                                  boxShadow: `0 0 8px ${theme.accent}`,
-                                }}
-                              />
-                              <Box
-                                style={{
-                                  width: 12,
-                                  height: 12,
-                                  borderRadius: "50%",
-                                  background: theme.accentSecondary,
-                                  boxShadow: `0 0 8px ${theme.accentSecondary}`,
-                                }}
-                              />
-                              <Text size="10px" c="dimmed" tt="uppercase" lts={1}>
-                                Palette Spectrum
-                              </Text>
-                            </Group>
-                          </Paper>
-                        </Grid.Col>
-                      );
-                    })}
-                  </Grid>
-                </Stack>
-              ) : (
-                <Stack gap="md">
-                  <Group gap="xs" align="center">
-                    <IconUserCircle size={20} color="var(--theme-color-accent-primary, #f59e0b)" />
-                    <Text
-                      fw={600}
-                      size="md"
-                      tt="uppercase"
-                      style={{
-                        letterSpacing: "2px",
-                        color: "var(--theme-color-text-primary, #fff)",
-                      }}
-                    >
-                      Character Tokens
-                    </Text>
-                  </Group>
-                  <Text size="xs" c="dimmed">
-                    Assign custom artwork URLs to represent your heroes on character lists, headers, and encounter maps.
-                  </Text>
-
-                  {characters.length === 0 ? (
-                    <Center py="xl">
-                      <Paper
-                        p="lg"
-                        style={{
-                          background: "var(--theme-bg-card, rgba(255,255,255,0.015))",
-                          border: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.06))",
-                          borderRadius: "12px",
-                        }}
-                      >
-                        <Text size="sm" c="dimmed" fs="italic">
-                          No characters found. Create an adventurer first to configure their token artwork.
-                        </Text>
-                      </Paper>
-                    </Center>
-                  ) : (
-                    <Stack gap="sm" mt="xs">
-                      {characters.map((char) => {
-                        if (!char.id) return null;
-                        const isSaving = savingCharId === char.id;
-                        const imageUrl = draftUrls[char.id] ?? "";
-                        const isCurrentUser = character?.id === char.id;
-
-                        return (
-                          <Paper
-                            key={char.id}
-                            p="md"
-                            style={{
-                              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.015))",
-                              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
-                              borderRadius: 12,
-                              transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.12))";
-                              e.currentTarget.style.transform = "translateY(-1px)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
-                              e.currentTarget.style.transform = "none";
-                            }}
-                          >
-                            <Grid gutter="md" align="center">
-                              {/* Character Avatar & Info */}
-                              <Grid.Col span={{ base: 12, sm: 5 }}>
-                                <Group gap="md" wrap="nowrap">
-                                  <Avatar
-                                    src={imageUrl || undefined}
-                                    size={72}
-                                    radius="md"
-                                    style={{
-                                      border: `2px solid ${isCurrentUser ? "var(--theme-color-accent-primary, #f59e0b)" : "var(--theme-border-subtle, rgba(255,255,255,0.15))"}`,
-                                      background: imageUrl ? "transparent" : "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
-                                      boxShadow: isCurrentUser ? "var(--theme-glow-shadow-primary)" : "none",
-                                      fontWeight: 800,
-                                      color: "#fff",
-                                    }}
-                                  >
-                                    {char.name.charAt(0).toUpperCase()}
-                                  </Avatar>
-                                  <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
-                                    <Group gap="xs" wrap="nowrap">
-                                      <Text
-                                        fw={700}
-                                        size="sm"
-                                        truncate
-                                        style={{ color: "var(--theme-color-text-primary, #fff)" }}
-                                      >
-                                        {char.name}
-                                      </Text>
-                                      {isCurrentUser && (
-                                        <Badge size="xs" color="violet" variant="light">
-                                          ACTIVE
-                                        </Badge>
-                                      )}
-                                    </Group>
-                                    <Text size="xs" c="dimmed" truncate>
-                                      Lvl {char.level} • {char.race} • {char.characterClass}
-                                    </Text>
-                                  </Stack>
-                                </Group>
-                              </Grid.Col>
-
-                              {/* Input URL field & Save Button */}
-                              <Grid.Col span={{ base: 12, sm: 7 }}>
-                                <Group gap="xs" wrap="nowrap" align="center">
-                                  <TextInput
-                                    placeholder="Image or Token URL (https://...)"
-                                    value={imageUrl}
-                                    onChange={(e) => handleUrlChange(char.id!, e.currentTarget.value)}
-                                    style={{ flex: 1 }}
-                                    styles={{
-                                      input: {
-                                        background: "rgba(0, 0, 0, 0.25)",
-                                        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-                                        color: "var(--theme-color-text-primary, #fff)",
-                                        borderRadius: "8px",
-                                        height: "36px",
-                                        fontSize: "13px",
-                                        "&:focus": {
-                                          borderColor: "var(--theme-border-glow, rgba(255, 255, 255, 0.2))",
-                                        },
-                                      },
-                                    }}
-                                  />
-                                  <Button
-                                    size="xs"
-                                    onClick={() => handleSaveImageUrl(char)}
-                                    loading={isSaving}
-                                    leftSection={<IconDeviceFloppy size={14} />}
-                                    style={{
-                                      height: "36px",
-                                      borderRadius: "8px",
-                                      background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
-                                      border: "none",
-                                      color: "#fff",
-                                      boxShadow: "var(--theme-glow-shadow-primary)",
-                                      fontWeight: 600,
-                                      flexShrink: 0,
-                                    }}
-                                  >
-                                    Save
-                                  </Button>
-                                </Group>
-                              </Grid.Col>
-                            </Grid>
-                          </Paper>
-                        );
-                      })}
-                    </Stack>
-                  )}
-                </Stack>
-              )}
-            </Paper>
-          </Grid.Col>
-        </Grid>
+          </Stack>
+        </Paper>
       </Stack>
     </Box>
   );
