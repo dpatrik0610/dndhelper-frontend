@@ -39,7 +39,15 @@ export function LoreSection({ noBox = false }: { noBox?: boolean }) {
       <Textarea autosize label="Bonds" classNames={glass} value={characterForm.bonds} onChange={(e) => setCharacterForm({ bonds: e.currentTarget.value })} />
       <Textarea autosize label="Flaws" classNames={glass} value={characterForm.flaws} onChange={(e) => setCharacterForm({ flaws: e.currentTarget.value })} />
 
-      <Textarea autosize label="Backstory" classNames={glass} value={characterForm.backstory.join("\n")} onChange={(e) => setCharacterForm({ backstory: e.currentTarget.value.split("\n") })} />
+      <Textarea
+        autosize
+        minRows={4}
+        label="Backstory"
+        description="Supports Markdown: **bold**, *italic*, - lists, # headings. Leave a blank line between paragraphs."
+        classNames={glass}
+        value={characterForm.backstory.join("\n")}
+        onChange={(e) => setCharacterForm({ backstory: e.currentTarget.value.split("\n") })}
+      />
 
     </Stack>
   );

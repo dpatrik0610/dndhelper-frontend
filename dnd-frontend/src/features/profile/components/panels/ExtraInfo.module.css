@@ -113,10 +113,6 @@
   max-width: 68ch;
 }
 
-.backstory p + p {
-  margin-top: 0.75em;
-}
-
 @media (max-width: 48em) {
   .panel {
     padding: 14px;

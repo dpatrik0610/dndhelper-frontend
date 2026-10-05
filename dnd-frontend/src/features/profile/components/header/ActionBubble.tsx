@@ -10,7 +10,7 @@ interface ActionBubbleProps {
   color?: string;
 }
 
-export const ActionBubble = forwardRef<HTMLButtonElement, ActionBubbleProps>(
+export const ActionBubble = forwardRef<HTMLDivElement, ActionBubbleProps>(
   ({ label, icon, onClick, color }, ref) => {
     const isMobile = useIsMobile();
     const [hovered, setHovered] = useState(false);
@@ -30,7 +30,7 @@ export const ActionBubble = forwardRef<HTMLButtonElement, ActionBubbleProps>(
         }}
       >
         <Box
-          ref={ref as any}
+          ref={ref}
           onClick={onClick}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}

@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import type { Skill } from "@appTypes/Character/Skill";
 import {
   Grid,
   Paper,
@@ -17,12 +18,15 @@ import { useIsMobile } from "@hooks/useIsMobile";
 import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
 import CustomBadge from "@components/common/CustomBadge";
 
+// Stable fallback, so the skills memo below doesn't recompute on every render.
+const NO_SKILLS: Skill[] = [];
+
 export function AbilityScores() {
   const character = useCurrentCharacter()!;
   const isMobile = useIsMobile();
   const [opened, setOpened] = useState(false);
 
-  const skills = character.skills || [];
+  const skills = character.skills ?? NO_SKILLS;
 
   const abilities = useMemo(() => [
     { key: "str" as const, name: "Strength", short: "STR", saveKey: "strength" as const, icon: "💪" },

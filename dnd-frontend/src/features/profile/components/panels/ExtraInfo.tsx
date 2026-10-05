@@ -47,8 +47,8 @@ export function ExtraInfo() {
     { label: "Flaws", value: character.flaws, Icon: IconAlertTriangle },
   ];
 
-  // Stored one line per entry; blank lines were paragraph breaks.
-  const backstory = (character.backstory ?? []).map((line) => line.trim()).filter(Boolean);
+  // Stored one line per entry (the form splits on newlines), so joining restores the Markdown source.
+  const backstory = (character.backstory ?? []).join("\n").trim();
 
   return (
     <div className={classes.stack}>
@@ -90,14 +90,8 @@ export function ExtraInfo() {
       </Panel>
 
       <Panel icon={<IconScript size={16} />} title="Backstory">
-        {backstory.length ? (
-          <div className={classes.backstory}>
-            {backstory.map((line, i) => (
-              <p key={i} className={classes.text}>
-                {line}
-              </p>
-            ))}
-          </div>
+        {backstory ? (
+          <MarkdownRenderer className={classes.backstory} content={backstory} textColor="var(--theme-color-text-primary, #fff)" />
         ) : (
           <Empty>No backstory yet.</Empty>
         )}

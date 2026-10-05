@@ -1,8 +1,9 @@
 import { Group, Title } from "@mantine/core";
+import type { Character } from "@appTypes/Character/Character";
 import { SwitchCharacterButton } from "./SwitchCharacterButton";
 
 interface TopPanelProps {
-  character: any;
+  character: Character | null;
   isMobile: boolean;
 }
 
@@ -20,7 +21,7 @@ export function TopPanel({ character, isMobile }: TopPanelProps) {
           lineHeight: 1.1,
         }}
       >
-        {character.name || "Unnamed"}
+        {character?.name || "Unnamed"}
       </Title>
       <SwitchCharacterButton />
     </Group>

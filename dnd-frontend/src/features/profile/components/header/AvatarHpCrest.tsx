@@ -1,8 +1,9 @@
 import { Box, Avatar, ThemeIcon } from "@mantine/core";
+import type { Character } from "@appTypes/Character/Character";
 import { IconAward } from "@tabler/icons-react";
 
 interface AvatarHpCrestProps {
-  character: any;
+  character: Character | null;
   isMobile: boolean;
 }
 
@@ -11,9 +12,9 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
   const strokeWidth = isMobile ? 5 : 7;
   const avatarSize = size - strokeWidth * 2 - (isMobile ? 6 : 8);
 
-  const current = character.hitPoints ?? 0;
-  const max = character.maxHitPoints ?? 100;
-  const temp = Math.max(0, character.temporaryHitPoints ?? 0);
+  const current = character?.hitPoints ?? 0;
+  const max = character?.maxHitPoints ?? 100;
+  const temp = Math.max(0, character?.temporaryHitPoints ?? 0);
   const maxHp = Math.max(1, max);
 
   const hpPercent = Math.min(100, Math.max(0, (current / maxHp) * 100));
@@ -173,7 +174,7 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
           zIndex: 1,
         }}
       >
-        {character.imageUrl ? (
+        {character?.imageUrl ? (
           <Avatar
             src={character.imageUrl}
             size={avatarSize}

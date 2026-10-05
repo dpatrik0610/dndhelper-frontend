@@ -2,7 +2,7 @@ import { Card, Text, Stack } from "@mantine/core";
 
 interface AbilityScoreTooltipProps {
   active?: boolean;
-  payload?: any[];
+  payload?: { payload: { ability: string; score: number } }[];
 }
 
 export default function AbilityScoreTooltip({ active, payload }: AbilityScoreTooltipProps) {

@@ -24,10 +24,13 @@ import { SpellModal } from "@features/profile/components/modals/SpellModal";
 import type { CharacterSpell } from "@appTypes/Character/CharacterSpell";
 import { useIsMobile } from "@hooks/useIsMobile";
 
+// Stable fallback: a fresh [] each render would re-run the spell fetch effect forever for spell-less characters.
+const NO_SPELLS: CharacterSpell[] = [];
+
 export function SpellsPanel() {
   const token = useToken();
   const character = useCurrentCharacter();
-  const chSpells = character?.spells ?? [];
+  const chSpells = character?.spells ?? NO_SPELLS;
   const isMobile = useIsMobile();
 
   const [loading, setLoading] = useState(true);
