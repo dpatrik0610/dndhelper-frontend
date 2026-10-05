@@ -4,6 +4,7 @@ import { showNotification } from "@components/Notification/Notification";
 import { useToken } from "@store/auth/authSelectors";
 import { useAuthStore } from "@store/auth/authStore";
 import { useChatStore } from "@store/chat/chatStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import type { ChatCampaign, ChatMessage, ChatPage, ChatRoom, ChatSendRequest } from "@appTypes/Chat";
 
 const API_BASE: string = import.meta.env.VITE_API_BASE || "https://localhost:7222/api";
@@ -114,7 +115,13 @@ export function useChatHub(campaignId: string | null) {
 
     void connect(0);
 
+    // Creating, joining or leaving a campaign changes which chats are available.
+    const unsubscribeCampaigns = useCampaignStore.subscribe((next, prev) => {
+      if (next.campaigns !== prev.campaigns && active === conn) void loadCampaigns();
+    });
+
     return () => {
+      unsubscribeCampaigns();
       cancelled = true;
       clearTimeout(retryTimer);
       if (active === conn) active = null;
