@@ -40,7 +40,7 @@ export function AdminNavItem({
 
   if (collapsed) {
     return (
-      <Tooltip label={label} position="right" withArrow>
+      <Tooltip label={label} position="left" withArrow>
         {item}
       </Tooltip>
     );
