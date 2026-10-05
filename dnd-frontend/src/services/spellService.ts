@@ -27,3 +27,7 @@ export async function updateSpell(spellId: string, spell: Spell): Promise<Spell>
     if(!spell) return Promise.reject("Spell is undefined");
     return await apiClient(`${baseUrl}/${spellId}`, {method: "PUT", body: spell });
 }
+
+export async function deleteSpell(spellId: string): Promise<void> {
+    return await apiClient(`${baseUrl}/${spellId}`, {method: "DELETE" });
+}

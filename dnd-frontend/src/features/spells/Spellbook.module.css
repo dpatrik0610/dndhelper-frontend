@@ -339,3 +339,197 @@
   border: 1px dashed var(--theme-border-subtle, rgba(255, 255, 255, 0.1));
   border-radius: 16px;
 }
+
+/* ================= Editor (DM) ================= */
+
+/* Header and footer stay put; the form and the preview scroll on their own. */
+.editor {
+  display: flex;
+  flex-direction: column;
+  /* Mantine caps the modal at 90dvh; stay under it so the modal itself never scrolls. */
+  height: min(900px, 86dvh);
+}
+
+@media (max-width: 768px) {
+  .editor {
+    height: 100dvh;
+  }
+}
+
+/* Readable labels inside the editor (the global ones are tiny tracked capitals). */
+.editor :global(.glassy-label) {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--theme-color-text-primary, #fff) !important;
+  opacity: 0.85;
+}
+
+.edHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  /* The header takes on the chosen school's colour, like the card's aura. */
+  background: linear-gradient(100deg, color-mix(in srgb, var(--school) 14%, transparent), transparent 55%);
+  transition: background 0.3s ease;
+}
+
+.edHeader .sigil {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.edTitle {
+  margin: 0;
+  font: 700 20px/1.2 "Plus Jakarta Sans", "Inter", sans-serif;
+  color: var(--theme-color-text-primary, #fff);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edTabs {
+  padding: 10px 14px 0;
+}
+
+.edBody {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px;
+}
+
+@media (max-width: 768px) {
+  .edBody {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.edForm,
+.edPreview {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-border-glow, rgba(255, 255, 255, 0.2)) transparent;
+}
+
+.edForm {
+  padding: 4px 24px 24px;
+}
+
+.edPreview {
+  padding: 20px;
+  border-left: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  background: rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 768px) {
+  .edForm {
+    padding: 0 14px 20px;
+  }
+
+  .edPreview {
+    padding: 14px;
+    border-left: none;
+    background: none;
+  }
+}
+
+/* Narrow pane: two stat cells per row. */
+.edPreview .stats {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.edSection {
+  padding: 20px 0 22px;
+}
+
+.edSection + .edSection {
+  border-top: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.edSectionTitle {
+  margin: 0 0 14px;
+  font: 600 16px/1.3 "Plus Jakarta Sans", "Inter", sans-serif;
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.edHint {
+  margin: -10px 0 14px;
+  font-size: 13px;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.edFields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.edLabel {
+  display: block;
+}
+
+.edSchools {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .edSchools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.edSchool {
+  height: 36px;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.edSep {
+  width: 1px;
+  margin: 4px 4px;
+  background: var(--theme-border-subtle, rgba(255, 255, 255, 0.12));
+}
+
+.edFooter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.edStatus {
+  flex: 1;
+  text-align: right;
+  font-size: 13px;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.edFooter :global(.glass-btn-primary)[data-disabled] {
+  opacity: 0.45;
+  box-shadow: none;
+  transform: none;
+}
+
+/* All ten levels on one row, also on phones. */
+.edLevels {
+  display: grid;
+  grid-template-columns: auto repeat(9, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.edLevels .chip {
+  min-width: 0;
+  padding: 0 8px;
+}

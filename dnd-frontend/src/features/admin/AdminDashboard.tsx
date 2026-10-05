@@ -16,7 +16,6 @@ import {
   IconCategory,
   IconBox,
   type IconProps,
-  IconWand,
   IconCamera,
   IconGhost,
   IconLayoutGrid,
@@ -37,7 +36,6 @@ import { useEffect, useState, type JSX, type ForwardRefExoticComponent } from "r
 import { SelectCampaignModal } from "./components/SelectCampaignModal";
 import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
 import { CampaignManager } from "./CampaignManager/CampaignManager";
-import { SpellForm } from "./SpellManager/SpellForm";
 import { CacheManager } from "./CacheManager/CacheManager";
 import { UserManager } from "./UserManager/UserManager";
 import { MonsterManager } from "./MonsterManager/MonsterManager";
@@ -69,7 +67,6 @@ export const AdminDashboard: React.FC = () => {
   const navItems: NavItem[] = [
     { icon: IconBox, label: "Inventories", key: "InventoryDashboard", component: <InventoryDashboard /> },
     { icon: IconSettings, label: "Campaigns", key: "CampaignManager", component: <CampaignManager /> },
-    { icon: IconWand, label: "Spells", key: "SpellsManager", component: <SpellForm /> },
     { icon: IconCamera, label: "Cache", key: "CacheManager", component: <CacheManager /> },
     { icon: IconUsers, label: "Users", key: "UserManager", component: <UserManager /> },
     { icon: IconGhost, label: "Monsters", key: "MonsterManager", component: <MonsterManager /> },

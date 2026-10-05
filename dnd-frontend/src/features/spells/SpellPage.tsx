@@ -1,20 +1,24 @@
 import { useEffect, useState } from "react";
 import { ActionIcon, Box, Button, Grid, Group, Skeleton, Stack, Text, Title, Tooltip } from "@mantine/core";
-import { IconArrowLeft, IconBook2, IconRefresh } from "@tabler/icons-react";
+import { IconArrowLeft, IconBook2, IconPencil, IconPlus, IconRefresh } from "@tabler/icons-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { useSpellStore } from "@store/spell/spellStore";
 import { loadSpells } from "@utils/loadSpells";
 import { getSpellById } from "@services/spellService";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { useIsDm } from "@store/auth/authSelectors";
+import type { Spell } from "@appTypes/Spell";
 import { SpellIndex } from "./components/SpellIndex";
 import { SpellCard } from "./components/SpellCard";
+import { SpellEditor } from "./components/SpellEditor";
 import classes from "./Spellbook.module.css";
 
 export default function SpellPage() {
   const { spellName } = useParams<{ spellName?: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const isDm = useIsDm();
 
   const spellNames = useSpellStore((s) => s.spellNames);
   const currentSpell = useSpellStore((s) => s.currentSpell);
@@ -22,6 +26,8 @@ export default function SpellPage() {
 
   const [loading, setLoading] = useState(false);
   const [reloading, setReloading] = useState(false);
+  // null = closed, "new" = create, otherwise the spell being edited.
+  const [editing, setEditing] = useState<Spell | "new" | null>(null);
 
   useEffect(() => {
     if (spellNames.length === 0) void loadSpells();
@@ -56,6 +62,20 @@ export default function SpellPage() {
   };
 
   const openSpell = (name: string) => navigate(`/spells/${encodeURIComponent(name)}`);
+
+  const onSaved = async (spell: Spell) => {
+    setEditing(null);
+    setCurrentSpell(spell);
+    await loadSpells();
+    openSpell(spell.name);
+  };
+
+  const onDeleted = async () => {
+    setEditing(null);
+    setCurrentSpell(null);
+    await loadSpells();
+    navigate("/spells");
+  };
 
   const notFound = !!spellName && spellNames.length > 0 && !urlSpell;
   const showingSpell = spellName ? currentSpell?.name === spellName : !!currentSpell;
@@ -107,12 +127,38 @@ export default function SpellPage() {
             </Text>
           </div>
         </Group>
-        <Tooltip label="Reload spells" withArrow>
-          <ActionIcon variant="subtle" size="lg" onClick={reload} loading={reloading} aria-label="Reload spells">
-            <IconRefresh size={18} />
-          </ActionIcon>
-        </Tooltip>
+        <Group gap="xs" wrap="nowrap">
+          {isDm && showingSpell && currentSpell && (
+            <Tooltip label="Edit spell" withArrow>
+              <ActionIcon variant="subtle" size="lg" onClick={() => setEditing(currentSpell)} aria-label="Edit spell">
+                <IconPencil size={18} />
+              </ActionIcon>
+            </Tooltip>
+          )}
+          {isDm && (
+            <Tooltip label="New spell" withArrow>
+              <ActionIcon variant="subtle" size="lg" onClick={() => setEditing("new")} aria-label="New spell">
+                <IconPlus size={18} />
+              </ActionIcon>
+            </Tooltip>
+          )}
+          <Tooltip label="Reload spells" withArrow>
+            <ActionIcon variant="subtle" size="lg" onClick={reload} loading={reloading} aria-label="Reload spells">
+              <IconRefresh size={18} />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
       </Group>
+
+      {isDm && (
+        <SpellEditor
+          opened={editing !== null}
+          spell={editing === "new" ? null : editing}
+          onClose={() => setEditing(null)}
+          onSaved={onSaved}
+          onDeleted={onDeleted}
+        />
+      )}
 
       {isMobile ? (
         spellName ? (

@@ -4,6 +4,7 @@ import { IconFlame, IconShield, IconSparkles, IconTarget, type Icon } from "@tab
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useSpellStore } from "@store/spell/spellStore";
+import type { Spell } from "@appTypes/Spell";
 import { getDamageInfo } from "@utils/getDamageInfo";
 import { getSchool, spellSubtitle } from "@features/spells/spellMeta";
 import classes from "@features/spells/Spellbook.module.css";
@@ -11,6 +12,8 @@ import classes from "@features/spells/Spellbook.module.css";
 interface SpellCardProps {
   /** No frame / aura: for use inside a modal. */
   flat?: boolean;
+  /** Spell to show instead of the open one (e.g. an editor draft). */
+  spell?: Spell;
 }
 
 /** Markdown tables arrive split across description lines; join consecutive table lines into one block. */
@@ -32,8 +35,9 @@ function groupTables(lines: string[]) {
 
 const COMPONENT_NAMES: Record<string, string> = { V: "Verbal", S: "Somatic", M: "Material" };
 
-export function SpellCard({ flat = false }: SpellCardProps) {
-  const spell = useSpellStore((state) => state.currentSpell);
+export function SpellCard({ flat = false, spell: draft }: SpellCardProps) {
+  const current = useSpellStore((state) => state.currentSpell);
+  const spell = draft ?? current;
 
   if (!spell) {
     return (
