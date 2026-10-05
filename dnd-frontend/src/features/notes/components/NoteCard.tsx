@@ -1,156 +1,92 @@
 import { Suspense, lazy } from "react";
-import { ActionIcon, Group, Text, Tooltip, Loader } from "@mantine/core";
-import {
-  IconDownload,
-  IconPencil,
-  IconStar,
-  IconStarFilled,
-  IconTrash,
-} from "@tabler/icons-react";
+import { Loader, Menu, Spoiler, Tooltip } from "@mantine/core";
+import { IconDotsVertical, IconDownload, IconPencil, IconPin, IconPinFilled, IconTrash } from "@tabler/icons-react";
 import type { Note } from "@appTypes/Note";
-const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then(m => ({ default: m.MarkdownRenderer })));
-import { ExpandableSection } from "@components/ExpandableSection";
-import { SectionColor } from "@appTypes/SectionColor";
-import { magicGlowTheme } from "@styles/magic/glowTheme";
+import { downloadNote, noteBody, timeAgo } from "@features/notes/noteUtils";
+import classes from "@features/notes/Notes.module.css";
+
+const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then((m) => ({ default: m.MarkdownRenderer })));
 
 interface NoteCardProps {
   note: Note;
-  searchQuery?: string;
-  onToggleFavorite: () => void;
-  onEdit: () => void;
+  /** The search text, highlighted in the title and body. */
+  query: string;
+  onOpen: () => void;
+  onTogglePin: () => void;
   onDelete: () => void;
-  isMobile?: boolean;
 }
 
-const highlightText = (value: string, query?: string) => {
-  if (!query) return value;
-
+function highlight(text: string, query: string) {
+  if (!query) return text;
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const regex = new RegExp(`(${escaped})`, "gi");
-  const lower = query.toLowerCase();
-
-  return value.split(regex).map((part, index) => {
-    const isMatch = part.toLowerCase() === lower;
-
-    return isMatch ? (
-      <Text
-        key={`${part}-${index}`}
-        span
-        style={{
-          background: "rgba(255, 230, 230, 0.35)",
-          color: "white",
-          padding: "0 2px",
-          borderRadius: 3,
-        }}
-      >
+  return text.split(new RegExp(`(${escaped})`, "gi")).map((part, i) =>
+    part.toLowerCase() === query.toLowerCase() ? (
+      <mark key={i} className={classes.mark}>
         {part}
-      </Text>
+      </mark>
     ) : (
-      <Text key={`${part}-${index}`} span>
-        {part}
-      </Text>
-    );
-  });
-};
-
-const safeFileName = (raw: string) =>
-  raw
-    .toLowerCase()
-    .replace(/[^a-z0-9-_]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/--+/g, "-") || "note";
-
-export function NoteCard({
-  note,
-  searchQuery,
-  onToggleFavorite,
-  onEdit,
-  onDelete,
-  isMobile,
-}: NoteCardProps) {
-  const markdownContent = (note.lines ?? []).join("\n");
-  const title = note.title ?? "Untitled";
-  const titleContent = (
-    <Text fw={600} c={magicGlowTheme.text.color} size="sm" style={{ lineHeight: 1.05 }}>
-      {highlightText(title, searchQuery)}
-    </Text>
+      part
+    )
   );
-  const actionSize = isMobile ? "lg" : "md";
+}
 
-  const handleDownload = () => {
-    const blob = new Blob([`# ${title}\n\n${markdownContent}`], {
-      type: "text/markdown",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${safeFileName(title)}.md`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+export function NoteCard({ note, query, onOpen, onTogglePin, onDelete }: NoteCardProps) {
+  const title = note.title || "Untitled";
+  const body = noteBody(note);
+  const pinned = !!note.isFavorite;
 
   return (
-    <ExpandableSection
-      title={title}
-      titleContent={titleContent}
-      color={SectionColor.Blue}
-      defaultOpen
-      transparent
-      padding={14}
-      marginTop={2}
-      marginBottom={2}
-      style={{
-        ...magicGlowTheme.card,
-        background: "rgba(30, 26, 60, 0.72)",
-      }}
-    >
-        <Group justify="space-between" mb={8} align="center" gap="xs">
-          <Text c="dimmed" size="xs">
-            Updated:{" "}
-            {note.updatedAt
-              ? new Date(note.updatedAt).toLocaleString("en-GB").replace(/\//g, ".")
-              : "n/a"}
-          </Text>
-          <Group gap={6} wrap="nowrap">
-          <Tooltip label={note.isFavorite ? "Unfavorite" : "Favorite"}>
-            <ActionIcon size={actionSize} variant="light" color="yellow" radius="md" onClick={onToggleFavorite}>
-              {note.isFavorite ? (
-                <IconStarFilled size={16} color="gold" />
-              ) : (
-                <IconStar size={16} />
-              )}
-            </ActionIcon>
-          </Tooltip>
+    <article className={classes.card} data-pinned={pinned || undefined}>
+      <header className={classes.cardHeader}>
+        <div className={classes.cardHeading}>
+          <button type="button" className={classes.cardTitle} onClick={onOpen}>
+            {highlight(title, query)}
+          </button>
+          {note.updatedAt && (
+            <p className={`${classes.cardMeta} ${classes.muted}`} title={new Date(note.updatedAt).toLocaleString()}>
+              Updated {timeAgo(note.updatedAt)}
+            </p>
+          )}
+        </div>
 
-          <Tooltip label="Edit note">
-            <ActionIcon size={actionSize} variant="light" color="grape" radius="md" onClick={onEdit}>
-              <IconPencil size={14} />
-            </ActionIcon>
+        <div className={classes.cardActions}>
+          <Tooltip label={pinned ? "Unpin" : "Pin to top"}>
+            <button type="button" className={classes.cardAction} onClick={onTogglePin} aria-pressed={pinned} aria-label={pinned ? `Unpin ${title}` : `Pin ${title}`}>
+              {pinned ? <IconPinFilled size={16} /> : <IconPin size={16} />}
+            </button>
           </Tooltip>
-
-          <Tooltip label="Download markdown">
-            <ActionIcon size={actionSize} variant="light" color="blue" radius="md" onClick={handleDownload}>
-              <IconDownload size={14} />
-            </ActionIcon>
+          <Tooltip label="Edit">
+            <button type="button" className={classes.cardAction} onClick={onOpen} aria-label={`Edit ${title}`}>
+              <IconPencil size={16} />
+            </button>
           </Tooltip>
+          <Menu position="bottom-end" withinPortal classNames={{ dropdown: "glassy-dropdown" }}>
+            <Menu.Target>
+              <button type="button" className={classes.cardAction} aria-label={`More actions for ${title}`}>
+                <IconDotsVertical size={16} />
+              </button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item leftSection={<IconDownload size={14} />} onClick={() => downloadNote(note)}>
+                Download .md
+              </Menu.Item>
+              <Menu.Item color="red" leftSection={<IconTrash size={14} />} onClick={onDelete}>
+                Delete
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </div>
+      </header>
 
-          <Tooltip label="Delete">
-            <ActionIcon
-              size={actionSize}
-              variant="light"
-              color="red"
-              radius="md"
-              onClick={onDelete}
-            >
-              <IconTrash size={14} />
-            </ActionIcon>
-          </Tooltip>
-          </Group>
-        </Group>
-
-        <Suspense fallback={<Loader size="sm" color="blue" />}>
-          <MarkdownRenderer content={markdownContent} highlightQuery={searchQuery} />
-        </Suspense>
-    </ExpandableSection>
+      {body.trim() && (
+        <div className={classes.cardBody}>
+          <Spoiler maxHeight={220} showLabel="Show more" hideLabel="Show less" classNames={{ control: classes.more }}>
+            <Suspense fallback={<Loader size="sm" />}>
+              <MarkdownRenderer content={body} highlightQuery={query || undefined} textColor="var(--theme-color-text-primary, #fff)" />
+            </Suspense>
+          </Spoiler>
+        </div>
+      )}
+    </article>
   );
 }
