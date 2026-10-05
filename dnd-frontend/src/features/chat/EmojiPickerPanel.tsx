@@ -16,6 +16,8 @@ export default function EmojiPickerPanel({ onPick }: { onPick: (emoji: string) =
       height={320}
       lazyLoadEmojis
       skinTonesDisabled
+      // On touch screens a focused search pops the keyboard, which resizes the viewport under the open popover.
+      autoFocusSearch={!window.matchMedia("(pointer: coarse)").matches}
       searchPlaceholder="Search emoji"
       previewConfig={{ showPreview: false }}
     />

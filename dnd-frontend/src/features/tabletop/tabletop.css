@@ -871,6 +871,12 @@
   border-color: rgba(167, 139, 250, 0.45);
 }
 
+/* Your own rolls: a violet edge and a faint tint. */
+.tt-log-entry.mine {
+  border-left: 3px solid #a78bfa;
+  background: rgba(167, 139, 250, 0.07);
+}
+
 .tt-log-total {
   font-variant-numeric: tabular-nums;
   min-width: 2ch;
@@ -1073,6 +1079,17 @@
 
 .tt-pin {
   justify-content: space-between;
+  flex-wrap: nowrap;
+}
+
+/* Cells shrink on narrow phones instead of pushing the card wider than the screen. */
+.tt-pin-cell {
+  flex: 0 1 50px;
+  min-width: 0;
+}
+
+.tt-pin .tt-pin-input {
+  width: 100%;
 }
 
 .tt-pin-input {
@@ -1098,6 +1115,10 @@
   margin: 12px 0 0;
   font-size: 12px;
   color: #64748b;
+}
+
+.tt-lobby-hint svg {
+  flex: none;
 }
 
 .tt-lobby-divider {
@@ -1201,7 +1222,7 @@
 
 @media (max-width: 860px) {
   .tt-lobby-main {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 32px;
     min-height: 0;
     padding: 24px 16px 40px;
@@ -1223,7 +1244,6 @@
   }
 
   .tt-pin-input {
-    width: 42px;
     height: 48px;
     min-height: 48px;
   }

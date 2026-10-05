@@ -122,7 +122,7 @@ export function TabletopLobby() {
               size="lg"
               gap={8}
               aria-label="Room code"
-              classNames={{ root: "tt-pin", input: "tt-pin-input" }}
+              classNames={{ root: "tt-pin", pinInput: "tt-pin-cell", input: "tt-pin-input" }}
               autoFocus
             />
             {joinError && (
