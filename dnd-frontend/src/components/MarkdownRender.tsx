@@ -99,29 +99,29 @@ const MARK_HIGHLIGHT_STYLE: CSSProperties = {
   textShadow: "0 0 6px rgba(255, 200, 120, 0.9)", // warm glow
 };
 
-const HASHTAG_REGEX = /#[a-zA-Z0-9_-]+/g;
+// Not global: .test() on a /g regex keeps lastIndex between calls, which made every other #tag fail.
+const HASHTAG_REGEX = /^#[a-zA-Z0-9_-]+$/;
 
+// Search matches and #tags take the active theme's accent.
 const HIGHLIGHT_STYLE: CSSProperties = {
-  background: "rgba(255, 230, 230, 0.35)",
-  color: "white",
+  background: "color-mix(in srgb, var(--theme-color-accent-primary, #f59e0b) 35%, transparent)",
+  color: "inherit",
   padding: "0 2px",
   borderRadius: 3,
-  textShadow: "0 0 6px rgba(255, 150, 150, 0.9)",
 };
 
 const TAG_BADGE_STYLE = {
   root: {
-    background:
-      "linear-gradient(135deg, rgba(255,80,80,0.45), rgba(255,140,140,0.25))",
-    border: "1px solid rgba(255,140,140,0.5)",
-    color: "rgba(255,240,240,0.95)",
-    boxShadow: "0 0 6px rgba(255,120,120,0.3)",
-    backdropFilter: "blur(4px)",
-    textTransform: "uppercase" as const,
-    letterSpacing: 0.5,
-    paddingLeft: 8,
-    paddingRight: 8,
-    marginRight: 4,
+    background: "color-mix(in srgb, var(--theme-color-accent-primary, #f59e0b) 16%, transparent)",
+    border: "1px solid color-mix(in srgb, var(--theme-color-accent-primary, #f59e0b) 45%, transparent)",
+    color: "var(--theme-color-accent-primary, #f59e0b)",
+    textTransform: "none" as const,
+    fontWeight: 600,
+    letterSpacing: 0,
+    paddingLeft: 6,
+    paddingRight: 6,
+    marginInline: 2,
+    verticalAlign: "baseline",
   },
 };
 
@@ -148,15 +148,14 @@ const renderTextSegments = (text: string, query?: string): ReactNode[] => {
     const isTag = HASHTAG_REGEX.test(segment);
 
     if (isTag) {
-      const tagLabel = segment.replace("#", "");
       return (
         <Badge
           key={`tag-${segment}-${idx}`}
-          variant="dot"
+          variant="light"
           size="sm"
           styles={TAG_BADGE_STYLE}
         >
-          {tagLabel}
+          {segment}
         </Badge>
       );
     }
@@ -296,7 +295,7 @@ export function MarkdownRenderer({
             </List>
           ),
 
-          li: ({ children }) => <List.Item>{children}</List.Item>,
+          li: ({ children }) => <List.Item>{transformChildren(children, highlightQuery)}</List.Item>,
           
           a: ({ href, children, ...props }) => (
             <Anchor
