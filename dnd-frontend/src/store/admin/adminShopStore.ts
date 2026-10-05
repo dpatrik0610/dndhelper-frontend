@@ -28,7 +28,7 @@ interface AdminShopState {
 
 export const useAdminShopStore = create<AdminShopState>()(
   devtools(
-    immer((set) => ({
+    immer((set, get) => ({
       shops: [],
       sellRequests: [],
       loading: false,
@@ -75,9 +75,8 @@ export const useAdminShopStore = create<AdminShopState>()(
         set({ loading: true, error: null });
         try {
           const newShop = await shopService.createShop(shop);
-          set((state) => {
-            state.shops.push(newShop);
-          });
+          // The live "created" notice often arrives before this response, so upsert instead of appending.
+          get().syncShopUpdated(newShop);
         } catch (error: any) {
           set({ error: error.message || "Failed to create shop" });
         } finally {
