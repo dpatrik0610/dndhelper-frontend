@@ -53,6 +53,39 @@
   scrollbar-width: thin;
 }
 
+/* Chromium/Safari: a slim rounded thumb with no arrow buttons. They only honour ::-webkit-scrollbar when the
+   standard scrollbar-width/color are unset, so reset those here (Firefox skips this block and keeps the above). */
+@supports selector(::-webkit-scrollbar) {
+  :root[class*="theme-"] .mantine-Modal-body {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
+  :root[class*="theme-"] .mantine-Modal-body::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  :root[class*="theme-"] .mantine-Modal-body::-webkit-scrollbar-track,
+  :root[class*="theme-"] .mantine-Modal-body::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  :root[class*="theme-"] .mantine-Modal-body::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 55%, transparent) padding-box;
+  }
+
+  :root[class*="theme-"] .mantine-Modal-body::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 80%, transparent) padding-box;
+  }
+
+  :root[class*="theme-"] .mantine-Modal-body::-webkit-scrollbar-button {
+    display: none;
+  }
+}
+
 /* Mantine scroll areas in modals: the theme accent instead of Mantine's gray thumb. */
 :root[class*="theme-"] .mantine-Modal-content .mantine-ScrollArea-thumb {
   background-color: color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 55%, transparent);
