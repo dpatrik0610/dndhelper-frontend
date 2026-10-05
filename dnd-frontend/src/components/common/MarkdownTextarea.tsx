@@ -16,8 +16,18 @@ import {
   useRef,
   useState,
   useMemo,
+  type CSSProperties,
   type SyntheticEvent,
 } from "react";
+
+// Toolbar buttons follow the theme: muted at rest, accent while the selection already has that format.
+const toolStyle = (active: boolean): CSSProperties =>
+  active
+    ? {
+        color: "var(--theme-color-accent-primary, #f59e0b)",
+        background: "color-mix(in srgb, var(--theme-color-accent-primary, #f59e0b) 18%, transparent)",
+      }
+    : { color: "color-mix(in srgb, var(--theme-color-text-primary, #fff) 65%, transparent)" };
 
 interface MarkdownTextareaProps {
   label?: string;
@@ -305,8 +315,8 @@ export function MarkdownTextarea({
   }
 
   // active states for buttons
-  const boldActive = useMemo(() => isWrapped("**"), [value, selection]);
-  const italicActive = useMemo(() => isWrapped("_"), [value, selection]);
+  const boldActive = isWrapped("**");
+  const italicActive = isWrapped("_");
 
   const listActive = useMemo(() => {
     const { start, end } = selection;
@@ -342,8 +352,9 @@ export function MarkdownTextarea({
         <Tooltip label="Bold" withArrow>
           <ActionIcon
             size="sm"
-            variant={boldActive ? "filled" : "subtle"}
-            color={boldActive ? "cyan" : undefined}
+            variant="subtle"
+            color="gray"
+            style={toolStyle(boldActive)}
             onClick={applyBold}
           >
             <IconBold size={14} />
@@ -353,8 +364,9 @@ export function MarkdownTextarea({
         <Tooltip label="Italic" withArrow>
           <ActionIcon
             size="sm"
-            variant={italicActive ? "filled" : "subtle"}
-            color={italicActive ? "cyan" : undefined}
+            variant="subtle"
+            color="gray"
+            style={toolStyle(italicActive)}
             onClick={applyItalic}
           >
             <IconItalic size={14} />
@@ -364,8 +376,9 @@ export function MarkdownTextarea({
         <Tooltip label="Bullet list" withArrow>
           <ActionIcon
             size="sm"
-            variant={listActive ? "filled" : "subtle"}
-            color={listActive ? "cyan" : undefined}
+            variant="subtle"
+            color="gray"
+            style={toolStyle(listActive)}
             onClick={applyBulletList}
           >
             <IconList size={14} />
@@ -375,8 +388,9 @@ export function MarkdownTextarea({
         <Tooltip label="Numbered list" withArrow>
           <ActionIcon
             size="sm"
-            variant={numberedListActive ? "filled" : "subtle"}
-            color={numberedListActive ? "cyan" : undefined}
+            variant="subtle"
+            color="gray"
+            style={toolStyle(numberedListActive)}
             onClick={applyNumberedList}
           >
             <IconListNumbers size={14} />
@@ -387,6 +401,8 @@ export function MarkdownTextarea({
           <ActionIcon
             size="sm"
             variant="subtle"
+            color="gray"
+            style={toolStyle(false)}
             onClick={insertTableTemplate}
           >
             <IconTable size={14} />
@@ -397,6 +413,8 @@ export function MarkdownTextarea({
           <ActionIcon
             size="sm"
             variant="subtle"
+            color="gray"
+            style={toolStyle(false)}
             onClick={insertHorizontalRule}
           >
             <IconMinus size={14} />

@@ -1,39 +1,42 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
-import type { ChangeEvent } from "react";
-import { Box } from "@mantine/core";
-
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { Modal, Skeleton, Stack, Text, TextInput, Tooltip } from "@mantine/core";
+import { IconFileImport, IconNotebook, IconPin, IconPlus, IconSearch } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
+import type { Note } from "@appTypes/Note";
+import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { SectionColor } from "@appTypes/SectionColor";
-import { useNoteStore } from "@store/note/noteStore";
-import type { Note } from "@appTypes/Note";
-import { AddNoteModal } from "@features/notes/components/AddNoteModal";
-import { EditNoteModal } from "./components/EditNoteModal";
-import { NotesPanel } from "./components/NotesPanel";
-import { useIsMobile } from "@hooks/useIsMobile";
+import { useNoteActions, useNoteList, useNoteLoading } from "@store/note/noteSelectors";
+import { NoteCard } from "@features/notes/components/NoteCard";
+import { NoteEditorModal } from "@features/notes/components/NoteEditorModal";
+import { noteBody, noteTags, timeAgo } from "@features/notes/noteUtils";
+import classes from "@features/notes/Notes.module.css";
+
+// Stable fallback, so the memos below don't recompute on every render.
+const NO_IDS: string[] = [];
+
+const byNewest = (a: Note, b: Note) => Date.parse(b.updatedAt ?? "0") - Date.parse(a.updatedAt ?? "0");
 
 export default function NotesPage() {
   const character = useCurrentCharacter();
   const { updateCharacter } = useCharacterCoreActions();
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const notes = useNoteList();
+  const loading = useNoteLoading();
+  const { loadForCharacter, create, update, remove } = useNoteActions();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const {
-    notes,
-    loading,
-    loadForCharacter,
-    remove,
-    update: updateNote,
-    create,
-  } = useNoteStore();
-
-  const [addModalOpened, setAddModalOpened] = useState(false);
-  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  // Kept apart from `editorOpen` so the dialog doesn't switch to "New note" while it fades out.
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorNote, setEditorNote] = useState<Note | null>(null);
+  const openEditor = (note: Note | null) => {
+    setEditorNote(note);
+    setEditorOpen(true);
+  };
+  const [deleting, setDeleting] = useState<Note | null>(null);
+  const [removing, setRemoving] = useState(false);
   const [search, setSearch] = useState("");
-  const [tagQuery, setTagQuery] = useState<string[]>([]);
-  const [showTagFilter, setShowTagFilter] = useState(false);
+  const [activeTags, setActiveTags] = useState<string[]>([]);
 
   useEffect(() => {
     if (!character) {
@@ -44,203 +47,219 @@ export default function NotesPage() {
         color: SectionColor.Red,
         withBorder: true,
       });
-
       navigate("/home", { replace: true });
     }
   }, [character, navigate]);
 
-  const characterId = character?.id;
-  const noteIds = character?.noteIds ?? [];
+  const noteIds = character?.noteIds ?? NO_IDS;
 
   useEffect(() => {
-    if (!characterId || noteIds.length === 0) return;
-    void loadForCharacter(noteIds);
-  }, [characterId, noteIds, loadForCharacter]);
-
-  const getTags = (note: Note) => {
-    const content = [note.title ?? "", ...(note.lines ?? [])].join(" ");
-    const matches = content.match(/#[a-zA-Z0-9_-]+/g) ?? [];
-    return Array.from(new Set(matches.map((tag) => tag.slice(1).toLowerCase())));
-  };
-
-  const characterNotes = notes
-    .filter((n) => n.id && noteIds.includes(n.id))
-    .slice()
-    .sort(
-      (a, b) =>
-        new Date(b.updatedAt ?? 0).getTime() -
-        new Date(a.updatedAt ?? 0).getTime()
+    if (!noteIds.length) return;
+    loadForCharacter(noteIds).catch(() =>
+      showNotification({ id: "notes-load-failed", title: "Could not load notes", message: "Showing the last saved copy.", color: "red" })
     );
+  }, [noteIds, loadForCharacter]);
 
-  const allTags = useMemo(
-    () =>
-      Array.from(
-        new Set(characterNotes.flatMap((note) => getTags(note)).filter((t) => t.length > 0))
-      ).sort(),
-    [characterNotes]
+  const characterNotes = useMemo(
+    () => notes.filter((n) => n.id && noteIds.includes(n.id)).sort(byNewest),
+    [notes, noteIds]
   );
 
-  const normalizedSearch = search.trim().toLowerCase();
-  const matchesSearch = (note: Note) => {
-    if (!normalizedSearch) return true;
-    const title = (note.title ?? "").toLowerCase();
-    const content = (note.lines ?? []).join(" ").toLowerCase();
-    return title.includes(normalizedSearch) || content.includes(normalizedSearch);
-  };
+  const allTags = useMemo(() => [...new Set(characterNotes.flatMap(noteTags))].sort(), [characterNotes]);
 
-  const matchesTags = (note: Note) => {
-    if (tagQuery.length === 0) return true;
-    const noteTags = getTags(note);
-    return tagQuery.every((tag) => noteTags.includes(tag));
-  };
-
-  const filteredNotes = characterNotes.filter((note) => matchesSearch(note) && matchesTags(note));
-  const favoriteNotes = filteredNotes.filter((note) => note.isFavorite);
-  const regularNotes = filteredNotes.filter((note) => !note.isFavorite);
-  const hasAnyNotes = characterNotes.length > 0;
-  const highlightQuery = search.trim();
-
-  const summary = useMemo(() => {
-    const latestUpdate = characterNotes
-      .filter((note) => note.updatedAt)
-      .sort(
-        (a, b) =>
-          new Date(b.updatedAt ?? 0).getTime() -
-          new Date(a.updatedAt ?? 0).getTime()
-      )[0];
-
-    const favoritesCount = filteredNotes.filter((n) => n.isFavorite).length;
-
-    return {
-      total: characterNotes.length,
-      favorites: favoritesCount,
-      tags: allTags.length,
-      filtered: filteredNotes.length,
-      latestUpdatedAt: latestUpdate?.updatedAt,
-      characterName: character?.name,
-    };
-  }, [allTags.length, character?.name, characterNotes, filteredNotes]);
-
-  const reloadNotes = async () => {
-    if (!characterId || noteIds.length === 0) return;
-    await loadForCharacter(noteIds);
-  };
-
-  const handleDelete = async (id: string) => {
-    await remove(id);
-
-    if (!character) return;
-
-    const currentIds = character.noteIds ?? [];
-    if (!currentIds.includes(id)) return;
-
-    updateCharacter({
-      noteIds: currentIds.filter((nid) => nid !== id),
+  const query = search.trim();
+  const visible = useMemo(() => {
+    const q = query.toLowerCase();
+    return characterNotes.filter((note) => {
+      const matchesText = !q || `${note.title ?? ""}\n${noteBody(note)}`.toLowerCase().includes(q);
+      const tags = noteTags(note);
+      return matchesText && activeTags.every((tag) => tags.includes(tag));
     });
+  }, [characterNotes, query, activeTags]);
+
+  const pinned = visible.filter((n) => n.isFavorite);
+  const others = visible.filter((n) => !n.isFavorite);
+  const filtering = !!query || activeTags.length > 0;
+
+  const toggleTag = (tag: string) =>
+    setActiveTags((tags) => (tags.includes(tag) ? tags.filter((t) => t !== tag) : [...tags, tag]));
+
+  const togglePin = async (note: Note) => {
+    try {
+      await update(note.id!, { isFavorite: !note.isFavorite });
+    } catch (error) {
+      showNotification({ title: "Could not update the note", message: (error as Error).message, color: "red" });
+    }
   };
 
-  const handleToggleFavorite = async (note: Note) => {
-    await updateNote(note.id!, { isFavorite: !note.isFavorite });
+  const confirmDelete = async () => {
+    if (!deleting?.id || !character) return;
+    const id = deleting.id;
+    setRemoving(true);
+    try {
+      await remove(id);
+      updateCharacter({ noteIds: (character.noteIds ?? []).filter((nid) => nid !== id) });
+      setDeleting(null);
+    } catch (error) {
+      showNotification({ title: "Could not delete the note", message: (error as Error).message, color: "red" });
+    } finally {
+      setRemoving(false);
+    }
   };
 
-  const handleTriggerImport = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
+  const importFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file || !character) return;
 
     try {
-      const text = await file.text();
-      const normalized = text.replace(/\r\n/g, "\n");
-
-      const fileName = file.name.replace(/\.[^/.]+$/, "");
-      const firstHeading = normalized
-        .split("\n")
-        .find((line) => line.trim().startsWith("#"));
-      const titleFromHeading = firstHeading
-        ? firstHeading.replace(/^#+\s*/, "").trim()
-        : undefined;
-
-      const newNote = await create({
-        title: titleFromHeading || fileName || "Imported note",
-        lines: normalized.split("\n"),
+      const text = (await file.text()).replace(/\r\n/g, "\n");
+      const heading = text.split("\n").find((line) => line.trim().startsWith("#"));
+      const created = await create({
+        title: heading?.replace(/^#+\s*/, "").trim() || file.name.replace(/\.[^/.]+$/, "") || "Imported note",
+        lines: text.split("\n"),
       });
-
-      const currentIds = character.noteIds ?? [];
-      updateCharacter({
-        noteIds: [...currentIds, newNote.id!],
-      });
-
-      showNotification({
-        title: "Imported",
-        message: `Added note from ${file.name}`,
-        color: "teal",
-      });
+      updateCharacter({ noteIds: [...(character.noteIds ?? []), created.id!] });
+      showNotification({ title: "Imported", message: `Added a note from ${file.name}.`, color: "teal" });
     } catch (error) {
-      console.error("Failed to import markdown", error);
-      showNotification({
-        title: "Import failed",
-        message: "Could not import markdown file.",
-        color: "red",
-      });
-    } finally {
-      if (event.target) {
-        event.target.value = "";
-      }
+      showNotification({ title: "Import failed", message: (error as Error).message, color: "red" });
     }
   };
 
   if (!character) return null;
 
+  const latest = characterNotes[0]?.updatedAt;
+  const renderCard = (note: Note) => (
+    <NoteCard
+      key={note.id}
+      note={note}
+      query={query}
+      onOpen={() => openEditor(note)}
+      onTogglePin={() => void togglePin(note)}
+      onDelete={() => setDeleting(note)}
+    />
+  );
+
   return (
-    <Box
-      p={isMobile ? "0" : "md"}
-      m="0 auto"
-      maw={isMobile ? "100%" : 1300}
-      w="100%"
-      mih="100vh"
-    >
-      <AddNoteModal
-        opened={addModalOpened}
-        onClose={() => setAddModalOpened(false)}
-      />
-      <EditNoteModal
-        opened={!!editingNote}
-        note={editingNote}
-        onClose={() => setEditingNote(null)}
-      />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".md,.markdown,text/markdown,.txt"
-        style={{ display: "none" }}
-        onChange={handleImportFile}
-      />
-      <NotesPanel
-        isMobile={isMobile}
-        loading={loading}
-        summary={summary}
-        search={search}
-        onSearchChange={setSearch}
-        allTags={allTags}
-        tagQuery={tagQuery}
-        onTagsChange={setTagQuery}
-        showTagFilter={showTagFilter}
-        toggleTagFilter={() => setShowTagFilter((v) => !v)}
-        favoriteNotes={favoriteNotes}
-        regularNotes={regularNotes}
-        filteredCount={filteredNotes.length}
-        hasAnyNotes={hasAnyNotes}
-        highlightQuery={highlightQuery}
-        onToggleFavorite={(note) => void handleToggleFavorite(note)}
-        onEdit={(note) => setEditingNote(note)}
-        onDelete={(id) => void handleDelete(id)}
-        onAdd={() => setAddModalOpened(true)}
-        onImportClick={handleTriggerImport}
-        onReload={reloadNotes}
-      />
-    </Box>
+    <div className={`${classes.page} readable-surfaces`}>
+      <header className={classes.header}>
+        <span className={classes.headerIcon}>
+          <IconNotebook size={22} stroke={1.75} />
+        </span>
+        <div className={classes.headerText}>
+          <h1 className={classes.title}>Notes</h1>
+          <p className={`${classes.subtitle} ${classes.muted}`}>
+            {characterNotes.length} note{characterNotes.length === 1 ? "" : "s"}
+            {latest && ` · updated ${timeAgo(latest)}`}
+          </p>
+        </div>
+        <div className={classes.headerActions}>
+          <Tooltip label="Import a Markdown file">
+            <button type="button" className={classes.iconButton} onClick={() => fileInputRef.current?.click()} aria-label="Import a Markdown file">
+              <IconFileImport size={18} />
+            </button>
+          </Tooltip>
+          <button type="button" className={classes.primaryButton} onClick={() => openEditor(null)}>
+            <IconPlus size={16} />
+            <span className={classes.buttonLabel}>New note</span>
+          </button>
+        </div>
+        <input ref={fileInputRef} type="file" accept=".md,.markdown,text/markdown,.txt" hidden onChange={(e) => void importFile(e)} />
+      </header>
+
+      {characterNotes.length > 0 && (
+        <div className={classes.toolbar}>
+          <TextInput
+            aria-label="Search notes"
+            placeholder="Search notes"
+            leftSection={<IconSearch size={15} />}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+          />
+          {allTags.length > 0 && (
+            <div className={classes.tags} role="group" aria-label="Filter by tag">
+              {allTags.map((tag) => (
+                <button key={tag} type="button" className={classes.tag} aria-pressed={activeTags.includes(tag)} onClick={() => toggleTag(tag)}>
+                  #{tag}
+                </button>
+              ))}
+              {activeTags.length > 0 && (
+                <button type="button" className={`${classes.clearTags} ${classes.muted}`} onClick={() => setActiveTags([])}>
+                  Clear
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {loading && !characterNotes.length ? (
+        <Stack gap="sm">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} height={96} radius={12} />
+          ))}
+        </Stack>
+      ) : !characterNotes.length ? (
+        <div className={classes.empty}>
+          <span className={classes.headerIcon}>
+            <IconNotebook size={22} stroke={1.75} />
+          </span>
+          <p className={classes.emptyTitle}>No notes yet</p>
+          <p className={`${classes.emptyText} ${classes.muted}`}>
+            Keep session recaps, NPCs and clues here. Notes support Markdown, and #tags make them easy to filter.
+          </p>
+          <button type="button" className={classes.primaryButton} onClick={() => openEditor(null)}>
+            <IconPlus size={16} /> Write your first note
+          </button>
+        </div>
+      ) : !visible.length ? (
+        <div className={classes.empty}>
+          <p className={classes.emptyTitle}>No matching notes</p>
+          <p className={`${classes.emptyText} ${classes.muted}`}>Try another search or clear the tag filter.</p>
+        </div>
+      ) : (
+        <>
+          {pinned.length > 0 && (
+            <section className={classes.section}>
+              <h2 className={`${classes.sectionLabel} ${classes.muted}`}>
+                <IconPin size={13} /> Pinned
+              </h2>
+              {pinned.map(renderCard)}
+            </section>
+          )}
+          {others.length > 0 && (
+            <section className={classes.section}>
+              {pinned.length > 0 && (
+                <h2 className={`${classes.sectionLabel} ${classes.muted}`}>{filtering ? "Other matches" : "All notes"}</h2>
+              )}
+              {others.map(renderCard)}
+            </section>
+          )}
+        </>
+      )}
+
+      <NoteEditorModal opened={editorOpen} note={editorNote} onClose={() => setEditorOpen(false)} />
+
+      <Modal
+        opened={!!deleting}
+        onClose={() => !removing && setDeleting(null)}
+        title={<span className={classes.dialogTitle}>Delete note?</span>}
+        size="sm"
+        centered
+        classNames={{ content: classes.dialog }}
+      >
+        <Text size="sm" mb="lg" className={classes.muted}>
+          “{deleting?.title || "Untitled"}” will be deleted. This can't be undone.
+        </Text>
+        <div className={classes.dialogFooterButtons}>
+          <button type="button" className={classes.secondaryButton} onClick={() => setDeleting(null)} disabled={removing}>
+            Cancel
+          </button>
+          <button type="button" className={classes.dangerButton} onClick={() => void confirmDelete()} disabled={removing}>
+            Delete
+          </button>
+        </div>
+      </Modal>
+    </div>
   );
 }
