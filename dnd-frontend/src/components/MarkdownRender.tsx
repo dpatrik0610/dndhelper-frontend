@@ -67,9 +67,17 @@ const BLOCKQUOTE_STYLE: CSSProperties = {
   boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
 };
 
-const TABLE_STYLE: CSSProperties = {
+// Wide tables scroll sideways instead of squeezing their columns.
+const TABLE_SCROLL_STYLE: CSSProperties = {
+  overflowX: "auto",
   marginTop: 6,
   marginBottom: 6,
+};
+
+// Undo the wrapper's `overflowWrap: anywhere`, which broke squeezed cells letter by letter.
+const TABLE_STYLE: CSSProperties = {
+  wordBreak: "normal",
+  overflowWrap: "normal",
 };
 
 const TABLE_HEADER_CELL_STYLE: CSSProperties = {
@@ -118,6 +126,15 @@ const TAG_BADGE_STYLE = {
 };
 
 // --- Helpers ---
+
+type HastNode = { type: string; value?: string; children?: HastNode[] };
+
+const hastText = (node?: HastNode): string =>
+  node?.type === "text" ? node.value ?? "" : (node?.children ?? []).map(hastText).join("");
+
+/** react-markdown passes every component its hast `node`; spread onto an element it renders as node="[object Object]". */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const withoutNode = <T extends { node?: unknown }>({ node: _node, ...rest }: T) => rest;
 
 const escapeRegex = (value: string) =>
   value.replace(/[.*+?^${}()|[\\]\\/g, "\\$&");
@@ -206,7 +223,7 @@ export function MarkdownRenderer({
         rehypePlugins={[rehypeKatex]}
         components={{
           p: ({ children, ...props }) => (
-            <div style={PARAGRAPH_STYLE} {...props}>
+            <div style={PARAGRAPH_STYLE} {...withoutNode(props)}>
               <Text
                 span
                 size="sm"
@@ -225,7 +242,7 @@ export function MarkdownRenderer({
               fw={800}
               tt="uppercase"
               style={HEADING_BASE_STYLE}
-              {...props}
+              {...withoutNode(props)}
             >
               {transformChildren(children, highlightQuery)}
             </Text>
@@ -237,7 +254,7 @@ export function MarkdownRenderer({
               fw={700}
               tt="uppercase"
               style={HEADING_BASE_STYLE}
-              {...props}
+              {...withoutNode(props)}
             >
               {transformChildren(children, highlightQuery)}
             </Text>
@@ -249,7 +266,7 @@ export function MarkdownRenderer({
               fw={700}
               tt="uppercase"
               style={HEADING_BASE_STYLE}
-              {...props}
+              {...withoutNode(props)}
             >
               {transformChildren(children, highlightQuery)}
             </Text>
@@ -260,7 +277,7 @@ export function MarkdownRenderer({
             <List
               size="sm"
               styles={{ root: { margin: 0, paddingLeft: "1rem" } }}
-              {...props}
+              {...withoutNode(props)}
             >
               {children}
             </List>
@@ -273,7 +290,7 @@ export function MarkdownRenderer({
               type="ordered"
               size="sm"
               styles={{ root: { margin: 0, paddingLeft: "1rem" } }}
-              {...props}
+              {...withoutNode(props)}
             >
               {children}
             </List>
@@ -287,37 +304,30 @@ export function MarkdownRenderer({
               target="_blank"
               rel="noopener noreferrer"
               size="sm"
-              {...props}
+              {...withoutNode(props)}
             >
               {children}
             </Anchor>
           ),
 
-          code: (props) => {
-            const { inline, children } = props as {
-              inline?: boolean;
-              children?: ReactNode;
-            };
+          // react-markdown v10 has no `inline` flag. Code blocks arrive wrapped in <pre>, which renders the whole block
+          // from its source text, so `code` only ever renders inline code.
+          pre: ({ node }) => (
+            <Code
+              block
+              fz="xs"
+              maw="100%"
+              style={{ whiteSpace: "pre-wrap" }}
+            >
+              {hastText(node).replace(/\n$/, "")}
+            </Code>
+          ),
 
-            if (inline) {
-              return (
-                <Code component="span" fz="xs">
-                  {children}
-                </Code>
-              );
-            }
-
-            return (
-              <Code
-                block
-                fz="xs"
-                maw="100%"
-                style={{ whiteSpace: "pre-wrap" }}
-              >
-                {children}
-              </Code>
-            );
-          },
+          code: ({ children }) => (
+            <Code component="span" fz="xs">
+              {children}
+            </Code>
+          ),
 
           blockquote: ({ children, ...props }) =>
             hasRenderableContent(children) ? (
@@ -330,7 +340,7 @@ export function MarkdownRenderer({
                   root: { gap: 8, fontSize: 18, lineHeight: 1.5, paddingTop: 2 },
                   icon: { marginTop: 2 },
                 }}
-                {...props}
+                {...withoutNode(props)}
               >
                 {children}
               </Blockquote>
@@ -349,30 +359,37 @@ export function MarkdownRenderer({
           hr: (props) => (
             <Divider
               my={6}
-              {...props}
+              {...withoutNode(props)}
             />
           ),
 
           table: (props) => (
-            <Table
-              striped
-              highlightOnHover
-              withTableBorder
-              withColumnBorders
-              style={TABLE_STYLE}
-              {...props}
-            />
+            <div style={TABLE_SCROLL_STYLE}>
+              <Table
+                striped
+                highlightOnHover
+                withTableBorder
+                withColumnBorders
+                style={TABLE_STYLE}
+                {...withoutNode(props)}
+              />
+            </div>
           ),
-          th: (props) => (
+          // Mantine's stripes and hover hang off its own row classes, so the sections and rows need its parts too.
+          thead: (props) => <Table.Thead {...withoutNode(props)} />,
+          tbody: (props) => <Table.Tbody {...withoutNode(props)} />,
+          tr: (props) => <Table.Tr {...withoutNode(props)} />,
+          // `style` carries the column alignment (:---:), merged so it doesn't wipe the padding.
+          th: ({ style, ...props }) => (
             <Table.Th
-              style={TABLE_HEADER_CELL_STYLE}
-              {...props}
+              {...withoutNode(props)}
+              style={{ ...TABLE_HEADER_CELL_STYLE, ...style }}
             />
           ),
-          td: (props) => (
+          td: ({ style, ...props }) => (
             <Table.Td
-              style={TABLE_CELL_STYLE}
-              {...props}
+              {...withoutNode(props)}
+              style={{ ...TABLE_CELL_STYLE, ...style }}
             />
           ),
         }}
