@@ -5,6 +5,7 @@ import { handleInventoryChange } from "./handlers/inventoryChangeHandler";
 import { handleShopChange } from "./handlers/shopChangeHandler";
 import { handleSellRequestChange } from "./handlers/sellRequestChangeHandler";
 import { handleQuestChange } from "./handlers/questChangeHandler";
+import { loadSpells } from "@utils/loadSpells";
 
 export class EntitySyncManager {
   static handleEntityChange(event: EntityChangeEvent) {
@@ -33,6 +34,12 @@ export class EntitySyncManager {
         break;
 
       case "Encounter":
+        break;
+
+      // The superadmin promoted (or moved) core content: refresh the cached spell list. The server decides
+      // whether the current campaign imports core spells, so a plain reload is enough.
+      case "CoreContent":
+        if (event.data?.type === "Spells") void loadSpells();
         break;
 
       default:

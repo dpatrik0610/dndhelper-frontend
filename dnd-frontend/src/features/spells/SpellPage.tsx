@@ -31,9 +31,11 @@ export default function SpellPage() {
   // null = closed, "new" = create, otherwise the spell being edited.
   const [editing, setEditing] = useState<Spell | "new" | null>(null);
 
+  // Show the cached list at once, but always refresh it: core spells promoted or imported since then
+  // must show up without a manual reload.
   useEffect(() => {
-    if (spellNames.length === 0) void loadSpells();
-  }, [spellNames.length]);
+    void loadSpells();
+  }, []);
 
   // URL is the source of truth for which spell is open.
   const urlSpell = spellName ? spellNames.find((s) => s.name === spellName) : undefined;

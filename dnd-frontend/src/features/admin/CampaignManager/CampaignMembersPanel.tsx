@@ -13,6 +13,7 @@ import {
 } from "@services/campaignService";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
+import { loadSpells } from "@utils/loadSpells";
 
 const ROLE_OPTIONS = [CampaignRoles.Dm, CampaignRoles.Player];
 
@@ -137,7 +138,9 @@ export function CampaignMembersPanel() {
       <Chip.Group
         multiple
         value={campaign.coreImports ?? []}
-        onChange={(types) => apply(() => setCampaignCoreImports(campaign.id, types as CoreContentType[]), "Core imports saved")}
+        onChange={(types) =>
+          apply(() => setCampaignCoreImports(campaign.id, types as CoreContentType[]), "Core imports saved").then(() => loadSpells())
+        }
       >
         <Group gap="xs" mt="xs">
           {CORE_CONTENT_TYPES.map((t) => (
