@@ -16,7 +16,7 @@ import {
   IconSearch,
   IconAlertCircle,
 } from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
+import { useCurrentCampaignId } from "@store/campaign/campaignSelectors";
 import { showNotification } from "@components/Notification/Notification";
 import { useCurrentCharacter, useCharacterList } from "@store/character/characterSelectors";
 import { useQuestList, useQuestLoading, useQuestActions } from "@store/quest/questSelectors";
@@ -35,7 +35,6 @@ import { GlassyTextarea } from "@components/common/GlassyTextarea";
 
 export default function QuestsPage() {
   const character = useCurrentCharacter();
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   const quests = useQuestList();
@@ -94,21 +93,9 @@ export default function QuestsPage() {
     involvedCharacterIds: [],
   });
 
-  // Verification and redirection if no character
-  useEffect(() => {
-    if (!character) {
-      showNotification({
-        id: "no-character-selected-quests",
-        title: "No Character Selected",
-        message: "Please select a character to view quests.",
-        color: SectionColor.Red,
-        withBorder: true,
-      });
-      navigate("/home", { replace: true });
-    }
-  }, [character, navigate]);
-
-  const campaignId = character?.campaignId;
+  // Quests belong to the campaign picked in the sidebar; a character is only needed for personal quests,
+  // so a DM without one still sees the campaign's quests.
+  const campaignId = useCurrentCampaignId();
 
   // Load campaign quests on mount / when campaignId changes
   useEffect(() => {
@@ -119,14 +106,13 @@ export default function QuestsPage() {
 
   // Group and filter quests
   const filteredQuests = useMemo(() => {
-    if (!character) return [];
     return quests.filter((q) => {
       // 1. Hide unavailable quests
       if (q.status === QuestStatus.Unavailable) return false;
 
       // 2. Separate Personal and Campaign with complete security isolation
       const isPersonal = q.type === QuestType.Personal;
-      const isParticipant = q.involvedCharacterIds?.includes(character.id || "") || false;
+      const isParticipant = !!character?.id && (q.involvedCharacterIds?.includes(character.id) ?? false);
 
       // Rule: If it's a personal quest, the active character MUST be a participant to see it under any circumstances
       if (isPersonal && !isParticipant) return false;
@@ -315,10 +301,6 @@ export default function QuestsPage() {
     borderRadius: isMobile ? "0" : "12px",
   };
 
-  if (!character) {
-    return null;
-  }
-
   return (
     <Box p={isMobile ? 0 : "md"} style={{ minHeight: "100%", position: "relative" }}>
       {/* Page Header */}
@@ -335,7 +317,7 @@ export default function QuestsPage() {
         >
           Quests
         </Text>
-        {campaignId && activeTab === "personal" && (
+        {campaignId && character && activeTab === "personal" && (
           <Button
             onClick={() => handleOpenQuestModal()}
             leftSection={<IconPlus size={16} />}
@@ -357,10 +339,10 @@ export default function QuestsPage() {
           <Stack align="center" gap="md">
             <IconAlertCircle size={48} color="var(--theme-color-accent-primary, #f59e0b)" />
             <Text size="md" fw={300} style={{ letterSpacing: "1px", textAlign: "center" }}>
-              This character is not currently assigned to a campaign.
+              No campaign selected.
             </Text>
             <Text size="xs" c="var(--theme-color-text-secondary)" style={{ textAlign: "center" }}>
-              Please speak with your Dungeon Master to register this character to a campaign to enable Quests.
+              Pick or join a campaign at the top of the sidebar to see its quests.
             </Text>
           </Stack>
         </Paper>
@@ -408,7 +390,9 @@ export default function QuestsPage() {
                 <Stack align="center" gap="sm">
                   <IconCompass size={32} color="var(--theme-color-text-secondary, rgba(255,255,255,0.4))" />
                   <Text size="sm" c="var(--theme-color-text-secondary)">
-                    No quests found matching your criteria.
+                    {activeTab === "personal" && !character
+                      ? "Personal quests belong to a character. Pick one to see them."
+                      : "No quests found matching your criteria."}
                   </Text>
                 </Stack>
               </Center>
