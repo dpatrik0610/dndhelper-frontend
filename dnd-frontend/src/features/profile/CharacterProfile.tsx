@@ -60,7 +60,7 @@ export default function CharacterProfile() {
   if (!character) return null;
 
   return (
-    <Box p={isMobile ? 0 : "md"} m={isMobile ? 0 : "0 auto"} maw={isMobile ? "100%" : 900}>
+    <Box className="profile-page" p={isMobile ? 0 : "md"} m={isMobile ? 0 : "0 auto"} maw={isMobile ? "100%" : 900}>
       <CharacterHeader />
 
       <Tabs

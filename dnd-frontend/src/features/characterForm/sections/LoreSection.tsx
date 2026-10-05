@@ -24,7 +24,16 @@ export function LoreSection({ noBox = false }: { noBox?: boolean }) {
         <TextInput label="Hair" value={characterForm.hair} classNames={glass} onChange={(e) => setCharacterForm({ hair: e.currentTarget.value })} />
       </Group>
 
-      <Textarea autosize label="Appearance" classNames={glass} value={characterForm.appearance} onChange={(e) => setCharacterForm({ appearance: e.currentTarget.value })} />
+      <Textarea
+        autosize
+        minRows={3}
+        label="Appearance"
+        description="Supports Markdown: **bold**, *italic*, - lists, # headings"
+        placeholder="Tall, lean, a scar across the left brow..."
+        classNames={glass}
+        value={characterForm.appearance}
+        onChange={(e) => setCharacterForm({ appearance: e.currentTarget.value })}
+      />
       <Textarea autosize label="Personality Traits" classNames={glass} value={characterForm.personalityTraits} onChange={(e) => setCharacterForm({ personalityTraits: e.currentTarget.value })} />
       <Textarea autosize label="Ideals" classNames={glass} value={characterForm.ideals} onChange={(e) => setCharacterForm({ ideals: e.currentTarget.value })} />
       <Textarea autosize label="Bonds" classNames={glass} value={characterForm.bonds} onChange={(e) => setCharacterForm({ bonds: e.currentTarget.value })} />

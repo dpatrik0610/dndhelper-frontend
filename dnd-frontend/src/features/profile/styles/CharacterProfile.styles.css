@@ -1,3 +1,17 @@
+/* Profile surfaces are more solid than the site default (themes use ~60% panels, ~50% cards), so text stays readable
+   over every animated background. Built from each theme's own opaque panel colour, so the tint is kept. */
+.profile-page {
+  --theme-bg-panel: color-mix(in srgb, var(--theme-bg-panel-opaque, #11131b) 84%, transparent);
+  --theme-bg-card: color-mix(in srgb, var(--theme-bg-panel-opaque, #11131b) 62%, transparent);
+}
+
+/* Phones have no blur behind panels (styles/theme.css) and already use a near-opaque panel; don't undercut it. */
+@media (max-width: 768px) {
+  .profile-page {
+    --theme-bg-panel: color-mix(in srgb, var(--theme-bg-panel-opaque, #11131b) 95%, transparent);
+  }
+}
+
 .profile-tabs-list {
   background: var(--theme-bg-panel, rgba(15, 15, 15, 0.45));
   backdrop-filter: blur(24px) saturate(130%);

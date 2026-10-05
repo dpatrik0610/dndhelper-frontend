@@ -1,58 +1,107 @@
-import { ExpandableSection } from "@components/ExpandableSection";
-import { StatBox } from "@features/profile/components/StatBox";
-import { Group, Stack, Text } from "@mantine/core";
-import { SectionColor } from "@appTypes/SectionColor";
+import type { ReactNode } from "react";
+import {
+  IconAlertTriangle,
+  IconFlag,
+  IconId,
+  IconLink,
+  IconMasksTheater,
+  IconMoodSmile,
+  IconScript,
+  IconUserCircle,
+} from "@tabler/icons-react";
+import { MarkdownRenderer } from "@components/MarkdownRender";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
-import { DividerWithLabel } from "@components/common/DividerWithLabel";
+import classes from "./ExtraInfo.module.css";
 
+function Panel({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
+  return (
+    <section className={classes.panel}>
+      <h3 className={classes.heading}>
+        <span className={classes.headingIcon}>{icon}</span>
+        {title}
+      </h3>
+      {children}
+    </section>
+  );
+}
+
+const Empty = ({ children }: { children: ReactNode }) => <p className={`${classes.text} ${classes.empty}`}>{children}</p>;
 
 export function ExtraInfo() {
   const character = useCurrentCharacter()!;
+
+  const attributes = [
+    ["Background", character.background],
+    ["Age", character.age ? String(character.age) : ""],
+    ["Height", character.height],
+    ["Weight", character.weight],
+    ["Eyes", character.eyes],
+    ["Hair", character.hair],
+    ["Skin", character.skin],
+  ].filter(([, value]) => value?.trim());
+
+  const traits = [
+    { label: "Personality traits", value: character.personalityTraits, Icon: IconMoodSmile },
+    { label: "Ideals", value: character.ideals, Icon: IconFlag },
+    { label: "Bonds", value: character.bonds, Icon: IconLink },
+    { label: "Flaws", value: character.flaws, Icon: IconAlertTriangle },
+  ];
+
+  // Stored one line per entry; blank lines were paragraph breaks.
+  const backstory = (character.backstory ?? []).map((line) => line.trim()).filter(Boolean);
+
   return (
-    <ExpandableSection
-      title="Additional Info"
-      color={SectionColor.Teal}
-      transparent
-      defaultOpen={true}
-      style={{
-        background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.45))",
-        backdropFilter: "blur(24px) saturate(130%)",
-        WebkitBackdropFilter: "blur(24px) saturate(130%)",
-        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-        borderRadius: "16px",
-        boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
-        transition: "all 0.25s ease-in-out",
-      }}
-    >
-      <Stack gap="sm">
-        {character.background ? <StatBox label="Background" value={character.background} color="gray" size="sm"/> : null}
-      </Stack>
+    <div className={classes.stack}>
+      <Panel icon={<IconId size={16} />} title="Profile">
+        {attributes.length ? (
+          <dl className={classes.attributes}>
+            {attributes.map(([label, value]) => (
+              <div key={label} className={classes.attribute}>
+                <dt className={classes.label}>{label}</dt>
+                <dd className={classes.value}>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <Empty>No details yet.</Empty>
+        )}
+      </Panel>
 
-      <DividerWithLabel label={"Physical Attributes"} thickness="2px" color={SectionColor.Orange}/>
-      <Stack gap="xs" mt="sm">
-        <StatBox label="Eyes" value={character.eyes ?? null} color="gray" size="sm"/>
-        <StatBox label="Hair" value={character.hair ?? null} color="gray" size="sm"/>
-        <StatBox label="Height" value={character.height ?? null} color="gray" size="sm"/>
-        <StatBox label="Weight" value={character.weight ?? null} color="gray" size="sm"/>
-        <StatBox label="Age" value={character.age ?? null} color="gray" size="sm"/>
-        <StatBox label="Skin" value={character.skin ?? null} color="gray" size="sm"/>
-        <StatBox label="Appearance" value={character.appearance ?? null} color="gray" size="sm"/>
-      </Stack>
+      <Panel icon={<IconUserCircle size={16} />} title="Appearance">
+        {character.appearance?.trim() ? (
+          <MarkdownRenderer content={character.appearance} textColor="var(--theme-color-text-primary, #fff)" />
+        ) : (
+          <Empty>No description yet.</Empty>
+        )}
+      </Panel>
 
-      <DividerWithLabel label={"Personality"} thickness="2px" color={SectionColor.Orange}/>
-      <Stack gap="xs" mt="sm">
-        <StatBox label="Personality Traits" value={character.personalityTraits ?? null} color="gray" size="sm"/>
-        <StatBox label="Ideals" value={character.ideals ?? null} color="gray" size="sm"/>
-        <StatBox label="Bonds" value={character.bonds ?? null} color="gray" size="sm"/>
-        <StatBox label="Flaws" value={character.flaws ?? null} color="gray" size="sm"/>
-      </Stack>
+      <Panel icon={<IconMasksTheater size={16} />} title="Personality">
+        <div className={classes.traits}>
+          {traits.map(({ label, value, Icon }) => (
+            <div key={label} className={classes.trait}>
+              <span className={classes.traitLabel}>
+                <Icon size={14} />
+                {label}
+              </span>
+              {value?.trim() ? <p className={classes.text}>{value}</p> : <Empty>—</Empty>}
+            </div>
+          ))}
+        </div>
+      </Panel>
 
-      <DividerWithLabel label={"Backstory"} thickness="2px" color={SectionColor.Orange}/>
-      <Group lts={1} ta={"center"} justify="center">
-        {character.backstory?.map((line, idx) => (
-          <Text key={idx}> {line} </Text>
-        ))}
-      </Group>
-    </ExpandableSection>
+      <Panel icon={<IconScript size={16} />} title="Backstory">
+        {backstory.length ? (
+          <div className={classes.backstory}>
+            {backstory.map((line, i) => (
+              <p key={i} className={classes.text}>
+                {line}
+              </p>
+            ))}
+          </div>
+        ) : (
+          <Empty>No backstory yet.</Empty>
+        )}
+      </Panel>
+    </div>
   );
 }
