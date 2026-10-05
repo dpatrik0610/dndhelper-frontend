@@ -63,6 +63,11 @@
   margin: 0 -6px;
 }
 
+/* In the scroll area the bleed would run the rows (and their school names) under the scrollbar. */
+.listScroll .list {
+  margin: 0;
+}
+
 .groupHeading {
   position: sticky;
   top: 0;

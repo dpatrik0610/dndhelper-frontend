@@ -128,7 +128,7 @@ export function SpellIndex({ activeName, onSelect, scrollHeight }: SpellIndexPro
       </Chips>
 
       {scrollHeight ? (
-        <ScrollArea h={scrollHeight} type="auto" offsetScrollbars>
+        <ScrollArea h={scrollHeight} type="auto" offsetScrollbars className={classes.listScroll}>
           {list}
         </ScrollArea>
       ) : (

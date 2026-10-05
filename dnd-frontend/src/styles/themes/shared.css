@@ -86,12 +86,12 @@
   }
 }
 
-/* Mantine scroll areas in modals: the theme accent instead of Mantine's gray thumb. */
-:root[class*="theme-"] .mantine-Modal-content .mantine-ScrollArea-thumb {
+/* Mantine scroll areas (modals, spellbook, chat, …): the theme accent instead of Mantine's gray thumb. */
+:root[class*="theme-"] .mantine-ScrollArea-thumb {
   background-color: color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 55%, transparent);
 }
 
-:root[class*="theme-"] .mantine-Modal-content .mantine-ScrollArea-thumb:hover {
+:root[class*="theme-"] .mantine-ScrollArea-thumb:hover {
   background-color: color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 80%, transparent);
 }
 
