@@ -31,7 +31,7 @@ import CustomBadge from "@components/common/CustomBadge";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { formatCostToDisplay } from "@utils/currencyConverter";
-import { equipmentTierTheme } from "./styles/equipmentTheme";
+import { tierTheme } from "./styles/equipmentTheme";
 import classes from "./EquipmentModal.module.css";
 import { useIsAdmin, useToken } from "@store/auth/authSelectors";
 import { useIsMobile } from "@hooks/useIsMobile";
@@ -99,10 +99,7 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
   const descriptionContent = equipment?.description?.join("\n\n") ?? "";
   const dmDescriptionContent = equipment && 'dmDescription' in equipment ? equipment.dmDescription?.join("\n\n") ?? "" : "";
 
-  const tierTheme =
-    equipment?.tier && equipmentTierTheme[equipment.tier as keyof typeof equipmentTierTheme]
-      ? equipmentTierTheme[equipment.tier as keyof typeof equipmentTierTheme]
-      : equipmentTierTheme.default;
+  const theme = tierTheme(equipment?.tier);
 
   return (
     <>
@@ -149,10 +146,10 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
           body: classes.modalBody,
         }}
         style={{
-          "--tier-glow": tierTheme.glow,
-          "--tier-gradient": tierTheme.gradient,
-          "--tier-accent": `var(--mantine-color-${tierTheme.accent}-9)`,
-          "--tier-accent-bg": `var(--mantine-color-${tierTheme.accent}-filled)`,
+          "--tier-glow": theme.glow,
+          "--tier-gradient": theme.gradient,
+          "--tier-accent": `var(--mantine-color-${theme.accent}-9)`,
+          "--tier-accent-bg": `var(--mantine-color-${theme.accent}-filled)`,
         } as React.CSSProperties}
       >
         {loading ? (
@@ -168,19 +165,19 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
             {(equipment.weight != null || (isAdmin && 'cost' in equipment && equipment.cost) || equipment.damage || equipment.range || equipment.tier) && (
               <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="md">
                 {equipment.weight != null && (
-                  <StatItem icon={<IconWeight size={20} />} color={tierTheme.accent} label="Weight" value={`${equipment.weight} lb`} />
+                  <StatItem icon={<IconWeight size={20} />} color={theme.accent} label="Weight" value={`${equipment.weight} lb`} />
                 )}
                 {isAdmin && 'cost' in equipment && equipment.cost && (
-                  <StatItem icon={<IconCoins size={20} />} color={tierTheme.accent} label="Cost" value={formatCostToDisplay(equipment.cost)} />
+                  <StatItem icon={<IconCoins size={20} />} color={theme.accent} label="Cost" value={formatCostToDisplay(equipment.cost)} />
                 )}
                 {equipment.damage && (
-                  <StatItem icon={<IconSwords size={20} />} color={tierTheme.accent} label="Damage" value={`${equipment.damage.damageDice} (${equipment.damage.damageType.name})`} />
+                  <StatItem icon={<IconSwords size={20} />} color={theme.accent} label="Damage" value={`${equipment.damage.damageDice} (${equipment.damage.damageType.name})`} />
                 )}
                 {equipment.range && (
-                  <StatItem icon={<IconRulerMeasure size={20} />} color={tierTheme.accent} label="Range" value={`Norm: ${equipment.range.normal} ft` + (equipment.range.long ? ` / Long: ${equipment.range.long} ft` : "")} />
+                  <StatItem icon={<IconRulerMeasure size={20} />} color={theme.accent} label="Range" value={`Norm: ${equipment.range.normal} ft` + (equipment.range.long ? ` / Long: ${equipment.range.long} ft` : "")} />
                 )}
                 {equipment.tier && (
-                  <StatItem icon={<IconCategory size={20} />} color={tierTheme.accent} label="Tier" value={equipment.tier} />
+                  <StatItem icon={<IconCategory size={20} />} color={theme.accent} label="Tier" value={equipment.tier} />
                 )}
               </SimpleGrid>
             )}

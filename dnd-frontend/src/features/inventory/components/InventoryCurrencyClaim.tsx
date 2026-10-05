@@ -14,7 +14,6 @@ interface InventoryCurrencyClaimProps {
 }
 
 export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimProps) {
-  const [claimed, setClaimed] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const token = getAuthTokenSafe()!;
@@ -48,8 +47,6 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
         message: "Money money money!",
         color: "green",
       });
-
-      setClaimed(true);
     } catch (error: unknown) {
       showNotification({
         title: "Error",
@@ -61,8 +58,8 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
     }
   };
 
-  // No display if nothing to claim
-  if (claimed || !inventory?.currencies?.length) return null;
+  // Hidden once claimed: the store empties the inventory's currencies.
+  if (!inventory?.currencies?.length) return null;
 
   return (
     <Box

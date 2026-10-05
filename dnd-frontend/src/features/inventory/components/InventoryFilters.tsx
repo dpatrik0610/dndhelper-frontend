@@ -1,16 +1,28 @@
-import { Group, TextInput } from "@mantine/core";
-import { SegmentedControl } from "@mantine/core";
+import { Group, Select, TextInput, SegmentedControl } from "@mantine/core";
+import { IconSearch } from "@tabler/icons-react";
+import type { InventorySort, InventoryViewMode } from "@features/inventory/hooks/useInventoryFilters";
+
+const SORT_OPTIONS: { value: InventorySort; label: string }[] = [
+  { value: "name", label: "Name" },
+  { value: "tier", label: "Rarity" },
+  { value: "weight", label: "Weight" },
+  { value: "quantity", label: "Quantity" },
+];
 
 interface InventoryFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  viewMode: "list" | "cards";
-  onViewModeChange: (mode: "list" | "cards") => void;
+  sortBy: InventorySort;
+  onSortChange: (sort: InventorySort) => void;
+  viewMode: InventoryViewMode;
+  onViewModeChange: (mode: InventoryViewMode) => void;
 }
 
 export function InventoryFilters({
   searchTerm,
   onSearchChange,
+  sortBy,
+  onSortChange,
   viewMode,
   onViewModeChange,
 }: InventoryFiltersProps) {
@@ -18,16 +30,27 @@ export function InventoryFilters({
     <Group gap="xs" align="flex-end" wrap="wrap">
       <TextInput
         label="Search items"
-        placeholder="Search by name"
+        placeholder="Name, tag or note"
+        leftSection={<IconSearch size={14} />}
         value={searchTerm}
         onChange={(e) => onSearchChange(e.currentTarget.value)}
         classNames={{ input: "glassy-input", label: "glassy-label" }}
         style={{ flex: 1, minWidth: 200 }}
       />
 
+      <Select
+        label="Sort by"
+        data={SORT_OPTIONS}
+        value={sortBy}
+        onChange={(value) => value && onSortChange(value as InventorySort)}
+        allowDeselect={false}
+        classNames={{ input: "glassy-input", label: "glassy-label" }}
+        w={130}
+      />
+
       <SegmentedControl
         value={viewMode}
-        onChange={(value) => onViewModeChange(value as "list" | "cards")}
+        onChange={(value) => onViewModeChange(value as InventoryViewMode)}
         data={[
           { label: "List", value: "list" },
           { label: "Cards", value: "cards" },

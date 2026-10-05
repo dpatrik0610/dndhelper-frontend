@@ -1,7 +1,6 @@
 ﻿import { Group, Text } from "@mantine/core";
 import CustomBadge from "@components/common/CustomBadge";
 import { SectionColor } from "@appTypes/SectionColor";
-import { randomId } from "@mantine/hooks";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
 
 export interface InventoryCurrencyBoxProps{
@@ -24,7 +23,7 @@ export function InventoryCurrencyBox({inventoryId} : InventoryCurrencyBoxProps) 
         <Group>
             {hasAnyCurrencies ? currencies.map((currency) => (
                 <CustomBadge
-                key={randomId()}
+                key={currency.currencyCode}
                 label={`${currency.amount} ${currency.currencyCode}`}
                 color={currencyColor(currency.currencyCode)}
                 variant = "light"

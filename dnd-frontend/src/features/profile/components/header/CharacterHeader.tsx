@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stack, Box, Group, Divider } from "@mantine/core";
+import { Stack, Box, Group, Divider, Modal, Text, Button } from "@mantine/core";
+import { IconMoon } from "@tabler/icons-react";
 import { useCurrentCharacter, useCharacterCoreActions, useCharacterCombatActions } from "@store/character/characterSelectors";
 import { longrest, updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { loadCharacters } from "@utils/loadCharacter";
@@ -27,6 +28,8 @@ export function CharacterHeader() {
   const [hpOpened, setHpOpened] = useState(false);
   const [moneyOpened, setMoneyOpened] = useState(false);
   const [rollOpened, setRollOpened] = useState(false);
+  const [restOpened, setRestOpened] = useState(false);
+  const [resting, setResting] = useState(false);
 
   const [detailsOpened, setDetailsOpened] = useState(false);
   const [selectedCondition, setSelectedCondition] = useState<string | null>(null);
@@ -56,6 +59,7 @@ export function CharacterHeader() {
 
   async function handleLongrest() {
     if (!character?.id) return;
+    setResting(true);
     try {
       await longrest(character.id);
       await loadCharacters();
@@ -70,6 +74,9 @@ export function CharacterHeader() {
         message: String(err),
         color: "red",
       });
+    } finally {
+      setResting(false);
+      setRestOpened(false);
     }
   }
 
@@ -170,12 +177,13 @@ export function CharacterHeader() {
               </Box>
             </Stack>
           </Group>
-          <Divider style={{ borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.08))" }} />
+          {/* On phones the actions float at the bottom right instead. */}
+          {!isMobile && <Divider style={{ borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.08))" }} />}
           <ActionRibbonPanel
             character={character}
             conditionsCount={conditionsCount}
             onNavigate={navigate}
-            onLongrest={handleLongrest}
+            onLongrest={() => setRestOpened(true)}
             onOpenAddCondition={() => setAddConditionOpened(true)}
             onRemoveCondition={handleRemoveCondition}
             onOpenDetails={handleOpenDetails}
@@ -204,6 +212,21 @@ export function CharacterHeader() {
         onRemoveFromModal={handleRemoveFromModal}
         removingDetails={removingDetails}
       />
+
+      {/* Mirrors CharacterService.LongRestAsync on the backend. */}
+      <Modal opened={restOpened} onClose={() => !resting && setRestOpened(false)} title="Take a long rest?" centered size="sm">
+        <Text size="sm" mb="md">
+          {character.name || "Your character"} regains all hit points and spell slots. Temporary hit points and death saves are reset.
+        </Text>
+        <Group justify="flex-end">
+          <Button variant="light" onClick={() => setRestOpened(false)} disabled={resting}>
+            Cancel
+          </Button>
+          <Button onClick={handleLongrest} loading={resting} leftSection={<IconMoon size={16} />}>
+            Rest
+          </Button>
+        </Group>
+      </Modal>
     </>
   );
 }

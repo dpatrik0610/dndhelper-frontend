@@ -19,6 +19,8 @@ interface ExpandableSectionProps {
   animated?: boolean;
   expandable?: boolean;
   rightSection?: ReactNode;
+  /** Shows the content regardless of the user's toggle, e.g. while a search has matches inside. */
+  forceOpen?: boolean;
 }
 
 export function ExpandableSection({
@@ -35,8 +37,10 @@ export function ExpandableSection({
   animated = false,
   expandable = true,
   rightSection,
+  forceOpen = false,
 }: ExpandableSectionProps) {
-  const [opened, setOpened] = useState(defaultOpen);
+  const [userOpened, setOpened] = useState(defaultOpen);
+  const opened = forceOpen || userOpened;
 
   return (
     <Paper

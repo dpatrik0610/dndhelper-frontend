@@ -11,13 +11,11 @@ export async function loadInventories() {
     return [];
   }
 
-  const {inventories, setInventories} = useInventoryStore.getState();
-
   try {
     const response = await getInventoriesByCharacter(character.id);
-    setInventories(response);
+    useInventoryStore.getState().setInventories(response);
 
-    return inventories;
+    return response;
   } catch (error) {
     console.error("❌ Failed to load inventories:", error);
     useInventoryStore.getState().setInventories([]);

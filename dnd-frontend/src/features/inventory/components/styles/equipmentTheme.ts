@@ -60,3 +60,7 @@ export const equipmentTierTheme: Record<
         badgeColor: SectionColor.Gray,
     },
 };
+
+export function tierTheme(tier?: string) {
+    return equipmentTierTheme[tier as EquipmentTier] ?? equipmentTierTheme.default;
+}

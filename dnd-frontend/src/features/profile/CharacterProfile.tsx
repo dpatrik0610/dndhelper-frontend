@@ -12,6 +12,8 @@ import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { CharacterHeader } from "./components/header/CharacterHeader";
 
 import "./styles/CharacterProfile.styles.css"
+import tabClasses from "./styles/ProfileTabs.module.css";
+import { IconBackpack, IconListCheck, IconNotes, IconShieldHalf, IconSparkles, IconStars } from "@tabler/icons-react";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +31,16 @@ const SpellCastingBlock = lazy(() => import("./components/panels/SpellCastingBlo
 const ExtraInfo = lazy(() => import("./components/panels/ExtraInfo").then(m => ({ default: m.ExtraInfo })));
 const FeaturesPanel = lazy(() => import("./components/panels/FeaturesPanel").then(m => ({ default: m.FeaturesPanel })));
 const Inventory = lazy(() => import("@features/inventory/Inventory").then(m => ({ default: m.Inventory })));
+
+/** `short` is the phone label, where six tabs share one row. */
+const PROFILE_TABS: { value: string; label: string; short?: string; Icon: typeof IconBackpack }[] = [
+  { value: "overview", label: "Skills", Icon: IconListCheck },
+  { value: "stats", label: "Stats", Icon: IconShieldHalf },
+  { value: "spellcasting", label: "Spellcasting", short: "Spells", Icon: IconSparkles },
+  { value: "features", label: "Features", Icon: IconStars },
+  { value: "extras", label: "Extras", Icon: IconNotes },
+  { value: "inventories", label: "Inventories", short: "Items", Icon: IconBackpack },
+];
 
 function useCampaignName(campaignId: string | null) {
   const [name, setName] = useState<string>("Loading...");
@@ -91,20 +103,15 @@ export default function CharacterProfile() {
       <Tabs
         value={activeTab}
         onChange={setActiveTab}
-        variant="pills"
-        radius="md"
-        classNames={{
-          list: "profile-tabs-list",
-          tab: "profile-tab",
-        }}
+        unstyled
+        classNames={{ list: tabClasses.list, tab: tabClasses.tab, tabSection: tabClasses.icon, tabLabel: tabClasses.label }}
       >
-        <Tabs.List>
-          <Tabs.Tab value="overview">Skills</Tabs.Tab>
-          <Tabs.Tab value="stats">Stats</Tabs.Tab>
-          <Tabs.Tab value="spellcasting">Spellcasting</Tabs.Tab>
-          <Tabs.Tab value="features">Features</Tabs.Tab>
-          <Tabs.Tab value="extras">Extras</Tabs.Tab>
-          <Tabs.Tab value="inventories">Inventories</Tabs.Tab>
+        <Tabs.List aria-label="Character sections">
+          {PROFILE_TABS.map(({ value, label, short, Icon }) => (
+            <Tabs.Tab key={value} value={value} aria-label={label} leftSection={<Icon size={isMobile ? 18 : 16} stroke={1.75} />}>
+              {isMobile ? short ?? label : label}
+            </Tabs.Tab>
+          ))}
         </Tabs.List>
 
         <Suspense

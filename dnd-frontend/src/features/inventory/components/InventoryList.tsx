@@ -1,18 +1,22 @@
 import type { Inventory } from "@appTypes/Inventory/Inventory";
+import type { EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
+import type { InventorySort, InventoryViewMode } from "@features/inventory/hooks/useInventoryFilters";
 import { Stack, Title } from "@mantine/core";
 import InventoryBox from "./InventoryBox";
 
 interface InventoryListProps {
   inventories: Inventory[];
+  details: Map<string, EquipmentUserResponse>;
   searchTerm: string;
-  viewMode: "list" | "cards";
+  sortBy: InventorySort;
+  viewMode: InventoryViewMode;
 }
 
-export function InventoryList({ inventories, searchTerm, viewMode }: InventoryListProps) {
+export function InventoryList({ inventories, details, searchTerm, sortBy, viewMode }: InventoryListProps) {
   if (!inventories.length)
     return (
       <Title order={4} c="dimmed" ta="center" mt="xl">
-        No inventories found
+        This character has no inventories yet.
       </Title>
     );
 
@@ -22,11 +26,13 @@ export function InventoryList({ inventories, searchTerm, viewMode }: InventoryLi
         <InventoryBox
           key={inv.id}
           inventory={inv}
+          inventories={inventories}
+          details={details}
           searchTerm={searchTerm}
+          sortBy={sortBy}
           viewMode={viewMode}
         />
       ))}
     </Stack>
   );
 }
-

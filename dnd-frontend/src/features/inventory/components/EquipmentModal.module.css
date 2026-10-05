@@ -1,21 +1,19 @@
-.modalContent {
-  backdrop-filter: blur(24px) saturate(120%);
-  -webkit-backdrop-filter: blur(24px) saturate(120%);
+/* Opaque: the tier gradient (translucent by itself) sits on the solid panel colour. The doubled selectors beat the
+   global .glass-modal styles, which load after this module. */
+.modalContent:global(.mantine-Modal-content) {
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   border-radius: var(--mantine-radius-lg);
   border: 1px solid var(--tier-glow, rgba(255, 255, 255, 0.15));
   box-shadow: 0 16px 40px 0 var(--tier-glow, rgba(0, 0, 0, 0.4)), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
-  background: var(--tier-gradient, rgba(30, 30, 30, 0.6));
+  background: var(--tier-gradient, transparent), var(--theme-bg-panel-opaque, #11131b);
 }
 
-.modalHeader {
+.modalHeader.modalHeader:global(.mantine-Modal-header) {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: var(--tier-gradient, rgba(30, 30, 30, 0.85));
-  backdrop-filter: blur(16px) saturate(120%);
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  background: var(--tier-gradient, transparent), var(--theme-bg-panel-opaque, #11131b);
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   border-bottom: 1px solid var(--tier-glow, rgba(255, 255, 255, 0.15));

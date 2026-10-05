@@ -95,17 +95,20 @@ export const useInventoryStore = create<InventoryState & InventoryActions>()(
           ),
         })),
 
+      // Like the backend, an item that runs out is dropped rather than kept at 0.
       decrementItemQuantity: (inventoryId, equipmentId, amount = 1) =>
         set((state) => ({
           inventories: state.inventories.map((inv) =>
             inv.id === inventoryId
               ? {
                   ...inv,
-                  items: inv.items?.map((i) =>
-                    i.equipmentId === equipmentId
-                      ? { ...i, quantity: Math.max(0, (i.quantity || 0) - amount) }
-                      : i
-                  ),
+                  items: inv.items
+                    ?.map((i) =>
+                      i.equipmentId === equipmentId
+                        ? { ...i, quantity: (i.quantity || 0) - amount }
+                        : i
+                    )
+                    .filter((i) => (i.quantity ?? 1) > 0),
                 }
               : inv
           ),

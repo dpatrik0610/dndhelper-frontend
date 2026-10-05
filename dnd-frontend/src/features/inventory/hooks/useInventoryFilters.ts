@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { useIsMobile } from "@hooks/useIsMobile";
 
+export type InventoryViewMode = "list" | "cards";
+export type InventorySort = "name" | "tier" | "weight" | "quantity";
+
 export function useInventoryFilters() {
   const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"list" | "cards">(
+  const [sortBy, setSortBy] = useState<InventorySort>("name");
+  const [viewMode, setViewMode] = useState<InventoryViewMode>(
     isMobile ? "list" : "cards"
   );
   const [hasSetViewMode, setHasSetViewMode] = useState(false);
@@ -15,7 +19,7 @@ export function useInventoryFilters() {
     }
   }, [isMobile, hasSetViewMode]);
 
-  const handleViewModeChange = (mode: "list" | "cards") => {
+  const handleViewModeChange = (mode: InventoryViewMode) => {
     setHasSetViewMode(true);
     setViewMode(mode);
   };
@@ -23,6 +27,8 @@ export function useInventoryFilters() {
   return {
     searchTerm,
     setSearchTerm,
+    sortBy,
+    setSortBy,
     viewMode,
     setViewMode: handleViewModeChange,
   };

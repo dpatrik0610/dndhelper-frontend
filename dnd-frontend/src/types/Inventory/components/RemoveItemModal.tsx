@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, NumberInput, Button, Group, Text } from "@mantine/core";
 
 interface RemoveItemModalProps {
@@ -12,10 +12,15 @@ interface RemoveItemModalProps {
 export function RemoveItemModal({ opened, onClose, onConfirm, itemName, maxAmount }: RemoveItemModalProps) {
   const [amount, setAmount] = useState(1);
 
+  // Each open starts from 1, not whatever was removed last time.
+  useEffect(() => {
+    if (opened) setAmount(1);
+  }, [opened]);
+
   return (
-    <Modal opened={opened} onClose={onClose} title={`Remove from ${itemName || "inventory"}`} centered>
+    <Modal opened={opened} onClose={onClose} title={`Remove ${itemName || "item"}`} centered>
       <Text size="sm" mb="xs">
-        How many items would you like to remove?
+        How many would you like to remove?
       </Text>
 
       <NumberInput
@@ -25,6 +30,7 @@ export function RemoveItemModal({ opened, onClose, onConfirm, itemName, maxAmoun
         onChange={(val) => setAmount(Number(val) || 1)}
         placeholder="Amount"
         label="Quantity"
+        description={maxAmount ? `You have ${maxAmount}` : undefined}
         mb="md"
       />
 
@@ -32,7 +38,7 @@ export function RemoveItemModal({ opened, onClose, onConfirm, itemName, maxAmoun
         <Button variant="light" onClick={onClose}>
           Cancel
         </Button>
-        <Button color="red" onClick={() => onConfirm(amount)}>
+        <Button color="red" onClick={() => onConfirm(maxAmount ? Math.min(amount, maxAmount) : amount)}>
           Remove
         </Button>
       </Group>
