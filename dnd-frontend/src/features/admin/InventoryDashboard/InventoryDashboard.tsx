@@ -23,7 +23,7 @@ import {
 } from "@tabler/icons-react";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
@@ -72,7 +72,7 @@ export function InventoryDashboard() {
   } = useAdminInventoryStore();
 
   const { characters, loadAll: loadCharacters } = useAdminCharacterStore();
-  const { campaigns, selectedId: activeCampaignId } = useAdminCampaignStore();
+  const { campaigns, selectedId: activeCampaignId } = useCampaignStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCampaignFilter, setSelectedCampaignFilter] = useState<string | null>("all");

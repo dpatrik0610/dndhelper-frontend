@@ -10,7 +10,8 @@ export interface NavItemData {
 export interface NavSectionData {
   label?: string;
   items: NavItemData[];
-  adminOnly?: boolean;
+  /** Only for the current campaign's DM (and the superadmin). */
+  dmOnly?: boolean;
 }
 
 /** Sidebar navigation, in display order. Settings lives in the footer. */
@@ -36,7 +37,7 @@ export const navSections: NavSectionData[] = [
   },
   {
     label: "Dungeon Master",
-    adminOnly: true,
+    dmOnly: true,
     items: [{ link: "/dashboard", label: "Dashboard", icon: IconDashboard }],
   },
 ];

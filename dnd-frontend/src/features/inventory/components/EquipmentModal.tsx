@@ -33,7 +33,9 @@ import { SectionColor } from "@appTypes/SectionColor";
 import { formatCostToDisplay } from "@utils/currencyConverter";
 import { tierTheme } from "./styles/equipmentTheme";
 import classes from "./EquipmentModal.module.css";
-import { useIsAdmin, useToken } from "@store/auth/authSelectors";
+import { useToken } from "@store/auth/authSelectors";
+import { useCanEditContent, useIsDm } from "@store/campaign/campaignSelectors";
+import { CoreBadge, PromoteToCoreButton } from "@components/common/CoreContentBadge";
 import { useIsMobile } from "@hooks/useIsMobile";
 
 const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then(m => ({ default: m.MarkdownRenderer })));
@@ -66,7 +68,9 @@ function StatItem({ icon, label, value, color }: { icon: React.ReactNode; label:
 export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalProps) {
   const isMobile = useIsMobile();
   const token = useToken();
-  const isAdmin = useIsAdmin();
+  // DMs get the full item (cost, DM notes); players get the trimmed user view.
+  const isAdmin = useIsDm();
+  const canEdit = useCanEditContent();
   const { update } = useAdminEquipmentStore();
 
   const [equipment, setEquipment] = useState<Equipment | EquipmentUserResponse | null>(null);
@@ -122,7 +126,16 @@ export function EquipmentModal({ opened, onClose, equipmentId }: EquipmentModalP
                 variant="light"
                 size={isMobile ? "md" : "lg"}
               />
-              {isAdmin && (
+              {'campaignId' in equipment && <CoreBadge campaignId={equipment.campaignId} size={isMobile ? "md" : "lg"} />}
+              {'campaignId' in equipment && (
+                <PromoteToCoreButton
+                  type="Equipment"
+                  id={equipment.id}
+                  campaignId={equipment.campaignId}
+                  onPromoted={() => setEquipment({ ...equipment, campaignId: null })}
+                />
+              )}
+              {isAdmin && 'campaignId' in equipment && canEdit(equipment.campaignId) && (
                 <Tooltip label="Edit Equipment" position="bottom" withArrow>
                   <ActionIcon
                     variant="transparent"

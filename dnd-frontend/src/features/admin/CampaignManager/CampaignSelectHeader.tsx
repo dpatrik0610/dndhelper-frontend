@@ -14,7 +14,7 @@ import {
   IconReload,
 } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 
@@ -26,7 +26,7 @@ export function CampaignSelectPanel() {
     reload,
     create,
     remove,
-  } = useAdminCampaignStore();
+  } = useCampaignStore();
 
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");

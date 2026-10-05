@@ -8,20 +8,33 @@ import { apiClient } from "@api/apiClient";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { getCharacters } from "@services/characterService";
+import { getCampaignById, joinCampaign } from "@services/campaignService";
+import { setCurrentCampaignId } from "@api/campaignContext";
 
-export interface AdminCampaignStore {
+export interface CampaignStore {
+  /** Campaigns I'm a member of (the superadmin included). */
   campaigns: Campaign[];
   selectedId: string | null;
+  /** Superadmin only: a campaign opened from the dashboard's all-campaigns list without being a member. */
+  visiting: Campaign | null;
   characters: Character[];
   allCharacters: Pick<Character, "id" | "name">[];
   loading: boolean;
 
+  /** Loads the campaigns I'm in and keeps a valid selection. */
   reload: () => Promise<void>;
+  /** The current campaign: every API call is scoped to it. */
   select: (id: string | null) => void;
+  /** Superadmin: make any campaign current without joining it. */
+  visit: (id: string) => Promise<void>;
+  join: (code: string) => Promise<Campaign | null>;
+  /** Replace one campaign in the list with a fresh copy from the server. */
+  patch: (campaign: Campaign) => void;
   reset: () => void;
   selectedCampaign: () => Campaign | null;
 
-  create: (campaign: Campaign) => Promise<void>;
+  /** The server makes the creator its DM and fills members, invite code and ids. */
+  create: (campaign: Partial<Campaign> & { name: string }) => Promise<void>;
   update: (id: string, campaign: Campaign) => Promise<void>;
   remove: (id: string) => Promise<void>;
 
@@ -32,13 +45,14 @@ export interface AdminCampaignStore {
   loadAllCharacters: () => Promise<void>;
 }
 
-type PersistedAdminCampaignStore = Pick<AdminCampaignStore, "campaigns" | "selectedId">;
+type PersistedCampaignStore = Pick<CampaignStore, "campaigns" | "selectedId" | "visiting">;
 
-export const useAdminCampaignStore = create<AdminCampaignStore>()(
-  persist<AdminCampaignStore, [], [], PersistedAdminCampaignStore>(
+export const useCampaignStore = create<CampaignStore>()(
+  persist<CampaignStore, [], [], PersistedCampaignStore>(
     (set, get) => ({
       campaigns: [],
       selectedId: null,
+      visiting: null,
       characters: [],
       allCharacters: [],
       loading: false,
@@ -48,7 +62,9 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
         set({ loading: true });
         try {
           const data = await apiClient<Campaign[]>("/campaign", { method: "GET", token });
-          set({ campaigns: data });
+          const { selectedId, visiting } = get();
+          const stillValid = data.some((c) => c.id === selectedId) || visiting?.id === selectedId;
+          set({ campaigns: data, selectedId: stillValid ? selectedId : data[0]?.id ?? null });
         } catch (err) {
           showNotification({
             title: "Error loading campaigns",
@@ -60,13 +76,45 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
         }
       },
 
-      select: (id) => set({ selectedId: id }),
+      // Leaving a visited campaign drops it from the switcher.
+      select: (id) => set((s) => ({ selectedId: id, visiting: s.visiting?.id === id ? s.visiting : null })),
+
+      visit: async (id) => {
+        if (get().campaigns.some((c) => c.id === id)) return get().select(id);
+        try {
+          const campaign = await getCampaignById(id);
+          set({ visiting: campaign, selectedId: campaign.id });
+        } catch (err) {
+          showNotification({ title: "Couldn't open campaign", message: (err as Error).message, color: SectionColor.Red });
+        }
+      },
+
+      join: async (code) => {
+        try {
+          const joined = await joinCampaign(code.trim());
+          set((s) => ({
+            campaigns: s.campaigns.some((c) => c.id === joined.id) ? s.campaigns : [...s.campaigns, joined],
+            selectedId: joined.id,
+          }));
+          showNotification({ title: "Joined campaign", message: joined.name, color: SectionColor.Green });
+          return joined;
+        } catch (err) {
+          showNotification({ title: "Couldn't join", message: (err as Error).message, color: SectionColor.Red });
+          return null;
+        }
+      },
+
+      patch: (campaign) =>
+        set((s) => ({
+          campaigns: s.campaigns.map((c) => (c.id === campaign.id ? campaign : c)),
+          visiting: s.visiting?.id === campaign.id ? campaign : s.visiting,
+        })),
 
       reset: () => set({ selectedId: null, characters: [] }),
 
       selectedCampaign: () => {
-        const { campaigns, selectedId } = get();
-        return campaigns.find((c) => c.id === selectedId) ?? null;
+        const { campaigns, selectedId, visiting } = get();
+        return campaigns.find((c) => c.id === selectedId) ?? (visiting?.id === selectedId ? visiting : null);
       },
 
       create: async (campaign) => {
@@ -77,7 +125,7 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
             body: campaign,
             token,
           });
-          set((s) => ({ campaigns: [...s.campaigns, created] }));
+          set((s) => ({ campaigns: [...s.campaigns, created], selectedId: created.id }));
           showNotification({
             title: "Campaign created",
             message: `${created.name} added.`,
@@ -121,10 +169,10 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
         const token = getAuthTokenSafe()!;
         try {
           await apiClient(`/campaign/${id}`, { method: "DELETE", token });
-          set((s) => ({
-            campaigns: s.campaigns.filter((c) => c.id !== id),
-            selectedId: s.selectedId === id ? null : s.selectedId,
-          }));
+          set((s) => {
+            const campaigns = s.campaigns.filter((c) => c.id !== id);
+            return { campaigns, selectedId: s.selectedId === id ? campaigns[0]?.id ?? null : s.selectedId };
+          });
           showNotification({
             title: "Campaign deleted",
             message: "Removed successfully.",
@@ -186,11 +234,16 @@ export const useAdminCampaignStore = create<AdminCampaignStore>()(
       },
     }),
     {
-      name: "admin-campaign-store",
+      name: "campaign-store",
       partialize: (state) => ({
         campaigns: state.campaigns,
         selectedId: state.selectedId,
+        visiting: state.visiting,
       }),
     }
   )
 );
+
+// Every request carries the current campaign. Persisted state is hydrated synchronously, so seed it now.
+setCurrentCampaignId(useCampaignStore.getState().selectedId);
+useCampaignStore.subscribe((s) => setCurrentCampaignId(s.selectedId));

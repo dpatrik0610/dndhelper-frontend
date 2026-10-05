@@ -18,8 +18,8 @@ export const getAuthTokenSafe = (): string | null => {
 };
 
 /**
- * Checks if the current user has the Admin role.
+ * Checks if the current user is the superadmin.
  */
-export const getIsAdmin = (): boolean => {
+export const getIsSuperAdmin = (): boolean => {
   return useAuthStore.getState().roles.includes("Admin");
 };

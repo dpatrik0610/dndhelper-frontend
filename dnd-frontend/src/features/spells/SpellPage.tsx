@@ -7,7 +7,8 @@ import { useSpellStore } from "@store/spell/spellStore";
 import { loadSpells } from "@utils/loadSpells";
 import { getSpellById } from "@services/spellService";
 import { useIsMobile } from "@hooks/useIsMobile";
-import { useIsDm } from "@store/auth/authSelectors";
+import { useCanEditContent, useIsDm } from "@store/campaign/campaignSelectors";
+import { CoreBadge, PromoteToCoreButton } from "@components/common/CoreContentBadge";
 import type { Spell } from "@appTypes/Spell";
 import { SpellIndex } from "./components/SpellIndex";
 import { SpellCard } from "./components/SpellCard";
@@ -19,6 +20,7 @@ export default function SpellPage() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const isDm = useIsDm();
+  const canEdit = useCanEditContent();
 
   const spellNames = useSpellStore((s) => s.spellNames);
   const currentSpell = useSpellStore((s) => s.currentSpell);
@@ -128,7 +130,16 @@ export default function SpellPage() {
           </div>
         </Group>
         <Group gap="xs" wrap="nowrap">
-          {isDm && showingSpell && currentSpell && (
+          {showingSpell && currentSpell && <CoreBadge campaignId={currentSpell.campaignId} />}
+          {showingSpell && currentSpell && (
+            <PromoteToCoreButton
+              type="Spells"
+              id={currentSpell.id}
+              campaignId={currentSpell.campaignId}
+              onPromoted={() => setCurrentSpell({ ...currentSpell, campaignId: null })}
+            />
+          )}
+          {isDm && showingSpell && currentSpell && canEdit(currentSpell.campaignId) && (
             <Tooltip label="Edit spell" withArrow>
               <ActionIcon variant="subtle" size="lg" onClick={() => setEditing(currentSpell)} aria-label="Edit spell">
                 <IconPencil size={18} />

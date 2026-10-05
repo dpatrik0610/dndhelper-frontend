@@ -27,6 +27,7 @@ import {
   IconChevronRight,
   IconBuildingStore,
   IconCompass,
+  IconWorld,
 } from "@tabler/icons-react";
 import { DashboardCard } from "./components/DashboardCard";
 import { AdminNavItem } from "./components/AdminNavItem";
@@ -34,7 +35,8 @@ import { useAdminDashboardStore, type AdminSection } from "@store/ui/adminDashbo
 import { InventoryDashboard } from "./InventoryDashboard/InventoryDashboard";
 import { useEffect, useState, type JSX, type ForwardRefExoticComponent } from "react";
 import { SelectCampaignModal } from "./components/SelectCampaignModal";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
+import { useIsSuperAdmin } from "@store/auth/authSelectors";
 import { CampaignManager } from "./CampaignManager/CampaignManager";
 import { CacheManager } from "./CacheManager/CacheManager";
 import { UserManager } from "./UserManager/UserManager";
@@ -45,6 +47,7 @@ import { BackupManager } from "./BackupManager/BackupManager";
 import { RuleManager } from "./RuleManager/RuleManager";
 import { ShopManager } from "./ShopManager/ShopManager";
 import { QuestManager } from "./QuestManager/QuestManager";
+import { AllCampaigns } from "./AllCampaigns/AllCampaigns";
 import styles from "@styles/AdminDashboard.module.css";
 
 type NavItem = {
@@ -52,31 +55,36 @@ type NavItem = {
   label: string;
   key: AdminSection;
   component: JSX.Element;
+  /** Site-wide tools, not campaign tools: superadmin only. */
+  superAdminOnly?: boolean;
 };
 
 export const AdminDashboard: React.FC = () => {
   const { activeSection, setActiveSection } = useAdminDashboardStore();
-  const { selectedId: selectedCampaignId } = useAdminCampaignStore();
+  const { selectedId: selectedCampaignId } = useCampaignStore();
   const [campaignModal, setCampaignModal] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isSuperAdmin = useIsSuperAdmin();
 
   useEffect(() => {
     if (!selectedCampaignId) setCampaignModal(true);
   }, [selectedCampaignId]);
 
-  const navItems: NavItem[] = [
+  const allNavItems: NavItem[] = [
     { icon: IconBox, label: "Inventories", key: "InventoryDashboard", component: <InventoryDashboard /> },
     { icon: IconSettings, label: "Campaigns", key: "CampaignManager", component: <CampaignManager /> },
-    { icon: IconCamera, label: "Cache", key: "CacheManager", component: <CacheManager /> },
-    { icon: IconUsers, label: "Users", key: "UserManager", component: <UserManager /> },
+    { icon: IconCamera, label: "Cache", key: "CacheManager", component: <CacheManager />, superAdminOnly: true },
+    { icon: IconUsers, label: "Users", key: "UserManager", component: <UserManager />, superAdminOnly: true },
     { icon: IconGhost, label: "Monsters", key: "MonsterManager", component: <MonsterManager /> },
     { icon: IconCategory, label: "Items", key: "ItemManager", component: <ItemManager /> },
     { icon: IconBuildingStore, label: "Shop Manager", key: "ShopManager", component: <ShopManager /> },
     { icon: IconUsersGroup, label: "Sessions", key: "SessionManager", component: <SessionManager /> },
-    { icon: IconCloudDownload, label: "Backups", key: "BackupManager", component: <BackupManager /> },
+    { icon: IconCloudDownload, label: "Backups", key: "BackupManager", component: <BackupManager />, superAdminOnly: true },
+    { icon: IconWorld, label: "All Campaigns", key: "AllCampaigns", component: <AllCampaigns />, superAdminOnly: true },
     { icon: IconBook2, label: "Rules", key: "RuleManager", component: <RuleManager /> },
     { icon: IconCompass, label: "Quests", key: "QuestManager", component: <QuestManager /> },
   ];
+  const navItems = allNavItems.filter((item) => isSuperAdmin || !item.superAdminOnly);
 
   const currentItem = navItems.find((n) => n.key === activeSection);
   const isDashboard = activeSection === "Dashboard";
@@ -92,7 +100,7 @@ export const AdminDashboard: React.FC = () => {
               <div className={styles.sidebarHeader}>
                 {sidebarCollapsed ? (
                   <Stack gap={6} align="center">
-                    <Tooltip label="Expand sidebar" position="right" withArrow>
+                    <Tooltip label="Expand sidebar" position="left" withArrow>
                       <ActionIcon
                         variant="subtle"
                         color="gray"
@@ -100,10 +108,10 @@ export const AdminDashboard: React.FC = () => {
                         onClick={() => setSidebarCollapsed(false)}
                         aria-label="Expand sidebar"
                       >
-                        <IconChevronRight size={16} />
+                        <IconChevronLeft size={16} />
                       </ActionIcon>
                     </Tooltip>
-                    <Tooltip label="Switch campaign" position="right" withArrow>
+                    <Tooltip label="Switch campaign" position="left" withArrow>
                       <ActionIcon
                         variant="light"
                         color="indigo"
@@ -123,7 +131,7 @@ export const AdminDashboard: React.FC = () => {
                           <IconLayoutGrid size={16} />
                         </ThemeIcon>
                         <Text fw={700} size="sm" c="white">
-                          Admin
+                          Dungeon Master
                         </Text>
                       </Group>
                       <Tooltip label="Collapse sidebar" withArrow>
@@ -134,7 +142,7 @@ export const AdminDashboard: React.FC = () => {
                           onClick={() => setSidebarCollapsed(true)}
                           aria-label="Collapse sidebar"
                         >
-                          <IconChevronLeft size={16} />
+                          <IconChevronRight size={16} />
                         </ActionIcon>
                       </Tooltip>
                     </Group>

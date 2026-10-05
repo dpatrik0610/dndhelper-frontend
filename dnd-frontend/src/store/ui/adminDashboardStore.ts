@@ -13,7 +13,8 @@ export type AdminSection =
   | "SessionManager"
   | "BackupManager"
   | "RuleManager"
-  | "QuestManager";
+  | "QuestManager"
+  | "AllCampaigns";
 
 export interface AdminDashboardState {
   activeSection: AdminSection;

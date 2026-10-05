@@ -1,15 +1,16 @@
 ﻿import { Box, Paper, Stack, Loader, Text, Group } from "@mantine/core";
 import { useEffect } from "react";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { CampaignHeader } from "./CampaignHeader";
 import { CampaignSelectPanel } from "./CampaignSelectHeader";
 import { CampaignCharactersPanel } from "./CampaignCharactersPanel";
 import { CampaignSessionsPanel } from "./CampaignSessionsPanel";
 import { CampaignNotesPanel } from "./CampaignNotesPanel";
+import { CampaignMembersPanel } from "./CampaignMembersPanel";
 import { useToken } from "@store/auth/authSelectors";
 
 export function CampaignManager() {
-  const { reload, loading, selectedId } = useAdminCampaignStore();
+  const { reload, loading, selectedId } = useCampaignStore();
   const token = useToken();
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export function CampaignManager() {
             }}
           >
         <CampaignHeader />
+        <CampaignMembersPanel />
         <CampaignCharactersPanel />
         <CampaignSessionsPanel />
         <CampaignNotesPanel />

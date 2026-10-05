@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { Box, Group, Text, Loader, Paper, ScrollArea, SimpleGrid } from "@mantine/core";
 import { IconMapPin, IconCheck } from "@tabler/icons-react";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { BaseModal } from "@components/BaseModal";
 import { SectionColor } from "@appTypes/SectionColor";
 
@@ -12,7 +12,7 @@ interface SelectCampaignModalProps {
 }
 
 export function SelectCampaignModal({ opened, onClose }: SelectCampaignModalProps) {
-  const { campaigns, selectedId, reload, select, loading } = useAdminCampaignStore();
+  const { campaigns, selectedId, reload, select, loading } = useCampaignStore();
 
   useEffect(() => { 
       const reloadfn = async () => {await reload ()}

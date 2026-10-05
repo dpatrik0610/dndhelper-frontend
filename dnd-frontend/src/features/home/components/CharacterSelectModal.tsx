@@ -10,13 +10,9 @@ import {
   SimpleGrid,
   Stack,
   Box,
-  Select,
 } from "@mantine/core";
 import { IconUserCircle, IconUserCog } from "@tabler/icons-react";
-import { useState, useMemo, useEffect } from "react";
-import { useIsAdmin } from "@store/auth/authSelectors";
-import { useCurrentCharacter } from "@store/character/characterSelectors";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useState, useMemo } from "react";
 import type { Character } from "@appTypes/Character/Character";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@hooks/useIsMobile";
@@ -29,9 +25,6 @@ interface CharacterSelectModalProps {
   characters: Character[];
   onSelect: (character: Character) => void;
 }
-
-const ALL = "__all";
-const NONE = "__none";
 
 export function CharacterSelectModal({
   opened,
@@ -47,24 +40,8 @@ export function CharacterSelectModal({
 
   const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
-  // DM sees every character, so give them a campaign filter
-  const isAdmin = useIsAdmin();
-  const current = useCurrentCharacter();
-  const campaigns = useAdminCampaignStore((s) => s.campaigns);
-  const reloadCampaigns = useAdminCampaignStore((s) => s.reload);
-  const [campaignFilter, setCampaignFilter] = useState<string>(ALL);
-
-  useEffect(() => {
-    if (!opened || !isAdmin) return;
-    if (campaigns.length === 0) void reloadCampaigns();
-    setCampaignFilter(current?.campaignId ?? ALL);
-  }, [opened, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const visibleCharacters = useMemo(() => {
-    if (!isAdmin || campaignFilter === ALL) return characters;
-    if (campaignFilter === NONE) return characters.filter((c) => !c.campaignId);
-    return characters.filter((c) => c.campaignId === campaignFilter);
-  }, [characters, isAdmin, campaignFilter]);
+  // The server already scopes the list to the current campaign (sidebar switcher).
+  const visibleCharacters = characters;
 
   const handleSelect = (char: Character) => {
     setSelected(char.id ?? null);
@@ -135,21 +112,6 @@ export function CharacterSelectModal({
       }}
       transitionProps={{ transition: "pop" }}
     >
-      {isAdmin && (
-        <Select
-          mb="md"
-          label="Campaign"
-          allowDeselect={false}
-          value={campaignFilter}
-          onChange={(v) => setCampaignFilter(v ?? ALL)}
-          data={[
-            { value: ALL, label: "All characters" },
-            ...campaigns.map((c) => ({ value: c.id, label: c.name })),
-            { value: NONE, label: "No campaign" },
-          ]}
-        />
-      )}
-
       <ScrollArea.Autosize mah={isMobile ? "calc(100dvh - 150px)" : 440} type="scroll" offsetScrollbars>
         {visibleCharacters.length === 0 ? (
           <Stack align="center" justify="center" h={300} gap="md">

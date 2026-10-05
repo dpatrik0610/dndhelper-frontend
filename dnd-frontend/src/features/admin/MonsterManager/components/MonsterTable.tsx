@@ -1,6 +1,8 @@
 import { Group, ActionIcon, Text, Badge, Tooltip } from "@mantine/core";
 import { IconPencil, IconTrash, IconEye, IconUsers, IconActivity } from "@tabler/icons-react";
 import type { Monster } from "@appTypes/Monster";
+import { useCanEditContent } from "@store/campaign/campaignSelectors";
+import { CoreBadge, PromoteToCoreButton } from "@components/common/CoreContentBadge";
 import styles from "../MonsterManager.module.css";
 
 interface MonsterTableProps {
@@ -11,6 +13,8 @@ interface MonsterTableProps {
   onView: (monster: Monster) => void;
   onEdit: (monster: Monster) => void;
   onDelete: (monster: Monster) => void;
+  /** Called after a monster was promoted to core, to refresh the list. */
+  onChanged?: () => void;
 }
 
 export function MonsterTable({
@@ -21,7 +25,10 @@ export function MonsterTable({
   onView,
   onEdit,
   onDelete,
+  onChanged,
 }: MonsterTableProps) {
+  // Core rows are read-only for DMs; the superadmin edits and promotes.
+  const canEdit = useCanEditContent();
   return (
     <div className={styles.tableContainer}>
       <table className={styles.glassTable}>
@@ -116,6 +123,9 @@ export function MonsterTable({
                       </ActionIcon>
                     </Tooltip>
 
+                    <PromoteToCoreButton type="Monsters" id={m.id} campaignId={m.campaignId} onPromoted={onChanged} />
+                    {canEdit(m.campaignId) ? (
+                    <>
                     <Tooltip label="Edit monster" withArrow position="top">
                       <ActionIcon
                         size="md"
@@ -140,6 +150,10 @@ export function MonsterTable({
                         <IconTrash size={16} />
                       </ActionIcon>
                     </Tooltip>
+                    </>
+                    ) : (
+                      <CoreBadge campaignId={m.campaignId} />
+                    )}
                   </Group>
                 </td>
               </tr>

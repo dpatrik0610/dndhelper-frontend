@@ -2,15 +2,13 @@
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { createCharacter, updateCharacter } from "@services/characterService";
-import { assignInventoryToCharacter, createInventory } from "@services/inventoryService";
-import { useIsAdmin } from "@store/auth/authSelectors";
-import type { Inventory } from "@appTypes/Inventory/Inventory";
+import { useIsDm } from "@store/campaign/campaignSelectors";
 import { loadCharacters } from "@utils/loadCharacter";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
 
 export function useCharacterForm(editMode: boolean) {
-    const isAdmin = useIsAdmin();
+  const isDm = useIsDm();
   const navigate = useNavigate()
   const { characterForm, replaceCharacterForm, resetCharacterForm } = useCharacterFormStore();
   const character = useCurrentCharacter();
@@ -39,21 +37,9 @@ export function useCharacterForm(editMode: boolean) {
         });
         loadCharacters()
       } else {
+        // The server also creates the character's starting inventory.
         const newCharacter = await createCharacter(characterForm);
         if (newCharacter) {
-          const newInventory: Inventory = {
-            name: `${newCharacter.name}'s Equipment`,
-            ownerIds: newCharacter.ownerIds ?? [],
-            characterIds: [newCharacter.id!],
-            currencies: [],
-            items: [],
-          };
-          const createdInventory = await createInventory(newInventory);
-
-          if (createdInventory.id) {
-            await assignInventoryToCharacter(createdInventory.id, newCharacter.id!);
-          }
-
           setCharacter(newCharacter);
 
           showNotification({
@@ -76,5 +62,5 @@ export function useCharacterForm(editMode: boolean) {
     }
   }
 
-  return { handleSubmit, loading, isAdmin, characterForm };
+  return { handleSubmit, loading, isDm, characterForm };
 }

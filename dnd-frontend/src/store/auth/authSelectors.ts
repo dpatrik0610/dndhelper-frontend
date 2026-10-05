@@ -6,9 +6,8 @@ export const useToken = () => useAuthStore((s) => s.token);
 export const useCurrentUserId = () => useAuthStore((s) => s.id);
 export const useUsername = () => useAuthStore((s) => s.username);
 export const useRoles = () => useAuthStore((s) => s.roles);
-export const useIsAdmin = () => useAuthStore((s) => s.roles.includes("Admin"));
-/** DungeonMaster role; admins count as DMs. */
-export const useIsDm = () => useAuthStore((s) => s.roles.includes("DungeonMaster") || s.roles.includes("Admin"));
+/** The superadmin: sees and edits every campaign and core content. */
+export const useIsSuperAdmin = () => useAuthStore((s) => s.roles.includes("Admin"));
 export const useIsAuthenticated = () => useAuthStore((s) => !!s.token);
 
 // Action selectors

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Text, Group, Button, Stack, Switch, NumberInput, Loader, Card, Badge, Grid, Paper, Avatar, ThemeIcon, Center, Box } from "@mantine/core";
 import { IconBuildingStore, IconCheck, IconX, IconPackage } from "@tabler/icons-react";
 import { useAdminShopStore } from "@store/admin/adminShopStore";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
@@ -15,7 +15,7 @@ import styles from "@styles/InventoryDashboard.module.css";
 
 export function ShopWorkspace() {
   const { selectedShopId, shops, updateShop, toggleShopOpen, sellRequests, loadSellRequests, approveSellRequest, rejectSellRequest } = useAdminShopStore();
-  const { selectedId: activeCampaignId } = useAdminCampaignStore();
+  const { selectedId: activeCampaignId } = useCampaignStore();
   const { equipments, loadAll: loadEquipments } = useAdminEquipmentStore();
   const { selected: selectedInventory, setSelected: setSelectedInventory } = useAdminInventoryStore();
   const { loadInventoryById } = useAdminCurrencyStore();

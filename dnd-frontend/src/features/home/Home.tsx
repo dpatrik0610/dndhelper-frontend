@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
 import { useCharacterList, useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { useToken } from "@store/auth/authSelectors";
+import { useCurrentUserId, useToken } from "@store/auth/authSelectors";
 import { useSessionStore } from "@store/session/sessionStore";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
 import type { Character } from "@appTypes/Character/Character";
@@ -26,11 +26,13 @@ export default function Home() {
   const [campaign, setCampaign] = useState<CampaignOverviewDto | null>(null);
   const isMobile = useIsMobile();
 
+  // Auto-pick only when exactly one of the visible characters is mine (DMs also see their players' characters).
+  const me = useCurrentUserId();
   useEffect(() => {
-    if (!character && characters.length === 1) {
-      setCharacter(characters[0]);
-    }
-  }, [characters, character, setCharacter]);
+    if (character) return;
+    const mine = characters.filter((c) => me && c.ownerIds?.includes(me));
+    if (mine.length === 1) setCharacter(mine[0]);
+  }, [characters, character, setCharacter, me]);
 
   const token = useToken();
   useEffect(() => {

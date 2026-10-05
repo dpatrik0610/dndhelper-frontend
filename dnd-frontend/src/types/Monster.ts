@@ -21,6 +21,8 @@ export interface MonsterType {
 
 export interface Monster {
   id?: string;
+  /** null = core (shared, read-only). */
+  campaignId?: string | null;
   name?: string;
   isNpc?: boolean;
   isDeleted?: boolean;

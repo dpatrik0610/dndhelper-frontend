@@ -1,5 +1,7 @@
 export interface Equipment {
   id?: string;
+  /** null = core (shared, read-only). */
+  campaignId?: string | null;
   index: string;
   name: string;
   description?: string[];

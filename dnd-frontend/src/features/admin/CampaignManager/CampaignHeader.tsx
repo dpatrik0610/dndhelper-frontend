@@ -20,7 +20,7 @@ import {
 } from "@tabler/icons-react";
 
 import { useState } from "react";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 
@@ -30,7 +30,7 @@ export function CampaignHeader() {
     reload,
     update,
     remove,
-  } = useAdminCampaignStore();
+  } = useCampaignStore();
 
   const campaign = selectedCampaign();
   const [updating, setUpdating] = useState(false);

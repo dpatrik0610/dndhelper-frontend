@@ -16,11 +16,10 @@ export interface User {
   isDeleted: boolean
 }
 
+/** Global roles. "Admin" is the superadmin; DMs and players are per campaign (Campaign.members). */
 export enum UserRole {
   User = "User",
-  Guest = "Guest",
   Admin = "Admin",
-  DungeonMaster = "DungeonMaster",
 }
 
 export enum UserStatus {

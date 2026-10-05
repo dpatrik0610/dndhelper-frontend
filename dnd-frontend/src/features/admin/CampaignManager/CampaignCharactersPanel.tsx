@@ -10,6 +10,7 @@ import {
   Divider,
   Button,
   Select,
+  MultiSelect,
 } from "@mantine/core";
 import {
   IconUserPlus,
@@ -20,15 +21,17 @@ import {
 import { useEffect, useState } from "react";
 import {
   getCampaignCharacters,
+  getCampaignMembers,
   addCharacterToCampaign,
   removeCharacterFromCampaign,
+  setCharacterOwners,
 } from "@services/campaignService";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import type { CampaignMemberView } from "@appTypes/Campaign";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Character } from "@appTypes/Character/Character";
-import { getCharacterById, updateCharacter } from "@services/characterService";
 
 export function CampaignCharactersPanel() {
   const {
@@ -36,11 +39,13 @@ export function CampaignCharactersPanel() {
     reload,
     allCharacters,
     loadAllCharacters,
-  } = useAdminCampaignStore();
+  } = useCampaignStore();
 
 
   const campaign = selectedCampaign();
   const [members, setMembers] = useState<Character[]>([]);
+  // People in the campaign: who a character can be handed to.
+  const [people, setPeople] = useState<CampaignMemberView[]>([]);
   const [adding, setAdding] = useState(false);
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,8 +64,12 @@ export function CampaignCharactersPanel() {
     if (!campaign?.id) return;
     setLoading(true);
     try {
-      const data = await getCampaignCharacters(campaign.id);
+      const [data, campaignPeople] = await Promise.all([
+        getCampaignCharacters(campaign.id),
+        getCampaignMembers(campaign.id),
+      ]);
       setMembers(data);
+      setPeople(campaignPeople);
     } catch (err) {
       console.error(err);
       showNotification({
@@ -76,15 +85,8 @@ export function CampaignCharactersPanel() {
   const handleAdd = async () => {
     if (!campaign?.id || !selectedChar) return;
 
-    // 1) Link in campaign table
+    // The server links both sides (campaign list + character.campaignId).
     await addCharacterToCampaign(campaign.id, selectedChar);
-
-    // 2) Patch character.campaignId in database
-    const charData = await getCharacterById(selectedChar);
-    if (charData) {
-      charData.campaignId = campaign.id;
-      await updateCharacter(charData);
-    }
 
     await fetchMembers();
     await reload();
@@ -106,15 +108,8 @@ const handleRemove = async (charId: string) => {
   const confirmDel = confirm("Remove this character from the campaign?");
   if (!confirmDel) return;
 
-  // 1) Unlink in campaign table
+  // The server unlinks both sides.
   await removeCharacterFromCampaign(campaign.id, charId);
-
-  // 2) Patch character.campaignId = null
-  const charData = await getCharacterById(charId);
-  if (charData) {
-    charData.campaignId = null;
-    await updateCharacter(charData);
-  }
 
   await fetchMembers();
   await reload();
@@ -125,6 +120,17 @@ const handleRemove = async (charId: string) => {
     color: SectionColor.Red,
   });
 };
+
+  const handleOwners = async (charId: string, ownerIds: string[]) => {
+    if (!campaign?.id || ownerIds.length === 0) return;
+    try {
+      const updated = await setCharacterOwners(campaign.id, charId, ownerIds);
+      setMembers((list) => list.map((c) => (c.id === charId ? { ...c, ownerIds: updated.ownerIds } : c)));
+      showNotification({ title: "Player updated", message: updated.name, color: SectionColor.Green });
+    } catch (err) {
+      showNotification({ title: "Couldn't change player", message: (err as Error).message, color: SectionColor.Red });
+    }
+  };
 
   return (
     <Paper
@@ -228,6 +234,16 @@ const handleRemove = async (charId: string) => {
                   {c.level ? `- lvl ${c.level}` : ""}
                 </Text>
               </Box>
+
+              <MultiSelect
+                aria-label={`Who plays ${c.name}`}
+                placeholder="Played by…"
+                data={people.map((p) => ({ value: p.userId, label: p.username }))}
+                value={(c.ownerIds ?? []).filter((id) => people.some((p) => p.userId === id))}
+                onChange={(ids) => handleOwners(c.id!, ids)}
+                size="xs"
+                w={220}
+              />
 
               <Tooltip label="Remove" withArrow>
                 <ActionIcon

@@ -3,7 +3,8 @@ export interface EntityChangeEvent {
   entityId?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
-  action: "created" | "updated" | "deleted" | "activeEncounterChanged";
+  // assigned / unassigned: a DM gave a character to you / took it from you.
+  action: "created" | "updated" | "deleted" | "activeEncounterChanged" | "assigned" | "unassigned";
   changedBy: string;
   timestamp: string;
 }

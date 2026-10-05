@@ -1,4 +1,5 @@
 import { getAuthTokenSafe } from "@store/auth/authUtils"
+import { getCurrentCampaignId } from "./campaignContext"
 
 export interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
@@ -20,6 +21,8 @@ export async function apiClient<T>(
   }
 
   if (token) headers['Authorization'] = `Bearer ${token}`
+  const campaignId = getCurrentCampaignId()
+  if (campaignId) headers['X-Campaign-Id'] = campaignId
 
   const res = await fetch(`${API_BASE}${endpoint}`, {
     method,

@@ -3,6 +3,8 @@ import { Group, ActionIcon, Text, Badge, Tooltip, Stack } from "@mantine/core";
 import { IconPencil, IconTrash, IconEye, IconCoins, IconFlame, IconScale } from "@tabler/icons-react";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { formatCostToDisplay } from "@utils/currencyConverter";
+import { useCanEditContent } from "@store/campaign/campaignSelectors";
+import { CoreBadge, PromoteToCoreButton } from "@components/common/CoreContentBadge";
 import GlassyBox from "./GlassyBox";
 import styles from "@features/admin/ItemManager/ItemManager.module.css";
 
@@ -11,9 +13,13 @@ interface ItemListProps {
   onEdit: (item: Equipment) => void;
   onDelete: (item: Equipment) => void;
   onDetails: (item: Equipment) => void;
+  /** Called after an item was promoted to core, to refresh the list. */
+  onChanged?: () => void;
 }
 
-const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails }) => {
+const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails, onChanged }) => {
+  // Core rows are read-only for DMs; the superadmin edits and promotes.
+  const canEdit = useCanEditContent();
   // Map tier to custom class in CSS
   const getTierClass = (tier?: string) => {
     switch (tier) {
@@ -130,6 +136,9 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails 
                       </ActionIcon>
                     </Tooltip>
 
+                    <PromoteToCoreButton type="Equipment" id={item.id} campaignId={item.campaignId} onPromoted={onChanged} />
+                    {canEdit(item.campaignId) ? (
+                    <>
                     <Tooltip label="Edit item" withArrow position="top">
                       <ActionIcon
                         size="md"
@@ -153,6 +162,10 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails 
                         <IconTrash size={16} />
                       </ActionIcon>
                     </Tooltip>
+                    </>
+                    ) : (
+                      <CoreBadge campaignId={item.campaignId} />
+                    )}
                   </Group>
                 </td>
               </tr>

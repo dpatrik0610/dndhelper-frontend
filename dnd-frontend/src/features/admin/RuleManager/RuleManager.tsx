@@ -9,7 +9,7 @@ import { ExpandableSection } from "@components/ExpandableSection";
 import { createRuleCategory, getRuleCategories } from "@services/ruleCategoryService";
 import "./ruleManager.css";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useToken } from "@store/auth/authSelectors";
+import { useIsSuperAdmin, useToken } from "@store/auth/authSelectors";
 
 const fallbackCategoryOptions = Object.values(RuleCategory).map((c) => ({ value: c, label: c }));
 
@@ -23,6 +23,8 @@ const defaultRule: RuleDetail = {
 
 export function RuleManager() {
   const token = useToken();
+  // Categories are a site-wide taxonomy; only the superadmin adds them.
+  const isSuperAdmin = useIsSuperAdmin();
   const [rule, setRule] = useState<RuleDetail>(() => ({ ...defaultRule }));
   const [bodyText, setBodyText] = useState("");
   const [sourceTitle, setSourceTitle] = useState("");
@@ -336,16 +338,18 @@ export function RuleManager() {
               Create new categories; they show up in filters and the rule form.
             </Text>
           </div>
-          <Button
-            size="xs"
-            variant="light"
-            color="grape"
-            leftSection={<IconPlus size={14} />}
-            loading={creatingCategory}
-            onClick={handleCreateCategory}
-          >
-            Add category
-          </Button>
+          {isSuperAdmin && (
+            <Button
+              size="xs"
+              variant="light"
+              color="grape"
+              leftSection={<IconPlus size={14} />}
+              loading={creatingCategory}
+              onClick={handleCreateCategory}
+            >
+              Add category
+            </Button>
+          )}
         </Group>
 
         <Stack gap="sm">

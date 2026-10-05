@@ -244,6 +244,7 @@ export function ItemManager() {
           onEdit={openFormModal}
           onDelete={openDeleteConfirm}
           onDetails={openDetailsModal}
+          onChanged={() => void loadAllData()}
         />
 
         {/* Pagination Section */}

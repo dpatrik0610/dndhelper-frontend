@@ -36,7 +36,7 @@ import {
   IconInbox,
   IconBookmark,
 } from "@tabler/icons-react";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import {
   getCampaignQuests,
   createQuest,
@@ -65,7 +65,7 @@ function generateObjectId(): string {
 }
 
 export function QuestManager() {
-  const { selectedId: campaignId, characters, loadCharacters } = useAdminCampaignStore();
+  const { selectedId: campaignId, characters, loadCharacters } = useCampaignStore();
 
   // Component State
   const [quests, setQuests] = useState<Quest[]>([]);

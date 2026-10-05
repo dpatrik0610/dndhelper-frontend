@@ -16,12 +16,12 @@ import {
   IconCheck,
 } from "@tabler/icons-react";
 import { useState } from "react";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 
 export function CampaignSessionsPanel() {
-  const { selectedCampaign, update } = useAdminCampaignStore();
+  const { selectedCampaign, update } = useCampaignStore();
   const campaign = selectedCampaign();
 
   const [newSession, setNewSession] = useState("");

@@ -307,6 +307,7 @@ export function MonsterManager() {
               onView={(m) => setViewMonster(m)}
               onEdit={openFormModal}
               onDelete={openDeleteConfirm}
+              onChanged={() => void loadAllData()}
             />
           </div>
         )}

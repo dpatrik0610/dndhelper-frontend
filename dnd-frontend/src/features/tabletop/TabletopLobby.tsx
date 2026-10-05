@@ -14,7 +14,7 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 import { getAllCampaigns } from "@services/campaignService";
-import { useCurrentUserId, useIsAdmin } from "@store/auth/authSelectors";
+import { useCurrentUserId, useIsSuperAdmin } from "@store/auth/authSelectors";
 import { useTabletopStore } from "@store/tabletop/tabletopStore";
 import type { Campaign } from "@appTypes/Campaign";
 import { tabletop } from "./useTabletopHub";
@@ -32,7 +32,7 @@ const FEATURES = [
 export function TabletopLobby() {
   const navigate = useNavigate();
   const me = useCurrentUserId();
-  const isAdmin = useIsAdmin();
+  const isAdmin = useIsSuperAdmin();
   const connected = useTabletopStore((s) => s.connected);
   const joinError = useTabletopStore((s) => s.joinError);
   const [code, setCode] = useState("");

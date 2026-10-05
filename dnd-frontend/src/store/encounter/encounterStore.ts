@@ -1,4 +1,4 @@
-import { getIsAdmin } from "@store/auth/authUtils";
+import { getIsSuperAdmin } from "@store/auth/authUtils";
 import { create } from "zustand";
 import type { Campaign } from "@appTypes/Campaign";
 import type { Encounter } from "@appTypes/Encounter";
@@ -285,7 +285,7 @@ export const useEncounterStore = create<EncounterState & EncounterActions>((set,
 
       set((state) => ({
         campaign: state.campaign ? { ...state.campaign, activeEncounterId: null } : null,
-        selectedEncounterId: getIsAdmin()
+        selectedEncounterId: getIsSuperAdmin()
           ? state.selectedEncounterId
           : resolveSelectedEncounterId(state.encounters, null),
       }));
@@ -318,7 +318,7 @@ export const useEncounterStore = create<EncounterState & EncounterActions>((set,
       }
 
       const shouldFollowActiveEncounter =
-        !getIsAdmin() ||
+        !getIsSuperAdmin() ||
         !state.selectedEncounterId ||
         state.selectedEncounterId === state.campaign.activeEncounterId;
 

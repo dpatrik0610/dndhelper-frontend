@@ -1,5 +1,5 @@
 import { apiClient } from "@api/apiClient"
-import type { Campaign } from "@appTypes/Campaign"
+import type { Campaign, CampaignMemberView, CampaignSummary, CoreContentType } from "@appTypes/Campaign"
 import type { Character } from "@appTypes/Character/Character"
 import type { CampaignOverviewDto } from "@appTypes/CampaignOverview"
 
@@ -38,6 +38,41 @@ export async function deleteCampaign(id: string): Promise<void> {
   return apiClient<void>(`/Campaign/${id}`, { method: "DELETE" })
 }
 
+/** Superadmin only: every campaign on the site. */
+export async function getAllCampaignsOverview(): Promise<CampaignSummary[]> {
+  return apiClient<CampaignSummary[]>("/Campaign/all", {})
+}
+
+// ----------- Membership -----------
+export async function joinCampaign(code: string): Promise<Campaign> {
+  return apiClient<Campaign>("/Campaign/join", { method: "POST", body: { code } })
+}
+
+export async function getCampaignMembers(id: string): Promise<CampaignMemberView[]> {
+  return apiClient<CampaignMemberView[]>(`/Campaign/${id}/members`, {})
+}
+
+export async function setCampaignMemberRoles(id: string, userId: string, roles: string[]): Promise<Campaign> {
+  return apiClient<Campaign>(`/Campaign/${id}/members/${userId}/roles`, { method: "PUT", body: roles })
+}
+
+export async function removeCampaignMember(id: string, userId: string): Promise<Campaign> {
+  return apiClient<Campaign>(`/Campaign/${id}/members/${userId}`, { method: "DELETE" })
+}
+
+export async function regenerateInviteCode(id: string): Promise<Campaign> {
+  return apiClient<Campaign>(`/Campaign/${id}/invite-code`, { method: "POST" })
+}
+
+export async function setCampaignCoreImports(id: string, types: CoreContentType[]): Promise<Campaign> {
+  return apiClient<Campaign>(`/Campaign/${id}/core-imports`, { method: "PUT", body: types })
+}
+
+/** Superadmin only: move a campaign's spell/item/monster/rule into shared, read-only core content. */
+export async function promoteToCore(type: CoreContentType, id: string): Promise<void> {
+  return apiClient<void>(`/core/${type}/${id}/promote`, { method: "POST" })
+}
+
 // ----------- Characters -----------
 export async function getCampaignCharacters(id: string): Promise<Character[]> {
   return apiClient(`/Campaign/${id}/characters`, {})
@@ -45,6 +80,11 @@ export async function getCampaignCharacters(id: string): Promise<Character[]> {
 
 export async function addCharacterToCampaign(id: string, characterId: string): Promise<void> {
   return apiClient(`/Campaign/${id}/characters/${characterId}`, { method: "POST" })
+}
+
+/** DM only: who plays this character (campaign members). */
+export async function setCharacterOwners(id: string, characterId: string, ownerIds: string[]): Promise<Character> {
+  return apiClient<Character>(`/Campaign/${id}/characters/${characterId}/owners`, { method: "PUT", body: ownerIds })
 }
 
 export async function removeCharacterFromCampaign(id: string, characterId: string): Promise<void> {

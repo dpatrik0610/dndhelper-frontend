@@ -20,7 +20,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { useAdminShopStore } from "@store/admin/adminShopStore";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { ShopWorkspace } from "./components/ShopWorkspace";
@@ -42,7 +42,7 @@ export function ShopManager() {
     deleteShop,
   } = useAdminShopStore();
 
-  const { selectedId: activeCampaignId } = useAdminCampaignStore();
+  const { selectedId: activeCampaignId } = useCampaignStore();
   const token = useToken();
 
   const [searchQuery, setSearchQuery] = useState("");

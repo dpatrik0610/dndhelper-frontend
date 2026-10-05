@@ -7,7 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { notifications } from "@mantine/notifications";
 import { showNotification } from "@components/Notification/Notification";
-import { useToken, useCurrentUserId, useIsAdmin } from "@store/auth/authSelectors";
+import { useToken, useCurrentUserId } from "@store/auth/authSelectors";
 import { useSubtleRollStore } from "@store/ui/subtleRollStore";
 import { EntitySyncManager } from "@signalr/SyncManager/entitySyncManager";
 import type { EntityChangeEvent } from "@signalr/SyncManager/handlers/entitySyncTypes";
@@ -27,19 +27,13 @@ export const useSignalR = () => {
 
   const token = useToken();
   const userId = useCurrentUserId();
-  const isAdmin = useIsAdmin();
   const openSubtleRoll = useSubtleRollStore((state) => state.openRoll);
   const navigate = useNavigate();
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
 
   // Keep latest values in refs to avoid recreating the connection/listeners when they change
-  const isAdminRef = useRef(isAdmin);
   const openSubtleRollRef = useRef(openSubtleRoll);
-
-  useEffect(() => {
-    isAdminRef.current = isAdmin;
-  }, [isAdmin]);
 
   useEffect(() => {
     openSubtleRollRef.current = openSubtleRoll;
@@ -60,7 +54,8 @@ export const useSignalR = () => {
     console.debug(`🔌 Creating SignalR connection for userId: ${userId}`);
 
     const newConnection = new HubConnectionBuilder()
-      .withUrl(`${baseUrl}/hubs/notifications?userId=${userId}`)
+      // The hub puts each connection in its own user group, read from the token.
+      .withUrl(`${baseUrl}/hubs/notifications`, { accessTokenFactory: () => token })
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retryContext) => {
           if (retryContext.previousRetryCount === 0) return 0;
@@ -102,9 +97,8 @@ export const useSignalR = () => {
       }
     );
 
+    // The server only sends these to the campaign's DMs.
     newConnection.on("SubtleRoll", (payload: SubtleRollEvent) => {
-      if (!isAdminRef.current) return;
-
       showNotification({
         title: `Subtle roll from ${payload.characterName}`,
         message: "Click to view details",

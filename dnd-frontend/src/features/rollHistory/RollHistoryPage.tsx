@@ -17,7 +17,8 @@ import { IconX } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
 import { ListSkeleton } from "@components/common/Skeletons";
-import { useToken, useIsAdmin } from "@store/auth/authSelectors";
+import { useToken } from "@store/auth/authSelectors";
+import { useCurrentCampaignId, useIsDm } from "@store/campaign/campaignSelectors";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { getRollHistory } from "@services/rollService";
 import type { RollHistoryEntry } from "@appTypes/Roll";
@@ -51,8 +52,9 @@ export default function RollHistoryPage() {
   const navigate = useNavigate();
   const token = useToken();
   const character = useCurrentCharacter();
-  const isAdmin = useIsAdmin();
-  const campaignId = character?.campaignId ?? null;
+  // DMs see the whole campaign's rolls (including subtle ones); players their own public rolls.
+  const isAdmin = useIsDm();
+  const campaignId = useCurrentCampaignId();
 
   const [entries, setEntries] = useState<RollHistoryEntry[]>([]);
   const [page, setPage] = useState(1);

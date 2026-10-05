@@ -33,6 +33,8 @@ export interface RuleReference {
 
 export interface RuleSnippet {
   id?: string;
+  /** null = core (shared, read-only). */
+  campaignId?: string | null;
   slug: string;
   title: string;
   category: RuleCategory | string;

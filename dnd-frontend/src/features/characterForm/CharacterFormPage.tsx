@@ -53,7 +53,7 @@ type TabType =
   | "settings";
 
 export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) {
-  const { handleSubmit, loading, isAdmin } = useCharacterForm(editMode);
+  const { handleSubmit, loading, isDm } = useCharacterForm(editMode);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<TabType>("basic");
@@ -77,11 +77,11 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
       { id: "collections" as TabType, label: "Proficiencies", icon: <IconBook2 size={16} /> },
     ];
     // Admin-only; deleting a character lives in Settings → Characters
-    if (isAdmin) {
+    if (isDm) {
       items.push({ id: "settings" as TabType, label: "Settings", icon: <IconLock size={16} /> });
     }
     return items;
-  }, [isAdmin]);
+  }, [isDm]);
 
   return (
     <Box

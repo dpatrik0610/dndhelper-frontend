@@ -6,7 +6,9 @@ import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useMemo, lazy, Suspense } from "react";
 import Sidebar from "@features/navigation/Sidebar/Sidebar";
 import PrivateRoute from "@components/PrivateRoute";
-import { useToken, useIsAdmin } from "@store/auth/authSelectors";
+import { useToken } from "@store/auth/authSelectors";
+import { useIsDm } from "@store/campaign/campaignSelectors";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { useCharacterList } from "@store/character/characterSelectors";
 import { useTokenExpiryGuard } from "@features/auth/hooks/useTokenExpiryGuard";
 import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapCharacters";
@@ -83,7 +85,8 @@ function AppRoutes() {
 
   const token = useToken();
   const characters = useCharacterList();
-  const isAdmin = useIsAdmin();
+  const isDm = useIsDm();
+  const reloadCampaigns = useCampaignStore((s) => s.reload);
 
   const localToken = useMemo(() => {
     if (!token) return null;
@@ -107,7 +110,12 @@ function AppRoutes() {
 
   useTokenExpiryGuard(token, localToken);
   useBootstrapCharacters(activeToken, characters.length);
-  usePrefetchPages(!!activeToken, isAdmin);
+  usePrefetchPages(!!activeToken, isDm);
+
+  // My campaigns (and a valid current one) on every sign-in / reload.
+  useEffect(() => {
+    if (activeToken) void reloadCampaigns();
+  }, [activeToken, reloadCampaigns]);
 
   // Top-level section ("spells" for /spells/Fireball). Changing it replays the page enter animation
   // and scrolls to top; moving within a section (e.g. between spells) does neither.
@@ -231,7 +239,7 @@ function AppRoutes() {
                 <Route path="/table/:code" element={<TabletopPage />} />
                 <Route path="/roll-history" element={<RollHistoryPage />} />
                 <Route path="/settings/:tab?" element={<SettingsPage />} />
-                {isAdmin && <Route path="/dashboard" element={<AdminDashboard />} />}
+                {isDm && <Route path="/dashboard" element={<AdminDashboard />} />}
               </Route>
 
               <Route path="/login" element={<Login />} />

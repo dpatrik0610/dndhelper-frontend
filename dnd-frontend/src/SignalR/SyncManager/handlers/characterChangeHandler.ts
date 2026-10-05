@@ -3,6 +3,7 @@ import { useAuthStore } from "@store/auth/authStore";
 import type { EntityChangeEvent } from "./entitySyncTypes";
 import type { Character } from "@appTypes/Character/Character";
 import { showNotification } from "@components/Notification/Notification";
+import { getCurrentCampaignId } from "@api/campaignContext";
 
 export function handleCharacterChange(event: EntityChangeEvent) {
   const characterStore = useCharacterStore.getState();
@@ -59,6 +60,39 @@ export function handleCharacterChange(event: EntityChangeEvent) {
           });
         }
       }
+      break;
+    }
+
+    case "assigned": {
+      const character = event.data as Character;
+
+      // The list only holds the current campaign's characters.
+      if (character.campaignId === getCurrentCampaignId()) {
+        characterStore.setCharacters([
+          ...characterStore.characters.filter((c) => c.id !== character.id),
+          character,
+        ]);
+      }
+
+      showNotification({
+        title: "New character",
+        message: `${event.changedBy} gave you ${character.name}.`,
+        color: "green",
+        autoClose: 6000,
+      });
+      break;
+    }
+
+    case "unassigned": {
+      characterStore.setCharacters(characterStore.characters.filter((c) => c.id !== event.entityId));
+      if (currentCharacter?.id === event.entityId) characterStore.setCharacter(null);
+
+      showNotification({
+        title: "Character reassigned",
+        message: `${event.changedBy} gave ${(event.data as Character).name} to someone else.`,
+        color: "orange",
+        autoClose: 6000,
+      });
       break;
     }
 

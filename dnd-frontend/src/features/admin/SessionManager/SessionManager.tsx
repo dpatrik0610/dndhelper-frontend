@@ -3,7 +3,7 @@ import { Stack, Group, Title, Button } from "@mantine/core";
 import dayjs from "dayjs";
 import { useSessionStore } from "@store/session/sessionStore";
 import { sessionTemplate, type Session } from "@appTypes/Session";
-import { useAdminCampaignStore } from "@store/admin/adminCampaignStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import SessionTable from "./components/SessionTable";
 import SessionModal from "./components/SessionModal";
 import SessionViewModal from "./components/SessionViewModal";
@@ -11,7 +11,7 @@ import SessionViewModal from "./components/SessionViewModal";
 export function SessionManager() {
   const { sessions, selected, loading, loadAll, select, create, update, setLive, loadByCampaign } =
     useSessionStore();
-  const { selectedId: selectedCampaignId, campaigns } = useAdminCampaignStore();
+  const { selectedId: selectedCampaignId, campaigns } = useCampaignStore();
 
   const [editMode, setEditMode] = useState<"create" | "edit" | null>(null);
   const [draft, setDraft] = useState<Session>(sessionTemplate);
