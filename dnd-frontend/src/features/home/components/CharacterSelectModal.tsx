@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
+import { UnassignedCharacters } from "./UnassignedCharacters";
 
 interface CharacterSelectModalProps {
   opened: boolean;
@@ -255,6 +256,8 @@ export function CharacterSelectModal({
           </SimpleGrid>
         )}
       </ScrollArea.Autosize>
+
+      <UnassignedCharacters opened={opened} />
 
       <Group
         justify="flex-end"

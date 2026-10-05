@@ -9,6 +9,11 @@ export interface ApiResponse {
   
 
 
+/** My characters that aren't in any campaign. */
+export async function getUnassignedCharacters(): Promise<Character[]> {
+  return apiClient<Character[]>("/character/unassigned", { method: "GET" });
+}
+
 export async function getCharacters(): Promise<Character[]> {
   
 
