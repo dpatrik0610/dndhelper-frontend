@@ -26,6 +26,7 @@
     "@tabler/icons-react": "^3.35.0",
     "dayjs": "^1.11.19",
     "emoji-picker-react": "^4.22.3",
+    "emojibase": "^17.0.0",
     "emojibase-data": "^17.0.0",
     "framer-motion": "^12.23.24",
     "immer": "^11.1.8",
