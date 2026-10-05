@@ -15,6 +15,7 @@ import {
 } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { useCampaignStore } from "@store/campaign/campaignStore";
+import { useDmCampaigns } from "@store/campaign/campaignSelectors";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 
@@ -27,6 +28,7 @@ export function CampaignSelectPanel() {
     create,
     remove,
   } = useCampaignStore();
+  const dmCampaigns = useDmCampaigns();
 
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
@@ -88,7 +90,7 @@ export function CampaignSelectPanel() {
           <Select
             style={{ flex: 1 }}
             placeholder="Select campaign..."
-            data={campaigns.map((c) => ({ value: c.id!, label: c.name }))}
+            data={dmCampaigns.map((c) => ({ value: c.id!, label: c.name }))}
             value={selectedId}
             onChange={(id) => select(id ?? null)}
             nothingFoundMessage="No campaigns"

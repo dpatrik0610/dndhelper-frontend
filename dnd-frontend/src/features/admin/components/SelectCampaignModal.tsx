@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Box, Group, Text, Loader, Paper, ScrollArea, SimpleGrid } from "@mantine/core";
 import { IconMapPin, IconCheck } from "@tabler/icons-react";
 import { useCampaignStore } from "@store/campaign/campaignStore";
+import { useDmCampaigns } from "@store/campaign/campaignSelectors";
 import { BaseModal } from "@components/BaseModal";
 import { SectionColor } from "@appTypes/SectionColor";
 
@@ -12,7 +13,9 @@ interface SelectCampaignModalProps {
 }
 
 export function SelectCampaignModal({ opened, onClose }: SelectCampaignModalProps) {
-  const { campaigns, selectedId, reload, select, loading } = useCampaignStore();
+  const { selectedId, reload, select, loading } = useCampaignStore();
+  // Only campaigns I DM: a campaign where I'm just a player isn't mine to manage.
+  const campaigns = useDmCampaigns();
 
   useEffect(() => { 
       const reloadfn = async () => {await reload ()}
