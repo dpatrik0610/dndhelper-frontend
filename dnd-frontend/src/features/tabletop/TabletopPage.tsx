@@ -7,6 +7,7 @@ import {
   Button,
   CopyButton,
   Group,
+  Indicator,
   Loader,
   SegmentedControl,
   Stack,
@@ -19,31 +20,35 @@ import {
   IconArrowLeft,
   IconCheck,
   IconCopy,
-  IconDice5,
   IconLayoutSidebarRightCollapse,
   IconLayoutSidebarRightExpand,
   IconListNumbers,
+  IconMessageCircle,
   IconEye,
   IconEyeOff,
   IconPlayerTrackNext,
   IconSettings,
-  IconSwords,
 } from "@tabler/icons-react";
 import { useCurrentUserId } from "@store/auth/authSelectors";
+import { useChatStore } from "@store/chat/chatStore";
+import { useChatHub } from "@features/chat/chatHub";
 import { initiativeOrder, useDmView, useTabletopStore } from "@store/tabletop/tabletopStore";
 import type { TableLayer } from "@appTypes/Tabletop";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { Board } from "./board/Board";
 import { TabletopLobby } from "./TabletopLobby";
-import { CharacterBubble } from "./CharacterBubble";
+import { DiceBubble } from "./DiceBubble";
 import { SpellSearch } from "./SpellSearch";
 import { JoinCombat } from "./JoinCombat";
 import { Toolbar } from "./Toolbar";
 import { LAYERS, TOOLS } from "./tools";
 import { InitiativePanel } from "./panels/InitiativePanel";
-import { ActionPanel } from "./panels/ActionPanel";
+import { InventoryButton } from "./panels/InventoryModal";
+import { ChatPanel } from "./panels/ChatPanel";
 import { LogPanel } from "./panels/LogPanel";
 import { TokenEditor } from "./panels/TokenEditor";
+import { TokenDialogs } from "./panels/TokenDialogs";
+import { TokenMenu } from "./panels/TokenMenu";
 import { SettingsDrawer } from "./SettingsDrawer";
 import { TokenProfileModal } from "./TokenProfileModal";
 import { resolveImageUrl, tabletop, useTabletopHub } from "./useTabletopHub";
@@ -90,6 +95,10 @@ function TableView() {
   const [sideOpen, setSideOpen] = useState(!isMobile);
   const isDm = useTabletopStore((s) => s.session!.isDm);
   const dmView = useDmView();
+  const campaignId = useTabletopStore((s) => s.session!.campaignId);
+  const chatUnread = useChatStore((s) => s.unread);
+  // Here the chat lives in the side panel; the floating chat stays off on the table.
+  useChatHub(campaignId);
   useShortcuts(dmView);
 
   return (
@@ -100,31 +109,33 @@ function TableView() {
       {sideOpen && (
         <aside className="tt-side tt-glass">
           <InitiativePanel />
-          <Tabs defaultValue="actions" className="tt-side-tabs" keepMounted={false}>
+          <Tabs defaultValue="log" className="tt-side-tabs" keepMounted={false}>
             <Tabs.List grow>
-              <Tabs.Tab value="actions" leftSection={<IconDice5 size={14} />}>
-                Actions
-              </Tabs.Tab>
               <Tabs.Tab value="log" leftSection={<IconListNumbers size={14} />}>
                 Log
               </Tabs.Tab>
+              <Tabs.Tab value="chat" leftSection={<IconMessageCircle size={14} />}>
+                <Indicator inline processing disabled={!chatUnread} size={7} offset={-3} color="red">
+                  Chat
+                </Indicator>
+              </Tabs.Tab>
             </Tabs.List>
-            <Tabs.Panel value="actions" className="tt-tab-panel">
-              <div className="tt-scroll-y">
-                <ActionPanel />
-              </div>
-            </Tabs.Panel>
             <Tabs.Panel value="log" className="tt-tab-panel">
               <LogPanel />
+            </Tabs.Panel>
+            <Tabs.Panel value="chat" className="tt-tab-panel">
+              <ChatPanel />
             </Tabs.Panel>
           </Tabs>
         </aside>
       )}
       <TurnBar />
       <ConnectionBanner />
-      <CharacterBubble />
+      <DiceBubble />
       {isDm && <SettingsDrawer />}
       {isDm && <TokenEditor />}
+      {isDm && <TokenMenu />}
+      {isDm && <TokenDialogs />}
       <TokenProfileModal />
     </div>
   );
@@ -141,11 +152,11 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
   const navigate = useNavigate();
   const session = useTabletopStore((s) => s.session!);
   const connected = useTabletopStore((s) => s.connected);
+  const chatUnread = useChatStore((s) => s.unread);
   const turn = useTabletopStore((s) => s.snapshot!.turn);
   const activeLayer = useTabletopStore((s) => s.activeLayer);
   const playerView = useTabletopStore((s) => s.playerView);
   const set = useTabletopStore((s) => s.set);
-  const current = useCurrentToken();
   const encounter = useTabletopStore((s) => s.snapshot!.encounter);
   const me = useCurrentUserId() ?? "";
   // A player who owns no token on this table can watch, roll and draw, but has nothing to move.
@@ -164,30 +175,6 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
         <Text fw={700} truncate maw={220} className="tt-hide-mobile">
           {session.campaignName}
         </Text>
-        {turn.active ? (
-          <Badge variant="light" color="yellow" leftSection={<IconSwords size={12} />}>
-            Round {turn.round} · {current ? current.name : "Hidden"}
-          </Badge>
-        ) : (
-          <Badge variant="light" color="gray">
-            {encounter ? encounter.name : "Exploring"}
-          </Badge>
-        )}
-        {spectating && (
-          <Tooltip
-            multiline
-            w={260}
-            label="None of your characters are on this table, so there's nothing for you to move. Ask the DM to add your character to the campaign and place it on the map."
-          >
-            <Badge variant="light" color="blue" leftSection={<IconEye size={12} />}>
-              Spectating
-            </Badge>
-          </Tooltip>
-        )}
-      </Group>
-
-      <Group gap="xs" className={`tt-glass tt-pillbar${playerView ? " player-view" : ""}`} wrap="nowrap">
-        <SpellSearch />
         <Tooltip label={connected ? "Connected" : "Reconnecting…"}>
           <span className={`tt-dot${connected ? " on" : ""}`} />
         </Tooltip>
@@ -207,6 +194,27 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
             </Tooltip>
           )}
         </CopyButton>
+        {(encounter || !turn.active) && (
+          <Badge variant="light" color="gray">
+            {encounter ? encounter.name : "Exploring"}
+          </Badge>
+        )}
+        {spectating && (
+          <Tooltip
+            multiline
+            w={260}
+            label="None of your characters are on this table, so there's nothing for you to move. Ask the DM to add your character to the campaign and place it on the map."
+          >
+            <Badge variant="light" color="blue" leftSection={<IconEye size={12} />}>
+              Spectating
+            </Badge>
+          </Tooltip>
+        )}
+      </Group>
+
+      <Group gap="xs" className={`tt-glass tt-pillbar${playerView ? " player-view" : ""}`} wrap="nowrap">
+        <SpellSearch />
+        <InventoryButton />
         {session.isDm && !playerView && (
           <SegmentedControl
             size="xs"
@@ -253,9 +261,11 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
           </Tooltip>
         )}
         <Tooltip label={sideOpen ? "Hide panel" : "Show panel"}>
-          <ActionIcon variant="subtle" color="gray" onClick={onToggleSide} aria-label="Toggle side panel">
-            {sideOpen ? <IconLayoutSidebarRightCollapse size={18} /> : <IconLayoutSidebarRightExpand size={18} />}
-          </ActionIcon>
+          <Indicator processing disabled={sideOpen || !chatUnread} size={7} offset={5} color="red">
+            <ActionIcon variant="subtle" color="gray" onClick={onToggleSide} aria-label="Toggle side panel">
+              {sideOpen ? <IconLayoutSidebarRightCollapse size={18} /> : <IconLayoutSidebarRightExpand size={18} />}
+            </ActionIcon>
+          </Indicator>
         </Tooltip>
       </Group>
     </div>
@@ -289,7 +299,8 @@ function TurnBar() {
         <JoinCombat />
       </div>
     );
-  const mine = !!current && current.ownerIds.includes(me);
+  // The DM plays every token no player owns, so they get the full card (movement, economy) on those turns.
+  const mine = !!current && (current.ownerIds.includes(me) || (dmView && current.ownerIds.length === 0));
   const order = initiativeOrder(dmView ? tokens : tokens.filter((t) => t.layer !== "Dm"));
   const index = order.findIndex((t) => t.id === turn.currentTokenId);
   const upNext = order.length > 1 ? order[(index + 1) % order.length] : undefined;
@@ -389,7 +400,7 @@ function useShortcuts(isDm: boolean) {
       const el = e.target as HTMLElement | null;
       if (el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))) return;
       const store = useTabletopStore.getState();
-      if (store.editingTokenId || store.profileCharacterId || store.settingsOpen) return;
+      if (store.editingTokenId || store.profileCharacterId || store.settingsOpen || store.tokenMenu || store.tokenDialog) return;
 
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
         if (isDm && store.tool === "fog") {

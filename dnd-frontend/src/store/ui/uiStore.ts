@@ -18,6 +18,8 @@ export interface SitePrefs {
   reduceMotion: boolean;
   /** Drops glass blur and the animated background for weaker devices. */
   performanceMode: boolean;
+  /** Campaign chat bubble at the bottom right (not on the tabletop, which has its own). */
+  floatingChat: boolean;
 }
 
 export const defaultPrefs: SitePrefs = {
@@ -27,6 +29,7 @@ export const defaultPrefs: SitePrefs = {
   notificationPosition: "bottom-right",
   reduceMotion: false,
   performanceMode: false,
+  floatingChat: true,
 };
 
 const PREFS_STORAGE_KEY = "sitePrefs";
@@ -38,6 +41,7 @@ const prefsToRecord = (prefs: SitePrefs): Record<string, string> => ({
   notificationPosition: prefs.notificationPosition,
   reduceMotion: String(prefs.reduceMotion),
   performanceMode: String(prefs.performanceMode),
+  floatingChat: String(prefs.floatingChat),
 });
 
 /** Parses untrusted strings (localStorage, backend); anything unknown falls back to the default. */
@@ -51,6 +55,7 @@ export const prefsFromRecord = (record: Record<string, string | undefined>): Sit
     notificationPosition: NOTIFICATION_POSITIONS.includes(position) ? position : defaultPrefs.notificationPosition,
     reduceMotion: record.reduceMotion === "true",
     performanceMode: record.performanceMode === "true",
+    floatingChat: record.floatingChat !== "false",
   };
 };
 

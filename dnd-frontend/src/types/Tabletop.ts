@@ -193,6 +193,13 @@ export interface TableJoinResult {
   log: TableLogEntry[];
 }
 
+/** Someone connected to the table right now (sent to DMs only). */
+export interface TableParticipant {
+  userId: string;
+  name: string;
+  isDm: boolean;
+}
+
 export interface MeasureEvent {
   userId: string;
   name: string;

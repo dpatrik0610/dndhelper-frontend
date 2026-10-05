@@ -8,7 +8,32 @@ import { useIsMobile } from "@hooks/useIsMobile";
 import type { Character } from "@appTypes/Character/Character";
 import type { EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
+import { useMyTableCharacter } from "@features/tabletop/characterSheet";
+import { tabletop } from "@features/tabletop/useTabletopHub";
 import { weaponAction } from "./tableActions";
+
+/** Backpack icon in the top bar; only there while the viewer has a character on the table. */
+export function InventoryButton() {
+  const character = useMyTableCharacter();
+  const [opened, setOpened] = useState(false);
+  if (!character) return null;
+
+  return (
+    <>
+      <Tooltip label="Inventory">
+        <ActionIcon variant="subtle" color="gray" onClick={() => setOpened(true)} aria-label="Inventory">
+          <IconBackpack size={18} />
+        </ActionIcon>
+      </Tooltip>
+      <InventoryModal
+        opened={opened}
+        onClose={() => setOpened(false)}
+        character={character}
+        onRoll={(expressions, label) => void tabletop.roll({ expressions, label, as: character.name })}
+      />
+    </>
+  );
+}
 
 /** The character's inventories over the table. Weapons roll their attack from the list; any item opens its details. */
 export function InventoryModal({

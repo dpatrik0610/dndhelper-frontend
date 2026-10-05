@@ -9,6 +9,7 @@ import type {
   MeasureEvent,
   TableJoinResult,
   TableLogEntry,
+  TableParticipant,
   TableResync,
   TableSnapshot,
   TableStroke,
@@ -48,6 +49,8 @@ interface TabletopState {
   log: TableLogEntry[];
   /** Other people's live rulers, by user id. */
   measures: Record<string, MeasureEvent>;
+  /** DM only: who is connected right now. */
+  participants: TableParticipant[];
 
   tool: TableTool;
   drawColor: string;
@@ -73,6 +76,10 @@ interface TabletopState {
   editingTokenId: string | null;
   profileCharacterId: string | null;
   settingsOpen: boolean;
+  /** DM only: right-click menu on a token, at a viewport point. */
+  tokenMenu: { tokenId: string; x: number; y: number } | null;
+  /** DM only: HP or condition dialog for a token, opened from the initiative list or the token menu. */
+  tokenDialog: { tokenId: string; kind: "heal" | "damage" | "condition" } | null;
 }
 
 interface TabletopActions {
@@ -105,6 +112,7 @@ const initial: TabletopState = {
   fog: { enabled: false, ops: [] },
   log: [],
   measures: {},
+  participants: [],
 
   tool: "select",
   drawColor: "#f8fafc",
@@ -126,6 +134,8 @@ const initial: TabletopState = {
   editingTokenId: null,
   profileCharacterId: null,
   settingsOpen: false,
+  tokenMenu: null,
+  tokenDialog: null,
 };
 
 export const useTabletopStore = create<TabletopState & TabletopActions>()((set) => ({

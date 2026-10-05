@@ -44,6 +44,8 @@ const QuestsPage = lazy(pages.quests);
 const RollHistoryPage = lazy(pages.rollHistory);
 const RulesPage = lazy(pages.rules);
 const TabletopPage = lazy(pages.tabletop);
+// Loads after the page itself; most of a visit never opens it.
+const FloatingChat = lazy(() => import("@features/chat/FloatingChat").then((m) => ({ default: m.FloatingChat })));
 const ShopkeeperPage = lazy(pages.shop);
 const SettingsPage = lazy(pages.settings);
 const AdminDashboard = lazy(adminPage);
@@ -90,7 +92,9 @@ function AppRoutes() {
   const activeToken = token ?? localToken ?? null;
 
   const fetchSettings = useUiStore((s) => s.fetchSettings);
-  const { uiScale, reduceMotion, performanceMode } = useUiStore((s) => s.prefs);
+  const { uiScale, reduceMotion, performanceMode, floatingChat } = useUiStore((s) => s.prefs);
+  // Everywhere signed in except a joined table, whose side panel has the chat.
+  const showFloatingChat = floatingChat && !!activeToken && !hideSidebarRoutes.includes(location.pathname) && !location.pathname.startsWith("/table/");
 
   // Site prefs on <html>: rem-based Mantine sizes follow the root font size; the data flags drive
   // the global overrides in styles/sitePrefs.css (and reach Mantine portals too).
@@ -238,6 +242,12 @@ function AppRoutes() {
           </Suspense>
         </div>
       </AppShell.Main>
+
+      {showFloatingChat && (
+        <Suspense fallback={null}>
+          <FloatingChat />
+        </Suspense>
+      )}
 
       {showSidebar && (
         <SidebarToggle opened={opened} onOpenedChange={(open) => (open ? handlers.open() : handlers.close())} />

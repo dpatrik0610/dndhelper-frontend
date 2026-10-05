@@ -20,7 +20,8 @@ import {
 } from "./gridMath";
 
 type Gesture =
-  | { kind: "pan"; sx: number; sy: number; start: View; moved: boolean; clicked?: TableToken }
+  /** clicked: token under a press that may turn out to be a click. menu: a DM right-click (opens the token menu). */
+  | { kind: "pan"; sx: number; sy: number; start: View; moved: boolean; clicked?: TableToken; menu?: boolean }
   | { kind: "pinch"; dist: number; mid: Pt; start: View }
   | { kind: "token"; token: TableToken; from: Pt; offset: Pt; pos: Pt; moved: boolean }
   | { kind: "draw"; points: number[] }
@@ -302,8 +303,15 @@ export function Board() {
       ? { kind: fxShape(fx), color: fxColor, centered: false, widthFt: templateWidthFt, layer: myLayer, fx }
       : { kind: templateKind, color: templateColor, centered: templateCentered, widthFt: templateWidthFt, layer: myLayer, fx: null };
 
-  const startPan = (e: ReactPointerEvent, clicked?: TableToken) =>
-    setGesture({ kind: "pan", sx: e.clientX, sy: e.clientY, start: view, moved: false, clicked });
+  const startPan = (e: ReactPointerEvent, clicked?: TableToken, menu?: boolean) =>
+    setGesture({ kind: "pan", sx: e.clientX, sy: e.clientY, start: view, moved: false, clicked, menu });
+
+  /** Topmost token the DM sees at p, on any layer: right-click reaches everything, not just the active layer. */
+  const tokenAt = (p: Pt) =>
+    [...tokens].reverse().find((t) => {
+      const c = posOf(t);
+      return Math.hypot(p.x - c.x, p.y - c.y) <= tokenRadius(t, grid);
+    });
 
   /** Drop whatever the first finger was doing when a second one lands. */
   const cancelGesture = () => {
@@ -332,6 +340,8 @@ export function Board() {
       return;
     }
     if (pointers.current.size > 2 || afterPinch.current || gestureRef.current) return;
+    // Right button pans; a DM right-click that doesn't move opens the token menu.
+    if (e.button === 2 && dmView) return startPan(e, tokenAt(toWorld(e)), true);
     if (e.button === 1 || e.button === 2 || (e.button === 0 && spaceDown.current)) return startPan(e);
     if (e.button !== 0) return;
 
@@ -483,7 +493,9 @@ export function Board() {
 
     switch (g.kind) {
       case "pan":
-        if (!g.moved && g.clicked && opensSomething(g.clicked)) clickToken(g.clicked);
+        if (g.moved || !g.clicked) break;
+        if (g.menu) useTabletopStore.getState().set({ tokenMenu: { tokenId: g.clicked.id, x: e.clientX, y: e.clientY } });
+        else if (opensSomething(g.clicked)) clickToken(g.clicked);
         break;
       case "token": {
         if (!g.moved) {

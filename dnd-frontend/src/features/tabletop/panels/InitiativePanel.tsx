@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import { ActionIcon, Avatar, Button, NumberInput, ScrollArea, Text, Tooltip } from "@mantine/core";
 import {
   IconDroplet,
@@ -17,27 +17,16 @@ import { useCurrentUserId } from "@store/auth/authSelectors";
 import { initiativeOrder, useDmView, useTabletopStore } from "@store/tabletop/tabletopStore";
 import type { TableToken } from "@appTypes/Tabletop";
 import { resolveImageUrl, tabletop } from "@features/tabletop/useTabletopHub";
-import { AdjustHpModal } from "./AdjustHpModal";
-import { AddConditionModal } from "./AddConditionModal";
 
-const update = (token: TableToken, patch: Partial<TableToken>) => void tabletop.upsertToken({ ...token, ...patch });
+const update = (token: TableToken, patch: Partial<TableToken>) => void tabletop.patchToken(token, patch);
 
 const HEALTH_TONE: Record<string, string> = { Healthy: "healthy", Wounded: "wounded", Bloodied: "bloodied", Down: "down" };
-
-/** Damage eats temp HP first; healing stops at max (when max is known). */
-function applyHp(token: TableToken, mode: "heal" | "damage", amount: number): Partial<TableToken> {
-  if (mode === "heal") return { hp: token.maxHp > 0 ? Math.min(token.maxHp, token.hp + amount) : token.hp + amount };
-  const fromTemp = Math.min(token.tempHp, amount);
-  return { tempHp: token.tempHp - fromTemp, hp: Math.max(0, token.hp - (amount - fromTemp)) };
-}
 
 /** Initiative table: everyone sees it, only the DM edits it. */
 export function InitiativePanel() {
   const me = useCurrentUserId() ?? "";
   const session = useTabletopStore((s) => s.session);
   const snapshot = useTabletopStore((s) => s.snapshot);
-  const [hpTarget, setHpTarget] = useState<{ id: string; mode: "heal" | "damage" } | null>(null);
-  const [effectTarget, setEffectTarget] = useState<string | null>(null);
   const dmView = useDmView();
 
   if (!session || !snapshot) return null;
@@ -47,7 +36,6 @@ export function InitiativePanel() {
   const tokens = isDm ? snapshot.tokens : snapshot.tokens.filter((t) => t.layer !== "Dm");
   const order = initiativeOrder(tokens);
   const waiting = isDm ? tokens.filter((t) => t.initiative === null) : [];
-  const byId = (id: string | null) => tokens.find((t) => t.id === id);
 
   const currentIndex = turn.active ? order.findIndex((t) => t.id === turn.currentTokenId) : -1;
   const nextId = turn.active && order.length > 1 ? order[(currentIndex + 1) % order.length]?.id : null;
@@ -59,8 +47,8 @@ export function InitiativePanel() {
     current: turn.active && turn.currentTokenId === t.id,
     next: t.id === nextId,
     combat: turn.active,
-    onHp: (mode: "heal" | "damage") => setHpTarget({ id: t.id, mode }),
-    onAddEffect: () => setEffectTarget(t.id),
+    onHp: (kind: "heal" | "damage") => useTabletopStore.getState().set({ tokenDialog: { tokenId: t.id, kind } }),
+    onAddEffect: () => useTabletopStore.getState().set({ tokenDialog: { tokenId: t.id, kind: "condition" } }),
   });
 
   return (
@@ -139,25 +127,6 @@ export function InitiativePanel() {
           )}
         </div>
       </ScrollArea>
-
-      <AdjustHpModal
-        opened={!!hpTarget}
-        mode={hpTarget?.mode ?? "damage"}
-        onClose={() => setHpTarget(null)}
-        onSubmit={(amount) => {
-          const t = byId(hpTarget?.id ?? null);
-          if (t && hpTarget) update(t, applyHp(t, hpTarget.mode, amount));
-        }}
-      />
-      <AddConditionModal
-        opened={!!effectTarget}
-        onClose={() => setEffectTarget(null)}
-        existingLabels={byId(effectTarget)?.effects.map((e) => e.label) ?? []}
-        onSubmit={(label, remaining) => {
-          const t = byId(effectTarget);
-          if (t) update(t, { effects: [...t.effects, { id: "", label, remaining }] });
-        }}
-      />
     </div>
   );
 }

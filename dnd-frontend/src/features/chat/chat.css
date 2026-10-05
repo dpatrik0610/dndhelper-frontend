@@ -1,0 +1,597 @@
+/*
+ * Campaign chat, shared by the tabletop's Chat tab and the floating chat.
+ * A host can set --chat-line and --chat-accent; otherwise the site theme (or neutral fallbacks) applies.
+ */
+.chat-view {
+  --chat-line-color: var(--chat-line, var(--theme-border-subtle, rgba(255, 255, 255, 0.08)));
+  --chat-accent-color: var(--chat-accent, var(--mantine-color-violet-4));
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-scroll {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Phones: the browser's own scrolling, kept inside the chat. */
+.chat-scroll.native {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Log-style cards, one per run of messages from the same speaker. */
+.chat-card {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--chat-line-color);
+  animation: chat-rise-in 0.25s ease-out;
+  transition: border-color 0.2s ease;
+}
+
+@keyframes chat-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.chat-card.mine {
+  border-color: color-mix(in srgb, var(--chat-accent-color) 40%, transparent);
+}
+
+.chat-card.whisper {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--chat-accent-color) 55%, transparent);
+}
+
+.chat-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-bottom: 2px;
+}
+
+.chat-dm {
+  flex: none;
+  height: 14px;
+  padding: 0 4px;
+  font-size: 9px;
+}
+
+/* Color emoji fonts first in line for emoji, so they don't fall back to flat symbol glyphs.
+   Two classes deep so Mantine's own text rules can't win on load order. */
+.chat-view .chat-text,
+.chat-view .chat-input textarea {
+  font-family: var(--mantine-font-family), "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+}
+
+.chat-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chat-day {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--mantine-color-dimmed);
+}
+
+.chat-day::before,
+.chat-day::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--chat-line-color);
+}
+
+.chat-whisper {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  color: var(--chat-accent-color);
+}
+
+/* One message: text plus a ⋯ button that shows on hover (always on touch screens). */
+.chat-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 0 -4px;
+  padding: 0 4px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+  animation: chat-line-in 0.22s ease-out;
+}
+
+@keyframes chat-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+.chat-line .chat-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-line:hover,
+.chat-line.active {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.chat-actions {
+  flex: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.chat-line:hover .chat-actions,
+.chat-actions:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .chat-actions {
+    opacity: 0.6;
+  }
+}
+
+.chat-compose {
+  position: relative;
+  border-top: 1px solid var(--chat-line-color);
+}
+
+/* :shortcode: suggestions, floating just above the message box. */
+.chat-suggest {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: calc(100% + 4px);
+  z-index: 5;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--theme-bg-panel-opaque, var(--theme-bg-panel, #16161e));
+  border: 1px solid var(--chat-line-color);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  animation: chat-slide-in 0.12s ease-out;
+}
+
+.chat-suggest-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.chat-suggest-item.active {
+  background: color-mix(in srgb, var(--chat-accent-color) 22%, transparent);
+}
+
+.chat-suggest-emoji {
+  width: 20px;
+  text-align: center;
+  font-size: 18px;
+  line-height: 1;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+}
+
+.chat-suggest-name {
+  color: var(--mantine-color-dimmed);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-suggest-item.active .chat-suggest-name {
+  color: var(--mantine-color-text);
+}
+
+.chat-editing {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 0;
+  font-size: 11px;
+  color: var(--chat-accent-color);
+  animation: chat-slide-in 0.18s ease-out;
+}
+
+@keyframes chat-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.chat-input {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 8px;
+}
+
+.chat-count {
+  padding: 0 10px 6px;
+  text-align: right;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--mantine-color-dimmed);
+  transition: color 0.2s ease;
+  animation: chat-slide-in 0.18s ease-out;
+}
+
+.chat-count.full {
+  color: var(--mantine-color-red-5);
+}
+
+.chat-emoji-face {
+  font-size: 16px;
+  line-height: 1;
+  animation: chat-emoji-pop 0.15s ease-out;
+}
+
+@keyframes chat-emoji-pop {
+  from {
+    transform: scale(0.6);
+  }
+}
+
+/*
+ * emoji-picker-react, compact and in the site theme. The popover is the frame; the picker is see-through.
+ * Its dark mode reads --epr-dark-* (which overrides --epr-*), so the colors are set there. It's portaled,
+ * so it takes the theme variables from <html>, not from .chat-view.
+ */
+.chat-emoji-pop {
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--theme-bg-panel-opaque, var(--theme-bg-panel, #16161e));
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.chat-emoji-picker.EmojiPickerReact {
+  --chat-emoji-accent: var(--theme-color-accent-primary, var(--mantine-color-violet-4));
+
+  /* Colors */
+  --epr-dark-bg-color: transparent;
+  --epr-dark-picker-border-color: transparent;
+  --epr-dark-category-label-bg-color: var(--theme-bg-panel-opaque, #16161e);
+  --epr-dark-search-input-bg-color: rgba(255, 255, 255, 0.05);
+  --epr-dark-search-input-bg-color-active: rgba(255, 255, 255, 0.08);
+  --epr-dark-hover-bg-color: color-mix(in srgb, var(--chat-emoji-accent) 22%, transparent);
+  --epr-dark-focus-bg-color: color-mix(in srgb, var(--chat-emoji-accent) 32%, transparent);
+  --epr-dark-highlight-color: var(--chat-emoji-accent);
+  --epr-dark-category-icon-active-color: var(--chat-emoji-accent);
+  --epr-dark-category-icon-inactive-color: var(--mantine-color-dimmed);
+  --epr-dark-text-color: var(--mantine-color-dimmed);
+  --epr-search-border-color: transparent;
+  --epr-search-border-color-active: var(--chat-emoji-accent);
+  --epr-search-input-text-color: var(--mantine-color-text);
+  --epr-search-input-placeholder-color: var(--mantine-color-dimmed);
+  --epr-category-label-text-color: var(--mantine-color-dimmed);
+
+  /* Compact: smaller emoji and tighter chrome than the library's defaults (30px emoji, 40px search). */
+  --epr-emoji-size: 22px;
+  --epr-emoji-padding: 4px;
+  --epr-horizontal-padding: 8px;
+  --epr-header-padding: 8px var(--epr-horizontal-padding) 6px;
+  --epr-search-input-height: 30px;
+  --epr-search-input-border-radius: 8px;
+  --epr-search-input-padding: 0 28px;
+  --epr-category-navigation-button-size: 22px;
+  --epr-category-label-height: 24px;
+
+  border: none;
+}
+
+/* The library forces sans-serif on everything; emoji keep their own (!important) font. */
+.chat-emoji-picker.EmojiPickerReact input,
+.chat-emoji-picker.EmojiPickerReact .epr-emoji-category-label {
+  font-family: var(--mantine-font-family);
+}
+
+.chat-emoji-picker.EmojiPickerReact .epr-emoji-category-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Floating chat: a themed bubble at the bottom right and the panel it opens ── */
+
+.chat-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 150; /* above pages, below Mantine overlays */
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  color: var(--theme-color-text-on-accent, #fff);
+  background: var(--theme-gradient-primary, linear-gradient(135deg, #8b5cf6, #6d28d9));
+  box-shadow: var(--theme-glow-shadow-primary, 0 6px 20px rgba(139, 92, 246, 0.45));
+  border: 1px solid var(--theme-border-glow, rgba(255, 255, 255, 0.18));
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease;
+}
+
+.chat-fab:hover {
+  transform: translateY(-2px) scale(1.04);
+  filter: brightness(1.08);
+}
+
+.chat-fab:active {
+  transform: scale(0.96);
+}
+
+.chat-fab-icon {
+  display: grid;
+  place-items: center;
+  animation: chat-fab-turn 0.22s ease-out;
+}
+
+@keyframes chat-fab-turn {
+  from {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+  }
+}
+
+.chat-fab-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--mantine-color-red-6);
+  box-shadow: 0 0 0 2px var(--theme-bg-base, #0b0b10);
+  animation: chat-dot-pop 0.3s cubic-bezier(0.3, 1.6, 0.6, 1);
+}
+
+.chat-fab-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  animation: chat-dot-ping 1.8s ease-out 0.3s infinite;
+}
+
+@keyframes chat-dot-pop {
+  from {
+    transform: scale(0);
+  }
+}
+
+@keyframes chat-dot-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70%,
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.chat-float {
+  --chat-accent: var(--theme-color-accent-primary, var(--mantine-color-violet-4));
+  position: fixed;
+  right: 20px;
+  bottom: 84px;
+  z-index: 150;
+  width: 360px;
+  height: min(560px, calc(100dvh - 110px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 16px;
+  color: var(--theme-color-text-primary, #e7e9f0);
+  background: var(--theme-bg-panel-opaque, var(--theme-bg-panel, rgba(18, 18, 26, 0.96)));
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.5),
+    var(--theme-glow-shadow-primary, none);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  animation: chat-float-in 0.2s ease-out;
+  transform-origin: bottom right;
+}
+
+@keyframes chat-float-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+.chat-float.closing {
+  animation: chat-float-out 0.15s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes chat-float-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+.chat-float-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 4px 6px 4px 12px;
+  border-bottom: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--theme-gradient-primary-glass, transparent);
+}
+
+/* The campaign picker reads as a title: no box until hovered. Beats the global .glassy-input (!important). */
+.chat-float-head .glassy-input {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.chat-float-head .glassy-input:hover,
+.chat-float-head .glassy-input:focus {
+  background: rgba(0, 0, 0, 0.18) !important;
+}
+
+.chat-float-empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+}
+
+/* Phones: the chat takes the whole screen and brings its own close button. */
+@media (max-width: 48em) {
+  .chat-float {
+    inset: 0;
+    width: auto;
+    height: 100dvh;
+    border-radius: 0;
+    border: none;
+  }
+
+  .chat-fab {
+    right: 14px;
+    bottom: 14px;
+  }
+
+  .chat-float + .chat-fab,
+  .chat-fab.hidden-mobile {
+    display: none;
+  }
+}
+
+[data-performance] .chat-float {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-view *,
+  .chat-float,
+  .chat-fab,
+  .chat-fab * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ── Themed controls: whisper and send buttons, and the chat's menus (portaled, so they read the theme from <html>) ── */
+
+.chat-view,
+.chat-menu {
+  --chat-theme-accent: var(--theme-color-accent-primary, var(--mantine-color-violet-4));
+}
+
+.chat-whisper-btn.chat-whisper-btn {
+  color: var(--mantine-color-dimmed);
+}
+
+.chat-whisper-btn.chat-whisper-btn:hover,
+.chat-whisper-btn.chat-whisper-btn.active {
+  color: var(--chat-theme-accent);
+  background: color-mix(in srgb, var(--chat-theme-accent) 16%, transparent);
+}
+
+.chat-send-btn.chat-send-btn:not(:disabled, [data-disabled]) {
+  color: var(--chat-theme-accent);
+  background: color-mix(in srgb, var(--chat-theme-accent) 18%, transparent);
+}
+
+.chat-send-btn.chat-send-btn:not(:disabled, [data-disabled]):hover {
+  background: color-mix(in srgb, var(--chat-theme-accent) 28%, transparent);
+}
+
+.mantine-Menu-dropdown.chat-menu {
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--theme-bg-panel-opaque, var(--theme-bg-panel, #16161e));
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+
+.mantine-Menu-item.chat-menu-item {
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+.mantine-Menu-item.chat-menu-item[data-hovered] {
+  background: color-mix(in srgb, var(--chat-theme-accent) 16%, transparent);
+}
+
+.mantine-Menu-item.chat-menu-item.selected {
+  color: var(--chat-theme-accent);
+  font-weight: 600;
+}
+
+.mantine-Menu-label.chat-menu-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--chat-theme-accent);
+}
+
+.mantine-Menu-divider.chat-menu-divider {
+  margin: 4px 6px;
+  border-color: var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+/* Tiny avatars: portrait, else the initial on a theme tint; the DM gets a glowing 4-point star. */
+.chat-avatar {
+  flex: none;
+}
+
+.mantine-Avatar-root.chat-avatar .mantine-Avatar-placeholder {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--chat-theme-accent);
+  background: color-mix(in srgb, var(--chat-theme-accent) 20%, transparent);
+}
+
+.chat-avatar.dm {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--chat-theme-accent);
+  background: color-mix(in srgb, var(--chat-theme-accent) 20%, transparent);
+}
+
+.chat-avatar.dm svg {
+  width: 72%;
+  height: 72%;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--chat-theme-accent) 70%, transparent));
+}

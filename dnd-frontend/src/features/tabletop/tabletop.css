@@ -760,6 +760,12 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
+  /* The row is as tall as the rail, so the empty space under a short options panel must not swallow board touches. */
+  pointer-events: none;
+}
+
+.tt-toolbar-wrap > * {
+  pointer-events: auto;
 }
 
 .tt-toolbar {
@@ -819,30 +825,6 @@
 .tt-scroll {
   flex: 1;
   min-height: 0;
-}
-
-.tt-scroll-y {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.tt-action {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--tt-line);
-  background: rgba(255, 255, 255, 0.02);
-  color: inherit;
-  text-align: left;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.tt-action:hover {
-  background: rgba(167, 139, 250, 0.1);
-  border-color: rgba(167, 139, 250, 0.4);
 }
 
 /* Inventory modal: item details on the left, attack roll on the right. */
@@ -1243,7 +1225,6 @@
 .tt-root .mantine-ActionIcon-root,
 .tt-root .mantine-Button-root,
 .tt-root .mantine-Chip-label,
-.tt-action,
 .tt-fx-pick {
   transition:
     transform 0.12s ease,
@@ -1253,7 +1234,6 @@
 }
 
 .tt-root .mantine-ActionIcon-root:hover:not(:disabled),
-.tt-action:hover,
 .tt-fx-pick:hover {
   transform: translateY(-1px);
 }
@@ -1261,7 +1241,6 @@
 .tt-root .mantine-ActionIcon-root:active:not(:disabled),
 .tt-root .mantine-Button-root:active:not(:disabled),
 .tt-root .mantine-Chip-label:active,
-.tt-action:active,
 .tt-fx-pick:active {
   transform: scale(0.93);
 }
@@ -1375,13 +1354,6 @@
   cursor: progress;
 }
 
-.tt-dice-result {
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid var(--tt-line);
-  animation: tt-rise-in 0.2s ease-out;
-}
-
 /* -- Checks & saves bubble -- */
 
 .tt-bubble {
@@ -1439,10 +1411,11 @@
   animation: tt-bubble-open 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
+/* No scale: the SegmentedControl inside measures its indicator on mount and would keep the shrunken size. */
 @keyframes tt-bubble-open {
   from {
     opacity: 0;
-    transform: scale(0.6) translateY(12px);
+    transform: translateY(16px);
   }
 }
 
@@ -1517,6 +1490,51 @@
   background: #f87171;
   box-shadow: 0 0 8px rgba(248, 113, 113, 0.6);
   animation: tt-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tt-pip.slot {
+  border: 2px solid rgba(167, 139, 250, 0.6);
+}
+
+.tt-pip.slot.on {
+  background: #a78bfa;
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.6);
+  animation: tt-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Spell slots in the dice bubble: one box like the death saves, a row per level. */
+.tt-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--tt-line);
+}
+
+.tt-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tt-slot-level {
+  width: 28px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.tt-slot-row .tt-death-pips {
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.tt-slot-count {
+  font-size: 12px;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
 }
 
 .tt-pip:focus-visible {
@@ -1962,13 +1980,13 @@
     opacity 0.15s ease;
 }
 
-.tt-roster-card:hover:not(.placed) {
+.tt-roster-card:hover:not(.placed):not(.static) {
   border-color: rgba(167, 139, 250, 0.55);
   transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
-.tt-roster-card:active:not(.placed) {
+.tt-roster-card:active:not(.placed):not(.static) {
   cursor: grabbing;
 }
 
@@ -1980,6 +1998,11 @@
 .tt-roster-card.placed {
   cursor: default;
   opacity: 0.6;
+}
+
+/* Not draggable: the "At the table" list. */
+.tt-roster-card.static {
+  cursor: default;
 }
 
 .tt-roster-grip {

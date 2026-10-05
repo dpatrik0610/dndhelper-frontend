@@ -81,6 +81,13 @@ export function InterfaceSettings() {
               aria-label="Notification position"
             />
           </SettingRow>
+          {divider}
+
+          <PrefSwitch
+            pref="floatingChat"
+            label="Chat bubble"
+            description="Your campaign chat in a bubble at the bottom right. The tabletop always has its own chat tab."
+          />
         </Stack>
       </SettingsSection>
 

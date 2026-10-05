@@ -4,6 +4,7 @@ import {
   Avatar,
   Badge,
   Button,
+  Checkbox,
   ColorInput,
   CopyButton,
   Drawer,
@@ -11,6 +12,7 @@ import {
   Group,
   Loader,
   NumberInput,
+  Popover,
   ScrollArea,
   Select,
   SimpleGrid,
@@ -29,6 +31,7 @@ import {
   IconCloudFog,
   IconCopy,
   IconDoorEnter,
+  IconDoorExit,
   IconEraser,
   IconEye,
   IconEyeOff,
@@ -42,8 +45,10 @@ import {
   IconShape,
   IconTrash,
   IconUpload,
+  IconUserMinus,
   IconUserPlus,
   IconUsers,
+  IconUsersGroup,
   IconX,
   type Icon,
 } from "@tabler/icons-react";
@@ -51,11 +56,12 @@ import { useDebouncedValue } from "@mantine/hooks";
 import { showNotification } from "@components/Notification/Notification";
 import { getCampaignCharacters } from "@services/campaignService";
 import { monsterService } from "@services/Admin/monsterService";
+import { useCurrentUserId } from "@store/auth/authSelectors";
 import { useTabletopStore } from "@store/tabletop/tabletopStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import type { Character } from "@appTypes/Character/Character";
 import type { Monster } from "@appTypes/Monster";
-import type { GridSettings, GridType, TableToken } from "@appTypes/Tabletop";
+import type { GridSettings, GridType, TableParticipant, TableToken } from "@appTypes/Tabletop";
 import { gridTile } from "./board/gridMath";
 import { resolveImageUrl, tabletop, uploadTableImage } from "./useTabletopHub";
 
@@ -218,12 +224,169 @@ function RoomTab() {
         </Group>
       </section>
 
+      <PeopleCard />
+
       <Card icon={IconBell} title="Invite the party" description="Online players with a character in this campaign get a notification that opens the table.">
         <Button fullWidth size="md" className="tt-cta" leftSection={<IconBell size={17} />} onClick={invite} loading={inviting}>
           Notify players
         </Button>
       </Card>
     </>
+  );
+}
+
+function PeopleCard() {
+  const me = useCurrentUserId() ?? "";
+  const participants = useTabletopStore((s) => s.participants);
+  const tokens = useTabletopStore((s) => s.snapshot!.tokens);
+  const players = participants.filter((p) => !p.isDm);
+
+  return (
+    <Card
+      icon={IconUsersGroup}
+      title="At the table"
+      description="Who's connected right now. Kicked players can come back with the room code until you make a new one."
+      action={players.length > 0 ? <KickAllButton count={players.length} /> : undefined}
+    >
+      {participants.length === 0 ? (
+        <Text size="sm" c="dimmed">
+          Nobody is connected yet.
+        </Text>
+      ) : (
+        <div className="tt-roster">
+          {participants.map((p) => {
+            const characters = tokens.filter((t) => t.characterId && t.ownerIds.includes(p.userId)).map((t) => t.name);
+            return (
+              <div key={p.userId} className="tt-roster-card static">
+                <Avatar radius="xl" size={36} className="tt-roster-avatar" style={p.isDm ? { borderColor: "#a78bfa" } : undefined}>
+                  {p.name.slice(0, 2).toUpperCase()}
+                </Avatar>
+                <div className="tt-roster-text">
+                  <strong>
+                    {p.name}
+                    {p.userId === me && " (you)"}
+                  </strong>
+                  <span>{p.isDm ? "Dungeon master" : characters.length ? characters.join(", ") : "No character on the map"}</span>
+                </div>
+                {p.isDm ? (
+                  <Badge size="sm" variant="light" color="violet">
+                    DM
+                  </Badge>
+                ) : (
+                  <KickButton participant={p} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+/** Small confirm popover shared by the kick buttons. */
+function ConfirmPopover({
+  target,
+  title,
+  children,
+  confirmLabel,
+  onConfirm,
+}: {
+  target: (toggle: () => void) => ReactNode;
+  title: string;
+  children?: ReactNode;
+  confirmLabel: string;
+  onConfirm: () => Promise<void>;
+}) {
+  const [opened, setOpened] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const confirm = async () => {
+    setBusy(true);
+    await onConfirm();
+    setBusy(false);
+    setOpened(false);
+  };
+
+  return (
+    <Popover opened={opened} onChange={setOpened} position="bottom-end" withArrow shadow="xl" radius="lg" width={260}>
+      <Popover.Target>{target(() => setOpened((o) => !o))}</Popover.Target>
+      <Popover.Dropdown>
+        <Text size="sm" fw={600}>
+          {title}
+        </Text>
+        {children}
+        <Group justify="flex-end" gap="xs" mt="sm">
+          <Button size="xs" variant="default" onClick={() => setOpened(false)}>
+            Cancel
+          </Button>
+          <Button size="xs" color="red" loading={busy} onClick={() => void confirm()}>
+            {confirmLabel}
+          </Button>
+        </Group>
+      </Popover.Dropdown>
+    </Popover>
+  );
+}
+
+function KickButton({ participant: p }: { participant: TableParticipant }) {
+  const kick = async () => {
+    if (await tabletop.kick(p.userId)) showNotification({ message: `${p.name} was removed from the table.`, color: "green" });
+  };
+
+  return (
+    <ConfirmPopover
+      title={`Kick ${p.name}?`}
+      confirmLabel="Kick"
+      onConfirm={kick}
+      target={(toggle) => (
+        <ActionIcon variant="subtle" color="red" radius="xl" onClick={toggle} aria-label={`Kick ${p.name}`} title={`Kick ${p.name}`}>
+          <IconUserMinus size={16} />
+        </ActionIcon>
+      )}
+    >
+      <Text size="xs" c="dimmed" mt={4}>
+        They drop out of the table right away, in every open tab. Their tokens stay on the map.
+      </Text>
+    </ConfirmPopover>
+  );
+}
+
+function KickAllButton({ count }: { count: number }) {
+  const [newCode, setNewCode] = useState(false);
+
+  const kickAll = async () => {
+    const removed = await tabletop.kickAll();
+    if (removed === undefined) return;
+    if (newCode) await tabletop.regenerateCode();
+    showNotification({
+      message: `Removed ${removed} player${removed === 1 ? "" : "s"}${newCode ? " and made a new room code" : ""}.`,
+      color: "green",
+    });
+  };
+
+  return (
+    <ConfirmPopover
+      title={`Kick all ${count} players?`}
+      confirmLabel="Kick all"
+      onConfirm={kickAll}
+      target={(toggle) => (
+        <Button size="compact-xs" variant="light" color="red" radius="xl" leftSection={<IconDoorExit size={13} />} onClick={toggle}>
+          Kick all
+        </Button>
+      )}
+    >
+      <Text size="xs" c="dimmed" mt={4}>
+        Everyone except the DMs leaves the table. Tokens stay on the map.
+      </Text>
+      <Checkbox
+        mt="sm"
+        size="xs"
+        label="Also make a new room code, so they can't rejoin"
+        checked={newCode}
+        onChange={(e) => setNewCode(e.currentTarget.checked)}
+      />
+    </ConfirmPopover>
   );
 }
 

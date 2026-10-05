@@ -14,6 +14,7 @@ import type {
   TableJoinResult,
   TableEncounterSummary,
   TableLogEntry,
+  TableParticipant,
   TableResync,
   TableSnapshot,
   TableStroke,
@@ -77,6 +78,8 @@ export const tabletop = {
   moveToken: async (tokenId: string, x: number, y: number, distanceFt: number) =>
     (await invoke("MoveToken", [tokenId, x, y, Math.round(distanceFt)])).ok,
   upsertToken: (token: Partial<TableToken>) => call("UpsertToken", token),
+  /** Saves a change to an existing token (the server takes the whole token). */
+  patchToken: (token: TableToken, patch: Partial<TableToken>) => call("UpsertToken", { ...token, ...patch }),
   /** Player characters always go on the play layer. */
   placeCharacter: (characterId: string, x: number, y: number) =>
     call("UpsertToken", { characterId, x, y, color: "#60a5fa", layer: "Token" }),
@@ -109,6 +112,9 @@ export const tabletop = {
   loadEncounter: async (encounterId: string) => (await invoke("LoadEncounter", [encounterId])).ok,
   deleteEncounter: async (encounterId: string) => (await invoke("DeleteEncounter", [encounterId])).ok,
   regenerateCode: () => call<string>("RegenerateCode"),
+  kick: async (userId: string) => (await invoke("Kick", [userId])).ok,
+  /** Resolves to how many players were removed. */
+  kickAll: () => call<number>("KickAll"),
   /** Fire-and-forget: a dropped ruler frame doesn't matter. */
   measure: (points: number[] | null) => {
     if (active?.state === HubConnectionState.Connected) void active.invoke("Measure", points).catch(() => {});
@@ -141,6 +147,12 @@ export function useTabletopHub(code: string | undefined) {
     conn.on("Measure", (measure: MeasureEvent) => store().setMeasure(measure));
     conn.on("CodeChanged", (newCode: string) => store().setCode(newCode));
     conn.on("Resync", (payload: TableResync) => store().resync(payload));
+    conn.on("Participants", (participants: TableParticipant[]) => store().set({ participants }));
+    // Dropping the session also stops the reconnect logic from joining again.
+    conn.on("Kicked", () => {
+      store().reset();
+      store().setJoinError("The DM removed you from the table.");
+    });
 
     let cancelled = false;
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
