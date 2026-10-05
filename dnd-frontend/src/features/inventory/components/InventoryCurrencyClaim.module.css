@@ -1,0 +1,58 @@
+.claim {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed color-mix(in srgb, var(--mantine-color-yellow-6) 40%, transparent);
+  background: color-mix(in srgb, var(--mantine-color-yellow-6) 6%, transparent);
+}
+
+.icon {
+  display: grid;
+  color: var(--mantine-color-yellow-4);
+}
+
+.text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--mantine-font-size-sm);
+  color: color-mix(in srgb, var(--theme-color-text-primary, #fff) 75%, transparent);
+}
+
+.amount {
+  font-weight: 700;
+  color: var(--mantine-color-yellow-4);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--mantine-color-yellow-6) 50%, transparent);
+  background: color-mix(in srgb, var(--mantine-color-yellow-6) 16%, transparent);
+  color: var(--mantine-color-yellow-3);
+  font: inherit;
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--mantine-color-yellow-6) 28%, transparent);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--mantine-color-yellow-4);
+  outline-offset: 2px;
+}

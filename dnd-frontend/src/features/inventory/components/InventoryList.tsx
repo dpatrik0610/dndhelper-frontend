@@ -21,7 +21,7 @@ export function InventoryList({ inventories, details, searchTerm, sortBy, viewMo
     );
 
   return (
-    <Stack gap={0}>
+    <Stack gap="sm">
       {inventories.map((inv) => (
         <InventoryBox
           key={inv.id}

@@ -1,8 +1,6 @@
 import {
   Box,
-  Group,
   Tabs,
-  Text,
   Stack,
 } from "@mantine/core";
 import { CardGridSkeleton, LinesSkeleton } from "@components/common/Skeletons";
@@ -17,9 +15,6 @@ import { IconBackpack, IconListCheck, IconNotes, IconShieldHalf, IconSparkles, I
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
-import { getCampaignById } from "@services/campaignService";
-import { useIsAdmin, useToken } from "@store/auth/authSelectors";
-import type { Campaign } from "@appTypes/Campaign";
 import { useIsMobile } from "@hooks/useIsMobile";
 
 // Lazy-loaded sub-panels to optimize initial bundle size, memory footprint, and rendering latency on mobile
@@ -42,44 +37,12 @@ const PROFILE_TABS: { value: string; label: string; short?: string; Icon: typeof
   { value: "inventories", label: "Inventories", short: "Items", Icon: IconBackpack },
 ];
 
-function useCampaignName(campaignId: string | null) {
-  const [name, setName] = useState<string>("Loading...");
-  const token = useToken();
-
-  useEffect(() => {
-    if (!campaignId || !token) {
-      setName("No Campaign");
-      return;
-    }
-
-    (async () => {
-      let data: Campaign | null = null;
-      try
-      {
-        const campaign = await getCampaignById(campaignId);
-        if (campaign) data = campaign;
-      }
-      catch (err)
-      {
-        data = null;
-        console.error("Error fetching campaign name in CharacterProfile:", err);
-      }
-
-      setName(data?.name ?? "Unknown Campaign");
-    })();
-  }, [campaignId, token]);
-
-  return name;
-}
-
 export default function CharacterProfile() {
   const character = useCurrentCharacter();
   const [activeTab, setActiveTab] = useState<string | null>("overview");
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
-  const isAdmin = useIsAdmin();
-  const campaignName = useCampaignName(isAdmin ? character?.campaignId ?? null : null);
   useEffect(() => {
     if (!character) {
       showNotification({
@@ -164,14 +127,6 @@ export default function CharacterProfile() {
           </AnimatePresence>
         </Suspense>
       </Tabs>
-      {isAdmin && (
-        <Group mb={10} gap={10} align="center" wrap="wrap">
-          <Text size="xs" c="dimmed">ID: {character.id}</Text>
-          <Text size="xs" c="dimmed">
-            Campaign: {character.campaignId} ({campaignName})
-          </Text>
-      </Group>
-      )}
     </Box>
   );
 }

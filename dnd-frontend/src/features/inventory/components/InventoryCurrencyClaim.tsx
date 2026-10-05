@@ -1,13 +1,14 @@
 import { getAuthTokenSafe } from "@store/auth/authUtils";
 import { useState } from "react";
-import { Button, Group, Loader, Box, Text } from "@mantine/core";
+import { Loader } from "@mantine/core";
+import { IconCoins } from "@tabler/icons-react";
 import { claimFromInventory } from "@services/currencyService";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
 import { loadInventories } from "@utils/loadinventory";
 import { loadCharacters } from "@utils/loadCharacter";
-import { InventoryCurrencyBox } from "./InventoryCurrencyBox";
 import { showNotification } from "@components/Notification/Notification";
+import classes from "./InventoryCurrencyClaim.module.css";
 
 interface InventoryCurrencyClaimProps {
   inventoryId: string;
@@ -61,36 +62,21 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
   // Hidden once claimed: the store empties the inventory's currencies.
   if (!inventory?.currencies?.length) return null;
 
-  return (
-    <Box
-      style={{
-        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-        borderRadius: 10,
-        padding: 12,
-        background: "var(--theme-bg-card, rgba(255, 255, 255, 0.02))",
-        boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-      }}
-    >
-      <Text size="sm" fw={700} c="white" mb={6}>
-        Available Currency
-      </Text>
-      <Group justify="space-between" align="center" wrap="wrap" gap="sm">
-        <InventoryCurrencyBox inventoryId={inventory.id!} />
+  const coins = inventory.currencies.map((c) => `${c.amount} ${c.currencyCode}`).join(", ");
 
-        <Button
-          variant="gradient"
-          gradient={{ from: "violet", to: "cyan", deg: 45 }}
-          size="sm"
-          radius="md"
-          onClick={handleClaim}
-          disabled={loading}
-        >
-          {loading ? <Loader size="xs" color="white" /> : "Claim"}
-        </Button>
-      </Group>
-    </Box>
+  return (
+    <div className={classes.claim}>
+      <span className={classes.icon}>
+        <IconCoins size={18} stroke={1.75} />
+      </span>
+      <span className={classes.text}>
+        <span className={classes.amount}>{coins}</span> waiting to be claimed
+      </span>
+      <button type="button" className={classes.button} onClick={handleClaim} disabled={loading}>
+        {loading && <Loader size={12} color="yellow" />}
+        Claim
+      </button>
+    </div>
   );
 }
 

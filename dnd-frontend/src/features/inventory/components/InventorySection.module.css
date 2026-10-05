@@ -1,0 +1,123 @@
+/* One collapsible inventory. Plain elements, so no Mantine/global class outranks these. */
+
+.section {
+  border-radius: 12px;
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--theme-bg-panel, rgba(15, 15, 15, 0.45));
+  backdrop-filter: blur(24px) saturate(130%);
+  -webkit-backdrop-filter: blur(24px) saturate(130%);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Has search matches. */
+.section[data-highlighted] {
+  border-color: color-mix(in srgb, var(--theme-color-accent-primary, #f59e0b) 55%, transparent);
+  box-shadow: var(--theme-glow-shadow-primary, none);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.header:hover {
+  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.04));
+}
+
+.header:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #f59e0b);
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: var(--theme-color-accent-primary, #f59e0b);
+  background: color-mix(in srgb, var(--theme-color-accent-primary, #f59e0b) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme-color-accent-primary, #f59e0b) 25%, transparent);
+}
+
+.titleBlock {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--mantine-font-size-md);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: var(--mantine-font-size-xs);
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--theme-color-text-primary, #fff) 55%, transparent);
+}
+
+.match {
+  font-weight: 600;
+  color: var(--mantine-color-green-5);
+}
+
+.noMatch {
+  font-weight: 600;
+}
+
+.coin {
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--mantine-color-yellow-4);
+  background: color-mix(in srgb, var(--mantine-color-yellow-6) 14%, transparent);
+}
+
+.chevron {
+  flex-shrink: 0;
+  display: grid;
+  color: color-mix(in srgb, var(--theme-color-text-primary, #fff) 55%, transparent);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.section[data-open] .chevron {
+  transform: rotate(180deg);
+}
+
+.body {
+  padding: 14px;
+  border-top: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}

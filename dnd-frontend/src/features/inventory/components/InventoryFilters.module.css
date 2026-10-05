@@ -1,0 +1,66 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.search {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.sort {
+  flex: 0 1 170px;
+}
+
+/* List / grid switch, sized to the 36px inputs next to it. */
+.view {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 2px;
+  height: 36px;
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--theme-bg-panel, rgba(15, 15, 15, 0.45));
+}
+
+.viewButton {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  color: color-mix(in srgb, var(--theme-color-text-primary, #fff) 50%, transparent);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.viewButton:hover {
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.viewButton[aria-pressed="true"] {
+  color: var(--theme-color-accent-primary, #f59e0b);
+  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.06));
+}
+
+.viewButton:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #f59e0b);
+  outline-offset: 1px;
+}
+
+/* Phones: search on its own row, sort takes the rest of the second. */
+@media (max-width: 48em) {
+  .search {
+    flex-basis: 100%;
+  }
+
+  .sort {
+    flex: 1 1 auto;
+  }
+}

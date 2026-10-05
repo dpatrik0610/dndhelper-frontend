@@ -1,6 +1,7 @@
-import { Group, Select, TextInput, SegmentedControl } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+import { Select, TextInput, Tooltip } from "@mantine/core";
+import { IconArrowsSort, IconLayoutGrid, IconLayoutList, IconSearch } from "@tabler/icons-react";
 import type { InventorySort, InventoryViewMode } from "@features/inventory/hooks/useInventoryFilters";
+import classes from "./InventoryFilters.module.css";
 
 const SORT_OPTIONS: { value: InventorySort; label: string }[] = [
   { value: "name", label: "Name" },
@@ -8,6 +9,11 @@ const SORT_OPTIONS: { value: InventorySort; label: string }[] = [
   { value: "weight", label: "Weight" },
   { value: "quantity", label: "Quantity" },
 ];
+
+const VIEW_OPTIONS = [
+  { value: "list", label: "List view", Icon: IconLayoutList },
+  { value: "cards", label: "Grid view", Icon: IconLayoutGrid },
+] as const;
 
 interface InventoryFiltersProps {
   searchTerm: string;
@@ -27,42 +33,43 @@ export function InventoryFilters({
   onViewModeChange,
 }: InventoryFiltersProps) {
   return (
-    <Group gap="xs" align="flex-end" wrap="wrap">
+    <div className={classes.toolbar}>
       <TextInput
-        label="Search items"
-        placeholder="Name, tag or note"
-        leftSection={<IconSearch size={14} />}
+        aria-label="Search items"
+        placeholder="Search by name, tag or note"
+        leftSection={<IconSearch size={15} />}
         value={searchTerm}
         onChange={(e) => onSearchChange(e.currentTarget.value)}
-        classNames={{ input: "glassy-input", label: "glassy-label" }}
-        style={{ flex: 1, minWidth: 200 }}
+        classNames={{ input: "glassy-input" }}
+        className={classes.search}
       />
 
       <Select
-        label="Sort by"
+        aria-label="Sort items"
+        leftSection={<IconArrowsSort size={15} />}
         data={SORT_OPTIONS}
         value={sortBy}
         onChange={(value) => value && onSortChange(value as InventorySort)}
         allowDeselect={false}
-        classNames={{ input: "glassy-input", label: "glassy-label" }}
-        w={130}
+        classNames={{ input: "glassy-input" }}
+        className={classes.sort}
       />
 
-      <SegmentedControl
-        value={viewMode}
-        onChange={(value) => onViewModeChange(value as InventoryViewMode)}
-        data={[
-          { label: "List", value: "list" },
-          { label: "Cards", value: "cards" },
-        ]}
-        size="sm"
-        radius="md"
-        classNames={{
-          root: "glassy-segmented",
-          control: "glassy-segmented__control",
-          label: "glassy-segmented__label",
-        }}
-      />
-    </Group>
+      <div className={classes.view} role="group" aria-label="Layout">
+        {VIEW_OPTIONS.map(({ value, label, Icon }) => (
+          <Tooltip key={value} label={label}>
+            <button
+              type="button"
+              className={classes.viewButton}
+              aria-label={label}
+              aria-pressed={viewMode === value}
+              onClick={() => onViewModeChange(value)}
+            >
+              <Icon size={17} stroke={1.75} />
+            </button>
+          </Tooltip>
+        ))}
+      </div>
+    </div>
   );
 }
