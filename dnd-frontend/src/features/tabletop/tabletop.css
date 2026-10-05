@@ -815,6 +815,15 @@
   min-height: 0;
 }
 
+/* Icon and label centered together; Mantine's grow mode stretches the label and leaves the icon at the edge. */
+.tt-side-tabs .mantine-Tabs-tab {
+  justify-content: center;
+}
+
+.tt-side-tabs .mantine-Tabs-tabLabel {
+  flex: none;
+}
+
 .tt-tab-panel {
   flex: 1;
   min-height: 0;
@@ -2986,6 +2995,36 @@
 
   .tt-spell-field {
     width: min(180px, 46vw);
+  }
+}
+
+/* -- Short landscape screens (phones turned sideways): a bottom sheet would get under half the height for both
+   the initiative list and the log, and push into the tool rail. The desktop-style side panel fits instead. -- */
+
+@media (max-width: 768px) and (orientation: landscape) and (max-height: 560px) {
+  .tt-root {
+    --tt-side-w: min(300px, 44vw);
+  }
+
+  .tt-side {
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
+    left: auto;
+    width: var(--tt-side-w);
+    height: auto;
+    border-radius: 14px;
+    animation-name: tt-panel-in;
+  }
+
+  .tt-root.side-open .tt-topbar,
+  .tt-root.side-open .tt-turnbar {
+    right: calc(var(--tt-side-w) + 16px);
+  }
+
+  .tt-root.side-open .tt-turnbar,
+  .tt-root.side-open .tt-bubble {
+    bottom: 12px;
   }
 }
 
