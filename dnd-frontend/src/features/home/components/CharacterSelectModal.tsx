@@ -121,7 +121,7 @@ export function CharacterSelectModal({
           padding: "16px 24px",
         },
         body: {
-          padding: "24px",
+          padding: "14px 20px 18px",
           background: "transparent",
         },
         close: {
@@ -150,7 +150,7 @@ export function CharacterSelectModal({
         />
       )}
 
-      <ScrollArea h={isMobile ? "calc(100vh - 140px)" : 450} type="scroll" offsetScrollbars>
+      <ScrollArea.Autosize mah={isMobile ? "calc(100dvh - 150px)" : 440} type="scroll" offsetScrollbars>
         {visibleCharacters.length === 0 ? (
           <Stack align="center" justify="center" h={300} gap="md">
             <IconUserCircle size={64} style={{ opacity: 0.3, color: "var(--theme-color-accent-primary)" }} />
@@ -159,7 +159,7 @@ export function CharacterSelectModal({
             </Text>
           </Stack>
         ) : (
-          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" pb="md">
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm" verticalSpacing="sm" pt={6} pb="xs" px={2}>
             {visibleCharacters.map((char) => {
               const isSelected = selected === char.id;
               return (
@@ -175,7 +175,7 @@ export function CharacterSelectModal({
                       ? "var(--theme-color-accent-primary, #f59e0b)"
                       : "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
                     borderRadius: "12px",
-                    padding: "16px",
+                    padding: "10px 12px",
                     cursor: "pointer",
                     position: "relative",
                     overflow: "hidden",
@@ -187,7 +187,7 @@ export function CharacterSelectModal({
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.transform = "translateY(-4px)";
+                      e.currentTarget.style.transform = "translateY(-3px)";
                       e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.06))";
                       e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.2))";
                       e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.25), var(--theme-glow-shadow-secondary)";
@@ -202,18 +202,18 @@ export function CharacterSelectModal({
                     }
                   }}
                 >
-                  <Group wrap="nowrap" align="center">
+                  <Group wrap="nowrap" align="center" gap="sm">
                    <Avatar
                      src={char.imageUrl || undefined}
                      radius="md"
-                     size={64}
+                     size={48}
                      style={{
                        border: "2px solid var(--theme-color-accent-primary)",
                        background: char.imageUrl ? "transparent" : "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
                        boxShadow: "var(--theme-glow-shadow-primary)",
                        color: "#121214",
                        fontWeight: 900,
-                       fontSize: "1.5rem",
+                       fontSize: "1.2rem",
                      }}
                    >
                      {char.name.charAt(0).toUpperCase()}
@@ -222,11 +222,12 @@ export function CharacterSelectModal({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <Text
                         fw={800}
-                        size="xl"
+                        size="lg"
                         truncate
                         style={{
                           letterSpacing: "0.3px",
-                          fontSize: "1.25rem",
+                          fontSize: "1.05rem",
+                          lineHeight: 1.25,
                           color: isSelected
                             ? "var(--theme-color-text-glow, #ffffff)"
                             : "var(--theme-color-text-primary, #ffffff)",
@@ -239,10 +240,10 @@ export function CharacterSelectModal({
                         {char.name}
                       </Text>
 
-                      <Group gap="xs" mt={8} wrap="wrap">
+                      <Group gap={6} mt={4} wrap="wrap">
                         <Badge
                           radius="sm"
-                          size="md"
+                          size="sm"
                           style={{
                             background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
                             border: "none",
@@ -256,7 +257,7 @@ export function CharacterSelectModal({
 
                         <Badge
                           radius="sm"
-                          size="md"
+                          size="sm"
                           style={{
                             background: "rgba(0, 0, 0, 0.25)",
                             border: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.08))",
@@ -271,7 +272,7 @@ export function CharacterSelectModal({
                         {char.characterClass && (
                           <Badge
                             radius="sm"
-                            size="md"
+                            size="sm"
                             style={{
                               background: "rgba(0, 0, 0, 0.25)",
                               border: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.08))",
@@ -291,11 +292,11 @@ export function CharacterSelectModal({
             })}
           </SimpleGrid>
         )}
-      </ScrollArea>
+      </ScrollArea.Autosize>
 
       <Group
         justify="flex-end"
-        mt="md"
+        mt="sm"
         pt="md"
         style={{ borderTop: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.05))" }}
       >

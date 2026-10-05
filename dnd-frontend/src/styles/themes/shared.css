@@ -49,6 +49,17 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  /* Thin, theme-colored bar (the color is inherited from each theme's html rule) instead of the system one. */
+  scrollbar-width: thin;
+}
+
+/* Mantine scroll areas in modals: the theme accent instead of Mantine's gray thumb. */
+:root[class*="theme-"] .mantine-Modal-content .mantine-ScrollArea-thumb {
+  background-color: color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 55%, transparent);
+}
+
+:root[class*="theme-"] .mantine-Modal-content .mantine-ScrollArea-thumb:hover {
+  background-color: color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 80%, transparent);
 }
 
 /* Panel decoration reveal: theme ::after rules scale their mask/size by --panel-reveal and run
