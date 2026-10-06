@@ -17,7 +17,7 @@ import { monsterService } from "@services/Admin/monsterService";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { IconSettings, IconCode, IconAlertCircle } from "@tabler/icons-react";
-import styles from "../MonsterManager.module.css";
+import styles from "@styles/AdminCatalog.module.css";
 
 interface MonsterFormModalProps {
   opened: boolean;
@@ -526,7 +526,7 @@ export const MonsterFormModal: React.FC<MonsterFormModalProps> = ({
             Cancel
           </Button>
           <Button
-            className={`${styles.neonButton} ${styles.neonRed}`}
+            color="neon"
             loading={saving}
             onClick={handleSave}
           >

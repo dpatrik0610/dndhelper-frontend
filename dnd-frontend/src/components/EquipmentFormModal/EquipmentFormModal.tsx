@@ -4,7 +4,7 @@ import { Button, Group, ScrollArea, Stack } from "@mantine/core";
 import { IconDeviceFloppy } from "@tabler/icons-react";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
-import { defaultEquipment } from "@features/admin/ItemManager/defaultEquipment";
+import { defaultEquipment, equipmentIndex } from "@features/admin/ItemManager/defaultEquipment";
 
 import { EquipmentBasicInfo } from "./EquipmentBasicInfo";
 import { EquipmentCombat } from "./EquipmentCombat";
@@ -52,8 +52,9 @@ export function EquipmentFormModal({
   };
 
   const handleSubmit = async () => {
-    if (!draft.name.trim() || !draft.index.trim()) return;
-    await onSubmit(draft);
+    if (!draft.name.trim()) return;
+    // The index is a lookup key, not something to type: new items take it from the name, existing ones keep theirs.
+    await onSubmit({ ...draft, index: draft.index.trim() || equipmentIndex(draft.name) });
   };
 
   return (
@@ -83,7 +84,7 @@ export function EquipmentFormModal({
             leftSection={<IconDeviceFloppy size={16} />}
             onClick={() => void handleSubmit()}
             loading={saving}
-            disabled={!draft.name.trim() || !draft.index.trim()}
+            disabled={!draft.name.trim()}
             variant="gradient"
             gradient={{ from: "violet", to: "cyan", deg: 90 }}
           >

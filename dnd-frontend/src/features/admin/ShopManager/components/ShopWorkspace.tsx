@@ -54,7 +54,7 @@ export function ShopWorkspace() {
     return (
       <div className={styles.emptyState}>
         <div className={styles.emptyStateInner}>
-          <IconBuildingStore size={36} color="#818cf8" stroke={1.3} />
+          <IconBuildingStore size={36} color="#00ff88" stroke={1.3} />
           <Text size="sm" c="dimmed" maw={280}>
             Select a shop from the sidebar to manage its settings and stock.
           </Text>
@@ -81,7 +81,7 @@ export function ShopWorkspace() {
                         </Badge>
                     </Group>
                     <Text size="xs" c="dimmed" mt={2}>
-                        Inventory ID: <code style={{ color: "#a5b4fc", backgroundColor: "rgba(0,0,0,0.2)", padding: "2px 4px", borderRadius: 4 }}>{shop.inventoryId}</code>
+                        Inventory ID: <code style={{ color: "#00ff88", backgroundColor: "rgba(0,0,0,0.2)", padding: "2px 4px", borderRadius: 4 }}>{shop.inventoryId}</code>
                     </Text>
                 </div>
 
@@ -221,11 +221,11 @@ export function ShopWorkspace() {
                                                 <Paper p="xs" radius="sm" bg="rgba(0,0,0,0.2)" style={{ border: "1px solid rgba(255,255,255,0.03)" }}>
                                                     <Group justify="space-between" align="center" wrap="nowrap">
                                                         <Group gap="xs">
-                                                            <Avatar color="indigo" radius="xl" size="sm">
+                                                            <Avatar color="neon" radius="xl" size="sm">
                                                                 {charName.substring(0, 2).toUpperCase()}
                                                             </Avatar>
                                                             <div>
-                                                                <Text size="xs" fw={700} c="indigo.3">{charName}</Text>
+                                                                <Text size="xs" fw={700} c="neon">{charName}</Text>
                                                                 <Text size="xxs" c="dimmed" title="Charisma score and modifier">
                                                                     CHA Score: <b style={{ color: "#2dd4bf" }}>{chaDisplay}</b>
                                                                 </Text>
@@ -302,7 +302,7 @@ export function ShopWorkspace() {
                             </div>
                         ) : (
                             <Center style={{ height: "100%" }}>
-                                <Loader color="indigo" size="sm" />
+                                <Loader color="neon" size="sm" />
                             </Center>
                         )}
                     </Box>

@@ -27,7 +27,7 @@ export function ItemsPanel() {
           <Button
             size="compact-xs"
             variant="light"
-            color="teal"
+            color="neon"
             leftSection={<IconBox size={12} />}
             onClick={() => setExistingModal(true)}
           >
@@ -36,7 +36,7 @@ export function ItemsPanel() {
           <Button
             size="compact-xs"
             variant="light"
-            color="indigo"
+            color="neon"
             leftSection={<IconPlus size={12} />}
             onClick={() => setAddModal(true)}
           >

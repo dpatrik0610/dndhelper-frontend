@@ -1,13 +1,13 @@
 ﻿import { useEffect, useMemo, useState } from "react";
-import { Button, Divider, FileInput, Group, MultiSelect, Paper, Select, Stack, Text, TextInput, Textarea, Title } from "@mantine/core";
-import { IconCheck, IconFileUpload, IconPlaylistAdd, IconUpload, IconX, IconPlus } from "@tabler/icons-react";
+import { Button, FileInput, Group, MultiSelect, Select, Stack, Text, TextInput, Textarea } from "@mantine/core";
+import { IconBook2, IconCategory, IconCheck, IconFileUpload, IconPencilPlus, IconPlaylistAdd, IconUpload, IconX, IconPlus } from "@tabler/icons-react";
 import { RuleCategory, type RuleDetail, type RuleCategoryResponse } from "@appTypes/Rules/Rule";
 import { createRule } from "@services/ruleService";
 import { showNotification } from "@components/Notification/Notification";
 import { mockRuleDetails } from "@features/rules/mockRules";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { createRuleCategory, getRuleCategories } from "@services/ruleCategoryService";
-import "./ruleManager.css";
+import { AdminPage, AdminPanel } from "@features/admin/components/AdminPage";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useIsSuperAdmin, useToken } from "@store/auth/authSelectors";
 
@@ -216,33 +216,25 @@ export function RuleManager() {
   };
 
   return (
-    <Stack gap="md">
-      <Paper withBorder radius="md" p="lg" shadow="lg" className="rule-manager-card">
-        <Group justify="space-between" align="flex-start">
-          <div>
-            <Title order={3}>Rule Manager</Title>
-            <Text size="sm" c="dimmed">
-              Create a single rule or import many via JSON.
-            </Text>
-          </div>
-          <Group gap="xs">
-            <Button variant="subtle" color="violet" leftSection={<IconPlaylistAdd size={16} />} onClick={handleImportMocks}>
-              Import mocks
-            </Button>
-            <Button
-              variant="filled"
-              color="grape"
-              leftSection={<IconCheck size={16} />}
-              loading={saving}
-              onClick={handleSave}
-            >
-              Save rule
-            </Button>
-          </Group>
-        </Group>
-
-        <Divider my="md" />
-
+    <AdminPage
+      icon={IconBook2}
+      title="Rules"
+      subtitle="Create a single rule or import many via JSON."
+      actions={
+        <Button variant="default" leftSection={<IconPlaylistAdd size={16} />} onClick={handleImportMocks}>
+          Import mocks
+        </Button>
+      }
+    >
+      <AdminPanel
+        icon={IconPencilPlus}
+        title="New rule"
+        actions={
+          <Button size="xs" color="neon" leftSection={<IconCheck size={14} />} loading={saving} onClick={handleSave}>
+            Save rule
+          </Button>
+        }
+      >
         <SimpleRuleForm
           rule={rule}
           bodyText={bodyText}
@@ -255,28 +247,21 @@ export function RuleManager() {
           onUpdateSourceTitle={setSourceTitle}
           onUpdateSourcePage={setSourcePage}
         />
-      </Paper>
+      </AdminPanel>
 
-      <Paper withBorder radius="md" p="lg" shadow="lg" className="rule-manager-card rule-manager-card--import">
-        <Group justify="space-between" align="center">
-          <div>
-            <Title order={4}>Import via JSON</Title>
-            <Text size="sm" c="dimmed">
-              Paste JSON (single object or array) or upload a .json file. Fields should match the RuleDetail shape.
-            </Text>
-          </div>
-          <Button
-            variant="light"
-            color="cyan"
-            leftSection={<IconUpload size={16} />}
-            loading={importing}
-            onClick={handleImportClick}
-          >
+      <AdminPanel
+        icon={IconUpload}
+        title="Import via JSON"
+        actions={
+          <Button size="xs" variant="light" color="neon" leftSection={<IconUpload size={14} />} loading={importing} onClick={handleImportClick}>
             Import
           </Button>
-        </Group>
-
-        <Stack gap="sm" mt="md">
+        }
+      >
+        <Stack gap="sm">
+          <Text size="sm" c="dimmed">
+            Paste JSON (single object or array) or upload a .json file. Fields should match the RuleDetail shape.
+          </Text>
           <FileInput
             label="Upload JSON file"
             placeholder="Select .json file"
@@ -328,31 +313,30 @@ export function RuleManager() {
             Tips: tags should be an array of strings; body is an array of paragraphs. Missing fields will be defaulted.
           </Text>
         </Stack>
-      </Paper>
+      </AdminPanel>
 
-      <Paper withBorder radius="md" p="lg" shadow="lg" className="rule-manager-card">
-        <Group justify="space-between" align="center" mb="sm">
-          <div>
-            <Title order={4}>Manage categories</Title>
-            <Text size="sm" c="dimmed">
-              Create new categories; they show up in filters and the rule form.
-            </Text>
-          </div>
-          {isSuperAdmin && (
+      <AdminPanel
+        icon={IconCategory}
+        title="Categories"
+        actions={
+          isSuperAdmin && (
             <Button
               size="xs"
               variant="light"
-              color="grape"
+              color="neon"
               leftSection={<IconPlus size={14} />}
               loading={creatingCategory}
               onClick={handleCreateCategory}
             >
               Add category
             </Button>
-          )}
-        </Group>
-
+          )
+        }
+      >
         <Stack gap="sm">
+          <Text size="sm" c="dimmed">
+            Create new categories; they show up in filters and the rule form.
+          </Text>
           <Group grow>
             <TextInput
               label="Name"
@@ -396,8 +380,8 @@ export function RuleManager() {
             </Stack>
           </ExpandableSection>
         </Stack>
-      </Paper>
-    </Stack>
+      </AdminPanel>
+    </AdminPage>
   );
 }
 
@@ -534,7 +518,7 @@ function SimpleRuleForm({
         />
         <Button
           variant="light"
-          color="grape"
+          color="neon"
           mt="xs"
           onClick={addTag}
         >

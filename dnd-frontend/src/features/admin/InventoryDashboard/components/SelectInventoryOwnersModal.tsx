@@ -119,7 +119,7 @@ export function SelectInventoryOwnersModal({
           </Button>
           <Button
             variant="gradient"
-            gradient={{ from: "teal", to: "cyan" }}
+            gradient={{ from: "neon", to: "electric" }}
             onClick={handleSave}
           >
             Save

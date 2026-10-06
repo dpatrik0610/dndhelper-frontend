@@ -514,7 +514,7 @@ export function QuestManager() {
         <div className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
             <Group gap="xs" mb="sm">
-              <ThemeIcon variant="light" color="indigo" size="md" radius="sm">
+              <ThemeIcon variant="light" color="neon" size="md" radius="sm">
                 <IconCompass size={16} />
               </ThemeIcon>
               <div>
@@ -603,7 +603,7 @@ export function QuestManager() {
             <Group gap="xs" grow>
               <Button
                 variant="filled"
-                color="indigo"
+                color="neon"
                 leftSection={<IconPlus size={14} />}
                 onClick={handleCreateQuest}
                 size="xs"
@@ -629,7 +629,7 @@ export function QuestManager() {
           <ScrollArea className={styles.sidebarScroll} offsetScrollbars>
             {loading && quests.length === 0 ? (
               <Group justify="center" py="xl">
-                <Loader color="indigo" size="sm" />
+                <Loader color="neon" size="sm" />
               </Group>
             ) : filteredQuests.length === 0 ? (
               <Stack align="center" py="xl" gap="xs">
@@ -792,7 +792,7 @@ export function QuestManager() {
                           dropdown: { background: "var(--theme-bg-panel-opaque, #140f28)", border: "1px solid rgba(255, 255, 255, 0.1)" },
                           option: {
                             color: "white",
-                            "&[data-hovered]": { background: "var(--theme-bg-hover, rgba(168, 85, 247, 0.14))" },
+                            "&[data-hovered]": { background: "var(--theme-bg-hover, rgba(255, 0, 255, 0.14))" },
                             "&[data-selected]": { background: "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.2))" },
                           },
                         }}
@@ -1114,15 +1114,15 @@ export function QuestManager() {
                                 key={itemId}
                                 size="sm"
                                 variant="outline"
-                                color="indigo"
+                                color="neon"
                                 pr={3}
                                 styles={{
                                   root: {
                                     textTransform: "none",
                                     paddingLeft: "8px",
                                     height: "24px",
-                                    background: "rgba(99, 102, 241, 0.05)",
-                                    borderColor: "rgba(99, 102, 241, 0.2)",
+                                    background: "rgba(0, 255, 136, 0.05)",
+                                    borderColor: "rgba(0, 255, 136, 0.2)",
                                   },
                                 }}
                                 rightSection={
@@ -1169,7 +1169,7 @@ export function QuestManager() {
                           <Button
                             size="xs"
                             variant="filled"
-                            color="indigo"
+                            color="neon"
                             onClick={handleSearchEquipment}
                             loading={searchingItems}
                             leftSection={<IconSearch size={12} />}
@@ -1216,7 +1216,7 @@ export function QuestManager() {
                                     <Button
                                       size="10px"
                                       variant={isAdded ? "light" : "filled"}
-                                      color={isAdded ? "green" : "indigo"}
+                                      color={isAdded ? "green" : "neon"}
                                       onClick={() => !isAdded && handleAddEquipmentReward(item)}
                                       disabled={isAdded}
                                       style={{ height: "20px", fontWeight: 700, padding: "0 8px" }}

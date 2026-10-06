@@ -6,7 +6,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useMemo, lazy, Suspense } from "react";
 import Sidebar from "@features/navigation/Sidebar/Sidebar";
 import PrivateRoute from "@components/PrivateRoute";
-import { useToken } from "@store/auth/authSelectors";
+import { useIsSuperAdmin, useToken } from "@store/auth/authSelectors";
 import { useIsDm } from "@store/campaign/campaignSelectors";
 import { useCampaignStore } from "@store/campaign/campaignStore";
 import { useCharacterList } from "@store/character/characterSelectors";
@@ -35,7 +35,10 @@ const pages = {
   shop: () => import("@features/shop/ShopkeeperPage"),
   settings: () => import("@features/settings/SettingsPage"),
 };
-const adminPage = () => import("@features/admin/AdminDashboard").then((m) => ({ default: m.AdminDashboard }));
+const adminPages = {
+  dm: () => import("@features/admin/DmDashboard").then((m) => ({ default: m.DmDashboard })),
+  superAdmin: () => import("@features/admin/SuperAdminConsole").then((m) => ({ default: m.SuperAdminConsole })),
+};
 
 const Home = lazy(pages.home);
 const CharacterProfile = lazy(pages.profile);
@@ -50,18 +53,20 @@ const TabletopPage = lazy(pages.tabletop);
 const FloatingChat = lazy(() => import("@features/chat/FloatingChat").then((m) => ({ default: m.FloatingChat })));
 const ShopkeeperPage = lazy(pages.shop);
 const SettingsPage = lazy(pages.settings);
-const AdminDashboard = lazy(adminPage);
+const DmDashboard = lazy(adminPages.dm);
+const SuperAdminConsole = lazy(adminPages.superAdmin);
 const Login = lazy(() => import("@features/auth/login/Login"));
 const Register = lazy(() => import("@features/auth/register/Register"));
 const NotFound = lazy(() => import("@features/notFound/NotFound"));
 
 /** After login, fetch every page chunk while the browser is idle, so later navigation never waits on the network. */
-function usePrefetchPages(enabled: boolean, includeAdmin: boolean) {
+function usePrefetchPages(enabled: boolean, isDm: boolean, isSuperAdmin: boolean) {
   useEffect(() => {
     if (!enabled) return;
     const prefetch = () => {
       Object.values(pages).forEach((load) => void load().catch(() => {}));
-      if (includeAdmin) void adminPage().catch(() => {});
+      if (isDm) void adminPages.dm().catch(() => {});
+      if (isSuperAdmin) void adminPages.superAdmin().catch(() => {});
     };
     if ("requestIdleCallback" in window) {
       const id = window.requestIdleCallback(prefetch, { timeout: 4000 });
@@ -69,7 +74,7 @@ function usePrefetchPages(enabled: boolean, includeAdmin: boolean) {
     }
     const id = setTimeout(prefetch, 1500);
     return () => clearTimeout(id);
-  }, [enabled, includeAdmin]);
+  }, [enabled, isDm, isSuperAdmin]);
 }
 
 function AppRoutes() {
@@ -86,6 +91,7 @@ function AppRoutes() {
   const token = useToken();
   const characters = useCharacterList();
   const isDm = useIsDm();
+  const isSuperAdmin = useIsSuperAdmin();
   const reloadCampaigns = useCampaignStore((s) => s.reload);
 
   const localToken = useMemo(() => {
@@ -110,7 +116,7 @@ function AppRoutes() {
 
   useTokenExpiryGuard(token, localToken);
   useBootstrapCharacters(activeToken, characters.length);
-  usePrefetchPages(!!activeToken, isDm);
+  usePrefetchPages(!!activeToken, isDm, isSuperAdmin);
 
   // My campaigns (and a valid current one) on every sign-in / reload.
   useEffect(() => {
@@ -188,18 +194,20 @@ function AppRoutes() {
     };
   }, [isMobile, showSidebar, opened, handlers]);
 
-  const isDashboardRoute = location.pathname === "/dashboard";
+  // The DM dashboard and the superadmin console are full-screen tools: no backdrop, no page padding.
+  const isDashboardRoute = section === "dashboard" || section === "admin";
 
   const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
   // Mantine portals (dropdowns, modals, popovers) render on <body>, outside AppShell,
   // so the theme class must also sit on <html> for them to get the theme variables.
+  // The admin routes have their own design system (styles/adminCyber.css) instead of the site theme.
+  const rootThemeClass = isDashboardRoute ? "admin-cyber" : activeThemeClass;
   useEffect(() => {
-    if (isDashboardRoute) return;
     const root = document.documentElement;
-    root.classList.add(activeThemeClass);
-    return () => root.classList.remove(activeThemeClass);
-  }, [activeThemeClass, isDashboardRoute]);
+    root.classList.add(rootThemeClass);
+    return () => root.classList.remove(rootThemeClass);
+  }, [rootThemeClass]);
 
   return (
     <AppShell 
@@ -210,7 +218,7 @@ function AppRoutes() {
       {showSidebar && <Sidebar opened={opened} onClose={handlers.close} themeVariant={sidebarTheme} />}
 
       <AppShell.Main>
-        {!isTableRoute && <AppBackground />}
+        {!isTableRoute && !isDashboardRoute && <AppBackground />}
         <SubtleRollDetailsModal />
         <div
           style={{
@@ -239,7 +247,8 @@ function AppRoutes() {
                 <Route path="/table/:code" element={<TabletopPage />} />
                 <Route path="/roll-history" element={<RollHistoryPage />} />
                 <Route path="/settings/:tab?" element={<SettingsPage />} />
-                {isDm && <Route path="/dashboard" element={<AdminDashboard />} />}
+                {isDm && <Route path="/dashboard/:section?" element={<DmDashboard />} />}
+                {isSuperAdmin && <Route path="/admin/:section?" element={<SuperAdminConsole />} />}
               </Route>
 
               <Route path="/login" element={<Login />} />

@@ -1,5 +1,5 @@
 import type { Icon } from "@tabler/icons-react";
-import { IconBook2, IconDashboard, IconDice5, IconHome, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconCompass } from "@tabler/icons-react";
+import { IconBook2, IconDashboard, IconShieldLock, IconDice5, IconHome, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconCompass } from "@tabler/icons-react";
 
 export interface NavItemData {
   link: string;
@@ -12,6 +12,8 @@ export interface NavSectionData {
   items: NavItemData[];
   /** Only for the current campaign's DM (and the superadmin). */
   dmOnly?: boolean;
+  /** Only for the superadmin. */
+  superAdminOnly?: boolean;
 }
 
 /** Sidebar navigation, in display order. Settings lives in the footer. */
@@ -39,5 +41,10 @@ export const navSections: NavSectionData[] = [
     label: "Dungeon Master",
     dmOnly: true,
     items: [{ link: "/dashboard", label: "Dashboard", icon: IconDashboard }],
+  },
+  {
+    label: "Superadmin",
+    superAdminOnly: true,
+    items: [{ link: "/admin", label: "Site Admin", icon: IconShieldLock }],
   },
 ];

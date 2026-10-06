@@ -1,200 +1,91 @@
-import { getAuthTokenSafe } from "@store/auth/authUtils";
 import { create } from "zustand";
 
 import { UserService } from "@services/Admin/userService";
-import { registerUser, resetPassword } from "@services/authService";
-import type { User } from "@appTypes/User";
+import type { AdminUser, AdminUserRequest } from "@appTypes/User";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 
 interface AdminUserStore {
-  users: User[];
+  users: AdminUser[];
   loading: boolean;
-  search: string;
-  setSearch: (value: string) => void;
   fetchUsers: () => Promise<void>;
-  createUser: (payload: Partial<User> & { password?: string }) => Promise<void>;
-  updateUser: (id: string, updates: Partial<User>) => Promise<void>;
-  updateStatus: (id: string, status: User["isActive"]) => Promise<void>;
-  removeUser: (id: string) => Promise<void>;
-  resetPassword: (username: string, newPassword: string) => Promise<void>;
+  createUser: (request: AdminUserRequest) => Promise<boolean>;
+  /** Patches every listed user the same way; one summary notification. Resolves true if all succeeded. */
+  updateUsers: (ids: string[], request: AdminUserRequest, done: string) => Promise<boolean>;
+  removeUsers: (ids: string[]) => Promise<boolean>;
   clearStorage: () => void;
 }
 
-export const useAdminUserStore = create<AdminUserStore>((set, get) => ({
+const fail = (title: string, err: unknown) =>
+  showNotification({ title, message: (err as Error).message ?? String(err), color: SectionColor.Red });
+
+/** Runs one request per id; reports the first failure and how many went through. */
+async function runAll<T>(ids: string[], action: (id: string) => Promise<T>, failTitle: string) {
+  const results = await Promise.allSettled(ids.map(action));
+  const failed = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
+  if (failed.length) fail(`${failTitle} (${failed.length} of ${ids.length})`, failed[0].reason);
+  return results;
+}
+
+export const useAdminUserStore = create<AdminUserStore>((set) => ({
   users: [],
   loading: false,
-  search: "",
-
-  setSearch: (value) => set({ search: value }),
 
   fetchUsers: async () => {
-    const token = getAuthTokenSafe();
-
-    if (!token) {
-      showNotification({
-        title: "Not authenticated",
-        message: "Please log in to load users.",
-        color: SectionColor.Red,
-      });
-      return;
-    }
-
     set({ loading: true });
-
     try {
-      const data = await UserService.getAll();
-      set({ users: data });
+      set({ users: await UserService.getAll() });
     } catch (err) {
-      showNotification({
-        title: "Failed to load users",
-        message: String(err),
-        color: SectionColor.Red,
-      });
+      fail("Failed to load users", err);
     } finally {
       set({ loading: false });
     }
   },
 
-  createUser: async (payload) => {
-
-    if (!payload.username || !payload.password) {
-      showNotification({
-        title: "Missing fields",
-        message: "Username and password are required.",
-        color: SectionColor.Red,
-      });
-      return;
-    }
-
+  createUser: async (request) => {
     try {
-      await registerUser({
-        username: payload.username,
-        password: payload.password,
-      });
-      await get().fetchUsers();
+      const created = await UserService.create(request);
+      set((s) => ({ users: [...s.users, created].sort((a, b) => a.username.localeCompare(b.username)) }));
+      showNotification({ title: "User created", message: created.username, color: SectionColor.Green });
+      return true;
+    } catch (err) {
+      fail("Failed to create user", err);
+      return false;
+    }
+  },
 
-      const created = get().users.find((u) => u.username === payload.username);
+  updateUsers: async (ids, request, done) => {
+    const results = await runAll(ids, (id) => UserService.update(id, request), "Not saved");
+    // The response leaves out characters and campaigns (they don't change here); keep ours.
+    const updated = new Map(
+      results.flatMap((r) => (r.status === "fulfilled" ? [[r.value.id, r.value] as const] : []))
+    );
+    set((s) => ({
+      users: s.users.map((u) => {
+        const next = updated.get(u.id);
+        return next ? { ...next, characters: u.characters, campaigns: u.campaigns } : u;
+      }),
+    }));
+    if (updated.size) {
+      const who = updated.size === 1 ? [...updated.values()][0].username : `${updated.size} users`;
+      showNotification({ title: done, message: who, color: SectionColor.Green });
+    }
+    return updated.size === ids.length;
+  },
 
-      if (created && (payload.email || payload.roles || payload.isActive)) {
-        try {
-          const updated = await UserService.update(created.id, {
-              ...created, email: payload.email ?? created.email, roles: payload.roles ?? created.roles, isActive: payload.isActive ?? created.isActive, });
-          set((state) => ({
-            users: state.users.map((u) => (u.id === updated.id ? updated : u)),
-          }));
-        } catch (err) {
-          showNotification({
-            title: "User created but update failed",
-            message: String(err),
-            color: SectionColor.Yellow,
-          });
-        }
-      }
-
+  removeUsers: async (ids) => {
+    const results = await runAll(ids, (id) => UserService.delete(id).then(() => id), "Not deleted");
+    const removed = new Set(results.flatMap((r) => (r.status === "fulfilled" ? [r.value] : [])));
+    set((s) => ({ users: s.users.filter((u) => !removed.has(u.id)) }));
+    if (removed.size) {
       showNotification({
-        title: "User created",
-        message: `${payload.username} added.`,
+        title: "Deleted",
+        message: removed.size === 1 ? "1 user" : `${removed.size} users`,
         color: SectionColor.Green,
       });
-    } catch (err) {
-      showNotification({
-        title: "Failed to create user",
-        message: String(err),
-        color: SectionColor.Red,
-      });
     }
+    return removed.size === ids.length;
   },
 
-  updateUser: async (id, updates) => {
-    const token = getAuthTokenSafe();
-    const user = get().users.find((u) => u.id === id);
-    if (!token || !user) return;
-
-    try {
-      const body: User = { ...user, ...updates };
-      const updated = await UserService.update(id, body);
-      set((state) => ({
-        users: state.users.map((u) => (u.id === id ? updated : u)),
-      }));
-      showNotification({
-        title: "User updated",
-        message: `${updated.username} saved.`,
-        color: SectionColor.Green,
-      });
-    } catch (err) {
-      showNotification({
-        title: "Failed to update user",
-        message: String(err),
-        color: SectionColor.Red,
-      });
-    }
-  },
-
-  updateStatus: async (id, status) => {
-    const token = getAuthTokenSafe();
-    if (!token) return;
-    const user = get().users.find((u) => u.id === id);
-    if (!user) return;
-
-    try {
-      const updated = await UserService.update(id, { ...user, isActive: status });
-      set((state) => ({
-        users: state.users.map((u) => (u.id === id ? updated : u)),
-      }));
-      showNotification({
-        title: "Status updated",
-        message: `${updated.username} is now ${updated.isActive}.`,
-        color: SectionColor.Green,
-      });
-    } catch (err) {
-      showNotification({
-        title: "Failed to update status",
-        message: String(err),
-        color: SectionColor.Red,
-      });
-    }
-  },
-
-  removeUser: async (id) => {
-    const token = getAuthTokenSafe();
-    if (!token) return;
-
-    try {
-      await UserService.delete(id);
-      set((state) => ({ users: state.users.filter((u) => u.id !== id) }));
-      showNotification({
-        title: "User removed",
-        message: "User deleted successfully.",
-        color: SectionColor.Red,
-      });
-    } catch (err) {
-      showNotification({
-        title: "Failed to delete user",
-        message: String(err),
-        color: SectionColor.Red,
-      });
-    }
-  },
-
-  resetPassword: async (username, newPassword) => {
-    const token = getAuthTokenSafe();
-    if (!token) return;
-    try {
-      await resetPassword({ username, newPassword });
-      showNotification({
-        title: "Password reset",
-        message: `Password reset for ${username}.`,
-        color: SectionColor.Green,
-      });
-    } catch (err) {
-      showNotification({
-        title: "Failed to reset password",
-        message: String(err),
-        color: SectionColor.Red,
-      });
-    }
-  },
-
-  clearStorage: () => set({ users: [], loading: false, search: "" }),
+  clearStorage: () => set({ users: [], loading: false }),
 }));

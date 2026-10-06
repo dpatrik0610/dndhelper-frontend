@@ -2,7 +2,8 @@ import { Suspense, lazy } from "react";
 import { Loader, Menu, Spoiler, Tooltip } from "@mantine/core";
 import { IconDotsVertical, IconDownload, IconPencil, IconPin, IconPinFilled, IconTrash } from "@tabler/icons-react";
 import type { Note } from "@appTypes/Note";
-import { downloadNote, noteBody, timeAgo } from "@features/notes/noteUtils";
+import { downloadNote, noteBody } from "@features/notes/noteUtils";
+import { timeAgo } from "@utils/timeAgo";
 import classes from "@features/notes/Notes.module.css";
 
 const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then((m) => ({ default: m.MarkdownRenderer })));

@@ -3,31 +3,24 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActionIcon,
   Button,
-  Card,
   FileInput,
   Group,
-  Paper,
   Progress,
   SimpleGrid,
   Stack,
   Text,
   TextInput,
-  Title,
   Tooltip,
 } from "@mantine/core";
-import {
-  IconArrowUpRight,
-  IconCloudDownload,
-  IconCloudUpload,
-  IconLock,
-  IconRefresh,
-} from "@tabler/icons-react";
+import { IconCloudDownload, IconCloudUpload, IconDatabase, IconLock, IconRefresh } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { exportCollection, exportAllCollections, restoreCollection } from "@services/backupService";
 import { listCollections } from "@services/databaseService";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { AdminPage, AdminPanel } from "@features/admin/components/AdminPage";
 
+const DEFAULT_COLLECTIONS = ["Campaigns", "Characters", "Sessions", "Equipment", "Inventories", "Notes", "Spells", "Monsters"];
 
 export function BackupManager() {
   const token = useToken()!;
@@ -197,188 +190,122 @@ export function BackupManager() {
   };
 
   return (
-    <Paper
-      p="md"
-      radius="md"
-      withBorder
-      style={{
-        background: "linear-gradient(135deg, rgba(20, 10, 40, 0.8), rgba(15, 8, 35, 0.7))",
-        border: "1px solid rgba(255, 255, 255, 0.08)",
-        backdropFilter: "blur(12px)",
-        width: "100%",
-        maxWidth: isMobile ? "100%" : "100%",
-        marginInline: 0,
-      }}
-    >
-      <Group
-        justify="space-between"
-        align="flex-start"
-        mb="lg"
-        gap="sm"
-        wrap="wrap"
-        style={isMobile ? { flexDirection: "column" } : undefined}
-      >
-        <Stack gap={4}>
-          <Group gap="xs">
-            <IconCloudDownload size={24} color="#b197fc" />
-            <Title order={3} c="gray.0">
-              Backup & Restore
-            </Title>
-          </Group>
-          <Text size="sm" c="grape.1">
-            Export any collection as a gzip archive or restore from a previous backup.
-          </Text>
-        </Stack>
-        <Tooltip label="Reset to default">
-          <ActionIcon
-            variant="subtle"
-            color="grape"
-            onClick={() => {
-              setCollectionName("Campaigns");
-              setFile(null);
-            }}
-          >
-            <IconRefresh size={18} />
-          </ActionIcon>
-        </Tooltip>
-      </Group>
-
-      <Stack gap="md">
-        <TextInput
-          label="Collection name (locked)"
-          placeholder="Auto-detected or choose below"
-          value={collectionName}
-          readOnly
-          rightSection={<IconLock size={16} color="#b197fc" />}
-          styles={{
-            input: {
-              background: "rgba(255,255,255,0.06)",
-              borderColor: "rgba(255,255,255,0.16)",
-              cursor: "not-allowed",
-            },
-            label: { color: "white" },
-          }}
-          description={
-            inferredCollectionFromFile
-              ? `Detected from file: ${inferredCollectionFromFile}`
-              : "Select a preset or upload a backup to set the collection."
-          }
-        />
-
-        <Group gap="xs" wrap="wrap">
-          {(collections.length ? collections : [
-            "Campaigns",
-            "Characters",
-            "Sessions",
-            "Equipment",
-            "Inventories",
-            "Notes",
-            "Spells",
-            "Monsters",
-          ]).map((c) => (
-            <Button
-              key={c}
-              size={isMobile ? "sm" : "xs"}
-              variant={normalizedCollection.toLowerCase() === c.toLowerCase() ? "filled" : "outline"}
-              color="grape"
-              onClick={() => setCollectionName(c)}
-              fullWidth={isMobile}
-              leftSection={<IconArrowUpRight size={14} />}
+    <AdminPage
+      icon={IconCloudDownload}
+      title="Backups"
+      subtitle="Export any collection as a gzip archive, or restore one."
+      actions={
+        <>
+          <Tooltip label="Reset to default" withArrow>
+            <ActionIcon
+              variant="default"
+              size="lg"
+              aria-label="Reset"
+              onClick={() => {
+                setCollectionName("Campaigns");
+                setFile(null);
+              }}
             >
-              {c}
-            </Button>
-          ))}
+              <IconRefresh size={16} />
+            </ActionIcon>
+          </Tooltip>
           <Button
-            size={isMobile ? "sm" : "xs"}
-            variant="outline"
-            color="blue"
-            onClick={() => void handleDownloadAll()}
-            leftSection={<IconCloudDownload size={14} />}
-            fullWidth={isMobile}
+            color="neon"
+            leftSection={<IconCloudDownload size={16} />}
             loading={downloading}
+            onClick={() => void handleDownloadAll()}
           >
             Backup all (zip)
           </Button>
-        </Group>
-
-        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md" mt="sm">
-          <Card
-            withBorder
-            padding="lg"
-            radius="md"
-            style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-          >
-            <Stack gap="sm">
-              <Group gap="xs">
-                <IconCloudDownload size={18} color="#8ce99a" />
-                <Text fw={600}>Export collection</Text>
-              </Group>
-              <Text size="sm" c="dimmed">
-                Generates a gzip archive for the chosen collection.
-              </Text>
+        </>
+      }
+    >
+      <AdminPanel icon={IconDatabase} title="Collection">
+        <Stack gap="sm">
+          <TextInput
+            label="Collection name (locked)"
+            placeholder="Auto-detected or choose below"
+            value={collectionName}
+            readOnly
+            rightSection={<IconLock size={16} />}
+            styles={{ input: { cursor: "not-allowed" } }}
+            description={
+              inferredCollectionFromFile
+                ? `Detected from file: ${inferredCollectionFromFile}`
+                : "Select a preset or upload a backup to set the collection."
+            }
+          />
+          <Group gap="xs" wrap="wrap">
+            {(collections.length ? collections : DEFAULT_COLLECTIONS).map((c) => (
               <Button
-                color="teal"
-                leftSection={<IconCloudDownload size={16} />}
-                loading={downloading}
+                key={c}
+                size="xs"
+                variant={normalizedCollection.toLowerCase() === c.toLowerCase() ? "filled" : "default"}
+                color="neon"
+                onClick={() => setCollectionName(c)}
                 fullWidth={isMobile}
-                onClick={() => void handleDownload()}
               >
-                Download backup
+                {c}
               </Button>
-              {downloading && <Progress size="sm" value={70} color="teal" striped animated />}
-            </Stack>
-          </Card>
+            ))}
+          </Group>
+        </Stack>
+      </AdminPanel>
 
-          <Card
-            withBorder
-            padding="lg"
-            radius="md"
-            style={{ background: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.08)" }}
-          >
-            <Stack gap="sm">
-              <Group gap="xs">
-                <IconCloudUpload size={18} color="#74c0fc" />
-                <Text fw={600}>Restore collection</Text>
-              </Group>
-              <Text size="sm" c="dimmed">
-                Upload a .gz backup created from this dashboard to restore the collection. We will auto-detect the
-                collection name from the file name.
-              </Text>
-              <FileInput
-                accept=".gz,application/gzip"
-                placeholder="Select .gz backup"
-                value={file}
-                onChange={(selected) => {
-                  setFile(selected);
-                  if (selected?.name) {
-                    const inferred = selected.name.replace(/\.gz$/i, "").replace(/\.gzip$/i, "").trim();
-                    if (inferred) setCollectionName(inferred);
-                  }
-                }}
-                clearable
-                w="100%"
-                styles={{
-                  input: { background: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.12)" },
-                }}
-              />
-              <Button
-                color="blue"
-                leftSection={<IconCloudUpload size={16} />}
-                loading={uploading}
-                disabled={!file}
-                fullWidth={isMobile}
-                onClick={() => void handleRestore()}
-              >
-                Restore backup
-              </Button>
-              {uploading && <Progress size="sm" value={55} color="blue" striped animated />}
-            </Stack>
-          </Card>
-        </SimpleGrid>
-      </Stack>
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+        <AdminPanel icon={IconCloudDownload} title="Export collection">
+          <Stack gap="sm">
+            <Text size="sm" c="dimmed">
+              Generates a gzip archive of <b>{normalizedCollection || "the chosen collection"}</b>.
+            </Text>
+            <Button
+              color="neon"
+              variant="light"
+              leftSection={<IconCloudDownload size={16} />}
+              loading={downloading}
+              onClick={() => void handleDownload()}
+            >
+              Download backup
+            </Button>
+            {downloading && <Progress size="sm" value={70} color="neon" striped animated />}
+          </Stack>
+        </AdminPanel>
+
+        <AdminPanel icon={IconCloudUpload} title="Restore collection">
+          <Stack gap="sm">
+            <Text size="sm" c="dimmed">
+              Upload a .gz backup made here; the collection name is read from the file name.
+            </Text>
+            <FileInput
+              accept=".gz,application/gzip"
+              placeholder="Select .gz backup"
+              value={file}
+              onChange={(selected) => {
+                setFile(selected);
+                if (selected?.name) {
+                  const inferred = selected.name.replace(/\.gz$/i, "").replace(/\.gzip$/i, "").trim();
+                  if (inferred) setCollectionName(inferred);
+                }
+              }}
+              clearable
+            />
+            <Button
+              color="orange"
+              variant="light"
+              leftSection={<IconCloudUpload size={16} />}
+              loading={uploading}
+              disabled={!file}
+              onClick={() => void handleRestore()}
+            >
+              Restore backup
+            </Button>
+            {uploading && <Progress size="sm" value={55} color="orange" striped animated />}
+          </Stack>
+        </AdminPanel>
+      </SimpleGrid>
 
       {/* Hidden anchor for download fallback */}
       <a ref={downloadLinkRef} style={{ display: "none" }} />
-    </Paper>
+    </AdminPage>
   );
 }

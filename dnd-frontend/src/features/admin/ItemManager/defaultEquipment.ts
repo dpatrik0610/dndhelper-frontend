@@ -11,3 +11,7 @@ export const defaultEquipment: Equipment = {
   isCustom: true,
   isDeleted: false,
 };
+
+/** The equipment's lookup key, derived from its name: "Bag of Holding" -> "bag-of-holding". */
+export const equipmentIndex = (name: string) =>
+  name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");

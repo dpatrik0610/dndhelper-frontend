@@ -55,21 +55,18 @@ export function SelectCampaignModal({ opened, onClose }: SelectCampaignModalProp
                 onClick={() => { select(camp.id); onClose(); }}
                 style={{
                   cursor: "pointer",
-                  background: isSelected
-                    ? "linear-gradient(135deg, rgba(255,80,120,0.25), rgba(255,0,100,0.15))"
-                    : "rgba(255,255,255,0.03)",
+                  background: isSelected ? "rgba(0, 255, 136,0.14)" : "rgba(255,255,255,0.03)",
                   border: isSelected
-                    ? "1px solid var(--mantine-color-red-5)"
+                    ? "1px solid var(--cyber-accent)"
                     : "1px solid rgba(255,255,255,0.08)",
-                  transition: "all 0.25s ease",
-                  boxShadow: isSelected ? "0 0 10px rgba(255,0,100,0.3)" : "none",
+                  transition: "background 0.15s ease, border-color 0.15s ease",
                 }}
               >
                 <Group justify="space-between" align="center">
                   <Group gap="sm">
                     <IconMapPin
                       size={20}
-                      color={isSelected ? "var(--mantine-color-red-5)" : "var(--mantine-color-gray-5)"}
+                      color={isSelected ? "var(--cyber-accent)" : "var(--mantine-color-gray-5)"}
                     />
                     <Box>
                       <Text fw={600} size="sm" c="gray.1">
@@ -81,7 +78,7 @@ export function SelectCampaignModal({ opened, onClose }: SelectCampaignModalProp
                     </Box>
                   </Group>
 
-                  {isSelected && <IconCheck size={18} color="var(--mantine-color-red-5)" />}
+                  {isSelected && <IconCheck size={18} color="var(--cyber-accent)" />}
                 </Group>
               </Paper>
             );

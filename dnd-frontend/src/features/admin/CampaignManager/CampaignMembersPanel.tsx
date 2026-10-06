@@ -1,7 +1,8 @@
-import { ActionIcon, Badge, Chip, CopyButton, Group, MultiSelect, Paper, Stack, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Badge, Chip, CopyButton, Group, MultiSelect, Stack, Text, Tooltip } from "@mantine/core";
 import { IconCheck, IconCopy, IconLock, IconRefresh, IconUserMinus, IconUsers } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
 import { useCampaignStore } from "@store/campaign/campaignStore";
+import { AdminPanel } from "@features/admin/components/AdminPage";
 import { useCurrentUserId } from "@store/auth/authSelectors";
 import { CORE_CONTENT_TYPES, CampaignRoles, type Campaign, type CampaignMemberView, type CoreContentType } from "@appTypes/Campaign";
 import {
@@ -16,12 +17,6 @@ import { SectionColor } from "@appTypes/SectionColor";
 import { loadSpells } from "@utils/loadSpells";
 
 const ROLE_OPTIONS = [CampaignRoles.Dm, CampaignRoles.Player];
-
-const panelStyle = {
-  background: "linear-gradient(145deg, rgba(0,40,60,0.5), rgba(0,20,40,0.35))",
-  border: "1px solid rgba(255,255,255,0.12)",
-  backdropFilter: "blur(10px)",
-};
 
 /** DM tools for the current campaign: invite code, member roles, imported core content. */
 export function CampaignMembersPanel() {
@@ -58,23 +53,20 @@ export function CampaignMembersPanel() {
   };
 
   return (
-    <Paper mt="md" p="md" radius="md" withBorder style={panelStyle}>
-      <Group mb="sm" justify="space-between">
-        <Group gap="xs">
-          <IconUsers size={18} color="cyan" />
-          <Text fw={600} c="cyan.3">Members</Text>
-        </Group>
-
-        <Group gap={6}>
+    <AdminPanel
+      icon={IconUsers}
+      title="Members"
+      actions={
+        <>
           <Text size="sm" c="dimmed">Invite code</Text>
-          <Badge size="lg" variant="light" color="cyan" style={{ fontFamily: "monospace", letterSpacing: 2 }}>
+          <Badge size="lg" variant="light" color="neon" style={{ fontFamily: "monospace", letterSpacing: 2 }}>
             {campaign.inviteCode ?? "—"}
           </Badge>
           {campaign.inviteCode && (
             <CopyButton value={campaign.inviteCode}>
               {({ copied, copy }) => (
                 <Tooltip label={copied ? "Copied" : "Copy code"} withArrow>
-                  <ActionIcon variant="subtle" color={copied ? "teal" : "gray"} onClick={copy} aria-label="Copy invite code">
+                  <ActionIcon variant="subtle" color={copied ? "neon" : "gray"} onClick={copy} aria-label="Copy invite code">
                     {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
                   </ActionIcon>
                 </Tooltip>
@@ -91,9 +83,9 @@ export function CampaignMembersPanel() {
               <IconRefresh size={16} />
             </ActionIcon>
           </Tooltip>
-        </Group>
-      </Group>
-
+        </>
+      }
+    >
       <Stack gap="xs">
         {members.map((m) => (
           <Group
@@ -131,7 +123,7 @@ export function CampaignMembersPanel() {
       </Stack>
 
       <Group mt="md" gap="xs" align="center">
-        <IconLock size={16} color="var(--mantine-color-blue-4)" />
+        <IconLock size={16} color="var(--cyber-accent-3)" />
         <Text size="sm" fw={600}>Import core content</Text>
         <Text size="xs" c="dimmed">Shared and read-only; your own homebrew stays editable.</Text>
       </Group>
@@ -144,12 +136,12 @@ export function CampaignMembersPanel() {
       >
         <Group gap="xs" mt="xs">
           {CORE_CONTENT_TYPES.map((t) => (
-            <Chip key={t} value={t} size="sm" color="blue">
+            <Chip key={t} value={t} size="sm" color="electric">
               Core {t}
             </Chip>
           ))}
         </Group>
       </Chip.Group>
-    </Paper>
+    </AdminPanel>
   );
 }

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Box, type BoxProps } from '@mantine/core';
-import styles from "@features/admin/ItemManager/ItemManager.module.css";
+import styles from "@styles/AdminCatalog.module.css";
 
 interface GlassyBoxProps extends BoxProps {
   children: React.ReactNode;

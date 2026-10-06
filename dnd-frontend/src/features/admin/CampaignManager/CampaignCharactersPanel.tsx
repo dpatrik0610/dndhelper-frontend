@@ -4,10 +4,8 @@ import {
   Text,
   ActionIcon,
   Tooltip,
-  Paper,
   Avatar,
   Stack,
-  Divider,
   Button,
   Select,
   MultiSelect,
@@ -28,6 +26,7 @@ import {
 } from "@services/campaignService";
 import type { CampaignMemberView } from "@appTypes/Campaign";
 import { useCampaignStore } from "@store/campaign/campaignStore";
+import { AdminPanel } from "@features/admin/components/AdminPage";
 
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -133,49 +132,24 @@ const handleRemove = async (charId: string) => {
   };
 
   return (
-    <Paper
-      p="sm"
-      radius="md"
-      withBorder
-      style={{
-        background:
-          "linear-gradient(145deg, rgba(60,0,80,0.55), rgba(20,0,30,0.4))",
-        border: "1px solid rgba(255,255,255,0.1)",
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      <Group justify="space-between" mb="xs">
-        <Group>
-          <IconUsersGroup size={18} color="violet" />
-          <Text fw={600} c="violet.1">
-            Campaign Characters
-          </Text>
-        </Group>
-        <Group gap="xs">
+    <AdminPanel
+      icon={IconUsersGroup}
+      title="Characters"
+      actions={
+        <>
           <Tooltip label="Reload" withArrow>
-            <ActionIcon
-              variant="subtle"
-              color="violet"
-              onClick={fetchMembers}
-              loading={loading}
-            >
-              <IconReload size={18} />
+            <ActionIcon variant="subtle" color="gray" onClick={fetchMembers} loading={loading} aria-label="Reload characters">
+              <IconReload size={16} />
             </ActionIcon>
           </Tooltip>
           <Tooltip label="Add character" withArrow>
-            <ActionIcon
-              variant="gradient"
-              gradient={{ from: "teal", to: "cyan" }}
-              onClick={() => setAdding((v) => !v)}
-            >
-              <IconUserPlus size={18} />
+            <ActionIcon variant="light" color="neon" onClick={() => setAdding((v) => !v)} aria-label="Add character">
+              <IconUserPlus size={16} />
             </ActionIcon>
           </Tooltip>
-        </Group>
-      </Group>
-
-      <Divider my="xs" color="rgba(255,255,255,0.1)" />
-
+        </>
+      }
+    >
       {/* === Add form === */}
       {adding && (
         <Group mt="xs" gap="xs" wrap="nowrap">
@@ -193,8 +167,7 @@ const handleRemove = async (charId: string) => {
             style={{ flex: 1 }}
           />
           <Button
-            variant="gradient"
-            gradient={{ from: "teal", to: "green" }}
+            color="neon"
             onClick={handleAdd}
           >
             Add
@@ -258,7 +231,7 @@ const handleRemove = async (charId: string) => {
           ))
         )}
       </Stack>
-    </Paper>
+    </AdminPanel>
   );
 }
 

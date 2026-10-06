@@ -1,0 +1,380 @@
+/* ==========================================================================
+   Admin console design system: "High-Tech, Low-Life" (cyberpunk / glitch).
+   App.tsx puts .admin-cyber on <html> for /dashboard and /admin, so portaled
+   modals, menus and dropdowns get it too. Layout pieces (shell, page, panel,
+   stat) live in AdminDashboard.module.css and read the tokens below.
+   ========================================================================== */
+
+/* ---------- Tokens ----------
+   html + attribute beats Mantine's :root[data-mantine-color-scheme] block, so its tokens can be retuned here. */
+html.admin-cyber[data-mantine-color-scheme] {
+  --cyber-bg: #0a0a0f;
+  --cyber-fg: #e0e0e0;
+  --cyber-card: #12121a;
+  --cyber-muted: #1c1c2e;
+  /* The spec's #6b7280 is ~4:1 on the void; this keeps small text at AA. */
+  --cyber-muted-fg: #8a91a0;
+  --cyber-border: #2a2a3a;
+  --cyber-accent: #00ff88;
+  --cyber-accent-2: #ff00ff;
+  --cyber-accent-3: #00d4ff;
+  --cyber-danger: #ff3366;
+  --cyber-warning: #ffb800;
+
+  --cyber-font-display: "Orbitron", "Share Tech Mono", monospace;
+  --cyber-font-body: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  --cyber-font-label: "Share Tech Mono", "JetBrains Mono", monospace;
+
+  --cyber-glow-sm: 0 0 3px #00ff88, 0 0 6px #00ff8830;
+  --cyber-glow: 0 0 5px #00ff88, 0 0 10px #00ff8840;
+  --cyber-glow-lg: 0 0 10px #00ff88, 0 0 20px #00ff8860, 0 0 40px #00ff8830;
+  --cyber-glow-2: 0 0 5px #ff00ff, 0 0 20px #ff00ff60;
+  --cyber-glow-3: 0 0 5px #00d4ff, 0 0 20px #00d4ff60;
+
+  /* Corner cuts. The two-corner cut (top-left, bottom-right) is the panel shape. */
+  --cyber-cut: 10px;
+  --cyber-chamfer: polygon(0 10px, 10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px));
+  --cyber-chamfer-sm: polygon(0 6px, 6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px));
+  --cyber-notch: polygon(0 var(--cyber-cut), var(--cyber-cut) 0, 100% 0, 100% calc(100% - var(--cyber-cut)), calc(100% - var(--cyber-cut)) 100%, 0 100%);
+
+  --cyber-snap: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Feed the app's own theme tokens, so the shared inputs, dropdowns and modals follow along. */
+  --theme-bg-base: var(--cyber-bg);
+  --theme-bg-panel: rgba(18, 18, 26, 0.97);
+  --theme-bg-panel-opaque: var(--cyber-card);
+  --theme-bg-card: var(--cyber-card);
+  --theme-bg-hover: rgba(0, 255, 136, 0.08);
+  --theme-border-glow: var(--cyber-accent);
+  --theme-border-accent: var(--cyber-accent-2);
+  --theme-border-subtle: var(--cyber-border);
+  --theme-color-accent-primary: var(--cyber-accent);
+  --theme-color-accent-secondary: var(--cyber-accent-2);
+  --theme-color-text-primary: var(--cyber-fg);
+  --theme-color-text-secondary: var(--cyber-muted-fg);
+  --theme-color-text-glow: #b3ffd9;
+  --theme-color-text-on-accent: var(--cyber-bg);
+  --theme-glow-shadow-primary: var(--cyber-glow-sm);
+  --theme-glow-shadow-secondary: var(--cyber-glow-2);
+  --theme-gradient-primary: linear-gradient(120deg, #00ff88, #00d4ff);
+  --theme-gradient-primary-glass: linear-gradient(120deg, rgba(0, 255, 136, 0.22), rgba(0, 212, 255, 0.18));
+  --theme-gradient-active: linear-gradient(135deg, rgba(0, 255, 136, 0.14), rgba(255, 0, 255, 0.08));
+
+  /* And Mantine's. */
+  --mantine-font-family: var(--cyber-font-body);
+  --mantine-font-family-headings: var(--cyber-font-display);
+  --mantine-color-body: var(--cyber-bg);
+  --mantine-color-text: var(--cyber-fg);
+  --mantine-color-dimmed: var(--cyber-muted-fg);
+  --mantine-color-anchor: var(--cyber-accent-3);
+  --mantine-color-default: var(--cyber-card);
+  --mantine-color-default-hover: var(--cyber-muted);
+  --mantine-color-default-border: var(--cyber-border);
+  --mantine-color-default-color: var(--cyber-fg);
+  --mantine-color-placeholder: #5c6270;
+
+  scrollbar-color: var(--cyber-border) transparent;
+}
+
+/* index.css sets the site font on body directly; the console speaks terminal. */
+.admin-cyber body {
+  font-family: var(--cyber-font-body);
+  background: var(--cyber-bg);
+  letter-spacing: 0.01em;
+}
+
+.admin-cyber ::selection {
+  background: var(--cyber-accent);
+  color: var(--cyber-bg);
+}
+
+/* CRT scanlines over the whole screen, modals included. */
+.admin-cyber body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.18) 2px 4px);
+  mix-blend-mode: multiply;
+}
+
+/* ---------- Buttons: mono, uppercase, corner-cut ----------
+   Mantine sets --button-bg to the chosen colour; every variant reads it, so one rule set covers all colours. */
+.admin-cyber .mantine-Button-root,
+.admin-cyber .mantine-ActionIcon-root {
+  border-radius: 0 !important;
+  clip-path: var(--cyber-chamfer-sm);
+  transition: background var(--cyber-snap), color var(--cyber-snap), box-shadow var(--cyber-snap), border-color var(--cyber-snap);
+}
+
+.admin-cyber .mantine-Button-root {
+  font-family: var(--cyber-font-label);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+/* Filled = the system's default button: neon outline that floods on hover.
+   (Mantine leaves data-variant off for its default variant, which is filled.) */
+.admin-cyber .mantine-Button-root:is([data-variant="filled"], :not([data-variant])) {
+  background: transparent;
+  border: 1px solid var(--button-bg);
+  color: var(--button-bg);
+  box-shadow: inset 0 0 10px color-mix(in srgb, var(--button-bg) 18%, transparent);
+  text-shadow: 0 0 6px color-mix(in srgb, var(--button-bg) 60%, transparent);
+}
+
+.admin-cyber .mantine-Button-root:is([data-variant="filled"], :not([data-variant])):hover:not(:disabled, [data-disabled]) {
+  background: var(--button-bg);
+  color: var(--cyber-bg);
+  text-shadow: none;
+  box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.35);
+}
+
+.admin-cyber .mantine-ActionIcon-root:is([data-variant="filled"], :not([data-variant])) {
+  color: var(--cyber-bg);
+}
+
+.admin-cyber .mantine-Button-root[data-variant="light"],
+.admin-cyber .mantine-ActionIcon-root[data-variant="light"] {
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+}
+
+.admin-cyber .mantine-Button-root[data-variant="default"],
+.admin-cyber .mantine-ActionIcon-root[data-variant="default"] {
+  background: transparent;
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-fg);
+}
+
+.admin-cyber .mantine-Button-root[data-variant="default"]:hover:not(:disabled, [data-disabled]),
+.admin-cyber .mantine-ActionIcon-root[data-variant="default"]:hover:not(:disabled, [data-disabled]) {
+  border-color: var(--cyber-accent);
+  color: var(--cyber-accent);
+  box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.2);
+}
+
+.admin-cyber .mantine-Button-root:is(:disabled, [data-disabled]) {
+  background: transparent;
+  border: 1px solid var(--cyber-border);
+  color: #4a4f5c;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+/* Clip-path would cut an outline off: draw the focus ring inside instead. */
+.admin-cyber .mantine-Button-root:focus-visible,
+.admin-cyber .mantine-ActionIcon-root:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--cyber-accent), inset 0 0 12px rgba(0, 255, 136, 0.4);
+}
+
+.admin-cyber .mantine-ActionIcon-root svg,
+.admin-cyber .mantine-Button-section svg {
+  stroke-width: 1.5;
+}
+
+.admin-cyber .mantine-ActionIcon-root:hover svg {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+/* ---------- Badges: HUD tags ---------- */
+.admin-cyber .mantine-Badge-root {
+  border-radius: 0;
+  font-family: var(--cyber-font-label);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+}
+
+.admin-cyber .mantine-Badge-root[data-variant="light"] {
+  border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
+  text-shadow: 0 0 6px color-mix(in srgb, currentColor 50%, transparent);
+}
+
+.admin-cyber .mantine-Badge-root[data-variant="dot"] {
+  background: transparent;
+  border-color: var(--cyber-border);
+}
+
+.admin-cyber .mantine-Badge-root[data-variant="dot"]::before {
+  border-radius: 0;
+  box-shadow: 0 0 6px var(--badge-dot-color);
+}
+
+/* ---------- Inputs: terminal fields ---------- */
+.admin-cyber .glassy-input,
+.admin-cyber .mantine-Input-input {
+  border-radius: 0 !important;
+  background: var(--cyber-card) !important;
+  border: 1px solid var(--cyber-border) !important;
+  color: var(--cyber-accent) !important;
+  font-family: var(--cyber-font-body);
+  caret-color: var(--cyber-accent);
+  transition: border-color 200ms, box-shadow 200ms;
+}
+
+.admin-cyber .glassy-input:focus,
+.admin-cyber .glassy-input:focus-within,
+.admin-cyber .mantine-Input-input:focus {
+  border-color: var(--cyber-accent) !important;
+  box-shadow: var(--cyber-glow) !important;
+}
+
+.admin-cyber .glassy-input::placeholder,
+.admin-cyber .mantine-Input-input::placeholder {
+  color: var(--mantine-color-placeholder);
+}
+
+.admin-cyber .glassy-label,
+.admin-cyber .mantine-InputWrapper-label {
+  font-family: var(--cyber-font-label) !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.2em !important;
+  color: var(--cyber-accent-3) !important;
+}
+
+.admin-cyber .mantine-InputWrapper-description {
+  color: var(--cyber-muted-fg);
+}
+
+.admin-cyber .mantine-Input-section {
+  color: var(--cyber-muted-fg);
+}
+
+.admin-cyber .glassy-dropdown,
+.admin-cyber .mantine-Popover-dropdown,
+.admin-cyber .mantine-Menu-dropdown {
+  border-radius: 0 !important;
+  background: var(--cyber-card) !important;
+  border: 1px solid var(--cyber-border) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 255, 136, 0.08) !important;
+}
+
+.admin-cyber .glassy-option,
+.admin-cyber .mantine-Menu-item {
+  border-radius: 0 !important;
+  font-family: var(--cyber-font-body);
+  font-size: 0.8rem;
+}
+
+.admin-cyber .mantine-Menu-item:not([data-disabled]):hover,
+.admin-cyber .mantine-Menu-item[data-hovered] {
+  background: rgba(0, 255, 136, 0.08);
+  color: var(--cyber-accent);
+}
+
+.admin-cyber .mantine-Menu-item[data-hovered] svg {
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+.admin-cyber .mantine-Tooltip-tooltip {
+  border-radius: 0;
+  background: var(--cyber-muted);
+  color: var(--cyber-accent);
+  border: 1px solid rgba(0, 255, 136, 0.35);
+  font-family: var(--cyber-font-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ---------- Toggles ---------- */
+.admin-cyber .mantine-Checkbox-input,
+.admin-cyber .mantine-Switch-track,
+.admin-cyber .mantine-Switch-thumb,
+.admin-cyber .mantine-Chip-label {
+  border-radius: 0 !important;
+}
+
+.admin-cyber .mantine-Checkbox-input {
+  background: var(--cyber-card);
+  border-color: var(--cyber-border);
+}
+
+.admin-cyber .mantine-Checkbox-input:checked,
+.admin-cyber .mantine-Checkbox-input[data-indeterminate] {
+  background: var(--cyber-accent);
+  border-color: var(--cyber-accent);
+  box-shadow: var(--cyber-glow-sm);
+}
+
+.admin-cyber .mantine-Checkbox-icon {
+  color: var(--cyber-bg);
+}
+
+.admin-cyber .mantine-Switch-input:checked + .mantine-Switch-track {
+  background: rgba(0, 255, 136, 0.15);
+  border-color: var(--cyber-accent);
+  box-shadow: var(--cyber-glow-sm);
+}
+
+.admin-cyber .mantine-Switch-input:checked + .mantine-Switch-track .mantine-Switch-thumb {
+  background: var(--cyber-accent);
+}
+
+.admin-cyber .mantine-SegmentedControl-root {
+  border-radius: 0;
+  background: var(--cyber-card);
+  border: 1px solid var(--cyber-border);
+}
+
+.admin-cyber .mantine-SegmentedControl-indicator {
+  border-radius: 0;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid var(--cyber-accent);
+  box-shadow: var(--cyber-glow-sm);
+}
+
+.admin-cyber .mantine-SegmentedControl-label {
+  font-family: var(--cyber-font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.admin-cyber .mantine-SegmentedControl-control[data-active] .mantine-SegmentedControl-label,
+.admin-cyber .mantine-SegmentedControl-label[data-active] {
+  color: var(--cyber-accent);
+}
+
+/* ---------- Tables ---------- */
+.admin-cyber .mantine-Table-table {
+  --table-border-color: var(--cyber-border);
+  --table-hover-color: rgba(0, 255, 136, 0.035);
+}
+
+/* ---------- Modals: HUD windows ---------- */
+.admin-cyber .mantine-Modal-content {
+  border-radius: 0 !important;
+  clip-path: var(--cyber-notch);
+  border: 1px solid var(--cyber-border) !important;
+  border-top: 2px solid var(--cyber-accent) !important;
+  box-shadow: inset 0 12px 30px -20px rgba(0, 255, 136, 0.5) !important;
+}
+
+.admin-cyber .modal-variant-danger.mantine-Modal-content {
+  border-top-color: var(--cyber-danger) !important;
+  box-shadow: inset 0 12px 30px -20px rgba(255, 51, 102, 0.6) !important;
+}
+
+.admin-cyber .mantine-Modal-title,
+.admin-cyber .mantine-Drawer-title {
+  font-family: var(--cyber-font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ---------- Motion off when asked (the OS setting or the site preference) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .admin-cyber *,
+  .admin-cyber *::before,
+  .admin-cyber *::after {
+    animation: none !important;
+  }
+}
+
+.admin-cyber[data-reduce-motion] *,
+.admin-cyber[data-reduce-motion] *::before,
+.admin-cyber[data-reduce-motion] *::after {
+  animation: none !important;
+}

@@ -1,10 +1,9 @@
-import { apiClient } from "../api/apiClient";
+import { apiClient } from "@api/apiClient";
 import type {
   AuthRequest,
   AuthResponse,
   ChangePasswordRequest,
-  ResetPasswordRequest,
-} from '../types/AuthTypes';
+} from '@appTypes/AuthTypes';
 
 export async function registerUser(request: AuthRequest): Promise<AuthResponse> {
     try {
@@ -33,14 +32,6 @@ export async function loginUser(request: AuthRequest): Promise<AuthResponse> {
 
 export async function changePassword(request: ChangePasswordRequest) {
     return apiClient<{ message: string }>('/Auth/change-password', {
-        method: 'POST',
-        body: request,
-
-    });
-}
-
-export async function resetPassword(request: ResetPasswordRequest) {
-    return apiClient<{ message: string }>('/Auth/reset-password', {
         method: 'POST',
         body: request,
 

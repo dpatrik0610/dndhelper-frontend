@@ -1,5 +1,4 @@
 ﻿import {
-  Paper,
   Group,
   Text,
   ActionIcon,
@@ -17,6 +16,7 @@ import {
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useCampaignStore } from "@store/campaign/campaignStore";
+import { AdminPanel } from "@features/admin/components/AdminPage";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 
@@ -76,25 +76,7 @@ export function CampaignSessionsPanel() {
   };
 
   return (
-    <Paper
-      mt="md"
-      p="md"
-      radius="md"
-      withBorder
-      style={{
-        background:
-          "linear-gradient(145deg, rgba(20,0,50,0.5), rgba(10,0,20,0.35))",
-        border: "1px solid rgba(255,255,255,0.12)",
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      <Group mb="xs">
-        <IconCalendarTime size={18} color="violet" />
-        <Text fw={600} c="violet.1">
-          Sessions
-        </Text>
-      </Group>
-
+    <AdminPanel icon={IconCalendarTime} title="Sessions">
       <Group mb="sm">
         <TextInput
           placeholder="New session ID or title..."
@@ -103,8 +85,7 @@ export function CampaignSessionsPanel() {
           style={{ flex: 1 }}
         />
         <Button
-          variant="gradient"
-          gradient={{ from: "indigo", to: "grape" }}
+          color="neon"
           leftSection={<IconPlus size={16} />}
           onClick={handleAddSession}
         >
@@ -129,11 +110,11 @@ export function CampaignSessionsPanel() {
               }}
             >
               <Group gap="sm">
-                <Badge color="violet" variant="light">
+                <Badge color="magenta" variant="light">
                   {id}
                 </Badge>
                 {campaign.currentSessionId === id && (
-                  <Badge color="teal" variant="filled">
+                  <Badge color="neon" variant="filled">
                     Current
                   </Badge>
                 )}
@@ -141,7 +122,7 @@ export function CampaignSessionsPanel() {
 
               <Group gap="xs">
                 <Tooltip label="Set as current">
-                  <ActionIcon variant="light" color="teal" onClick={() => handleSetCurrent(id)}>
+                  <ActionIcon variant="light" color="neon" onClick={() => handleSetCurrent(id)}>
                     <IconCheck size={16} />
                   </ActionIcon>
                 </Tooltip>
@@ -156,7 +137,7 @@ export function CampaignSessionsPanel() {
           ))
         )}
       </Stack>
-    </Paper>
+    </AdminPanel>
   );
 }
 

@@ -86,7 +86,7 @@ export function AddExistingItemModal({
 
         {loading ? (
           <Group justify="center" py="xl">
-            <Loader color="cyan" />
+            <Loader color="electric" />
           </Group>
         ) : (
           <ScrollArea
@@ -145,7 +145,7 @@ export function AddExistingItemModal({
                         />
                         <Button
                           size={isMobile ? "compact-sm" : "xs"}
-                          color="teal"
+                          color="neon"
                           variant="light"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -162,7 +162,7 @@ export function AddExistingItemModal({
 
               {visible < filtered.length && (
                 <Group justify="center" py="sm">
-                  <Loader size="sm" color="cyan" />
+                  <Loader size="sm" color="electric" />
                 </Group>
               )}
             </Stack>

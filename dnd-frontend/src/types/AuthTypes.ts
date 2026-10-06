@@ -15,8 +15,3 @@ export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string
 }
-
-export interface ResetPasswordRequest {
-  username: string
-  newPassword: string
-}

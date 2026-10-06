@@ -95,13 +95,13 @@ export function ItemModal({
       {loading && !equipment && (
         <AdminGlassModal opened={opened} onClose={onClose} withCloseButton={false} size="sm">
           <Center h={200}>
-            <Loader color="grape" />
+            <Loader color="magenta" />
           </Center>
         </AdminGlassModal>
       )}
 
       {equipment && (
-        <Suspense fallback={<Center h={200}><Loader color="grape" /></Center>}>
+        <Suspense fallback={<Center h={200}><Loader color="magenta" /></Center>}>
           <EquipmentFormModal
             opened={opened}
             initial={equipment}

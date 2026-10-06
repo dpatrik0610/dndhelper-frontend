@@ -5,7 +5,6 @@ import {
   Pagination,
   Stack,
   Text,
-  Title,
   Tooltip,
   SimpleGrid,
   Loader,
@@ -27,7 +26,7 @@ import { monsterService } from "@services/Admin/monsterService";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
-import styles from "./MonsterManager.module.css";
+import { AdminPage, AdminPanel, AdminStat } from "@features/admin/components/AdminPage";
 
 export function MonsterManager() {
   const [allData, setAllData] = useState<Monster[]>([]);
@@ -213,140 +212,79 @@ export function MonsterManager() {
   };
 
   return (
-    <div className={styles.dashboard}>
-      <Stack gap="xl">
-        {/* Header Title Section */}
-        <Group justify="space-between" align="center">
-          <Group gap="md">
-            <IconSkull size={32} color="#ef4444" style={{ filter: "drop-shadow(0 0 8px rgba(239, 68, 68, 0.5))" }} />
-            <div>
-              <Title order={2} style={{ color: "white", textShadow: "0 0 12px rgba(255,255,255,0.15)" }}>
-                Bestiary & Monster Manager
-              </Title>
-              <Text size="xs" c="dimmed">
-                Manage visual & custom creatures, NPC sheets, perception attributes, and combat stats.
-              </Text>
-            </div>
+    <AdminPage
+      icon={IconSkull}
+      title="Monsters"
+      subtitle="Bestiary: custom creatures, NPC sheets and combat stats."
+      actions={
+        <>
+          <Tooltip label="Reload bestiary" withArrow>
+            <ActionIcon variant="default" size="lg" onClick={loadAllData} loading={loading} aria-label="Reload bestiary">
+              <IconRefresh size={16} />
+            </ActionIcon>
+          </Tooltip>
+          <Button color="neon" leftSection={<IconPlus size={16} />} onClick={() => openFormModal(null)}>
+            New monster
+          </Button>
+        </>
+      }
+    >
+      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
+        <AdminStat label="Total bestiary" value={stats.total} tone="tertiary" />
+        <AdminStat label="NPC records" value={stats.npcs} tone="warning" />
+        <AdminStat label="Bosses (CR 10+)" value={stats.bosses} tone="danger" />
+        <AdminStat label="Custom creations" value={stats.custom} tone="secondary" />
+      </SimpleGrid>
+
+      {/* Filter Controls */}
+      <MonsterFilters
+        nameInput={nameInput}
+        setNameInput={setNameInput}
+        typeInput={typeInput}
+        setTypeInput={setTypeInput}
+        npcFilter={filters.npcFilter}
+        setNpcFilter={(val) => setFilters((prev) => ({ ...prev, npcFilter: val }))}
+        minCR={filters.minCR}
+        setMinCR={(val) => setFilters((prev) => ({ ...prev, minCR: val }))}
+        maxCR={filters.maxCR}
+        setMaxCR={(val) => setFilters((prev) => ({ ...prev, maxCR: val }))}
+        tags={filters.tags}
+        setTags={(val) => setFilters((prev) => ({ ...prev, tags: val }))}
+        tagsRule={filters.tagsRule}
+        setTagsRule={(val) => setFilters((prev) => ({ ...prev, tagsRule: val }))}
+        allTags={allTags}
+        onApplyFilters={handleApplyTextFilters}
+        onClear={handleClearFilters}
+      />
+
+      {/* Loading Indicator or Monster Table View */}
+      {loading ? (
+        <Center p="xl">
+          <Loader size="md" />
+        </Center>
+      ) : (
+        <AdminPanel flush>
+          <MonsterTable
+            monsters={paginatedData}
+            loading={loading}
+            saving={saving}
+            deleteId={deleteId}
+            onView={(m) => setViewMonster(m)}
+            onEdit={openFormModal}
+            onDelete={openDeleteConfirm}
+            onChanged={() => void loadAllData()}
+          />
+        </AdminPanel>
+      )}
+
+      {/* Pagination Section */}
+      {totalPages > 1 && (
+        <AdminPanel>
+          <Group justify="center">
+            <Pagination value={page} onChange={setPage} total={totalPages} size="sm" color="neon" />
           </Group>
-
-          {/* Action buttons */}
-          <Group gap="sm">
-            <Tooltip label="Reload bestiary list" withArrow>
-              <ActionIcon
-                className={`${styles.neonButton} ${styles.neonGray}`}
-                size="lg"
-                onClick={loadAllData}
-                loading={loading}
-              >
-                <IconRefresh size={18} />
-              </ActionIcon>
-            </Tooltip>
-            <Button
-              className={`${styles.neonButton} ${styles.neonRed}`}
-              leftSection={<IconPlus size={16} />}
-              onClick={() => openFormModal(null)}
-            >
-              Add New Monster
-            </Button>
-          </Group>
-        </Group>
-
-        {/* Dynamic Glassy Stats Row */}
-        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
-          <div className={`${styles.statCard} ${styles.statCardRed}`}>
-            <Text size="xs" c="dimmed" fw={600} style={{ textTransform: "uppercase" }}>Total Bestiary</Text>
-            <Text size="xl" fw={800} c="white">{stats.total}</Text>
-          </div>
-          <div className={`${styles.statCard} ${styles.statCardOrange}`}>
-            <Text size="xs" c="dimmed" fw={600} style={{ textTransform: "uppercase" }}>NPC Records</Text>
-            <Text size="xl" fw={800} c="orange.2">{stats.npcs}</Text>
-          </div>
-          <div className={`${styles.statCard} ${styles.statCardGold}`}>
-            <Text size="xs" c="dimmed" fw={600} style={{ textTransform: "uppercase" }}>Bosses (CR 10+)</Text>
-            <Text size="xl" fw={800} c="yellow.3">{stats.bosses}</Text>
-          </div>
-          <div className={`${styles.statCard} ${styles.statCardGray}`}>
-            <Text size="xs" c="dimmed" fw={600} style={{ textTransform: "uppercase" }}>Custom Creations</Text>
-            <Text size="xl" fw={800} c="slate.2">{stats.custom}</Text>
-          </div>
-        </SimpleGrid>
-
-        {/* Filter Controls */}
-        <MonsterFilters
-          nameInput={nameInput}
-          setNameInput={setNameInput}
-          typeInput={typeInput}
-          setTypeInput={setTypeInput}
-          npcFilter={filters.npcFilter}
-          setNpcFilter={(val) => setFilters((prev) => ({ ...prev, npcFilter: val }))}
-          minCR={filters.minCR}
-          setMinCR={(val) => setFilters((prev) => ({ ...prev, minCR: val }))}
-          maxCR={filters.maxCR}
-          setMaxCR={(val) => setFilters((prev) => ({ ...prev, maxCR: val }))}
-          tags={filters.tags}
-          setTags={(val) => setFilters((prev) => ({ ...prev, tags: val }))}
-          tagsRule={filters.tagsRule}
-          setTagsRule={(val) => setFilters((prev) => ({ ...prev, tagsRule: val }))}
-          allTags={allTags}
-          onApplyFilters={handleApplyTextFilters}
-          onClear={handleClearFilters}
-        />
-
-        {/* Loading Indicator or Monster Table View */}
-        {loading ? (
-          <Center p="xl">
-            <Loader color="red" size="md" />
-          </Center>
-        ) : (
-          <div className={styles.glassyBox}>
-            <MonsterTable
-              monsters={paginatedData}
-              loading={loading}
-              saving={saving}
-              deleteId={deleteId}
-              onView={(m) => setViewMonster(m)}
-              onEdit={openFormModal}
-              onDelete={openDeleteConfirm}
-              onChanged={() => void loadAllData()}
-            />
-          </div>
-        )}
-
-        {/* Pagination Section */}
-        {totalPages > 1 && (
-          <div className={styles.glassyBox}>
-            <Group justify="center">
-              <Pagination
-                value={page}
-                onChange={setPage}
-                total={totalPages}
-                size="sm"
-                radius="md"
-                styles={{
-                  control: {
-                    background: "rgba(255, 255, 255, 0.03)",
-                    border: "1px solid rgba(255, 255, 255, 0.08)",
-                    color: "rgba(255, 255, 255, 0.75)",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      background: "rgba(239, 68, 68, 0.1)",
-                      borderColor: "rgba(239, 68, 68, 0.3)",
-                      color: "#fca5a5",
-                      transform: "translateY(-1px)",
-                    },
-                    "&[data-active]": {
-                      background: "rgba(239, 68, 68, 0.35) !important",
-                      borderColor: "rgba(239, 68, 68, 0.6) !important",
-                      color: "#fee2e2 !important",
-                      boxShadow: "0 0 10px rgba(239, 68, 68, 0.4)",
-                    },
-                  },
-                }}
-              />
-            </Group>
-          </div>
-        )}
-      </Stack>
+        </AdminPanel>
+      )}
 
       {/* Form Dialog Modal */}
       <MonsterFormModal
@@ -390,16 +328,12 @@ export function MonsterManager() {
             <Button variant="subtle" onClick={() => { setDeleteId(null); setSelectedItem(null); }} disabled={saving}>
               Cancel
             </Button>
-            <Button
-              className={`${styles.neonButton} ${styles.neonRed}`}
-              loading={saving}
-              onClick={handleDelete}
-            >
+            <Button color="red" loading={saving} onClick={handleDelete}>
               Purge Permanently
             </Button>
           </Group>
         </Stack>
       </AdminGlassModal>
-    </div>
+    </AdminPage>
   );
 }

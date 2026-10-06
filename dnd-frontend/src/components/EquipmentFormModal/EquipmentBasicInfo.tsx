@@ -29,24 +29,14 @@ export function EquipmentBasicInfo({ draft, handleChange }: Props) {
         Basic Information
       </div>
       <Stack gap="md">
-        <SimpleGrid cols={{ base: 1, sm: 2 }}>
-          <TextInput
-            classNames={glass}
-            label="Name"
-            placeholder="e.g. Longsword"
-            value={draft.name}
-            onChange={(e) => handleChange("name", e.currentTarget.value)}
-            required
-          />
-          <TextInput
-            classNames={glass}
-            label="Index"
-            placeholder="e.g. longsword"
-            value={draft.index}
-            onChange={(e) => handleChange("index", e.currentTarget.value)}
-            required
-          />
-        </SimpleGrid>
+        <TextInput
+          classNames={glass}
+          label="Name"
+          placeholder="e.g. Longsword"
+          value={draft.name}
+          onChange={(e) => handleChange("name", e.currentTarget.value)}
+          required
+        />
 
         <Group justify="space-between" align="flex-start">
           <Stack gap={4}>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Button, Stack, Text, Group, SimpleGrid, Title } from "@mantine/core";
+import { Button, Stack, Text, Group, SimpleGrid } from "@mantine/core";
 import { IconPlus, IconCloudUpload, IconTools, IconAlertCircle } from "@tabler/icons-react";
 
 import { getAllEquipment, deleteEquipment } from "@services/equipmentService";
@@ -14,7 +14,7 @@ import Pagination from "./components/Pagination";
 import { EquipmentModal } from "@features/inventory/components/EquipmentModal";
 import { ItemFormModal } from "./components/ItemFormModal";
 import { BulkImportModal } from "./components/BulkImportModal";
-import styles from "./ItemManager.module.css";
+import { AdminPage, AdminStat } from "@features/admin/components/AdminPage";
 
 export function ItemManager() {
   const [allData, setAllData] = useState<Equipment[]>([]);
@@ -175,87 +175,53 @@ export function ItemManager() {
   };
 
   return (
-    <div className={styles.dashboard}>
-      <Stack gap="xl">
-        {/* Header Title Section */}
-        <Group justify="space-between" align="center">
-          <Group gap="md">
-            <IconTools size={32} color="#a855f7" style={{ filter: "drop-shadow(0 0 8px rgba(168,85,247,0.5))" }} />
-            <div>
-              <Title order={2} style={{ color: "white", textShadow: "0 0 12px rgba(255,255,255,0.15)" }}>
-                Item Database & Equipment Manager
-              </Title>
-              <Text size="xs" c="dimmed">
-                Manage visual & custom equipment, view stats block details, and import in bulk.
-              </Text>
-            </div>
-          </Group>
+    <AdminPage
+      icon={IconTools}
+      title="Items"
+      subtitle="Equipment database: custom items, stat blocks and bulk import."
+      actions={
+        <>
+          <Button variant="light" color="electric" leftSection={<IconCloudUpload size={16} />} onClick={() => setBulkOpen(true)}>
+            Bulk import JSON
+          </Button>
+          <Button color="neon" leftSection={<IconPlus size={16} />} onClick={() => openFormModal(null)}>
+            New equipment
+          </Button>
+        </>
+      }
+    >
+      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
+        <AdminStat label="Total equipment" value={stats.total} tone="tertiary" />
+        <AdminStat label="Custom creations" value={stats.customCount} tone="secondary" />
+        <AdminStat label="Legendary & artifacts" value={stats.legendaryOrArtifact} tone="warning" />
+        <AdminStat label="Deleted / archived" value={stats.deletedCount} tone="danger" />
+      </SimpleGrid>
 
-          {/* Action buttons */}
-          <Group gap="sm">
-            <Button
-              className={`${styles.neonButton} ${styles.neonCyan}`}
-              leftSection={<IconCloudUpload size={16} />}
-              onClick={() => setBulkOpen(true)}
-            >
-              Bulk Import JSON
-            </Button>
-            <Button
-              className={`${styles.neonButton} ${styles.neonPurple}`}
-              leftSection={<IconPlus size={16} />}
-              onClick={() => openFormModal(null)}
-            >
-              Add New Equipment
-            </Button>
-          </Group>
-        </Group>
+      {/* Filter Controls */}
+      <FilterControls
+        filters={filters}
+        onFilterChange={setFilters}
+        onClear={handleClearFilters}
+        allTags={allTags}
+      />
 
-        {/* Dynamic Glassy Stats Row */}
-        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="md">
-          <div className={`${styles.statCard} ${styles.statCardBlue}`}>
-            <Text size="xs" c="dimmed" fw={600} style={{ textTransform: "uppercase" }}>Total Equipment</Text>
-            <Text size="xl" fw={800} c="white">{stats.total}</Text>
-          </div>
-          <div className={`${styles.statCard} ${styles.statCardPurple}`}>
-            <Text size="xs" c="dimmed" fw={600} style={{ textTransform: "uppercase" }}>Custom Creations</Text>
-            <Text size="xl" fw={800} c="purple.2">{stats.customCount}</Text>
-          </div>
-          <div className={`${styles.statCard} ${styles.statCardGold}`}>
-            <Text size="xs" c="dimmed" fw={600} style={{ textTransform: "uppercase" }}>Legendary & Artifacts</Text>
-            <Text size="xl" fw={800} c="yellow.3">{stats.legendaryOrArtifact}</Text>
-          </div>
-          <div className={`${styles.statCard} ${styles.statCardRed}`}>
-            <Text size="xs" c="dimmed" fw={600} style={{ textTransform: "uppercase" }}>Deleted / Archived</Text>
-            <Text size="xl" fw={800} c="red.3">{stats.deletedCount}</Text>
-          </div>
-        </SimpleGrid>
+      {/* Item Table View */}
+      <ItemList
+        items={paginatedData}
+        onEdit={openFormModal}
+        onDelete={openDeleteConfirm}
+        onDetails={openDetailsModal}
+        onChanged={() => void loadAllData()}
+      />
 
-        {/* Filter Controls */}
-        <FilterControls
-          filters={filters}
-          onFilterChange={setFilters}
-          onClear={handleClearFilters}
-          allTags={allTags}
+      {/* Pagination Section */}
+      {totalPages > 1 && (
+        <Pagination
+          page={page}
+          total={totalPages}
+          onChange={setPage}
         />
-
-        {/* Item Table View */}
-        <ItemList
-          items={paginatedData}
-          onEdit={openFormModal}
-          onDelete={openDeleteConfirm}
-          onDetails={openDetailsModal}
-          onChanged={() => void loadAllData()}
-        />
-
-        {/* Pagination Section */}
-        {totalPages > 1 && (
-          <Pagination
-            page={page}
-            total={totalPages}
-            onChange={setPage}
-          />
-        )}
-      </Stack>
+      )}
 
       {/* Modals Layer */}
 
@@ -312,15 +278,12 @@ export function ItemManager() {
             <Button variant="subtle" onClick={() => { setDeleteOpen(false); setSelectedItem(null); }}>
               Cancel
             </Button>
-            <Button
-              className={`${styles.neonButton} ${styles.neonRed}`}
-              onClick={handleDeleteItem}
-            >
+            <Button color="red" onClick={handleDeleteItem}>
               Delete Permanently
             </Button>
           </Group>
         </Stack>
       </AdminGlassModal>
-    </div>
+    </AdminPage>
   );
 }

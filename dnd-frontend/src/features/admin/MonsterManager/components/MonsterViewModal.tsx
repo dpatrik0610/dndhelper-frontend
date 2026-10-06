@@ -56,7 +56,7 @@ export function MonsterViewModal({ monster, onClose }: MonsterViewModalProps) {
                 CR {monster.cr}
               </Badge>
             )}
-            <Badge color={monster?.isNpc ? "pink" : "teal"} variant="dot">
+            <Badge color={monster?.isNpc ? "pink" : "neon"} variant="dot">
               {monster?.isNpc ? "NPC" : "Creature"}
             </Badge>
           </Group>

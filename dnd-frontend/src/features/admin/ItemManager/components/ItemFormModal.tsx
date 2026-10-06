@@ -21,7 +21,8 @@ import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { IconSettings, IconCode, IconCheck, IconX } from "@tabler/icons-react";
 import { EQUIPMENT_TEMPLATES } from "../templates/equipmentTemplates";
-import styles from "@features/admin/ItemManager/ItemManager.module.css";
+import styles from "@styles/AdminCatalog.module.css";
+import { equipmentIndex } from "@features/admin/ItemManager/defaultEquipment";
 
 interface ItemFormModalProps {
   opened: boolean;
@@ -152,7 +153,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
     const equip: Equipment = {
       ...(item?.id ? { id: item.id } : {}),
       name: name.trim(),
-      index: index.trim() || name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      index: index.trim() || equipmentIndex(name),
       tier: tier || "Common",
       weight: weight === "" ? undefined : weight,
       isCustom,
@@ -270,7 +271,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
       // Also update JSON editor so the tabs stay beautifully synced!
       const finalGenerated = {
         ...d,
-        index: d.name ? d.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "",
+        index: d.name ? equipmentIndex(d.name) : "",
       };
       setJsonPayload(JSON.stringify(finalGenerated, null, 2));
 
@@ -298,7 +299,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
           return;
         }
         if (!finalItem.index) {
-          finalItem.index = finalItem.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          finalItem.index = equipmentIndex(finalItem.name);
         }
       } catch {
         showNotification({
@@ -390,7 +391,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
           className={styles.glassyBox}
           styles={{
             root: { background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.08)" },
-            indicator: { background: "rgba(168, 85, 247, 0.25)", border: "1px solid rgba(168,85,247,0.4)" },
+            indicator: { background: "rgba(255, 0, 255, 0.25)", border: "1px solid rgba(255, 0, 255,0.4)" },
           }}
         />
 
@@ -409,8 +410,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                     data={EQUIPMENT_TEMPLATES}
                     onChange={handleSelectTemplate}
                     styles={{
-                      input: { background: "rgba(168, 85, 247, 0.08)", color: "#e9d5ff", borderColor: "rgba(168, 85, 247, 0.3)" },
-                      dropdown: { background: "rgba(20, 20, 30, 0.95)", border: "1px solid rgba(168, 85, 247, 0.3)" },
+                      input: { background: "rgba(255, 0, 255, 0.08)", color: "#e9d5ff", borderColor: "rgba(255, 0, 255, 0.3)" },
+                      dropdown: { background: "rgba(20, 20, 30, 0.95)", border: "1px solid rgba(255, 0, 255, 0.3)" },
                       label: { color: "#c084fc", fontWeight: 600 }
                     }}
                     clearable
@@ -666,7 +667,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
             Cancel
           </Button>
           <Button
-            className={`${styles.neonButton} ${styles.neonPurple}`}
+            color="neon"
             onClick={handleSave}
             loading={saving}
             disabled={activeTab === "json" && !!jsonError}

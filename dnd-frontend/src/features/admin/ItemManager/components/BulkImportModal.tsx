@@ -23,7 +23,8 @@ import {
   IconChevronUp,
 } from "@tabler/icons-react";
 import { importSamplePretty } from "./ImportTemplate";
-import styles from "@features/admin/ItemManager/ItemManager.module.css";
+import styles from "@styles/AdminCatalog.module.css";
+import { equipmentIndex } from "@features/admin/ItemManager/defaultEquipment";
 
 interface BulkImportModalProps {
   opened: boolean;
@@ -74,7 +75,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
       // Map indices if missing
       const sanitized = parsed.map((item) => ({
         ...item,
-        index: item.index || item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        index: item.index || equipmentIndex(item.name),
         isCustom: item.isCustom ?? true,
         isDeleted: item.isDeleted ?? false,
       }));
@@ -140,7 +141,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
       />
 
       <Stack gap="md" p="xs">
-        <Group align="flex-start" gap="xs" p="sm" style={{ background: "rgba(168, 85, 247, 0.08)", borderRadius: "8px", border: "1px solid rgba(168, 85, 247, 0.2)" }}>
+        <Group align="flex-start" gap="xs" p="sm" style={{ background: "rgba(255, 0, 255, 0.08)", borderRadius: "8px", border: "1px solid rgba(255, 0, 255, 0.2)" }}>
           <IconInfoCircle size={20} color="#c084fc" style={{ marginTop: 2, flexShrink: 0 }} />
           <Text size="sm" c="purple.1">
             Bulk upload multiple equipment items at once. You can upload a <code>.json</code> file or paste a JSON array formatted with item properties. Missing <code>index</code> attributes will be auto-generated.
@@ -186,13 +187,13 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
           <Collapse in={showSample}>
             <Stack gap={6} mt="xs" p="xs" style={{ background: "rgba(0,0,0,0.2)", borderRadius: "6px" }}>
               <Group justify="space-between">
-                <Text size="xs" c="teal.3" fw={600}>Sample Structure</Text>
-                <Button size="xs" variant="outline" color="teal" leftSection={<IconClipboardCopy size={12} />} onClick={handleCopySample}>
+                <Text size="xs" c="neon" fw={600}>Sample Structure</Text>
+                <Button size="xs" variant="outline" color="neon" leftSection={<IconClipboardCopy size={12} />} onClick={handleCopySample}>
                   Copy Sample
                 </Button>
               </Group>
               <ScrollArea.Autosize mah={180} type="hover">
-                <Code block color="grape" fz="xs" style={{ background: "transparent" }}>
+                <Code block color="magenta" fz="xs" style={{ background: "transparent" }}>
                   {importSamplePretty}
                 </Code>
               </ScrollArea.Autosize>
@@ -202,7 +203,8 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
 
         <Group justify="space-between" mt="md">
           <Button
-            className={`${styles.neonButton} ${styles.neonCyan}`}
+            variant="light"
+            color="electric"
             leftSection={<IconUpload size={16} />}
             onClick={handleFilePick}
           >
@@ -213,7 +215,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
               Cancel
             </Button>
             <Button
-              className={`${styles.neonButton} ${styles.neonGreen}`}
+              color="neon"
               loading={saving}
               onClick={handleBulkImport}
               leftSection={<IconCheck size={16} />}

@@ -1,50 +1,28 @@
 import { Tooltip } from "@mantine/core";
-import type { IconProps } from "@tabler/icons-react";
-import type { ForwardRefExoticComponent } from "react";
+import type { Icon } from "@tabler/icons-react";
 import styles from "@styles/AdminDashboard.module.css";
 
 interface AdminNavItemProps {
-  icon: ForwardRefExoticComponent<IconProps>;
+  icon: Icon;
   label: string;
   isSelected: boolean;
   collapsed: boolean;
   onClick: () => void;
 }
 
-export function AdminNavItem({
-  icon: Icon,
-  label,
-  isSelected,
-  collapsed,
-  onClick,
-}: AdminNavItemProps) {
-  const item = (
-    <div
-      className={`${styles.navItem} ${isSelected ? styles.navItemSelected : ""}`}
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-    >
-      <div className={styles.navItemIcon}>
-        <Icon size={16} stroke={1.6} />
-      </div>
-      {!collapsed && <span className={styles.navItemLabel}>{label}</span>}
-    </div>
+export function AdminNavItem({ icon: Icon, label, isSelected, collapsed, onClick }: AdminNavItemProps) {
+  return (
+    <Tooltip label={label} position="left" withArrow disabled={!collapsed}>
+      <button
+        type="button"
+        className={`${styles.navItem} ${isSelected ? styles.navItemSelected : ""}`}
+        aria-current={isSelected ? "page" : undefined}
+        aria-label={collapsed ? label : undefined}
+        onClick={onClick}
+      >
+        <Icon size={18} stroke={1.6} />
+        {!collapsed && <span className={styles.navItemLabel}>{label}</span>}
+      </button>
+    </Tooltip>
   );
-
-  if (collapsed) {
-    return (
-      <Tooltip label={label} position="left" withArrow>
-        {item}
-      </Tooltip>
-    );
-  }
-
-  return item;
 }

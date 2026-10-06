@@ -7,7 +7,8 @@ import { useNoteActions } from "@store/note/noteSelectors";
 import { showNotification } from "@components/Notification/Notification";
 import { MarkdownTextarea } from "@components/common/MarkdownTextarea";
 import { useIsMobile } from "@hooks/useIsMobile";
-import { noteBody, timeAgo } from "@features/notes/noteUtils";
+import { noteBody } from "@features/notes/noteUtils";
+import { timeAgo } from "@utils/timeAgo";
 import classes from "@features/notes/Notes.module.css";
 
 const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then((m) => ({ default: m.MarkdownRenderer })));

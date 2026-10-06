@@ -129,7 +129,7 @@ export function MetaPanel() {
             </ActionIcon>
           </Tooltip>
           <Tooltip label="Sync character links" withArrow>
-            <ActionIcon size="sm" variant="subtle" color="indigo" onClick={handleSyncLinks} loading={syncing}>
+            <ActionIcon size="sm" variant="subtle" color="neon" onClick={handleSyncLinks} loading={syncing}>
               <IconLink size={14} />
             </ActionIcon>
           </Tooltip>

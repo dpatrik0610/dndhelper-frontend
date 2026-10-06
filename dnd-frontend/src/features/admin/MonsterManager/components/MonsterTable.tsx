@@ -3,7 +3,7 @@ import { IconPencil, IconTrash, IconEye, IconUsers, IconActivity } from "@tabler
 import type { Monster } from "@appTypes/Monster";
 import { useCanEditContent } from "@store/campaign/campaignSelectors";
 import { CoreBadge, PromoteToCoreButton } from "@components/common/CoreContentBadge";
-import styles from "../MonsterManager.module.css";
+import styles from "@styles/AdminCatalog.module.css";
 
 interface MonsterTableProps {
   monsters: Monster[];
@@ -115,7 +115,7 @@ export function MonsterTable({
                       <ActionIcon
                         size="md"
                         variant="subtle"
-                        color="cyan.4"
+                        color="electric"
                         onClick={() => onView(m)}
                         style={{ background: "rgba(255,255,255,0.03)" }}
                       >
@@ -130,7 +130,7 @@ export function MonsterTable({
                       <ActionIcon
                         size="md"
                         variant="subtle"
-                        color="grape.4"
+                        color="magenta"
                         onClick={() => onEdit(m)}
                         style={{ background: "rgba(255,255,255,0.03)" }}
                       >

@@ -1,38 +1,19 @@
-import { apiClient } from "../../api/apiClient"
-import type { User, UserStatus } from "../../types/User"
+import { apiClient } from "@api/apiClient"
+import type { AdminUser, AdminUserRequest } from "@appTypes/User"
 
 const BASE_URL = "/user"
 
+/** Superadmin user management. */
 export const UserService = {
   // GET: /api/user
-  getAll: async (): Promise<User[]> => {
-    return apiClient<User[]>(BASE_URL, {})
-  },
+  getAll: () => apiClient<AdminUser[]>(BASE_URL, {}),
 
-  // GET: /api/user/{id}
-  getById: async (id: string): Promise<User> => {
-    return apiClient<User>(`${BASE_URL}/${id}`, {})
-  },
+  // POST: /api/user
+  create: (request: AdminUserRequest) => apiClient<AdminUser>(BASE_URL, { method: "POST", body: request }),
 
-  // PUT: /api/user/{id}
-  update: async (id: string, user: User): Promise<User> => {
-    return apiClient<User>(`${BASE_URL}/${id}`, {
-      method: "PUT",
-      body: user,
-
-    })
-  },
-
-  // PATCH: /api/user/{id}/status?status=Active
-  updateStatus: async (
-    id: string,
-    status: UserStatus
-  ): Promise<User> => {
-    return apiClient<User>(`${BASE_URL}/${id}/status?status=${status}`, {
-      method: "PATCH",
-
-    })
-  },
+  // PATCH: /api/user/{id} (only the sent fields change; a password resets it)
+  update: (id: string, request: AdminUserRequest) =>
+    apiClient<AdminUser>(`${BASE_URL}/${id}`, { method: "PATCH", body: request }),
 
   // DELETE: /api/user/{id}
   delete: async (id: string): Promise<void> => {

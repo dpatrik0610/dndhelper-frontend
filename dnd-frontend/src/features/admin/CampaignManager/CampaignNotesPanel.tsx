@@ -1,5 +1,4 @@
 ﻿import {
-  Paper,
   Group,
   Text,
   ActionIcon,
@@ -12,6 +11,7 @@
 import { IconPlus, IconTrash, IconNote } from "@tabler/icons-react";
 import { useState } from "react";
 import { useCampaignStore } from "@store/campaign/campaignStore";
+import { AdminPanel } from "@features/admin/components/AdminPage";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 
@@ -58,25 +58,7 @@ export function CampaignNotesPanel() {
   };
 
   return (
-    <Paper
-      mt="md"
-      p="md"
-      radius="md"
-      withBorder
-      style={{
-        background:
-          "linear-gradient(145deg, rgba(0,40,60,0.5), rgba(0,20,40,0.35))",
-        border: "1px solid rgba(255,255,255,0.12)",
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      <Group mb="xs">
-        <IconNote size={18} color="cyan" />
-        <Text fw={600} c="cyan.3">
-          Notes
-        </Text>
-      </Group>
-
+    <AdminPanel icon={IconNote} title="Notes">
       <Group mb="sm">
         <TextInput
           placeholder="New note ID..."
@@ -85,8 +67,7 @@ export function CampaignNotesPanel() {
           style={{ flex: 1 }}
         />
         <Button
-          variant="gradient"
-          gradient={{ from: "cyan", to: "blue" }}
+          color="neon"
           leftSection={<IconPlus size={16} />}
           onClick={handleAddNote}
         >
@@ -110,7 +91,7 @@ export function CampaignNotesPanel() {
                 padding: "6px 8px",
               }}
             >
-              <Badge color="cyan" variant="light">
+              <Badge color="electric" variant="light">
                 {id}
               </Badge>
 
@@ -127,7 +108,7 @@ export function CampaignNotesPanel() {
           ))
         )}
       </Stack>
-    </Paper>
+    </AdminPanel>
   );
 }
 

@@ -40,7 +40,7 @@ export function TagsInput({
         />
         <Button
           variant="gradient"
-          gradient={{ from: "violet", to: "cyan", deg: 90 }}
+          gradient={{ from: "magenta", to: "electric", deg: 90 }}
           onClick={addTag}
           leftSection={<IconPlus size={14} />}
           disabled={!tagValue.trim()}

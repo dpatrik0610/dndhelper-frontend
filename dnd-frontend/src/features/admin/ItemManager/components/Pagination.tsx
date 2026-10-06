@@ -1,7 +1,7 @@
 import React from "react";
 import { Pagination as MantinePagination, Group } from "@mantine/core";
 import GlassyBox from "./GlassyBox";
-import styles from "@features/admin/ItemManager/ItemManager.module.css";
+import styles from "@styles/AdminCatalog.module.css";
 
 interface PaginationProps {
   page: number;
@@ -32,10 +32,10 @@ const Pagination: React.FC<PaginationProps> = ({ page, total, onChange }) => {
                 transform: "translateY(-1px)",
               },
               "&[data-active]": {
-                background: "rgba(168, 85, 247, 0.3) !important",
-                borderColor: "rgba(168, 85, 247, 0.6) !important",
+                background: "rgba(255, 0, 255, 0.3) !important",
+                borderColor: "rgba(255, 0, 255, 0.6) !important",
                 color: "#e9d5ff !important",
-                boxShadow: "0 0 10px rgba(168, 85, 247, 0.4)",
+                boxShadow: "0 0 10px rgba(255, 0, 255, 0.4)",
               },
             },
           }}

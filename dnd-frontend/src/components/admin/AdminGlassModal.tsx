@@ -2,9 +2,7 @@ import { ActionIcon, Box, Group, Modal, Text } from "@mantine/core";
 import type { ModalProps } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useMemo, type ReactNode } from "react";
-import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
-import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 
 export type AdminGlassModalVariant = "default" | "danger";
 
@@ -63,11 +61,8 @@ export function AdminGlassModal({
   loading = false,
   withCloseButton = true,
 }: AdminGlassModalProps) {
-  const sidebarTheme = useUiStore((s) => s.sidebarTheme);
   const isMobile = useIsMobile();
   const isFullScreen = fullScreen || isMobile;
-
-  const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
   const theme = variantStyles[variant];
 
@@ -99,7 +94,7 @@ export function AdminGlassModal({
       opened={opened}
       onClose={onClose}
       classNames={{
-        content: `${activeThemeClass} ${variant === "danger" ? "modal-variant-danger" : ""}`,
+        content: variant === "danger" ? "modal-variant-danger" : undefined,
       }}
       withCloseButton={false}
       centered={centered}

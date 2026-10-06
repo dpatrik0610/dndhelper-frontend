@@ -85,7 +85,7 @@ export function MoveItemModal({ opened, onClose, itemId }: MoveItemModalProps) {
           <Button variant="subtle" color="gray" onClick={onClose}>
             Cancel
           </Button>
-          <Button color="indigo" onClick={() => void handleMove()}>
+          <Button color="neon" onClick={() => void handleMove()}>
             Move
           </Button>
         </Group>

@@ -1,4 +1,5 @@
 import {
+  colorsTuple,
   createTheme,
   Autocomplete,
   Loader,
@@ -20,6 +21,12 @@ const input = { input: "glassy-input", label: "glassy-label" };
 const combobox = { ...input, dropdown: "glassy-dropdown", option: "glassy-option" };
 
 export const mantineTheme = createTheme({
+  // The admin console's neons (adminCyber.css): color="neon" | "magenta" | "electric".
+  colors: {
+    neon: colorsTuple("#00ff88"),
+    magenta: colorsTuple("#ff00ff"),
+    electric: colorsTuple("#00d4ff"),
+  },
   components: {
     TextInput: TextInput.extend({ classNames: input }),
     NumberInput: NumberInput.extend({ classNames: input }),

@@ -1,191 +1,228 @@
+import { ActionIcon, Avatar, Badge, Checkbox, Group, Menu, Table, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import {
-  ActionIcon,
-  Avatar,
-  Badge,
-  Box,
-  Group,
-  Paper,
-  ScrollArea,
-  Table,
-  Text,
-  Tooltip,
-} from "@mantine/core";
-import { IconEdit, IconShieldExclamation, IconTrash, IconUser } from "@tabler/icons-react";
-import { UserRole, UserStatus } from "@appTypes/User";
+  IconBan,
+  IconChevronDown,
+  IconChevronUp,
+  IconDots,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconSelector,
+  IconTrash,
+  IconUserCircle,
+} from "@tabler/icons-react";
+import { UserStatus, type AdminUser } from "@appTypes/User";
+import { timeAgo } from "@utils/timeAgo";
+import { STATUS_META, dmCampaigns, isSuperAdmin } from "@features/admin/UserManager/userUtils";
 
-const statusColor: Record<UserStatus, string> = {
-  [UserStatus.Active]: "green",
-  [UserStatus.Inactive]: "yellow",
-  [UserStatus.Banned]: "red",
-  [UserStatus.LogicDeleted]: "gray",
-};
+export type SortKey = "username" | "lastLogin" | "dateCreated" | "characters";
+export type Sort = { key: SortKey; desc: boolean };
 
-interface UsersTableProps {
-  users: Array<{
-    id: string;
-    username: string;
-    email?: string;
-    roles: UserRole[];
-    isActive: UserStatus;
-    dateCreated?: string;
-    lastLogin?: string;
-    profilePictureUrl?: string;
-  }>;
-  loading: boolean;
-  statusBusyId: string | null;
-  deleteBusyId: string | null;
-  isMobile: boolean;
-  onEdit: (id: string) => void;
-  onToggleStatus: (id: string, status: UserStatus) => void;
-  onDelete: (id: string, name: string) => void;
+function SortHeader({ label, sortKey, sort, onSort }: { label: string; sortKey: SortKey; sort: Sort; onSort: (s: Sort) => void }) {
+  const active = sort.key === sortKey;
+  const SortIcon = !active ? IconSelector : sort.desc ? IconChevronDown : IconChevronUp;
+  return (
+    <Table.Th>
+      <UnstyledButton
+        onClick={() => onSort({ key: sortKey, desc: active ? !sort.desc : sortKey !== "username" })}
+        aria-sort={active ? (sort.desc ? "descending" : "ascending") : undefined}
+      >
+        <Group gap={4} wrap="nowrap" c={active ? "gray.2" : undefined}>
+          {label}
+          <SortIcon size={13} />
+        </Group>
+      </UnstyledButton>
+    </Table.Th>
+  );
 }
 
 export function UsersTable({
   users,
-  loading,
-  statusBusyId,
-  deleteBusyId,
-  isMobile,
-  onEdit,
-  onToggleStatus,
+  me,
+  selected,
+  onSelect,
+  sort,
+  onSort,
+  onOpen,
+  onStatus,
   onDelete,
-}: UsersTableProps) {
+}: {
+  users: AdminUser[];
+  me: string | null;
+  selected: Set<string>;
+  onSelect: (ids: string[], on: boolean) => void;
+  sort: Sort;
+  onSort: (s: Sort) => void;
+  onOpen: (u: AdminUser) => void;
+  onStatus: (u: AdminUser, status: UserStatus) => void;
+  onDelete: (u: AdminUser) => void;
+}) {
+  // You can't ban or delete yourself, so you're never in a bulk selection either.
+  const selectable = users.filter((u) => u.id !== me).map((u) => u.id);
+  const allSelected = selectable.length > 0 && selectable.every((id) => selected.has(id));
+  const someSelected = selectable.some((id) => selected.has(id));
+
   return (
-    <Paper
-      withBorder
-      p="md"
-      style={{
-        background: "rgba(15, 0, 0, 0.25)",
-        border: "1px solid rgba(255, 60, 60, 0.35)",
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      <ScrollArea h={isMobile ? 400 : 520}>
-        <Table verticalSpacing="md" highlightOnHover withColumnBorders>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>User</Table.Th>
-              <Table.Th>Email</Table.Th>
-              <Table.Th>Roles</Table.Th>
-              <Table.Th>Status</Table.Th>
-              <Table.Th>Joined</Table.Th>
-              <Table.Th>Last Login</Table.Th>
-              <Table.Th>Actions</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {users.map((user, index) => (
+    <Table.ScrollContainer minWidth={860}>
+      <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th w={40}>
+              <Checkbox
+                size="xs"
+                aria-label="Select all"
+                checked={allSelected}
+                indeterminate={someSelected && !allSelected}
+                onChange={() => onSelect(selectable, !allSelected)}
+              />
+            </Table.Th>
+            <SortHeader label="User" sortKey="username" sort={sort} onSort={onSort} />
+            <Table.Th>Access</Table.Th>
+            <Table.Th>Status</Table.Th>
+            <SortHeader label="Characters" sortKey="characters" sort={sort} onSort={onSort} />
+            <Table.Th>Campaigns</Table.Th>
+            <SortHeader label="Last seen" sortKey="lastLogin" sort={sort} onSort={onSort} />
+            <SortHeader label="Joined" sortKey="dateCreated" sort={sort} onSort={onSort} />
+            <Table.Th w={48} />
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {users.map((u) => {
+            const isMe = u.id === me;
+            const status = STATUS_META[u.status];
+            const dmCount = dmCampaigns(u).length;
+            return (
               <Table.Tr
-                key={user.id}
-                bg={
-                  index % 2 === 0
-                    ? "rgba(255, 150, 0, 0.06)"
-                    : "rgba(255, 60, 60, 0.06)"
-                }
-                style={{ transition: "background 120ms ease" }}
+                key={u.id}
+                bg={selected.has(u.id) ? "rgba(0, 255, 136,0.08)" : undefined}
+                style={{ cursor: "pointer" }}
+                onClick={() => onOpen(u)}
               >
+                <Table.Td onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    size="xs"
+                    aria-label={`Select ${u.username}`}
+                    disabled={isMe}
+                    checked={selected.has(u.id)}
+                    onChange={(e) => onSelect([u.id], e.currentTarget.checked)}
+                  />
+                </Table.Td>
                 <Table.Td>
-                  <Group gap="sm">
-                    <Avatar radius="xl" src={user.profilePictureUrl} color="orange">
-                      <IconUser size={16} />
-                    </Avatar>
-                    <Box>
-                      <Text fw={600}>{user.username}</Text>
-                      <Text size="xs" c="dimmed">
-                        {user.id}
+                  <Group gap="sm" wrap="nowrap">
+                    <Avatar size={32} radius="xl" color="neon" name={u.username} />
+                    <div style={{ minWidth: 0 }}>
+                      <Group gap={6} wrap="nowrap">
+                        <Text size="sm" fw={600} truncate>
+                          {u.username}
+                        </Text>
+                        {isMe && (
+                          <Badge size="xs" variant="outline" color="gray">
+                            you
+                          </Badge>
+                        )}
+                      </Group>
+                      <Text size="xs" c="dimmed" truncate>
+                        {u.email || "No email"}
                       </Text>
-                    </Box>
+                    </div>
                   </Group>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm" c={user.email ? undefined : "dimmed"}>
-                    {user.email ?? "-"}
-                  </Text>
-                </Table.Td>
-                <Table.Td>
-                  <Group gap={6}>
-                    {user.roles?.map((role) => (
-                      <Badge
-                        key={role}
-                        color={role === UserRole.Admin ? "violet" : "gray"}
-                        variant="light"
-                        size="sm"
-                      >
-                        {role}
+                  <Group gap={4}>
+                    {isSuperAdmin(u) && (
+                      <Badge size="sm" variant="light" color="magenta">
+                        Superadmin
                       </Badge>
-                    ))}
+                    )}
+                    {dmCount > 0 && (
+                      <Badge size="sm" variant="light" color="neon">
+                        DM ×{dmCount}
+                      </Badge>
+                    )}
+                    {!isSuperAdmin(u) && dmCount === 0 && (
+                      <Text size="sm" c="dimmed">
+                        {u.campaigns.length ? "Player" : "—"}
+                      </Text>
+                    )}
                   </Group>
                 </Table.Td>
                 <Table.Td>
-                  <Badge color={statusColor[user.isActive]} variant="dot">
-                    {user.isActive}
+                  <Badge size="sm" variant="dot" color={status.color}>
+                    {status.label}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
-                  <Text size="sm">
-                    {user.dateCreated
-                      ? new Date(user.dateCreated).toLocaleDateString()
-                      : "-"}
+                  <Text size="sm">{u.characters.length}</Text>
+                </Table.Td>
+                <Table.Td>
+                  <Text size="sm" truncate maw={180}>
+                    {u.campaigns.map((c) => c.name).join(", ") || "—"}
                   </Text>
+                </Table.Td>
+                <Table.Td>
+                  {u.lastLogin ? (
+                    <Tooltip label={new Date(u.lastLogin).toLocaleString()} withArrow>
+                      <Text size="sm">{timeAgo(u.lastLogin)}</Text>
+                    </Tooltip>
+                  ) : (
+                    <Text size="sm" c="dimmed">
+                      Never
+                    </Text>
+                  )}
                 </Table.Td>
                 <Table.Td>
                   <Text size="sm" c="dimmed">
-                    {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : "-"}
+                    {new Date(u.dateCreated).toLocaleDateString()}
                   </Text>
                 </Table.Td>
-                <Table.Td>
-                  <Group gap="xs">
-                    <Tooltip label="Edit user">
-                      <ActionIcon
-                        size="sm"
-                        variant="light"
-                        onClick={() => onEdit(user.id)}
-                      >
-                        <IconEdit size={14} />
+                <Table.Td onClick={(e) => e.stopPropagation()}>
+                  <Menu position="bottom-end" withinPortal shadow="md">
+                    <Menu.Target>
+                      <ActionIcon variant="subtle" color="gray" aria-label={`Actions for ${u.username}`}>
+                        <IconDots size={16} />
                       </ActionIcon>
-                    </Tooltip>
-                    <Tooltip
-                      label={user.isActive === UserStatus.Banned ? "Unban user" : "Ban user"}
-                    >
-                      <ActionIcon
-                        size="sm"
-                        variant="light"
-                        color={user.isActive === UserStatus.Banned ? "green" : "red"}
-                        loading={statusBusyId === user.id}
-                        onClick={() => onToggleStatus(user.id, user.isActive)}
-                      >
-                        <IconShieldExclamation size={14} />
-                      </ActionIcon>
-                    </Tooltip>
-                    <Tooltip label="Delete user">
-                      <ActionIcon
-                        size="sm"
-                        variant="light"
-                        color="red"
-                        loading={deleteBusyId === user.id}
-                        onClick={() => onDelete(user.id, user.username ?? "this user")}
-                      >
-                        <IconTrash size={14} />
-                      </ActionIcon>
-                    </Tooltip>
-                  </Group>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                      <Menu.Item leftSection={<IconUserCircle size={14} />} onClick={() => onOpen(u)}>
+                        Open details
+                      </Menu.Item>
+                      {!isMe && (
+                        <>
+                          <Menu.Divider />
+                          {u.status !== UserStatus.Active && (
+                            <Menu.Item leftSection={<IconPlayerPlay size={14} />} onClick={() => onStatus(u, UserStatus.Active)}>
+                              Activate
+                            </Menu.Item>
+                          )}
+                          {u.status === UserStatus.Active && (
+                            <Menu.Item
+                              leftSection={<IconPlayerPause size={14} />}
+                              onClick={() => onStatus(u, UserStatus.Inactive)}
+                            >
+                              Deactivate
+                            </Menu.Item>
+                          )}
+                          {u.status !== UserStatus.Banned && (
+                            <Menu.Item
+                              color="orange"
+                              leftSection={<IconBan size={14} />}
+                              onClick={() => onStatus(u, UserStatus.Banned)}
+                            >
+                              Ban
+                            </Menu.Item>
+                          )}
+                          <Menu.Item color="red" leftSection={<IconTrash size={14} />} onClick={() => onDelete(u)}>
+                            Delete…
+                          </Menu.Item>
+                        </>
+                      )}
+                    </Menu.Dropdown>
+                  </Menu>
                 </Table.Td>
               </Table.Tr>
-            ))}
-
-            {!loading && users.length === 0 && (
-              <Table.Tr>
-                <Table.Td colSpan={7}>
-                  <Text ta="center" c="dimmed">
-                    No users found.
-                  </Text>
-                </Table.Td>
-              </Table.Tr>
-            )}
-          </Table.Tbody>
-        </Table>
-      </ScrollArea>
-    </Paper>
+            );
+          })}
+        </Table.Tbody>
+      </Table>
+    </Table.ScrollContainer>
   );
 }
-

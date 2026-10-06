@@ -6,7 +6,7 @@ import { formatCostToDisplay } from "@utils/currencyConverter";
 import { useCanEditContent } from "@store/campaign/campaignSelectors";
 import { CoreBadge, PromoteToCoreButton } from "@components/common/CoreContentBadge";
 import GlassyBox from "./GlassyBox";
-import styles from "@features/admin/ItemManager/ItemManager.module.css";
+import styles from "@styles/AdminCatalog.module.css";
 
 interface ItemListProps {
   items: Equipment[];
@@ -63,7 +63,7 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails,
                     </Text>
                     <Group gap={4}>
                       {item.isCustom && (
-                        <Badge variant="gradient" gradient={{ from: "teal", to: "cyan" }} size="xs" radius="sm">
+                        <Badge variant="gradient" gradient={{ from: "neon", to: "electric" }} size="xs" radius="sm">
                           Custom
                         </Badge>
                       )}
@@ -112,7 +112,7 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails,
                   {item.weight !== undefined ? (
                     <Group gap="xs" wrap="nowrap">
                       <IconScale size={16} color="#a7f3d0" />
-                      <Text size="sm" c="teal.1">
+                      <Text size="sm" c="neon">
                         {item.weight} lbs.
                       </Text>
                     </Group>
@@ -128,7 +128,7 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails,
                       <ActionIcon
                         size="md"
                         variant="subtle"
-                        color="cyan.4"
+                        color="electric"
                         onClick={() => onDetails(item)}
                         style={{ background: "rgba(255,255,255,0.03)" }}
                       >
@@ -143,7 +143,7 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails,
                       <ActionIcon
                         size="md"
                         variant="subtle"
-                        color="grape.4"
+                        color="magenta"
                         onClick={() => onEdit(item)}
                         style={{ background: "rgba(255,255,255,0.03)" }}
                       >

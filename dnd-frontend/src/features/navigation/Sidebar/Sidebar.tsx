@@ -1,6 +1,7 @@
 import { Drawer } from "@mantine/core";
 import { useLocation } from "react-router-dom";
 import { useIsDm } from "@store/campaign/campaignSelectors";
+import { useIsSuperAdmin } from "@store/auth/authSelectors";
 import { getActiveThemeClass, type SidebarThemeVariant } from "@appTypes/ThemeTypes";
 import { navSections } from "./navItems";
 import { CharacterCard } from "./components/CharacterCard";
@@ -17,6 +18,7 @@ interface SidebarProps {
 
 export default function Sidebar({ opened, onClose, themeVariant = "midnight" }: SidebarProps) {
   const isDm = useIsDm();
+  const isSuperAdmin = useIsSuperAdmin();
   const { pathname } = useLocation();
 
   // "/" renders Home; "/spells/Fireball" belongs to "/spells"
@@ -41,7 +43,7 @@ export default function Sidebar({ opened, onClose, themeVariant = "midnight" }: 
 
       <nav className={classes.nav} aria-label="Main">
         {navSections
-          .filter((section) => !section.dmOnly || isDm)
+          .filter((section) => (!section.dmOnly || isDm) && (!section.superAdminOnly || isSuperAdmin))
           .map((section) => (
             <NavSection key={section.label ?? "root"} section={section} activeLink={activeLink} onNavigate={onClose} />
           ))}

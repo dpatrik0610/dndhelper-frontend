@@ -147,7 +147,7 @@ export function ShopManager() {
         <div className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
             <Group gap="xs" mb="sm">
-              <ThemeIcon variant="light" color="indigo" size="md" radius="sm">
+              <ThemeIcon variant="light" color="neon" size="md" radius="sm">
                 <IconBuildingStore size={16} />
               </ThemeIcon>
               <div>
@@ -169,7 +169,7 @@ export function ShopManager() {
             <Group gap="xs" grow>
               <Button
                 variant="filled"
-                color="indigo"
+                color="neon"
                 leftSection={<IconPlus size={14} />}
                 onClick={() => setCreateModalOpen(true)}
                 size="xs"
@@ -195,7 +195,7 @@ export function ShopManager() {
           <ScrollArea className={styles.sidebarScroll} offsetScrollbars>
             {loading && filteredShops.length === 0 ? (
               <Group justify="center" py="xl">
-                <Loader color="indigo" size="sm" />
+                <Loader color="neon" size="sm" />
               </Group>
             ) : filteredShops.length === 0 ? (
               <Stack align="center" py="xl" gap="xs">
@@ -250,7 +250,7 @@ export function ShopManager() {
             <Button variant="subtle" color="gray" onClick={() => setCreateModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="filled" color="indigo" onClick={executeCreate} loading={creating}>
+            <Button variant="filled" color="neon" onClick={executeCreate} loading={creating}>
               Create
             </Button>
           </Group>

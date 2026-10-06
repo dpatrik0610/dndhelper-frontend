@@ -40,7 +40,7 @@ export default function SessionViewModal({ opened, session, campaigns, onClose }
               Campaign: {campaignName}
             </Text>
           </Stack>
-          <Badge color={session.isLive ? "teal" : "gray"}>{session.isLive ? "Active" : "Inactive"}</Badge>
+          <Badge color={session.isLive ? "neon" : "gray"}>{session.isLive ? "Active" : "Inactive"}</Badge>
         </Group>
 
         <Card withBorder radius="md" p="md" style={{ background: "rgba(255,255,255,0.02)" }}>

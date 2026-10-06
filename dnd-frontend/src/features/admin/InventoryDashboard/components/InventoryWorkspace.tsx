@@ -21,7 +21,7 @@ export function InventoryWorkspace() {
     return (
       <div className={styles.emptyState}>
         <div className={styles.emptyStateInner}>
-          <IconArchive size={36} color="#818cf8" stroke={1.3} />
+          <IconArchive size={36} color="#00ff88" stroke={1.3} />
           <Text size="sm" c="dimmed" maw={280}>
             Select an inventory from the sidebar to manage its contents.
           </Text>

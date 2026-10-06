@@ -9,7 +9,8 @@ import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/c
 import { useNoteActions, useNoteList, useNoteLoading } from "@store/note/noteSelectors";
 import { NoteCard } from "@features/notes/components/NoteCard";
 import { NoteEditorModal } from "@features/notes/components/NoteEditorModal";
-import { noteBody, noteTags, timeAgo } from "@features/notes/noteUtils";
+import { noteBody, noteTags } from "@features/notes/noteUtils";
+import { timeAgo } from "@utils/timeAgo";
 import classes from "@features/notes/Notes.module.css";
 
 // Stable fallback, so the memos below don't recompute on every render.

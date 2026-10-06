@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
-import { Stack, Group, Title, Button } from "@mantine/core";
+import { ActionIcon, Button, Tooltip } from "@mantine/core";
+import { IconCalendarTime, IconPlus, IconRefresh } from "@tabler/icons-react";
 import dayjs from "dayjs";
 import { useSessionStore } from "@store/session/sessionStore";
 import { sessionTemplate, type Session } from "@appTypes/Session";
@@ -7,6 +8,7 @@ import { useCampaignStore } from "@store/campaign/campaignStore";
 import SessionTable from "./components/SessionTable";
 import SessionModal from "./components/SessionModal";
 import SessionViewModal from "./components/SessionViewModal";
+import { AdminPage } from "@features/admin/components/AdminPage";
 
 export function SessionManager() {
   const { sessions, selected, loading, loadAll, select, create, update, setLive, loadByCampaign } =
@@ -82,19 +84,23 @@ export function SessionManager() {
   };
 
   return (
-    <Stack gap="md">
-      <Group justify="space-between">
-        <Title order={2} c="grape.0">
-          Session Manager {selectedCampaignId ? `- ${campaigns.find((c) => c.id === selectedCampaignId)?.name ?? ""}` : ""}
-        </Title>
-        <Group gap="xs">
-          <Button variant="outline" onClick={handleRefresh} loading={loading}>
-            Refresh
+    <AdminPage
+      icon={IconCalendarTime}
+      title="Sessions"
+      subtitle={campaigns.find((c) => c.id === selectedCampaignId)?.name}
+      actions={
+        <>
+          <Tooltip label="Reload" withArrow>
+            <ActionIcon variant="default" size="lg" onClick={handleRefresh} loading={loading} aria-label="Reload sessions">
+              <IconRefresh size={16} />
+            </ActionIcon>
+          </Tooltip>
+          <Button color="neon" leftSection={<IconPlus size={16} />} onClick={() => openEdit()}>
+            New session
           </Button>
-          <Button onClick={() => openEdit()}>New</Button>
-        </Group>
-      </Group>
-
+        </>
+      }
+    >
       <SessionTable
         sessions={sortedSessions}
         selectedId={selected?.id ?? null}
@@ -123,6 +129,6 @@ export function SessionManager() {
         campaigns={campaigns}
         onClose={() => setViewSession(null)}
       />
-    </Stack>
+    </AdminPage>
   );
 }

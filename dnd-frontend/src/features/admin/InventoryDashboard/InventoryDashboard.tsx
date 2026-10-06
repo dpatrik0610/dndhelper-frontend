@@ -233,7 +233,7 @@ export function InventoryDashboard() {
         <div className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
             <Group gap="xs" mb="sm">
-              <ThemeIcon variant="light" color="indigo" size="md" radius="sm">
+              <ThemeIcon variant="light" color="neon" size="md" radius="sm">
                 <IconArchive size={16} />
               </ThemeIcon>
               <div>
@@ -287,7 +287,7 @@ export function InventoryDashboard() {
             <Group gap="xs" grow>
               <Button
                 variant="filled"
-                color="indigo"
+                color="neon"
                 leftSection={<IconPlus size={14} />}
                 onClick={() => setCreateModalOpen(true)}
                 size="xs"
@@ -311,7 +311,7 @@ export function InventoryDashboard() {
           <ScrollArea className={styles.sidebarScroll} offsetScrollbars>
             {loading && filteredInventories.length === 0 ? (
               <Group justify="center" py="xl">
-                <Loader color="indigo" size="sm" />
+                <Loader color="neon" size="sm" />
               </Group>
             ) : filteredInventories.length === 0 ? (
               <Stack align="center" py="xl" gap="xs">
@@ -391,7 +391,7 @@ export function InventoryDashboard() {
             <Button variant="subtle" color="gray" onClick={() => setCreateModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="filled" color="indigo" onClick={executeCreate} loading={creating}>
+            <Button variant="filled" color="neon" onClick={executeCreate} loading={creating}>
               Create
             </Button>
           </Group>

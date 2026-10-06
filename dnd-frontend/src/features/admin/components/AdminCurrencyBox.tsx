@@ -103,7 +103,7 @@ const handleConfirm = async () => {
         <Text fw={600}>💰 {targetName}</Text>
         <Group gap="xs">
           <Tooltip label="Refresh">
-            <ActionIcon variant="light" color="blue" onClick={refresh}>
+            <ActionIcon variant="light" color="electric" onClick={refresh}>
               <IconRefresh size={16} />
             </ActionIcon>
           </Tooltip>
@@ -206,8 +206,8 @@ const handleConfirm = async () => {
             size="md"
             variant="gradient"
             gradient={mode === "add"
-              ? { from: "teal", to: "green" }
-              : { from: "red", to: "grape" }}
+              ? { from: "neon", to: "green" }
+              : { from: "red", to: "magenta" }}
           >
             {mode === "add" ? "Add Currency" : "Remove Currency"}
           </Button>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Select, TextInput, NumberInput, Button, Group, MultiSelect, SegmentedControl, Divider, Title, Stack, Text } from "@mantine/core";
 import { IconSearch, IconX, IconFilter, IconTags } from "@tabler/icons-react";
-import styles from "../MonsterManager.module.css";
+import styles from "@styles/AdminCatalog.module.css";
 
 interface MonsterFiltersProps {
   nameInput: string;
