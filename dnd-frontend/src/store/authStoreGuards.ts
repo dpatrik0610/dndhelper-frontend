@@ -5,6 +5,7 @@ import { useNoteStore } from "@store/note/noteStore";
 import { useSpellStore } from "@store/spell/spellStore";
 import { useSessionStore } from "@store/session/sessionStore";
 import { useQuestStore } from "@store/quest/questStore";
+import { usePollStore } from "@store/poll/pollStore";
 import { useCampaignStore } from "@store/campaign/campaignStore";
 import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
@@ -66,6 +67,8 @@ const clearScopedStores = () => {
 
   useQuestStore.getState().clearStore();
   useQuestStore.persist?.clearStorage?.();
+
+  usePollStore.getState().clear();
 
   useAdminCharacterStore.getState().clearStorage?.();
   useAdminInventoryStore.getState().clearStorage?.();

@@ -29,6 +29,7 @@ const pages = {
   characterForm: () => import("@features/characterForm/CharacterFormPage").then((m) => ({ default: m.CharacterFormPage })),
   notes: () => import("@features/notes/NotesPage"),
   quests: () => import("@features/quests/QuestsPage"),
+  polls: () => import("@features/polls/PollsPage"),
   rollHistory: () => import("@features/rollHistory/RollHistoryPage"),
   rules: () => import("@features/rules/RulesPage"),
   tabletop: () => import("@features/tabletop/TabletopPage"),
@@ -46,6 +47,7 @@ const SpellPage = lazy(pages.spells);
 const CharacterFormPage = lazy(pages.characterForm);
 const NotesPage = lazy(pages.notes);
 const QuestsPage = lazy(pages.quests);
+const PollsPage = lazy(pages.polls);
 const RollHistoryPage = lazy(pages.rollHistory);
 const RulesPage = lazy(pages.rules);
 const TabletopPage = lazy(pages.tabletop);
@@ -243,6 +245,7 @@ function AppRoutes() {
                 <Route path="/shop" element={<ShopkeeperPage />} />
                 <Route path="/notes" element={<NotesPage />} />
                 <Route path="/quests" element={<QuestsPage />} />
+                <Route path="/polls" element={<PollsPage />} />
                 <Route path="/table" element={<TabletopPage />} />
                 <Route path="/table/:code" element={<TabletopPage />} />
                 <Route path="/roll-history" element={<RollHistoryPage />} />
