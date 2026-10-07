@@ -29,8 +29,8 @@ export function SelectInventoryOwnersModal({
   opened: boolean;
   onClose: () => void;
 }) {
-  const { characters, selectedId } = useAdminCharacterStore();
-  const { selected, refreshInventories } = useAdminInventoryStore();
+  const { characters } = useAdminCharacterStore();
+  const { selected, reloadInventory } = useAdminInventoryStore();
 
   const [selectedOwners, setSelectedOwners] = useState<string[]>([]);
 
@@ -49,7 +49,6 @@ export function SelectInventoryOwnersModal({
     const currentOwners = selected.characterIds ?? [];
     const addedOwners = selectedOwners.filter((id) => !currentOwners.includes(id));
     const removedOwners = currentOwners.filter((id) => !selectedOwners.includes(id));
-    const targetRefreshCharacter = selectedId || selectedOwners[0] || currentOwners[0];
     const invId = selected.id;
 
     try {
@@ -70,11 +69,9 @@ export function SelectInventoryOwnersModal({
         );
       }
 
-      await updateInventory(selected.id, { ...selected, characterIds: selectedOwners });
+      await updateInventory(invId, { ...selected, characterIds: selectedOwners });
 
-      if (targetRefreshCharacter) {
-        await refreshInventories(targetRefreshCharacter);
-      }
+      await reloadInventory(invId);
 
       showNotification({
         title: "Owners updated",

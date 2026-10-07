@@ -3,7 +3,6 @@ import { create } from "zustand";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import {
-  getInventoriesByCharacter,
   getInventory,
   createInventory,
   updateInventory,
@@ -36,10 +35,8 @@ interface AdminInventoryStore {
   applyInventoryUpdate: (inventory: Inventory) => void;
   applyInventoryDelete: (id: string) => void;
 
-  loadByCharacter: (characterId: string) => Promise<void>;
   loadAll: () => Promise<void>;
   reloadInventory: (id: string) => Promise<void>;
-  refreshInventories: (characterId?: string) => Promise<void>;
   refreshSelected: () => Promise<void>;
   select: (id: string | null) => void;
 
@@ -134,36 +131,13 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         return { inventories, selected };
       }),
 
-    // === LOAD ALL INVENTORIES FOR ONE CHARACTER ===
-    loadByCharacter: async (characterId) => {
-      if (!characterId) return;
-      set({ loading: true });
-      try {
-        const data = await getInventoriesByCharacter(characterId);
-        const owned = data.filter((i) => i.characterIds?.includes(characterId));
-        set({ inventories: owned, selected: owned[0] ?? null });
-
-        const equipmentIds = getEquipmentIdsFromInventories(data);
-        if (equipmentIds.length > 0) {
-          await useAdminEquipmentStore.getState().loadByIds(equipmentIds);
-        }
-      } catch (err) {
-        showNotification({
-          title: "Error loading inventories",
-          message: String(err),
-          color: SectionColor.Red,
-        });
-      } finally {
-        set({ loading: false });
-      }
-    },
-
     // === LOAD ALL INVENTORIES (ADMIN BROWSE) ===
     loadAll: async () => {
       set({ loading: true });
       try {
         const data = await getAllInventories();
-        set({ inventories: data, selected: data[0] ?? null });
+        const selectedId = get().selected?.id;
+        set({ inventories: data, selected: data.find((i) => i.id === selectedId) ?? data[0] ?? null });
 
         const equipmentIds = getEquipmentIdsFromInventories(data);
         if (equipmentIds.length > 0) {
@@ -184,31 +158,6 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     select: (id) => {
       const { inventories } = get();
       set({ selected: inventories.find((i) => i.id === id) ?? null });
-    },
-
-    // === REFRESH INVENTORY LIST ===
-    refreshInventories: async (characterId?: string) => {
-
-      if (!characterId) {
-        await get().loadAll();
-        return;
-      }
-
-      try {
-        const refreshed = await getInventoriesByCharacter(characterId);
-        const owned = refreshed.filter((i) => i.characterIds?.includes(characterId));
-        const sel = get().selected;
-        set({
-          inventories: owned,
-          selected: sel ? owned.find((i) => i.id === sel.id) ?? sel : null,
-        });
-      } catch (err) {
-        showNotification({
-          title: "Error refreshing inventories",
-          message: String(err),
-          color: SectionColor.Red,
-        });
-      }
     },
 
     reloadInventory: async (id: string) => {
@@ -240,24 +189,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     // === REFRESH THE CURRENTLY SELECTED INVENTORY ===
     refreshSelected: async () => {
       const sel = get().selected;
-      if (!sel?.id) return;
-      try {
-        const updated = await getInventory(sel.id);
-        set({ selected: updated });
-
-        if (updated.items) {
-          const equipmentIds = getEquipmentIdsFromInventories([updated]);
-          if (equipmentIds.length > 0) {
-            await useAdminEquipmentStore.getState().loadByIds(equipmentIds);
-          }
-        }
-      } catch (err) {
-        showNotification({
-          title: "Error refreshing inventory",
-          message: String(err),
-          color: SectionColor.Red,
-        });
-      }
+      if (sel?.id) await get().reloadInventory(sel.id);
     },
 
     // === CREATE NEW INVENTORY ===
@@ -410,7 +342,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
 
       const request: MoveItemRequest = { targetInventoryId, amount };
       await moveItemService(sel.id, equipmentId, request);
-      await get().reloadInventory(sel.id);
+      await Promise.all([get().reloadInventory(sel.id), get().reloadInventory(targetInventoryId)]);
       showNotification({
         title: "Item moved",
         message: `Moved ${amount}x item from ${sel.name} to target inventory.`,
@@ -420,7 +352,7 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
 
     updateEquipment: async (equipment) => {
       const updated = await updateEquipmentById(equipment.id!, equipment);
-      await get().refreshInventories();
+      await get().loadAll();
       return updated;
     },
 

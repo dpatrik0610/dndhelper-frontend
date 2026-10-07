@@ -77,7 +77,6 @@ export function InventoryDashboard() {
     remove,
     duplicate,
     create,
-    refreshInventories,
   } = useAdminInventoryStore();
 
   const { characters, loadAll: loadCharacters } = useAdminCharacterStore();
@@ -237,7 +236,7 @@ export function InventoryDashboard() {
   };
 
   const handleRefresh = () => {
-    void refreshInventories();
+    void loadAll();
     if (activeCampaignId) void loadCharacters(activeCampaignId);
   };
 

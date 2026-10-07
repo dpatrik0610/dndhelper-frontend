@@ -1,5 +1,4 @@
 import { showNotification } from "@components/Notification/Notification";
-import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
 import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
@@ -12,7 +11,6 @@ export function handleInventoryChange(event: EntityChangeEvent) {
   const currentSelected = inventoryStore.selectedInventory;
 
   const adminStore = useAdminInventoryStore.getState();
-  const adminSelectedCharId = useAdminCharacterStore.getState().selectedId;
 
   const adminCurrencyStore = useAdminCurrencyStore.getState();
 
@@ -36,15 +34,8 @@ export function handleInventoryChange(event: EntityChangeEvent) {
         inventoryStore.selectInventory(newInventory);
       }
 
-      // --- Admin inventory store ---
-      const isNewUnowned = !newInventory.characterIds || newInventory.characterIds.length === 0;
-      const touchesNewSelectedAdminChar =
-        adminSelectedCharId &&
-        newInventory.characterIds?.includes(adminSelectedCharId);
-
-      if (touchesNewSelectedAdminChar || isNewUnowned || !adminSelectedCharId) {
-        adminStore.applyInventoryUpdate(newInventory);
-      }
+      // --- Admin inventory store (holds every inventory) ---
+      adminStore.applyInventoryUpdate(newInventory);
 
       // --- Admin currency store (if this inventory is currently open there) ---
       if (adminCurrencyStore.selectedInventory?.id === newInventory.id) {
@@ -78,16 +69,8 @@ export function handleInventoryChange(event: EntityChangeEvent) {
         inventoryStore.selectInventory(updatedInventory);
       }
 
-      // --- Admin inventory list (tiles/items) ---
-      const existsInAdmin = adminStore.inventories.some((i) => i.id === updatedInventory.id);
-      const isUpdatedUnowned = !updatedInventory.characterIds || updatedInventory.characterIds.length === 0;
-      const touchesSelectedAdminChar =
-        adminSelectedCharId &&
-        updatedInventory.characterIds?.includes(adminSelectedCharId);
-
-      if (existsInAdmin || touchesSelectedAdminChar || isUpdatedUnowned || !adminSelectedCharId) {
-        adminStore.applyInventoryUpdate(updatedInventory);
-      }
+      // --- Admin inventory list (holds every inventory) ---
+      adminStore.applyInventoryUpdate(updatedInventory);
 
       // --- Admin currency panel (the one you mentioned) ---
       if (adminCurrencyStore.selectedInventory?.id === updatedInventory.id) {
