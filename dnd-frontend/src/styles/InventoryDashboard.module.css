@@ -160,6 +160,14 @@
   text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
 }
 
+.listItemMatches {
+  font-size: 0.68rem;
+  color: var(--cyber-accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .listItemMeta {
   font-family: var(--cyber-font-label);
   font-size: 0.65rem;

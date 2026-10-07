@@ -1,11 +1,13 @@
 import { ActionIcon, Tooltip } from "@mantine/core";
 import { IconCopy, IconEdit, IconTrash } from "@tabler/icons-react";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
+import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import styles from "@styles/InventoryDashboard.module.css";
 
 interface InventoryListItemProps {
   inventory: Inventory;
   isSelected: boolean;
+  matchedItems?: InventoryItem[];
   onSelect: () => void;
   onDuplicate: () => void;
   onRename: () => void;
@@ -15,6 +17,7 @@ interface InventoryListItemProps {
 export function InventoryListItem({
   inventory,
   isSelected,
+  matchedItems,
   onSelect,
   onDuplicate,
   onRename,
@@ -45,6 +48,11 @@ export function InventoryListItem({
           <span>·</span>
           <span>{isUnowned ? "Shared" : `${inventory.characterIds?.length} owner${(inventory.characterIds?.length ?? 0) !== 1 ? "s" : ""}`}</span>
         </span>
+        {matchedItems && matchedItems.length > 0 && (
+          <span className={styles.listItemMatches}>
+            {matchedItems.map((item) => `${item.equipmentName ?? "Unnamed"} ×${item.quantity ?? 1}`).join(", ")}
+          </span>
+        )}
       </div>
 
       <div className={styles.listItemActions}>

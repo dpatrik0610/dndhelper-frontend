@@ -14,6 +14,7 @@ import {
 } from "@mantine/core";
 import {
   IconArchive,
+  IconBox,
   IconFilterOff,
   IconInbox,
   IconPlus,
@@ -27,6 +28,7 @@ import { useCampaignStore } from "@store/campaign/campaignStore";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
+import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import { InventoryWorkspace } from "./components/InventoryWorkspace";
 import { InventoryListItem } from "./components/InventoryListItem";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
@@ -57,6 +59,13 @@ function groupInventories(inventories: Inventory[]): InventoryGroup[] {
   return groups;
 }
 
+function findMatchingItems(inv: Inventory, query: string): InventoryItem[] {
+  return (inv.items ?? []).filter((item) =>
+    (item.equipmentName ?? "").toLowerCase().includes(query) ||
+    (item.tags ?? []).some((tag) => tag.toLowerCase().includes(query))
+  );
+}
+
 export function InventoryDashboard() {
   const {
     inventories,
@@ -75,6 +84,8 @@ export function InventoryDashboard() {
   const { campaigns, selectedId: activeCampaignId } = useCampaignStore();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [itemQuery, setItemQuery] = useState("");
+  const normalizedItemQuery = itemQuery.trim().toLowerCase();
   const [selectedCampaignFilter, setSelectedCampaignFilter] = useState<string | null>("all");
   const [selectedCharacterFilter, setSelectedCharacterFilter] = useState<string | null>("all");
 
@@ -113,6 +124,7 @@ export function InventoryDashboard() {
     return inventories.filter((inv) => {
       const matchesSearch = (inv.name ?? "").toLowerCase().includes(searchQuery.trim().toLowerCase());
       if (!matchesSearch) return false;
+      if (normalizedItemQuery && findMatchingItems(inv, normalizedItemQuery).length === 0) return false;
 
       const isUnowned = !inv.characterIds || inv.characterIds.length === 0;
 
@@ -135,7 +147,7 @@ export function InventoryDashboard() {
 
       return true;
     });
-  }, [inventories, searchQuery, selectedCharacterFilter, selectedCampaignFilter, characters]);
+  }, [inventories, searchQuery, normalizedItemQuery, selectedCharacterFilter, selectedCampaignFilter, characters]);
 
   const inventoryGroups = useMemo(
     () => groupInventories(filteredInventories),
@@ -144,11 +156,13 @@ export function InventoryDashboard() {
 
   const hasActiveFilters =
     searchQuery.trim().length > 0 ||
+    normalizedItemQuery.length > 0 ||
     selectedCampaignFilter !== "all" ||
     selectedCharacterFilter !== "all";
 
   const clearFilters = () => {
     setSearchQuery("");
+    setItemQuery("");
     setSelectedCampaignFilter("all");
     setSelectedCharacterFilter("all");
   };
@@ -252,6 +266,16 @@ export function InventoryDashboard() {
               styles={inputStyle}
             />
 
+            <TextInput
+              placeholder="Search in inventories..."
+              leftSection={<IconBox size={14} />}
+              value={itemQuery}
+              onChange={(e) => setItemQuery(e.currentTarget.value)}
+              size="xs"
+              mb="xs"
+              styles={inputStyle}
+            />
+
             <Stack gap={6} mb="sm">
               <Select
                 placeholder="Campaign"
@@ -331,6 +355,7 @@ export function InventoryDashboard() {
                         key={inv.id}
                         inventory={inv}
                         isSelected={selected?.id === inv.id}
+                        matchedItems={normalizedItemQuery ? findMatchingItems(inv, normalizedItemQuery) : undefined}
                         onSelect={() => select(inv.id!)}
                         onDuplicate={() => handleDuplicate(inv.id!)}
                         onRename={() => handleRename(inv.id!, inv.name || "")}
