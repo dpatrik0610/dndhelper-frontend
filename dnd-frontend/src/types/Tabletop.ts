@@ -75,6 +75,9 @@ export interface TableToken {
   tempHp: number;
   ac: number;
   speed: number;
+  /** Aura reach in ft beyond the token's edge; 0 = none. */
+  auraFt: number;
+  auraColor: string;
   effects: TableEffect[];
   economy: TurnEconomy;
   /** Healthy / Wounded / Bloodied / Down. Players get only this for monsters and NPCs (numbers are zeroed). */

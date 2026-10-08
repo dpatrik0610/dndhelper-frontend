@@ -449,26 +449,26 @@ function BoardTab() {
             size="xs"
             radius="xl"
             min={20}
-            max={200}
+            max={500}
             clampBehavior="blur"
             suffix=" px"
             defaultValue={grid.cellSize}
             onBlur={(e) => {
               const v = parseInt(e.currentTarget.value, 10);
-              if (v >= 20 && v <= 200 && v !== grid.cellSize) commit({ cellSize: v });
+              if (v >= 20 && v <= 500 && v !== grid.cellSize) commit({ cellSize: v });
             }}
             onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
           />
         </div>
         <Slider
           min={20}
-          max={200}
+          max={500}
           value={grid.cellSize}
           onChange={(cellSize) => preview({ cellSize })}
           onChangeEnd={(cellSize) => commit({ cellSize })}
           label={(v) => `${v}px`}
           color="violet"
-          marks={[{ value: 50 }, { value: 100 }, { value: 150 }]}
+          marks={[{ value: 100 }, { value: 200 }, { value: 300 }, { value: 400 }]}
         />
 
         <div className="tt-set-row">

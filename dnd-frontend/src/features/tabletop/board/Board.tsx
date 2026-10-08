@@ -614,6 +614,11 @@ export function Board() {
           layerTokens.map((t) => (
             <polygon key={`cell-${t.id}`} points={toPoints(cellCorners(grid, posOf(t)))} fill={t.color} fillOpacity={0.14} />
           ))}
+        {layerTokens
+          .filter((t) => t.auraFt > 0 && t.id !== draggingId)
+          .map((t) => (
+            <AuraView key={`aura-${t.id}`} token={t} grid={grid} pos={posOf(t)} />
+          ))}
         {on(visibleStrokes, layer).map((s) => (
           <StrokeView key={s.id} stroke={s} />
         ))}
@@ -681,25 +686,25 @@ export function Board() {
       </svg>
       {fxLayer("Map")}
 
-      {/* Token layer */}
+      {/* Token layer; its effects sit under the tokens */}
+      {fxLayer("Token")}
       <svg className="tt-layer" width={size.width} height={size.height}>
         <g transform={worldTransform} opacity={layerOpacity("Token")}>
           {renderLayer("Token", true)}
         </g>
       </svg>
-      {fxLayer("Token")}
 
       {fog.enabled && <FogLayer ops={fog.ops} view={view} width={size.width} height={size.height} translucent={dmView} />}
 
       {/* DM layer: above the fog, only for the DM */}
       {dmView && (
         <>
+          {fxLayer("Dm")}
           <svg className="tt-layer" width={size.width} height={size.height}>
             <g transform={worldTransform} opacity={layerOpacity("Dm")}>
               {renderLayer("Dm", true)}
             </g>
           </svg>
-          {fxLayer("Dm")}
         </>
       )}
 
@@ -932,7 +937,17 @@ function TokenView({
   );
 }
 
-const PACE_COLOR = { walk: "#f5c451", dash: "#a78bfa", over: "#f87171" } as const;
+/** Soft ring reaching auraFt beyond the token's edge; same sliding transform as TokenView so it follows moves. */
+function AuraView({ token, grid, pos, dragging }: { token: TableToken; grid: GridSettings; pos: Pt; dragging?: boolean }) {
+  const r = (token.size / 2 + token.auraFt / 5) * grid.cellSize;
+  return (
+    <g className={`tt-token${dragging ? " dragging" : ""}`} style={{ transform: `translate(${pos.x}px, ${pos.y}px)` }}>
+      <circle r={r} fill={token.auraColor} fillOpacity={0.14} stroke={token.auraColor} strokeOpacity={0.7} strokeWidth={2} />
+    </g>
+  );
+}
+
+const PACE_COLOR ={ walk: "#f5c451", dash: "#a78bfa", over: "#f87171" } as const;
 
 function TokenDrag({
   gesture,
@@ -963,6 +978,7 @@ function TokenDrag({
 
   return (
     <g className="tt-drag">
+      {gesture.token.auraFt > 0 && <AuraView token={gesture.token} grid={grid} pos={gesture.pos} dragging />}
       <polygon
         points={toPoints(cellCorners(grid, target))}
         className="tt-drag-target"

@@ -129,6 +129,26 @@ function TokenForm({ token, onClose: close }: { token: TableToken; onClose: () =
             />
           </div>
 
+          <Group grow align="flex-end">
+            <NumberInput
+              label="Aura (ft)"
+              description="Reach beyond the token's edge, 0 for none"
+              min={0}
+              max={300}
+              step={5}
+              value={draft.auraFt}
+              onChange={(v) => set({ auraFt: num(v) })}
+            />
+            <ColorInput
+              label="Aura color"
+              value={draft.auraColor}
+              onChange={(auraColor) => set({ auraColor })}
+              swatches={TOKEN_SWATCHES}
+              format="hex"
+              disabled={draft.auraFt <= 0}
+            />
+          </Group>
+
           <div>
             <Text size="sm" fw={500} mb={4}>
               Effects
