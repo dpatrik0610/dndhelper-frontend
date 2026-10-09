@@ -44,6 +44,7 @@ import { Toolbar } from "./Toolbar";
 import { LAYERS, TOOLS } from "./tools";
 import { InitiativePanel } from "./panels/InitiativePanel";
 import { InventoryButton } from "./panels/InventoryModal";
+import { NotesButton } from "./panels/NotesModal";
 import { ChatPanel } from "./panels/ChatPanel";
 import { LogPanel } from "./panels/LogPanel";
 import { TokenEditor } from "./panels/TokenEditor";
@@ -215,6 +216,7 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
       <Group gap="xs" className={`tt-glass tt-pillbar${playerView ? " player-view" : ""}`} wrap="nowrap">
         <SpellSearch />
         <InventoryButton />
+        <NotesButton />
         {session.isDm && !playerView && (
           <SegmentedControl
             size="xs"

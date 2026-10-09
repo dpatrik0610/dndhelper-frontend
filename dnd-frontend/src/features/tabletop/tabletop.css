@@ -853,6 +853,13 @@
   border-color: rgba(167, 139, 250, 0.35);
 }
 
+/* Notes stack their body under the title row. */
+.tt-item.tt-note {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
 .tt-item-main {
   flex: 1;
   min-width: 0;
