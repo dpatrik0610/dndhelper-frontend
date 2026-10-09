@@ -9,6 +9,9 @@ import { notifications } from "@mantine/notifications";
 import { showNotification } from "@components/Notification/Notification";
 import { useToken, useCurrentUserId } from "@store/auth/authSelectors";
 import { useSubtleRollStore } from "@store/ui/subtleRollStore";
+import { useUiStore } from "@store/ui/uiStore";
+
+const TABLE_INVITE_SOUND = "/assets/sounds/notification.mp3";
 import { EntitySyncManager } from "@signalr/SyncManager/entitySyncManager";
 import type { EntityChangeEvent } from "@signalr/SyncManager/handlers/entitySyncTypes";
 import type { SubtleRollEvent } from "@appTypes/Roll";
@@ -111,6 +114,9 @@ export const useSignalR = () => {
     newConnection.on(
       "TableInvite",
       (invite: { code: string; campaignName: string; invitedBy: string }) => {
+        if (useUiStore.getState().prefs.chatSound) {
+          new Audio(TABLE_INVITE_SOUND).play().catch(() => {});
+        }
         const id = `table-invite-${invite.code}`;
         showNotification({
           id,
