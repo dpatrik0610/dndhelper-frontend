@@ -2,6 +2,7 @@ import {
   colorsTuple,
   createTheme,
   Autocomplete,
+  ColorInput,
   Loader,
   Modal,
   MultiSelect,
@@ -36,6 +37,8 @@ export const mantineTheme = createTheme({
     MultiSelect: MultiSelect.extend({ classNames: combobox }),
     Autocomplete: Autocomplete.extend({ classNames: combobox }),
     TagsInput: TagsInput.extend({ classNames: combobox }),
+    // Mantine leaves the swatch catching clicks, so only the hex text opened the picker; let them through to the input.
+    ColorInput: ColorInput.extend({ defaultProps: { leftSectionPointerEvents: "none" } }),
     Modal: Modal.extend({ classNames: { content: "glass-modal" } }),
     Paper: Paper.extend({ classNames: { root: "glass-paper" } }),
     // Every <Loader /> (and Button/ActionIcon `loading`) renders the themed rune circle.

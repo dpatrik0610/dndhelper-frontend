@@ -118,6 +118,8 @@ export interface AoeTemplate {
   centered: boolean;
   /** Pinned to this token; follows it around. */
   tokenId: string | null;
+  /** Lines pinned to a token can aim at this one; the server re-aims them when either moves. */
+  targetTokenId?: string | null;
   angle: number;
   color: string;
   remaining: number | null;

@@ -20,6 +20,10 @@ export interface SitePrefs {
   performanceMode: boolean;
   /** Campaign chat bubble at the bottom right (not on the tabletop, which has its own). */
   floatingChat: boolean;
+  /** Soft chime when someone else writes in the campaign chat. */
+  chatSound: boolean;
+  /** Overview of the whole board in a corner of the tabletop. */
+  tabletopMinimap: boolean;
 }
 
 export const defaultPrefs: SitePrefs = {
@@ -30,6 +34,8 @@ export const defaultPrefs: SitePrefs = {
   reduceMotion: false,
   performanceMode: false,
   floatingChat: true,
+  chatSound: true,
+  tabletopMinimap: true,
 };
 
 const PREFS_STORAGE_KEY = "sitePrefs";
@@ -42,6 +48,8 @@ const prefsToRecord = (prefs: SitePrefs): Record<string, string> => ({
   reduceMotion: String(prefs.reduceMotion),
   performanceMode: String(prefs.performanceMode),
   floatingChat: String(prefs.floatingChat),
+  chatSound: String(prefs.chatSound),
+  tabletopMinimap: String(prefs.tabletopMinimap),
 });
 
 /** Parses untrusted strings (localStorage, backend); anything unknown falls back to the default. */
@@ -56,6 +64,8 @@ export const prefsFromRecord = (record: Record<string, string | undefined>): Sit
     reduceMotion: record.reduceMotion === "true",
     performanceMode: record.performanceMode === "true",
     floatingChat: record.floatingChat !== "false",
+    chatSound: record.chatSound !== "false",
+    tabletopMinimap: record.tabletopMinimap !== "false",
   };
 };
 

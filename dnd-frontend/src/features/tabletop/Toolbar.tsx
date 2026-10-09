@@ -192,16 +192,29 @@ function FxOptions() {
         />
       )}
       {shape === "Line" && (
-        <div>
-          <Text size="xs" c="dimmed">
-            Width: {widthFt} ft
-          </Text>
-          <Slider min={5} max={60} step={5} value={widthFt} onChange={(templateWidthFt) => set({ templateWidthFt })} label={(v) => `${v} ft`} size="sm" />
-        </div>
+        <>
+          <SegmentedControl
+            size="xs"
+            value={centered ? "token" : "free"}
+            onChange={(v) => set({ templateCentered: v === "token" })}
+            data={[
+              { value: "free", label: "Free" },
+              { value: "token", label: "Token to token" },
+            ]}
+          />
+          <div>
+            <Text size="xs" c="dimmed">
+              Width: {widthFt} ft
+            </Text>
+            <Slider min={5} max={60} step={5} value={widthFt} onChange={(templateWidthFt) => set({ templateWidthFt })} label={(v) => `${v} ft`} size="sm" />
+          </div>
+        </>
       )}
       <Text size="xs" c="dimmed">
         {shape === "Line"
-          ? "Drag from the source to the target."
+          ? centered
+            ? "Drag from the caster's token to the target's: the line stays locked between them as they move."
+            : "Drag from the source to the target."
           : shape === "Cone"
             ? "Drag from the source in the direction of the breath."
             : centered

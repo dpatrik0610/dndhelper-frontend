@@ -1,5 +1,5 @@
 import { Button, Divider, Group, SegmentedControl, Select, Stack, Switch } from "@mantine/core";
-import { IconAdjustments, IconBolt, IconRestore } from "@tabler/icons-react";
+import { IconAdjustments, IconBolt, IconMessageCircle, IconRestore } from "@tabler/icons-react";
 import { useUiStore, type NotificationPosition, type SitePrefs } from "@store/ui/uiStore";
 import { SettingRow, SettingsSection } from "@features/settings/SettingsSection";
 
@@ -132,6 +132,27 @@ export function InterfaceSettings() {
                 : "Tumble and count-up when rolling. Off shows results immediately."
             }
             forcedOff={prefs.reduceMotion}
+          />
+        </Stack>
+      </SettingsSection>
+
+      <SettingsSection
+        icon={<IconMessageCircle size={20} color={accent} />}
+        title="Chat & tabletop"
+        description="Sounds and helpers for playing at the table."
+      >
+        <Stack gap={0}>
+          <PrefSwitch
+            pref="chatSound"
+            label="Chat sound"
+            description="A soft chime when someone else writes in the campaign chat."
+          />
+          {divider}
+
+          <PrefSwitch
+            pref="tabletopMinimap"
+            label="Tabletop minimap"
+            description="An overview of the whole board in a corner of the tabletop. Drag it by its top edge to move it."
           />
         </Stack>
       </SettingsSection>

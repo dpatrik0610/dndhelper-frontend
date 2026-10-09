@@ -58,6 +58,8 @@ export function SpellSearch() {
             onChange={setQuery}
             data={options}
             limit={12}
+            // Wider than the field: long spell names get room, and wrap instead of spilling out.
+            comboboxProps={{ width: 300, position: "bottom-start" }}
             onOptionSubmit={(name) => void pick(name)}
             onBlur={() => !query && !loading && close()}
             onKeyDown={(e) => e.key === "Escape" && close()}
@@ -65,10 +67,10 @@ export function SpellSearch() {
             rightSection={loading ? <Loader size={12} /> : null}
             renderOption={({ option }) => (
               <Group justify="space-between" wrap="nowrap" w="100%" gap="xs">
-                <Text size="sm" truncate>
+                <Text size="sm" miw={0}>
                   {option.value}
                 </Text>
-                <Text size="xs" c="dimmed">
+                <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
                   {levelOf.get(option.value) ? `Lvl ${levelOf.get(option.value)}` : "Cantrip"}
                 </Text>
               </Group>

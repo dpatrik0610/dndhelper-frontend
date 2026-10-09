@@ -6,6 +6,10 @@ import type { AoeKind, GridType } from "@appTypes/Tabletop";
  * Hex coordinates are axial (q, r): https://www.redblobgames.com/grids/hexagons/
  */
 
+export const MIN_ZOOM = 0.05;
+export const MAX_ZOOM = 10;
+export const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
+
 export interface Grid {
   type: GridType;
   cellSize: number;

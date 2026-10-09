@@ -6,8 +6,10 @@ import { resolveImageUrl, tabletop } from "@features/tabletop/useTabletopHub";
 import { CHARACTER_DRAG_TYPE, fxShape } from "@features/tabletop/tools";
 import { FogLayer, type View } from "./FogLayer";
 import { FxView } from "./Effects";
+import { Navigator } from "./Navigator";
 import {
   cellCorners,
+  clampZoom,
   distanceFt,
   distanceToPolyline,
   gridTile,
@@ -31,13 +33,10 @@ type Gesture =
   | { kind: "fogRect"; from: Pt; to: Pt }
   | { kind: "fogBrush"; points: number[] };
 
-const MIN_ZOOM = 0.15;
-const MAX_ZOOM = 5;
 const MAX_COORDS = 1000; // server cap for strokes and fog brushes
 
 const tokenRadius = (t: TableToken, grid: GridSettings) => t.size * grid.cellSize * 0.42;
 const samePoint = (a: Pt, b: Pt) => Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5;
-const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
 
 /** Keep every k-th point so long strokes fit the server cap (always keeps the last point). */
 function thin(points: number[]): number[] {
@@ -58,7 +57,7 @@ interface DraftOptions {
   fx: FxKind | null;
 }
 
-function templateDraft(o: DraftOptions, grid: GridSettings, origin: Pt, cursor: Pt, tokenId: string | null) {
+function templateDraft(o: DraftOptions, grid: GridSettings, origin: Pt, cursor: Pt, tokenId: string | null, targetTokenId: string | null = null) {
   const dx = cursor.x - origin.x;
   const dy = cursor.y - origin.y;
   const centered = o.kind === "Cube" && o.centered;
@@ -77,6 +76,7 @@ function templateDraft(o: DraftOptions, grid: GridSettings, origin: Pt, cursor: 
     widthFt: o.widthFt,
     centered,
     tokenId,
+    targetTokenId,
     angle: centered ? 0 : (Math.atan2(dy, dx) * 180) / Math.PI,
     remaining: null,
   };
@@ -157,6 +157,8 @@ export function Board() {
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
+      // The zoom panel sits on the board; scrolling over it shouldn't zoom the map.
+      if (e.target instanceof Element && e.target.closest(".tt-navigator")) return;
       const rect = el.getBoundingClientRect();
       const sx = e.clientX - rect.left;
       const sy = e.clientY - rect.top;
@@ -313,6 +315,13 @@ export function Board() {
       return Math.hypot(p.x - c.x, p.y - c.y) <= tokenRadius(t, grid);
     });
 
+  /** The token a caster-pinned line is dropped on, which it then stays aimed at. */
+  const lockTarget = (g: Extract<Gesture, { kind: "template" }>) => {
+    if (!g.tokenId || !g.fx || fxShape(g.fx) !== "Line") return undefined;
+    const t = tokenAt(g.cursor);
+    return t && t.id !== g.tokenId ? t : undefined;
+  };
+
   /** Drop whatever the first finger was doing when a second one lands. */
   const cancelGesture = () => {
     if (gestureRef.current?.kind === "measure") tabletop.measure(null);
@@ -373,8 +382,9 @@ export function Board() {
       case "fx": {
         const fx = tool === "fx" ? fxKind : null;
         const shape = fx ? fxShape(fx) : templateKind;
-        // "On token": cubes and area effects started on a token centre on it and stay pinned to it.
-        const pin = templateCentered && (fx ? shape === "Circle" : shape === "Cube");
+        // "On token": cubes and area effects started on a token centre on it and stay pinned to it;
+        // "Token to token" lines start on the caster and lock onto whatever token they're dropped on.
+        const pin = templateCentered && (fx ? shape === "Circle" || shape === "Line" : shape === "Cube");
         const token = pin ? hitToken(p) : undefined;
         const origin = token ? posOf(token) : snap(grid, p);
         setGesture({ kind: "template", origin, cursor: origin, tokenId: token?.id ?? null, fx });
@@ -523,7 +533,8 @@ export function Board() {
         // A click places the smallest centred cube or area effect; the rest need a drag for direction and size.
         const clickable = (options.kind === "Cube" && options.centered) || (g.fx !== null && options.kind === "Circle");
         if (!clickable && Math.hypot(g.cursor.x - g.origin.x, g.cursor.y - g.origin.y) < grid.cellSize / 2) break;
-        void tabletop.addTemplate(templateDraft(options, grid, g.origin, g.cursor, g.tokenId));
+        const target = lockTarget(g);
+        void tabletop.addTemplate(templateDraft(options, grid, g.origin, target ? posOf(target) : g.cursor, g.tokenId, target?.id ?? null));
         break;
       }
       case "fogRect":
@@ -644,9 +655,14 @@ export function Board() {
     );
   };
 
+  const draftTarget = gesture?.kind === "template" ? lockTarget(gesture) : undefined;
   const draft =
     gesture?.kind === "template"
-      ? { id: "draft", userId: me, ...templateDraft(draftOptions(gesture.fx), grid, gesture.origin, gesture.cursor, gesture.tokenId) }
+      ? {
+          id: "draft",
+          userId: me,
+          ...templateDraft(draftOptions(gesture.fx), grid, gesture.origin, draftTarget ? posOf(draftTarget) : gesture.cursor, gesture.tokenId),
+        }
       : null;
 
   return (
@@ -797,8 +813,20 @@ export function Board() {
           {ripples.map((r) => (
             <circle key={r.id} cx={r.x} cy={r.y} r={16 / view.zoom} className="tt-ripple" strokeWidth={2 / view.zoom} />
           ))}
+          {draftTarget && (
+            <circle
+              cx={posOf(draftTarget).x}
+              cy={posOf(draftTarget).y}
+              r={tokenRadius(draftTarget, grid) + 6 / view.zoom}
+              className="tt-hover-ring"
+              strokeWidth={2 / view.zoom}
+              strokeDasharray={`${6 / view.zoom} ${4 / view.zoom}`}
+            />
+          )}
         </g>
       </svg>
+
+      <Navigator view={view} size={size} setView={setView} tokens={tokens} map={map} grid={grid} fog={fog} dmView={dmView} me={me} />
     </div>
   );
 }

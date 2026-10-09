@@ -772,7 +772,14 @@
   padding: 6px;
 }
 
+/* Beside the rail rather than in the row: a tall panel would otherwise make the centred rail jump up. It hangs from
+   the rail's top, so it gets the space down to the bottom edge (half the screen plus half the rail). */
 .tt-tool-options {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 8px);
+  max-height: calc(50dvh + 50% - 16px);
+  overflow-y: auto;
   padding: 10px 12px;
   width: 220px;
 }
@@ -1391,6 +1398,82 @@
 }
 
 /* -- Checks & saves bubble -- */
+
+/* ── Navigator: zoom bar and minimap, top right under the top bar (draggable) ── */
+
+.tt-navigator {
+  position: absolute;
+  right: 12px;
+  top: 64px;
+  width: 244px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  touch-action: none;
+}
+
+.tt-root.side-open .tt-navigator:not(.moved) {
+  right: calc(var(--tt-side-w) + 24px);
+}
+
+.tt-minimap {
+  position: relative;
+  align-self: center;
+  overflow: hidden;
+  border-radius: 9px;
+  background: rgba(0, 0, 0, 0.35);
+  cursor: crosshair;
+}
+
+.tt-minimap svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.tt-minimap-view {
+  fill: rgba(167, 139, 250, 0.12);
+  stroke: #a78bfa;
+}
+
+.tt-navigator-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tt-navigator-grip {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--mantine-color-dimmed);
+  cursor: grab;
+}
+
+.tt-navigator-grip:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tt-navigator-grip:active {
+  cursor: grabbing;
+}
+
+.tt-navigator-zoom {
+  flex: 1;
+  margin: 0 4px;
+}
+
+.tt-navigator-pct {
+  min-width: 40px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--mantine-color-dimmed);
+}
 
 .tt-bubble {
   position: absolute;
@@ -2986,6 +3069,11 @@
   .tt-bubble {
     left: 8px;
     bottom: 12px;
+  }
+
+  /* Phones pinch to zoom, and the bottom of the screen already holds the turn card and the panel sheet. */
+  .tt-navigator {
+    display: none;
   }
 
   .tt-turncard.mine {

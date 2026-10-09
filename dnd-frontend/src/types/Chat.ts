@@ -12,9 +12,10 @@ export interface ChatMessage {
   /** Only the sender, the DMs and the target character's owners see it. */
   whisper: boolean;
   /** A DM's whisper target; null on a player's whisper, which goes to the DMs. */
-  /** A DM's whisper target; null on a player's whisper, which goes to the DMs. */
   toCharacterId: string | null;
   toName: string | null;
+  /** The message this answers; looked up among the loaded ones (it may be older, deleted or hidden). */
+  replyToId?: string | null;
   editedAt: string | null;
   createdAt: string;
 }
@@ -31,6 +32,7 @@ export interface ChatSendRequest {
   whisper: boolean;
   /** DM whispers only. */
   toCharacterId: string | null;
+  replyToId?: string | null;
 }
 
 /** A campaign the user can chat in. */

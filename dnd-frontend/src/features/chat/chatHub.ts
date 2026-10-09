@@ -5,6 +5,7 @@ import { useToken } from "@store/auth/authSelectors";
 import { useAuthStore } from "@store/auth/authStore";
 import { useChatStore } from "@store/chat/chatStore";
 import { useCampaignStore } from "@store/campaign/campaignStore";
+import { useUiStore } from "@store/ui/uiStore";
 import type { ChatCampaign, ChatMessage, ChatPage, ChatRoom, ChatSendRequest } from "@appTypes/Chat";
 
 const API_BASE: string = import.meta.env.VITE_API_BASE || "https://localhost:7222/api";
@@ -14,6 +15,37 @@ const retryDelay = (attempt: number) => Math.min(30_000, 1000 * 2 ** attempt);
 
 // One chat connection per tab; views call the helpers below.
 let active: HubConnection | null = null;
+
+let audio: AudioContext | null = null;
+let lastChime = 0;
+
+/** A soft two-note chime, synthesized so there's no sound file to load. Bursts of messages chime once. */
+function chime() {
+  const now = Date.now();
+  if (now - lastChime < 1500) return;
+  lastChime = now;
+  try {
+    audio ??= new AudioContext();
+    // Before the first click on the page the browser keeps audio suspended; that chime is just skipped.
+    if (audio.state === "suspended") void audio.resume();
+    const t = audio.currentTime;
+    [659.25, 987.77].forEach((freq, i) => {
+      const osc = audio!.createOscillator();
+      const gain = audio!.createGain();
+      const start = t + i * 0.12;
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.06, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.7);
+      osc.connect(gain).connect(audio!.destination);
+      osc.start(start);
+      osc.stop(start + 0.75);
+    });
+  } catch {
+    // No Web Audio: stay quiet.
+  }
+}
 
 function hubError(err: unknown) {
   const message = err instanceof Error ? err.message : String(err);
@@ -61,7 +93,11 @@ export function useChatHub(campaignId: string | null) {
       .build();
 
     const isMine = (m: ChatMessage) => m.userId === useAuthStore.getState().id;
-    conn.on("ChatAdded", (m: ChatMessage) => store().add(m, isMine(m)));
+    conn.on("ChatAdded", (m: ChatMessage) => {
+      const fresh = !store().messages.some((x) => x.id === m.id);
+      store().add(m, isMine(m));
+      if (fresh && !isMine(m) && useUiStore.getState().prefs.chatSound) chime();
+    });
     conn.on("ChatUpdated", (m: ChatMessage) => store().update(m));
     conn.on("ChatRemoved", (id: string) => store().remove(id));
 

@@ -50,8 +50,8 @@ export function CampaignChat({ characterId }: { characterId?: string | null }) {
       whisperTargets={whisperTargets}
       canEdit={(m) => m.userId === me}
       canDelete={(m) => m.userId === me || room.isDm}
-      onSend={(text, target) =>
-        chat.send({ text, characterId: speaker?.id ?? null, whisper: !!target, toCharacterId: target?.characterId ?? null })
+      onSend={(text, target, replyToId) =>
+        chat.send({ text, characterId: speaker?.id ?? null, whisper: !!target, toCharacterId: target?.characterId ?? null, replyToId })
       }
       avatarOf={(m) => (m.characterId ? room.avatars?.[m.characterId] : undefined)}
       onEdit={chat.edit}

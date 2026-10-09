@@ -208,6 +208,68 @@
   animation: chat-slide-in 0.18s ease-out;
 }
 
+.chat-replying-text {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--mantine-color-dimmed);
+}
+
+.chat-replying-text b {
+  color: var(--chat-accent-color);
+}
+
+/* The answered message, quoted above a reply. */
+.chat-quote {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  margin: 2px 0;
+  padding: 1px 6px;
+  border: 0;
+  border-left: 2px solid var(--chat-accent-color);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--mantine-color-dimmed);
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.chat-quote b {
+  flex: none;
+  color: var(--chat-accent-color);
+}
+
+.chat-quote span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-quote:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.chat-quote.missing {
+  font-style: italic;
+  cursor: default;
+}
+
+.chat-line.flash {
+  animation: chat-flash 1.2s ease-out;
+}
+
+@keyframes chat-flash {
+  from {
+    background: color-mix(in srgb, var(--chat-accent-color) 30%, transparent);
+  }
+}
+
 @keyframes chat-slide-in {
   from {
     opacity: 0;

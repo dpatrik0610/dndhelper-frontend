@@ -1,6 +1,6 @@
 import { Fragment, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { ActionIcon, Badge, Button, Center, Loader, Menu, Popover, Portal, ScrollArea, Stack, Text, Textarea, Tooltip } from "@mantine/core";
-import { IconCheck, IconDots, IconEdit, IconMoodSmile, IconSend, IconSpy, IconTrash, IconUsersGroup, IconX } from "@tabler/icons-react";
+import { IconArrowBackUp, IconCheck, IconDots, IconEdit, IconMoodSmile, IconSend, IconSpy, IconTrash, IconUsersGroup, IconX } from "@tabler/icons-react";
 import { useCurrentUserId } from "@store/auth/authSelectors";
 import { useIsMobile } from "@hooks/useIsMobile";
 import type { ChatMessage } from "@appTypes/Chat";
@@ -52,7 +52,7 @@ export function ChatView({
   whisperTargets: WhisperTarget[];
   canEdit: (message: ChatMessage) => boolean;
   canDelete: (message: ChatMessage) => boolean;
-  onSend: (text: string, whisperTo: WhisperTarget | null) => Promise<boolean>;
+  onSend: (text: string, whisperTo: WhisperTarget | null, replyToId: string | null) => Promise<boolean>;
   onEdit: (messageId: string, text: string) => Promise<boolean>;
   onDelete: (messageId: string) => void;
   onLoadMore: () => Promise<void>;
@@ -69,6 +69,10 @@ export function ChatView({
   const [editingState, setEditing] = useState<ChatMessage | null>(null);
   // A message deleted elsewhere can't be edited any more.
   const editing = editingState && messages.some((m) => m.id === editingState.id) ? editingState : null;
+  const [replyState, setReplyTo] = useState<ChatMessage | null>(null);
+  // Same for replies; the quoted text follows edits to the original.
+  const replyTo = replyState ? (messages.find((m) => m.id === replyState.id) ?? null) : null;
+  const byId = new Map(messages.map((m) => [m.id, m]));
   /** Edit/Delete menu for one message, at a viewport point (right-click or the ⋯ button). */
   const [menu, setMenu] = useState<{
     message: ChatMessage;
@@ -144,6 +148,7 @@ export function ChatView({
   };
 
   const startEdit = (message: ChatMessage) => {
+    setReplyTo(null);
     setEditing(message);
     setDraft(message.text);
     input.current?.focus();
@@ -194,6 +199,22 @@ export function ChatView({
     input.current?.focus();
   };
 
+  const startReply = (message: ChatMessage) => {
+    if (editing) cancelEdit();
+    setReplyTo(message);
+    input.current?.focus();
+  };
+
+  /** Brings a quoted message into view and flashes it. */
+  const jumpTo = (id: string) => {
+    const el = viewport.current?.querySelector<HTMLElement>(`[data-message-id="${id}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: "center", behavior: reducedMotion() ? "auto" : "smooth" });
+    el.classList.remove("flash");
+    void el.offsetWidth; // restart the animation
+    el.classList.add("flash");
+  };
+
   const cancelEdit = () => {
     setEditing(null);
     setDraft("");
@@ -205,10 +226,13 @@ export function ChatView({
     // Shortcodes pasted or typed without the suggestions still become emoji.
     const table = draft.includes(":") ? (codes ?? (await loadShortcodes())) : null;
     const text = (table ? replaceShortcodes(table, draft) : draft).trim();
-    const ok = editing ? text === editing.text || (await onEdit(editing.id, text)) : await onSend(text, whisperTo);
+    const ok = editing
+      ? text === editing.text || (await onEdit(editing.id, text))
+      : await onSend(text, whisperTo, replyTo?.id ?? null);
     if (ok) {
       setDraft("");
       setEditing(null);
+      setReplyTo(null);
     }
     setSending(false);
   };
@@ -257,14 +281,15 @@ export function ChatView({
                   {group.map((m) => (
                     <div
                       key={m.id}
-                      className={`chat-line${editing?.id === m.id || menu?.message.id === m.id ? " active" : ""}`}
+                      data-message-id={m.id}
+                      className={`chat-line${editing?.id === m.id || replyTo?.id === m.id || menu?.message.id === m.id ? " active" : ""}`}
                       onContextMenu={(e) => {
-                        if (!canEdit(m) && !canDelete(m)) return;
                         e.preventDefault();
                         setMenu({ message: m, x: e.clientX, y: e.clientY });
                       }}
                     >
-                      <Text size="sm" className="chat-text" title={fullDate(m.createdAt)}>
+                      <Text size="sm" className="chat-text" title={fullDate(m.createdAt)} component="div">
+                        {m.replyToId && <Quote original={byId.get(m.replyToId)} onJump={() => jumpTo(m.replyToId!)} />}
                         {m.text}
                         {m.editedAt && (
                           <Text span size="xs" c="dimmed" title={`Edited ${fullDate(m.editedAt)}`}>
@@ -273,6 +298,17 @@ export function ChatView({
                           </Text>
                         )}
                       </Text>
+                      <ActionIcon
+                        size="xs"
+                        variant="subtle"
+                        color="gray"
+                        className="chat-actions"
+                        aria-label="Reply"
+                        title="Reply"
+                        onClick={() => startReply(m)}
+                      >
+                        <IconArrowBackUp size={14} />
+                      </ActionIcon>
                       {(canEdit(m) || canDelete(m)) && (
                         <ActionIcon
                           size="xs"
@@ -314,6 +350,9 @@ export function ChatView({
               />
             </Menu.Target>
             <Menu.Dropdown>
+              <Menu.Item leftSection={<IconArrowBackUp size={14} />} onClick={() => startReply(menu.message)}>
+                Reply
+              </Menu.Item>
               {canEdit(menu.message) && (
                 <Menu.Item leftSection={<IconEdit size={14} />} onClick={() => startEdit(menu.message)}>
                   Edit
@@ -349,6 +388,17 @@ export function ChatView({
                 <span className="chat-suggest-name">:{code.name}:</span>
               </div>
             ))}
+          </div>
+        )}
+        {replyTo && !editing && (
+          <div className="chat-editing">
+            <IconArrowBackUp size={12} />
+            <span className="chat-replying-text">
+              Replying to <b>{replyTo.name}</b>: {replyTo.text}
+            </span>
+            <ActionIcon size="xs" variant="subtle" color="gray" ml="auto" onClick={() => setReplyTo(null)} aria-label="Cancel reply">
+              <IconX size={12} />
+            </ActionIcon>
           </div>
         )}
         {editing && (
@@ -443,6 +493,8 @@ export function ChatView({
                 void send();
               } else if (e.key === "Escape" && editing) {
                 cancelEdit();
+              } else if (e.key === "Escape" && replyTo) {
+                setReplyTo(null);
               } else if (e.key === "ArrowUp" && !draft) {
                 // Up in an empty box edits your last message.
                 const last = [...messages].reverse().find(canEdit);
@@ -474,6 +526,23 @@ export function ChatView({
         )}
       </div>
     </div>
+  );
+}
+
+/** The answered message above a reply; click to jump to it. It may be older than what's loaded, deleted, or a whisper you can't see. */
+function Quote({ original, onJump }: { original?: ChatMessage; onJump: () => void }) {
+  if (!original)
+    return (
+      <span className="chat-quote missing">
+        <IconArrowBackUp size={12} /> Reply to an earlier message
+      </span>
+    );
+  return (
+    <button type="button" className="chat-quote" onClick={onJump} title="Show the original">
+      <IconArrowBackUp size={12} />
+      <b>{original.name}</b>
+      <span>{original.text}</span>
+    </button>
   );
 }
 
