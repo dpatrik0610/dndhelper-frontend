@@ -38,6 +38,8 @@ export function ExtraInfo() {
     ["Eyes", character.eyes],
     ["Hair", character.hair],
     ["Skin", character.skin],
+    ["Alignment", character.alignment],
+    ["Carrying Capacity", character.abilityScores?.str ? `${character.abilityScores.str * 15} lbs` : ""],
   ].filter(([, value]) => value?.trim());
 
   const traits = [
