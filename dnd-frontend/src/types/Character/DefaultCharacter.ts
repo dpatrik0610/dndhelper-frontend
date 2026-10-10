@@ -75,6 +75,7 @@ export const defaultCharacter: Character = {
     { level: 8, current: 0, max: 0 },
     { level: 9, current: 0, max: 0 },
   ],
+  classResources: [],
   deathSavesSuccesses: 0,
   deathSavesFailures: 0,
   passivePerception: 10,

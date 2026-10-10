@@ -2,6 +2,7 @@ import type { SavingThrows } from "./SavingThrows";
 import type { AbilityScores } from "./AbilityScores";
 import { HeightLabel } from "./HeightLabel";
 import type { SpellSlot } from "./SpellSlot";
+import type { ClassResource } from "./ClassResource";
 import type { Skill } from "./Skill";
 import type { Feature } from "./Feature";
 import type { CharacterSpell } from "./CharacterSpell";
@@ -53,6 +54,7 @@ export interface Character {
   spellSaveDc: number;
   spellAttackBonus: number;
   spellSlots: SpellSlot[];
+  classResources: ClassResource[];
   spellcastingAbility: string;
   deathSavesSuccesses: number;
   deathSavesFailures: number;

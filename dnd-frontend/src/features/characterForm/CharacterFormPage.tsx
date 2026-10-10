@@ -31,6 +31,7 @@ import { AdminSection } from "./sections/AdminSection";
 import { AbilitiesSection } from "./sections/AbilitiesSection";
 import { LoreSection } from "./sections/LoreSection";
 import { SpellSlotsSection } from "./sections/SpellSlotsSection";
+import { ClassResourcesSection } from "./sections/ClassResourcesSection";
 import { SpellsSection } from "./sections/SpellsSection";
 import { FeaturesSection } from "./sections/FeaturesSection";
 import { useIsMobile } from "@hooks/useIsMobile";
@@ -71,7 +72,7 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
       { id: "lore" as TabType, label: "Lore", icon: <IconBook size={16} /> },
       { id: "combat" as TabType, label: "Combat", icon: <IconSword size={16} /> },
       { id: "abilities" as TabType, label: "Abilities", icon: <IconBrain size={16} /> },
-      { id: "slots" as TabType, label: "Slots", icon: <IconWand size={16} /> },
+      { id: "slots" as TabType, label: "Resources", icon: <IconWand size={16} /> },
       { id: "spells" as TabType, label: "Spells", icon: <IconFlame size={16} /> },
       { id: "features" as TabType, label: "Features", icon: <IconBookmark size={16} /> },
       { id: "collections" as TabType, label: "Proficiencies", icon: <IconBook2 size={16} /> },
@@ -283,7 +284,10 @@ export function CharacterFormPage({ editMode = false }: CharacterFormPageProps) 
               )}
 
               {activeTab === "slots" && (
-                <SpellSlotsSection noBox />
+                <Stack gap="md">
+                  <ClassResourcesSection />
+                  <SpellSlotsSection />
+                </Stack>
               )}
 
               {activeTab === "spells" && (

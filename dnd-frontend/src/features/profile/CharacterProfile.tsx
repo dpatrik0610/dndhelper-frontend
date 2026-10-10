@@ -11,7 +11,7 @@ import { CharacterHeader } from "./components/header/CharacterHeader";
 
 import "./styles/CharacterProfile.styles.css"
 import tabClasses from "./styles/ProfileTabs.module.css";
-import { IconBackpack, IconListCheck, IconNotes, IconShieldHalf, IconSparkles, IconStars } from "@tabler/icons-react";
+import { IconBackpack, IconBolt, IconListCheck, IconNotes, IconShieldHalf, IconSparkles, IconStars } from "@tabler/icons-react";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
@@ -23,15 +23,17 @@ const CombatStats = lazy(() => import("./components/panels/CombatStats").then(m 
 const ExperienceTableCard = lazy(() => import("./components/panels/ExperienceTableCard").then(m => ({ default: m.ExperienceTableCard })));
 const SpellsPanel = lazy(() => import("./components/panels/SpellsPanel").then(m => ({ default: m.SpellsPanel })));
 const SpellCastingBlock = lazy(() => import("./components/panels/SpellCastingBlock").then(m => ({ default: m.SpellCastingBlock })));
+const ClassResourcesPanel = lazy(() => import("./components/panels/ClassResourcesPanel").then(m => ({ default: m.ClassResourcesPanel })));
 const ExtraInfo = lazy(() => import("./components/panels/ExtraInfo").then(m => ({ default: m.ExtraInfo })));
 const FeaturesPanel = lazy(() => import("./components/panels/FeaturesPanel").then(m => ({ default: m.FeaturesPanel })));
 const Inventory = lazy(() => import("@features/inventory/Inventory").then(m => ({ default: m.Inventory })));
 
-/** `short` is the phone label, where six tabs share one row. */
+/** `short` is the phone label, where seven tabs share one row. */
 const PROFILE_TABS: { value: string; label: string; short?: string; Icon: typeof IconBackpack }[] = [
   { value: "overview", label: "Skills", Icon: IconListCheck },
   { value: "stats", label: "Stats", Icon: IconShieldHalf },
   { value: "spellcasting", label: "Spellcasting", short: "Spells", Icon: IconSparkles },
+  { value: "resources", label: "Resources", short: "Pools", Icon: IconBolt },
   { value: "features", label: "Features", Icon: IconStars },
   { value: "extras", label: "Extras", Icon: IconNotes },
   { value: "inventories", label: "Inventories", short: "Items", Icon: IconBackpack },
@@ -59,18 +61,23 @@ export default function CharacterProfile() {
 
   if (!character) return null;
 
+  const hasResources = (character.classResources?.length ?? 0) > 0;
+  const tabs = hasResources ? PROFILE_TABS : PROFILE_TABS.filter((t) => t.value !== "resources");
+  // Switching to a character without resources while on that tab falls back to the first tab
+  const shownTab = activeTab === "resources" && !hasResources ? "overview" : activeTab;
+
   return (
     <Box className="readable-surfaces" p={isMobile ? 0 : "md"} m={isMobile ? 0 : "0 auto"} maw={isMobile ? "100%" : 900}>
       <CharacterHeader />
 
       <Tabs
-        value={activeTab}
+        value={shownTab}
         onChange={setActiveTab}
         unstyled
         classNames={{ list: tabClasses.list, tab: tabClasses.tab, tabSection: tabClasses.icon, tabLabel: tabClasses.label }}
       >
         <Tabs.List aria-label="Character sections">
-          {PROFILE_TABS.map(({ value, label, short, Icon }) => (
+          {tabs.map(({ value, label, short, Icon }) => (
             <Tabs.Tab key={value} value={value} aria-label={label} leftSection={<Icon size={isMobile ? 18 : 16} stroke={1.75} />}>
               {isMobile ? short ?? label : label}
             </Tabs.Tab>
@@ -86,13 +93,13 @@ export default function CharacterProfile() {
           }
         >
           <AnimatePresence mode="wait">
-            {activeTab === "overview" && (
+            {shownTab === "overview" && (
               <motion.div key="overview" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
                 <AbilityScores />
               </motion.div>
             )}
 
-            {activeTab === "stats" && (
+            {shownTab === "stats" && (
               <motion.div key="stats" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
                 {/* <AbilityScores /> */}
                 <CombatStats />
@@ -100,26 +107,32 @@ export default function CharacterProfile() {
               </motion.div>
             )}
 
-            {activeTab === "spellcasting" && (
+            {shownTab === "spellcasting" && (
               <motion.div key="spellcasting" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
                 <SpellsPanel />
                 <SpellCastingBlock />
               </motion.div>
             )}
 
-            {activeTab === "extras" && (
+            {shownTab === "resources" && (
+              <motion.div key="resources" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+                <ClassResourcesPanel />
+              </motion.div>
+            )}
+
+            {shownTab === "extras" && (
               <motion.div key="extras" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
                 <ExtraInfo />
               </motion.div>
             )}
 
-            {activeTab === "features" && (
+            {shownTab === "features" && (
               <motion.div key="features" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
                 <FeaturesPanel />
               </motion.div>
             )}
 
-            {activeTab === "inventories" && (
+            {shownTab === "inventories" && (
               <motion.div key="inventories" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
                 <Inventory />
               </motion.div>
