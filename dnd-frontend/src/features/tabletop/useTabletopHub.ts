@@ -29,11 +29,12 @@ const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
 export const resolveImageUrl = (url: string | null | undefined) =>
   url ? (url.startsWith("/api/") ? API_ORIGIN + url : url) : undefined;
 
-export async function uploadTableImage(tableId: string, file: File): Promise<string | null> {
+/** Maps land in images/maps/, tokens in images/tokens/ on the CDN. */
+export async function uploadTableImage(tableId: string, file: File, kind: "map" | "token"): Promise<string | null> {
   const body = new FormData();
   body.append("file", file);
   const token = useAuthStore.getState().token;
-  const res = await fetch(`${API_BASE}/tabletop/${tableId}/images`, {
+  const res = await fetch(`${API_BASE}/tabletop/${tableId}/images?kind=${kind}`, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body,

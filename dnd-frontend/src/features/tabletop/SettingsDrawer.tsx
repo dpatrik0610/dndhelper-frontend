@@ -523,7 +523,7 @@ function MapCard() {
   const upload = async (file: File | null) => {
     if (!file) return;
     setUploading(true);
-    const url = await uploadTableImage(tableId, file);
+    const url = await uploadTableImage(tableId, file, "map");
     if (url) {
       // Natural size first: most battle maps are drawn at a known pixels-per-square.
       const objectUrl = URL.createObjectURL(file);
@@ -882,7 +882,7 @@ function CustomToken({ cellSize }: { cellSize: number }) {
           onChange={async (file) => {
             if (!file) return;
             setUploading(true);
-            const url = await uploadTableImage(tableId, file);
+            const url = await uploadTableImage(tableId, file, "token");
             setUploading(false);
             if (url) set({ imageUrl: url });
           }}

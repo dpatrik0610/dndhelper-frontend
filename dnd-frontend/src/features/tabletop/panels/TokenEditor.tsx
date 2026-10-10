@@ -66,7 +66,7 @@ function TokenForm({ token, onClose: close }: { token: TableToken; onClose: () =
   const upload = async (file: File | null) => {
     if (!file || !tableId) return;
     setUploading(true);
-    const url = await uploadTableImage(tableId, file);
+    const url = await uploadTableImage(tableId, file, "token");
     setUploading(false);
     if (url) set({ imageUrl: url });
   };
