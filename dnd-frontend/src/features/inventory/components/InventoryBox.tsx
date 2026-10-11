@@ -59,7 +59,9 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
   // Unequipping only switches the effect off, so edits made to it survive the next equip.
   const handleEquip = (item: InventoryItem) => {
     const existing = effectOf(item.equipmentId);
-    if (existing) return saveEffect({ ...existing, active: !existing.active });
+    if (existing?.active) return saveEffect({ ...existing, active: false });
+    // Equipping always goes through the editor, so the changes can be checked; saving switches it on.
+    if (existing) return setEquipDraft({ ...existing, active: true });
 
     const d = details.get(item.equipmentId ?? "");
     const name = item.equipmentName || d?.name || "Item";

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { ActionIcon, Button, Chip, Group, Menu, Stack, Table, Text, TextInput, ThemeIcon } from "@mantine/core";
 import {
   IconDots,
+  IconEye,
   IconPencil,
   IconPlayerPause,
   IconPlayerPlay,
@@ -19,6 +20,7 @@ import { useEffectActions } from "@features/profile/hooks/useEffectActions";
 import { EffectModal } from "@features/profile/components/modals/EffectModal";
 import { EffectSigil } from "@features/profile/components/EffectSigil";
 import { EFFECT_SOURCES } from "@features/profile/components/effectSources";
+import { EquipmentModal } from "@features/inventory/components/EquipmentModal";
 
 // Stable fallback, so the changes memo does not recompute every render.
 const NO_SITUATIONS: string[] = [];
@@ -56,6 +58,7 @@ export function EffectsPanel() {
   const [removing, setRemoving] = useState<CharacterEffect | null>(null);
   const [showQuiet, setShowQuiet] = useState(false);
   const [newSituation, setNewSituation] = useState("");
+  const [viewingItemId, setViewingItemId] = useState<string | null>(null);
   const character = useCurrentCharacter();
   const { updateCharacter } = useCharacterCoreActions();
   const situations = character ? situationsOf(character) : [];
@@ -145,6 +148,11 @@ export function EffectsPanel() {
                 <Menu.Item leftSection={<IconPencil size={14} />} onClick={() => setEditing(stored)}>
                   Edit
                 </Menu.Item>
+                {stored.equipmentId && (
+                  <Menu.Item leftSection={<IconEye size={14} />} onClick={() => setViewingItemId(stored.equipmentId!)}>
+                    View item
+                  </Menu.Item>
+                )}
                 <Menu.Item
                   leftSection={stored.active ? <IconPlayerPause size={14} /> : <IconPlayerPlay size={14} />}
                   onClick={() => saveEffect({ ...stored, active: !stored.active })}
@@ -345,6 +353,8 @@ export function EffectsPanel() {
         }}
         onDelete={editing && !editing.auto && effects.some((e) => e.id === editing.id) ? () => (setRemoving(editing), setEditing(null)) : undefined}
       />
+
+      <EquipmentModal opened={!!viewingItemId} onClose={() => setViewingItemId(null)} equipmentId={viewingItemId} />
 
       <BaseModal
         opened={!!removing}

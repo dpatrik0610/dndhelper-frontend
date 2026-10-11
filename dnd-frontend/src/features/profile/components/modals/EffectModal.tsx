@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { ActionIcon, Autocomplete, Button, Group, NumberInput, Select, Stack, Text, TextInput, Textarea } from "@mantine/core";
-import { IconPlus, IconTrash, IconWand } from "@tabler/icons-react";
+import { IconEye, IconPlus, IconTrash, IconWand } from "@tabler/icons-react";
 import { BaseModal } from "@components/BaseModal";
+import { EquipmentModal } from "@features/inventory/components/EquipmentModal";
 import type { CharacterEffect, EffectSource, ModifierType, StatModifier } from "@appTypes/Character/Effect";
 import { PROFICIENCY_OPTIONS, PROFICIENCY_OTHER, TARGET_OPTIONS, detectModifiers, situationsOf } from "@utils/effects";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
@@ -42,6 +43,7 @@ interface EffectModalProps {
 export function EffectModal({ opened, initial, onClose, onSave, onDelete }: EffectModalProps) {
   const [draft, setDraft] = useState<CharacterEffect | null>(initial);
   const [pasted, setPasted] = useState("");
+  const [viewingItem, setViewingItem] = useState(false);
   const character = useCurrentCharacter();
   const situations = character ? situationsOf(character) : [];
 
@@ -49,6 +51,7 @@ export function EffectModal({ opened, initial, onClose, onSave, onDelete }: Effe
     if (opened) {
       setDraft(initial);
       setPasted("");
+      setViewingItem(false);
     }
   }, [opened, initial]);
 
@@ -79,6 +82,14 @@ export function EffectModal({ opened, initial, onClose, onSave, onDelete }: Effe
             comboboxProps={{ zIndex: 3000 }}
           />
         </Group>
+
+        {draft.equipmentId && (
+          <Group>
+            <Button size="xs" variant="subtle" leftSection={<IconEye size={14} />} onClick={() => setViewingItem(true)}>
+              View item
+            </Button>
+          </Group>
+        )}
 
         <Text size="sm" fw={600}>
           What it changes
@@ -192,6 +203,9 @@ export function EffectModal({ opened, initial, onClose, onSave, onDelete }: Effe
           </Group>
         )}
       </Stack>
+
+      {/* The item's own details window opens over the editor. */}
+      <EquipmentModal opened={viewingItem} onClose={() => setViewingItem(false)} equipmentId={draft.equipmentId ?? null} />
     </BaseModal>
   );
 }
