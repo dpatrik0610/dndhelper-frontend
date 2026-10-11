@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Avatar, Button, FileButton, Group, Text, TextInput } from "@mantine/core";
+import { Avatar, Button, CloseButton, FileButton, Group, Text, TextInput } from "@mantine/core";
 import { IconDeviceFloppy, IconPhoto, IconUpload } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -9,6 +9,8 @@ import type { Character } from "@appTypes/Character/Character";
 import { SettingsSection } from "@features/settings/SettingsSection";
 
 const MAX_TOKEN_BYTES = 5 * 1024 * 1024;
+
+const isUploaded = (url: string) => /\/images\/tokens\/[0-9a-f]{32}\.\w+$/.test(url);
 
 /** Token artwork for one character. Mount with key={character.id} so the draft resets per character. */
 export function TokenSection({ character }: { character: Character }) {
@@ -20,6 +22,7 @@ export function TokenSection({ character }: { character: Character }) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const isDirty = draftUrl.trim() !== (character.imageUrl ?? "");
+  const uploaded = isUploaded(draftUrl);
 
   const applySaved = (saved: Character) => {
     setCharacters(characters.map((c) => (c.id === saved.id ? saved : c)));
@@ -98,10 +101,11 @@ export function TokenSection({ character }: { character: Character }) {
         </Avatar>
         <Group gap="xs" wrap="nowrap" align="center" style={{ flex: "1 1 240px", minWidth: 0 }}>
           <TextInput
-            placeholder="Paste an image URL (https://...) or upload"
-            value={draftUrl}
+            placeholder={uploaded ? "Uploaded image. Paste a URL to replace it" : "Paste an image URL (https://...) or upload"}
+            value={uploaded ? "" : draftUrl}
             onChange={(e) => setDraftUrl(e.currentTarget.value)}
             aria-label="Token image URL"
+            rightSection={uploaded ? <CloseButton size="sm" aria-label="Remove token image" onClick={() => setDraftUrl("")} /> : null}
             style={{ flex: 1, minWidth: 0 }}
             styles={{
               input: {
