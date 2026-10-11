@@ -231,7 +231,8 @@ export function AbilityScores() {
 
               <div style={{ width: "100%", columns: isMobile ? 1 : 2, columnGap: "var(--mantine-spacing-xs)" }}>
                 {enrichedSkills.map((skill) => {
-                  const isProf = !!skill.proficient;
+                  // Proficiency an effect grants counts too.
+                  const isProf = stats[`skill:${skill.name}`]?.proficient ?? !!skill.proficient;
                   const skillStat = stats[`skill:${skill.name}`];
                   const skillValue = skillStat?.value ?? skill.value;
 

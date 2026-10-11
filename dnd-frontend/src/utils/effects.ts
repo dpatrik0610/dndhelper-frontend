@@ -29,6 +29,8 @@ export interface StatResult {
   value: number;
   roll: RollMode;
   why: Reason[];
+  /** Saves and skills only: proficient after effects. */
+  proficient?: boolean;
 }
 
 /** An applied effect; conditions are derived from `character.conditions` and never stored. */
@@ -37,8 +39,10 @@ export type AppliedEffect = Omit<CharacterEffect, "source"> & { source: Characte
 export interface EffectiveStats {
   /** Keyed like modifier targets: "con", "save:con", "check:con", "skill:Stealth", "passive:Perception", "ac", ... */
   stats: Record<string, StatResult>;
-  /** Non-numeric effects ("Resistance to fire damage"). */
+  /** Non-numeric effects ("Resistance to fire damage"), granted proficiencies included. */
   notes: Reason[];
+  /** Weapon, armor and tool proficiencies effects grant: { source, detail: "Thieves' tools" }. */
+  proficiencies: Reason[];
   effects: AppliedEffect[];
 }
 
@@ -107,13 +111,29 @@ export function computeEffects(c: Character): EffectiveStats {
   const stats: Record<string, StatResult> = {};
 
   // Order: "min" raises the floor, bonuses add up, then "set" overrides everything (restrained: speed 0 even with boots).
-  const resolve = (key: string, base: number, targets: string[], carried?: { source: string; value: number }) => {
+  const pb = c.proficiencyBonus ?? 2;
+
+  // `proficient` (saves and skills) is whether the sheet already has proficiency; leave it out elsewhere.
+  const resolve = (key: string, base: number, targets: string[], carried?: { source: string; value: number }, proficient?: boolean) => {
     const own = mods.filter((m) => targets.includes(m.target));
     const why: Reason[] = [];
     let value = base;
     if (carried?.value) {
       value += carried.value;
       why.push({ source: carried.source, detail: signed(carried.value) });
+    }
+    // Proficiency never stacks: the bonus is added once, and only where the sheet lacks it.
+    let isProficient = proficient;
+    if (proficient !== undefined) {
+      for (const m of own.filter((o) => o.type === "proficiency")) {
+        if (isProficient) {
+          why.push({ source: m.source, detail: "proficiency (already proficient, no change)" });
+        } else {
+          value += pb;
+          isProficient = true;
+          why.push({ source: m.source, detail: `proficiency ${signed(pb)}` });
+        }
+      }
     }
     for (const m of own) {
       if (m.value == null) continue;
@@ -136,7 +156,7 @@ export function computeEffects(c: Character): EffectiveStats {
     for (const m of [...adv, ...dis]) why.push({ source: m.source, detail: m.type });
     // 5e: any advantage and any disadvantage cancel out.
     const roll: RollMode = adv.length && !dis.length ? "advantage" : dis.length && !adv.length ? "disadvantage" : "normal";
-    return (stats[key] = { base, value, roll, why });
+    return (stats[key] = { base, value, roll, why, ...(isProficient !== undefined && { proficient: isProficient }) });
   };
 
   for (const a of ABILITIES) resolve(a.key, c.abilityScores?.[a.key] ?? 10, [a.key]);
@@ -152,11 +172,14 @@ export function computeEffects(c: Character): EffectiveStats {
   };
 
   for (const a of ABILITIES) {
-    resolve(`save:${a.key}`, c.savingThrows?.[a.save] ?? 0, [`save:${a.key}`, "saves"], fromAbility(a.key));
+    const save = c.savingThrows?.[a.save] ?? 0;
+    // Saves are stored as plain numbers: one at mod + proficiency bonus or more counts as proficient.
+    const saveProficient = save >= abilityMod(stats[a.key].base) + pb;
+    resolve(`save:${a.key}`, save, [`save:${a.key}`, "saves"], fromAbility(a.key), saveProficient);
     resolve(`check:${a.key}`, abilityMod(stats[a.key].base), ["checks"], fromAbility(a.key));
   }
   for (const s of c.skills ?? []) {
-    resolve(`skill:${s.name}`, s.value, [`skill:${s.name}`, "checks"], fromAbility(SKILL_ABILITY[s.name] ?? "str"));
+    resolve(`skill:${s.name}`, s.value, [`skill:${s.name}`, "checks"], fromAbility(SKILL_ABILITY[s.name] ?? "str"), !!s.proficient);
   }
 
   resolve("initiative", c.initiative ?? 0, ["initiative"], fromAbility("dex"));
@@ -178,8 +201,14 @@ export function computeEffects(c: Character): EffectiveStats {
     stats[`passive:${name}`] = { base, value: base + shift, roll: "normal", why: skill?.why ?? [] };
   }
 
-  const notes = mods.filter((m) => m.type === "note" && m.text).map((m) => ({ source: m.source, detail: m.text! }));
-  return { stats, notes, effects };
+  const proficiencies = mods
+    .filter((m) => m.type === "proficiency" && !m.target && m.text?.trim())
+    .map((m) => ({ source: m.source, detail: m.text!.trim() }));
+  const notes = [
+    ...mods.filter((m) => m.type === "note" && m.text).map((m) => ({ source: m.source, detail: m.text! })),
+    ...proficiencies.map((p) => ({ ...p, detail: `Proficiency: ${p.detail}` })),
+  ];
+  return { stats, notes, proficiencies, effects };
 }
 
 // ---------- Labels ----------
@@ -222,6 +251,16 @@ export const TARGET_OPTIONS = [
   },
 ];
 
+/** Select value for a weapon, armor or tool proficiency; it is stored as no target plus the name in `text`. */
+export const PROFICIENCY_OTHER = "other";
+
+/** What a proficiency can be in: a save, a skill, or something named. */
+export const PROFICIENCY_OPTIONS = [
+  TARGET_OPTIONS[1],
+  { group: "Skills", items: DEFAULT_SKILLS.map((s) => ({ value: `skill:${s.name}`, label: s.name })) },
+  { group: "Other", items: [{ value: PROFICIENCY_OTHER, label: "Weapon, armor or tool…" }] },
+];
+
 export function describeModifier(m: StatModifier): string {
   const when = m.when?.trim() ? ` when ${m.when.trim()}` : "";
   return describeChange(m) + when;
@@ -235,6 +274,7 @@ function describeChange(m: StatModifier): string {
     case "min": return `${target} at least ${m.value ?? 0}`;
     case "advantage": return `Advantage on ${target}`;
     case "disadvantage": return `Disadvantage on ${target}`;
+    case "proficiency": return m.target ? `Proficiency in ${target}` : `Proficiency: ${m.text ?? ""}`;
     case "note": return m.text ?? "";
   }
 }
@@ -247,7 +287,7 @@ const TO = "\\s*(?:bonus\\s+)?(?:to\\s+)?(?:your\\s+|their\\s+|all\\s+|the\\s+)?
 const AC = "(?:AC|armou?r class)\\b";
 // Bonuses that only apply sometimes ("+2 to saves against poison") are left out instead of applied all the time.
 const SITUATIONAL =
-  /\b(against|when|whenever|if|on a hit|with|until|once|made to|based on|to resist|removes?|ignores?|chosen|choose|one of|reaction|expend)\b/i;
+  /\b(against|when|whenever|if|on a hit|with|until|once|made to|based on|to resist|removes?|ignores?|chosen|choose|choice|one of|reaction|expend)\b/i;
 // The trigger of a consumable is not a condition on its effect.
 const USE_TRIGGER = /\b(?:when|after|once) you (?:drink|consume|eat|swallow|apply|use|inhale)\b[^,]*,/gi;
 // SRD armor that imposes disadvantage on Stealth; its descriptions are empty, so go by name.
@@ -277,7 +317,8 @@ export function detectModifiers(item: { name?: string; description?: string[]; t
   if (enchant && ARMOR_NAME.test(name)) add({ target: "ac", type: "bonus", value: Number(enchant[1]) });
 
   for (const sentence of (item.description ?? []).join("\n").split(/(?<=[.;!?])\s+|\n+/)) {
-    const clean = sentence.replace(USE_TRIGGER, "");
+    // "proficiency with heavy armor" is not situational, though "with" usually is.
+    const clean = sentence.replace(USE_TRIGGER, "").replace(/proficiency with\b/gi, "proficiency in");
     if (!SITUATIONAL.test(clean)) parseSentence(clean, add);
   }
   return out;
@@ -317,6 +358,28 @@ function parseSentence(text: string, add: (m: StatModifier) => void) {
     bonus("speed", `-${g[1]}`));
   rule(`speed\\s+(?:becomes|is|drops to)\\s+0\\b`, () => add({ target: "speed", type: "set", value: 0 }));
   rule(`${N}\\s*(?:feet|ft\\.?)?\\s*(?:to\\s+)?(?:your\\s+)?(?:walking\\s+|movement\\s+)?speed`, (g) => bonus("speed", g[1]));
+
+  // "You gain proficiency in Wisdom saving throws and the Stealth skill" / "...with heavy armor" ("with" was turned into "in").
+  rule(`\\bproficiency in ([^.;]+)`, (g) => {
+    let phrase = g[1];
+    phrase = phrase.replace(new RegExp(`\\b(${AB})\\s+saving throws?`, "gi"), (_, a: string) => {
+      add({ target: `save:${toAbility(a)}`, type: "proficiency" });
+      return " ";
+    });
+    if (/\bsaving throws?\b/i.test(phrase)) {
+      add({ target: "saves", type: "proficiency" });
+      phrase = phrase.replace(/\bsaving throws?\b/gi, " ");
+    }
+    for (const skill of SKILL_STEMS) {
+      if (skill.re.test(phrase)) {
+        add({ target: `skill:${skill.name}`, type: "proficiency" });
+        phrase = phrase.replace(skill.re, " ");
+      }
+    }
+    // What is left names a weapon, armor or tool: "heavy armor", "thieves' tools".
+    const rest = phrase.replace(/\b(and|or|the|skills?|a|an)\b|[,()]/gi, " ").replace(/\s+/g, " ").trim();
+    if (/[a-z]{3}/i.test(rest) && rest.length <= 40) add({ target: "", type: "proficiency", text: rest[0].toUpperCase() + rest.slice(1) });
+  });
 
   rule(`\\b(dis)?advantage on ([^.;]+)`, (g) => {
     const type = g[1] ? "disadvantage" : "advantage";

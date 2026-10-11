@@ -91,6 +91,42 @@ assert.equal(computeEffects({ ...boots, activeSituations: ["swamp"] }).stats.spe
 assert.equal(computeEffects({ ...boots, activeSituations: ["Desert"] }).stats.speed.value, 40);
 assert.deepEqual(situationsOf({ ...boots, activeSituations: ["Raging"] }), ["Swamp", "Desert", "Raging"]);
 
+assert.deepEqual(detect("Sage's Circlet", "You gain proficiency in Wisdom saving throws and the Insight skill."), [
+  { target: "save:wis", type: "proficiency" },
+  { target: "skill:Insight", type: "proficiency" },
+]);
+assert.deepEqual(detect("Gauntlets", "While wearing these, you have proficiency with heavy armor."), [
+  { target: "", type: "proficiency", text: "Heavy armor" },
+]);
+assert.deepEqual(detect("Tome", "You gain proficiency in two skills of your choice."), [], "a choice is the player's to make");
+
+const learner = {
+  ...defaultCharacter,
+  proficiencyBonus: 3,
+  abilityScores: { ...defaultCharacter.abilityScores, wis: 14, dex: 16 },
+  savingThrows: { ...defaultCharacter.savingThrows, wisdom: 2, dexterity: 6 },
+  skills: defaultCharacter.skills.map((s) => (s.name === "Insight" ? { ...s, value: 2 } : s.name === "Stealth" ? { ...s, value: 6, proficient: true } : s)),
+  effects: [{
+    id: "p", name: "Sage's Circlet", source: "item" as const, active: true,
+    modifiers: [
+      { target: "save:wis", type: "proficiency" as const },
+      { target: "save:wis", type: "proficiency" as const },
+      { target: "save:dex", type: "proficiency" as const },
+      { target: "skill:Insight", type: "proficiency" as const },
+      { target: "skill:Stealth", type: "proficiency" as const },
+      { target: "", type: "proficiency" as const, text: "Thieves' tools" },
+    ],
+  }],
+};
+const lfx = computeEffects(learner);
+assert.equal(lfx.stats["save:wis"].value, 5, "+PB once, never twice");
+assert.equal(lfx.stats["save:wis"].proficient, true);
+assert.equal(lfx.stats["save:dex"].value, 6, "already proficient (3 DEX + 3 PB): no change");
+assert.equal(lfx.stats["skill:Insight"].value, 5);
+assert.equal(lfx.stats["skill:Stealth"].value, 6, "skill already proficient");
+assert.equal(lfx.stats["passive:Insight"].value, 13, "passive follows the skill");
+assert.deepEqual(lfx.proficiencies, [{ source: "Sage's Circlet", detail: "Thieves' tools" }]);
+
 const bags = [{ id: "a", name: "Backpack" }, { id: "b", name: "Aria's Equipment" }];
 assert.equal(wornInventoryId(undefined, bags), "b", "guessed from the name");
 assert.equal(wornInventoryId("a", bags), "a", "the pick wins");

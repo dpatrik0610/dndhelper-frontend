@@ -3,6 +3,7 @@ import { Group, Popover, Portal, Stack, Text, Divider, ActionIcon, Button, Toolt
 import CustomBadge from "@components/common/CustomBadge";
 import type { Character } from "@appTypes/Character/Character";
 import { useIsMobile } from "@hooks/useIsMobile";
+import { computeEffects } from "@utils/effects";
 import { ActionBubble } from "./ActionBubble";
 import classes from "./ActionRibbonPanel.module.css";
 
@@ -88,15 +89,26 @@ function CountBadge({ count, style }: { count: number; style?: CSSProperties }) 
 }
 
 function ProficienciesList({ character }: { character: Character }) {
+  // Proficiencies items and other effects grant, unless the sheet already lists them.
+  const own = new Set((character.proficiencies ?? []).map((p) => p.trim().toLowerCase()));
+  const granted = computeEffects(character).proficiencies.filter((p) => !own.has(p.detail.toLowerCase()));
+
   return (
     <Stack gap="xs">
       <Text fw={300} size="xs" tt="uppercase" style={sectionLabel}>
         Weapons & Tools
       </Text>
-      {character.proficiencies?.length ? (
+      {character.proficiencies?.length || granted.length ? (
         <Group gap={6}>
-          {character.proficiencies.map((p: string, i: number) => (
+          {(character.proficiencies ?? []).map((p: string, i: number) => (
             <CustomBadge key={i} label={p} variant="themed" radius="sm" />
+          ))}
+          {granted.map((p) => (
+            <Tooltip key={`${p.source}:${p.detail}`} label={`From ${p.source}`} withArrow>
+              <span style={{ display: "inline-flex", borderBottom: "1px dotted currentColor" }}>
+                <CustomBadge label={p.detail} variant="themed" radius="sm" />
+              </span>
+            </Tooltip>
           ))}
         </Group>
       ) : (

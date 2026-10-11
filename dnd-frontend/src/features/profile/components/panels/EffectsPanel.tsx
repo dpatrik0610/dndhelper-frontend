@@ -43,6 +43,7 @@ const changeLabel = (m: StatModifier) => {
     case "min": return `≥ ${m.value ?? 0}`;
     case "advantage": return "Advantage";
     case "disadvantage": return "Disadvantage";
+    case "proficiency": return "Proficiency";
     case "note": return m.text ?? "";
   }
 };
@@ -79,7 +80,8 @@ export function EffectsPanel() {
     () =>
       (fx?.effects ?? [])
         .flatMap((e) =>
-          e.modifiers.filter((m) => m.type !== "note").map((m) => ({ m, source: e.name, applies: modifierApplies({ activeSituations }, m) }))
+          // Named proficiencies (heavy armor) have no stat; they are listed under "Other effects".
+          e.modifiers.filter((m) => m.type !== "note" && !(m.type === "proficiency" && !m.target)).map((m) => ({ m, source: e.name, applies: modifierApplies({ activeSituations }, m) }))
         )
         .sort((a, b) => (TARGET_ORDER.get(a.m.target) ?? 999) - (TARGET_ORDER.get(b.m.target) ?? 999) || Number(b.applies) - Number(a.applies)),
     [fx, activeSituations]

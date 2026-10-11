@@ -3,7 +3,7 @@ import { ActionIcon, Autocomplete, Button, Group, NumberInput, Select, Stack, Te
 import { IconPlus, IconTrash, IconWand } from "@tabler/icons-react";
 import { BaseModal } from "@components/BaseModal";
 import type { CharacterEffect, EffectSource, ModifierType, StatModifier } from "@appTypes/Character/Effect";
-import { TARGET_OPTIONS, detectModifiers, situationsOf } from "@utils/effects";
+import { PROFICIENCY_OPTIONS, PROFICIENCY_OTHER, TARGET_OPTIONS, detectModifiers, situationsOf } from "@utils/effects";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 
 const SOURCES: { value: EffectSource; label: string }[] = [
@@ -20,10 +20,15 @@ const TYPES: { value: ModifierType; label: string }[] = [
   { value: "set", label: "Set to" },
   { value: "advantage", label: "Advantage" },
   { value: "disadvantage", label: "Disadvantage" },
+  { value: "proficiency", label: "Proficiency" },
   { value: "note", label: "Note" },
 ];
 
 const hasNumber = (t: ModifierType) => t === "bonus" || t === "min" || t === "set";
+
+// A proficiency is only in a save or a skill; any other target is cleared so the picker starts empty.
+const changeType = (m: StatModifier, type: ModifierType): Partial<StatModifier> =>
+  type === "proficiency" && !/^(save:|skill:|saves$)/.test(m.target) ? { type, target: "", text: undefined } : { type };
 
 interface EffectModalProps {
   opened: boolean;
@@ -55,7 +60,7 @@ export function EffectModal({ opened, initial, onClose, onSave, onDelete }: Effe
 
   const handleSave = () => {
     const modifiers = draft.modifiers
-      .filter((m) => (m.type === "note" ? !!m.text?.trim() : !!m.target))
+      .filter((m) => (m.type === "note" || (m.type === "proficiency" && !m.target) ? !!m.text?.trim() : !!m.target))
       .map((m) => ({ ...m, when: m.when?.trim() || undefined }));
     onSave({ ...draft, name: draft.name.trim() || "Effect", modifiers });
   };
@@ -95,11 +100,33 @@ export function EffectModal({ opened, initial, onClose, onSave, onDelete }: Effe
               value={m.type}
               allowDeselect={false}
               w={140}
-              onChange={(v) => v && patchMod(i, { type: v as ModifierType })}
+              onChange={(v) => v && patchMod(i, changeType(m, v as ModifierType))}
               comboboxProps={{ zIndex: 3000 }}
             />
             {m.type === "note" ? (
               <TextInput aria-label="Note" style={{ flex: 1 }} value={m.text ?? ""} onChange={(e) => patchMod(i, { text: e.currentTarget.value })} />
+            ) : m.type === "proficiency" ? (
+              <>
+                <Select
+                  aria-label="Proficient in"
+                  placeholder="Proficient in…"
+                  data={PROFICIENCY_OPTIONS}
+                  value={m.target || (m.text !== undefined ? PROFICIENCY_OTHER : null)}
+                  searchable
+                  style={{ flex: 1 }}
+                  onChange={(v) => patchMod(i, v === PROFICIENCY_OTHER ? { target: "", text: m.text ?? "" } : { target: v ?? "", text: undefined })}
+                  comboboxProps={{ zIndex: 3000 }}
+                />
+                {!m.target && m.text !== undefined && (
+                  <TextInput
+                    aria-label="Weapon, armor or tool"
+                    placeholder="e.g. Heavy armor, Thieves' tools"
+                    style={{ flex: 1 }}
+                    value={m.text}
+                    onChange={(e) => patchMod(i, { text: e.currentTarget.value })}
+                  />
+                )}
+              </>
             ) : (
               <Select
                 aria-label="Applies to"

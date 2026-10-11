@@ -194,10 +194,10 @@ function Checks({
             })}
           {tab === "skills" &&
             skills.map((s) => {
-              const { value, roll } = stats[`skill:${s.name}`];
+              const { value, roll, proficient } = stats[`skill:${s.name}`];
               return (
                 <UnstyledButton key={s.name} className="tt-check" onClick={() => onCheck(`${s.name} check`, value, roll)}>
-                  <span className={`tt-check-prof${s.proficient ? " on" : ""}`} aria-label={s.proficient ? "Proficient" : undefined} />
+                  <span className={`tt-check-prof${proficient ? " on" : ""}`} aria-label={proficient ? "Proficient" : undefined} />
                   <span className="tt-check-name">{s.name}</span>
                   <span className="tt-check-ability">{abilityOf(s.name)}</span>
                   <span className="tt-check-mod">{signed(value)}</span>
