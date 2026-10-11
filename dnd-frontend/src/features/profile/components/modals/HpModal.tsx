@@ -5,6 +5,7 @@ import { updateCharacter } from "@services/characterService";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { BaseModal } from "@components/BaseModal";
+import { computeEffects } from "@utils/effects";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 
 interface HpModalProps {
@@ -28,7 +29,7 @@ export function HpModal({ opened, onClose }: HpModalProps) {
   if (!character) return null;
 
   const currentHp = character.hitPoints ?? 0;
-  const maxHp = character.maxHitPoints ?? currentHp;
+  const maxHp = computeEffects(character).stats.maxHp.value || currentHp;
   const tempHp = character.temporaryHitPoints ?? 0;
 
   const handleApply = async () => {

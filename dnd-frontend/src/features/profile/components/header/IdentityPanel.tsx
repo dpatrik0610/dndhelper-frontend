@@ -2,6 +2,7 @@ import { Box, Stack, Text } from "@mantine/core";
 import { TopPanel } from "./TopPanel";
 import { AvatarHpCrest } from "./AvatarHpCrest";
 import type { Character } from "@appTypes/Character/Character";
+import { computeEffects } from "@utils/effects";
 
 interface IdentityPanelProps {
   character: Character | null;
@@ -10,7 +11,7 @@ interface IdentityPanelProps {
 
 export function IdentityPanel({ character, isMobile }: IdentityPanelProps) {
   const currentHp = character?.hitPoints ?? 0;
-  const maxHp = character?.maxHitPoints ?? 100;
+  const maxHp = character ? computeEffects(character).stats.maxHp.value : 100;
   const tempHp = character?.temporaryHitPoints ?? 0;
   const totalHpStr = tempHp > 0 ? `${currentHp} + ${tempHp} / ${maxHp} HP` : `${currentHp} / ${maxHp} HP`;
 

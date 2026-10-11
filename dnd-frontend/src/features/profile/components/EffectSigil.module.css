@@ -1,0 +1,117 @@
+/* The source icon doubles as the on/off control: dormant stone when off, a lit rune when active. */
+.sigil {
+  --glow: color-mix(in srgb, var(--sigil) 45%, transparent);
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px dashed var(--theme-border-subtle, rgba(255, 255, 255, 0.16));
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: color 0.25s, border-color 0.25s, background 0.3s, box-shadow 0.35s, transform 0.15s;
+}
+
+.sigil svg {
+  filter: grayscale(1);
+  transition: filter 0.25s;
+}
+
+/* Rune ring around the stone; it turns a quarter on hover. */
+.sigil::before {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 1px dotted rgba(255, 255, 255, 0.08);
+  transition: border-color 0.3s, transform 0.6s ease;
+}
+
+.sigil:hover {
+  border-color: color-mix(in srgb, var(--sigil) 55%, transparent);
+  color: color-mix(in srgb, var(--sigil) 70%, white);
+}
+
+.sigil:hover svg {
+  filter: grayscale(0.3);
+}
+
+.sigil:hover::before {
+  transform: rotate(90deg);
+}
+
+.sigil:active {
+  transform: scale(0.92);
+}
+
+.sigil:focus-visible {
+  outline: 2px solid var(--sigil);
+  outline-offset: 6px;
+}
+
+.sigil[data-active="true"] {
+  color: var(--sigil);
+  border: 1px solid color-mix(in srgb, var(--sigil) 70%, transparent);
+  background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--sigil) 38%, transparent), transparent 72%);
+  box-shadow: 0 0 14px var(--glow), inset 0 0 8px var(--glow);
+}
+
+.sigil[data-active="true"] svg {
+  filter: drop-shadow(0 0 4px var(--glow));
+}
+
+.sigil[data-active="true"]::before {
+  border-color: color-mix(in srgb, var(--sigil) 55%, transparent);
+}
+
+/* Conditions: always lit, not a control. */
+.static,
+.static:hover {
+  cursor: default;
+  color: var(--sigil);
+}
+
+.static:hover::before {
+  transform: none;
+}
+
+/* One ring of light when an effect is switched on. */
+.burst {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--sigil);
+  pointer-events: none;
+  animation: ignite 0.5s ease-out forwards;
+}
+
+@keyframes ignite {
+  from {
+    transform: scale(0.8);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .burst {
+    display: none;
+  }
+
+  .sigil,
+  .sigil::before,
+  .sigil svg {
+    transition: none;
+  }
+
+  .sigil:hover::before {
+    transform: none;
+  }
+}

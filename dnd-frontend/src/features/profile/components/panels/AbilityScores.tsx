@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import type { Skill } from "@appTypes/Character/Skill";
 import {
   Grid,
@@ -6,14 +6,13 @@ import {
   Stack,
   Group,
   Text,
-  Button,
   SimpleGrid,
 } from "@mantine/core";
-import { RadarChart } from "@mantine/charts";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useCurrentCharacter } from "@store/character/characterSelectors";
-import AbilityScoreTooltip from "./AbilityScoreToolTip";
+import { useCurrentCharacter, useEffectiveStats } from "@store/character/characterSelectors";
+import { EffectHint, RollMark } from "@features/profile/components/EffectHint";
+import { changedColor } from "@utils/effects";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
 import CustomBadge from "@components/common/CustomBadge";
@@ -23,8 +22,8 @@ const NO_SKILLS: Skill[] = [];
 
 export function AbilityScores() {
   const character = useCurrentCharacter()!;
+  const { stats } = useEffectiveStats()!;
   const isMobile = useIsMobile();
-  const [opened, setOpened] = useState(false);
 
   const skills = character.skills ?? NO_SKILLS;
 
@@ -48,17 +47,6 @@ export function AbilityScores() {
     }).sort((a, b) => a.name.localeCompare(b.name));
   }, [skills]);
 
-  const radarData = useMemo(
-    () => [
-      { ability: "STR", score: character.abilityScores.str },
-      { ability: "DEX", score: character.abilityScores.dex },
-      { ability: "CON", score: character.abilityScores.con },
-      { ability: "INT", score: character.abilityScores.int },
-      { ability: "WIS", score: character.abilityScores.wis },
-      { ability: "CHA", score: character.abilityScores.cha },
-    ],
-    [character.abilityScores]
-  );
 
   const getMod = (score: number) => {
     return Math.floor((score - 10) / 2);
@@ -105,8 +93,8 @@ export function AbilityScores() {
 
               <SimpleGrid cols={{ base: 3, md: 1 }} spacing="xs">
                 {abilities.map((ab) => {
-                  const score = character.abilityScores[ab.key];
-                  const mod = getMod(score);
+                  const stat = stats[ab.key];
+                  const mod = getMod(stat.value);
 
                   return (
                     <Paper
@@ -145,17 +133,19 @@ export function AbilityScores() {
                       </Group>
 
                       {/* Modifier */}
-                      <Text
-                        fw={700}
-                        style={{
-                          fontSize: isMobile ? "22px" : "26px",
-                          color: "var(--theme-color-accent-primary, #f59e0b)",
-                          lineHeight: 1,
-                          margin: "4px 0",
-                        }}
-                      >
-                        {mod >= 0 ? `+${mod}` : mod}
-                      </Text>
+                      <EffectHint stat={stat}>
+                        <Text
+                          fw={700}
+                          style={{
+                            fontSize: isMobile ? "22px" : "26px",
+                            color: changedColor(stat) ?? "var(--theme-color-accent-primary, #f59e0b)",
+                            lineHeight: 1,
+                            margin: "4px 0",
+                          }}
+                        >
+                          {mod >= 0 ? `+${mod}` : mod}
+                        </Text>
+                      </EffectHint>
 
                       {/* Base Score Capsule */}
                       <Text
@@ -171,7 +161,7 @@ export function AbilityScores() {
                           letterSpacing: "0.5px",
                         }}
                       >
-                        {score} BASE
+                        {stat.value === stat.base ? `${stat.base} BASE` : `${stat.base} → ${stat.value}`}
                       </Text>
                     </Paper>
                   );
@@ -198,7 +188,8 @@ export function AbilityScores() {
 
               <SimpleGrid cols={{ base: 3, sm: 6 }} spacing="xs" style={{ width: "100%" }}>
                 {abilities.map((ab) => {
-                  const save = character.savingThrows?.[ab.saveKey] ?? 0;
+                  const saveStat = stats[`save:${ab.key}`];
+                  const save = saveStat.value;
                   return (
                     <Group
                       key={ab.saveKey}
@@ -214,9 +205,12 @@ export function AbilityScores() {
                       <Text size="xs" fw={700} style={{ color: "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))", letterSpacing: "1px" }}>
                         {ab.short}
                       </Text>
-                      <Text size="sm" fw={700} style={{ color: "var(--theme-color-accent-primary, #f59e0b)" }}>
-                        {save >= 0 ? `+${save}` : save}
-                      </Text>
+                      <EffectHint stat={saveStat}>
+                        <RollMark roll={saveStat.roll} />
+                        <Text size="sm" fw={700} style={{ color: changedColor(saveStat) ?? "var(--theme-color-accent-primary, #f59e0b)" }}>
+                          {save >= 0 ? `+${save}` : save}
+                        </Text>
+                      </EffectHint>
                     </Group>
                   );
                 })}
@@ -238,6 +232,8 @@ export function AbilityScores() {
               <div style={{ width: "100%", columns: isMobile ? 1 : 2, columnGap: "var(--mantine-spacing-xs)" }}>
                 {enrichedSkills.map((skill) => {
                   const isProf = !!skill.proficient;
+                  const skillStat = stats[`skill:${skill.name}`];
+                  const skillValue = skillStat?.value ?? skill.value;
 
                   const rowBg = isProf
                     ? "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.05))"
@@ -330,17 +326,21 @@ export function AbilityScores() {
                       </Group>
 
                       {/* Right side modifier text */}
-                      <Text
-                        size="sm"
-                        fw={700}
-                        style={{
-                          color: isProf
-                            ? "#121214"
-                            : "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
-                        }}
-                      >
-                        {skill.value >= 0 ? `+${skill.value}` : skill.value}
-                      </Text>
+                      <EffectHint stat={skillStat}>
+                        <RollMark roll={skillStat?.roll} />
+                        <Text
+                          size="sm"
+                          fw={700}
+                          style={{
+                            // Green/red would be unreadable on the gold proficient row; the dotted hint still marks it.
+                            color: isProf
+                              ? "#121214"
+                              : changedColor(skillStat) ?? "var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))",
+                          }}
+                        >
+                          {skillValue >= 0 ? `+${skillValue}` : skillValue}
+                        </Text>
+                      </EffectHint>
                     </Group>
                   );
                 })}
@@ -349,65 +349,6 @@ export function AbilityScores() {
           </Grid.Col>
 
         </Grid>
-
-        {/* COLLAPSIBLE RADAR CHART TOGGLER */}
-        <Button
-          fullWidth
-          onClick={() => setOpened((o) => !o)}
-          style={{
-            background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
-            border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-            color: "var(--theme-color-accent-primary, #fff)",
-            fontWeight: 700,
-            transition: "all 0.2s ease",
-            fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-            fontSize: "11px",
-            letterSpacing: "1.5px",
-            textTransform: "uppercase",
-            height: "40px",
-            marginTop: "12px",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.08))";
-            e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.04))";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          {opened ? "Hide Radar Chart" : "Show Radar Chart"}
-        </Button>
-
-        {opened && (
-          <div style={{ minHeight: "35vh", width: "100%" }}>
-            <RadarChart
-              h="35vh"
-              w="100%"
-              data={radarData}
-              dataKey="ability"
-              series={[{ name: "score", color: "var(--theme-color-accent-primary)", opacity: 0.15 }]}
-              withDots
-              textColor="rgba(255, 255, 255, 0.8)"
-              withTooltip
-              tooltipProps={{ content: <AbilityScoreTooltip /> }}
-              radarProps={{
-                stroke: "var(--theme-color-accent-primary)",
-                fill: "var(--theme-gradient-active)",
-                filter: "drop-shadow(0 0 6px var(--theme-border-glow))",
-                strokeWidth: 2,
-              }}
-              dotProps={{
-                r: 6,
-                stroke: "#fff",
-                strokeWidth: 2,
-                fill: "var(--theme-color-accent-primary)",
-              }}
-              gridColor="rgba(255, 255, 255, 0.15)"
-              withPolarAngleAxis
-            />
-          </div>
-        )}
 
       </Stack>
     </ExpandableSection>

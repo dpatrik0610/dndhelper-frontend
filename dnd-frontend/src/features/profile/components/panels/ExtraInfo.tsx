@@ -10,7 +10,8 @@ import {
   IconUserCircle,
 } from "@tabler/icons-react";
 import { MarkdownRenderer } from "@components/MarkdownRender";
-import { useCurrentCharacter } from "@store/character/characterSelectors";
+import { useCurrentCharacter, useEffectiveStats } from "@store/character/characterSelectors";
+import { physicalLimits } from "@utils/checkMath";
 import classes from "./ExtraInfo.module.css";
 
 function Panel({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
@@ -29,6 +30,7 @@ const Empty = ({ children }: { children: ReactNode }) => <p className={`${classe
 
 export function ExtraInfo() {
   const character = useCurrentCharacter()!;
+  const { stats } = useEffectiveStats()!;
 
   const attributes = [
     ["Background", character.background],
@@ -39,7 +41,7 @@ export function ExtraInfo() {
     ["Hair", character.hair],
     ["Skin", character.skin],
     ["Alignment", character.alignment],
-    ["Carrying Capacity", character.abilityScores?.str ? `${character.abilityScores.str * 15} lbs` : ""],
+    ["Carrying Capacity", `${physicalLimits(stats.str.value, stats.con.value, character.size).carry} lbs`],
   ].filter(([, value]) => value?.trim());
 
   const traits = [

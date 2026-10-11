@@ -1,0 +1,297 @@
+.columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 48em) {
+  .columns {
+    grid-template-columns: 2fr 3fr;
+  }
+}
+
+.heading {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* name | modifier | bar | percent */
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) 30px minmax(56px, 1.4fr) 40px;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: default;
+}
+
+.row:hover {
+  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.04));
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.mod {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: var(--dc, var(--theme-color-accent-primary, #f59e0b));
+  transition: width 0.3s ease, background 0.3s;
+}
+
+/* The chance before advantage/disadvantage, so the row shows what the effect is worth. */
+.tick {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--theme-color-text-primary, #fff);
+  opacity: 0.7;
+}
+
+.pct {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 48em) {
+  .tiles {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.tile {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
+  background: var(--theme-bg-card, rgba(255, 255, 255, 0.015));
+}
+
+.tileLabel {
+  font-size: 12px;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.tileValue {
+  margin-top: 2px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.tileSub {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.55));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+}
+
+/* ---------- DC picker: a d20 face per difficulty ---------- */
+
+.dcGroup {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@media (min-width: 48em) {
+  .dcGroup {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.dc {
+  --tier-soft: color-mix(in srgb, var(--tier) 16%, transparent);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 12px;
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.25s;
+  user-select: none;
+}
+
+.dc:hover {
+  border-color: color-mix(in srgb, var(--tier) 45%, transparent);
+}
+
+.dc:has(.dcInput:checked) {
+  border-color: color-mix(in srgb, var(--tier) 70%, transparent);
+  background: radial-gradient(120% 140% at 0% 50%, var(--tier-soft), transparent 70%);
+}
+
+.dc:has(.dcInput:focus-visible) {
+  outline: 2px solid var(--tier);
+  outline-offset: 2px;
+}
+
+/* The native radio stays for keyboard and screen readers, out of sight. */
+.dcInput {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+/* Glow lives on this wrapper because clip-path would cut a box-shadow off the die itself. */
+.dieWrap {
+  flex-shrink: 0;
+  display: grid;
+  transition: filter 0.3s;
+}
+
+.die {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 44px;
+  clip-path: polygon(50% 0, 96% 25%, 96% 75%, 50% 100%, 4% 75%, 4% 25%);
+  background: rgba(255, 255, 255, 0.07);
+  transition: background 0.3s, transform 0.3s ease;
+}
+
+/* The front facet of a d20. */
+.die::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(50% 14%, 86% 70%, 14% 70%);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.dieNum {
+  position: relative;
+  margin-top: 4px;
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--tier);
+}
+
+.dc:hover .die {
+  transform: rotate(-10deg);
+}
+
+.dc:has(.dcInput:checked) .dieWrap {
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--tier) 55%, transparent));
+}
+
+.dc:has(.dcInput:checked) .die {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--tier) 70%, white), var(--tier));
+  animation: tumble 0.5s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+
+.dc:has(.dcInput:checked) .die::before {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.dc:has(.dcInput:checked) .dieNum {
+  color: #16130f;
+}
+
+@keyframes tumble {
+  from {
+    transform: rotate(-220deg) scale(0.6);
+  }
+  to {
+    transform: rotate(0) scale(1);
+  }
+}
+
+.dcText {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.dcLabel {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.pips {
+  display: flex;
+  gap: 3px;
+}
+
+.pip {
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pip[data-on="true"] {
+  background: var(--tier);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dc:has(.dcInput:checked) .die {
+    animation: none;
+  }
+
+  .die,
+  .dc:hover .die {
+    transition: none;
+    transform: none;
+  }
+}

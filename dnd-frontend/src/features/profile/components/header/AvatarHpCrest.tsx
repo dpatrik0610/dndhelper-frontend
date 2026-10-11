@@ -1,5 +1,6 @@
 import { Box, Avatar, ThemeIcon } from "@mantine/core";
 import type { Character } from "@appTypes/Character/Character";
+import { computeEffects } from "@utils/effects";
 import { IconAward } from "@tabler/icons-react";
 
 interface AvatarHpCrestProps {
@@ -13,7 +14,7 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
   const avatarSize = size - strokeWidth * 2 - (isMobile ? 6 : 8);
 
   const current = character?.hitPoints ?? 0;
-  const max = character?.maxHitPoints ?? 100;
+  const max = character ? computeEffects(character).stats.maxHp.value : 100;
   const temp = Math.max(0, character?.temporaryHitPoints ?? 0);
   const maxHp = Math.max(1, max);
 

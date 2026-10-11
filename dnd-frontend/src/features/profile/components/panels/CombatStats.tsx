@@ -10,34 +10,40 @@ import {
 } from "@tabler/icons-react";
 import { ExpandableSection } from "@components/ExpandableSection";
 
-import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
+import { useCurrentCharacter, useCharacterCoreActions, useEffectiveStats } from "@store/character/characterSelectors";
+import { EffectHint } from "@features/profile/components/EffectHint";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useIsMobile } from "@hooks/useIsMobile";
 
 export function CombatStats() {
   const character = useCurrentCharacter()!;
   const { updateCharacter } = useCharacterCoreActions();
+  const { stats } = useEffectiveStats()!;
+  const initiative = stats.initiative.value;
   const isMobile = useIsMobile();
 
   // Core Combat Stats (The Holy Trinity: AC, Initiative, Speed)
   const coreStats = [
     {
       label: "Armor Class",
-      value: character.armorClass,
+      value: stats.ac.value,
+      effect: stats.ac,
       color: "var(--theme-color-accent-secondary, #06b6d4)",
       icon: <IconShield size={isMobile ? 22 : 26} />,
       glowColor: "rgba(6, 182, 212, 0.15)",
     },
     {
       label: "Initiative",
-      value: character.initiative >= 0 ? `+${character.initiative}` : character.initiative,
+      value: initiative >= 0 ? `+${initiative}` : initiative,
+      effect: stats.initiative,
       color: "var(--theme-color-accent-primary, #f59e0b)",
       icon: <IconTarget size={isMobile ? 22 : 26} />,
       glowColor: "rgba(245, 158, 11, 0.15)",
     },
     {
       label: "Speed",
-      value: `${character.speed} ft`,
+      value: `${stats.speed.value} ft`,
+      effect: stats.speed,
       color: "var(--theme-color-accent-secondary, #10b981)",
       icon: <IconRun size={isMobile ? 22 : 26} />,
       glowColor: "rgba(16, 185, 129, 0.15)",
@@ -54,7 +60,8 @@ export function CombatStats() {
     },
     {
       label: "Passive Investigation",
-      value: character.passiveInvestigation ?? 10,
+      value: stats["passive:Investigation"].value,
+      effect: stats["passive:Investigation"],
       color: "var(--theme-color-accent-secondary, #a855f7)",
       icon: <IconEye size={16} />,
     },
@@ -66,7 +73,8 @@ export function CombatStats() {
     },
     {
       label: "Passive Perception",
-      value: character.passivePerception ?? 10,
+      value: stats["passive:Perception"].value,
+      effect: stats["passive:Perception"],
       color: "var(--theme-color-accent-secondary, #a855f7)",
       icon: <IconEye size={16} />,
     },
@@ -78,7 +86,8 @@ export function CombatStats() {
     },
     {
       label: "Passive Insight",
-      value: character.passiveInsight ?? 10,
+      value: stats["passive:Insight"].value,
+      effect: stats["passive:Insight"],
       color: "var(--theme-color-accent-secondary, #a855f7)",
       icon: <IconEye size={16} />,
     },
@@ -241,18 +250,20 @@ export function CombatStats() {
               </span>
 
               {/* Stat Value */}
-              <Text
-                fw={900}
-                style={{
-                  fontSize: isMobile ? "18px" : "26px",
-                  color: stat.color,
-                  lineHeight: 1.1,
-                  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-                  textShadow: "0 2px 10px rgba(0, 0, 0, 0.3)",
-                }}
-              >
-                {stat.value}
-              </Text>
+              <EffectHint stat={stat.effect}>
+                <Text
+                  fw={900}
+                  style={{
+                    fontSize: isMobile ? "18px" : "26px",
+                    color: stat.color,
+                    lineHeight: 1.1,
+                    fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                    textShadow: "0 2px 10px rgba(0, 0, 0, 0.3)",
+                  }}
+                >
+                  {stat.value}
+                </Text>
+              </EffectHint>
 
               {/* Label */}
               <Text
@@ -411,16 +422,18 @@ export function CombatStats() {
                     </Text>
                   </Group>
 
-                  <Text
-                    size="sm"
-                    fw={800}
-                    style={{
-                      color: stat.color,
-                      fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-                    }}
-                  >
-                    {stat.value}
-                  </Text>
+                  <EffectHint stat={stat.effect}>
+                    <Text
+                      size="sm"
+                      fw={800}
+                      style={{
+                        color: stat.color,
+                        fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+                      }}
+                    >
+                      {stat.value}
+                    </Text>
+                  </EffectHint>
                 </Paper>
               ))}
             </SimpleGrid>

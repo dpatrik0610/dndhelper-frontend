@@ -11,7 +11,7 @@ import { CharacterHeader } from "./components/header/CharacterHeader";
 
 import "./styles/CharacterProfile.styles.css"
 import tabClasses from "./styles/ProfileTabs.module.css";
-import { IconBackpack, IconBolt, IconListCheck, IconNotes, IconShieldHalf, IconSparkles, IconStars } from "@tabler/icons-react";
+import { IconBackpack, IconBolt, IconFlask, IconListCheck, IconNotes, IconShieldHalf, IconSparkles, IconStars } from "@tabler/icons-react";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +19,8 @@ import { useIsMobile } from "@hooks/useIsMobile";
 
 // Lazy-loaded sub-panels to optimize initial bundle size, memory footprint, and rendering latency on mobile
 const AbilityScores = lazy(() => import("./components/panels/AbilityScores").then(m => ({ default: m.AbilityScores })));
+const EffectsPanel = lazy(() => import("./components/panels/EffectsPanel").then(m => ({ default: m.EffectsPanel })));
+const StatisticsPanel = lazy(() => import("./components/panels/StatisticsPanel").then(m => ({ default: m.StatisticsPanel })));
 const CombatStats = lazy(() => import("./components/panels/CombatStats").then(m => ({ default: m.CombatStats })));
 const ExperienceTableCard = lazy(() => import("./components/panels/ExperienceTableCard").then(m => ({ default: m.ExperienceTableCard })));
 const SpellsPanel = lazy(() => import("./components/panels/SpellsPanel").then(m => ({ default: m.SpellsPanel })));
@@ -28,10 +30,11 @@ const ExtraInfo = lazy(() => import("./components/panels/ExtraInfo").then(m => (
 const FeaturesPanel = lazy(() => import("./components/panels/FeaturesPanel").then(m => ({ default: m.FeaturesPanel })));
 const Inventory = lazy(() => import("@features/inventory/Inventory").then(m => ({ default: m.Inventory })));
 
-/** `short` is the phone label, where seven tabs share one row. */
+/** `short` is the phone label, where eight tabs share one row. */
 const PROFILE_TABS: { value: string; label: string; short?: string; Icon: typeof IconBackpack }[] = [
   { value: "overview", label: "Skills", Icon: IconListCheck },
   { value: "stats", label: "Stats", Icon: IconShieldHalf },
+  { value: "effects", label: "Effects", Icon: IconFlask },
   { value: "spellcasting", label: "Spellcasting", short: "Spells", Icon: IconSparkles },
   { value: "resources", label: "Resources", short: "Pools", Icon: IconBolt },
   { value: "features", label: "Features", Icon: IconStars },
@@ -96,6 +99,7 @@ export default function CharacterProfile() {
             {shownTab === "overview" && (
               <motion.div key="overview" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
                 <AbilityScores />
+                <StatisticsPanel />
               </motion.div>
             )}
 
@@ -104,6 +108,12 @@ export default function CharacterProfile() {
                 {/* <AbilityScores /> */}
                 <CombatStats />
                 <ExperienceTableCard />
+              </motion.div>
+            )}
+
+            {shownTab === "effects" && (
+              <motion.div key="effects" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
+                <EffectsPanel />
               </motion.div>
             )}
 
