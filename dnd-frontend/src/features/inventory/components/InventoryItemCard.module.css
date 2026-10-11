@@ -134,11 +134,14 @@
   --action-color: var(--theme-color-accent-secondary, #06b6d4);
 }
 
+/* Neutral until equipped, so green always means "on". */
 .equip {
-  --action-color: #4ade80;
+  --action-color: var(--theme-color-text-secondary, #9ca3af);
+  --action-hover-border: #4ade80;
 }
 
 .equipped {
+  --action-color: #4ade80;
   border-color: #4ade80;
   background: rgba(74, 222, 128, 0.12);
 }

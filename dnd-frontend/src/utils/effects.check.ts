@@ -61,6 +61,16 @@ assert.equal(stats.speed.value, 0, "restrained sets speed 0 over the boots");
 assert.equal(stats.str.value, 10, "inactive effects do nothing");
 assert.equal(stats["passive:Perception"].value, 10);
 
+const gauntlets = computeEffects({
+  ...character,
+  conditions: [],
+  effects: [
+    { id: "g", name: "Gauntlets", source: "item" as const, active: true, modifiers: [{ target: "str", type: "set" as const, value: 19 }, { target: "str", type: "bonus" as const, value: 1 }] },
+    { id: "b", name: "Belt", source: "item" as const, active: true, modifiers: [{ target: "str", type: "bonus" as const, value: 2 }] },
+  ],
+}).stats;
+assert.equal(gauntlets.str.value, 20, "a set and a bonus on one item both apply; another item's bonus is still overridden");
+
 const manual = { id: "m", name: "Ring", source: "item" as const, equipmentId: "ring", active: true, modifiers: [] };
 const plateFx = syncEquippedEffects([manual], [
   { equipmentId: "plate", name: "Plate Armor" },

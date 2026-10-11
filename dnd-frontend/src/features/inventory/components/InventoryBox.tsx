@@ -3,7 +3,7 @@ import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import type { EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
 import { useState } from "react";
 import { RemoveItemModal } from "@appTypes/Inventory/components/RemoveItemModal";
-import { SimpleGrid, Stack, Text } from "@mantine/core";
+import { Button, Group, Modal, SimpleGrid, Stack, Text } from "@mantine/core";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useInventoryStore } from "@store/inventory/inventoryStore";
 
@@ -42,6 +42,7 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
   const [moveItemId, setMoveItemId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [equipDraft, setEquipDraft] = useState<CharacterEffect | null>(null);
+  const [unequipTarget, setUnequipTarget] = useState<CharacterEffect | null>(null);
   const { effects, saveEffect, removeEffect } = useEffectActions();
   const effectOf = (equipmentId?: string) => (equipmentId ? effects.find((e) => e.equipmentId === equipmentId) : undefined);
   const { updateCharacter } = useCharacterCoreActions();
@@ -59,7 +60,7 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
   // Unequipping only switches the effect off, so edits made to it survive the next equip.
   const handleEquip = (item: InventoryItem) => {
     const existing = effectOf(item.equipmentId);
-    if (existing?.active) return saveEffect({ ...existing, active: false });
+    if (existing?.active) return setUnequipTarget(existing);
     // Equipping always goes through the editor, so the changes can be checked; saving switches it on.
     if (existing) return setEquipDraft({ ...existing, active: true });
 
@@ -179,6 +180,26 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
       />
 
       <EquipmentModal opened={!!detailId} onClose={() => setDetailId(null)} equipmentId={detailId} />
+
+      <Modal opened={!!unequipTarget} onClose={() => setUnequipTarget(null)} title={`Unequip ${unequipTarget?.name ?? "item"}?`} centered>
+        <Text size="sm" mb="md">
+          Its effects stop applying to your character.
+        </Text>
+        <Group justify="flex-end">
+          <Button variant="light" onClick={() => setUnequipTarget(null)}>
+            Cancel
+          </Button>
+          <Button
+            color="red"
+            onClick={() => {
+              saveEffect({ ...unequipTarget!, active: false });
+              setUnequipTarget(null);
+            }}
+          >
+            Unequip
+          </Button>
+        </Group>
+      </Modal>
 
       <EffectModal
         opened={!!equipDraft}

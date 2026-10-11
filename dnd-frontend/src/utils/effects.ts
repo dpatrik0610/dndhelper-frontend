@@ -107,10 +107,11 @@ export function situationsOf(c: Pick<Character, "effects" | "activeSituations">)
 
 export function computeEffects(c: Character): EffectiveStats {
   const effects = appliedEffects(c);
-  const mods = effects.flatMap((e) => e.modifiers.filter((m) => modifierApplies(c, m)).map((m) => ({ ...m, source: e.name })));
+  const mods = effects.flatMap((e) => e.modifiers.filter((m) => modifierApplies(c, m)).map((m) => ({ ...m, source: e.name, effectId: e.id })));
   const stats: Record<string, StatResult> = {};
 
-  // Order: "min" raises the floor, bonuses add up, then "set" overrides everything (restrained: speed 0 even with boots).
+  // Order: "min" raises the floor, bonuses add up, then "set" overrides everything (restrained: speed 0 even with boots),
+  // except bonuses from the same effect as the set, which stack on top of it ("STR set to 19, +1").
   const pb = c.proficiencyBonus ?? 2;
 
   // `proficient` (saves and skills) is whether the sheet already has proficiency; leave it out elsewhere.
@@ -145,10 +146,16 @@ export function computeEffects(c: Character): EffectiveStats {
         why.push({ source: m.source, detail: signed(m.value) });
       }
     }
+    const sets = own.filter((m) => m.type === "set" && m.value != null);
+    for (const m of sets) {
+      value = m.value!;
+      why.push({ source: m.source, detail: `set to ${m.value}` });
+    }
+    const winner = sets.at(-1);
     for (const m of own) {
-      if (m.type === "set" && m.value != null) {
-        value = m.value;
-        why.push({ source: m.source, detail: `set to ${m.value}` });
+      if (winner && m.type === "bonus" && m.value != null && m.effectId === winner.effectId) {
+        value += m.value;
+        why.push({ source: m.source, detail: signed(m.value) });
       }
     }
     const adv = own.filter((m) => m.type === "advantage");
