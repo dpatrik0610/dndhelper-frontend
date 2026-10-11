@@ -71,6 +71,13 @@ export async function updateCharacter(character: Character): Promise<Character |
   }
 }
 
+/** Uploads token art for the character (max 5 MB) and returns the saved character. Throws with the server's message. */
+export async function uploadCharacterImage(characterId: string, file: File): Promise<Character> {
+  const body = new FormData();
+  body.append("file", file);
+  return apiClient<Character>(`/character/${characterId}/image`, { method: "POST", body });
+}
+
 export async function deleteCharacter(characterId: string): Promise<boolean> {
   
 

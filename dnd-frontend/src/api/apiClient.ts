@@ -16,7 +16,9 @@ export async function apiClient<T>(
   const token = explicitToken ?? getAuthTokenSafe();
   const headers: Record<string, string> = {};
 
-  if (body) {
+  // FormData (file uploads) sets its own multipart Content-Type with the boundary.
+  const isForm = body instanceof FormData
+  if (body && !isForm) {
     headers["Content-Type"] = "application/json";
   }
 
@@ -27,7 +29,7 @@ export async function apiClient<T>(
   const res = await fetch(`${API_BASE}${endpoint}`, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: isForm ? body : body ? JSON.stringify(body) : undefined,
     cache: 'no-store',
   })
 
