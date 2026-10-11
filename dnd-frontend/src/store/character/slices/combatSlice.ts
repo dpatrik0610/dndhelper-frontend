@@ -1,5 +1,6 @@
 import type { StateCreator } from "zustand";
 import type { CharacterStoreState, CombatSliceActions } from "../storeTypes";
+import { computeEffects } from "@utils/effects";
 
 export const createCombatSlice: StateCreator<
   CharacterStoreState,
@@ -31,7 +32,8 @@ export const createCombatSlice: StateCreator<
 
   heal: (amount) => {
     get().applyAndPersist((current) => {
-      const max = current.maxHitPoints ?? 0;
+      // Effects (e.g. a CON item) can raise the cap above the sheet value.
+      const max = computeEffects(current).stats.maxHp.value;
       const hp = Math.min(max, (current.hitPoints ?? 0) + amount);
       return { ...current, hitPoints: hp };
     });

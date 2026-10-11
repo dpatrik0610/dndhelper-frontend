@@ -6,6 +6,7 @@ import type { ClassResource } from "./ClassResource";
 import type { Skill } from "./Skill";
 import type { Feature } from "./Feature";
 import type { CharacterSpell } from "./CharacterSpell";
+import type { CharacterEffect } from "./Effect";
 import type { Currency } from "@appTypes/Currency";
 
 export interface Character {
@@ -55,6 +56,12 @@ export interface Character {
   spellAttackBonus: number;
   spellSlots: SpellSlot[];
   classResources: ClassResource[];
+  /** Missing on characters saved before effects existed. */
+  effects?: CharacterEffect[];
+  /** Inventory whose items are worn. "none" = chose to wear nothing; missing = not chosen, guessed from the name. */
+  equipmentInventoryId?: string;
+  /** Situations happening right now ("Swamp", "Raging"); turn on the changes marked `when` with them. */
+  activeSituations?: string[];
   spellcastingAbility: string;
   deathSavesSuccesses: number;
   deathSavesFailures: number;

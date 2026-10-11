@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { computeEffects } from "@utils/effects";
 import { useCharacterStore } from "./characterStore";
 import { useShallow } from "zustand/react/shallow";
 
@@ -49,3 +51,9 @@ export const useCharacterCurrencyActions = () => useCharacterStore(useShallow((s
 export const useCharacterPersistActions = () => useCharacterStore(useShallow((s) => ({
   persistCharacter: s.persistCharacter,
 })));
+
+/** The sheet with items, potions and conditions layered on; the stored character stays the base. */
+export const useEffectiveStats = () => {
+  const character = useCurrentCharacter();
+  return useMemo(() => (character ? computeEffects(character) : null), [character]);
+};
