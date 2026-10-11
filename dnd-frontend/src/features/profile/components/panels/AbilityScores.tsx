@@ -16,6 +16,7 @@ import { changedColor } from "@utils/effects";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
 import CustomBadge from "@components/common/CustomBadge";
+import { AbilityGlyphIcon } from "@features/profile/components/abilityGlyphs";
 
 // Stable fallback, so the skills memo below doesn't recompute on every render.
 const NO_SKILLS: Skill[] = [];
@@ -28,12 +29,12 @@ export function AbilityScores() {
   const skills = character.skills ?? NO_SKILLS;
 
   const abilities = useMemo(() => [
-    { key: "str" as const, name: "Strength", short: "STR", saveKey: "strength" as const, icon: "💪" },
-    { key: "dex" as const, name: "Dexterity", short: "DEX", saveKey: "dexterity" as const, icon: "🏃" },
-    { key: "con" as const, name: "Constitution", short: "CON", saveKey: "constitution" as const, icon: "🛡️" },
-    { key: "int" as const, name: "Intelligence", short: "INT", saveKey: "intelligence" as const, icon: "🧠" },
-    { key: "wis" as const, name: "Wisdom", short: "WIS", saveKey: "wisdom" as const, icon: "👁️" },
-    { key: "cha" as const, name: "Charisma", short: "CHA", saveKey: "charisma" as const, icon: "🗣️" },
+    { key: "str" as const, name: "Strength", short: "STR", saveKey: "strength" as const },
+    { key: "dex" as const, name: "Dexterity", short: "DEX", saveKey: "dexterity" as const },
+    { key: "con" as const, name: "Constitution", short: "CON", saveKey: "constitution" as const },
+    { key: "int" as const, name: "Intelligence", short: "INT", saveKey: "intelligence" as const },
+    { key: "wis" as const, name: "Wisdom", short: "WIS", saveKey: "wisdom" as const },
+    { key: "cha" as const, name: "Charisma", short: "CHA", saveKey: "charisma" as const },
   ], []);
 
   // Enrich skills with their short ability name and sort alphabetically for a premium layout
@@ -121,15 +122,35 @@ export function AbilityScores() {
                         alignItems: "center",
                         justifyContent: "space-between",
                         minHeight: isMobile ? "92px" : "105px",
+                        position: "relative",
+                        overflow: "hidden",
+                        // Own stacking context, so the watermark (z-index -1) sits above the card background but under the text.
+                        isolation: "isolate",
                         padding: "12px",
                       }}
                     >
-                      {/* Name + Icon */}
+                      {/* Faint silhouette watermark on the right edge */}
+                      <AbilityGlyphIcon
+                        ability={ab.key}
+                        aria-hidden
+                        size={isMobile ? 58 : 78}
+                        style={{
+                          position: "absolute",
+                          right: isMobile ? -10 : -12,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          zIndex: -1,
+                          color: "var(--theme-color-accent-primary, #f59e0b)",
+                          opacity: 0.12,
+                          pointerEvents: "none",
+                        }}
+                      />
+
+                      {/* Name */}
                       <Group justify="space-between" w="100%" wrap="nowrap" style={{ width: "100%" }}>
                         <Text size="10px" fw={700} style={{ color: "var(--theme-color-text-secondary, rgba(255,255,255,0.6))", letterSpacing: "1px" }}>
                           {ab.short}
                         </Text>
-                        <Text size="12px" style={{ opacity: 0.8 }}>{ab.icon}</Text>
                       </Group>
 
                       {/* Modifier */}
