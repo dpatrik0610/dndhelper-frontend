@@ -1,6 +1,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { Collapse } from "@mantine/core";
-import { IconBackpack, IconChevronDown } from "@tabler/icons-react";
+import { Tooltip } from "@mantine/core";
+import { IconBackpack, IconChevronDown, IconShirt } from "@tabler/icons-react";
 import type { Currency } from "@appTypes/Currency";
 import classes from "./InventorySection.module.css";
 
@@ -11,6 +12,10 @@ interface InventorySectionProps {
   currencies: Currency[];
   matchCount: number;
   hasFilters: boolean;
+  /** This character wears what is in here, so its items apply their effects. */
+  worn: boolean;
+  /** Left out to hide the toggle (another inventory is already worn). */
+  onToggleWorn?: () => void;
   children: ReactNode;
 }
 
@@ -22,6 +27,8 @@ export function InventorySection({
   currencies,
   matchCount,
   hasFilters,
+  worn,
+  onToggleWorn,
   children,
 }: InventorySectionProps) {
   const [userOpened, setUserOpened] = useState(false);
@@ -32,7 +39,13 @@ export function InventorySection({
   const money = currencies.filter((c) => c.amount > 0);
 
   return (
-    <section className={classes.section} data-open={opened || undefined} data-highlighted={highlighted || undefined}>
+    <section
+      className={classes.section}
+      data-open={opened || undefined}
+      data-highlighted={highlighted || undefined}
+      data-worn={worn || undefined}
+    >
+      <div className={classes.headerRow}>
       <button
         type="button"
         className={classes.header}
@@ -41,7 +54,7 @@ export function InventorySection({
         aria-controls={bodyId}
       >
         <span className={classes.avatar}>
-          <IconBackpack size={18} stroke={1.75} />
+          {worn ? <IconShirt size={18} stroke={1.75} /> : <IconBackpack size={18} stroke={1.75} />}
         </span>
 
         <span className={classes.titleBlock}>
@@ -64,11 +77,27 @@ export function InventorySection({
             ))}
           </span>
         </span>
-
-        <span className={classes.chevron}>
-          <IconChevronDown size={18} />
-        </span>
       </button>
+
+      {onToggleWorn && (
+        <Tooltip
+          label={worn ? "Worn: its items apply their effects. Click to stop wearing it." : "Wear this inventory: its items apply their effects."}
+          withArrow
+          multiline
+          w={240}
+        >
+          <button type="button" className={classes.wear} aria-pressed={worn} onClick={onToggleWorn}>
+            <IconShirt size={14} />
+            {worn ? "Worn" : "Wear"}
+          </button>
+        </Tooltip>
+      )}
+
+      {/* Outside the header button so the wear toggle can sit before it; keyboard users open via the header. */}
+      <span className={classes.chevron} onClick={() => setUserOpened(!opened)} aria-hidden>
+        <IconChevronDown size={18} />
+      </span>
+      </div>
 
       <Collapse in={opened} transitionDuration={200}>
         <div id={bodyId} className={classes.body}>

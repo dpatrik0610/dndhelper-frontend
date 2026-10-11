@@ -3,6 +3,8 @@ import type { EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
 import type { InventorySort, InventoryViewMode } from "@features/inventory/hooks/useInventoryFilters";
 import { Stack, Title } from "@mantine/core";
 import InventoryBox from "./InventoryBox";
+import { useCurrentCharacter } from "@store/character/characterSelectors";
+import { wornInventoryId } from "@utils/effects";
 
 interface InventoryListProps {
   inventories: Inventory[];
@@ -13,6 +15,11 @@ interface InventoryListProps {
 }
 
 export function InventoryList({ inventories, details, searchTerm, sortBy, viewMode }: InventoryListProps) {
+  const choice = useCurrentCharacter()?.equipmentInventoryId;
+  const wornId = wornInventoryId(choice, inventories);
+  // The worn inventory leads; the rest keep their order (sort is stable).
+  const ordered = [...inventories].sort((a, b) => Number(b.id === wornId) - Number(a.id === wornId));
+
   if (!inventories.length)
     return (
       <Title order={4} c="dimmed" ta="center" mt="xl">
@@ -22,7 +29,7 @@ export function InventoryList({ inventories, details, searchTerm, sortBy, viewMo
 
   return (
     <Stack gap="sm">
-      {inventories.map((inv) => (
+      {ordered.map((inv) => (
         <InventoryBox
           key={inv.id}
           inventory={inv}

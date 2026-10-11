@@ -18,7 +18,11 @@ import { InventoryCurrencyClaim } from "./InventoryCurrencyClaim";
 import { EquipmentModal } from "./EquipmentModal";
 import { useFilteredItems } from "@features/inventory/hooks/useFilteredItems";
 import type { InventorySort, InventoryViewMode } from "@features/inventory/hooks/useInventoryFilters";
-import { useCurrentCharacter } from "@store/character/characterSelectors";
+import { useCharacterCoreActions, useCurrentCharacter } from "@store/character/characterSelectors";
+import type { CharacterEffect } from "@appTypes/Character/Effect";
+import { detectModifiers, isConsumable, newEffectId, wornInventoryId } from "@utils/effects";
+import { useEffectActions } from "@features/profile/hooks/useEffectActions";
+import { EffectModal } from "@features/profile/components/modals/EffectModal";
 
 interface InventoryBoxProps {
   inventory: Inventory;
@@ -37,17 +41,51 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
   const [removeTarget, setRemoveTarget] = useState<InventoryItem | null>(null);
   const [moveItemId, setMoveItemId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [equipDraft, setEquipDraft] = useState<CharacterEffect | null>(null);
+  const { effects, saveEffect, removeEffect } = useEffectActions();
+  const effectOf = (equipmentId?: string) => (equipmentId ? effects.find((e) => e.equipmentId === equipmentId) : undefined);
+  const { updateCharacter } = useCharacterCoreActions();
+  const wornId = wornInventoryId(character?.equipmentInventoryId, inventories);
+  const worn = wornId === inventory.id;
+  const anyWorn = !!wornId;
+  // Turning the worn one off is an explicit "wear nothing", so the name guess doesn't pick it again.
+  const toggleWorn = () => updateCharacter({ equipmentInventoryId: worn ? "none" : inventory.id! });
 
   const inventoryId = inventory.id!;
   const items = inventory.items ?? [];
   const { filteredItems, hasFilters } = useFilteredItems(inventory.items, searchTerm, sortBy, details);
   const totalWeight = items.reduce((sum, item) => sum + (details.get(item.equipmentId ?? "")?.weight ?? 0) * (item.quantity ?? 1), 0);
 
+  // Unequipping only switches the effect off, so edits made to it survive the next equip.
+  const handleEquip = (item: InventoryItem) => {
+    const existing = effectOf(item.equipmentId);
+    if (existing) return saveEffect({ ...existing, active: !existing.active });
+
+    const d = details.get(item.equipmentId ?? "");
+    const name = item.equipmentName || d?.name || "Item";
+    setEquipDraft({
+      id: newEffectId(),
+      name,
+      source: isConsumable(name) ? "potion" : "item",
+      equipmentId: item.equipmentId,
+      active: true,
+      modifiers: detectModifiers({ name, description: d?.description, tags: [...(d?.tags ?? []), ...(item.tags ?? [])] }),
+    });
+  };
+
+  // The last one leaving this character takes its effect with it.
+  const dropEffectIfGone = (equipmentId: string, amount: number) => {
+    const quantity = items.find((i) => i.equipmentId === equipmentId)?.quantity ?? 1;
+    const effect = effectOf(equipmentId);
+    if (effect && amount >= quantity) removeEffect(effect.id);
+  };
+
   const handleConfirmRemove = async (amount: number) => {
     const equipmentId = removeTarget?.equipmentId;
     if (!equipmentId) return;
     const name = removeTarget.equipmentName || "item";
     setRemoveTarget(null);
+    dropEffectIfGone(equipmentId, amount);
 
     // Optimistic; a failure reloads the real state.
     decrementItemQuantity(inventoryId, equipmentId, amount);
@@ -82,6 +120,9 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
       } else if (payload.targetInventoryId) {
         await moveItem(inventoryId, moveItemId, { targetInventoryId: payload.targetInventoryId, amount: payload.amount });
       }
+      // Moving between this character's own inventories keeps it equipped.
+      const stillMine = payload.targetInventoryId && inventories.some((inv) => inv.id === payload.targetInventoryId);
+      if (!stillMine) dropEffectIfGone(moveItemId, payload.amount);
       showNotification({
         id: moveItemId,
         title: `Moved ${payload.amount}× ${name}`,
@@ -110,6 +151,8 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
       onOpen={setDetailId}
       onRemove={setRemoveTarget}
       onMove={setMoveItemId}
+      equipped={!!effectOf(item.equipmentId)?.active}
+      onEquip={handleEquip}
     />
   ));
 
@@ -135,6 +178,16 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
 
       <EquipmentModal opened={!!detailId} onClose={() => setDetailId(null)} equipmentId={detailId} />
 
+      <EffectModal
+        opened={!!equipDraft}
+        initial={equipDraft}
+        onClose={() => setEquipDraft(null)}
+        onSave={(effect) => {
+          saveEffect(effect);
+          setEquipDraft(null);
+        }}
+      />
+
       <InventorySection
         title={inventory.name || "Unnamed Inventory"}
         itemCount={items.length}
@@ -142,6 +195,9 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
         currencies={inventory.currencies ?? []}
         matchCount={filteredItems.length}
         hasFilters={hasFilters}
+        worn={worn}
+        // Once one is worn, only it keeps a toggle; the rest show it again after it is taken off.
+        onToggleWorn={worn || !anyWorn ? toggleWorn : undefined}
       >
         <Stack gap="sm">
           {!filteredItems.length ? (

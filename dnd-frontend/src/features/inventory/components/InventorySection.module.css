@@ -121,3 +121,74 @@
     transition: none;
   }
 }
+
+/* Header button and the wear toggle side by side; a button can't hold another button. */
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 12px;
+}
+
+.headerRow > .header {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Worn: its items apply their effects to the character. */
+.section[data-worn] {
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.section[data-worn] .avatar {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.35);
+}
+
+.wear {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px dashed var(--theme-border-subtle, rgba(255, 255, 255, 0.18));
+  background: transparent;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.65));
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.25s;
+}
+
+.wear:hover {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.55);
+}
+
+.wear:focus-visible {
+  outline: 2px solid #4ade80;
+  outline-offset: 2px;
+}
+
+.wear[aria-pressed="true"] {
+  border-style: solid;
+  border-color: rgba(74, 222, 128, 0.7);
+  background: rgba(74, 222, 128, 0.14);
+  color: #4ade80;
+  box-shadow: 0 0 12px rgba(74, 222, 128, 0.25);
+}
+
+@media (max-width: 48em) {
+  .wear {
+    height: 36px;
+  }
+}
+
+.headerRow > .chevron {
+  padding: 6px 2px;
+  cursor: pointer;
+}

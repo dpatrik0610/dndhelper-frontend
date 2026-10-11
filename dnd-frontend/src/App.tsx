@@ -12,6 +12,7 @@ import { useCampaignStore } from "@store/campaign/campaignStore";
 import { useCharacterList } from "@store/character/characterSelectors";
 import { useTokenExpiryGuard } from "@features/auth/hooks/useTokenExpiryGuard";
 import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapCharacters";
+import { useEquipmentInventoryEffects } from "@hooks/useEquipmentInventoryEffects";
 import { AppBackground } from "@components/layout/AppBackground";
 import { SidebarToggle } from "@components/layout/SidebarToggle";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
@@ -118,6 +119,7 @@ function AppRoutes() {
 
   useTokenExpiryGuard(token, localToken);
   useBootstrapCharacters(activeToken, characters.length);
+  useEquipmentInventoryEffects();
   usePrefetchPages(!!activeToken, isDm, isSuperAdmin);
 
   // My campaigns (and a valid current one) on every sign-in / reload.

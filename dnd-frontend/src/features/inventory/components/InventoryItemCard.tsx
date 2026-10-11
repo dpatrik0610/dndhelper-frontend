@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Group, Tooltip } from "@mantine/core";
-import { IconArrowsRightLeft, IconTrash } from "@tabler/icons-react";
+import { IconArrowsRightLeft, IconFlask, IconShirt, IconTrash } from "@tabler/icons-react";
+import { isConsumable } from "@utils/effects";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import type { EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -15,11 +16,15 @@ interface InventoryItemCardProps {
   onOpen: (equipmentId: string) => void;
   onRemove: (item: InventoryItem) => void;
   onMove: (equipmentId: string) => void;
+  /** Its effects are applied to the character. */
+  equipped: boolean;
+  onEquip: (item: InventoryItem) => void;
 }
 
-export function InventoryItemCard({ item, details, layout, onOpen, onRemove, onMove }: InventoryItemCardProps) {
+export function InventoryItemCard({ item, details, layout, onOpen, onRemove, onMove, equipped, onEquip }: InventoryItemCardProps) {
   const name = item.equipmentName || details?.name || "Unnamed Item";
   const quantity = item.quantity ?? 1;
+  const consumable = isConsumable(name);
   // "dark" (Common) is unreadable as text on the dark cards.
   const accent = tierTheme(details?.tier).accent;
   const accentColor = accent === SectionColor.Dark ? SectionColor.Gray : accent;
@@ -70,6 +75,17 @@ export function InventoryItemCard({ item, details, layout, onOpen, onRemove, onM
       )}
 
       <div className={classes.actions}>
+        <Tooltip label={equipped ? "Unequip (stop its effects)" : consumable ? "Use (apply its effects)" : "Equip (apply its effects)"}>
+          <button
+            type="button"
+            className={`${classes.action} ${classes.equip} ${equipped ? classes.equipped : ""}`}
+            onClick={() => onEquip(item)}
+            aria-pressed={equipped}
+            aria-label={`${equipped ? "Unequip" : consumable ? "Use" : "Equip"} ${name}`}
+          >
+            {consumable ? <IconFlask size={16} /> : <IconShirt size={16} />}
+          </button>
+        </Tooltip>
         <Tooltip label="Move">
           <button
             type="button"

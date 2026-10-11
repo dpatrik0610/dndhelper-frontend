@@ -134,6 +134,15 @@
   --action-color: var(--theme-color-accent-secondary, #06b6d4);
 }
 
+.equip {
+  --action-color: #4ade80;
+}
+
+.equipped {
+  border-color: #4ade80;
+  background: rgba(74, 222, 128, 0.12);
+}
+
 .remove {
   --action-color: #fca5a5;
   --action-hover-border: #ef4444;
