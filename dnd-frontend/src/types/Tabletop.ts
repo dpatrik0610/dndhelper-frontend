@@ -19,6 +19,21 @@ export interface MapLayer {
   height: number;
 }
 
+/** A map the DM uploaded to the CDN, for reuse or deletion. */
+export interface MapUpload {
+  id: string;
+  url: string;
+  name: string | null;
+  size: number;
+  createdAt: string | null;
+}
+
+/** The DM's uploaded maps, newest first; limit is null for superadmins. */
+export interface MapLibrary {
+  maps: MapUpload[];
+  limit: number | null;
+}
+
 export interface TableEffect {
   id: string;
   label: string;

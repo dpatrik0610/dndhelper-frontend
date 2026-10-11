@@ -61,9 +61,9 @@ import { useTabletopStore } from "@store/tabletop/tabletopStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import type { Character } from "@appTypes/Character/Character";
 import type { Monster } from "@appTypes/Monster";
-import type { GridSettings, GridType, TableParticipant, TableToken } from "@appTypes/Tabletop";
+import type { GridSettings, GridType, MapLibrary, MapUpload, TableParticipant, TableToken } from "@appTypes/Tabletop";
 import { gridTile } from "./board/gridMath";
-import { resolveImageUrl, tabletop, uploadTableImage } from "./useTabletopHub";
+import { deleteMyMap, listMyMaps, resolveImageUrl, tabletop, uploadTableImage } from "./useTabletopHub";
 
 const placeCharacter = tabletop.placeCharacter;
 import { CHARACTER_DRAG_TYPE, TOKEN_SWATCHES } from "./tools";
@@ -518,26 +518,63 @@ function MapCard() {
   const tableId = useTabletopStore((s) => s.session!.tableId);
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [library, setLibrary] = useState<MapLibrary | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const aspect = map.width > 0 ? map.height / map.width : 1;
+
+  const refreshLibrary = () =>
+    listMyMaps()
+      .then(setLibrary)
+      .catch(() => setLibrary(null));
+
+  useEffect(() => {
+    void refreshLibrary();
+  }, []);
+
+  // Natural size first: most battle maps are drawn at a known pixels-per-square.
+  const naturalSize = (src: string) =>
+    new Promise<{ w: number; h: number }>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+      img.onerror = () => resolve({ w: 1000, h: 1000 });
+      img.src = src;
+    });
 
   const upload = async (file: File | null) => {
     if (!file) return;
     setUploading(true);
     const url = await uploadTableImage(tableId, file, "map");
     if (url) {
-      // Natural size first: most battle maps are drawn at a known pixels-per-square.
       const objectUrl = URL.createObjectURL(file);
-      const size = await new Promise<{ w: number; h: number }>((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
-        img.onerror = () => resolve({ w: 1000, h: 1000 });
-        img.src = objectUrl;
-      });
+      const size = await naturalSize(objectUrl);
       URL.revokeObjectURL(objectUrl);
       await tabletop.updateMap({ imageUrl: url, x: 0, y: 0, width: size.w, height: size.h });
+      void refreshLibrary();
     }
     setUploading(false);
   };
+
+  const applyMap = async (picked: MapUpload) => {
+    const size = await naturalSize(picked.url);
+    await tabletop.updateMap({ imageUrl: picked.url, x: 0, y: 0, width: size.w, height: size.h });
+  };
+
+  // First click arms, second click deletes, so a stray click can't remove a map.
+  const removeMap = async (id: string) => {
+    if (confirmDelete !== id) {
+      setConfirmDelete(id);
+      return;
+    }
+    setConfirmDelete(null);
+    try {
+      await deleteMyMap(id);
+      void refreshLibrary();
+    } catch (err) {
+      showNotification({ title: "Couldn't delete map", message: (err as Error).message, color: "red" });
+    }
+  };
+
+  const full = library?.limit != null && library.maps.length >= library.limit;
 
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
@@ -567,11 +604,44 @@ function MapCard() {
             <span className="tt-dropzone-label">
               {uploading ? <Loader size="sm" color="violet" /> : <IconUpload size={20} />}
               <strong>{uploading ? "Uploading…" : map.imageUrl ? "Replace map" : "Upload a battle map"}</strong>
-              <span>Click or drop an image here</span>
+              <span>{full ? "Map limit reached: delete one below to upload more" : "Click or drop an image here"}</span>
             </span>
           </UnstyledButton>
         )}
       </FileButton>
+
+      {library && library.maps.length > 0 && (
+        <>
+          <div className="tt-set-row">
+            <span className="tt-set-label">Your maps</span>
+            <Text size="xs" c="dimmed">
+              {library.limit == null ? library.maps.length : `${library.maps.length} / ${library.limit}`}
+            </Text>
+          </div>
+          <SimpleGrid cols={3} spacing="xs">
+            {library.maps.map((m) => (
+              <div key={m.id} className={`tt-map-thumb${m.url === map.imageUrl ? " active" : ""}`}>
+                <UnstyledButton onClick={() => void applyMap(m)} aria-label={`Use ${m.name ?? "map"}`} title={m.name ?? undefined}>
+                  <img src={m.url} alt="" loading="lazy" />
+                </UnstyledButton>
+                <Tooltip label={confirmDelete === m.id ? "Click again to delete" : "Delete map"} withArrow>
+                  <ActionIcon
+                    size="sm"
+                    color="red"
+                    variant={confirmDelete === m.id ? "filled" : "light"}
+                    className="tt-map-thumb-delete"
+                    aria-label={`Delete ${m.name ?? "map"}`}
+                    onClick={() => void removeMap(m.id)}
+                    onMouseLeave={() => confirmDelete === m.id && setConfirmDelete(null)}
+                  >
+                    <IconTrash size={13} />
+                  </ActionIcon>
+                </Tooltip>
+              </div>
+            ))}
+          </SimpleGrid>
+        </>
+      )}
 
       {map.imageUrl && (
         <>

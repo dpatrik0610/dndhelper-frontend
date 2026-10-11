@@ -3356,3 +3356,36 @@
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid var(--tt-line);
 }
+
+/* Map library thumbnails in the Battle map card */
+.tt-map-thumb {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tt-map-thumb.active {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 1px #a78bfa;
+}
+
+.tt-map-thumb > button {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tt-map-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tt-map-thumb-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}

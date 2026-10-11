@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { showNotification } from "@components/Notification/Notification";
+import { apiClient } from "@api/apiClient";
 import { useToken } from "@store/auth/authSelectors";
 import { useAuthStore } from "@store/auth/authStore";
 import { useTabletopStore } from "@store/tabletop/tabletopStore";
@@ -20,6 +21,7 @@ import type {
   TableStroke,
   TableToken,
   TurnEconomy,
+  MapLibrary,
 } from "@appTypes/Tabletop";
 
 const API_BASE: string = import.meta.env.VITE_API_BASE || "https://localhost:7222/api";
@@ -46,6 +48,10 @@ export async function uploadTableImage(tableId: string, file: File, kind: "map" 
   }
   return json.url as string;
 }
+
+/** The DM's uploaded maps; deleting one frees a slot of the per-DM limit. */
+export const listMyMaps = () => apiClient<MapLibrary>("/tabletop/maps");
+export const deleteMyMap = (id: string) => apiClient<void>(`/tabletop/maps/${id}`, { method: "DELETE" });
 
 const retryDelay = (attempt: number) => Math.min(30_000, 1000 * 2 ** attempt);
 
