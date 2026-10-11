@@ -157,7 +157,7 @@ function InitiativeRow({
   const clickable = isDm || (mine && !!t.characterId);
   const open = () => {
     const store = useTabletopStore.getState();
-    if (isDm) store.set({ editingTokenId: t.id });
+    if (isDm) store.set({ editingTokenId: t.id, focusTokenId: t.id });
     else if (mine && t.characterId) store.set({ profileCharacterId: t.characterId });
   };
   const hpTone = hpRatio === null ? "" : hpRatio > 0.5 ? "healthy" : hpRatio > 0.25 ? "wounded" : "bloodied";

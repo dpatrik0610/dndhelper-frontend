@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ActionIcon, Button, Group, ScrollArea, SegmentedControl, Select, Switch, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { IconDice5, IconSkull, IconX } from "@tabler/icons-react";
 import { Die, DiceResult } from "@components/roll/Dice";
@@ -9,8 +9,9 @@ import { useDmView, useTabletopStore } from "@store/tabletop/tabletopStore";
 import type { AbilityScores } from "@appTypes/Character/AbilityScores";
 import type { Character } from "@appTypes/Character/Character";
 import type { SavingThrows } from "@appTypes/Character/SavingThrows";
-import { abilityMod, saveCharacter, togglePip } from "./characterSheet";
+import { saveCharacter, togglePip } from "./characterSheet";
 import { d20With, signed, useTableRoll } from "./useTableRoll";
+import { ABILITIES as EFFECT_ABILITIES, computeEffects, type RollMode } from "@utils/effects";
 
 const DICE = [4, 6, 8, 10, 12, 20, 100];
 
@@ -31,6 +32,8 @@ const SAVES: { key: keyof SavingThrows; label: string }[] = [
   { key: "wisdom", label: "Wisdom" },
   { key: "charisma", label: "Charisma" },
 ];
+
+const SAVE_KEY = Object.fromEntries(EFFECT_ABILITIES.map((a) => [a.save, a.key]));
 
 type Tab = "abilities" | "skills" | "saves";
 
@@ -66,7 +69,11 @@ export function DiceBubble() {
 
   const roll = (expressions: string[], label: string, sides: number) =>
     void dice.roll({ expressions, label, as, private: isDm && isPrivate }, sides);
-  const check = (label: string, modifier: number) => roll([d20With(modifier)], label, 20);
+  // No keep-highest in the dice syntax, so advantage/disadvantage rolls two and the label says which counts.
+  const check = (label: string, modifier: number, mode: RollMode = "normal") =>
+    mode === "normal"
+      ? roll([d20With(modifier)], label, 20)
+      : roll([d20With(modifier), d20With(modifier)], `${label} (${mode}: take the ${mode === "advantage" ? "higher" : "lower"})`, 20);
 
   return (
     <div className={`tt-bubble${open ? " open" : ""}`}>
@@ -148,9 +155,11 @@ function Checks({
   character: Character;
   tab: Tab;
   onTab: (tab: Tab) => void;
-  onCheck: (label: string, modifier: number) => void;
+  onCheck: (label: string, modifier: number, roll?: RollMode) => void;
 }) {
   const skills = [...(character.skills ?? [])].sort((a, b) => a.name.localeCompare(b.name));
+  // Same numbers as the profile: equipped items, potions and conditions included.
+  const { stats } = useMemo(() => computeEffects(character), [character]);
 
   return (
     <>
@@ -173,10 +182,10 @@ function Checks({
         <div className="tt-check-list">
           {tab === "abilities" &&
             ABILITIES.map(({ key, label }) => {
-              const score = character.abilityScores?.[key] ?? 10;
-              const mod = abilityMod(score);
+              const score = stats[key].value;
+              const { value: mod, roll } = stats[`check:${key}`];
               return (
-                <UnstyledButton key={key} className="tt-check" onClick={() => onCheck(`${label} check`, mod)}>
+                <UnstyledButton key={key} className="tt-check" onClick={() => onCheck(`${label} check`, mod, roll)}>
                   <span className="tt-check-name">{label}</span>
                   <span className="tt-check-ability">{score}</span>
                   <span className="tt-check-mod">{signed(mod)}</span>
@@ -184,19 +193,22 @@ function Checks({
               );
             })}
           {tab === "skills" &&
-            skills.map((s) => (
-              <UnstyledButton key={s.name} className="tt-check" onClick={() => onCheck(`${s.name} check`, s.value)}>
-                <span className={`tt-check-prof${s.proficient ? " on" : ""}`} aria-label={s.proficient ? "Proficient" : undefined} />
-                <span className="tt-check-name">{s.name}</span>
-                <span className="tt-check-ability">{abilityOf(s.name)}</span>
-                <span className="tt-check-mod">{signed(s.value)}</span>
-              </UnstyledButton>
-            ))}
+            skills.map((s) => {
+              const { value, roll } = stats[`skill:${s.name}`];
+              return (
+                <UnstyledButton key={s.name} className="tt-check" onClick={() => onCheck(`${s.name} check`, value, roll)}>
+                  <span className={`tt-check-prof${s.proficient ? " on" : ""}`} aria-label={s.proficient ? "Proficient" : undefined} />
+                  <span className="tt-check-name">{s.name}</span>
+                  <span className="tt-check-ability">{abilityOf(s.name)}</span>
+                  <span className="tt-check-mod">{signed(value)}</span>
+                </UnstyledButton>
+              );
+            })}
           {tab === "saves" &&
             SAVES.map(({ key, label }) => {
-              const mod = character.savingThrows?.[key] ?? 0;
+              const { value: mod, roll } = stats[`save:${SAVE_KEY[key]}`];
               return (
-                <UnstyledButton key={key} className="tt-check" onClick={() => onCheck(`${label} saving throw`, mod)}>
+                <UnstyledButton key={key} className="tt-check" onClick={() => onCheck(`${label} saving throw`, mod, roll)}>
                   <span className="tt-check-name">{label}</span>
                   <span className="tt-check-ability">{label.slice(0, 3).toUpperCase()}</span>
                   <span className="tt-check-mod">{signed(mod)}</span>

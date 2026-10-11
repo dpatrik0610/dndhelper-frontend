@@ -38,6 +38,7 @@ import { useIsMobile } from "@hooks/useIsMobile";
 import { Board } from "./board/Board";
 import { TabletopLobby } from "./TabletopLobby";
 import { DiceBubble } from "./DiceBubble";
+import { TableEffects } from "./TableEffects";
 import { SpellSearch } from "./SpellSearch";
 import { JoinCombat } from "./JoinCombat";
 import { Toolbar } from "./Toolbar";
@@ -106,6 +107,7 @@ function TableView() {
     <div className={`tt-root${sideOpen ? " side-open" : ""}`}>
       <Board />
       <TopBar sideOpen={sideOpen} onToggleSide={() => setSideOpen((o) => !o)} />
+      <TableEffects />
       <Toolbar />
       {sideOpen && (
         <aside className="tt-side tt-glass">

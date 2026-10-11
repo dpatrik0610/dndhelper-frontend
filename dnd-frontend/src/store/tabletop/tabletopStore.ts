@@ -78,6 +78,8 @@ interface TabletopState {
   settingsOpen: boolean;
   /** DM only: right-click menu on a token, at a viewport point. */
   tokenMenu: { tokenId: string; x: number; y: number } | null;
+  /** Token the DM last clicked, dragged or right-clicked; the effects box shows its character. */
+  focusTokenId: string | null;
   /** DM only: HP or condition dialog for a token, opened from the initiative list or the token menu. */
   tokenDialog: { tokenId: string; kind: "heal" | "damage" | "condition" } | null;
 }
@@ -135,6 +137,7 @@ const initial: TabletopState = {
   profileCharacterId: null,
   settingsOpen: false,
   tokenMenu: null,
+  focusTokenId: null,
   tokenDialog: null,
 };
 

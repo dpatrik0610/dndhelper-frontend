@@ -257,7 +257,7 @@ export function Board() {
 
   const clickToken = (t: TableToken) => {
     const store = useTabletopStore.getState();
-    if (dmView) store.set({ editingTokenId: t.id });
+    if (dmView) store.set({ editingTokenId: t.id, focusTokenId: t.id });
     else if (owns(t) && t.characterId) store.set({ profileCharacterId: t.characterId });
   };
 
@@ -504,7 +504,7 @@ export function Board() {
     switch (g.kind) {
       case "pan":
         if (g.moved || !g.clicked) break;
-        if (g.menu) useTabletopStore.getState().set({ tokenMenu: { tokenId: g.clicked.id, x: e.clientX, y: e.clientY } });
+        if (g.menu) useTabletopStore.getState().set({ tokenMenu: { tokenId: g.clicked.id, x: e.clientX, y: e.clientY }, focusTokenId: g.clicked.id });
         else if (opensSomething(g.clicked)) clickToken(g.clicked);
         break;
       case "token": {
@@ -515,6 +515,7 @@ export function Board() {
         const to = snap(grid, g.pos);
         if (samePoint(to, g.from)) break;
         const store = useTabletopStore.getState();
+        if (dmView) store.set({ focusTokenId: g.token.id });
         store.moveTokenLocal(g.token.id, to.x, to.y);
         void tabletop.moveToken(g.token.id, to.x, to.y, distanceFt(grid, g.from, to)).then((ok) => {
           if (!ok) store.moveTokenLocal(g.token.id, g.token.x, g.token.y);
