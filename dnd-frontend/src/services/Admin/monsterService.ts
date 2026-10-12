@@ -1,85 +1,50 @@
-import { apiClient } from "../../api/apiClient";
-import type { Monster } from "../../types/Monster";
+import { apiClient } from "@api/apiClient";
+import type {
+  Monster,
+  MonsterMigrationReport,
+  MonsterSearch,
+  SrdImportResult,
+  SrdMonsterEntry,
+  SrdRuleset,
+} from "@appTypes/Monster";
 
 const BASE = "/monster";
 
 export const monsterService = {
-  getAll: async (): Promise<Monster[]> => {
-    return apiClient<Monster[]>(BASE, {});
-  },
-
-  getById: async (id: string): Promise<Monster> => {
-    return apiClient<Monster>(`${BASE}/${id}`, {});
-  },
-
-  getByName: async (name: string): Promise<Monster[]> => {
-    return apiClient<Monster[]>(`${BASE}/name/${encodeURIComponent(name)}`, {});
-  },
-
-  getPaged: async (page = 1, pageSize = 10) => {
-    const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
-    return apiClient<Monster[]>(`${BASE}/paged?${params.toString()}`, {});
-  },
-
-  getCount: async (): Promise<{ Count: number }> => {
-    return apiClient<{ Count: number }>(`${BASE}/count`, {});
-  },
-
-  search: async (
-    criteria: {
-      name?: string;
-      type?: string;
-      minCR?: number;
-      maxCR?: number;
-      tags?: string[];
-      sortBy?: string;
-      desc?: boolean;
-      page?: number;
-      pageSize?: number;
-    }
-  ) => {
+  search: (criteria: MonsterSearch) => {
     const params = new URLSearchParams();
-    if (criteria.name) params.set("name", criteria.name);
-    if (criteria.type) params.set("type", criteria.type);
-    if (criteria.minCR !== undefined) params.set("minCR", String(criteria.minCR));
-    if (criteria.maxCR !== undefined) params.set("maxCR", String(criteria.maxCR));
-    if (criteria.tags?.length) criteria.tags.forEach((t) => params.append("tags", t));
-    if (criteria.sortBy) params.set("sortBy", criteria.sortBy);
-    if (criteria.desc) params.set("desc", "true");
-    params.set("page", String(criteria.page ?? 1));
-    params.set("pageSize", String(criteria.pageSize ?? 10));
-
-    return apiClient<{ Found: number; monsters: Monster[] }>(
-      `${BASE}/search?${params.toString()}`,
-      {}
-    );
+    for (const [key, value] of Object.entries(criteria))
+      if (value !== undefined && value !== "") params.set(key, String(value));
+    return apiClient<{ items: Monster[]; total: number }>(`${BASE}?${params}`);
   },
 
-  create: async (monster: Monster): Promise<Monster> => {
-    return apiClient<Monster>(BASE, { method: "POST", body: monster });
+  types: () => apiClient<string[]>(`${BASE}/types`),
+
+  getById: (id: string) => apiClient<Monster>(`${BASE}/${id}`),
+
+  create: (monster: Monster) => apiClient<Monster>(BASE, { method: "POST", body: monster }),
+
+  update: (monster: Monster) => apiClient<Monster>(`${BASE}/${monster.id}`, { method: "PUT", body: monster }),
+
+  delete: (id: string) => apiClient<void>(`${BASE}/${id}`, { method: "DELETE" }),
+
+  /** Art for the monster and its tabletop token (R2, max 10 MB). Returns the saved monster. */
+  uploadImage: (id: string, file: File) => {
+    const body = new FormData();
+    body.append("file", file);
+    return apiClient<Monster>(`${BASE}/${id}/image`, { method: "POST", body });
   },
 
-  update: async (id: string, monster: Monster): Promise<Monster> => {
-    return apiClient<Monster>(`${BASE}/${id}`, { method: "PUT", body: monster });
-  },
+  // Superadmin: SRD import into core content.
+  srdCatalog: (ruleset: SrdRuleset) => apiClient<SrdMonsterEntry[]>(`${BASE}/srd/${ruleset}`),
 
-  delete: async (id: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/${id}`, { method: "DELETE" });
-  },
+  srdImport: (ruleset: SrdRuleset, keys: string[]) =>
+    apiClient<SrdImportResult>(`${BASE}/srd/${ruleset}/import`, { method: "POST", body: { keys } }),
 
-  softDelete: async (id: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/soft-delete/${id}`, { method: "PATCH" });
-  },
-
-  deleteOwn: async (id: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/delete-own/${id}`, { method: "DELETE" });
-  },
-
-  switchOwner: async (monsterId: string, newOwnerId: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/${monsterId}/switch-owner/${newOwnerId}`, { method: "POST" });
-  },
-
-  addOwner: async (monsterId: string, newOwnerId: string): Promise<void> => {
-    await apiClient<void>(`${BASE}/${monsterId}/addOwner/${newOwnerId}`, { method: "GET" });
-  },
+  /** Superadmin: converts monsters still in the old 5etools shape. Dry run by default. */
+  migrateLegacy: (dryRun: boolean) =>
+    apiClient<MonsterMigrationReport>(`/database/migrate/monsters?dryRun=${dryRun}`, { method: "POST" }),
 };
+
+/** Most the server accepts per import call. */
+export const SRD_IMPORT_BATCH = 20;

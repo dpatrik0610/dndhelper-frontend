@@ -61,6 +61,7 @@ import { useTabletopStore } from "@store/tabletop/tabletopStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import type { Character } from "@appTypes/Character/Character";
 import type { Monster } from "@appTypes/Monster";
+import { crLabel } from "@utils/monster";
 import type { GridSettings, GridType, MapLibrary, MapUpload, TableParticipant, TableToken } from "@appTypes/Tabletop";
 import { gridTile } from "./board/gridMath";
 import { deleteMyMap, listMyMaps, resolveImageUrl, tabletop, uploadTableImage } from "./useTabletopHub";
@@ -853,8 +854,8 @@ function MonsterPicker({ cellSize }: { cellSize: number }) {
     }
     let active = true;
     monsterService
-      .search({ name: debounced.trim(), pageSize: 15 })
-      .then((r) => active && setResults(r?.monsters ?? []))
+      .search({ query: debounced.trim(), pageSize: 15 })
+      .then((r) => active && setResults(r.items))
       .catch(() => active && setResults([]));
     return () => {
       active = false;
@@ -864,15 +865,16 @@ function MonsterPicker({ cellSize }: { cellSize: number }) {
   const add = (id: string | null) => {
     const monster = results.find((m) => m.id === id);
     if (!monster) return;
-    const hp = monster.hitPoints?.average ?? 10;
+    const hp = monster.hitPoints || 10;
     const [p] = spawnPoints(1, cellSize);
     void tabletop.upsertToken({
       layer: useTabletopStore.getState().activeLayer,
-      name: monster.name ?? "Monster",
+      name: monster.name || "Monster",
       hp,
       maxHp: hp,
-      ac: monster.armorClass?.[0] ?? 10,
-      speed: monster.speed?.walk ?? 30,
+      ac: monster.armorClass || 10,
+      speed: monster.speed.walk,
+      imageUrl: monster.imageUrl ?? null,
       color: "#f87171",
       x: p.x,
       y: p.y,
@@ -887,7 +889,7 @@ function MonsterPicker({ cellSize }: { cellSize: number }) {
       searchable
       searchValue={search}
       onSearchChange={setSearch}
-      data={results.filter((m) => m.id).map((m) => ({ value: m.id!, label: `${m.name}${m.cr !== undefined ? ` · CR ${m.cr}` : ""}` }))}
+      data={results.filter((m) => m.id).map((m) => ({ value: m.id!, label: `${m.name} · CR ${crLabel(m.challengeRating)}` }))}
       filter={({ options }) => options}
       value={null}
       onChange={add}

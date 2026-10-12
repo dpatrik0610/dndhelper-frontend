@@ -11,7 +11,6 @@ import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
 import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
-import { useAdminMonsterStore } from "@store/admin/adminMonsterStore";
 import { useAdminUserStore } from "@store/admin/adminUserStore";
 import { loadCharacters } from "@utils/loadCharacter";
 
@@ -74,7 +73,6 @@ const clearScopedStores = () => {
   useAdminInventoryStore.getState().clearStorage?.();
   useAdminCurrencyStore.getState().clearStorage?.();
   useAdminEquipmentStore.getState().clearStorage?.();
-  useAdminMonsterStore.getState().clearStorage?.();
 };
 
 /**
