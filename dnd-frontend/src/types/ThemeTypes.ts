@@ -18,7 +18,7 @@ export const themeOptions: ThemeOption[] = [
   { key: "feywild", name: "Feywild Bloom", icon: "🌸", accent: "#f472b6", accentSecondary: "#fbbf24", glow: "0 0 15px rgba(244, 114, 182, 0.25)" },
   { key: "toxic", name: "Toxic Spore", icon: "☣️", accent: "#22c55e", accentSecondary: "#facc15", glow: "0 0 15px rgba(34, 197, 94, 0.25)" },
   { key: "void", name: "Eldritch Void", icon: "👁️", accent: "#d946ef", accentSecondary: "#6366f1", glow: "0 0 15px rgba(217, 70, 239, 0.25)" },
-  { key: "steampunk", name: "Clockwork Brass", icon: "⚙️", accent: "#ea580c", accentSecondary: "#0d9488", glow: "0 0 15px rgba(234, 88, 12, 0.25)" },
+  { key: "steampunk", name: "Clockwork Brass", icon: "⚙️", accent: "#c9a24a", accentSecondary: "#56a08c", glow: "0 0 15px rgba(201, 162, 74, 0.25)" },
   { key: "deep-ocean", name: "Deep Ocean", icon: "🌊", accent: "#0284c7", accentSecondary: "#0d9488", glow: "0 0 15px rgba(2, 132, 199, 0.25)" },
   { key: "darkvision", name: "Darkvision", icon: "🕶️", accent: "#ffffff", accentSecondary: "#9ca3af", glow: "0 0 15px rgba(255, 255, 255, 0.25)" },
   { key: "cyberpunk", name: "Cyberpunk", icon: "🌃", accent: "#fcee0a", accentSecondary: "#00f0ff", glow: "0 0 15px rgba(252, 238, 10, 0.45)" },

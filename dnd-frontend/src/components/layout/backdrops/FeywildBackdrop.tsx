@@ -3,10 +3,10 @@ import { seededRandom } from "@utils/seededRandom";
 import type { BackdropProps } from "./index";
 
 /**
- * Feywild Bloom: an enchanted twilight forest. Depth comes from layered trunks (far = heavily blurred
- * in violet haze, near = sharp with cylindrical bark shading and flared roots), a soft foliage canopy
- * lit pink at its edges, bioluminescent mushrooms lit from within, gradient grass with blurred
- * foreground blades (depth of field), soft light shafts, wandering fireflies and out-of-focus bokeh.
+ * Feywild Bloom: an enchanted twilight forest. Depth comes from three layers of procedurally grown,
+ * branching trees (far = small and blurred in violet haze, mid = leafy and softly out of focus, near =
+ * two old rim-lit trees leaning in to frame the glade, crowns in blossom with wisteria drapes),
+ * bioluminescent mushrooms lit from within, gradient grass with blurred foreground blades (depth of field), soft light shafts, wandering fireflies and out-of-focus bokeh.
  * (Spinning petals = the shared particles.) Styles in styles/themes/feywild.css. Seeded = identical every load.
  */
 
@@ -14,16 +14,55 @@ const W = 1600;
 const H = 900;
 const f = (n: number) => n.toFixed(1);
 const GLOWS = ["#f472b6", "#5eead4", "#c084fc", "#fbbf24"];
+/** Mid-crown leaf tints: deep teal, dusk blue, plum, with the odd moonlit sage */
+const LEAVES = ["#10291f", "#16203a", "#251433", "#10291f", "#2a4538"];
+/** Blossom tints: rose, blush, deep pink, lilac */
+const BLOOMS = ["#f472b6", "#f9a8d4", "#db2777", "#c084fc", "#f472b6"];
 
-/** Tapered trunk from the top edge to the ground, flaring into roots at the base. */
-function trunk(x: number, topW: number, baseW: number, lean: number) {
-  const l0 = x - topW / 2;
-  const r0 = x + topW / 2;
-  const lb = x + lean - baseW / 2;
-  const rb = x + lean + baseW / 2;
-  return (
-    `M${f(l0)} 0C${f(l0 - 4)} ${H * 0.4} ${f(lb + baseW * 0.15)} ${H * 0.75} ${f(lb - baseW * 0.35)} ${H}` +
-    `H${f(rb + baseW * 0.35)}C${f(rb - baseW * 0.15)} ${H * 0.75} ${f(r0 + 4)} ${H * 0.4} ${f(r0)} 0Z`
+const rad = (a: number) => (a * Math.PI) / 180;
+
+interface Tip { x: number; y: number }
+
+/**
+ * A branching tree grown from (x, y): each limb is a tapered quadratic curve that bends a little and
+ * forks into 2–3 shorter, thinner limbs; `trunk` limbs just continue (a gnarled bole before the
+ * crown). All limbs (and a root flare) go into one path, every subpath wound the same way so overlaps
+ * don't punch holes. Returns the twig tips, where the crown is drawn.
+ */
+function tree(r: () => number, x: number, y: number, len: number, width: number, angle: number, depth: number, trunk = 2) {
+  let d = `M${f(x - width / 2)} ${f(y - width * 0.9)}Q${f(x - width * 0.55)} ${f(y - width * 0.2)} ${f(x - width * 1.5)} ${f(y)}H${f(x + width * 1.5)}Q${f(x + width * 0.55)} ${f(y - width * 0.2)} ${f(x + width / 2)} ${f(y - width * 0.9)}Z`;
+  const tips: Tip[] = [];
+  const limb = (x0: number, y0: number, a: number, l: number, w0: number, left: number, bole: number) => {
+    const a1 = a + (r() - 0.5) * 34;
+    const am = (a + a1) / 2;
+    const w1 = Math.max(1.2, w0 * (bole > 0 ? 0.86 : 0.66));
+    const wm = (w0 + w1) / 2;
+    const cx = x0 + Math.cos(rad(a)) * l * 0.5;
+    const cy = y0 + Math.sin(rad(a)) * l * 0.5;
+    const x1 = cx + Math.cos(rad(a1)) * l * 0.5;
+    const y1 = cy + Math.sin(rad(a1)) * l * 0.5;
+    const side = (px: number, py: number, ang: number, w: number, s: number) => `${f(px - Math.sin(rad(ang)) * w * s * 0.5)} ${f(py + Math.cos(rad(ang)) * w * s * 0.5)}`;
+    d += `M${side(x0, y0, a, w0, 1)}Q${side(cx, cy, am, wm, 1)} ${side(x1, y1, a1, w1, 1)}L${side(x1, y1, a1, w1, -1)}Q${side(cx, cy, am, wm, -1)} ${side(x0, y0, a, w0, -1)}Z`;
+    // round knuckle so the next limb joins without a notch
+    const k = w1 / 2;
+    d += `M${f(x1 + k)} ${f(y1)}a${f(k)} ${f(k)} 0 1 0 ${f(-2 * k)} 0a${f(k)} ${f(k)} 0 1 0 ${f(2 * k)} 0Z`;
+    if (bole > 0) return limb(x1, y1, a1 + (r() - 0.5) * 16, l * 0.9, w1, left, bole - 1);
+    if (left === 0) return void tips.push({ x: x1, y: y1 });
+    const n = r() < 0.3 ? 3 : 2;
+    for (let i = 0; i < n; i++) {
+      const fan = (i / (n - 1) - 0.5) * 70 + (r() - 0.5) * 18;
+      const up = (-90 - a1) * 0.18; // a gentle pull back toward the light
+      limb(x1, y1, a1 + fan + up, l * (0.66 + r() * 0.16), w1 * 0.9, left - 1, 0);
+    }
+  };
+  limb(x, y - width * 0.6, angle, len, width, depth, trunk);
+  return { d, tips };
+}
+
+/** Clumps of soft blobs around each twig tip: a crown that actually sits on its branches. */
+function crown(r: () => number, tips: Tip[], size: number, per = 3) {
+  return tips.flatMap((t) =>
+    Array.from({ length: per }, () => ({ cx: t.x + (r() - 0.5) * size * 1.4, cy: t.y + (r() - 0.6) * size, rad: size * (0.5 + r() * 0.6), tone: r() }))
   );
 }
 
@@ -40,9 +79,23 @@ interface Shroom { x: number; y: number; h: number; c: number; color: string; le
 export function FeywildBackdrop({ isStatic = false }: BackdropProps) {
   const scene = useMemo(() => {
     const r = seededRandom(5150);
-    const far = Array.from({ length: 9 }, (_, i) => trunk(90 + i * 180 + r() * 60, 26 + r() * 20, 40 + r() * 20, (r() - 0.5) * 30));
-    const mid = [250, 610, 1010, 1330].map((x) => trunk(x + r() * 40, 40 + r() * 16, 70 + r() * 30, (r() - 0.5) * 40));
-    const foliage = Array.from({ length: 46 }, () => ({ cx: r() * W, cy: -20 + r() * 150, rad: 40 + r() * 70 }));
+    // far: small trees on the horizon, lost in violet haze
+    const far = Array.from({ length: 9 }, (_, i) => tree(r, 60 + i * 185 + r() * 70, 700 + r() * 30, 46 + r() * 22, 9 + r() * 5, -90 + (r() - 0.5) * 14, 4, 1));
+    const farCrown = far.flatMap((t) => crown(r, t.tips, 22, 2));
+    // mid: four trees either side of the glade, softly out of focus
+    const mid = [300, 620, 990, 1310].map((x) => tree(r, x + (r() - 0.5) * 50, H - 46, 80 + r() * 70, 24 + r() * 12, -90 + (r() - 0.5) * 16, 5));
+    const midCrown = mid.flatMap((t) => crown(r, t.tips, 32, 4));
+    // near: two old trees leaning in to frame the glade, crowns in blossom
+    const near = [
+      tree(r, 30, H - 30, 175, 66, -72, 6, 1),
+      tree(r, 1570, H - 30, 185, 70, -108, 6, 1),
+    ];
+    const blossom = near.flatMap((t) => crown(r, t.tips, 14, 4));
+    // wisteria drapes hanging from the near crowns' lower twigs
+    const drapes = near
+      .flatMap((t) => t.tips)
+      .filter((t) => t.y > 60 && t.y < 520 && r() < 0.2)
+      .map((t) => ({ x: t.x, y: t.y, n: 5 + Math.floor(r() * 5) }));
     const shrooms: Shroom[] = [190, 470, 780, 1040, 1270].flatMap((x) =>
       Array.from({ length: 2 + Math.floor(r() * 3) }, (_, i) => ({
         x: x + (i - 1) * (18 + r() * 14),
@@ -73,7 +126,7 @@ export function FeywildBackdrop({ isStatic = false }: BackdropProps) {
       color: i % 2 ? "rgba(244, 114, 182, 0.18)" : "rgba(253, 230, 138, 0.16)",
       dur: 14 + r() * 10,
     }));
-    return { far, mid, foliage, shrooms, grass, foreground, fireflies, bokeh };
+    return { far, farCrown, mid, midCrown, near, blossom, drapes, shrooms, grass, foreground, fireflies, bokeh };
   }, []);
 
   return (
@@ -86,24 +139,14 @@ export function FeywildBackdrop({ isStatic = false }: BackdropProps) {
             <feGaussianBlur stdDeviation="7" />
           </filter>
           <filter id="fw-blur-mid" x="-20%" y="-5%" width="140%" height="110%">
-            <feGaussianBlur stdDeviation="2.2" />
+            <feGaussianBlur stdDeviation="3.2" />
+          </filter>
+          <filter id="fw-blur-soft" x="-5%" y="-5%" width="110%" height="110%">
+            <feGaussianBlur stdDeviation="1.3" />
           </filter>
           <filter id="fw-blur-fg" x="-50%" y="-10%" width="200%" height="120%">
             <feGaussianBlur stdDeviation="4" />
           </filter>
-          {/* cylindrical bark shading: dark edges, pink-lit side */}
-          <linearGradient id="fw-bark" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#07040b" />
-            <stop offset="0.35" stopColor="#1c1222" />
-            <stop offset="0.62" stopColor="#3a2234" />
-            <stop offset="0.85" stopColor="#140c18" />
-            <stop offset="1" stopColor="#060309" />
-          </linearGradient>
-          <radialGradient id="fw-leaf" cx="0.5" cy="0.35" r="0.65">
-            <stop offset="0" stopColor="#0b1a12" />
-            <stop offset="0.78" stopColor="#0f2418" />
-            <stop offset="1" stopColor="#5b2a4a" />
-          </radialGradient>
           <linearGradient id="fw-grass" x1="0" y1="1" x2="0" y2="0">
             <stop offset="0" stopColor="#040a07" />
             <stop offset="1" stopColor="#1f4030" />
@@ -132,28 +175,50 @@ export function FeywildBackdrop({ isStatic = false }: BackdropProps) {
           ))}
         </defs>
 
+        {/* all trees eased back a touch so they stay behind the UI */}
+        <g opacity={0.85}>
         {/* far forest in violet haze */}
         <g filter="url(#fw-blur-far)" fill="#2a1a3a" opacity={0.55}>
-          {scene.far.map((d, i) => (
-            <path key={i} d={d} />
+          {scene.far.map((t, i) => (
+            <path key={i} d={t.d} />
+          ))}
+          {scene.farCrown.map((l, i) => (
+            <circle key={i} cx={l.cx} cy={l.cy} r={l.rad} />
           ))}
         </g>
         <rect x={0} y={H * 0.45} width={W} height={H * 0.4} fill="#3b1a4a" opacity={0.18} />
+
+        {/* mid trees, slightly out of focus */}
         <g filter="url(#fw-blur-mid)">
-          {scene.mid.map((d, i) => (
-            <path key={i} d={d} fill="url(#fw-bark)" opacity={0.85} />
+          {scene.mid.map((t, i) => (
+            <path key={i} d={t.d} fill="#150c1b" />
+          ))}
+          {scene.midCrown.map((l, i) => (
+            <circle key={i} cx={l.cx} cy={l.cy} r={l.rad} fill={LEAVES[Math.floor(l.tone * LEAVES.length)]} opacity={0.8} />
           ))}
         </g>
 
-        {/* near trunks framing the glade */}
-        <path d={trunk(70, 120, 200, 10)} fill="url(#fw-bark)" />
-        <path d={trunk(1530, 130, 210, -12)} fill="url(#fw-bark)" />
-
-        {/* canopy: soft foliage masses, pink-lit at the edges */}
-        <g filter="url(#fw-blur-mid)">
-          {scene.foliage.map((l, i) => (
-            <circle key={i} cx={l.cx} cy={l.cy} r={l.rad} fill="url(#fw-leaf)" />
+        {/* near trees: dark silhouettes rim-lit pink on the side facing the glade's glow */}
+        {scene.near.map((t, i) => (
+          <g key={i}>
+            <path d={t.d} fill="#f472b6" opacity={0.35} transform={`translate(${i ? -3 : 3} -1)`} />
+            <path d={t.d} fill="#08050c" />
+          </g>
+        ))}
+        {scene.drapes.map((v, i) => (
+          <g key={i} fill="#c084fc" opacity={0.75}>
+            {Array.from({ length: v.n }, (_, k) => (
+              <circle key={k} cx={v.x + Math.sin(k * 1.3) * 2} cy={v.y + 6 + k * 7} r={5 - (k / v.n) * 3.5} fill={k % 2 ? "#f9a8d4" : undefined} />
+            ))}
+          </g>
+        ))}
+        {/* translucent, overlapping petal clouds rather than solid balls */}
+        <g opacity={0.55} filter="url(#fw-blur-soft)">
+          {scene.blossom.map((l, i) => (
+            <circle key={i} cx={l.cx} cy={l.cy} r={l.rad} fill={BLOOMS[Math.floor(l.tone * BLOOMS.length)]} />
           ))}
+        </g>
+
         </g>
 
         <path d={`M0 ${H}V${H - 40}Q400 ${H - 70} 800 ${H - 45}T${W} ${H - 50}V${H}Z`} fill="url(#fw-ground)" />

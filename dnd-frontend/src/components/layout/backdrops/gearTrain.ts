@@ -50,10 +50,25 @@ export function buildTrain(spec: { teeth: number; angle?: number }[], period0: n
   return gears;
 }
 
-/** The Clockwork scene's trains (origin = first gear's centre; y grows downward). */
+/** Where the two working trains' first gears sit, px from the viewport corner they hang off. */
+export const TR_ORIGIN = { right: 100, top: 50 };
+export const BL_ORIGIN = { left: 80, bottom: 40 };
+
+/**
+ * The Clockwork scene's trains (origin = first gear's centre; y grows downward). `deep` trains are
+ * huge, faint and slow, sitting behind the foreground ones for depth; `letters` label each gear the
+ * way an engraved plate keys its parts.
+ *
+ * tr: the engine's train. The steam engine's crank is on its last gear (F), so F's period is the
+ *     engine's cycle (9s × 28/36 = 7s); D carries the belt pulley.
+ * bl: driven by that belt through a pulley on A. D's and A's pulleys are the same size, so A turns in
+ *     D's 9s.
+ */
 export const CLOCKWORK_TRAINS = [
-  { key: "bl", className: "cw-train cw-train--bl", gears: buildTrain([{ teeth: 44 }, { teeth: 22, angle: -20 }, { teeth: 14, angle: -80 }], 70) },
-  { key: "tr", className: "cw-train cw-train--tr", gears: buildTrain([{ teeth: 36 }, { teeth: 18, angle: 160 }, { teeth: 28, angle: 100 }], 60) },
+  { key: "deep-l", pos: { left: -150, top: "42%" }, deep: true, gears: buildTrain([{ teeth: 96 }, { teeth: 40, angle: -35 }], 420) },
+  { key: "deep-r", pos: { right: 160, bottom: -170 }, deep: true, gears: buildTrain([{ teeth: 80 }], 360) },
+  { key: "bl", pos: BL_ORIGIN, letters: "ABC", gears: buildTrain([{ teeth: 44 }, { teeth: 22, angle: -20 }, { teeth: 14, angle: -80 }], 9) },
+  { key: "tr", pos: TR_ORIGIN, letters: "DEF", gears: buildTrain([{ teeth: 36 }, { teeth: 18, angle: 160 }, { teeth: 28, angle: 100 }], 9) },
 ];
 
 /**

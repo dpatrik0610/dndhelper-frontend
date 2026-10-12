@@ -1,14 +1,86 @@
 /* ==========================================================================
-   ⚙️ Clockwork Brass (.theme-clockwork-brass): minimal steampunk — brass line-art on dark paper
+   ⚙️ Clockwork Brass (.theme-clockwork-brass): an engraved plate from an artificer's treatise —
+   brass line-art on aged dark paper, lit by a desk lamp
    Scene: backdrops/ClockworkBackdrop.tsx (+ gearTrain.ts). Variables: theme.css.
    ========================================================================== */
 
 /* ---------- Scene ---------- */
 
-/* Dark paper: flat, with only a gentle falloff to the edges */
+/* Aged dark paper: warm falloff to the edges plus a few foxing stains */
 .cw-paper {
   inset: 0;
-  background: radial-gradient(ellipse 85% 75% at 50% 50%, #17110b 0%, #0d0906 70%, #080604 100%);
+  background:
+    radial-gradient(circle at 78% 22%, rgba(120, 78, 30, 0.12) 0, transparent 9%),
+    radial-gradient(circle at 12% 70%, rgba(120, 78, 30, 0.1) 0, transparent 7%),
+    radial-gradient(circle at 63% 86%, rgba(120, 78, 30, 0.08) 0, transparent 5%),
+    radial-gradient(circle at 34% 14%, rgba(120, 78, 30, 0.07) 0, transparent 4%),
+    radial-gradient(ellipse 85% 75% at 50% 50%, #1a130c 0%, #0f0a06 68%, #070504 100%);
+}
+
+/* Paper fibre: static fractal noise, rasterised once */
+.cw-grain {
+  inset: 0;
+  opacity: 0.6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .8 0 0 0 0 .66 0 0 0 0 .42 .6 0 0 0 -.22'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Desk lamp from above: a warm pool of light that gutters now and then */
+.cw-lamp {
+  left: 5%;
+  top: -35%;
+  width: 75%;
+  height: 115%;
+  background: radial-gradient(ellipse at 50% 35%, rgba(255, 186, 104, 0.11) 0%, rgba(255, 160, 80, 0.045) 38%, transparent 68%);
+  will-change: opacity;
+  animation: cwFlicker 9s linear infinite;
+}
+
+.cw-mote {
+  border-radius: 50%;
+  background: rgba(244, 214, 156, 0.7);
+  opacity: 0.35;
+  will-change: transform, opacity;
+  animation-name: cwMote;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* Engraver's plate: a double ruled border with a rivet in each corner */
+.cw-plate {
+  inset: 14px;
+  border: 1px solid rgba(201, 162, 74, 0.2);
+  background:
+    radial-gradient(circle, rgba(201, 162, 74, 0.45) 0 2px, transparent 2.6px) no-repeat left 4px top 4px / 10px 10px,
+    radial-gradient(circle, rgba(201, 162, 74, 0.45) 0 2px, transparent 2.6px) no-repeat right 4px top 4px / 10px 10px,
+    radial-gradient(circle, rgba(201, 162, 74, 0.45) 0 2px, transparent 2.6px) no-repeat left 4px bottom 4px / 10px 10px,
+    radial-gradient(circle, rgba(201, 162, 74, 0.45) 0 2px, transparent 2.6px) no-repeat right 4px bottom 4px / 10px 10px;
+}
+
+.cw-plate::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 1px solid rgba(201, 162, 74, 0.09);
+}
+
+/* Plate title along the top margin (the belt runs along the bottom one) */
+.cw-cartouche {
+  left: 50%;
+  top: 22px;
+  transform: translateX(-50%);
+  padding: 3px 22px;
+  border-top: 1px solid rgba(201, 162, 74, 0.22);
+  border-bottom: 1px solid rgba(201, 162, 74, 0.22);
+  white-space: nowrap;
+  font-family: "IM Fell English SC", serif;
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: rgba(201, 162, 74, 0.45);
+}
+
+.cw-defs {
+  width: 0;
+  height: 0;
 }
 
 /* Engraving ink: fine brass strokes, no fills */
@@ -29,6 +101,20 @@
   stroke-dasharray: 2 5;
 }
 
+/* Red-line arc on the gauge, in faded red ink */
+.cw-ink--warn {
+  stroke: #b4553a;
+  stroke-width: 2;
+  opacity: 0.6;
+}
+
+/* Section hatching: the cut faces of gears and the bob, as a draughtsman shades them */
+.cw-hatch {
+  fill: url(#cw-hatch);
+  stroke: none;
+  opacity: 0.26;
+}
+
 .cw-label {
   fill: #c9a24a;
   opacity: 0.6;
@@ -42,20 +128,65 @@
   opacity: 0.5;
 }
 
-/* Gear trains: origin = the first gear's centre (px) */
+/* Gear trains: origin = the first gear's centre (px), placed inline from gearTrain.ts */
 .cw-train {
   width: 0;
   height: 0;
 }
 
-.cw-train--bl {
-  left: 80px;
-  bottom: 40px;
+/* Huge, faint and slow: depth behind the working trains */
+.cw-train--deep-l {
+  opacity: 0.3;
 }
 
-.cw-train--tr {
-  right: 100px;
-  top: 50px;
+.cw-train--deep-r {
+  opacity: 0.26;
+}
+
+/* Draughtsman's dash-dot centre lines through each working train's main axle */
+.cw-train--bl::before,
+.cw-train--bl::after,
+.cw-train--tr::before,
+.cw-train--tr::after {
+  content: "";
+  position: absolute;
+  opacity: 0.22;
+}
+
+.cw-train--bl::before,
+.cw-train--tr::before {
+  height: 1px;
+  background: repeating-linear-gradient(90deg, #c9a24a 0 16px, transparent 16px 20px, #c9a24a 20px 22px, transparent 22px 26px);
+}
+
+.cw-train--bl::after,
+.cw-train--tr::after {
+  width: 1px;
+  background: repeating-linear-gradient(180deg, #c9a24a 0 16px, transparent 16px 20px, #c9a24a 20px 22px, transparent 22px 26px);
+}
+
+.cw-train--bl::before {
+  left: -80px;
+  width: 560px;
+  mask-image: linear-gradient(90deg, #000 60%, transparent);
+}
+
+.cw-train--bl::after {
+  top: -420px;
+  height: 460px;
+  mask-image: linear-gradient(0deg, #000 60%, transparent);
+}
+
+.cw-train--tr::before {
+  left: -680px;
+  width: 780px;
+  mask-image: linear-gradient(270deg, #000 60%, transparent);
+}
+
+.cw-train--tr::after {
+  top: -50px;
+  height: 260px;
+  mask-image: linear-gradient(180deg, #000 60%, transparent);
 }
 
 .cw-gear {
@@ -72,13 +203,181 @@
   animation: cwTurn var(--period) linear infinite;
 }
 
-/* Plumbing + gauge: fixed px, anchored top-right so it registers with the gears */
-.cw-plumbing {
+/* Plate keys A, B, C… beside each gear */
+.cw-letter {
+  position: absolute;
+  font-family: "IM Fell English SC", serif;
+  font-size: 15px;
+  font-style: italic;
+  color: #c9a24a;
+  opacity: 0.55;
+}
+
+.cw-caption {
+  position: absolute;
+  white-space: nowrap;
+  font-family: "IM Fell English SC", serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #c9a24a;
+  opacity: 0.5;
+}
+
+/* ----- Belt: D's pulley → right edge → corner idler → bottom edge → A's barrel ----- */
+
+.cw-belt {
+  overflow: hidden;
+  background: rgba(201, 162, 74, 0.28);
+}
+
+.cw-belt--down,
+.cw-belt--up {
+  width: 2px;
+}
+
+.cw-belt--left,
+.cw-belt--right {
+  height: 2px;
+}
+
+/* Lacing marks riding along the belt: a strip one mark-pitch longer than the run slides by exactly
+   one pitch, so the loop is seamless. Speed = pulley rim speed (2π·20px per 9s ≈ 14px/s). */
+.cw-belt::before {
+  content: "";
+  position: absolute;
+  will-change: transform;
+  animation: 0.857s linear infinite;
+}
+
+.cw-belt--down::before,
+.cw-belt--up::before {
+  left: 0;
+  right: 0;
+  top: -12px;
+  bottom: -12px;
+  background: repeating-linear-gradient(180deg, rgba(227, 196, 122, 0.85) 0 3px, transparent 3px 12px);
+  animation-name: cwBeltY;
+}
+
+.cw-belt--left::before,
+.cw-belt--right::before {
+  top: 0;
+  bottom: 0;
+  left: -12px;
+  right: -12px;
+  background: repeating-linear-gradient(90deg, rgba(227, 196, 122, 0.85) 0 3px, transparent 3px 12px);
+  animation-name: cwBeltX;
+}
+
+.cw-belt--up::before,
+.cw-belt--left::before {
+  animation-direction: reverse;
+}
+
+.cw-idler {
+  position: absolute;
+  width: 42px;
+  height: 42px;
+}
+
+.cw-idler svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  will-change: transform;
+  animation: cwTick 9s linear infinite;
+}
+
+.cw-jockey {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 162, 74, 0.7);
+}
+
+/* ----- Engine: fixed px, anchored top-right so it registers with train D·E·F ----- */
+
+.cw-engine {
   top: 0;
   right: 0;
-  width: 560px;
+  width: 640px;
   height: 900px;
   overflow: visible;
+}
+
+/* Pipe walls: brass stroke with a paper-coloured bore on top */
+.cw-pipe,
+.cw-pipe-bore {
+  fill: none;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+}
+
+.cw-pipe {
+  stroke: rgba(201, 162, 74, 0.8);
+  stroke-width: 13;
+}
+
+.cw-pipe-bore {
+  stroke: #140e09;
+  stroke-width: 10.6;
+}
+
+/* Working fluid, hand-tinted like a coloured plate: verdigris water, pale steam. Flow = dashes
+   travelling along the pipe centre lines (small SVG paths, so the dash repaint stays cheap) */
+.cw-flow {
+  fill: none;
+  stroke-width: 5;
+  stroke-dasharray: 9 13;
+  animation: cwFlow 1.1s linear infinite;
+}
+
+.cw-flow--water {
+  stroke: #4fae96;
+  opacity: 0.55;
+  animation-duration: 2.2s;
+}
+
+.cw-flow--steam {
+  stroke: #e9dcc2;
+  opacity: 0.3;
+  animation-duration: 0.8s;
+}
+
+.cw-fluid {
+  fill: #4fae96;
+  fill-opacity: 0.2;
+  stroke: #4fae96;
+  stroke-opacity: 0.7;
+  stroke-width: 1.2;
+}
+
+/* Water surface sloshing: slide exactly one 24px wave, so the loop is seamless */
+.cw-wave {
+  animation: cwWave 2.4s linear infinite;
+}
+
+.cw-bubble {
+  fill: none;
+  stroke: #84d3bc;
+  stroke-width: 0.9;
+  opacity: 0.5;
+  animation-name: cwBubble;
+  animation-timing-function: ease-in;
+  animation-iteration-count: infinite;
+}
+
+/* Firebox: coals and the glow on the boiler's belly breathe out of step */
+.cw-fireglow {
+  fill: url(#cw-fire);
+  animation: cwFlicker 3.3s linear infinite;
+}
+
+.cw-coal {
+  fill: #ff8a2a;
+  opacity: 0.7;
+  animation: cwCoal 2.1s ease-in-out infinite alternate;
 }
 
 /* Needle twitching in mechanical steps around ~half pressure */
@@ -87,23 +386,155 @@
   animation: cwNeedle 7s steps(1, end) infinite;
 }
 
-/* Thin steam wisp drawing itself upward and fading */
-.cw-steam {
-  stroke-dasharray: 160;
-  stroke-dashoffset: 160;
-  animation: cwSteam 4.5s ease-out infinite;
+/* Crosshead/piston and connecting rod: keyframes cwCrosshead/cwRod are computed in the component
+   from gear F's rotation; duration = F's period (set inline) */
+.cw-crosshead {
+  animation: cwCrosshead 7s linear infinite;
 }
 
-.theme-scene--static .cw-steam {
-  stroke-dashoffset: 0;
+.cw-rod {
+  animation: cwRod 7s linear infinite;
 }
 
-.cw-annotation {
-  left: 197px;
-  bottom: 200px;
-  width: 300px;
-  height: 70px;
+/* Soft puffs, rising and spreading (hidden when static) */
+.cw-puff {
+  fill: url(#cw-puff);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Safety-valve burst: a short plume, then quiet for the rest of the 7s cycle (synced to the needle) */
+.cw-puff--burst {
+  animation: cwBurst 7s ease-out infinite;
+}
+
+/* Exhaust: one chuff per stroke (duration = half a crank turn, set inline) */
+.cw-puff--chuff {
+  animation: cwChuff 3.5s ease-out infinite;
+}
+
+/* ----- Siding: fixed px, anchored bottom-right; the crane's column is the water main continued ----- */
+
+.cw-loco {
+  right: 0;
+  bottom: 0;
+  width: 720px;
+  height: 240px;
   overflow: visible;
+}
+
+/* Paper-coloured fill for parts that hide what's behind them (tender, wheels) */
+.cw-solid,
+.cw-ink.cw-solid {
+  fill: #130e09;
+}
+
+/* The water main below the boiler tee: an HTML pipe, since its length follows the viewport height.
+   Same look as the SVG pipes (brass walls, paper bore) with water dashes running down it. */
+.cw-column {
+  width: 13px;
+  overflow: hidden;
+  border-left: 1.2px solid rgba(201, 162, 74, 0.8);
+  border-right: 1.2px solid rgba(201, 162, 74, 0.8);
+  background: #140e09;
+}
+
+.cw-column::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: -22px;
+  bottom: -22px;
+  opacity: 0.55;
+  background: repeating-linear-gradient(180deg, #4fae96 0 9px, transparent 9px 22px);
+  will-change: transform;
+  animation: cwColumn 2.2s linear infinite;
+}
+
+.cw-fireglow--cab {
+  animation-duration: 2.7s;
+}
+
+/* Coal smoke from the chimney: slow, heavy and drifting back over the train */
+.cw-smoke {
+  fill: url(#cw-smoke);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cwSmoke 4.2s ease-out infinite;
+}
+
+/* A thin feather of steam at the safety valves, as a loco standing in steam shows */
+.cw-puff--feather {
+  animation: cwFeather 1.2s ease-out infinite;
+}
+
+/* Drain cocks: a low hiss forward along the rails every 8s */
+.cw-puff--drain {
+  animation: cwDrain 8s ease-out infinite;
+}
+
+/* Water landing in the tender filler: rings spreading out */
+.cw-ripple {
+  fill: none;
+  stroke: #84d3bc;
+  stroke-width: 0.9;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: cwRipple 1.4s ease-out infinite;
+}
+
+@media (max-width: 768px) {
+  .cw-cartouche {
+    display: none;
+  }
+}
+
+@keyframes cwFlow {
+  to { stroke-dashoffset: -22; }
+}
+
+@keyframes cwWave {
+  to { transform: translateX(24px); }
+}
+
+@keyframes cwBubble {
+  0%   { transform: translateY(0); opacity: 0; }
+  12%  { opacity: 0.8; }
+  85%  { opacity: 0.6; }
+  100% { transform: translateY(-60px); opacity: 0; }
+}
+
+@keyframes cwBurst {
+  0%   { transform: translate(0, 0) scale(0.3); opacity: 0; }
+  2%   { opacity: 0.9; }
+  30%  { transform: translate(var(--drift), -150px) scale(4.5); opacity: 0; }
+  100% { transform: translate(var(--drift), -150px) scale(4.5); opacity: 0; }
+}
+
+@keyframes cwChuff {
+  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
+  6%   { opacity: 0.85; }
+  70%  { transform: translate(var(--drift), -90px) scale(3.4); opacity: 0; }
+  100% { transform: translate(var(--drift), -90px) scale(3.4); opacity: 0; }
+}
+
+@keyframes cwCoal {
+  from { opacity: 0.45; }
+  to   { opacity: 0.9; }
+}
+
+@keyframes cwBeltY {
+  from { transform: translateY(0); }
+  to   { transform: translateY(12px); }
+}
+
+@keyframes cwBeltX {
+  from { transform: translateX(0); }
+  to   { transform: translateX(12px); }
 }
 
 @keyframes cwTurn {
@@ -121,10 +552,54 @@
   83%  { transform: rotate(-60deg); }
 }
 
-@keyframes cwSteam {
-  0%   { stroke-dashoffset: 160; opacity: 0; }
-  20%  { opacity: 0.45; }
-  100% { stroke-dashoffset: 0; opacity: 0; }
+@keyframes cwColumn {
+  from { transform: translateY(0); }
+  to   { transform: translateY(22px); }
+}
+
+@keyframes cwSmoke {
+  0%   { transform: translate(0, 0) scale(0.5); opacity: 0; }
+  10%  { opacity: 0.9; }
+  100% { transform: translate(var(--drift), -110px) scale(4); opacity: 0; }
+}
+
+@keyframes cwFeather {
+  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
+  15%  { opacity: 0.7; }
+  100% { transform: translate(-6px, -40px) scale(2.2); opacity: 0; }
+}
+
+@keyframes cwDrain {
+  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
+  2%   { opacity: 0.8; }
+  20%  { transform: translate(46px, -10px) scale(3); opacity: 0; }
+  100% { transform: translate(46px, -10px) scale(3); opacity: 0; }
+}
+
+@keyframes cwRipple {
+  0%   { transform: scale(0.3); opacity: 0.8; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes cwTick {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes cwMote {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  20%  { opacity: 0.6; }
+  80%  { opacity: 0.4; }
+  100% { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+}
+
+/* Mostly steady, with the odd gutter and catch of a wick */
+@keyframes cwFlicker {
+  0%, 41%, 50%, 80%, 100% { opacity: 1; }
+  43% { opacity: 0.82; }
+  45% { opacity: 0.96; }
+  47% { opacity: 0.88; }
+  77% { opacity: 0.93; }
 }
 
 /* The line-art is the whole picture: hide the shared glow + particles */
@@ -154,7 +629,7 @@ html.theme-clockwork-brass {
 }
 
 /* Panels: a single brass hairline frame drawn around the panel like a pen stroke, plus an inner
-   rule — no fills, no glow */
+   rule riveted at the corners — no fills, no glow */
 .theme-clockwork-brass .mantine-Paper-root::before {
   content: "";
   position: absolute;
@@ -163,6 +638,11 @@ html.theme-clockwork-brass {
   border-radius: inherit;
   pointer-events: none;
   box-shadow: inset 0 0 0 1px rgba(201, 162, 74, 0.16);
+  background:
+    radial-gradient(circle, rgba(227, 196, 122, 0.5) 0 1.6px, transparent 2.2px) no-repeat left 5px top 5px / 8px 8px,
+    radial-gradient(circle, rgba(227, 196, 122, 0.5) 0 1.6px, transparent 2.2px) no-repeat right 5px top 5px / 8px 8px,
+    radial-gradient(circle, rgba(227, 196, 122, 0.5) 0 1.6px, transparent 2.2px) no-repeat left 5px bottom 5px / 8px 8px,
+    radial-gradient(circle, rgba(227, 196, 122, 0.5) 0 1.6px, transparent 2.2px) no-repeat right 5px bottom 5px / 8px 8px;
 }
 
 .theme-clockwork-brass .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {

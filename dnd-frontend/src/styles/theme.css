@@ -239,29 +239,29 @@
 
 /* ⚙️ Clockwork Brass */
 .theme-clockwork-brass {
-  --theme-bg-base: rgba(18, 19, 22, 0.35);
-  --theme-bg-panel: rgba(30, 31, 36, 0.6);
-  --theme-bg-panel-opaque: #141518;
-  --theme-bg-card: rgba(38, 39, 46, 0.5);
-  --theme-bg-hover: rgba(234, 88, 12, 0.14);
-  
-  --theme-border-glow: rgba(234, 88, 12, 0.4);
-  --theme-border-accent: rgba(13, 148, 136, 0.4);
-  --theme-border-subtle: rgba(234, 88, 12, 0.15);
-  
-  --theme-color-accent-primary: #ea580ce6; /* Copper Orange with 10% transparency */
-  --theme-color-accent-secondary: #0d9488e6; /* Weathered Turquoise with 10% transparency */
-  --theme-color-text-primary: #f8fafc;
-  --theme-color-text-secondary: #fde047; /* Bright Brass Secondary */
-  --theme-color-text-glow: #fef9c3;
-  --theme-color-text-on-accent: #141518;
-  
-  --theme-glow-shadow-primary: 0 0 15px rgba(234, 88, 12, 0.25);
-  --theme-glow-shadow-secondary: 0 0 15px rgba(13, 148, 136, 0.25);
-  
-  --theme-gradient-primary: linear-gradient(135deg, #ea580c, #0d9488);
-  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(234, 88, 12, 0.85), rgba(13, 148, 136, 0.85));
-  --theme-gradient-active: linear-gradient(135deg, rgba(234, 88, 12, 0.2), rgba(13, 148, 136, 0.2));
+  --theme-bg-base: rgba(16, 12, 8, 0.4);
+  --theme-bg-panel: rgba(23, 17, 11, 0.78); /* walnut-dark, dense so the busy engraving stays behind */
+  --theme-bg-panel-opaque: #16110c;
+  --theme-bg-card: rgba(38, 28, 18, 0.55);
+  --theme-bg-hover: rgba(201, 162, 74, 0.12);
+
+  --theme-border-glow: rgba(201, 162, 74, 0.45);
+  --theme-border-accent: rgba(86, 160, 140, 0.4);
+  --theme-border-subtle: rgba(201, 162, 74, 0.16);
+
+  --theme-color-accent-primary: #c9a24ae6; /* Polished brass */
+  --theme-color-accent-secondary: #56a08ce6; /* Verdigris patina */
+  --theme-color-text-primary: #f2e8d5; /* Lamplit parchment */
+  --theme-color-text-secondary: #e3c47a;
+  --theme-color-text-glow: #f6e7bf;
+  --theme-color-text-on-accent: #1a120a;
+
+  --theme-glow-shadow-primary: 0 0 14px rgba(201, 162, 74, 0.22);
+  --theme-glow-shadow-secondary: 0 0 14px rgba(86, 160, 140, 0.22);
+
+  --theme-gradient-primary: linear-gradient(135deg, #dcb766, #a8742f);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(220, 183, 102, 0.88), rgba(168, 116, 47, 0.88));
+  --theme-gradient-active: linear-gradient(135deg, rgba(201, 162, 74, 0.2), rgba(86, 160, 140, 0.14));
 }
 
 /* 🌊 Deep Ocean */
@@ -930,7 +930,7 @@
   }
   @keyframes modalThemeFadeClockwork {
     0% { background: #030305 !important; }
-    100% { background: #141518 !important; }
+    100% { background: #16110c !important; }
   }
   @keyframes modalThemeFadeDeepOcean {
     0% { background: #030305 !important; }
