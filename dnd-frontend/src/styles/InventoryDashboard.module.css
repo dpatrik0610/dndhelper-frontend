@@ -244,7 +244,6 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 0.75rem;
   padding: 0.6rem 1rem;
   min-height: 48px;
@@ -273,21 +272,117 @@
   text-transform: uppercase;
 }
 
-.metaBarSegment {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.metaBarRule {
+  flex-shrink: 0;
+  width: 1px;
+  height: 18px;
+  background: var(--cyber-border);
+}
+
+.metaChip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   min-width: 0;
+  padding: 0.25rem 0.625rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  transition: border-color 150ms ease, background-color 150ms ease;
 }
 
-.metaBarDivider {
-  flex-shrink: 0;
-  opacity: 0.5;
-  color: var(--cyber-accent-2);
+.metaChip:hover {
+  border-color: var(--cyber-border);
+  background: rgba(255, 255, 255, 0.03);
 }
 
-.metaBarActions {
+.metaChip:focus-visible {
+  outline: 1px solid var(--cyber-accent);
+  outline-offset: 1px;
+}
+
+.metaChipLabel {
   flex-shrink: 0;
+  font-family: var(--cyber-font-label);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cyber-muted-fg);
+}
+
+.metaChipValue {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.8125rem;
+  color: var(--cyber-fg);
+}
+
+.metaCoin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.metaCoinDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ------ Purse (currency modal) ------ */
+.purseList {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.purseRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  transition: background-color 150ms ease;
+}
+
+.purseRow + .purseRow {
+  border-top: 1px solid var(--cyber-border);
+}
+
+.purseRow:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.purseRow[data-active] {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 2px 0 0 var(--cyber-accent);
+}
+
+.purseCoinLabel {
+  font-family: var(--cyber-font-label);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--cyber-fg);
+}
+
+.purseCoinName {
+  font-size: 0.75rem;
+  color: var(--cyber-muted-fg);
+}
+
+.purseAmount {
+  margin-left: auto;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--cyber-fg);
 }
 
 /* ------ Items Panel ------ */
@@ -452,6 +547,10 @@
 
   .metaBar {
     flex-wrap: wrap;
+  }
+
+  .metaBarRule {
+    display: none;
   }
 
   .metaBarTitle {

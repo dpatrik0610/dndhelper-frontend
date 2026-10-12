@@ -9,17 +9,10 @@ import {
 import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useState, useEffect } from "react";
-import {
-  updateInventory,
-  assignInventoryToCharacter,
-} from "@services/inventoryService";
+import { setInventoryCharacters } from "@services/inventoryService";
 
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
-import {
-  ensureInventoryLinkedToCharacter,
-  removeInventoryFromCharacter,
-} from "@utils/inventorySync";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 
 export function SelectInventoryOwnersModal({
@@ -30,7 +23,7 @@ export function SelectInventoryOwnersModal({
   onClose: () => void;
 }) {
   const { characters } = useAdminCharacterStore();
-  const { selected, reloadInventory } = useAdminInventoryStore();
+  const { selected, applyInventoryUpdate } = useAdminInventoryStore();
 
   const [selectedOwners, setSelectedOwners] = useState<string[]>([]);
 
@@ -46,32 +39,9 @@ export function SelectInventoryOwnersModal({
 
   const handleSave = async () => {
     if (!selected?.id) return;
-    const currentOwners = selected.characterIds ?? [];
-    const addedOwners = selectedOwners.filter((id) => !currentOwners.includes(id));
-    const removedOwners = currentOwners.filter((id) => !selectedOwners.includes(id));
-    const invId = selected.id;
 
     try {
-      if (addedOwners.length > 0) {
-        await Promise.all(
-          addedOwners.map(async (ownerId) => {
-            await assignInventoryToCharacter(invId, ownerId);
-            await ensureInventoryLinkedToCharacter(ownerId, invId);
-          })
-        );
-      }
-
-      if (removedOwners.length > 0) {
-        await Promise.all(
-          removedOwners.map(async (ownerId) => {
-            await removeInventoryFromCharacter(ownerId, invId);
-          })
-        );
-      }
-
-      await updateInventory(invId, { ...selected, characterIds: selectedOwners });
-
-      await reloadInventory(invId);
+      applyInventoryUpdate(await setInventoryCharacters(selected.id, selectedOwners));
 
       showNotification({
         title: "Owners updated",

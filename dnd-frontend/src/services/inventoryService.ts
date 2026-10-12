@@ -35,8 +35,9 @@ export async function deleteInventory(id: string): Promise<void> {
   await apiClient(`${baseUrl}/${id}`, { method: "DELETE" });
 }
 
-export async function assignInventoryToCharacter(inventoryId: string, characterId: string ): Promise<Inventory[]> {
-  return apiClient(`${baseUrl}/${inventoryId}/assign-to/${characterId}`, { method: "PATCH" });
+/** Sets the inventory's characters; the server keeps each character's inventoryIds in step. */
+export async function setInventoryCharacters(inventoryId: string, characterIds: string[]): Promise<Inventory> {
+  return apiClient(`${baseUrl}/${inventoryId}/characters`, { method: "PUT", body: characterIds });
 }
 // ------------------------
 // Inventory Item Operations

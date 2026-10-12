@@ -15,7 +15,6 @@ import {
   getAllInventories,
   type MoveItemRequest,
   type ModifyEquipmentAmount,
-  assignInventoryToCharacter,
 } from "@services/inventoryService";
 
 import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
@@ -51,7 +50,6 @@ interface AdminInventoryStore {
   moveItem: (equipmentId: string, targetInventoryId: string, amount: number) => Promise<void>;
   incrementItemQuantity: (equipmentId: string) => Promise<void>;
   decrementItemQuantity: (equipmentId: string) => Promise<void>;
-  linkInventoryToCharacters: (inventoryId: string, characterIds: string[]) => Promise<void>;
 
   updateEquipment: (equipment: Equipment) => Promise<Equipment>;
   clearStorage: () => void;
@@ -231,8 +229,6 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
 
       try {
         const created = await createInventory(payload);
-        get().linkInventoryToCharacters(created.id!, created.characterIds ?? []);
-
         get().applyInventoryUpdate(created);
         set({ selected: created });
 
@@ -377,31 +373,5 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     },
 
     clearStorage: () => set({ inventories: [], selected: null, loading: false }),
-
-    linkInventoryToCharacters: async (inventoryId: string, characterIds: string[]) => {
-      if (characterIds.length === 0 || characterIds.find((id) => id.trim() === "")) {
-        showNotification({
-          title: "Error linking inventory",
-          message: "No characters to link or invalid character IDs",
-          color: SectionColor.Yellow,
-        });
-        return;
-      }
-
-      try {
-        await Promise.all(characterIds.map((charId) => assignInventoryToCharacter(inventoryId, charId)));
-        showNotification({
-          title: "Success",
-          message: "Inventory linked to characters successfully.",
-          color: SectionColor.Green,
-        });
-      } catch (err) {
-        showNotification({
-          title: "Error linking inventory",
-          message: String(err),
-          color: SectionColor.Red,
-        });
-      }
-    },
   };
 });
