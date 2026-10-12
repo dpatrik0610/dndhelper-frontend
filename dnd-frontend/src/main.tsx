@@ -15,13 +15,13 @@ import './styles/adminCyber.css'
 import { BrowserRouter } from 'react-router-dom'
 import { SignalRProvider } from './SignalR/SignalRProvider.tsx'
 import { registerAuthStoreGuards } from '@store/authStoreGuards'
-import { mantineTheme } from './styles/mantineTheme'
+import { cssVariablesResolver, mantineTheme } from './styles/mantineTheme'
 
 registerAuthStoreGuards();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <MantineProvider defaultColorScheme="dark" theme={mantineTheme}>
+    <MantineProvider defaultColorScheme="dark" theme={mantineTheme} cssVariablesResolver={cssVariablesResolver}>
       {/* Router above SignalR so hub notifications (table invites) can navigate */}
       <BrowserRouter>
         <SignalRProvider>

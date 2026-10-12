@@ -258,3 +258,60 @@
   color: #ffffff !important;
   background-color: var(--theme-bg-hover, rgba(255, 255, 255, 0.1)) !important;
 }
+
+/* ==========================================================================
+   🎨 Mantine defaults, theme-tinted (wired in mantineTheme.ts)
+   Mantine's dark rules are single-class selectors, so these win by order
+   without !important; a component's own classNames / color prop still win.
+   ========================================================================== */
+
+/* Tabs: tinted hover instead of dark grey; the underline follows the theme accent (primary color). */
+.glassy-tabs {
+  --tab-border-color: var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+.glassy-tab {
+  --tab-hover-color: var(--theme-bg-hover, rgba(255, 255, 255, 0.05));
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7));
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.glassy-tab:hover,
+.glassy-tab[data-active] {
+  color: var(--theme-color-text-primary, #fff);
+}
+
+/* Menus and popovers: the same glass as select dropdowns. */
+.glassy-menu {
+  background: var(--theme-bg-panel, rgba(15, 15, 15, 0.92));
+  backdrop-filter: blur(24px) saturate(130%);
+  -webkit-backdrop-filter: blur(24px) saturate(130%);
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1));
+  border-radius: 12px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.5), var(--theme-glow-shadow-primary, 0 0 0 transparent);
+  color: var(--theme-color-text-primary, #fff);
+}
+
+.glassy-menu-item {
+  --menu-item-hover: var(--theme-bg-hover, rgba(255, 255, 255, 0.06));
+  border-radius: 8px;
+}
+
+.glassy-menu-divider {
+  border-color: var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+}
+
+/* Tooltips: a dark themed chip instead of Mantine's light grey one. A `color` prop still wins. */
+.glassy-tooltip {
+  --tooltip-bg: var(--theme-bg-panel-opaque, #1c1b22);
+  --tooltip-color: var(--theme-color-text-primary, #fff);
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.1));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+/* Segmented controls: a dark track with a theme-tinted pill. A `color` prop (inline --sc-color) still wins. */
+.glassy-sc {
+  --sc-color: var(--theme-border-glow, rgba(255, 255, 255, 0.12));
+  background-color: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
+}

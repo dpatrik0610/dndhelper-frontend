@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type DragEvent } from "react";
-import { ActionIcon, Avatar, CloseButton, Group, Loader, ScrollArea, SegmentedControl, Text, TextInput, Tooltip } from "@mantine/core";
+import { ActionIcon, Avatar, Button, CloseButton, Group, Loader, ScrollArea, SegmentedControl, Text, TextInput, Tooltip } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { IconEye, IconGhost2, IconHandGrab, IconLock, IconPlus, IconSearch, IconChessKnight } from "@tabler/icons-react";
+import { MonsterFormModal } from "@features/admin/MonsterManager/components/MonsterFormModal";
 import { MonsterViewModal } from "@features/admin/MonsterManager/components/MonsterViewModal";
 import { monsterService } from "@services/Admin/monsterService";
 import { spawnPoints, useTabletopStore } from "@store/tabletop/tabletopStore";
@@ -62,6 +63,15 @@ function MonsterPanelBody() {
   // Hidden (DM layer) for ambushes and reinforcements, visible otherwise.
   const [layer, setLayer] = useState<TableLayer>(() => (useTabletopStore.getState().activeLayer === "Dm" ? "Dm" : "Token"));
   const [viewing, setViewing] = useState<Monster | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [types, setTypes] = useState<string[]>([]);
+  // Bumped after a save so the list picks up the new monster.
+  const [version, setVersion] = useState(0);
+
+  const openNew = () => {
+    setCreating(true);
+    if (!types.length) monsterService.types().then(setTypes).catch(() => {});
+  };
 
   useEffect(() => {
     let current = true;
@@ -72,7 +82,7 @@ function MonsterPanelBody() {
     return () => {
       current = false;
     };
-  }, [debounced]);
+  }, [debounced, version]);
 
   const place = (m: Monster) => {
     const [p] = spawnPoints(1, cellSize);
@@ -86,7 +96,12 @@ function MonsterPanelBody() {
           <IconGhost2 size={18} color="#f87171" />
           <Text fw={700}>Monsters</Text>
         </Group>
-        <CloseButton size="sm" onClick={() => setOpen(false)} aria-label="Close monsters" />
+        <Group gap={6} wrap="nowrap">
+          <Button size="compact-xs" variant="light" color="red" radius="xl" leftSection={<IconPlus size={13} />} onClick={openNew}>
+            New
+          </Button>
+          <CloseButton size="sm" onClick={() => setOpen(false)} aria-label="Close monsters" />
+        </Group>
       </Group>
 
       <div className="tt-monster-controls">
@@ -156,6 +171,7 @@ function MonsterPanelBody() {
         Drag onto the map, or + to place in the middle of your view.
       </Text>
       <MonsterViewModal monster={viewing} onClose={() => setViewing(null)} />
+      <MonsterFormModal opened={creating} monster={null} onClose={() => setCreating(false)} onSaved={() => setVersion((v) => v + 1)} types={types} />
     </div>
   );
 }

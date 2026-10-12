@@ -80,10 +80,17 @@ export function MonsterFormModal({ opened, monster, onClose, onSaved, types }: M
     }
     setSaving(true);
     try {
-      await (draft.id ? monsterService.update(draft) : monsterService.create(draft));
-      showNotification({ title: "Saved", message: `${draft.name} is in the bestiary.`, color: SectionColor.Green });
-      onSaved();
-      onClose();
+      if (draft.id) {
+        await monsterService.update(draft);
+        onSaved();
+        showNotification({ title: "Saved", message: `${draft.name} is in the bestiary.`, color: SectionColor.Green });
+        onClose();
+      } else {
+        // A new monster stays open, now with an id, so its art can be uploaded straight away.
+        setDraft(await monsterService.create(draft));
+        onSaved();
+        showNotification({ title: "Created", message: `${draft.name} is in the bestiary. Add art on Basics, or close.`, color: SectionColor.Green });
+      }
     } catch (err) {
       showNotification({ title: "Couldn't save", message: (err as Error).message, color: SectionColor.Red });
     } finally {
@@ -115,7 +122,7 @@ export function MonsterFormModal({ opened, monster, onClose, onSaved, types }: M
   };
 
   return (
-    <AdminGlassModal opened={opened} onClose={onClose} size="xl" title={draft.id ? `Edit ${monster?.name}` : "New monster"}>
+    <AdminGlassModal opened={opened} onClose={onClose} size="xl" title={draft.id ? `Edit ${monster?.name ?? draft.name}` : "New monster"}>
       <Tabs defaultValue="basics" keepMounted={false} onChange={(tab) => tab === "json" && setJson(JSON.stringify(draft, null, 2))}>
         <Tabs.List mb="md">
           <Tabs.Tab value="basics">Basics</Tabs.Tab>
