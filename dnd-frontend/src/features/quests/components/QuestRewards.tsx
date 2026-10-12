@@ -3,6 +3,7 @@ import { Box, Group, Stack, Text, Paper } from "@mantine/core";
 import { IconCoins, IconGift } from "@tabler/icons-react";
 import type { Currency } from "@appTypes/Currency";
 import { getEquipmentByIds } from "@services/equipmentService";
+import { formatCurrencies } from "@utils/currency";
 
 interface QuestRewardsProps {
   rewardCurrencies?: Currency[];
@@ -52,7 +53,7 @@ export function QuestRewards({
           <Group gap="xs" align="center" wrap="nowrap">
             <IconCoins size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
             <Text size="xs" c="var(--theme-color-text-secondary)" truncate="end">
-              Coins: {rewardCurrencies.map((c) => `${c.amount} ${c.currencyCode || c.type}`).join(", ")}
+              Coins: {formatCurrencies(rewardCurrencies)}
             </Text>
           </Group>
         ) : 

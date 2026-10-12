@@ -6,7 +6,8 @@ import {
   getCharacterCurrencies,
   removeCurrencies,
   transferCurrenciesToCharacter,
-  transferCurrenciesToInventory
+  transferCurrenciesToInventory,
+  removeCurrenciesFromInventory,
 } from "@services/currencyService";
 import type { Character } from "@appTypes/Character/Character";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
@@ -172,9 +173,7 @@ export const useAdminCurrencyStore = create<AdminCurrencyStore>()(
         if (!id) return;
 
         try {
-          for (const c of currencies) {
-            await transferCurrenciesToInventory(id, [{ ...c, amount: -Math.abs(c.amount) }]);
-          }
+          await removeCurrenciesFromInventory(id, currencies);
           await get().refresh();
           showNotification({
             title: "Currencies Removed",

@@ -2,6 +2,7 @@ import { Box, Group, Text } from "@mantine/core";
 import { IconCoin } from "@tabler/icons-react";
 import type { CSSProperties } from "react";
 import type { Character } from "@appTypes/Character/Character";
+import { coinInfo, sortCurrencies } from "@utils/currency";
 
 interface Props {
   character?: Pick<Character, "currencies">;
@@ -74,43 +75,10 @@ function CoinPill({ label, amount, gradient, glow }: { label: string; amount: nu
 export function CharacterCurrencyArea({ character, containerStyle }: Props) {
   const currencies = character?.currencies ?? [];
   
-  // 1. Filter out zero currencies and construct display config
-  const activeCoins = currencies
-    .filter((c) => (c.amount ?? 0) > 0)
-    .map((c) => {
-      const code = c.currencyCode.toLowerCase();
-      
-      const presets: Record<string, { gradient: string; glow: string }> = {
-        gp: { gradient: "linear-gradient(135deg, #fbbf24, #f59e0b)", glow: "rgba(245, 158, 11, 0.3)" },
-        pp: { gradient: "linear-gradient(135deg, #a78bfa, #c084fc)", glow: "rgba(167, 139, 250, 0.3)" },
-        sp: { gradient: "linear-gradient(135deg, #cbd5e1, #94a3b8)", glow: "rgba(203, 213, 225, 0.3)" },
-        cp: { gradient: "linear-gradient(135deg, #fb923c, #ea580c)", glow: "rgba(234, 88, 12, 0.3)" },
-        ep: { gradient: "linear-gradient(135deg, #2dd4bf, #0d9488)", glow: "rgba(13, 148, 136, 0.3)" },
-      };
-      
-      const style = presets[code] || {
-        gradient: "linear-gradient(135deg, #38bdf8, #0284c7)",
-        glow: "rgba(14, 165, 233, 0.3)",
-      };
-      
-      return {
-        label: c.currencyCode.toUpperCase(),
-        amount: c.amount ?? 0,
-        gradient: style.gradient,
-        glow: style.glow,
-      };
-    });
-
-  // 2. Sort coins by standard D&D value hierarchy (PP > GP > EP > SP > CP)
-  const order: Record<string, number> = { pp: 0, gp: 1, ep: 2, sp: 3, cp: 4 };
-  activeCoins.sort((a, b) => {
-    const orderA = order[a.label.toLowerCase()] ?? 99;
-    const orderB = order[b.label.toLowerCase()] ?? 99;
-    return orderA - orderB;
-  });
-
-  // 3. Slice to first 4 active coins to guarantee perfect 2x2 grid symmetry and prevent overflow
-  const displayedCoins = activeCoins.slice(0, 4);
+  const coins = sortCurrencies(currencies.filter((c) => c.amount > 0)).map((c) => ({
+    ...coinInfo(c.type),
+    amount: c.amount,
+  }));
 
   return (
     <Box
@@ -135,7 +103,7 @@ export function CharacterCurrencyArea({ character, containerStyle }: Props) {
         <IconCoin size={14} color="var(--theme-color-accent-primary, #f59e0b)" />
       </Group>
 
-      {displayedCoins.length === 0 ? (
+      {coins.length === 0 ? (
         <Text size="xs" c="dimmed" style={{ fontStyle: "italic", textAlign: "center", padding: "12px 0" }}>
           Pouch is empty
         </Text>
@@ -148,7 +116,7 @@ export function CharacterCurrencyArea({ character, containerStyle }: Props) {
             width: "100%",
           }}
         >
-          {displayedCoins.map((coin) => (
+          {coins.map((coin) => (
             <CoinPill
               key={coin.label}
               label={coin.label}

@@ -12,6 +12,7 @@ import { FormNumberInput } from "@components/common/FormNumberInput";
 import type { Character } from "@appTypes/Character/Character";
 import { BaseModal } from "@components/BaseModal";
 import { IconCoins } from "@tabler/icons-react";
+import { coinInfo, sortCurrencies } from "@utils/currency";
 
 interface MoneyModalProps {
   opened: boolean;
@@ -64,12 +65,9 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
 
   if (!character) return null;
 
-  const currencies = character.currencies ?? [];
+  const currencies = sortCurrencies((character.currencies ?? []).filter((c) => c.amount > 0));
   const activeCurrencyObj = currencies.find((c) => c.type === selectedCurrency);
   const maxAmount = activeCurrencyObj?.amount ?? 0;
-
-  const getCurrencyName = (t: string) =>
-    ({ gp: "Gold", sp: "Silver", cp: "Copper", pp: "Platinum", ep: "Electrum" }[t] ?? "Unknown");
 
   const handleAction = async () => {
     if (!selectedCurrency || !amount || amount <= 0) return;
@@ -82,7 +80,7 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
         await updateCharacter(useCharacterStore.getState().character!);
         showNotification({
           title: "Currency Removed",
-          message: `Successfully removed ${amount} ${getCurrencyName(selectedCurrency)} (${selectedCurrency}).`,
+          message: `Removed ${amount} ${coinInfo(selectedCurrency).label}.`,
           color: "green",
         });
         onClose();
@@ -109,17 +107,11 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
           return;
         }
 
-        await transferBetweenCharacters(character.id!, targetId, [
-          {
-            type: sourceCurrency.type,
-            currencyCode: sourceCurrency.currencyCode,
-            amount,
-          },
-        ]);
+        await transferBetweenCharacters(character.id!, targetId, [{ type: sourceCurrency.type, amount }]);
 
         showNotification({
           title: "Success",
-          message: `Transferred ${amount} ${sourceCurrency.currencyCode} successfully.`,
+          message: `Sent ${amount} ${coinInfo(sourceCurrency.type).label}.`,
           color: "green",
         });
 
@@ -240,7 +232,9 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
               }}
               data={currencies.map((c) => ({
                 value: c.type,
-                label: `${getCurrencyName(c.type)} (${c.amount} ${c.currencyCode})`,
+                label: coinInfo(c.type).standard
+                  ? `${coinInfo(c.type).name} — ${c.amount} ${coinInfo(c.type).label}`
+                  : `${c.type} — ${c.amount}`,
               }))}
               styles={{
                 label: {

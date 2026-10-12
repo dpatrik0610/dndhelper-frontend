@@ -54,6 +54,8 @@ import { MarkdownRenderer } from "@components/MarkdownRender";
 import { CustomSelect } from "@components/common/CustomSelect";
 import { GlassyTextInput } from "@components/common/GlassyTextInput";
 import styles from "@styles/InventoryDashboard.module.css";
+import { CurrencyTypeInput } from "@components/common/CurrencyTypeInput";
+import { adjustCurrency, coinInfo, currencySuggestions, sameCurrency, sortCurrencies } from "@utils/currency";
 
 function generateObjectId(): string {
   const chars = "0123456789abcdef";
@@ -380,34 +382,13 @@ export function QuestManager() {
 
   // 5. Dynamic Currency Board Add/Remove handlers
   const handleAddCustomCurrency = () => {
-    const code = addCurrencyCode.trim().toLowerCase();
-    if (!code || addCurrencyAmount <= 0) return;
-
-    setRewardCurrencies((prev) => {
-      const existingIdx = prev.findIndex((c) => c.currencyCode.toLowerCase() === code);
-      if (existingIdx > -1) {
-        const updated = [...prev];
-        updated[existingIdx] = {
-          ...updated[existingIdx],
-          amount: updated[existingIdx].amount + addCurrencyAmount,
-        };
-        return updated;
-      } else {
-        // Strict Error-Alignment Mandate: BOTH type and currencyCode are set to the SAME string value
-        const newCurrency: Currency = {
-          currencyCode: code,
-          type: code,
-          amount: addCurrencyAmount,
-        };
-        return [...prev, newCurrency];
-      }
-    });
-
+    if (!addCurrencyCode.trim() || addCurrencyAmount <= 0) return;
+    setRewardCurrencies((prev) => adjustCurrency(prev, addCurrencyCode, addCurrencyAmount));
     setAddCurrencyAmount(1);
   };
 
-  const handleRemoveCurrency = (code: string) => {
-    setRewardCurrencies((prev) => prev.filter((c) => c.currencyCode.toLowerCase() !== code.toLowerCase()));
+  const handleRemoveCurrency = (type: string) => {
+    setRewardCurrencies((prev) => prev.filter((c) => !sameCurrency(c.type, type)));
   };
 
   // 6. Asynchronous Equipment Search Board handlers
@@ -1021,9 +1002,9 @@ export function QuestManager() {
                           </Text>
                         ) : (
                           <Group gap="xs">
-                            {rewardCurrencies.map((c) => (
+                            {sortCurrencies(rewardCurrencies).map((c) => (
                               <Badge
-                                key={c.currencyCode}
+                                key={c.type}
                                 size="sm"
                                 variant="outline"
                                 color="yellow"
@@ -1042,7 +1023,7 @@ export function QuestManager() {
                                     size="10px"
                                     color="red"
                                     variant="subtle"
-                                    onClick={() => handleRemoveCurrency(c.currencyCode)}
+                                    onClick={() => handleRemoveCurrency(c.type)}
                                     style={{ marginLeft: "4px" }}
                                   >
                                     <IconTrash size={10} />
@@ -1050,7 +1031,7 @@ export function QuestManager() {
                                 }
                               >
                                 <span style={{ color: "white", fontWeight: 600 }}>{c.amount}</span>{" "}
-                                <span style={{ color: "var(--theme-color-accent-primary)", fontWeight: 700 }}>{c.currencyCode}</span>
+                                <span style={{ color: "var(--theme-color-accent-primary)", fontWeight: 700 }}>{coinInfo(c.type).label}</span>
                               </Badge>
                             ))}
                           </Group>
@@ -1060,11 +1041,10 @@ export function QuestManager() {
                       {/* Add Currency Inline Form */}
                       <Paper p="xs" style={{ background: "rgba(0,0,0,0.15)", border: "1px solid rgba(255,255,255,0.04)" }}>
                         <Group align="flex-end" gap="sm">
-                          <TextInput
-                            label="Currency Code"
-                            placeholder="e.g. gp, pp, cp, shards"
+                          <CurrencyTypeInput
                             value={addCurrencyCode}
-                            onChange={(e) => setAddCurrencyCode(e.currentTarget.value)}
+                            onChange={setAddCurrencyCode}
+                            suggestions={currencySuggestions(rewardCurrencies)}
                             style={{ flex: 1 }}
                             styles={{
                               label: { color: "rgba(255, 255, 255, 0.8)", fontSize: "10px", fontWeight: 600 },
@@ -1074,6 +1054,8 @@ export function QuestManager() {
                           <NumberInput
                             label="Amount"
                             min={1}
+                            allowDecimal={false}
+                            allowNegative={false}
                             value={addCurrencyAmount}
                             onChange={(val) => setAddCurrencyAmount(Number(val) || 1)}
                             style={{ width: "100px" }}

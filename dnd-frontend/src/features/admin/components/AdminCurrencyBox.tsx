@@ -1,4 +1,4 @@
-﻿import {
+import {
   ActionIcon,
   Group,
   Text,
@@ -6,12 +6,9 @@
   NumberInput,
   Stack,
   Button,
-  Select,
   Divider,
-  Input,
 } from "@mantine/core";
 import { useState } from "react";
-import { randomId } from "@mantine/hooks";
 import {
   IconCoin,
   IconRefresh,
@@ -20,9 +17,11 @@ import {
 } from "@tabler/icons-react";
 import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
 import { SectionColor } from "@appTypes/SectionColor";
-import type { Currency } from "@appTypes/Currency";
 import CustomBadge from "@components/common/CustomBadge";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
+import { CurrencyTypeInput } from "@components/common/CurrencyTypeInput";
+import { showNotification } from "@components/Notification/Notification";
+import { coinInfo, currencySuggestions, sameCurrency, sortCurrencies } from "@utils/currency";
 
 export function AdminCurrencyBox() {
   const {
@@ -38,60 +37,49 @@ export function AdminCurrencyBox() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [mode, setMode] = useState<"add" | "remove" | null>(null);
-  const [amount, setAmount] = useState<number>(0);
-  const [currencyCode, setCurrencyCode] = useState<string>("gp");
-  const [customCurrency, setCustomCurrency] = useState<string>();
+  const [amount, setAmount] = useState<number>(1);
+  const [type, setType] = useState<string>("gp");
 
   const isCharacter = !!selectedCharacter;
-  const currentCurrencies = isCharacter
+  const currentCurrencies = sortCurrencies(isCharacter
     ? characterCurrencies
-    : selectedInventory?.currencies || [];
+    : selectedInventory?.currencies || []);
 
   const hasTarget = !!(selectedCharacter || selectedInventory);
   const targetName =
     selectedCharacter?.name || selectedInventory?.name || "No target";
 
-  function currencyColor(code: string) {
-    switch (code) {
-      case "gp": return SectionColor.Yellow;
-      case "sp": return SectionColor.Gray;
-      case "ep": return SectionColor.Cyan;
-      case "pp": return SectionColor.Blue;
-      default: return SectionColor.Orange;
+  // Removing is capped at what the target holds; adding can create any currency.
+  const held = currentCurrencies.find((c) => sameCurrency(c.type, type))?.amount ?? 0;
+  const maxAmount = mode === "remove" ? held : undefined;
+  const canConfirm = type.trim() !== "" && amount > 0 && (maxAmount === undefined || amount <= maxAmount);
+
+  const openModal = (next: "add" | "remove") => {
+    setMode(next);
+    setType(next === "remove" ? (currentCurrencies[0]?.type ?? "") : "gp");
+    setAmount(1);
+    setModalOpen(true);
+  };
+
+  const handleConfirm = async () => {
+    if (!canConfirm) return;
+    const change = [{ type: type.trim(), amount }];
+
+    try {
+      if (isCharacter) {
+        await (mode === "add" ? addToCharacter(change) : removeFromCharacter(change));
+      } else if (selectedInventory) {
+        await (mode === "add" ? addToInventory(change) : removeFromInventory(change));
+      }
+      setModalOpen(false);
+    } catch (err) {
+      showNotification({
+        title: "Currency update failed",
+        message: err instanceof Error ? err.message : String(err),
+        color: SectionColor.Red,
+      });
     }
-  }
-
-const handleConfirm = async () => {
-  if (currencyCode === "other" && (!customCurrency || !customCurrency)) {
-    alert("Please enter a valid currency code.");
-    return;
-  }
-  let change: Currency[];
-
-  if (currencyCode === "other") {
-    change = [{ type: customCurrency!, amount, currencyCode: customCurrency! }];
-  }
-  else {
-    change = [{ type: currencyCode, amount, currencyCode }];
-  }
-
-  if (isCharacter) {
-    if (mode === "add") {
-      await addToCharacter(change);
-    } else {
-      await removeFromCharacter(change);
-    }
-  } else if (selectedInventory) {
-    if (mode === "add") {
-      await addToInventory(change);
-    } else {
-      await removeFromInventory(change);
-    }
-  }
-
-  setModalOpen(false);
-  setAmount(0);
-};
+  };
 
   return (
     <Stack p="sm" mb={15} gap="xs" style={{
@@ -111,7 +99,7 @@ const handleConfirm = async () => {
             <ActionIcon
               variant="light"
               color="green"
-              onClick={() => { setMode("add"); setModalOpen(true); }}
+              onClick={() => openModal("add")}
               disabled={!hasTarget}
             >
               <IconPlus size={16} />
@@ -121,8 +109,8 @@ const handleConfirm = async () => {
             <ActionIcon
               variant="light"
               color="red"
-              onClick={() => { setMode("remove"); setModalOpen(true); }}
-              disabled={!hasTarget}
+              onClick={() => openModal("remove")}
+              disabled={!hasTarget || currentCurrencies.length === 0}
             >
               <IconMinus size={16} />
             </ActionIcon>
@@ -136,9 +124,9 @@ const handleConfirm = async () => {
         {currentCurrencies.length > 0 ? (
           currentCurrencies.map((currency) => (
             <CustomBadge
-              key={randomId()}
-              label={`${currency.amount} ${currency.currencyCode}`}
-              color={currencyColor(currency.currencyCode)}
+              key={currency.type}
+              label={`${currency.amount} ${coinInfo(currency.type).label}`}
+              color={coinInfo(currency.type).color}
               variant="light"
               size="lg"
               icon={<IconCoin size={16} />}
@@ -159,38 +147,26 @@ const handleConfirm = async () => {
           <Text fz="sm" c="dimmed" ta="center">
             Target: <Text span fw={600}>{targetName}</Text>
           </Text>
-          <Select
-            label="Currency Type"
-            data={[
-              { value: "gp", label: "🪙 Gold Pieces" },
-              { value: "sp", label: "đźĄ Silver Pieces" },
-              { value: "ep", label: "Electrum Pieces" },
-              { value: "pp", label: "💎 Platinum Pieces" },
-              { value: "cp", label: "🥉 Copper Pieces" },
-              { value: "other", label: "🔶 Other" },
-            ]}
-            value={currencyCode}
-            onChange={(val) => setCurrencyCode(val!)}
+          <CurrencyTypeInput
+            value={type}
+            onChange={setType}
+            suggestions={mode === "remove"
+              ? currentCurrencies.map((c) => c.type)
+              : currencySuggestions(currentCurrencies)}
             radius="md"
             styles={{
               input: { background: "rgba(255,255,255,0.05)", border: "none" },
             }}
+            data-autofocus
           />
-          {currencyCode === "other" && (
-            <Input
-              placeholder="Enter currency code (e.g. 'gp' or 'mythril')"
-              value={customCurrency || ""}
-              onChange={(e) => setCustomCurrency(e.target.value)}
-              radius="md"
-              styles={{
-                input: { background: "rgba(255,255,255,0.05)", border: "none" },
-              }}
-            />
-          )}
 
           <NumberInput
             label="Amount"
-            min={0}
+            description={mode === "remove" ? `Holding ${held} ${coinInfo(type || "?").label}` : undefined}
+            min={1}
+            max={maxAmount}
+            allowDecimal={false}
+            allowNegative={false}
             value={amount}
             onChange={(val) => setAmount(Number(val) || 0)}
             radius="md"
@@ -200,6 +176,7 @@ const handleConfirm = async () => {
           />
           <Button
             onClick={handleConfirm}
+            disabled={!canConfirm}
             color={mode === "add" ? "green" : "red"}
             fullWidth
             radius="md"

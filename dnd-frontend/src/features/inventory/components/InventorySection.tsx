@@ -4,6 +4,7 @@ import { Tooltip } from "@mantine/core";
 import { IconBackpack, IconChevronDown, IconShirt } from "@tabler/icons-react";
 import type { Currency } from "@appTypes/Currency";
 import classes from "./InventorySection.module.css";
+import { coinInfo, sortCurrencies } from "@utils/currency";
 
 interface InventorySectionProps {
   title: string;
@@ -70,9 +71,9 @@ export function InventorySection({
                 {totalWeight > 0 && ` · ${Math.round(totalWeight * 10) / 10} lb`}
               </span>
             )}
-            {money.map((c) => (
-              <span key={c.currencyCode} className={classes.coin}>
-                {c.amount} {c.currencyCode}
+            {sortCurrencies(money).map((c) => (
+              <span key={c.type} className={classes.coin}>
+                {c.amount} {coinInfo(c.type).label}
               </span>
             ))}
           </span>

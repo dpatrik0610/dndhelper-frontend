@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import type { Currency } from "@appTypes/Currency";
+import { adjustCurrency } from "@utils/currency";
 
 export interface InventoryState {
   inventories: Inventory[];
@@ -126,16 +127,10 @@ export const useInventoryStore = create<InventoryState & InventoryActions>()(
           inventories: state.inventories.map((inv) => {
             if (inv.id !== inventoryId) return inv;
 
-            const existing = inv.currencies || [];
-            const updated = existing
-              .map((c) => {
-                const claim = currenciesToClaim.find((x) => x.currencyCode === c.currencyCode);
-                if (!claim) return c;
-
-                const newAmount = c.amount - claim.amount;
-                return { ...c, amount: Math.max(0, newAmount) };
-              })
-              .filter((c) => c.amount > 0);
+            const updated = currenciesToClaim.reduce(
+              (list, claim) => adjustCurrency(list, claim.type, -claim.amount),
+              inv.currencies ?? []
+            );
 
             return { ...inv, currencies: updated };
           }),

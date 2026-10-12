@@ -2,12 +2,10 @@
 import { create } from "zustand";
 import { getCampaignCharacters } from "@services/campaignService";
 import { updateCharacter as updateCharacterService, longrest as longrestService, bulkLongRest } from "@services/characterService";
-import { transferCurrenciesToCharacter, removeCurrencies } from "@services/currencyService";
 
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Character } from "@appTypes/Character/Character";
-import type { Currency } from "@appTypes/Currency";
 
 interface AdminCharacterStore {
   characters: Character[];
@@ -18,7 +16,6 @@ interface AdminCharacterStore {
   updateCharacter: (id: string, patch: Partial<Character>) => Promise<void>;
   longRestCharacter: (id: string) => Promise<void>;
   bulkLongRest: (characterIds: string[]) => Promise<void>;
-  modifyCurrency: (characterId: string, currencyCode: string, delta: number) => Promise<void>;
 
   select: (id: string | null) => void;
   clearStorage: () => void;
@@ -178,52 +175,6 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
       });
     } finally {
       set({ loading: false });
-    }
-  },
-
-  // -------------------------
-  // MODIFY CURRENCY
-  // -------------------------
-  modifyCurrency: async (characterId, currencyCode, delta) => {
-
-    if (!delta) return;
-
-    const payload: Currency[] = [
-      { currencyCode, type: currencyCode, amount: Math.abs(delta) },
-    ];
-
-    try {
-      if (delta > 0) {
-        await transferCurrenciesToCharacter(characterId, payload);
-      } else {
-        await removeCurrencies(characterId, payload);
-      }
-
-      // local optimistic update
-      set((state) => ({
-        characters: state.characters.map((c) => {
-          if (c.id !== characterId) return c;
-
-          const existing = c.currencies.find(x => x.currencyCode === currencyCode)
-            ?? { currencyCode, type: currencyCode, amount: 0 };
-
-          const updatedAmount = Math.max(0, existing.amount + delta);
-
-          const nextCurrencies = [
-            ...c.currencies.filter(x => x.currencyCode !== currencyCode),
-            { ...existing, amount: updatedAmount },
-          ];
-
-          return { ...c, currencies: nextCurrencies };
-        }),
-      }));
-    } catch (err) {
-      console.error(err);
-      showNotification({
-        title: "Currency update failed",
-        message: String(err),
-        color: SectionColor.Red,
-      });
     }
   },
 

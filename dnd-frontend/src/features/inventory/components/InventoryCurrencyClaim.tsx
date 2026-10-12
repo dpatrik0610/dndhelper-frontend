@@ -9,6 +9,7 @@ import { loadInventories } from "@utils/loadinventory";
 import { loadCharacters } from "@utils/loadCharacter";
 import { showNotification } from "@components/Notification/Notification";
 import classes from "./InventoryCurrencyClaim.module.css";
+import { formatCurrencies } from "@utils/currency";
 
 interface InventoryCurrencyClaimProps {
   inventoryId: string;
@@ -62,7 +63,7 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
   // Hidden once claimed: the store empties the inventory's currencies.
   if (!inventory?.currencies?.length) return null;
 
-  const coins = inventory.currencies.map((c) => `${c.amount} ${c.currencyCode}`).join(", ");
+  const coins = formatCurrencies(inventory.currencies);
 
   return (
     <div className={classes.claim}>

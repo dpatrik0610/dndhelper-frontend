@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import {
   ActionIcon,
   Group,
@@ -20,6 +20,7 @@ import { ensureInventoryLinkedToCharacter } from "@utils/inventorySync";
 import { SelectInventoryOwnersModal } from "./SelectInventoryOwnersModal";
 import { CurrencyModal } from "./CurrencyModal";
 import styles from "@styles/InventoryDashboard.module.css";
+import { formatCurrencies } from "@utils/currency";
 
 export function MetaPanel() {
   const { selected, refreshSelected } = useAdminInventoryStore();
@@ -41,13 +42,7 @@ export function MetaPanel() {
         ? ownerCharacters.map((c) => c.name).join(", ")
         : `${ownerCharacters[0].name} +${ownerCharacters.length - 1} more`;
 
-  const currencySummary =
-    currencies.length === 0
-      ? "No currency"
-      : currencies
-          .slice(0, 3)
-          .map((c) => `${c.amount} ${c.currencyCode}`)
-          .join(" ");
+  const currencySummary = formatCurrencies(currencies, " · ") || "No currency";
 
   const handleSyncLinks = async () => {
     if (!selected?.id) return;

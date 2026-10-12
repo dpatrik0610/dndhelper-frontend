@@ -11,6 +11,7 @@ import type { Inventory } from "@appTypes/Inventory/Inventory";
 import { useMyTableCharacter } from "@features/tabletop/characterSheet";
 import { tabletop } from "@features/tabletop/useTabletopHub";
 import { weaponAction } from "./tableActions";
+import { coinInfo, sortCurrencies } from "@utils/currency";
 
 /** Backpack icon in the top bar; only there while the viewer has a character on the table. */
 export function InventoryButton() {
@@ -119,9 +120,9 @@ export function InventoryModal({
                       {inv.name || "Inventory"}
                     </Text>
                     <Group gap={4}>
-                      {money.map((c) => (
-                        <Badge key={c.currencyCode} size="xs" variant="light" color="yellow">
-                          {c.amount} {c.currencyCode}
+                      {sortCurrencies(money).map((c) => (
+                        <Badge key={c.type} size="xs" variant="light" color={coinInfo(c.type).color}>
+                          {c.amount} {coinInfo(c.type).label}
                         </Badge>
                       ))}
                     </Group>

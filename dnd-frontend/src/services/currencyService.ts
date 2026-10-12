@@ -1,5 +1,5 @@
-import { apiClient } from "../api/apiClient"
-import type { Currency } from "../types/Currency";
+import { apiClient } from "@api/apiClient"
+import type { Currency } from "@appTypes/Currency";
 
 const baseUrl = "/currency";
 
@@ -41,6 +41,14 @@ export async function transferCurrenciesToInventory(
     method: "PUT",
     body: currencies,
 
+  });
+}
+
+// PUT: /api/currency/inventory/{inventoryId}/remove
+export async function removeCurrenciesFromInventory(inventoryId: string, currencies: Currency[]): Promise<string> {
+  return apiClient<string>(`${baseUrl}/inventory/${inventoryId}/remove`, {
+    method: "PUT",
+    body: currencies,
   });
 }
 
