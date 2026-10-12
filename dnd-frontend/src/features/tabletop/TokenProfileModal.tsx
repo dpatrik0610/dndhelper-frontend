@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { Center, Loader, Modal } from "@mantine/core";
+import { Center, CloseButton, Loader, Modal } from "@mantine/core";
 import { useCharacterStore } from "@store/character/characterStore";
 import { useTabletopStore } from "@store/tabletop/tabletopStore";
 import { getCharacterById } from "@services/characterService";
@@ -57,5 +57,29 @@ export function TokenProfileModal() {
         {readyFor === characterId && characterId ? <CharacterProfile /> : <Center py="xl"><Loader /></Center>}
       </Suspense>
     </Modal>
+  );
+}
+
+/** A monster or NPC token's art, full screen. Click anywhere or press Escape to close. */
+export function TokenImageViewer() {
+  const preview = useTabletopStore((s) => s.imagePreview);
+  const close = () => useTabletopStore.getState().set({ imagePreview: null });
+
+  useEffect(() => {
+    if (!preview) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [preview]);
+
+  if (!preview) return null;
+  return (
+    <div className="tt-lightbox" role="dialog" aria-label={preview.name} onClick={close}>
+      <figure className="tt-lightbox-figure tt-pop-in">
+        <img src={preview.url} alt={preview.name} />
+        <figcaption>{preview.name}</figcaption>
+      </figure>
+      <CloseButton className="tt-lightbox-close" size="lg" variant="transparent" aria-label="Close" />
+    </div>
   );
 }

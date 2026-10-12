@@ -75,7 +75,13 @@ interface TabletopState {
   viewCenter: { x: number; y: number };
   editingTokenId: string | null;
   profileCharacterId: string | null;
+  /** A player's full-screen look at a monster or NPC token's art. */
+  imagePreview: { url: string; name: string } | null;
   settingsOpen: boolean;
+  /** The centered search popup (spells, monsters…). */
+  searchOpen: boolean;
+  /** DM only: the monster panel under the top bar. */
+  monsterPanelOpen: boolean;
   /** DM only: right-click menu on a token, at a viewport point. */
   tokenMenu: { tokenId: string; x: number; y: number } | null;
   /** Token the DM last clicked, dragged or right-clicked; the effects box shows its character. */
@@ -135,7 +141,10 @@ const initial: TabletopState = {
   viewCenter: { x: 0, y: 0 },
   editingTokenId: null,
   profileCharacterId: null,
+  imagePreview: null,
   settingsOpen: false,
+  searchOpen: false,
+  monsterPanelOpen: false,
   tokenMenu: null,
   focusTokenId: null,
   tokenDialog: null,
@@ -203,6 +212,12 @@ export const useTabletopStore = create<TabletopState & TabletopActions>()((set) 
       fxColor: s.fxColor,
     })),
 }));
+
+/** Places `count` new tokens in a row around the middle of the screen. */
+export function spawnPoints(count: number, cellSize: number) {
+  const { x, y } = useTabletopStore.getState().viewCenter;
+  return Array.from({ length: count }, (_, i) => ({ x: x + (i - (count - 1) / 2) * cellSize, y }));
+}
 
 /** True when the viewer gets the DM's picture: the DM, unless previewing the player view. */
 export const useDmView = () => useTabletopStore((s) => !!s.session?.isDm && !s.playerView);

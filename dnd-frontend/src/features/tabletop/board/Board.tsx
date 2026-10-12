@@ -3,7 +3,7 @@ import { useTabletopStore } from "@store/tabletop/tabletopStore";
 import { useCurrentUserId } from "@store/auth/authSelectors";
 import type { AoeKind, AoeTemplate, FxKind, GridSettings, TableLayer, TableStroke, TableToken } from "@appTypes/Tabletop";
 import { resolveImageUrl, tabletop } from "@features/tabletop/useTabletopHub";
-import { CHARACTER_DRAG_TYPE, fxShape } from "@features/tabletop/tools";
+import { CHARACTER_DRAG_TYPE, MONSTER_DRAG_TYPE, fxShape } from "@features/tabletop/tools";
 import { FogLayer, type View } from "./FogLayer";
 import { FxView } from "./Effects";
 import { Navigator } from "./Navigator";
@@ -349,8 +349,12 @@ export function Board() {
       return;
     }
     if (pointers.current.size > 2 || afterPinch.current || gestureRef.current) return;
-    // Right button pans; a DM right-click that doesn't move opens the token menu.
-    if (e.button === 2 && dmView) return startPan(e, tokenAt(toWorld(e)), true);
+    // Right button pans; a right-click that doesn't move opens the token menu: the DM's on any token,
+    // a player's (just "View image") on a visible token with art.
+    if (e.button === 2) {
+      const t = dmView ? tokenAt(toWorld(e)) : hitToken(toWorld(e));
+      if (dmView || t?.imageUrl) return startPan(e, t, true);
+    }
     if (e.button === 1 || e.button === 2 || (e.button === 0 && spaceDown.current)) return startPan(e);
     if (e.button !== 0) return;
 
@@ -548,12 +552,13 @@ export function Board() {
     }
   };
 
-  // ── Party drag & drop (from the settings drawer) ──
+  // ── Drag & drop: party members (settings drawer) and monsters (monster panel) ──
 
-  const isCharacterDrag = (e: DragEvent) => dmView && e.dataTransfer.types.includes(CHARACTER_DRAG_TYPE);
+  const isTokenDrag = (e: DragEvent) =>
+    dmView && (e.dataTransfer.types.includes(CHARACTER_DRAG_TYPE) || e.dataTransfer.types.includes(MONSTER_DRAG_TYPE));
 
   const onDragOver = (e: DragEvent<HTMLDivElement>) => {
-    if (!isCharacterDrag(e)) return;
+    if (!isTokenDrag(e)) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = "copy";
     const p = snap(grid, toWorld(e));
@@ -563,11 +568,13 @@ export function Board() {
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     setDropPoint(null);
     const characterId = e.dataTransfer.getData(CHARACTER_DRAG_TYPE);
-    if (!characterId || !dmView) return;
+    const monster = e.dataTransfer.getData(MONSTER_DRAG_TYPE);
+    if ((!characterId && !monster) || !dmView) return;
     e.preventDefault();
     const p = snap(grid, toWorld(e));
     ripple(p);
-    void tabletop.placeCharacter(characterId, p.x, p.y);
+    if (characterId) void tabletop.placeCharacter(characterId, p.x, p.y);
+    else void tabletop.upsertToken({ ...(JSON.parse(monster) as Partial<TableToken>), x: p.x, y: p.y });
   };
 
   // ── Render ──

@@ -14,7 +14,6 @@ import {
   NumberInput,
   Popover,
   ScrollArea,
-  Select,
   SimpleGrid,
   Slider,
   Switch,
@@ -35,7 +34,6 @@ import {
   IconEraser,
   IconEye,
   IconEyeOff,
-  IconGhost2,
   IconGridDots,
   IconHandGrab,
   IconLayoutGrid,
@@ -52,16 +50,12 @@ import {
   IconX,
   type Icon,
 } from "@tabler/icons-react";
-import { useDebouncedValue } from "@mantine/hooks";
 import { showNotification } from "@components/Notification/Notification";
 import { getCampaignCharacters } from "@services/campaignService";
-import { monsterService } from "@services/Admin/monsterService";
 import { useCurrentUserId } from "@store/auth/authSelectors";
-import { useTabletopStore } from "@store/tabletop/tabletopStore";
+import { spawnPoints, useTabletopStore } from "@store/tabletop/tabletopStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import type { Character } from "@appTypes/Character/Character";
-import type { Monster } from "@appTypes/Monster";
-import { crLabel } from "@utils/monster";
 import type { GridSettings, GridType, MapLibrary, MapUpload, TableParticipant, TableToken } from "@appTypes/Tabletop";
 import { gridTile } from "./board/gridMath";
 import { deleteMyMap, listMyMaps, resolveImageUrl, tabletop, uploadTableImage } from "./useTabletopHub";
@@ -72,12 +66,6 @@ import { EncounterSection } from "./EncounterSection";
 
 const GRID_SWATCHES = ["#ffffff33", "#ffffff66", "#00000066", "#a78bfa66", "#f5c45166", "#22d3ee55"];
 const IMAGE_TYPES = "image/png,image/jpeg,image/webp,image/gif";
-
-/** Places `count` new tokens in a row around the middle of the screen. */
-function spawnPoints(count: number, cellSize: number) {
-  const { x, y } = useTabletopStore.getState().viewCenter;
-  return Array.from({ length: count }, (_, i) => ({ x: x + (i - (count - 1) / 2) * cellSize, y }));
-}
 
 
 type Tab = "room" | "board" | "tokens" | "fog";
@@ -727,9 +715,6 @@ function TokensTab() {
   return (
     <>
       <PartyCard cellSize={cellSize} />
-      <Card icon={IconGhost2} title="Monsters" description="Search the bestiary; stats come along. Placed on your active layer.">
-        <MonsterPicker cellSize={cellSize} />
-      </Card>
       <Card icon={IconUserPlus} title="Custom token" description="NPCs, props and anything else.">
         <CustomToken cellSize={cellSize} />
       </Card>
@@ -839,62 +824,6 @@ function RosterCard({ character: c, placed, cellSize }: { character: Character; 
         </Tooltip>
       )}
     </div>
-  );
-}
-
-function MonsterPicker({ cellSize }: { cellSize: number }) {
-  const [search, setSearch] = useState("");
-  const [debounced] = useDebouncedValue(search, 300);
-  const [results, setResults] = useState<Monster[]>([]);
-
-  useEffect(() => {
-    if (debounced.trim().length < 2) {
-      setResults([]);
-      return;
-    }
-    let active = true;
-    monsterService
-      .search({ query: debounced.trim(), pageSize: 15 })
-      .then((r) => active && setResults(r.items))
-      .catch(() => active && setResults([]));
-    return () => {
-      active = false;
-    };
-  }, [debounced]);
-
-  const add = (id: string | null) => {
-    const monster = results.find((m) => m.id === id);
-    if (!monster) return;
-    const hp = monster.hitPoints || 10;
-    const [p] = spawnPoints(1, cellSize);
-    void tabletop.upsertToken({
-      layer: useTabletopStore.getState().activeLayer,
-      name: monster.name || "Monster",
-      hp,
-      maxHp: hp,
-      ac: monster.armorClass || 10,
-      speed: monster.speed.walk,
-      imageUrl: monster.imageUrl ?? null,
-      color: "#f87171",
-      x: p.x,
-      y: p.y,
-    });
-    setSearch("");
-  };
-
-  return (
-    <Select
-      radius="xl"
-      placeholder="Search monsters…"
-      searchable
-      searchValue={search}
-      onSearchChange={setSearch}
-      data={results.filter((m) => m.id).map((m) => ({ value: m.id!, label: `${m.name} · CR ${crLabel(m.challengeRating)}` }))}
-      filter={({ options }) => options}
-      value={null}
-      onChange={add}
-      nothingFoundMessage={debounced.trim().length >= 2 ? "No monsters found" : undefined}
-    />
   );
 }
 

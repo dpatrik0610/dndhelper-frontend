@@ -61,6 +61,9 @@ export const fxShape = (kind: FxKind): AoeKind => (LINE_FX.includes(kind) ? "Lin
 /** dataTransfer type for dragging a campaign character from the settings drawer onto the board. */
 export const CHARACTER_DRAG_TYPE = "application/x-tabletop-character";
 
+/** dataTransfer type for dragging a monster from the monster panel; the data is a JSON token draft (no x/y). */
+export const MONSTER_DRAG_TYPE = "application/x-tabletop-monster";
+
 export const DRAW_COLORS = ["#f8fafc", "#f87171", "#fb923c", "#facc15", "#4ade80", "#22d3ee", "#a78bfa", "#111827"];
 
 export const TOKEN_SWATCHES = ["#f87171", "#fb923c", "#facc15", "#4ade80", "#22d3ee", "#60a5fa", "#a78bfa", "#f472b6", "#e5e7eb"];

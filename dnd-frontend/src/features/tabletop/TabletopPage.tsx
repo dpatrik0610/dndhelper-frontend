@@ -39,7 +39,7 @@ import { Board } from "./board/Board";
 import { TabletopLobby } from "./TabletopLobby";
 import { DiceBubble } from "./DiceBubble";
 import { TableEffects } from "./TableEffects";
-import { SpellSearch } from "./SpellSearch";
+import { SearchButton, TableSearch } from "./TableSearch";
 import { JoinCombat } from "./JoinCombat";
 import { Toolbar } from "./Toolbar";
 import { LAYERS, TOOLS } from "./tools";
@@ -48,11 +48,12 @@ import { InventoryButton } from "./panels/InventoryModal";
 import { NotesButton } from "./panels/NotesModal";
 import { ChatPanel } from "./panels/ChatPanel";
 import { LogPanel } from "./panels/LogPanel";
+import { MonsterPanel, MonsterPanelButton } from "./panels/MonsterPanel";
 import { TokenEditor } from "./panels/TokenEditor";
 import { TokenDialogs } from "./panels/TokenDialogs";
 import { TokenMenu } from "./panels/TokenMenu";
 import { SettingsDrawer } from "./SettingsDrawer";
-import { TokenProfileModal } from "./TokenProfileModal";
+import { TokenImageViewer, TokenProfileModal } from "./TokenProfileModal";
 import { resolveImageUrl, tabletop, useTabletopHub } from "./useTabletopHub";
 import "./tabletop.css";
 
@@ -134,12 +135,15 @@ function TableView() {
       )}
       <TurnBar />
       <ConnectionBanner />
+      <TableSearch />
+      {dmView && <MonsterPanel />}
       <DiceBubble />
       {isDm && <SettingsDrawer />}
       {isDm && <TokenEditor />}
-      {isDm && <TokenMenu />}
+      <TokenMenu />
       {isDm && <TokenDialogs />}
       <TokenProfileModal />
+      <TokenImageViewer />
     </div>
   );
 }
@@ -216,7 +220,7 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
       </Group>
 
       <Group gap="xs" className={`tt-glass tt-pillbar${playerView ? " player-view" : ""}`} wrap="nowrap">
-        <SpellSearch />
+        <SearchButton />
         <InventoryButton />
         <NotesButton />
         {session.isDm && !playerView && (
@@ -252,6 +256,7 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
             </ActionIcon>
           </Tooltip>
         )}
+        {session.isDm && !playerView && <MonsterPanelButton />}
         {session.isDm && (
           <Tooltip label="Table settings">
             <ActionIcon
@@ -401,10 +406,15 @@ function TurnBar() {
 function useShortcuts(isDm: boolean) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Search opens from anywhere, even mid-typing in chat.
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        return useTabletopStore.getState().set({ searchOpen: true });
+      }
       const el = e.target as HTMLElement | null;
       if (el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))) return;
       const store = useTabletopStore.getState();
-      if (store.editingTokenId || store.profileCharacterId || store.settingsOpen || store.tokenMenu || store.tokenDialog) return;
+      if (store.editingTokenId || store.profileCharacterId || store.imagePreview || store.settingsOpen || store.tokenMenu || store.tokenDialog) return;
 
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
         if (isDm && store.tool === "fog") {
@@ -414,6 +424,10 @@ function useShortcuts(isDm: boolean) {
         return;
       }
       if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === "/") {
+        e.preventDefault();
+        return store.set({ searchOpen: true });
+      }
       if (e.key === "Escape") return store.set({ tool: "select" });
       const match = TOOLS.find((t) => t.key === e.key.toUpperCase() && (isDm || !t.dmOnly));
       if (match) store.set({ tool: match.tool });
