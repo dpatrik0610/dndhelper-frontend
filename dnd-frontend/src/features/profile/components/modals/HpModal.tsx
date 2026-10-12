@@ -7,6 +7,8 @@ import { SectionColor } from "@appTypes/SectionColor";
 import { BaseModal } from "@components/BaseModal";
 import { computeEffects } from "@utils/effects";
 import { FormNumberInput } from "@components/common/FormNumberInput";
+import { concentrationDc, isConcentration } from "@utils/concentration";
+import { signed } from "@utils/effects";
 
 interface HpModalProps {
   opened: boolean;
@@ -39,6 +41,8 @@ export function HpModal({ opened, onClose }: HpModalProps) {
     try {
       let newHp = currentHp;
       let newTempHp = tempHp;
+      let conditions = character.conditions;
+      let concentrationPrompt = "";
       let notificationMessage = "";
 
       if (amount >= 0) {
@@ -54,12 +58,25 @@ export function HpModal({ opened, onClose }: HpModalProps) {
         newTempHp = actualTempHp - damageToTemp;
         newHp = currentHp - remainingDamage; // Allows negatives, infinite/no clamp!
         notificationMessage = `Took ${damageVal} damage (now ${newHp}/${maxHp}).`;
+
+        // Down ends concentration outright; otherwise the player rolls the Con save.
+        if (conditions.some(isConcentration)) {
+          if (newHp <= 0) {
+            conditions = conditions.filter((c) => !isConcentration(c));
+            notificationMessage += " Concentration lost.";
+          } else {
+            const save = computeEffects(character).stats["save:con"];
+            const mode = save.roll === "normal" ? "" : ` with ${save.roll}`;
+            concentrationPrompt = `Make a Con save (${signed(save.value)}${mode}) against DC ${concentrationDc(damageVal)}, or remove Concentrating.`;
+          }
+        }
       }
 
       const updated = await updateCharacter({
         ...character,
         hitPoints: newHp,
         temporaryHitPoints: newTempHp,
+        conditions,
       });
 
       if (updated) {
@@ -69,6 +86,7 @@ export function HpModal({ opened, onClose }: HpModalProps) {
         updateCharacterLocal({
           hitPoints: newHp,
           temporaryHitPoints: newTempHp,
+          conditions,
         });
       }
 
@@ -77,6 +95,9 @@ export function HpModal({ opened, onClose }: HpModalProps) {
         message: notificationMessage,
         color: amount >= 0 ? SectionColor.Green : SectionColor.Red,
       });
+      if (concentrationPrompt) {
+        showNotification({ title: "Concentration check", message: concentrationPrompt, color: SectionColor.Yellow });
+      }
 
       onClose();
     } catch (err) {

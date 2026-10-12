@@ -3,6 +3,7 @@ import type { AbilityScores } from "@appTypes/Character/AbilityScores";
 import type { SavingThrows } from "@appTypes/Character/SavingThrows";
 import type { CharacterEffect, StatModifier } from "@appTypes/Character/Effect";
 import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
+import { CONCENTRATION_RULE, isConcentration } from "./concentration";
 
 export type Ability = keyof AbilityScores;
 export type RollMode = "normal" | "advantage" | "disadvantage";
@@ -54,6 +55,7 @@ const AUTO_FAIL = "Automatically fails STR and DEX saves";
 export const CONDITION_MODIFIERS: Record<string, StatModifier[]> = {
   blinded: [{ target: "attack", type: "disadvantage" }, note("Fails sight-based checks; attacks against you have advantage")],
   charmed: [note("Can't attack the charmer; the charmer has advantage on social checks against you")],
+  concentrating: [note(CONCENTRATION_RULE)],
   deafened: [note("Fails hearing-based checks")],
   exhaustion: [{ target: "checks", type: "disadvantage" }, note("Level 1 shown; higher levels add more penalties")],
   frightened: [
@@ -78,7 +80,7 @@ export const CONDITION_MODIFIERS: Record<string, StatModifier[]> = {
 
 export function appliedEffects(c: Character): AppliedEffect[] {
   const conditions = (c.conditions ?? []).flatMap((name): AppliedEffect[] => {
-    const modifiers = CONDITION_MODIFIERS[name.trim().toLowerCase()];
+    const modifiers = CONDITION_MODIFIERS[isConcentration(name) ? "concentrating" : name.trim().toLowerCase()];
     return modifiers ? [{ id: `condition:${name}`, name, source: "condition", active: true, modifiers }] : [];
   });
   return [...(c.effects ?? []).filter((e) => e.active), ...conditions];

@@ -1,8 +1,10 @@
+import { CONCENTRATION, CONCENTRATION_RULE, isConcentration } from "@utils/concentration";
+
 const BASE_URL = "https://www.dnd5eapi.co/api/2014/conditions";
 
 /**
  * Fetches all available conditions from the DnD 5e API.
- * Returns only their names as an array of strings.
+ * Returns only their names as an array of strings, with Concentrating (not an SRD condition) first.
  */
 export async function getConditions(): Promise<string[]> {
   try {
@@ -10,12 +12,12 @@ export async function getConditions(): Promise<string[]> {
     if (!res.ok) throw new Error(`Failed to fetch conditions: ${res.status}`);
 
     const data = await res.json();
-    if (!data.results || !Array.isArray(data.results)) return [];
+    if (!data.results || !Array.isArray(data.results)) return [CONCENTRATION];
 
-    return data.results.map((cond: { name: string }) => cond.name);
+    return [CONCENTRATION, ...data.results.map((cond: { name: string }) => cond.name)];
   } catch (error) {
     console.error("Error fetching conditions:", error);
-    return [];
+    return [CONCENTRATION];
   }
 }
 
@@ -24,6 +26,7 @@ export async function getConditions(): Promise<string[]> {
  * Returns an array of description strings.
  */
 export async function getCondition(name: string): Promise<string[]> {
+  if (isConcentration(name)) return [CONCENTRATION_RULE];
   try {
     const formatted = name.trim().toLowerCase().replace(/\s+/g, "-");
     const res = await fetch(`${BASE_URL}/${formatted}`);

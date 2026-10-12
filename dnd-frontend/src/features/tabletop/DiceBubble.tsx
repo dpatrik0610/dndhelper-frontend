@@ -2,15 +2,18 @@ import { useMemo, useState } from "react";
 import { ActionIcon, Button, Group, ScrollArea, SegmentedControl, Select, Switch, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { IconDice5, IconSkull, IconX } from "@tabler/icons-react";
 import { Die, DiceResult } from "@components/roll/Dice";
+import { showNotification } from "@components/Notification/Notification";
 import { DEFAULT_SKILLS } from "@features/characterForm/Tooltips/tooltips";
 import { useCurrentUserId } from "@store/auth/authSelectors";
 import { useCharacterList } from "@store/character/characterSelectors";
+import { useCharacterStore } from "@store/character/characterStore";
 import { useDmView, useTabletopStore } from "@store/tabletop/tabletopStore";
 import type { AbilityScores } from "@appTypes/Character/AbilityScores";
 import type { Character } from "@appTypes/Character/Character";
 import type { SavingThrows } from "@appTypes/Character/SavingThrows";
 import { saveCharacter, togglePip } from "./characterSheet";
 import { d20With, signed, useTableRoll } from "./useTableRoll";
+import { deathSave } from "@utils/deathSave";
 import { ABILITIES as EFFECT_ABILITIES, computeEffects, type RollMode } from "@utils/effects";
 
 const DICE = [4, 6, 8, 10, 12, 20, 100];
@@ -74,6 +77,16 @@ export function DiceBubble() {
     mode === "normal"
       ? roll([d20With(modifier)], label, 20)
       : roll([d20With(modifier), d20With(modifier)], `${label} (${mode}: take the ${mode === "advantage" ? "higher" : "lower"})`, 20);
+  // The die decides: the result goes straight onto the sheet, re-read after the roll so nothing saved meanwhile is lost.
+  const rollDeathSave = async (c: Character) => {
+    const entry = await dice.roll({ expressions: ["1d20"], label: "Death saving throw", as, private: isDm && isPrivate }, 20);
+    const natural = entry?.rolls[0]?.rolls[0];
+    if (natural === undefined) return;
+    const latest = useCharacterStore.getState().characters.find((x) => x.id === c.id) ?? c;
+    const outcome = deathSave(natural, latest);
+    await saveCharacter(latest, outcome.patch, "Couldn't save death saves.");
+    showNotification({ title: `${latest.name}: death save`, message: outcome.message, color: outcome.color });
+  };
 
   return (
     <div className={`tt-bubble${open ? " open" : ""}`}>
@@ -127,7 +140,16 @@ export function DiceBubble() {
             <Switch size="xs" label="Private roll (DM only)" checked={isPrivate} onChange={(e) => setIsPrivate(e.currentTarget.checked)} />
           )}
 
-          {character && <Checks character={character} tab={tab} onTab={setTab} onCheck={check} />}
+          {character && (
+            <Checks
+              character={character}
+              tab={tab}
+              onTab={setTab}
+              onCheck={check}
+              onDeathSave={() => void rollDeathSave(character)}
+              rolling={dice.rolling}
+            />
+          )}
         </div>
       )}
 
@@ -151,11 +173,15 @@ function Checks({
   tab,
   onTab,
   onCheck,
+  onDeathSave,
+  rolling,
 }: {
   character: Character;
   tab: Tab;
   onTab: (tab: Tab) => void;
   onCheck: (label: string, modifier: number, roll?: RollMode) => void;
+  onDeathSave: () => void;
+  rolling: boolean;
 }) {
   const skills = [...(character.skills ?? [])].sort((a, b) => a.name.localeCompare(b.name));
   // Same numbers as the profile: equipped items, potions and conditions included.
@@ -163,7 +189,7 @@ function Checks({
 
   return (
     <>
-      <DeathSaves character={character} onRoll={() => onCheck("Death saving throw", 0)} />
+      <DeathSaves character={character} onRoll={onDeathSave} rolling={rolling} />
       <SpellSlots character={character} />
 
       <SegmentedControl
@@ -226,8 +252,8 @@ function Checks({
   );
 }
 
-/** Three success and three failure pips, saved straight to the character sheet. */
-function DeathSaves({ character, onRoll }: { character: Character; onRoll: () => void }) {
+/** Three success and three failure pips, saved straight to the character sheet; rolling fills them in by itself. */
+function DeathSaves({ character, onRoll, rolling }: { character: Character; onRoll: () => void; rolling: boolean }) {
   const successes = character.deathSavesSuccesses ?? 0;
   const failures = character.deathSavesFailures ?? 0;
   const save = (patch: Partial<Character>) => void saveCharacter(character, patch, "Couldn't save death saves.");
@@ -261,7 +287,7 @@ function DeathSaves({ character, onRoll }: { character: Character; onRoll: () =>
         ))}
       </span>
       <Tooltip label="Roll a death save">
-        <ActionIcon size="sm" variant="subtle" color="gray" onClick={onRoll} aria-label="Roll a death save">
+        <ActionIcon size="sm" variant="subtle" color="gray" onClick={onRoll} disabled={rolling} aria-label="Roll a death save">
           <IconDice5 size={14} />
         </ActionIcon>
       </Tooltip>

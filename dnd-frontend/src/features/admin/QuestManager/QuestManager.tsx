@@ -258,7 +258,7 @@ export function QuestManager() {
     const cleanedObjectives = objectives.map((obj) => {
       if (obj.id && obj.id.startsWith("temp-")) {
         const copy = { ...obj };
-        delete (copy as any).id;
+        delete (copy as Partial<QuestObjective>).id;
         return copy;
       }
       return obj;
@@ -803,7 +803,7 @@ export function QuestManager() {
                     <Box>
                       <Group justify="space-between" align="center" mb={6}>
                         <Text size="sm" fw={700} tt="uppercase" c="rgba(255, 255, 255, 0.95)" style={{ letterSpacing: "0.5px" }}>
-                          Lore & Description (Markdown)
+                          Lore &amp; Description (Markdown)
                         </Text>
                         <Button
                           size="xs"
@@ -1009,7 +1009,7 @@ export function QuestManager() {
                       <Group gap="xs" mb="sm" align="center">
                         <IconCoins size={15} color="var(--theme-color-accent-primary)" />
                         <Text size="sm" fw={700} tt="uppercase" c="rgba(255, 255, 255, 0.95)" style={{ letterSpacing: "0.5px" }}>
-                          Reward Currencies (Coins & Custom)
+                          Reward Currencies (Coins &amp; Custom)
                         </Text>
                       </Group>
                       

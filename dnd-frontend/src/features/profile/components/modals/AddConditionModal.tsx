@@ -6,6 +6,7 @@ import { getConditions } from "@services/conditionService";
 import { updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { BaseModal } from "@components/BaseModal";
+import { addCondition } from "@utils/concentration";
 
 interface AddConditionModalProps {
   opened: boolean;
@@ -72,7 +73,7 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     if (!character || !selected) return;
     if (character.conditions.includes(selected)) return;
 
-    const updatedConditions = [...character.conditions, selected];
+    const updatedConditions = addCondition(character.conditions, selected, (c) => c);
     updateCharacterLocal({ conditions: updatedConditions });
 
     if (character) {
