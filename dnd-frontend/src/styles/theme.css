@@ -781,32 +781,6 @@
   opacity: 0.7;
 }
 
-/* 🌃 Cyberpunk: falling data-rain streaks (cyan, every third one glitch-red) */
-.theme-cyberpunk .portal-particle {
-  animation-name: cpRain;
-  animation-timing-function: linear;
-  animation-duration: 3.2s !important;
-}
-.theme-cyberpunk .portal-particle:nth-child(even) {
-  animation-duration: 4.6s !important;
-}
-.theme-cyberpunk .portal-particle::after {
-  width: 2px;
-  height: 56px;
-  background: linear-gradient(to bottom, transparent, #00f0ff);
-}
-.theme-cyberpunk .portal-particle:nth-child(3n)::after {
-  background: linear-gradient(to bottom, transparent, #ff003c);
-}
-
-@keyframes cpRain {
-  0%   { transform: translate3d(0, -10vh, 0); opacity: 0; }
-  10%  { opacity: 0.7; }
-  90%  { opacity: 0.7; }
-  100% { transform: translate3d(0, 105vh, 0); opacity: 0; }
-}
-
-
 /* Keyframe Animations */
 
 @keyframes floatUp {
