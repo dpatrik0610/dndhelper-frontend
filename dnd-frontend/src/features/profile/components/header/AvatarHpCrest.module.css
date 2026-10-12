@@ -1,0 +1,238 @@
+/* Flippable avatar token: the HP ring stays put, the coin inside spins. */
+
+.coin {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  perspective: 600px;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.coin:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #10b981);
+  outline-offset: 4px;
+}
+
+/* Idle tease: a short wobble once per cycle while the front is showing. */
+.idle {
+  animation: idleWobble 22s ease-in-out 8s infinite;
+}
+
+@keyframes idleWobble {
+  0%, 90%, 100% { transform: perspective(600px) rotateY(0deg); }
+  92% { transform: perspective(600px) rotateY(32deg); }
+  94.5% { transform: perspective(600px) rotateY(-18deg); }
+  96.5% { transform: perspective(600px) rotateY(8deg); }
+  98% { transform: perspective(600px) rotateY(0deg); }
+}
+
+.flipper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateZ(3px);
+  border: 2px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08));
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.35);
+  background: var(--theme-bg-card, rgba(255, 255, 255, 0.02));
+}
+
+/* Coin rim, only seen edge-on while spinning. */
+.edge {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--theme-color-accent-primary, #10b981) 35%, #0b0b0e);
+}
+
+.back {
+  --die: var(--theme-color-accent-primary, #10b981);
+  transform: rotateY(180deg) translateZ(3px);
+  color: var(--die);
+  background:
+    radial-gradient(circle at 35% 25%, color-mix(in srgb, var(--die) 22%, transparent), transparent 60%),
+    radial-gradient(circle at 50% 50%, #1a1a20, #0b0b0e 75%);
+  border-color: color-mix(in srgb, var(--die) 55%, transparent);
+  box-shadow:
+    inset 0 0 0 4px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 5px color-mix(in srgb, var(--die) 25%, transparent),
+    inset 0 0 22px rgba(0, 0, 0, 0.6);
+}
+
+.d20 {
+  width: 76%;
+  height: 76%;
+  overflow: visible;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--die) 45%, transparent));
+}
+
+.rollValue {
+  fill: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  text-anchor: middle;
+  dominant-baseline: central;
+  font-variant-numeric: tabular-nums;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.55);
+  stroke-width: 3px;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop 420ms cubic-bezier(0.3, 1.6, 0.5, 1) 820ms both;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.3); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* One light sweep across the face as it lands. */
+.glint {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: glint 700ms ease-out 950ms both;
+}
+
+@keyframes glint {
+  to { transform: translateX(120%); }
+}
+
+.back[data-crit="high"] {
+  --die: #fbbf24;
+}
+
+.back[data-crit="high"] .rollValue {
+  fill: #fef3c7;
+}
+
+.back[data-crit="low"] {
+  --die: #b91c1c;
+}
+
+.back[data-crit="low"] .rollValue {
+  fill: #fca5a5;
+}
+
+.crack {
+  fill: none;
+  stroke: #0b0b0e;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+  animation: crack 300ms ease-in 1000ms forwards;
+}
+
+@keyframes crack {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Natural 20: a gold ring bursts out past the HP ring. */
+.burst {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid #fbbf24;
+  box-shadow: 0 0 18px rgba(251, 191, 36, 0.8);
+  pointer-events: none;
+  opacity: 0;
+  animation: burst 900ms ease-out 900ms;
+}
+
+@keyframes burst {
+  0% { opacity: 0.9; transform: scale(0.9); }
+  100% { opacity: 0; transform: scale(1.7); }
+}
+
+/* Below 25% HP the ring beats like a heart: a double thump, then rest. */
+.heartbeat {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heartbeat 1.3s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0%, 40%, 100% { transform: scale(1); opacity: 1; }
+  10% { transform: scale(1.045); opacity: 0.85; }
+  20% { transform: scale(1); opacity: 1; }
+  28% { transform: scale(1.03); opacity: 0.9; }
+}
+
+/* At 0 HP: a dim monitor line across the token, with a blip sweeping now and then. */
+.flatline {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 16%;
+  height: 16%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.flatlineBase,
+.flatlineBlip {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.flatlineBase {
+  stroke: rgba(239, 68, 68, 0.35);
+  stroke-width: 1.5;
+}
+
+.flatlineBlip {
+  stroke: #f87171;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.9));
+  stroke-dasharray: 22 300;
+  stroke-dashoffset: 22;
+  animation: flatlineSweep 6s linear infinite;
+}
+
+@keyframes flatlineSweep {
+  0% { stroke-dashoffset: 22; opacity: 1; }
+  45% { stroke-dashoffset: -110; opacity: 1; }
+  46%, 100% { stroke-dashoffset: -110; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idle,
+  .heartbeat,
+  .flatlineBlip,
+  .rollValue,
+  .glint,
+  .burst {
+    animation: none;
+  }
+
+  .glint,
+  .burst {
+    display: none;
+  }
+
+  .crack {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}

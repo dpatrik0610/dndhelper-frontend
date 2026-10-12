@@ -1,6 +1,8 @@
 import { Box, Group, Text } from "@mantine/core";
 import { IconCoin } from "@tabler/icons-react";
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
+import { useReduceMotion } from "@hooks/useReduceMotion";
+import fun from "./HeaderFun.module.css";
 import type { Character } from "@appTypes/Character/Character";
 import { coinInfo, sortCurrencies } from "@utils/currency";
 
@@ -9,8 +11,46 @@ interface Props {
   containerStyle?: CSSProperties;
 }
 
+interface SpilledCoin {
+  id: number;
+  style: CSSProperties;
+}
+
+let nextCoinId = 0;
+
+/** A handful of coins that hop out of the pill and bounce away. Pure decoration. */
+function spill(): SpilledCoin[] {
+  return Array.from({ length: 3 + Math.floor(Math.random() * 3) }, () => ({
+    id: nextCoinId++,
+    style: {
+      "--dx": `${Math.round(-36 + Math.random() * 72)}px`,
+      "--dy": `${Math.round(-22 - Math.random() * 20)}px`,
+      "--rot": `${Math.round(-300 + Math.random() * 600)}deg`,
+      animationDelay: `${Math.round(Math.random() * 90)}ms`,
+    } as CSSProperties,
+  }));
+}
+
 function CoinPill({ label, amount, gradient, glow }: { label: string; amount: number; gradient: string; glow: string }) {
+  const reduceMotion = useReduceMotion();
+  const [coins, setCoins] = useState<SpilledCoin[]>([]);
+
+  const jingle = () => {
+    if (reduceMotion) return;
+    const batch = spill();
+    setCoins((c) => [...c, ...batch]);
+    window.setTimeout(() => setCoins((c) => c.filter((x) => !batch.includes(x))), 1000);
+  };
+
   return (
+    <button type="button" className={fun.pill} onClick={jingle} aria-label={`${amount} ${label}`}>
+      {coins.map((c) => (
+        <span
+          key={c.id}
+          className={fun.coin}
+          style={{ ...c.style, background: gradient, "--glow": glow } as CSSProperties}
+        />
+      ))}
     <Group
       gap="xs"
       align="center"
@@ -69,6 +109,7 @@ function CoinPill({ label, amount, gradient, glow }: { label: string; amount: nu
         {amount}
       </Text>
     </Group>
+    </button>
   );
 }
 

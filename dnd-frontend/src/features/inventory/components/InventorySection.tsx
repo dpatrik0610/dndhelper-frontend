@@ -1,4 +1,5 @@
-import { useId, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
+import { useReduceMotion } from "@hooks/useReduceMotion";
 import { Collapse } from "@mantine/core";
 import { Tooltip } from "@mantine/core";
 import { IconBackpack, IconChevronDown, IconShirt } from "@tabler/icons-react";
@@ -39,6 +40,35 @@ export function InventorySection({
   const opened = highlighted || userOpened;
   const money = currencies.filter((c) => c.amount > 0);
 
+  // Opening the bag gives it a shake and the contents settle in. Purely decorative.
+  const bagRef = useRef<HTMLSpanElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReduceMotion();
+  const toggle = () => {
+    setUserOpened(!opened);
+    if (opened || reduceMotion) return;
+    bagRef.current?.animate(
+      [
+        { transform: "rotate(0deg)" },
+        { transform: "rotate(-14deg) translateY(-2px)" },
+        { transform: "rotate(11deg)" },
+        { transform: "rotate(-7deg)" },
+        { transform: "rotate(4deg)" },
+        { transform: "rotate(0deg)" },
+      ],
+      { duration: 520, easing: "ease-out" }
+    );
+    bodyRef.current?.animate(
+      [
+        { transform: "translateY(-6px)" },
+        { transform: "translateY(3px)", offset: 0.45 },
+        { transform: "translateY(-1px)", offset: 0.75 },
+        { transform: "translateY(0)" },
+      ],
+      { duration: 480, easing: "ease-out" }
+    );
+  };
+
   return (
     <section
       className={classes.section}
@@ -50,11 +80,11 @@ export function InventorySection({
       <button
         type="button"
         className={classes.header}
-        onClick={() => setUserOpened(!opened)}
+        onClick={toggle}
         aria-expanded={opened}
         aria-controls={bodyId}
       >
-        <span className={classes.avatar}>
+        <span ref={bagRef} className={classes.avatar}>
           {worn ? <IconShirt size={18} stroke={1.75} /> : <IconBackpack size={18} stroke={1.75} />}
         </span>
 
@@ -95,13 +125,13 @@ export function InventorySection({
       )}
 
       {/* Outside the header button so the wear toggle can sit before it; keyboard users open via the header. */}
-      <span className={classes.chevron} onClick={() => setUserOpened(!opened)} aria-hidden>
+      <span className={classes.chevron} onClick={toggle} aria-hidden>
         <IconChevronDown size={18} />
       </span>
       </div>
 
       <Collapse in={opened} transitionDuration={200}>
-        <div id={bodyId} className={classes.body}>
+        <div ref={bodyRef} id={bodyId} className={classes.body}>
           {children}
         </div>
       </Collapse>

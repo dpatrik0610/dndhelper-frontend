@@ -5,6 +5,7 @@ import { useReduceMotion } from "@hooks/useReduceMotion";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 import { themeBackdrops } from "./backdrops";
+import { ThemeCritter } from "./ThemeCritter";
 
 /**
  * AppBackground
@@ -69,6 +70,8 @@ export function AppBackground() {
   }
 
   return (
+    <>
+    {animated && <ThemeCritter theme={sidebarTheme} />}
     <Box className={`portal-background ${activeThemeClass}`} style={{ position: "fixed", pointerEvents: "none" }}>
       <Box className="portal-backdrop-glow" />
       {scene}
@@ -89,5 +92,6 @@ export function AppBackground() {
         ))}
       </Box>
     </Box>
+    </>
   );
 }

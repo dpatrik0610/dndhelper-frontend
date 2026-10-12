@@ -28,11 +28,6 @@
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.header:hover {
-  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.04));
 }
 
 .header:focus-visible {
@@ -128,6 +123,12 @@
   align-items: center;
   gap: 8px;
   padding-right: 12px;
+  transition: background 0.15s ease;
+}
+
+/* The whole row lights up, wear toggle and chevron included. */
+.headerRow:hover {
+  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.04));
 }
 
 .headerRow > .header {
