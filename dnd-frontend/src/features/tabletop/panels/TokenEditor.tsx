@@ -21,6 +21,7 @@ import { useIsMobile } from "@hooks/useIsMobile";
 import type { TableLayer } from "@appTypes/Tabletop";
 import { LAYERS } from "@features/tabletop/tools";
 import type { TableToken } from "@appTypes/Tabletop";
+import { addCondition } from "@utils/concentration";
 import { tabletop, uploadTableImage } from "@features/tabletop/useTabletopHub";
 import { TOKEN_SWATCHES } from "@features/tabletop/tools";
 import { AddConditionModal } from "./AddConditionModal";
@@ -217,7 +218,7 @@ function TokenForm({ token, onClose: close }: { token: TableToken; onClose: () =
             onClose={() => setAddingEffect(false)}
             existingLabels={draft.effects.map((e) => e.label)}
             targetName={draft.name}
-            onSubmit={(label, remaining) => set({ effects: [...draft.effects, { id: "", label, remaining }] })}
+            onSubmit={(label, remaining) => set({ effects: addCondition(draft.effects, { id: "", label, remaining }, (e) => e.label) })}
           />
         </Stack>
   );
