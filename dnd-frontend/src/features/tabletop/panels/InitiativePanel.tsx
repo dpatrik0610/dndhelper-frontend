@@ -160,6 +160,8 @@ function InitiativeRow({
     if (isDm) store.set({ editingTokenId: t.id, focusTokenId: t.id });
     else if (mine && t.characterId) store.set({ profileCharacterId: t.characterId });
   };
+  const ac = t.effectiveAc ?? t.ac;
+  const acFromEffects = ac !== t.ac;
   const hpTone = hpRatio === null ? "" : hpRatio > 0.5 ? "healthy" : hpRatio > 0.25 ? "wounded" : "bloodied";
 
   return (
@@ -228,13 +230,14 @@ function InitiativeRow({
         </div>
 
         {!redacted && (
-          <Tooltip label="Armor class">
+          <Tooltip label={acFromEffects ? `Armor class ${ac} with effects (${t.ac} on the sheet)` : "Armor class"}>
             <div className="tt-init-ac">
               <IconShield size={30} stroke={1.4} className="tt-init-ac-shield" />
-              {isDm ? (
+              {/* Effects change it: show the result; the sheet value is edited in the token editor. */}
+              {isDm && !acFromEffects ? (
                 <InlineNumber value={t.ac} onCommit={(ac) => update(t, { ac: ac ?? 0 })} />
               ) : (
-                <span>{t.ac}</span>
+                <span>{ac}</span>
               )}
             </div>
           </Tooltip>

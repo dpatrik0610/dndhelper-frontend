@@ -61,7 +61,7 @@ export function TokenMenu() {
             {dmView ? (
               <span>
                 HP {token.hp}/{token.maxHp}
-                {token.tempHp > 0 && ` +${token.tempHp}`} · AC {token.ac}
+                {token.tempHp > 0 && ` +${token.tempHp}`} · AC {token.effectiveAc ?? token.ac}
                 {token.layer !== "Token" && layer && ` · ${layer.label} layer`}
               </span>
             ) : (

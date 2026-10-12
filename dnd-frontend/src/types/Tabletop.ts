@@ -88,7 +88,10 @@ export interface TableToken {
   hp: number;
   maxHp: number;
   tempHp: number;
+  /** Base AC; for a character token, the sheet's value (edits are written back to it). */
   ac: number;
+  /** Character tokens: the AC with the character's active effects, computed by the server. */
+  effectiveAc?: number | null;
   speed: number;
   /** Aura reach in ft beyond the token's edge; 0 = none. */
   auraFt: number;

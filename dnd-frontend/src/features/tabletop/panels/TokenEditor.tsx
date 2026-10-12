@@ -105,7 +105,13 @@ function TokenForm({ token, onClose: close }: { token: TableToken; onClose: () =
             <NumberInput label="HP" min={0} value={draft.hp} onChange={(v) => set({ hp: num(v) })} />
             <NumberInput label="Max HP" min={0} value={draft.maxHp} onChange={(v) => set({ maxHp: num(v) })} />
             <NumberInput label="Temp HP" min={0} value={draft.tempHp} onChange={(v) => set({ tempHp: num(v) })} />
-            <NumberInput label="AC" min={0} value={draft.ac} onChange={(v) => set({ ac: num(v) })} />
+            <NumberInput
+              label="AC"
+              description={draft.effectiveAc != null && draft.effectiveAc !== draft.ac ? `${draft.effectiveAc} with effects` : undefined}
+              min={0}
+              value={draft.ac}
+              onChange={(v) => set({ ac: num(v) })}
+            />
             <NumberInput
               label="Initiative"
               placeholder="Not in combat"
