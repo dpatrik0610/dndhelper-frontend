@@ -216,6 +216,7 @@ function TokenForm({ token, onClose: close }: { token: TableToken; onClose: () =
             opened={addingEffect}
             onClose={() => setAddingEffect(false)}
             existingLabels={draft.effects.map((e) => e.label)}
+            targetName={draft.name}
             onSubmit={(label, remaining) => set({ effects: [...draft.effects, { id: "", label, remaining }] })}
           />
         </Stack>

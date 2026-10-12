@@ -1,65 +1,115 @@
-import { useEffect, useMemo, useState } from "react";
-import { Autocomplete, Button, Chip, Group, Loader, Modal, NumberInput, SimpleGrid, Stack, Text } from "@mantine/core";
-import { IconCheck, IconSparkles } from "@tabler/icons-react";
-import { getConditions } from "@services/conditionService";
-import { magicGlowTheme } from "@styles/magic/glowTheme";
+import { useEffect, useState } from "react";
+import { Button, Loader, Modal, NumberInput } from "@mantine/core";
+import {
+  IconArrowBigDownLines,
+  IconBan,
+  IconBolt,
+  IconBrain,
+  IconCheck,
+  IconEarOff,
+  IconEyeClosed,
+  IconEyeOff,
+  IconFlask,
+  IconGhost,
+  IconHandGrab,
+  IconHeart,
+  IconInfinity,
+  IconLink,
+  IconMountain,
+  IconSearch,
+  IconSparkles,
+  IconStars,
+  IconZzz,
+  type Icon,
+} from "@tabler/icons-react";
+import { getCondition, getConditions } from "@services/conditionService";
 
 interface AddConditionModalProps {
   opened: boolean;
   onClose: () => void;
   onSubmit: (label: string, remaining: number | null) => void;
   existingLabels?: string[];
+  /** Whose condition it is, for the header ("Goblin"). */
+  targetName?: string;
 }
 
-export function AddConditionModal({ opened, onClose, onSubmit, existingLabels = [] }: AddConditionModalProps) {
-  const [label, setLabel] = useState("");
-  const [duration, setDuration] = useState<number | "">("");
-  const [conditions, setConditions] = useState<string[]>([]);
+const ICONS: Record<string, Icon> = {
+  concentrating: IconBrain,
+  blinded: IconEyeOff,
+  charmed: IconHeart,
+  deafened: IconEarOff,
+  exhaustion: IconZzz,
+  frightened: IconGhost,
+  grappled: IconHandGrab,
+  incapacitated: IconBan,
+  invisible: IconEyeClosed,
+  paralyzed: IconBolt,
+  petrified: IconMountain,
+  poisoned: IconFlask,
+  prone: IconArrowBigDownLines,
+  restrained: IconLink,
+  stunned: IconStars,
+  unconscious: IconZzz,
+};
+const iconFor = (name: string) => ICONS[name.trim().toLowerCase()] ?? IconSparkles;
+
+/** Rounds; null = until removed. */
+const DURATIONS: { value: number | null; label: string }[] = [
+  { value: null, label: "Until removed" },
+  { value: 1, label: "1 round" },
+  { value: 3, label: "3 rounds" },
+  { value: 10, label: "1 minute" },
+];
+
+// The list and the rules text come from dnd5eapi; fetch each once per session.
+let conditionList: Promise<string[]> | null = null;
+const rulesCache = new Map<string, Promise<string[]>>();
+const rulesFor = (name: string) => {
+  if (!rulesCache.has(name)) rulesCache.set(name, getCondition(name));
+  return rulesCache.get(name)!;
+};
+
+export function AddConditionModal({ opened, onClose, onSubmit, existingLabels = [], targetName }: AddConditionModalProps) {
+  const [conditions, setConditions] = useState<string[] | null>(null);
+  const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
+  const [duration, setDuration] = useState<number | null>(null);
+  const [rules, setRules] = useState<string[] | null>(null);
 
   useEffect(() => {
-    if (opened) {
-      setLabel("");
-      setDuration("");
-      setSelected(null);
-      setSearch("");
-
-      let active = true;
-      setLoading(true);
-      void getConditions().then((list) => {
-        if (!active) return;
-        setConditions(list);
-        setLoading(false);
-      });
-
-      return () => {
-        active = false;
-      };
-    }
+    if (!opened) return;
+    setQuery("");
+    setSelected(null);
+    setDuration(null);
+    let current = true;
+    conditionList ??= getConditions();
+    void conditionList.then((list) => current && setConditions(list));
+    return () => {
+      current = false;
+    };
   }, [opened]);
 
-  const filteredList = useMemo(() => {
-    if (!search.trim()) return conditions;
-    return conditions.filter((c) => c.toLowerCase().includes(search.toLowerCase()));
-  }, [conditions, search]);
+  useEffect(() => {
+    if (!selected) return setRules(null);
+    let current = true;
+    setRules(null);
+    void rulesFor(selected).then((lines) => current && setRules(lines));
+    return () => {
+      current = false;
+    };
+  }, [selected]);
 
-  const existingSet = useMemo(
-    () => new Set(existingLabels.map((c) => c.trim().toLowerCase()).filter(Boolean)),
-    [existingLabels]
-  );
+  const active = new Set(existingLabels.map((c) => c.trim().toLowerCase()).filter(Boolean));
+  const q = query.trim();
+  const shown = (conditions ?? []).filter((c) => c.toLowerCase().includes(q.toLowerCase()));
+  // Typing a name that isn't in the list makes it a custom condition.
+  const custom = q && !(conditions ?? []).some((c) => c.toLowerCase() === q.toLowerCase()) ? q : null;
+  const label = (selected ?? custom ?? "").trim();
+  const duplicate = !!label && active.has(label.toLowerCase());
 
-  const candidateLabel = (selected || label).trim();
-  const isDuplicate = candidateLabel.length > 0 && existingSet.has(candidateLabel.toLowerCase());
-
-  const handleSubmit = () => {
-    const trimmed = candidateLabel;
-    if (!trimmed) return;
-    if (existingSet.has(trimmed.toLowerCase())) return;
-    const parsed = duration === "" ? null : Number(duration);
-    const normalized = typeof parsed === "number" && Number.isFinite(parsed) ? parsed : null;
-    onSubmit(trimmed, normalized);
+  const apply = () => {
+    if (!label || duplicate) return;
+    onSubmit(label, duration);
     onClose();
   };
 
@@ -67,128 +117,130 @@ export function AddConditionModal({ opened, onClose, onSubmit, existingLabels = 
     <Modal
       opened={opened}
       onClose={onClose}
-      title={
-        <Group gap={6}>
-          <IconSparkles size={18} color={magicGlowTheme.palette.primary} />
-          <Text fw={700} style={magicGlowTheme.text}>
-            Add condition
-          </Text>
-        </Group>
-      }
       centered
-      styles={{
-        content: {
-          ...magicGlowTheme.card,
-          borderRadius: 14,
-          border: magicGlowTheme.card.border,
-        },
-        header: { background: "transparent" },
-        title: { ...magicGlowTheme.text, display: "flex", alignItems: "center", gap: 6 },
-      }}
+      size={560}
+      radius="lg"
+      classNames={{ content: "tt-cond", header: "tt-cond-header", body: "tt-cond-body" }}
+      title={
+        <div className="tt-cond-title">
+          <span className="tt-cond-title-icon">
+            <IconSparkles size={18} />
+          </span>
+          <div>
+            <strong>Add condition</strong>
+            {targetName && <span>to {targetName}</span>}
+          </div>
+        </div>
+      }
     >
-      <Stack gap="md">
-        <Autocomplete
-          label="Condition"
-          placeholder="Search or type a custom condition"
-          data={filteredList}
-          value={selected ?? label}
-          onChange={(val) => {
+      <label className="tt-cond-search">
+        <IconSearch size={16} />
+        <input
+          autoFocus
+          placeholder="Search, or type a custom condition…"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.currentTarget.value);
             setSelected(null);
-            setLabel(val);
-            setSearch(val);
           }}
-          onOptionSubmit={(val) => {
-            setSelected(val);
-            setLabel(val);
-          }}
-          rightSection={loading ? <Loader size="xs" /> : undefined}
-          styles={{
-            input: {
-              background: "rgba(255,255,255,0.06)",
-              border: magicGlowTheme.badge.border,
-              color: magicGlowTheme.text.color,
-            },
-            dropdown: {
-              ...magicGlowTheme.card,
-            },
-          }}
+          onKeyDown={(e) => e.key === "Enter" && apply()}
+          aria-label="Search conditions"
         />
+      </label>
 
-        {loading ? (
-          <Loader size="sm" />
+      <div className="tt-cond-grid" role="listbox" aria-label="Conditions">
+        {conditions === null ? (
+          <div className="tt-cond-empty">
+            <Loader size="sm" />
+          </div>
         ) : (
-          <Chip.Group multiple={false} value={selected} onChange={setSelected}>
-            <SimpleGrid
-              cols={{ base: 1, sm: 2, md: 3 }}
-              spacing={8}
-              verticalSpacing={8}
-              style={{ maxHeight: 260, overflowY: "auto", padding: 20 }}
-            >
-              {filteredList.map((cond) => (
-                <Chip
-                  key={cond}
-                  value={cond}
-                  size="sm"
-                  variant={selected === cond ? "filled" : "outline"}
-                  color="grape"
-                  styles={{
-                    label: {
-                      width: "100%",
-                      background:
-                        selected === cond
-                          ? "linear-gradient(135deg, rgba(160,120,255,0.5), rgba(120,200,255,0.35))"
-                          : "rgba(255,255,255,0.04)",
-                      border: magicGlowTheme.badge.border,
-                      color: magicGlowTheme.text.color,
-                      boxShadow: magicGlowTheme.badge.boxShadow,
-                    },
-                  }}
-                >
-                  {cond}
-                </Chip>
-              ))}
-              {filteredList.length === 0 && <Text size="xs" c="dimmed">No matches</Text>}
-            </SimpleGrid>
-          </Chip.Group>
+          shown.map((name) => {
+            const CondIcon = iconFor(name);
+            const on = active.has(name.toLowerCase());
+            return (
+              <button
+                key={name}
+                type="button"
+                role="option"
+                aria-selected={selected === name}
+                disabled={on}
+                className={`tt-cond-card${selected === name ? " selected" : ""}${on ? " active" : ""}`}
+                onClick={() => setSelected(selected === name ? null : name)}
+              >
+                <span className="tt-cond-icon">
+                  <CondIcon size={16} />
+                </span>
+                <span className="tt-cond-name">{name}</span>
+                {on && <span className="tt-cond-tag">On</span>}
+              </button>
+            );
+          })
         )}
+        {custom && (
+          <button type="button" className={`tt-cond-card custom${duplicate ? " active" : ""}`} disabled={duplicate} onClick={apply}>
+            <span className="tt-cond-icon">
+              <IconSparkles size={16} />
+            </span>
+            <span className="tt-cond-name">Custom: “{custom}”</span>
+          </button>
+        )}
+        {conditions !== null && !shown.length && !custom && <div className="tt-cond-empty">No conditions match.</div>}
+      </div>
 
-        <NumberInput
-          label="Duration (rounds, optional)"
-          placeholder="Indefinite"
-          min={0}
-          max={99}
-          value={duration}
-          onChange={(val) => setDuration(typeof val === "number" ? val : "")}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-          styles={{
-            input: {
-              background: "rgba(255,255,255,0.06)",
-              border: magicGlowTheme.badge.border,
-              color: magicGlowTheme.text.color,
-            },
-          }}
-        />
+      {selected && (
+        <div className="tt-cond-rules">
+          <span className="tt-cond-section">{selected}</span>
+          {rules === null ? (
+            <Loader size="xs" />
+          ) : rules.length ? (
+            <ul>
+              {rules.map((line, i) => (
+                <li key={i}>{line.replace(/^[-•]\s*/, "")}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No rules text for this one.</p>
+          )}
+        </div>
+      )}
 
-        <Group justify="flex-end">
-          <Button variant="subtle" color="gray" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            variant="filled"
-            color="grape"
-            leftSection={<IconCheck size={16} />}
-            onClick={handleSubmit}
-            disabled={!candidateLabel || isDuplicate}
-          >
-            Apply
-          </Button>
-        </Group>
-      </Stack>
+      <div className="tt-cond-duration">
+        <span className="tt-cond-section">Duration</span>
+        <div className="tt-cond-pills">
+          {DURATIONS.map((d) => (
+            <button
+              key={d.label}
+              type="button"
+              className={`tt-cond-pill${duration === d.value ? " on" : ""}`}
+              onClick={() => setDuration(d.value)}
+            >
+              {d.value === null && <IconInfinity size={14} />}
+              {d.label}
+            </button>
+          ))}
+          <NumberInput
+            size="xs"
+            radius="xl"
+            w={110}
+            min={1}
+            max={99}
+            placeholder="Rounds"
+            value={duration !== null && !DURATIONS.some((d) => d.value === duration) ? duration : ""}
+            onChange={(v) => setDuration(typeof v === "number" && v > 0 ? v : null)}
+            onKeyDown={(e) => e.key === "Enter" && apply()}
+            aria-label="Custom duration in rounds"
+          />
+        </div>
+      </div>
+
+      <div className="tt-cond-footer">
+        <Button variant="subtle" color="gray" radius="xl" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button radius="xl" leftSection={<IconCheck size={16} />} onClick={apply} disabled={!label || duplicate}>
+          {duplicate ? "Already on" : label ? `Apply ${label}` : "Pick a condition"}
+        </Button>
+      </div>
     </Modal>
   );
 }

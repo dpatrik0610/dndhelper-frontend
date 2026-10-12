@@ -74,6 +74,7 @@ export function TokenDialogs() {
         opened={!!token && dialog?.kind === "condition"}
         onClose={close}
         existingLabels={token?.effects.map((e) => e.label) ?? []}
+        targetName={token?.name}
         onSubmit={(label, remaining) =>
           token && void tabletop.patchToken(token, { effects: addCondition(token.effects, { id: "", label, remaining }, (e) => e.label) })
         }
