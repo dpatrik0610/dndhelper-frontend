@@ -400,6 +400,34 @@
   --theme-gradient-active: linear-gradient(135deg, rgba(255, 122, 26, 0.22), rgba(64, 194, 201, 0.14));
 }
 
+/* 📚 Wizard's Library (mahogany, parchment, candle gold, velvet red) */
+.theme-wizards-library {
+  --theme-bg-base: rgba(30, 14, 11, 0.78);
+  --theme-bg-panel: rgba(38, 17, 14, 0.95); /* brown with a burgundy cast */
+  --theme-bg-panel-opaque: #26110e;
+  --theme-bg-card: rgba(76, 22, 30, 0.6); /* burgundy velvet */
+  --theme-bg-hover: rgba(224, 179, 90, 0.12);
+
+  --theme-border-glow: rgba(224, 179, 90, 0.5);
+  --theme-border-accent: rgba(210, 65, 74, 0.5);
+  --theme-border-subtle: rgba(150, 62, 52, 0.4);
+
+  --theme-color-accent-primary: #e0b35a; /* Candle gold */
+  --theme-color-accent-secondary: #d2414a; /* Velvet red */
+  --theme-color-text-primary: #f3e6c8; /* Parchment */
+  --theme-color-text-secondary: #d9bf8f;
+  --theme-color-text-glow: #fff4dc;
+  --theme-color-text-on-accent: #1a0f0a;
+
+  --theme-glow-shadow-primary: 0 0 14px rgba(224, 179, 90, 0.3);
+  --theme-glow-shadow-secondary: 0 0 14px rgba(210, 65, 74, 0.3);
+
+  /* Gold to amber: dark text stays readable across the whole button (red shows in borders and selection) */
+  --theme-gradient-primary: linear-gradient(135deg, #f0cf7a, #e0b35a 50%, #c9822f);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(240, 207, 122, 0.88), rgba(224, 179, 90, 0.88) 50%, rgba(201, 130, 47, 0.88));
+  --theme-gradient-active: linear-gradient(135deg, rgba(224, 179, 90, 0.2), rgba(210, 65, 74, 0.16));
+}
+
 /* Default styling helper fallbacks */
 .theme-preview-card--interactive {
   cursor: pointer;
@@ -981,6 +1009,10 @@
     0% { background: #030305 !important; }
     100% { background: #1a0e08 !important; }
   }
+  @keyframes modalThemeFadeLibrary {
+    0% { background: #030305 !important; }
+    100% { background: #26110e !important; }
+  }
   @keyframes modalThemeFadeDanger {
     0% { background: #030305 !important; }
     100% { background: rgb(40, 12, 18) !important; }
@@ -1029,6 +1061,9 @@
   }
   .mantine-Modal-content.theme-scorching-desert {
     animation: modalThemeFadeDesert 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-wizards-library {
+    animation: modalThemeFadeLibrary 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .mantine-Modal-content.modal-variant-danger {
     animation: modalThemeFadeDanger 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;

@@ -1,0 +1,236 @@
+/* ==========================================================================
+   📚 Wizard's Library (.theme-wizards-library): pixel-art library, mouse wizard, flying broom
+   Scene: backdrops/LibraryBackdrop.tsx (sprites: librarySprites.ts). Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+.wl-scene {
+  background: #1c110a;
+}
+
+/* The 384×216 room, scaled by --px (screen pixels per room pixel) to cover the viewport */
+.wl-stage {
+  --px: max(calc(100vw / 384), calc(100vh / 216));
+  left: 50%;
+  top: 50%;
+  width: calc(384 * var(--px));
+  height: calc(216 * var(--px));
+  transform: translate(-50%, -50%);
+}
+
+.wl-stage img {
+  display: block;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.wl-room {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+}
+
+.wl-sprite,
+.wl-candle,
+.wl-broom {
+  position: absolute;
+}
+
+/* One-frame window onto a sprite's frame strip; wl-frames steps the strip through it */
+.wl-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.wl-frames {
+  animation: wlFrames var(--dur, 1s) steps(var(--n)) infinite;
+}
+
+/* Floating candles bob gently; every flame has a flickering halo */
+.wl-candle {
+  animation: wlBob 3s ease-in-out infinite alternate;
+}
+
+.wl-glow {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: calc(28 * var(--px));
+  height: calc(28 * var(--px));
+  transform: translate(-50%, -42%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 190, 100, 0.32), rgba(255, 150, 60, 0.1) 55%, transparent);
+  animation: wlFlicker 0.9s ease-in-out infinite alternate;
+}
+
+.wl-glow--big {
+  width: calc(56 * var(--px));
+  height: calc(56 * var(--px));
+}
+
+/* The levitating spellbook: a slower, higher float with a violet aura */
+.wl-spellbook {
+  animation-duration: 2.6s;
+}
+
+.wl-glow--magic {
+  width: calc(40 * var(--px));
+  height: calc(40 * var(--px));
+  transform: translate(-50%, -30%);
+  background: radial-gradient(closest-side, rgba(157, 107, 255, 0.38), rgba(120, 80, 255, 0.12) 55%, transparent);
+  animation-duration: 1.7s;
+}
+
+/* Magic motes: little pixel stars (a centre pixel plus four arms) drifting up and fading */
+.wl-mote {
+  position: absolute;
+  background: currentColor;
+  box-shadow:
+    var(--px) 0 currentColor,
+    calc(-1 * var(--px)) 0 currentColor,
+    0 var(--px) currentColor,
+    0 calc(-1 * var(--px)) currentColor,
+    0 0 calc(4 * var(--px)) currentColor;
+  opacity: 0.7;
+  animation: wlMote 7s ease-in-out infinite;
+}
+
+/* The broom crosses the room, then waits off-screen; it hovers by the shelves when static */
+.wl-broom {
+  transform: translateX(calc(286 * var(--px)));
+  animation: wlFly 30s linear infinite;
+}
+
+.wl-broom-bob {
+  position: absolute;
+  inset: 0;
+  animation: wlBroomBob 1.6s ease-in-out infinite alternate;
+}
+
+.wl-spark {
+  position: absolute;
+  background: #fff6c2;
+  box-shadow: 0 0 calc(2 * var(--px)) #f2c94c;
+  animation: wlTwinkle 0.9s steps(2) infinite;
+}
+
+/* Candlelight on the desk, moonlight from the window, dark corners */
+.wl-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 26% 73%, rgba(255, 170, 80, 0.16), transparent 18%),
+    radial-gradient(ellipse 14% 30% at 21% 42%, rgba(120, 140, 255, 0.1), transparent),
+    radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+@keyframes wlFrames {
+  to { transform: translateX(-100%); }
+}
+
+@keyframes wlBob {
+  from { transform: translateY(calc(-2 * var(--px))); }
+  to   { transform: translateY(calc(2 * var(--px))); }
+}
+
+@keyframes wlFlicker {
+  from { opacity: 0.7; }
+  to   { opacity: 1; }
+}
+
+@keyframes wlFly {
+  0%       { transform: translateX(calc(-50 * var(--px))); }
+  60%, 100% { transform: translateX(calc(410 * var(--px))); }
+}
+
+@keyframes wlBroomBob {
+  from { transform: translateY(calc(-4 * var(--px))) rotate(-4deg); }
+  to   { transform: translateY(calc(4 * var(--px))) rotate(3deg); }
+}
+
+@keyframes wlMote {
+  0%   { transform: translateY(0); opacity: 0; }
+  20%  { opacity: 0.9; }
+  75%  { opacity: 0.6; }
+  100% { transform: translateY(calc(-14 * var(--px))); opacity: 0; }
+}
+
+@keyframes wlTwinkle {
+  50% { opacity: 0.15; }
+}
+
+/* Particles: square dust motes drifting up through the candlelight */
+.theme-wizards-library .portal-particle {
+  animation-name: floatUp;
+}
+.theme-wizards-library .portal-particle::after {
+  width: 3px;
+  height: 3px;
+  background: #f0d9a0;
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-wizards-library {
+  scrollbar-color: rgba(224, 179, 90, 0.55) transparent;
+}
+
+.theme-wizards-library ::selection {
+  background: #b8323a;
+  color: #fbeedd;
+}
+
+/* Pixel headings with a hard, pixel-art drop shadow */
+.theme-wizards-library .narrative-title {
+  font-family: "Pixelify Sans", "Plus Jakarta Sans", sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+  color: #f0d9a0 !important;
+  text-shadow: 2px 2px 0 #4f1216 !important;
+}
+
+/* Outer panels: burgundy velvet inside a bevelled brown wood frame with a gold hairline… */
+.theme-wizards-library .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(122, 31, 43, 0.34), rgba(79, 18, 25, 0.14) 45%, rgba(122, 31, 43, 0.22)),
+    repeating-linear-gradient(90deg, transparent 0 3px, rgba(0, 0, 0, 0.05) 3px 4px);
+  box-shadow:
+    inset 0 0 0 3px #4a2d19,
+    inset 0 1px 0 3px #7a4e2c,
+    inset 0 0 0 4px rgba(10, 5, 3, 0.7),
+    inset 0 0 0 5px rgba(224, 179, 90, 0.22);
+}
+
+/* …and a brass nail in each corner */
+.theme-wizards-library .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  pointer-events: none;
+  background:
+    linear-gradient(#e0b35a, #e0b35a) no-repeat 0 0 / calc(var(--panel-reveal) * 4px) calc(var(--panel-reveal) * 4px),
+    linear-gradient(#e0b35a, #e0b35a) no-repeat 100% 0 / calc(var(--panel-reveal) * 4px) calc(var(--panel-reveal) * 4px),
+    linear-gradient(#e0b35a, #e0b35a) no-repeat 0 100% / calc(var(--panel-reveal) * 4px) calc(var(--panel-reveal) * 4px),
+    linear-gradient(#e0b35a, #e0b35a) no-repeat 100% 100% / calc(var(--panel-reveal) * 4px) calc(var(--panel-reveal) * 4px);
+  animation: panelReveal 0.6s steps(4) both;
+}
+
+/* Buttons: a crisp gold pixel outline with a hard shadow */
+.theme-wizards-library .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 2px #e0b35a, 3px 3px 0 2px #4f1216 !important;
+}
+
+.theme-wizards-library .glassy-input:focus-within,
+.theme-wizards-library .glassy-input:focus {
+  border-color: #e0b35a !important;
+  box-shadow: 0 0 0 2px rgba(210, 65, 74, 0.45) !important;
+}

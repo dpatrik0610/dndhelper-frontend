@@ -71,7 +71,8 @@ export function AppBackground() {
 
   return (
     <>
-    {animated && <ThemeCritter theme={sidebarTheme} />}
+    {/* keyed: a theme switch starts that theme's critter on the quick first-visit timer */}
+    {animated && <ThemeCritter key={sidebarTheme} theme={sidebarTheme} />}
     <Box className={`portal-background ${activeThemeClass}`} style={{ position: "fixed", pointerEvents: "none" }}>
       <Box className="portal-backdrop-glow" />
       {scene}

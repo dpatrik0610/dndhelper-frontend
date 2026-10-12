@@ -61,6 +61,8 @@ const SuperAdminConsole = lazy(adminPages.superAdmin);
 const Login = lazy(() => import("@features/auth/login/Login"));
 const Register = lazy(() => import("@features/auth/register/Register"));
 const NotFound = lazy(() => import("@features/notFound/NotFound"));
+// Hidden: no nav link and not prefetched, only reachable by typing /scoreboard.
+const ScoreboardPage = lazy(() => import("@features/scoreboard/ScoreboardPage"));
 
 /** After login, fetch every page chunk while the browser is idle, so later navigation never waits on the network. */
 function usePrefetchPages(enabled: boolean, isDm: boolean, isSuperAdmin: boolean) {
@@ -252,6 +254,7 @@ function AppRoutes() {
                 <Route path="/table/:code" element={<TabletopPage />} />
                 <Route path="/roll-history" element={<RollHistoryPage />} />
                 <Route path="/settings/:tab?" element={<SettingsPage />} />
+                <Route path="/scoreboard" element={<ScoreboardPage />} />
                 {isDm && <Route path="/dashboard/:section?" element={<DmDashboard />} />}
                 {isSuperAdmin && <Route path="/admin/:section?" element={<SuperAdminConsole />} />}
               </Route>

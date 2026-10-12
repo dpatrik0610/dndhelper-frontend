@@ -72,6 +72,7 @@
 .tail { transform-origin: 23px 16px; animation: tail 0.4s ease-in-out infinite alternate; }
 .rotor { transform-box: fill-box; transform-origin: center; animation: rotor 0.08s linear infinite alternate; }
 .led { animation: led 1s steps(2) infinite; }
+.flutter { transform-box: view-box; transform-origin: 16px 16px; animation: flutter 0.5s ease-in-out infinite alternate; }
 .sway { transform-box: view-box; transform-origin: 16px 4px; animation: sway 1.8s ease-in-out infinite alternate; }
 .scuttle { animation: scuttle 0.14s steps(2) infinite; }
 .sting { transform-box: view-box; transform-origin: 10px 20px; animation: sting 0.9s ease-in-out infinite alternate; }
@@ -84,6 +85,7 @@
 @keyframes tail { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
 @keyframes rotor { from { transform: scaleX(1); } to { transform: scaleX(0.4); } }
 @keyframes led { 50% { opacity: 0.2; } }
+@keyframes flutter { from { transform: skewY(-7deg) rotate(-5deg); } to { transform: skewY(7deg) rotate(5deg); } }
 @keyframes sway { from { transform: rotate(-22deg); } to { transform: rotate(18deg); } }
 @keyframes scuttle { 50% { transform: translateX(1px); } }
 @keyframes sting { from { transform: rotate(-5deg); } to { transform: rotate(7deg); } }
