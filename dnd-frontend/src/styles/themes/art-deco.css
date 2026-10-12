@@ -1,0 +1,207 @@
+/* ==========================================================================
+   🍸 Art Deco (.theme-art-deco): gilt sunburst behind a stepped skyline, sweeping searchlights
+   Scene: backdrops/ArtDecoBackdrop.tsx. Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+.ad-sky {
+  inset: 0;
+  background: radial-gradient(ellipse 80% 70% at 50% 100%, #1a2824 0%, #0c1312 45%, #060708 100%);
+}
+
+/* Anchor point at the bottom centre; the sunburst and arcs are centred on it */
+.ad-sun {
+  left: 50%;
+  top: 92%;
+  width: 0;
+  height: 0;
+}
+
+.ad-rays,
+.ad-arcs {
+  position: absolute;
+}
+
+.ad-rays {
+  width: 150vmax;
+  height: 150vmax;
+  left: -75vmax;
+  top: -75vmax;
+  animation: adSpin 300s linear infinite;
+}
+
+.ad-arcs {
+  width: 70vmin;
+  height: 70vmin;
+  left: -35vmin;
+  top: -35vmin;
+  opacity: 0.5;
+  animation: adGlow 9s ease-in-out infinite alternate;
+}
+
+.ad-arcs circle {
+  fill: none;
+  stroke: #d4af37;
+  stroke-width: 1.2;
+  stroke-dasharray: 2 6;
+}
+
+.ad-arcs circle:nth-child(odd) {
+  stroke-dasharray: none;
+}
+
+.ad-arcs .ad-arcs__disc {
+  fill: rgba(212, 175, 55, 0.14);
+  stroke-dasharray: none;
+}
+
+/* Searchlights: soft cones pivoting from the skyline */
+.ad-beam {
+  bottom: 18%;
+  width: 16vw;
+  height: 110vh;
+  margin-left: -8vw;
+  transform-origin: 50% 100%;
+  transform: rotate(var(--from));
+  clip-path: polygon(46% 100%, 54% 100%, 100% 0, 0 0);
+  background: linear-gradient(to top, rgba(255, 238, 190, 0.16), rgba(255, 238, 190, 0.04) 70%, transparent);
+  animation: adSweep 16s ease-in-out infinite alternate;
+}
+
+.ad-beam--left {
+  left: 24%;
+  --from: -28deg;
+  --to: 10deg;
+}
+
+.ad-beam--right {
+  left: 76%;
+  --from: 26deg;
+  --to: -12deg;
+  animation-duration: 21s;
+  animation-delay: -6s;
+}
+
+.ad-glints {
+  inset: 0;
+}
+
+/* 4-point gold sparkle */
+.ad-glint {
+  position: absolute;
+  background: #f3dc8a;
+  clip-path: polygon(50% 0, 58% 42%, 100% 50%, 58% 58%, 50% 100%, 42% 58%, 0 50%, 42% 42%);
+  opacity: 0.5;
+  animation: adTwinkle 4s ease-in-out infinite alternate;
+}
+
+.ad-skyline {
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 42vh;
+}
+
+.ad-skyline__back path {
+  fill: #0b1110;
+  stroke: rgba(212, 175, 55, 0.16);
+  stroke-width: 1;
+}
+
+.ad-skyline__front path {
+  fill: #050606;
+  stroke: rgba(212, 175, 55, 0.45);
+  stroke-width: 1;
+}
+
+.ad-skyline__windows rect {
+  fill: rgba(240, 205, 120, 0.55);
+}
+
+@keyframes adSpin {
+  to { transform: rotate(1turn); }
+}
+
+@keyframes adGlow {
+  from { opacity: 0.35; }
+  to   { opacity: 0.6; }
+}
+
+@keyframes adSweep {
+  from { transform: rotate(var(--from)); }
+  to   { transform: rotate(var(--to)); }
+}
+
+@keyframes adTwinkle {
+  from { opacity: 0.1; transform: scale(0.6); }
+  to   { opacity: 0.8; transform: scale(1); }
+}
+
+/* Particles: gold glitter diamonds */
+.theme-art-deco .portal-particle {
+  animation-name: floatUp;
+}
+.theme-art-deco .portal-particle::after {
+  width: 6px;
+  height: 6px;
+  background: #d4af37;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-art-deco {
+  scrollbar-color: rgba(212, 175, 55, 0.55) transparent;
+}
+
+.theme-art-deco ::selection {
+  background: #d4af37;
+  color: #14110a;
+}
+
+.theme-art-deco .narrative-title {
+  font-family: "Poiret One", "Plus Jakarta Sans", sans-serif !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 4px !important;
+  color: #e9c862 !important;
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.25) !important;
+}
+
+/* Outer panels: a gold hairline 4px inside the border makes the deco double rule… */
+.theme-art-deco .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  z-index: -1;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(212, 175, 55, 0.05), transparent 40%);
+}
+
+/* …and a fan crest opens at the top centre with gold rules running out from it */
+.theme-art-deco .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 20' fill='none' stroke='%23d4af37' stroke-width='1.2'%3E%3Cpath d='M4 19.5a16 16 0 0 1 32 0M10 19.5a10 10 0 0 1 20 0M20 19.5V3.5M20 19.5 8.7 8.2M20 19.5 31.3 8.2M20 19.5 5.2 13.4M20 19.5l14.8-6.1'/%3E%3Cpath d='M15 19.5a5 5 0 0 1 10 0z' fill='%23d4af37'/%3E%3C/svg%3E")
+      no-repeat 50% 0 / calc(var(--panel-reveal) * 28px) calc(var(--panel-reveal) * 14px),
+    linear-gradient(90deg, transparent 8%, rgba(212, 175, 55, 0.55) calc(50% - 16px), transparent calc(50% - 15px), transparent calc(50% + 15px), rgba(212, 175, 55, 0.55) calc(50% + 16px), transparent 92%)
+      no-repeat 50% 13px / calc(var(--panel-reveal) * 100%) 1px;
+  animation: panelReveal 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Buttons: an offset gold double ring */
+.theme-art-deco .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 2px var(--theme-bg-panel-opaque), 0 0 0 3px rgba(212, 175, 55, 0.75), 0 0 16px rgba(212, 175, 55, 0.25) !important;
+}
+
+.theme-art-deco .glassy-input:focus-within,
+.theme-art-deco .glassy-input:focus {
+  border-color: #d4af37 !important;
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.35), 0 0 12px rgba(58, 165, 143, 0.25) !important;
+}

@@ -345,6 +345,61 @@
   --theme-gradient-active: linear-gradient(135deg, rgba(252, 238, 10, 0.18), rgba(0, 240, 255, 0.12));
 }
 
+/* 🍸 Art Deco (1920s: onyx, gilt gold, jade) */
+.theme-art-deco {
+  --theme-bg-base: rgba(12, 11, 9, 0.4);
+  --theme-bg-panel: rgba(14, 13, 10, 0.72);
+  --theme-bg-panel-opaque: #0e0d0a;
+  --theme-bg-card: rgba(26, 23, 15, 0.55);
+  --theme-bg-hover: rgba(212, 175, 55, 0.12);
+
+  --theme-border-glow: rgba(212, 175, 55, 0.5);
+  --theme-border-accent: rgba(58, 165, 143, 0.45);
+  --theme-border-subtle: rgba(212, 175, 55, 0.2);
+
+  --theme-color-accent-primary: #d4af37; /* Gilt gold */
+  --theme-color-accent-secondary: #3aa58f; /* Jade */
+  --theme-color-text-primary: #f5ecd7; /* Cream */
+  --theme-color-text-secondary: #d8c08a; /* Champagne */
+  --theme-color-text-glow: #fbf3dc;
+  --theme-color-text-on-accent: #14110a;
+
+  --theme-glow-shadow-primary: 0 0 14px rgba(212, 175, 55, 0.3);
+  --theme-glow-shadow-secondary: 0 0 14px rgba(58, 165, 143, 0.3);
+
+  --theme-gradient-primary: linear-gradient(135deg, #e9c862, #d4af37 55%, #3aa58f);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(233, 200, 98, 0.88), rgba(212, 175, 55, 0.88) 55%, rgba(58, 165, 143, 0.85));
+  --theme-gradient-active: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(58, 165, 143, 0.14));
+}
+
+/* 🏜️ Scorching Desert (sun-baked sand, heat orange, desert turquoise) */
+.theme-scorching-desert {
+  --theme-bg-base: rgba(22, 12, 6, 0.4);
+  --theme-bg-panel: rgba(26, 14, 8, 0.74);
+  --theme-bg-panel-opaque: #1a0e08;
+  --theme-bg-card: rgba(42, 23, 12, 0.55);
+  --theme-bg-hover: rgba(255, 122, 26, 0.13);
+
+  --theme-border-glow: rgba(255, 122, 26, 0.5);
+  --theme-border-accent: rgba(64, 194, 201, 0.45);
+  --theme-border-subtle: rgba(255, 150, 70, 0.2);
+
+  --theme-color-accent-primary: #ff7a1a; /* Heat orange */
+  --theme-color-accent-secondary: #40c2c9; /* Desert turquoise */
+  --theme-color-text-primary: #fff3e4;
+  --theme-color-text-secondary: #f2bf88; /* Sand */
+  --theme-color-text-glow: #ffe6c7;
+  --theme-color-text-on-accent: #1c0d04;
+
+  --theme-glow-shadow-primary: 0 0 14px rgba(255, 122, 26, 0.35);
+  --theme-glow-shadow-secondary: 0 0 14px rgba(64, 194, 201, 0.3);
+
+  /* Primary stays in the heat family (orange → turquoise muddies in the middle); turquoise shows in the active fill */
+  --theme-gradient-primary: linear-gradient(135deg, #ffb347, #ff7a1a 55%, #e2501c);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(255, 179, 71, 0.88), rgba(255, 122, 26, 0.88) 55%, rgba(226, 80, 28, 0.88));
+  --theme-gradient-active: linear-gradient(135deg, rgba(255, 122, 26, 0.22), rgba(64, 194, 201, 0.14));
+}
+
 /* Default styling helper fallbacks */
 .theme-preview-card--interactive {
   cursor: pointer;
@@ -918,6 +973,14 @@
     0% { background: #030305 !important; }
     100% { background: #07060d !important; }
   }
+  @keyframes modalThemeFadeArtDeco {
+    0% { background: #030305 !important; }
+    100% { background: #0e0d0a !important; }
+  }
+  @keyframes modalThemeFadeDesert {
+    0% { background: #030305 !important; }
+    100% { background: #1a0e08 !important; }
+  }
   @keyframes modalThemeFadeDanger {
     0% { background: #030305 !important; }
     100% { background: rgb(40, 12, 18) !important; }
@@ -960,6 +1023,12 @@
   }
   .mantine-Modal-content.theme-cyberpunk {
     animation: modalThemeFadeCyberpunk 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-art-deco {
+    animation: modalThemeFadeArtDeco 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-scorching-desert {
+    animation: modalThemeFadeDesert 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .mantine-Modal-content.modal-variant-danger {
     animation: modalThemeFadeDanger 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;

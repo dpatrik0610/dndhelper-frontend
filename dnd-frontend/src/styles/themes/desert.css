@@ -1,0 +1,85 @@
+/* ==========================================================================
+   🏜️ Scorching Desert (.theme-scorching-desert): shader dunes, mesas, heat haze and mirage
+   Scene: backdrops/DesertBackdrop.tsx. Variables: theme.css.
+   ========================================================================== */
+
+/* ---------- Scene ---------- */
+
+/* Backing colour before the shader's first frame (or without WebGL) */
+.sd-scene {
+  background: linear-gradient(180deg, #3a1208 0%, #8a3a16 45%, #c9783e 52%, #5a2a14 100%);
+}
+
+/* Particles: sand grains blown sideways on the wind */
+.theme-scorching-desert .portal-particle {
+  animation-name: sdBlow;
+}
+.theme-scorching-desert .portal-particle::after {
+  width: 3px;
+  height: 2px;
+  border-radius: 1px;
+  background: #f4c48a;
+}
+
+@keyframes sdBlow {
+  0%   { transform: translate3d(30vw, 70vh, 0); opacity: 0; }
+  15%  { opacity: 0.6; }
+  85%  { opacity: 0.6; }
+  100% { transform: translate3d(-60vw, 58vh, 0); opacity: 0; }
+}
+
+/* ---------- UI signature ---------- */
+
+html.theme-scorching-desert {
+  scrollbar-color: rgba(255, 122, 26, 0.55) transparent;
+}
+
+.theme-scorching-desert ::selection {
+  background: #ff7a1a;
+  color: #1c0d04;
+}
+
+.theme-scorching-desert .narrative-title {
+  font-family: "Rakkas", "Plus Jakarta Sans", serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 1.5px !important;
+  color: #ffd9a0 !important;
+  text-shadow: 0 0 12px rgba(255, 122, 26, 0.45) !important;
+}
+
+/* Panels: sun-baked from above, warm at the top fading down… */
+.theme-scorching-desert .mantine-Paper-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 140, 50, 0.09), transparent 40%);
+  box-shadow: inset 0 1px 0 rgba(255, 190, 120, 0.22);
+}
+
+/* …with a dune-ridge line drawn along the top that spreads out from the middle */
+.theme-scorching-desert .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  inset: 5px 12px auto;
+  height: 8px;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 8' fill='none' stroke='%23ff9a4a' stroke-width='1.1'%3E%3Cpath d='M0 6Q12 6 22 2.5L24 1.5Q27 4 34 5.5T60 6'/%3E%3C/svg%3E") repeat-x 0 0 / 60px 8px;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent) no-repeat 50% 0 / calc(var(--panel-reveal) * 100%) 100%;
+  mask: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent) no-repeat 50% 0 / calc(var(--panel-reveal) * 100%) 100%;
+  opacity: 0.7;
+  animation: panelReveal 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Buttons: heat bloom with a turquoise rim */
+.theme-scorching-desert .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(64, 194, 201, 0.55), 0 0 18px rgba(255, 122, 26, 0.45) !important;
+}
+
+.theme-scorching-desert .glassy-input:focus-within,
+.theme-scorching-desert .glassy-input:focus {
+  border-color: #ff7a1a !important;
+  box-shadow: 0 0 0 1px rgba(255, 122, 26, 0.35), 0 0 14px rgba(64, 194, 201, 0.22) !important;
+}

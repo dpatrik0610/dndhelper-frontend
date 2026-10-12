@@ -194,6 +194,38 @@ const CRITTERS: Partial<Record<SidebarThemeVariant, Critter>> = {
       </>
     ),
   },
+  "art-deco": {
+    name: "Plume",
+    motion: "sink",
+    art: (
+      <g className={s.sway}>
+        <path d="M25 4Q29 11 21 17Q16 22 8 27Q12 20 15 15Q19 8 25 4Z" fill={ACCENT} fillOpacity={0.9} />
+        <path d="M16 13.5l-3-1M19 10.5l-3-1.5M14 17l-3.5-.5M21.5 13l1.5 3M18.5 16.5l1.5 3" stroke="#14110a" strokeOpacity={0.35} strokeWidth="0.6" />
+        <path d="M6 30Q13 18 25 4" stroke={SECOND} strokeWidth="0.9" fill="none" />
+      </g>
+    ),
+  },
+  "scorching-desert": {
+    name: "Scorpion",
+    motion: "roll",
+    facing: true,
+    art: (
+      <>
+        <g className={s.scuttle} stroke={ACCENT} strokeWidth="1" strokeLinecap="round">
+          <path d="M12 23l-2.5 4M14.5 23.5l-1 4M17 23.5l.5 4M19 23l2 3.5" />
+        </g>
+        <g className={s.sting}>
+          <path d="M10 20Q4 17 5 12Q6 7.5 11 8" stroke={ACCENT} strokeWidth="2.4" strokeLinecap="round" fill="none" />
+          <path d="M11 6.6q3.4.3 3.4 3.6l-1.9-1.6Z" fill={SECOND} />
+        </g>
+        <ellipse cx="15" cy="21" rx="6" ry="3.2" fill={ACCENT} />
+        <ellipse cx="21.5" cy="21" rx="2.8" ry="2.5" fill={ACCENT} />
+        <path d="M23 20Q26 18 27 18" stroke={ACCENT} strokeWidth="1.4" fill="none" />
+        <path d="M26.5 16.5q3.5-1.5 4.5 1q-2.2-.6-3.2.7q2.4 0 2.8 1.6q-2.6-.4-4.1-.9Z" fill={ACCENT} />
+        <circle cx="22.6" cy="20.2" r="0.6" fill="#1c0d04" />
+      </>
+    ),
+  },
 };
 
 function readCaught(): Record<string, number> {

@@ -24,5 +24,7 @@ export const themeBackdrops: Partial<Record<SidebarThemeVariant, Backdrop>> = {
   feywild: lazy(() => import("./FeywildBackdrop").then((m) => ({ default: m.FeywildBackdrop }))),
   toxic: lazy(() => import("./ToxicBackdrop").then((m) => ({ default: m.ToxicBackdrop }))),
   void: lazy(() => import("./VoidBackdrop").then((m) => ({ default: m.VoidBackdrop }))),
+  "art-deco": lazy(() => import("./ArtDecoBackdrop").then((m) => ({ default: m.ArtDecoBackdrop }))),
+  "scorching-desert": lazy(() => import("./DesertBackdrop").then((m) => ({ default: m.DesertBackdrop }))),
   darkvision: lazy(() => import("./DarkvisionBackdrop").then((m) => ({ default: m.DarkvisionBackdrop }))),
 };
