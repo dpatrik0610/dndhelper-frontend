@@ -7,8 +7,9 @@ import type { Character } from "@appTypes/Character/Character";
 import { TokenSection } from "@features/settings/characters/TokenSection";
 import { DangerZone } from "@features/settings/characters/DangerZone";
 import { settingsPanelBg } from "@features/settings/SettingsSection";
+import { classSummary } from "@utils/hitDice";
 
-const characterSummary = (c: Character) => `Lvl ${c.level} • ${c.race} • ${c.characterClass}`;
+const characterSummary = (c: Character) => `Lvl ${c.level} • ${c.race} • ${classSummary(c)}`;
 
 function CharacterAvatar({ character, size }: { character?: Character; size: number }) {
   return (

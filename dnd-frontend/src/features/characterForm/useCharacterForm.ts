@@ -6,6 +6,7 @@ import { useIsDm } from "@store/campaign/campaignSelectors";
 import { loadCharacters } from "@utils/loadCharacter";
 import { useNavigate } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
+import { classHitDice } from "@utils/hitDice";
 
 export function useCharacterForm(editMode: boolean) {
   const isDm = useIsDm();
@@ -24,21 +25,22 @@ export function useCharacterForm(editMode: boolean) {
 
   async function handleSubmit() {
     setLoading(true);
+    const form = { ...characterForm, hitDice: classHitDice(characterForm) ?? characterForm.hitDice };
 
     try {
       if (editMode && character) {
-        updateInStore(characterForm);
-        await updateCharacter(characterForm);
+        updateInStore(form);
+        await updateCharacter(form);
 
         showNotification({
           title: "Character Updated",
-          message: `${characterForm.name} updated successfully!`,
+          message: `${form.name} updated successfully!`,
           color: "teal",
         });
         loadCharacters()
       } else {
         // The server also creates the character's starting inventory.
-        const newCharacter = await createCharacter(characterForm);
+        const newCharacter = await createCharacter(form);
         if (newCharacter) {
           setCharacter(newCharacter);
 

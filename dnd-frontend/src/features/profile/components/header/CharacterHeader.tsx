@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Stack, Box, Group, Divider, Modal, Text, Button } from "@mantine/core";
-import { IconMoon } from "@tabler/icons-react";
+import { Stack, Box, Group, Divider } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions, useCharacterCombatActions } from "@store/character/characterSelectors";
-import { longrest, updateCharacter as apiUpdateCharacter } from "@services/characterService";
-import { loadCharacters } from "@utils/loadCharacter";
+import { updateCharacter as apiUpdateCharacter } from "@services/characterService";
 import { useCharacterStore } from "@store/character/characterStore";
 import { getCondition } from "@services/conditionService";
 
@@ -29,7 +27,7 @@ export function CharacterHeader() {
   const [moneyOpened, setMoneyOpened] = useState(false);
   const [rollOpened, setRollOpened] = useState(false);
   const [restOpened, setRestOpened] = useState(false);
-  const [resting, setResting] = useState(false);
+  const [shortRestOpened, setShortRestOpened] = useState(false);
 
   const [detailsOpened, setDetailsOpened] = useState(false);
   const [selectedCondition, setSelectedCondition] = useState<string | null>(null);
@@ -55,29 +53,6 @@ export function CharacterHeader() {
       message: "You spent 1 Inspiration point.",
       color: "blue",
     });
-  }
-
-  async function handleLongrest() {
-    if (!character?.id) return;
-    setResting(true);
-    try {
-      await longrest(character.id);
-      await loadCharacters();
-      showNotification({
-        id: "longrest-success",
-        title: "Success",
-        message: "You slept through the night 🙂",
-      });
-    } catch (err) {
-      showNotification({
-        title: "Long rest failed",
-        message: String(err),
-        color: "red",
-      });
-    } finally {
-      setResting(false);
-      setRestOpened(false);
-    }
   }
 
   const handleRemoveCondition = async (cond: string) => {
@@ -184,6 +159,7 @@ export function CharacterHeader() {
             conditionsCount={conditionsCount}
             onNavigate={navigate}
             onLongrest={() => setRestOpened(true)}
+            onShortRest={() => setShortRestOpened(true)}
             onOpenAddCondition={() => setAddConditionOpened(true)}
             onRemoveCondition={handleRemoveCondition}
             onOpenDetails={handleOpenDetails}
@@ -203,6 +179,10 @@ export function CharacterHeader() {
         onCloseMoney={() => setMoneyOpened(false)}
         rollOpened={rollOpened}
         onCloseRoll={() => setRollOpened(false)}
+        shortRestOpened={shortRestOpened}
+        onCloseShortRest={() => setShortRestOpened(false)}
+        longRestOpened={restOpened}
+        onCloseLongRest={() => setRestOpened(false)}
         detailsOpened={detailsOpened}
         onCloseDetails={() => setDetailsOpened(false)}
         selectedCondition={selectedCondition}
@@ -213,20 +193,6 @@ export function CharacterHeader() {
         removingDetails={removingDetails}
       />
 
-      {/* Mirrors CharacterService.LongRestAsync on the backend. */}
-      <Modal opened={restOpened} onClose={() => !resting && setRestOpened(false)} title="Take a long rest?" centered size="sm">
-        <Text size="sm" mb="md">
-          {character.name || "Your character"} regains all hit points and spell slots. Temporary hit points and death saves are reset.
-        </Text>
-        <Group justify="flex-end">
-          <Button variant="light" onClick={() => setRestOpened(false)} disabled={resting}>
-            Cancel
-          </Button>
-          <Button onClick={handleLongrest} loading={resting} leftSection={<IconMoon size={16} />}>
-            Rest
-          </Button>
-        </Group>
-      </Modal>
     </>
   );
 }

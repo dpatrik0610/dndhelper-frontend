@@ -15,6 +15,7 @@ import type { ReactNode } from "react";
 import type { Character } from "@appTypes/Character/Character";
 import { XpProgressCard } from "@components/common/XpProgressCard";
 import CustomBadge from "@components/common/CustomBadge";
+import { classSummary } from "@utils/hitDice";
 
 interface Props {
   campaignName: string | null;
@@ -102,7 +103,7 @@ export function HeaderCard({
                 }}
               >
                 {character
-                  ? `${character.race ?? ""} • ${character.characterClass || ""} (Level ${character.level ?? 1})`
+                  ? `${character.race ?? ""} • ${classSummary(character)} (Level ${character.level ?? 1})`
                   : "Select a character to initialize your adventure!"}
               </Text>
 

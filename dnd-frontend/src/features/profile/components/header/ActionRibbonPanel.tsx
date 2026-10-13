@@ -8,6 +8,7 @@ import classes from "./ActionRibbonPanel.module.css";
 import {
   IconEdit,
   IconMoon,
+  IconCampfire,
   IconFlame,
   IconDice5,
   IconHeartPlus,
@@ -22,6 +23,7 @@ interface ActionRibbonPanelProps {
   conditionsCount: number;
   onNavigate: (path: string) => void;
   onLongrest: () => void;
+  onShortRest: () => void;
   onOpenAddCondition: () => void;
   onRemoveCondition: (cond: string) => void;
   onOpenDetails: (cond: string) => void;
@@ -165,12 +167,13 @@ function ConditionsList({
 }
 
 export function ActionRibbonPanel(props: ActionRibbonPanelProps) {
-  const { conditionsCount, onNavigate, onLongrest, onOpenRoll, onOpenHp, onOpenMoney } = props;
+  const { conditionsCount, onNavigate, onLongrest, onShortRest, onOpenRoll, onOpenHp, onOpenMoney } = props;
   const isMobile = useIsMobile();
 
   const actions: RibbonAction[] = [
     { label: "Edit", tooltip: "Edit Character", icon: <IconEdit size={18} />, onClick: () => onNavigate("/editCharacter") },
-    { label: "Rest", tooltip: "Long Rest", icon: <IconMoon size={18} />, onClick: onLongrest },
+    { label: "Short Rest", tooltip: "Short Rest: spend hit dice", icon: <IconCampfire size={18} />, onClick: onShortRest },
+    { label: "Long Rest", tooltip: "Long Rest", icon: <IconMoon size={18} />, onClick: onLongrest },
     { label: "Roll", tooltip: "Roll Dice", icon: <IconDice5 size={18} />, onClick: onOpenRoll },
     { label: "Health", tooltip: "Manage HP", icon: <IconHeartPlus size={18} />, onClick: onOpenHp },
     { label: "Money", tooltip: "Manage Money", icon: <IconCoin size={18} />, onClick: onOpenMoney },

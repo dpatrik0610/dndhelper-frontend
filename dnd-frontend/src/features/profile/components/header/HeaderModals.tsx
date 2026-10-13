@@ -2,6 +2,8 @@ import { AddConditionModal } from "@features/profile/components/modals/AddCondit
 import { HpModal } from "@features/profile/components/modals/HpModal";
 import { MoneyModal } from "@features/profile/components/modals/MoneyModal";
 import { RollModal } from "@features/profile/components/modals/RollModal";
+import { ShortRestModal } from "@features/profile/components/modals/ShortRestModal";
+import { LongRestModal } from "@features/profile/components/modals/LongRestModal";
 import { ConditionDetailsModal } from "@features/profile/components/modals/ConditionDetailsModal";
 
 interface HeaderModalsProps {
@@ -13,6 +15,10 @@ interface HeaderModalsProps {
   onCloseMoney: () => void;
   rollOpened: boolean;
   onCloseRoll: () => void;
+  shortRestOpened: boolean;
+  onCloseShortRest: () => void;
+  longRestOpened: boolean;
+  onCloseLongRest: () => void;
   detailsOpened: boolean;
   onCloseDetails: () => void;
   selectedCondition: string | null;
@@ -32,6 +38,10 @@ export function HeaderModals({
   onCloseMoney,
   rollOpened,
   onCloseRoll,
+  shortRestOpened,
+  onCloseShortRest,
+  longRestOpened,
+  onCloseLongRest,
   detailsOpened,
   onCloseDetails,
   selectedCondition,
@@ -47,6 +57,8 @@ export function HeaderModals({
       <HpModal opened={hpOpened} onClose={onCloseHp} />
       <MoneyModal opened={moneyOpened} onClose={onCloseMoney} />
       <RollModal opened={rollOpened} onClose={onCloseRoll} />
+      <ShortRestModal opened={shortRestOpened} onClose={onCloseShortRest} />
+      <LongRestModal opened={longRestOpened} onClose={onCloseLongRest} />
 
       <ConditionDetailsModal
         opened={detailsOpened}

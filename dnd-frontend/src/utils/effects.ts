@@ -86,7 +86,7 @@ export function appliedEffects(c: Character): AppliedEffect[] {
   return [...(c.effects ?? []).filter((e) => e.active), ...conditions];
 }
 
-const abilityMod = (score: number) => Math.floor((score - 10) / 2);
+export const abilityMod = (score: number) => Math.floor((score - 10) / 2);
 export const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 const toAbility = (word?: string) => ABILITIES.find((a) => a.key === word?.slice(0, 3).toLowerCase())?.key;
 

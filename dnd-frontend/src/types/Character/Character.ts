@@ -9,6 +9,14 @@ import type { CharacterSpell } from "./CharacterSpell";
 import type { CharacterEffect } from "./Effect";
 import type { Currency } from "@appTypes/Currency";
 
+/** A class taken on top of the main one when multiclassing. */
+export interface ClassLevel {
+  name: string;
+  level: number;
+  /** Hit die sides (8 = d8). */
+  hitDie: number;
+}
+
 export interface Character {
   // METADATA
   id?: string;
@@ -24,6 +32,11 @@ export interface Character {
   campaignId?: string | null;
   race: string;
   characterClass: string;
+  /** Main class hit die sides (10 = d10). Its level is `level` minus the multiclass levels. Missing on older characters. */
+  hitDie?: number | null;
+  isMulticlass?: boolean;
+  /** Classes taken after the main one; only count while `isMulticlass` is on. */
+  multiclasses?: ClassLevel[];
   background: string;
   level: number;
   armorClass: number;
@@ -34,7 +47,10 @@ export interface Character {
   initiative: number;
   alignment: string;
   proficiencyBonus: number;
+  /** Worked out from `hitDie` and `multiclasses` when the form saves, e.g. "3d10 + 2d8". */
   hitDice: string;
+  /** Hit dice spent on short rests, by die ("d10" -> 2). Missing on older characters. */
+  hitDiceSpent?: Record<string, number>;
 
   proficiencies: string[];
   languages: string[];

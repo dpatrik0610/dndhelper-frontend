@@ -2,6 +2,7 @@ import { Group, Stack, TextInput } from "@mantine/core";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 
 import { FormNumberInput } from "@components/common/FormNumberInput";
+import { classHitDice } from "@utils/hitDice";
 // import { WheelPickerInput } from "@components/common/WheelPickerInput"; // 🔧 Disabled for now
 
 export function CombatStatsSection() {
@@ -86,12 +87,14 @@ export function CombatStatsSection() {
           onChange={(v) => setCharacterForm({ initiative: v })}
         />
 
+        {/* Worked out from the class hit dice on the Basic Info tab. */}
         <TextInput
           label="Hit Dice"
-          placeholder="e.g., 1d10"
+          placeholder="Pick your class hit die"
           classNames={input}
-          value={characterForm.hitDice}
-          onChange={(e) => setCharacterForm({ hitDice: e.currentTarget.value })}
+          value={classHitDice(characterForm) ?? characterForm.hitDice}
+          readOnly
+          disabled
         />
       </Group>
 

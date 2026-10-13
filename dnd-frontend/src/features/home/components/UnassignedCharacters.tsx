@@ -8,6 +8,7 @@ import { useCurrentCampaign } from "@store/campaign/campaignSelectors";
 import { loadCharacters } from "@utils/loadCharacter";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
+import { classSummary } from "@utils/hitDice";
 
 /**
  * My characters that aren't in any campaign (left it, or were kicked along with me), with a button to
@@ -49,7 +50,7 @@ export function UnassignedCharacters({ opened }: { opened: boolean }) {
         <Group key={c.id} justify="space-between" wrap="nowrap" gap="sm">
           <Text fw={600} truncate style={{ minWidth: 0 }}>
             {c.name}
-            <Text span size="sm" c="dimmed"> · Lvl {c.level} {c.characterClass ?? ""}</Text>
+            <Text span size="sm" c="dimmed"> · Lvl {c.level} {classSummary(c)}</Text>
           </Text>
           <Button
             size="compact-sm"

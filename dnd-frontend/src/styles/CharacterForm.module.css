@@ -1,8 +1,9 @@
 /* Edit Character speaks in one typeface. Themes give .narrative-title a display font
    (Orbitron, Cormorant, Pixelify...) — inside the form body that turned every small label
    into a different font per tab, so the body falls back to the site sans. The page title
-   sits outside the form and keeps the theme font. `form.` outranks `.theme-x .narrative-title`. */
-form.body :global(.narrative-title),
+   sits outside the form and keeps the theme font. `form.` outranks `.theme-x .narrative-title`.
+   A title marked `data-themed` (e.g. "Classes") opts back into the theme font. */
+form.body :global(.narrative-title):not([data-themed]),
 form.body :global(.glassy-label) {
   font-family: var(--font-sans) !important;
   font-weight: 500 !important;

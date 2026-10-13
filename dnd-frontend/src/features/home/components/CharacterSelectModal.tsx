@@ -19,6 +19,7 @@ import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 import { UnassignedCharacters } from "./UnassignedCharacters";
+import { classSummary } from "@utils/hitDice";
 
 interface CharacterSelectModalProps {
   opened: boolean;
@@ -244,7 +245,7 @@ export function CharacterSelectModal({
                               textTransform: "capitalize",
                             }}
                           >
-                            {char.characterClass}
+                            {classSummary(char)}
                           </Badge>
                         )}
                       </Group>

@@ -4,6 +4,7 @@ import { useCharacterCoreActions, useCharacterList, useCurrentCharacter } from "
 import { CharacterSelectModal } from "@features/home/components/CharacterSelectModal";
 import type { Character } from "@appTypes/Character/Character";
 import classes from "./CharacterCard.module.css";
+import { classSummary } from "@utils/hitDice";
 
 /** Active character at the top of the sidebar: portrait, name, class line, HP. Click to switch characters. */
 export function CharacterCard() {
@@ -13,7 +14,7 @@ export function CharacterCard() {
   const [selecting, setSelecting] = useState(false);
 
   const hpPercent = character?.maxHitPoints ? Math.min(100, Math.max(0, (character.hitPoints / character.maxHitPoints) * 100)) : 0;
-  const subtitle = character ? [character.race, character.characterClass].filter(Boolean).join(" · ") : "Choose one to begin";
+  const subtitle = character ? [character.race, classSummary(character)].filter(Boolean).join(" · ") : "Choose one to begin";
 
   return (
     <>

@@ -63,6 +63,7 @@ import { deleteMyMap, listMyMaps, resolveImageUrl, tabletop, uploadTableImage } 
 const placeCharacter = tabletop.placeCharacter;
 import { CHARACTER_DRAG_TYPE, TOKEN_SWATCHES } from "./tools";
 import { EncounterSection } from "./EncounterSection";
+import { classSummary } from "@utils/hitDice";
 
 const GRID_SWATCHES = ["#ffffff33", "#ffffff66", "#00000066", "#a78bfa66", "#f5c45166", "#22d3ee55"];
 const IMAGE_TYPES = "image/png,image/jpeg,image/webp,image/gif";
@@ -806,7 +807,7 @@ function RosterCard({ character: c, placed, cellSize }: { character: Character; 
       <div className="tt-roster-text">
         <strong>{c.name}</strong>
         <span>
-          {[c.race, c.characterClass].filter(Boolean).join(" ")} · Lv {c.level ?? 1}
+          {[c.race, classSummary(c)].filter(Boolean).join(" ")} · Lv {c.level ?? 1}
         </span>
         <span className="tt-roster-hp">
           HP {c.hitPoints}/{c.maxHitPoints} · AC {c.armorClass}

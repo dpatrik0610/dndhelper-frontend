@@ -11,6 +11,7 @@ import {
 import { ExpandableSection } from "@components/ExpandableSection";
 
 import { useCurrentCharacter, useCharacterCoreActions, useEffectiveStats } from "@store/character/characterSelectors";
+import { formatPool, hitDicePool } from "@utils/hitDice";
 import { EffectHint } from "@features/profile/components/EffectHint";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useIsMobile } from "@hooks/useIsMobile";
@@ -80,7 +81,7 @@ export function CombatStats() {
     },
     {
       label: "Hit Dice",
-      value: character.hitDice || "—",
+      value: formatPool(hitDicePool(character)) || "—",
       color: "var(--theme-color-accent-secondary, #06b6d4)",
       icon: <IconSword size={16} />,
     },

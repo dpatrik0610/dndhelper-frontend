@@ -28,5 +28,4 @@ export const CLASS_RESOURCE_PRESETS: { name: string; recharge: ResourceRecharge 
   { name: "Favored Foe", recharge: "long" },
   { name: "Infusions", recharge: "long" },
   { name: "Flash of Genius", recharge: "long" },
-  { name: "Hit Dice", recharge: "long" },
 ];

@@ -31,6 +31,7 @@ import { AdminPanel } from "@features/admin/components/AdminPage";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import type { Character } from "@appTypes/Character/Character";
+import { classSummary } from "@utils/hitDice";
 
 export function CampaignCharactersPanel() {
   const {
@@ -203,7 +204,7 @@ const handleRemove = async (charId: string) => {
               <Box style={{ flex: 1 }}>
                 <Text fw={500}>{c.name}</Text>
                 <Text size="xs" c="dimmed">
-                  {c.characterClass ?? "Unknown"}{" "}
+                  {classSummary(c) || "Unknown"}{" "}
                   {c.level ? `- lvl ${c.level}` : ""}
                 </Text>
               </Box>
