@@ -6,6 +6,8 @@ import styles from "./SidebarToggle.module.css";
 interface SidebarToggleProps {
   opened: boolean;
   onOpenedChange: (opened: boolean) => void;
+  /** Live drag as a fraction of the drawer width (-1..1), null when it ends; the drawer follows it (Sidebar.tsx). */
+  onDrag: (fraction: number | null) => void;
 }
 
 /** Drawer width (Sidebar.tsx) at the default 16px root font; the tab rides its edge and a drag can pull it at most this far. */
@@ -18,13 +20,15 @@ const DRAG_COMMIT = 50;
 
 /**
  * Pull-tab on the left screen edge, where the sidebar drawer slides in from. Click, Ctrl/⌘+B, or drag it with the mouse:
- * outward to open, back to close. Touch drags are left to App.tsx's swipe handler.
+ * outward to open, back to close; the drawer moves with it. Touch drags are left to App.tsx's swipe handler.
  * Not portaled: its z-index sits between the drawer and Mantine's modals/popovers/notifications.
  */
-export function SidebarToggle({ opened, onOpenedChange }: SidebarToggleProps) {
+export function SidebarToggle({ opened, onOpenedChange, onDrag }: SidebarToggleProps) {
   const [dragX, setDragX] = useState<number | null>(null);
   const startX = useRef(0);
   const dragged = useRef(false);
+  /** The mouse press already toggled (or dragged) on pointerup, so its trailing click must not toggle again. */
+  const handled = useRef(false);
   const maxDrag = useRef(DRAWER_WIDTH);
 
   useHotkeys([["mod+B", () => onOpenedChange(!opened)]]);
@@ -36,6 +40,7 @@ export function SidebarToggle({ opened, onOpenedChange }: SidebarToggleProps) {
     maxDrag.current = drawerWidthPx();
     e.currentTarget.setPointerCapture(e.pointerId);
     setDragX(0);
+    onDrag(0);
   };
 
   const handlePointerMove = (e: PointerEvent<HTMLButtonElement>) => {
@@ -43,13 +48,23 @@ export function SidebarToggle({ opened, onOpenedChange }: SidebarToggleProps) {
     const dx = e.clientX - startX.current;
     if (Math.abs(dx) > 4) dragged.current = true;
     // Closed: can only be pulled out (right); open: only pushed back (left).
-    setDragX(opened ? Math.max(-maxDrag.current, Math.min(0, dx)) : Math.max(0, Math.min(maxDrag.current, dx)));
+    const x = opened ? Math.max(-maxDrag.current, Math.min(0, dx)) : Math.max(0, Math.min(maxDrag.current, dx));
+    setDragX(x);
+    onDrag(x / maxDrag.current);
   };
 
+  const endDrag = () => {
+    setDragX(null);
+    onDrag(null);
+  };
+
+  // A plain click toggles here, not in onClick, so it lands in the same render as the drag ending:
+  // otherwise the drawer (mounted for the drag) would start closing, then reopen.
   const handlePointerUp = () => {
     if (dragX === null) return;
-    if (Math.abs(dragX) >= DRAG_COMMIT) onOpenedChange(!opened);
-    setDragX(null);
+    handled.current = true;
+    if (!dragged.current || Math.abs(dragX) >= DRAG_COMMIT) onOpenedChange(!opened);
+    endDrag();
   };
 
   const label = opened ? "Close navigation" : "Open navigation";
@@ -63,10 +78,10 @@ export function SidebarToggle({ opened, onOpenedChange }: SidebarToggleProps) {
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
-      onPointerCancel={() => setDragX(null)}
+      onPointerCancel={endDrag}
       onClick={() => {
-        // A drag ends with a click on the tab (it follows the pointer); the drag already decided.
-        if (dragged.current) dragged.current = false;
+        // Keyboard and touch clicks toggle here; mouse presses were handled on pointerup.
+        if (handled.current) handled.current = false;
         else onOpenedChange(!opened);
       }}
       aria-label={label}

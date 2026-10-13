@@ -14,7 +14,6 @@ import { useTokenExpiryGuard } from "@features/auth/hooks/useTokenExpiryGuard";
 import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapCharacters";
 import { useEquipmentInventoryEffects } from "@hooks/useEquipmentInventoryEffects";
 import { AppBackground } from "@components/layout/AppBackground";
-import { SidebarToggle } from "@components/layout/SidebarToggle";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
 import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal";
 import { type SidebarThemeVariant, getActiveThemeClass } from "@appTypes/ThemeTypes";
@@ -225,7 +224,13 @@ function AppRoutes() {
       styles={getAppShellStyles(isMobile, isDashboardRoute, showSidebar)} 
       className={isDashboardRoute ? "" : `${activeThemeClass} style-variant-glass`}
     >
-      {showSidebar && <Sidebar opened={opened} onClose={handlers.close} themeVariant={sidebarTheme} />}
+      {showSidebar && (
+        <Sidebar
+          opened={opened}
+          onOpenedChange={(open) => (open ? handlers.open() : handlers.close())}
+          themeVariant={sidebarTheme}
+        />
+      )}
 
       <AppShell.Main>
         {!isTableRoute && !isDashboardRoute && <AppBackground />}
@@ -276,10 +281,6 @@ function AppRoutes() {
         <Suspense fallback={null}>
           <FloatingChat />
         </Suspense>
-      )}
-
-      {showSidebar && (
-        <SidebarToggle opened={opened} onOpenedChange={(open) => (open ? handlers.open() : handlers.close())} />
       )}
     </AppShell>
   );

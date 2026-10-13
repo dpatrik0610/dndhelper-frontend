@@ -33,3 +33,13 @@
   scrollbar-width: thin;
   scrollbar-color: var(--theme-border-glow, rgba(168, 85, 247, 0.35)) transparent;
 }
+
+/* While the toggle tab is dragged: drawer and overlay follow the pointer 1:1. !important beats the inline
+   transition/opacity styles Mantine's Transition writes. */
+.dragging {
+  transition: none !important;
+}
+
+.dragging:global(.mantine-Drawer-overlay) {
+  opacity: var(--drag-shown) !important;
+}
