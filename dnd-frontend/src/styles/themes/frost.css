@@ -1,118 +1,15 @@
 /* ==========================================================================
-   ❄️ Frost Glacier theme: backdrop scene + UI signature
-   Variables live in theme.css (.theme-frost-glacier). The theme class sits on <html>,
+   ❄️ Frost Glacier (.theme-frost-glacier): aurora over a glacier lake at night
+   Scene: backdrops/FrostBackdrop.tsx. Variables: theme.css. The theme class sits on <html>,
    so UI rules also reach portaled modals and dropdowns.
    ========================================================================== */
 
-/* ---------- Backdrop (FrostBackdrop.tsx) ----------
-   Layers (bottom → top): sky + aurora (shader), stars, mountains, lake, glints, snow, corner frost. */
+/* ---------- Scene ----------
+   Sky, aurora, mountains, frozen lake and spruces are one fragment shader on a canvas; this is the
+   backing colour shown before the first frame or if WebGL is unavailable. Snowfall is drawn on top. */
 
-.fr-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.fr-overlay > * {
-  position: absolute;
-}
-
-.fr-sky {
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 40% at 50% 78%, rgba(56, 189, 248, 0.18), transparent 70%),
-    linear-gradient(to bottom, #020816 0%, #051530 40%, #0b2a4d 68%, #15466b 80%, #0a1d36 100%);
-}
-
-/* Stars */
-.fr-stars {
-  inset: 0;
-}
-
-.fr-star {
-  position: absolute;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 4px rgba(186, 230, 253, 0.8);
-  opacity: 0.7;
-}
-
-.fr-star--twinkle {
-  animation: frTwinkle 3.5s ease-in-out infinite alternate;
-}
-
-/* Night sky + aurora borealis: a fragment shader on a canvas (FrostBackdrop.tsx), drawn over
-   .fr-sky (the fallback without WebGL), under the stars. */
-.fr-aurora {
-  inset: 0;
-}
-
-/* Glacier ranges, standing on the lake shore */
-.fr-mountains {
-  left: 0;
-  bottom: 21.5%;
-  width: 100%;
-  height: 46%;
-}
-
-.fr-range--far {
-  opacity: 0.75;
-}
-
-/* Frozen lake reflecting the aurora */
-.fr-lake {
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 22%;
-  border-top: 1px solid rgba(224, 242, 254, 0.35);
-  box-shadow: 0 -2px 18px rgba(125, 211, 252, 0.25);
-  background:
-    repeating-linear-gradient(to bottom, rgba(186, 230, 253, 0.05) 0 1px, transparent 1px 7px),
-    linear-gradient(to bottom, #0d2c4d 0%, #071a33 55%, #030c1c 100%);
-}
-
-/* Mirrored aurora on the ice */
-.fr-lake::before {
-  content: "";
-  position: absolute;
-  left: 10%;
-  right: 10%;
-  top: 0;
-  height: 70%;
-  background: radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.18), rgba(34, 211, 238, 0.08) 40%, transparent 70%);
-}
-
-.fr-cracks {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.fr-cracks path {
-  fill: none;
-  stroke: rgba(224, 242, 254, 0.22);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-}
-
-/* Ice glints: a 4-point sparkle that flashes now and then */
-.fr-glints {
-  inset: 0;
-}
-
-.fr-glint {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: #fff;
-  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
-  filter: drop-shadow(0 0 4px #bae6fd);
-  opacity: 0;
-  animation: frGlint 9s ease-in-out infinite;
+.fr-scene {
+  background: linear-gradient(to bottom, #020816 0%, #051530 40%, #0b2a4d 68%, #15466b 72%, #0a1d36 74%, #030c1c 100%);
 }
 
 /* Snowfall in three depths */
@@ -132,51 +29,6 @@
 .fr-flake--d0 { opacity: 0.4; }
 .fr-flake--d1 { opacity: 0.7; }
 .fr-flake--d2 { opacity: 0.85; }
-
-/* Frost creeping in from the four corners (noise texture, drawn once) */
-.fr-frost {
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.5;
-  -webkit-mask-image:
-    radial-gradient(ellipse 30% 40% at 0 0, #000, transparent),
-    radial-gradient(ellipse 30% 40% at 100% 0, #000, transparent),
-    radial-gradient(ellipse 30% 40% at 0 100%, #000, transparent),
-    radial-gradient(ellipse 30% 40% at 100% 100%, #000, transparent);
-  mask-image:
-    radial-gradient(ellipse 30% 40% at 0 0, #000, transparent),
-    radial-gradient(ellipse 30% 40% at 100% 0, #000, transparent),
-    radial-gradient(ellipse 30% 40% at 0 100%, #000, transparent),
-    radial-gradient(ellipse 30% 40% at 100% 100%, #000, transparent);
-}
-
-/* Static (mobile) + reduced motion: keep the scene, stop all motion */
-.fr-overlay--static,
-.fr-overlay--static * {
-  animation: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .fr-overlay *,
-  .fr-overlay *::before {
-    animation: none !important;
-  }
-  .fr-snow {
-    display: none;
-  }
-}
-
-@keyframes frTwinkle {
-  from { opacity: 0.2; }
-  to   { opacity: 1; }
-}
-
-@keyframes frGlint {
-  0%, 88%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
-  92%           { opacity: 1; transform: scale(1) rotate(45deg); }
-  96%           { opacity: 0; transform: scale(0.5) rotate(90deg); }
-}
 
 @keyframes frFall {
   0%   { transform: translate3d(0, 0, 0); }
