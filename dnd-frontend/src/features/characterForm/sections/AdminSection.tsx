@@ -1,13 +1,10 @@
-﻿import { Group, Switch } from "@mantine/core";
-import { ExpandableSection } from "@components/ExpandableSection";
-import { SectionColor } from "@appTypes/SectionColor";
-import { IconLock } from "@tabler/icons-react";
+import { Group, Switch } from "@mantine/core";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 
-export function AdminSection({ noBox = false }: { noBox?: boolean }) {
+export function AdminSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
 
-  const content = (
+  return (
     <Group grow gap="xl">
       <Switch
         label="Is Dead"
@@ -32,13 +29,5 @@ export function AdminSection({ noBox = false }: { noBox?: boolean }) {
         styles={{ label: { color: "#fff", fontSize: "13px" } }}
       />
     </Group>
-  );
-
-  if (noBox) return content;
-
-  return (
-    <ExpandableSection title="Admin Options" icon={<IconLock />} color={SectionColor.Orange} defaultOpen>
-      {content}
-    </ExpandableSection>
   );
 }

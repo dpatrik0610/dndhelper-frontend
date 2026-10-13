@@ -1,7 +1,4 @@
 import { Stack, Group, TextInput, Select } from "@mantine/core";
-import { IconUser } from "@tabler/icons-react";
-import { ExpandableSection } from "@components/ExpandableSection";
-import { SectionColor } from "@appTypes/SectionColor";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { InfoIconPopover } from "@components/common/InfoIconPopover";
@@ -14,7 +11,7 @@ const ALIGNMENTS = [
   "Lawful Evil","Neutral Evil","Chaotic Evil",
 ];
 
-export function BasicInfoSection({ noBox = false }: { noBox?: boolean }) {
+export function BasicInfoSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
   const cls = { input: "glassy-input", label: "glassy-label" };
 
@@ -41,7 +38,7 @@ export function BasicInfoSection({ noBox = false }: { noBox?: boolean }) {
     }
   }, [characterForm.experience, characterForm.level, characterForm.proficiencyBonus]);
 
-  const content = (
+  return (
     <Stack gap={8}>
 
       {/* NAME */}
@@ -126,18 +123,5 @@ export function BasicInfoSection({ noBox = false }: { noBox?: boolean }) {
       />
 
     </Stack>
-  );
-
-  if (noBox) return content;
-
-  return (
-    <ExpandableSection
-      title="Basic Information"
-      icon={<IconUser />}
-      color={SectionColor.White}
-      defaultOpen
-    >
-      {content}
-    </ExpandableSection>
   );
 }

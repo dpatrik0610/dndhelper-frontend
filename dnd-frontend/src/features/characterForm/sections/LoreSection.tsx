@@ -1,15 +1,12 @@
-﻿import { Stack, Textarea, Group, TextInput } from "@mantine/core";
-import { IconBook } from "@tabler/icons-react";
-import { ExpandableSection } from "@components/ExpandableSection";
-import { SectionColor } from "@appTypes/SectionColor";
+import { Stack, Textarea, Group, TextInput } from "@mantine/core";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 import { FormNumberInput } from "@components/common/FormNumberInput";
 
-export function LoreSection({ noBox = false }: { noBox?: boolean }) {
+export function LoreSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
   const glass = { input: "glassy-input", label: "glassy-label" };
 
-  const content = (
+  return (
     <Stack>
 
       <Group grow>
@@ -50,13 +47,5 @@ export function LoreSection({ noBox = false }: { noBox?: boolean }) {
       />
 
     </Stack>
-  );
-
-  if (noBox) return content;
-
-  return (
-    <ExpandableSection title="Lore & Personality" icon={<IconBook />} color={SectionColor.Orange} defaultOpen>
-      {content}
-    </ExpandableSection>
   );
 }

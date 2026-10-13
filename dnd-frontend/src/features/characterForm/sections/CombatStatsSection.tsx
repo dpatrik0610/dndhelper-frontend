@@ -1,17 +1,14 @@
-﻿import { Group, Stack, TextInput } from "@mantine/core";
-import { IconSword } from "@tabler/icons-react";
-import { ExpandableSection } from "@components/ExpandableSection";
-import { SectionColor } from "@appTypes/SectionColor";
+import { Group, Stack, TextInput } from "@mantine/core";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
 
 import { FormNumberInput } from "@components/common/FormNumberInput";
 // import { WheelPickerInput } from "@components/common/WheelPickerInput"; // 🔧 Disabled for now
 
-export function CombatStatsSection({ noBox = false }: { noBox?: boolean }) {
+export function CombatStatsSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
   const input = { input: "glassy-input", label: "glassy-label" };
 
-  const content = (
+  return (
     <Stack>
 
       {/* ---------------------------------------- */}
@@ -99,18 +96,5 @@ export function CombatStatsSection({ noBox = false }: { noBox?: boolean }) {
       </Group>
 
     </Stack>
-  );
-
-  if (noBox) return content;
-
-  return (
-    <ExpandableSection
-      title="Combat Statistics"
-      icon={<IconSword />}
-      color={SectionColor.Red}
-      defaultOpen
-    >
-      {content}
-    </ExpandableSection>
   );
 }

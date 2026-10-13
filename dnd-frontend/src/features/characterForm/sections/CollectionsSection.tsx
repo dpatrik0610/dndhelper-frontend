@@ -1,31 +1,22 @@
-﻿import { Stack } from "@mantine/core";
-import { ExpandableSection } from "@components/ExpandableSection";
-import { SectionColor } from "@appTypes/SectionColor";
-import { IconBook2 } from "@tabler/icons-react";
-import { ListEditor } from "@features/characterForm/components/ListEditor";
+import { Stack } from "@mantine/core";
+import { IconLanguage, IconTool } from "@tabler/icons-react";
 import { useCharacterFormStore } from "@store/character/characterFormStore";
+import { FormGroup } from "@features/characterForm/components/FormGroup";
+import { ListEditor } from "@features/characterForm/components/ListEditor";
 
-export function CollectionsSection({ noBox = false }: { noBox?: boolean }) {
-  const { characterForm, setCharacterForm } = useCharacterFormStore();
-
-  const formAdapter = {
-    values: characterForm,
-    setFieldValue: (field: string, value: unknown) => setCharacterForm({ [field]: value }),
-  };
-
-  const content = (
-    <Stack gap="md">
-      <ListEditor form={formAdapter} field="languages" label="Languages" placeholder="Add language..." />
-      <ListEditor form={formAdapter} field="proficiencies" label="Proficiencies" placeholder="Add proficiency..." />
-    </Stack>
-  );
-
-  if (noBox) return content;
+export function CollectionsSection() {
+  const languages = useCharacterFormStore((s) => s.characterForm.languages?.length ?? 0);
+  const proficiencies = useCharacterFormStore((s) => s.characterForm.proficiencies?.length ?? 0);
 
   return (
-    <ExpandableSection title="Collections" icon={<IconBook2 />} color={SectionColor.Blue} defaultOpen>
-      {content}
-    </ExpandableSection>
+    <Stack gap="xl">
+      <FormGroup icon={<IconLanguage size={16} />} title="Languages" count={languages}>
+        <ListEditor field="languages" noun="language" placeholder="e.g. Elvish" />
+      </FormGroup>
+      <FormGroup icon={<IconTool size={16} />} title="Proficiencies" count={proficiencies}>
+        <ListEditor field="proficiencies" noun="proficiency" placeholder="e.g. Thieves' Tools" />
+      </FormGroup>
+    </Stack>
   );
 }
 
