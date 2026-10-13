@@ -259,7 +259,7 @@ export function ActionRibbonPanel(props: ActionRibbonPanelProps) {
         action.dropdown ? (
           <Popover key={action.label} position={action.dropdownPosition} withArrow shadow="md" trapFocus={false}>
             <Popover.Target>
-              <div style={{ position: "relative", display: "inline-flex", flex: "1 1 auto", justifyContent: "center" }}>
+              <div style={{ position: "relative", display: "inline-flex", flex: "1 1 auto", justifyContent: "center", pointerEvents: "none" }}>
                 <Tooltip label={action.tooltip} position="top" withArrow>
                   <div>
                     <ActionBubble label={action.label} icon={action.icon} />
@@ -272,7 +272,7 @@ export function ActionRibbonPanel(props: ActionRibbonPanelProps) {
           </Popover>
         ) : (
           <Tooltip key={action.label} label={action.tooltip} position="top" withArrow>
-            <div style={{ display: "flex", flex: "1 1 auto" }}>
+            <div style={{ display: "flex", flex: "1 1 auto", pointerEvents: "none" }}>
               <ActionBubble label={action.label} icon={action.icon} onClick={action.onClick} />
             </div>
           </Tooltip>

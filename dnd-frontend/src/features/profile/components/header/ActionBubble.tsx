@@ -53,6 +53,8 @@ export const ActionBubble = forwardRef<HTMLDivElement, ActionBubbleProps>(
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
+            // Wrappers may set pointer-events: none so only the circle is the hit area.
+            pointerEvents: "auto",
             transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
           }}
         >
