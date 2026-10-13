@@ -141,7 +141,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
       />
 
       <Stack gap="md" p="xs">
-        <Group align="flex-start" gap="xs" p="sm" style={{ background: "rgba(255, 0, 255, 0.08)", borderRadius: "8px", border: "1px solid rgba(255, 0, 255, 0.2)" }}>
+        <Group align="flex-start" gap="xs" p="sm" style={{ background: "rgba(var(--cyber-accent-2-rgb), 0.08)", borderRadius: "8px", border: "1px solid rgba(var(--cyber-accent-2-rgb), 0.2)" }}>
           <IconInfoCircle size={20} color="#c084fc" style={{ marginTop: 2, flexShrink: 0 }} />
           <Text size="sm" c="purple.1">
             Bulk upload multiple equipment items at once. You can upload a <code>.json</code> file or paste a JSON array formatted with item properties. Missing <code>index</code> attributes will be auto-generated.

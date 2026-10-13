@@ -32,7 +32,7 @@
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
-  background: rgba(18, 18, 26, 0.88);
+  background: rgba(var(--cyber-card-rgb), 0.88);
   border-right: 1px solid var(--cyber-border);
 }
 
@@ -40,7 +40,7 @@
   flex-shrink: 0;
   padding: 1rem 0.875rem 0.875rem;
   border-bottom: 1px solid var(--cyber-border);
-  background: linear-gradient(180deg, rgba(0, 255, 136, 0.05), transparent);
+  background: linear-gradient(180deg, rgba(var(--cyber-accent-rgb), 0.05), transparent);
 }
 
 .sidebarScroll {
@@ -76,7 +76,7 @@
   font-family: var(--cyber-font-label);
   font-size: 0.65rem;
   color: var(--cyber-accent-3);
-  border: 1px solid rgba(0, 212, 255, 0.4);
+  border: 1px solid rgba(var(--cyber-accent-3-rgb), 0.4);
   padding: 0 6px;
 }
 
@@ -94,14 +94,14 @@
 }
 
 .listItem:hover {
-  background: rgba(0, 212, 255, 0.05);
-  border-color: rgba(0, 212, 255, 0.2);
+  background: rgba(var(--cyber-accent-3-rgb), 0.05);
+  border-color: rgba(var(--cyber-accent-3-rgb), 0.2);
 }
 
 .listItemSelected,
 .listItemSelected:hover {
-  background: linear-gradient(90deg, rgba(0, 255, 136, 0.14), rgba(0, 255, 136, 0.02));
-  border-color: rgba(0, 255, 136, 0.35);
+  background: linear-gradient(90deg, rgba(var(--cyber-accent-rgb), 0.14), rgba(var(--cyber-accent-rgb), 0.02));
+  border-color: rgba(var(--cyber-accent-rgb), 0.35);
 }
 
 .listItemSelected::before {
@@ -123,17 +123,18 @@
   justify-content: center;
   flex-shrink: 0;
   clip-path: var(--cyber-chamfer-sm);
+  border-radius: var(--cyber-radius-sm);
   font-family: var(--cyber-font-display);
   font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  background: rgba(255, 0, 255, 0.1);
-  border: 1px solid rgba(255, 0, 255, 0.4);
+  background: rgba(var(--cyber-accent-2-rgb), 0.1);
+  border: 1px solid rgba(var(--cyber-accent-2-rgb), 0.4);
   color: #ff7dff;
 }
 
 .listItemSelected .listItemAvatar {
-  background: rgba(0, 255, 136, 0.12);
+  background: rgba(var(--cyber-accent-rgb), 0.12);
   border-color: var(--cyber-accent);
   color: var(--cyber-accent);
 }
@@ -157,7 +158,7 @@
 
 .listItemSelected .listItemName {
   color: var(--cyber-accent);
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+  text-shadow: 0 0 8px rgba(var(--cyber-accent-rgb), 0.5);
 }
 
 .listItemMatches {
@@ -209,8 +210,8 @@
   min-height: 0;
   color: var(--cyber-muted-fg);
   background:
-    linear-gradient(rgba(0, 255, 136, 0.04) 1px, transparent 1px) 0 0 / 24px 24px,
-    linear-gradient(90deg, rgba(0, 255, 136, 0.04) 1px, transparent 1px) 0 0 / 24px 24px;
+    linear-gradient(rgba(var(--cyber-accent-rgb), 0.04) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(var(--cyber-accent-rgb), 0.04) 1px, transparent 1px) 0 0 / 24px 24px;
 }
 
 .emptyStateInner {
@@ -236,7 +237,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: rgba(18, 18, 26, 0.55);
+  background: rgba(var(--cyber-card-rgb), 0.55);
 }
 
 /* ------ Meta Bar (1-liner) ------ */
@@ -248,7 +249,7 @@
   padding: 0.6rem 1rem;
   min-height: 48px;
   position: relative;
-  background: linear-gradient(90deg, rgba(0, 255, 136, 0.06), transparent 60%);
+  background: linear-gradient(90deg, rgba(var(--cyber-accent-rgb), 0.06), transparent 60%);
 }
 
 .metaBar::after {
@@ -427,13 +428,14 @@
   background: var(--cyber-card);
   border: 1px solid var(--cyber-border);
   clip-path: var(--cyber-notch);
+  border-radius: var(--cyber-radius);
   transition: border-color var(--cyber-snap), box-shadow var(--cyber-snap), transform var(--cyber-snap);
 }
 
 .itemCard:hover {
   transform: translateY(-1px);
   border-color: var(--cyber-accent);
-  box-shadow: inset 0 0 18px rgba(0, 255, 136, 0.12);
+  box-shadow: inset 0 0 18px rgba(var(--cyber-accent-rgb), 0.12);
 }
 
 .itemCardHeader {

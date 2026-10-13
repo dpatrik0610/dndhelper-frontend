@@ -1,0 +1,165 @@
+/* ==========================================================================
+   Admin console "Dungeon" style: a cozy, torchlit DM's den. Warm stone,
+   oak and parchment, candle-gold accents, arcane violet and moss.
+   Layered on top of adminCyber.css: App.tsx adds .admin-dungeon next to
+   .admin-cyber on <html>, so this file mostly retunes the --cyber-* tokens
+   and undoes the terminal flourishes. Shell/page/panel touches live in
+   AdminDashboard.module.css under :global(.admin-dungeon).
+   ========================================================================== */
+
+html.admin-cyber.admin-dungeon[data-mantine-color-scheme] {
+  --cyber-bg: #15100c;
+  --cyber-fg: #ecdcc0;
+  --cyber-card: #211912;
+  --cyber-muted: #2e2219;
+  --cyber-muted-fg: #a8957a;
+  --cyber-faint: #6b5a46;
+  --cyber-border: #3f2f21;
+  --cyber-accent: #e8a33d; /* torchlight */
+  --cyber-accent-2: #a77bd6; /* arcane */
+  --cyber-accent-3: #7fb38a; /* moss */
+  --cyber-accent-rgb: 232, 163, 61;
+  --cyber-accent-2-rgb: 167, 123, 214;
+  --cyber-accent-3-rgb: 127, 179, 138;
+  --cyber-card-rgb: 33, 25, 18;
+  --cyber-danger: #d9604c;
+  --cyber-warning: #e8813d;
+
+  --cyber-font-display: "Cinzel", "Cormorant Garamond", serif;
+  --cyber-font-body: "Inter", system-ui, sans-serif;
+  --cyber-font-label: "IM Fell English SC", "Cinzel", serif;
+
+  --cyber-glow-sm: 0 0 4px rgba(232, 163, 61, 0.35);
+  --cyber-glow: 0 0 6px rgba(232, 163, 61, 0.4), 0 0 14px rgba(232, 163, 61, 0.15);
+  --cyber-glow-lg: 0 0 10px rgba(232, 163, 61, 0.45), 0 0 26px rgba(232, 163, 61, 0.2);
+  --cyber-glow-2: 0 0 6px rgba(167, 123, 214, 0.45), 0 0 16px rgba(167, 123, 214, 0.2);
+  --cyber-glow-3: 0 0 6px rgba(127, 179, 138, 0.45), 0 0 16px rgba(127, 179, 138, 0.2);
+
+  /* Rounded, worn corners instead of corner cuts. */
+  --cyber-cut: 0px;
+  --cyber-chamfer: none;
+  --cyber-chamfer-sm: none;
+  --cyber-notch: none;
+  --cyber-radius: 10px;
+  --cyber-radius-sm: 6px;
+  --cyber-snap: 220ms ease;
+
+  /* Torchlit stone blocks. */
+  --cyber-wall:
+    radial-gradient(ellipse 50% 45% at 0% 0%, rgba(232, 163, 61, 0.12), transparent 70%),
+    radial-gradient(ellipse 40% 35% at 100% 100%, rgba(167, 123, 214, 0.07), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Cpath d='M0 1H120M0 31H120M1 0V30M61 30V60' stroke='%23000' stroke-opacity='.45' stroke-width='2' fill='none'/%3E%3Cpath d='M0 3.5H120M0 33.5H120M3.5 2V30M63.5 32V60' stroke='%23ffdcaa' stroke-opacity='.035' fill='none'/%3E%3C/svg%3E") 0 0 / 120px 60px,
+    var(--cyber-bg);
+
+  --theme-color-text-glow: #ffe2b0;
+  --theme-gradient-primary: linear-gradient(120deg, #e8a33d, #d9604c);
+  --theme-gradient-primary-glass: linear-gradient(120deg, rgba(232, 163, 61, 0.22), rgba(217, 96, 76, 0.16));
+  --theme-gradient-active: linear-gradient(135deg, rgba(232, 163, 61, 0.14), rgba(167, 123, 214, 0.08));
+
+  --mantine-color-placeholder: #7a6a55;
+}
+
+.admin-dungeon ::selection {
+  background: rgba(232, 163, 61, 0.35);
+  color: var(--cyber-fg);
+}
+
+/* Candlelit vignette instead of CRT scanlines. */
+.admin-dungeon body::after {
+  background: radial-gradient(ellipse 85% 80% at 50% 45%, transparent 60%, rgba(8, 4, 2, 0.5));
+  mix-blend-mode: normal;
+}
+
+/* The torch in the corner breathes. Behind the page content (z-index 2 in App.tsx), over the wall. */
+.admin-dungeon .mantine-AppShell-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 40% 35% at 0% 0%, rgba(232, 163, 61, 0.08), transparent 70%);
+  animation: adminTorchFlicker 5s ease-in-out infinite;
+}
+
+@keyframes adminTorchFlicker {
+  0%, 100% { opacity: 1; }
+  20% { opacity: 0.75; }
+  35% { opacity: 0.95; }
+  55% { opacity: 0.7; }
+  80% { opacity: 0.9; }
+}
+
+/* ---------- Buttons: lantern-lit plaques ---------- */
+.admin-dungeon .mantine-Button-root {
+  font-family: var(--cyber-font-display);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.06em;
+}
+
+.admin-dungeon .mantine-Button-root:is([data-variant="filled"], :not([data-variant])) {
+  background: color-mix(in srgb, var(--button-bg) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--button-bg) 70%, transparent);
+  color: var(--button-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.08);
+  text-shadow: none;
+}
+
+.admin-dungeon .mantine-Button-root:is([data-variant="filled"], :not([data-variant])):hover:not(:disabled, [data-disabled]) {
+  background: color-mix(in srgb, var(--button-bg) 28%, transparent);
+  color: var(--cyber-fg);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--button-bg) 35%, transparent), inset 0 1px 0 rgba(255, 230, 190, 0.12);
+}
+
+.admin-dungeon .mantine-Button-root:focus-visible,
+.admin-dungeon .mantine-ActionIcon-root:focus-visible {
+  box-shadow: 0 0 0 2px var(--cyber-accent);
+}
+
+/* ---------- Fields: ink on parchment-dark ---------- */
+.admin-dungeon .glassy-input,
+.admin-dungeon .mantine-Input-input {
+  color: var(--cyber-fg) !important;
+}
+
+.admin-dungeon .glassy-label,
+.admin-dungeon .mantine-InputWrapper-label {
+  text-transform: none;
+  letter-spacing: 0.04em !important;
+  font-size: 0.85rem !important;
+}
+
+.admin-dungeon .glassy-label::before,
+.admin-dungeon .mantine-InputWrapper-label::before {
+  content: "✦";
+  font-size: 0.7em;
+}
+
+.admin-dungeon .mantine-Tooltip-tooltip,
+.admin-dungeon .mantine-SegmentedControl-label {
+  font-family: var(--cyber-font-label);
+  text-transform: none;
+  letter-spacing: 0.03em;
+}
+
+.admin-dungeon .mantine-Tooltip-tooltip {
+  color: var(--cyber-fg);
+}
+
+.admin-dungeon .mantine-Modal-title,
+.admin-dungeon .mantine-Drawer-title {
+  text-transform: none;
+  letter-spacing: 0.05em;
+}
+
+.admin-dungeon .glassy-dropdown,
+.admin-dungeon .mantine-Popover-dropdown,
+.admin-dungeon .mantine-Menu-dropdown {
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(232, 163, 61, 0.1) !important;
+}
+
+/* Toggles stay round. */
+.admin-dungeon .mantine-Switch-track,
+.admin-dungeon .mantine-Switch-thumb,
+.admin-dungeon .mantine-Chip-label {
+  border-radius: 999px !important;
+}

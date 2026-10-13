@@ -32,10 +32,10 @@ const Pagination: React.FC<PaginationProps> = ({ page, total, onChange }) => {
                 transform: "translateY(-1px)",
               },
               "&[data-active]": {
-                background: "rgba(255, 0, 255, 0.3) !important",
-                borderColor: "rgba(255, 0, 255, 0.6) !important",
+                background: "rgba(var(--cyber-accent-2-rgb), 0.3) !important",
+                borderColor: "rgba(var(--cyber-accent-2-rgb), 0.6) !important",
                 color: "#e9d5ff !important",
-                boxShadow: "0 0 10px rgba(255, 0, 255, 0.4)",
+                boxShadow: "0 0 10px rgba(var(--cyber-accent-2-rgb), 0.4)",
               },
             },
           }}

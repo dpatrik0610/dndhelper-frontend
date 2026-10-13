@@ -28,11 +28,12 @@ const input = { input: "glassy-input", label: "glassy-label" };
 const combobox = { ...input, dropdown: "glassy-dropdown", option: "glassy-option" };
 
 export const mantineTheme = createTheme({
-  // The admin console's neons (adminCyber.css): color="neon" | "magenta" | "electric".
+  // The admin console's accents (adminCyber.css, retuned by adminDungeon.css): color="neon" | "magenta" | "electric".
+  // CSS variables, so they follow the console style; Mantine turns their alphas into color-mix().
   colors: {
-    neon: colorsTuple("#00ff88"),
-    magenta: colorsTuple("#ff00ff"),
-    electric: colorsTuple("#00d4ff"),
+    neon: colorsTuple("var(--cyber-accent)"),
+    magenta: colorsTuple("var(--cyber-accent-2)"),
+    electric: colorsTuple("var(--cyber-accent-3)"),
   },
   components: {
     TextInput: TextInput.extend({ classNames: input }),

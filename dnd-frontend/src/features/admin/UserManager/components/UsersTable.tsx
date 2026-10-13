@@ -93,7 +93,7 @@ export function UsersTable({
             return (
               <Table.Tr
                 key={u.id}
-                bg={selected.has(u.id) ? "rgba(0, 255, 136,0.08)" : undefined}
+                bg={selected.has(u.id) ? "rgba(var(--cyber-accent-rgb), 0.08)" : undefined}
                 style={{ cursor: "pointer" }}
                 onClick={() => onOpen(u)}
               >

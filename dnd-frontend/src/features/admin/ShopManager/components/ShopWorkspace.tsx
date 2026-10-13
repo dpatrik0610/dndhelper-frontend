@@ -8,8 +8,8 @@ import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
 import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { getInventory } from "@services/inventoryService";
-import { MetaPanel } from "../../InventoryDashboard/components/MetaPanel";
-import { ItemsPanel } from "../../InventoryDashboard/components/ItemsPanel";
+import { MetaPanel } from "@features/admin/InventoryDashboard/components/MetaPanel";
+import { ItemsPanel } from "@features/admin/InventoryDashboard/components/ItemsPanel";
 import { formatCostToDisplay, formatSilverToDisplay } from "@utils/currencyConverter";
 import styles from "@styles/InventoryDashboard.module.css";
 
@@ -54,7 +54,7 @@ export function ShopWorkspace() {
     return (
       <div className={styles.emptyState}>
         <div className={styles.emptyStateInner}>
-          <IconBuildingStore size={36} color="#00ff88" stroke={1.3} />
+          <IconBuildingStore size={36} color="var(--cyber-accent)" stroke={1.3} />
           <Text size="sm" c="dimmed" maw={280}>
             Select a shop from the sidebar to manage its settings and stock.
           </Text>
@@ -81,7 +81,7 @@ export function ShopWorkspace() {
                         </Badge>
                     </Group>
                     <Text size="xs" c="dimmed" mt={2}>
-                        Inventory ID: <code style={{ color: "#00ff88", backgroundColor: "rgba(0,0,0,0.2)", padding: "2px 4px", borderRadius: 4 }}>{shop.inventoryId}</code>
+                        Inventory ID: <code style={{ color: "var(--cyber-accent)", backgroundColor: "rgba(0,0,0,0.2)", padding: "2px 4px", borderRadius: 4 }}>{shop.inventoryId}</code>
                     </Text>
                 </div>
 

@@ -55,7 +55,7 @@ export function SelectCampaignModal({ opened, onClose }: SelectCampaignModalProp
                 onClick={() => { select(camp.id); onClose(); }}
                 style={{
                   cursor: "pointer",
-                  background: isSelected ? "rgba(0, 255, 136,0.14)" : "rgba(255,255,255,0.03)",
+                  background: isSelected ? "rgba(var(--cyber-accent-rgb), 0.14)" : "rgba(255,255,255,0.03)",
                   border: isSelected
                     ? "1px solid var(--cyber-accent)"
                     : "1px solid rgba(255,255,255,0.08)",

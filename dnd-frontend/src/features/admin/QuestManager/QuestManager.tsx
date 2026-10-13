@@ -773,7 +773,7 @@ export function QuestManager() {
                           dropdown: { background: "var(--theme-bg-panel-opaque, #140f28)", border: "1px solid rgba(255, 255, 255, 0.1)" },
                           option: {
                             color: "white",
-                            "&[data-hovered]": { background: "var(--theme-bg-hover, rgba(255, 0, 255, 0.14))" },
+                            "&[data-hovered]": { background: "var(--theme-bg-hover, rgba(var(--cyber-accent-2-rgb), 0.14))" },
                             "&[data-selected]": { background: "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.2))" },
                           },
                         }}
@@ -1103,8 +1103,8 @@ export function QuestManager() {
                                     textTransform: "none",
                                     paddingLeft: "8px",
                                     height: "24px",
-                                    background: "rgba(0, 255, 136, 0.05)",
-                                    borderColor: "rgba(0, 255, 136, 0.2)",
+                                    background: "rgba(var(--cyber-accent-rgb), 0.05)",
+                                    borderColor: "rgba(var(--cyber-accent-rgb), 0.2)",
                                   },
                                 }}
                                 rightSection={

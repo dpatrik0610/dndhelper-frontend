@@ -1,7 +1,8 @@
 import { ActionIcon, Group, ScrollArea, Stack, Tooltip } from "@mantine/core";
-import { IconChevronLeft, IconChevronRight, type Icon } from "@tabler/icons-react";
+import { IconBuildingCastle, IconChevronLeft, IconChevronRight, IconCpu, type Icon } from "@tabler/icons-react";
 import { useState, type ComponentType, type ReactNode } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useUiStore } from "@store/ui/uiStore";
 import { AdminNavItem } from "./AdminNavItem";
 import styles from "@styles/AdminDashboard.module.css";
 
@@ -32,6 +33,9 @@ export function AdminShell({
   const { section } = useParams<{ section: string }>();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+  const adminStyle = useUiStore((s) => s.prefs.adminStyle);
+  const setPref = useUiStore((s) => s.setPref);
+  const isDungeon = adminStyle === "dungeon";
 
   const current = sections.find((s) => s.path === section);
   if (!current) return <Navigate to={`${basePath}/${sections[0].path}`} replace />;
@@ -51,6 +55,21 @@ export function AdminShell({
     </Tooltip>
   );
 
+  const styleLabel = isDungeon ? "Cyberpunk style" : "Dungeon style";
+  const styleSwitch = (
+    <Tooltip label={styleLabel} position="left" withArrow>
+      <ActionIcon
+        variant="subtle"
+        color="gray"
+        size="sm"
+        onClick={() => setPref("adminStyle", isDungeon ? "cyber" : "dungeon")}
+        aria-label={`Switch to ${styleLabel}`}
+      >
+        {isDungeon ? <IconCpu size={16} /> : <IconBuildingCastle size={16} />}
+      </ActionIcon>
+    </Tooltip>
+  );
+
   return (
     <div className={styles.shell}>
       <aside className={`${styles.sidebar} ${collapsed ? styles.sidebarCollapsed : ""}`}>
@@ -58,6 +77,7 @@ export function AdminShell({
           {collapsed ? (
             <Stack gap={6} align="center">
               {toggle}
+              {styleSwitch}
               {headerAction?.(true)}
             </Stack>
           ) : (
@@ -65,9 +85,12 @@ export function AdminShell({
               <Group justify="space-between" wrap="nowrap" align="flex-start">
                 <div>
                   <div className={styles.sidebarTitle}>{title}</div>
-                  <span className={styles.sidebarStatus}>Link online</span>
+                  <span className={styles.sidebarStatus}>{isDungeon ? "Torches lit" : "Link online"}</span>
                 </div>
-                {toggle}
+                <Group gap={2} wrap="nowrap">
+                  {styleSwitch}
+                  {toggle}
+                </Group>
               </Group>
               {headerAction?.(false)}
             </Stack>

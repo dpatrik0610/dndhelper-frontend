@@ -106,7 +106,7 @@ function AppRoutes() {
   const activeToken = token ?? localToken ?? null;
 
   const fetchSettings = useUiStore((s) => s.fetchSettings);
-  const { uiScale, reduceMotion, performanceMode, floatingChat } = useUiStore((s) => s.prefs);
+  const { uiScale, reduceMotion, performanceMode, floatingChat, adminStyle } = useUiStore((s) => s.prefs);
   // Everywhere signed in except a joined table, whose side panel has the chat.
   const showFloatingChat = floatingChat && !!activeToken && !hideSidebarRoutes.includes(location.pathname) && !location.pathname.startsWith("/table/");
 
@@ -207,12 +207,16 @@ function AppRoutes() {
 
   // Mantine portals (dropdowns, modals, popovers) render on <body>, outside AppShell,
   // so the theme class must also sit on <html> for them to get the theme variables.
-  // The admin routes have their own design system (styles/adminCyber.css) instead of the site theme.
-  const rootThemeClass = isDashboardRoute ? "admin-cyber" : activeThemeClass;
+  // The admin routes have their own design system (styles/adminCyber.css) instead of the site theme;
+  // the Dungeon style layers .admin-dungeon on top of it (styles/adminDungeon.css).
+  const rootThemeClass = isDashboardRoute
+    ? adminStyle === "dungeon" ? "admin-cyber admin-dungeon" : "admin-cyber"
+    : activeThemeClass;
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.add(rootThemeClass);
-    return () => root.classList.remove(rootThemeClass);
+    const classes = rootThemeClass.split(" ");
+    root.classList.add(...classes);
+    return () => root.classList.remove(...classes);
   }, [rootThemeClass]);
 
   return (

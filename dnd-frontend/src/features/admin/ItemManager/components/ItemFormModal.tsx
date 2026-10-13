@@ -20,7 +20,7 @@ import { createEquipment, updateEquipmentById } from "@services/equipmentService
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { IconSettings, IconCode, IconCheck, IconX } from "@tabler/icons-react";
-import { EQUIPMENT_TEMPLATES } from "../templates/equipmentTemplates";
+import { EQUIPMENT_TEMPLATES } from "@features/admin/ItemManager/templates/equipmentTemplates";
 import styles from "@styles/AdminCatalog.module.css";
 import { equipmentIndex } from "@features/admin/ItemManager/defaultEquipment";
 
@@ -391,7 +391,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
           className={styles.glassyBox}
           styles={{
             root: { background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.08)" },
-            indicator: { background: "rgba(255, 0, 255, 0.25)", border: "1px solid rgba(255, 0, 255,0.4)" },
+            indicator: { background: "rgba(var(--cyber-accent-2-rgb), 0.25)", border: "1px solid rgba(var(--cyber-accent-2-rgb), 0.4)" },
           }}
         />
 
@@ -410,8 +410,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                     data={EQUIPMENT_TEMPLATES}
                     onChange={handleSelectTemplate}
                     styles={{
-                      input: { background: "rgba(255, 0, 255, 0.08)", color: "#e9d5ff", borderColor: "rgba(255, 0, 255, 0.3)" },
-                      dropdown: { background: "rgba(20, 20, 30, 0.95)", border: "1px solid rgba(255, 0, 255, 0.3)" },
+                      input: { background: "rgba(var(--cyber-accent-2-rgb), 0.08)", color: "#e9d5ff", borderColor: "rgba(var(--cyber-accent-2-rgb), 0.3)" },
+                      dropdown: { background: "var(--cyber-card)", border: "1px solid rgba(var(--cyber-accent-2-rgb), 0.3)" },
                       label: { color: "#c084fc", fontWeight: 600 }
                     }}
                     clearable

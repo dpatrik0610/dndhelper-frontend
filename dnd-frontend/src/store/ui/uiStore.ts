@@ -6,6 +6,9 @@ import { useAuthStore } from "@store/auth/authStore";
 export const UI_SCALES = [90, 100, 110, 120] as const;
 export const NOTIFICATION_POSITIONS = ["top-left", "top-right", "bottom-left", "bottom-right"] as const;
 export type NotificationPosition = (typeof NOTIFICATION_POSITIONS)[number];
+/** The DM dashboard / superadmin console look: neon terminal or torchlit dungeon. */
+export const ADMIN_STYLES = ["cyber", "dungeon"] as const;
+export type AdminStyle = (typeof ADMIN_STYLES)[number];
 
 /** Site preferences. Stored as flat string keys next to sidebarTheme, both in localStorage and the backend. */
 export interface SitePrefs {
@@ -24,6 +27,7 @@ export interface SitePrefs {
   chatSound: boolean;
   /** Overview of the whole board in a corner of the tabletop. */
   tabletopMinimap: boolean;
+  adminStyle: AdminStyle;
 }
 
 export const defaultPrefs: SitePrefs = {
@@ -36,6 +40,7 @@ export const defaultPrefs: SitePrefs = {
   floatingChat: true,
   chatSound: true,
   tabletopMinimap: true,
+  adminStyle: "cyber",
 };
 
 const PREFS_STORAGE_KEY = "sitePrefs";
@@ -50,12 +55,14 @@ const prefsToRecord = (prefs: SitePrefs): Record<string, string> => ({
   floatingChat: String(prefs.floatingChat),
   chatSound: String(prefs.chatSound),
   tabletopMinimap: String(prefs.tabletopMinimap),
+  adminStyle: prefs.adminStyle,
 });
 
 /** Parses untrusted strings (localStorage, backend); anything unknown falls back to the default. */
 export const prefsFromRecord = (record: Record<string, string | undefined>): SitePrefs => {
   const scale = Number(record.uiScale);
   const position = record.notificationPosition as NotificationPosition;
+  const adminStyle = record.adminStyle as AdminStyle;
   return {
     uiScale: (UI_SCALES as readonly number[]).includes(scale) ? scale : defaultPrefs.uiScale,
     animatedBackground: record.animatedBackground !== "false",
@@ -66,6 +73,7 @@ export const prefsFromRecord = (record: Record<string, string | undefined>): Sit
     floatingChat: record.floatingChat !== "false",
     chatSound: record.chatSound !== "false",
     tabletopMinimap: record.tabletopMinimap !== "false",
+    adminStyle: ADMIN_STYLES.includes(adminStyle) ? adminStyle : defaultPrefs.adminStyle,
   };
 };
 

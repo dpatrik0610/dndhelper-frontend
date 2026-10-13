@@ -4,19 +4,13 @@
    Tokens (--cyber-*) and Mantine treatment: adminCyber.css.
    ============================================================ */
 
-/* Full-bleed: edge to edge, the void with a faint circuit grid and neon haze in the corners. */
+/* Full-bleed, edge to edge. The backdrop (--cyber-wall) sits on AppShell.Main, so it also fills the sidebar-toggle lane. */
 .shell {
   width: 100%;
   height: 100vh;
   min-height: 480px;
   display: flex;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse 50% 40% at 0% 0%, rgba(255, 0, 255, 0.07), transparent 70%),
-    radial-gradient(ellipse 45% 40% at 100% 100%, rgba(0, 212, 255, 0.07), transparent 70%),
-    linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px) 0 0 / 50px 50px,
-    linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px) 0 0 / 50px 50px,
-    var(--cyber-bg);
   color: var(--cyber-fg);
 }
 
@@ -28,7 +22,7 @@
   flex-direction: column;
   min-height: 0;
   position: relative;
-  background: rgba(18, 18, 26, 0.92);
+  background: rgba(var(--cyber-card-rgb), 0.92);
   border-left: 1px solid var(--cyber-border);
   transition: flex-basis 0.2s steps(4);
 }
@@ -67,7 +61,7 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--cyber-accent);
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+  text-shadow: 0 0 8px rgba(var(--cyber-accent-rgb), 0.6);
   animation: cyberGlitch 11s steps(1) infinite;
 }
 
@@ -108,7 +102,7 @@
   width: 100%;
   padding: 0.55rem 0.75rem;
   border: 0;
-  border-radius: 0;
+  border-radius: var(--cyber-radius-sm);
   background: transparent;
   font: inherit;
   text-align: left;
@@ -124,7 +118,7 @@
   margin-left: auto;
   font-family: var(--cyber-font-label);
   font-size: 0.65rem;
-  color: #4a4f5c;
+  color: var(--cyber-faint);
 }
 
 .sidebarCollapsed .navItem {
@@ -137,7 +131,7 @@
 }
 
 .navItem:hover {
-  background: rgba(0, 212, 255, 0.06);
+  background: rgba(var(--cyber-accent-3-rgb), 0.06);
   color: var(--cyber-accent-3);
 }
 
@@ -152,9 +146,9 @@
 
 .navItemSelected,
 .navItemSelected:hover {
-  background: linear-gradient(90deg, rgba(0, 255, 136, 0.02), rgba(0, 255, 136, 0.12));
+  background: linear-gradient(90deg, rgba(var(--cyber-accent-rgb), 0.02), rgba(var(--cyber-accent-rgb), 0.12));
   color: var(--cyber-accent);
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.55);
+  text-shadow: 0 0 8px rgba(var(--cyber-accent-rgb), 0.55);
 }
 
 .navItemSelected svg {
@@ -223,7 +217,7 @@
   bottom: 0;
   height: 1px;
   background: linear-gradient(90deg, var(--cyber-accent), var(--cyber-accent-2) 35%, var(--cyber-border) 60%, transparent);
-  box-shadow: 0 0 6px rgba(0, 255, 136, 0.4);
+  box-shadow: 0 0 6px rgba(var(--cyber-accent-rgb), 0.4);
 }
 
 .pageIcon {
@@ -234,10 +228,11 @@
   justify-content: center;
   flex-shrink: 0;
   clip-path: var(--cyber-chamfer-sm);
-  background: rgba(0, 255, 136, 0.08);
+  border-radius: var(--cyber-radius-sm);
+  background: rgba(var(--cyber-accent-rgb), 0.08);
   border: 1px solid var(--cyber-accent);
   color: var(--cyber-accent);
-  box-shadow: inset 0 0 14px rgba(0, 255, 136, 0.3);
+  box-shadow: inset 0 0 14px rgba(var(--cyber-accent-rgb), 0.3);
 }
 
 .pageIcon svg {
@@ -283,6 +278,7 @@
   background: var(--cyber-card);
   border: 1px solid var(--cyber-border);
   clip-path: var(--cyber-notch);
+  border-radius: var(--cyber-radius);
 }
 
 /* The diagonal of each cut, drawn in neon (the border itself stops at the cut). */
@@ -316,7 +312,7 @@
   flex-wrap: wrap;
   padding: 0.75rem 1rem 0.75rem 1.25rem;
   border-bottom: 1px solid var(--cyber-border);
-  background: linear-gradient(90deg, rgba(0, 255, 136, 0.05), transparent 50%);
+  background: linear-gradient(90deg, rgba(var(--cyber-accent-rgb), 0.05), transparent 50%);
 }
 
 .panelTitle {
@@ -351,7 +347,7 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--cyber-accent-3);
-  background: rgba(0, 212, 255, 0.03);
+  background: rgba(var(--cyber-accent-3-rgb), 0.03);
 }
 
 /* Sortable headers are buttons; they look like the rest. */
@@ -370,6 +366,7 @@
   background: var(--cyber-card);
   border: 1px solid var(--cyber-border);
   clip-path: var(--cyber-notch);
+  border-radius: var(--cyber-radius);
 }
 
 .stat::before {
@@ -432,4 +429,122 @@
   .page {
     padding: 1rem;
   }
+}
+
+/* ============================================================
+   Dungeon style (.admin-dungeon on <html>, tokens in adminDungeon.css):
+   Roman-numbered nav, gilded corner brackets on panels, no glitch or
+   terminal cursor. The stone wall itself is --cyber-wall.
+   ============================================================ */
+
+:global(.admin-dungeon) .sidebar::before {
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+:global(.admin-dungeon) .sidebarTitle {
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: none;
+  text-shadow: 0 0 10px rgba(var(--cyber-accent-rgb), 0.45);
+  animation: none;
+}
+
+:global(.admin-dungeon) .sidebarStatus {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+
+:global(.admin-dungeon) .sidebarStatus::before {
+  animation: torchFlicker 2.6s ease-in-out infinite;
+}
+
+:global(.admin-dungeon) .navItem {
+  border-radius: var(--cyber-radius-sm);
+}
+
+:global(.admin-dungeon) .navItem::after {
+  content: counter(nav, upper-roman);
+}
+
+:global(.admin-dungeon) .navItemLabel {
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+:global(.admin-dungeon) .navItemSelected,
+:global(.admin-dungeon) .navItemSelected:hover {
+  text-shadow: 0 0 8px rgba(var(--cyber-accent-rgb), 0.35);
+}
+
+:global(.admin-dungeon) .pageIcon,
+:global(.admin-dungeon) .pageHeader::after {
+  box-shadow: none;
+}
+
+:global(.admin-dungeon) .pageTitle {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  text-shadow: 0 2px 14px rgba(var(--cyber-accent-rgb), 0.25);
+  animation: none;
+}
+
+:global(.admin-dungeon) .pageSubtitle {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1rem;
+  font-style: italic;
+}
+
+:global(.admin-dungeon) .pageSubtitle::before,
+:global(.admin-dungeon) .pageSubtitle::after {
+  content: none;
+}
+
+/* Oak boards with gilded corner brackets. */
+:global(.admin-dungeon) .panel {
+  background: linear-gradient(180deg, rgba(255, 220, 170, 0.025), transparent 40%), var(--cyber-card);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+
+:global(.admin-dungeon) .panel::before,
+:global(.admin-dungeon) .panel::after {
+  width: 14px;
+  height: 14px;
+  background: none;
+  filter: none;
+  border: 2px solid rgba(var(--cyber-accent-rgb), 0.55);
+}
+
+:global(.admin-dungeon) .panel::before {
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: var(--cyber-radius);
+}
+
+:global(.admin-dungeon) .panel::after {
+  border-left: 0;
+  border-top: 0;
+  border-bottom-right-radius: var(--cyber-radius);
+}
+
+:global(.admin-dungeon) .panelTitle,
+:global(.admin-dungeon) .panel th,
+:global(.admin-dungeon) .statLabel {
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+
+:global(.admin-dungeon) .stat {
+  overflow: hidden;
+}
+
+@keyframes torchFlicker {
+  0%, 100% { opacity: 1; }
+  20% { opacity: 0.75; }
+  35% { opacity: 0.95; }
+  55% { opacity: 0.7; }
+  80% { opacity: 0.9; }
 }

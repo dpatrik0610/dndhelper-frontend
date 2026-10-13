@@ -100,7 +100,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange
         <Group align="flex-end" gap="md" style={{ flexWrap: "wrap" }}>
           <div style={{ flexGrow: 2, minWidth: "220px" }}>
             <Group gap="xs" mb={4}>
-              <IconTags size={14} color="#ff00ff" />
+              <IconTags size={14} color="var(--cyber-accent-2)" />
               <Title order={6} style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.75rem", fontWeight: 600, textTransform: "uppercase", margin: 0 }}>
                 Filter By Tags
               </Title>
