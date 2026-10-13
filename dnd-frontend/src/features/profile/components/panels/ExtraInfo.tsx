@@ -1,17 +1,22 @@
 import type { ReactNode } from "react";
+import { Tooltip } from "@mantine/core";
 import {
   IconAlertTriangle,
+  IconAward,
   IconFlag,
   IconId,
+  IconLanguage,
   IconLink,
   IconMasksTheater,
   IconMoodSmile,
   IconScript,
+  IconSword,
   IconUserCircle,
 } from "@tabler/icons-react";
 import { MarkdownRenderer } from "@components/MarkdownRender";
 import { useCurrentCharacter, useEffectiveStats } from "@store/character/characterSelectors";
 import { physicalLimits } from "@utils/checkMath";
+import { computeEffects } from "@utils/effects";
 import classes from "./ExtraInfo.module.css";
 
 function Panel({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
@@ -51,6 +56,21 @@ export function ExtraInfo() {
     { label: "Flaws", value: character.flaws, Icon: IconAlertTriangle },
   ];
 
+  // Proficiencies items and other effects grant, unless the sheet already lists them.
+  const own = new Set((character.proficiencies ?? []).map((p) => p.trim().toLowerCase()));
+  const granted = computeEffects(character).proficiencies.filter((p) => !own.has(p.detail.toLowerCase()));
+  const proficiencyGroups = [
+    {
+      label: "Weapons & Tools",
+      Icon: IconSword,
+      items: [
+        ...(character.proficiencies ?? []).map((name) => ({ name, source: "" })),
+        ...granted.map((p) => ({ name: p.detail, source: p.source })),
+      ],
+    },
+    { label: "Languages", Icon: IconLanguage, items: (character.languages ?? []).map((name) => ({ name, source: "" })) },
+  ];
+
   // Stored one line per entry (the form splits on newlines), so joining restores the Markdown source.
   const backstory = (character.backstory ?? []).join("\n").trim();
 
@@ -69,6 +89,35 @@ export function ExtraInfo() {
         ) : (
           <Empty>No details yet.</Empty>
         )}
+      </Panel>
+
+      <Panel icon={<IconAward size={16} />} title="Proficiencies & Languages">
+        <div className={classes.traits}>
+          {proficiencyGroups.map(({ label, Icon, items }) => (
+            <div key={label} className={classes.trait}>
+              <span className={classes.traitLabel}>
+                <Icon size={14} />
+                {label}
+                <span className={classes.count}>{items.length}</span>
+              </span>
+              {items.length ? (
+                <ul className={classes.tags}>
+                  {items.map(({ name, source }, i) =>
+                    source ? (
+                      <Tooltip key={`${source}:${name}`} label={`From ${source}`} withArrow>
+                        <li className={`${classes.tag} ${classes.tagGranted}`}>{name}</li>
+                      </Tooltip>
+                    ) : (
+                      <li key={i} className={classes.tag}>{name}</li>
+                    )
+                  )}
+                </ul>
+              ) : (
+                <Empty>None</Empty>
+              )}
+            </div>
+          ))}
+        </div>
       </Panel>
 
       <Panel icon={<IconUserCircle size={16} />} title="Appearance">

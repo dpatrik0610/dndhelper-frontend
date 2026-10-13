@@ -1,9 +1,7 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { Group, Popover, Portal, Stack, Text, Divider, ActionIcon, Button, Tooltip, Box, type PopoverProps } from "@mantine/core";
-import CustomBadge from "@components/common/CustomBadge";
 import type { Character } from "@appTypes/Character/Character";
 import { useIsMobile } from "@hooks/useIsMobile";
-import { computeEffects } from "@utils/effects";
 import { ActionBubble } from "./ActionBubble";
 import classes from "./ActionRibbonPanel.module.css";
 
@@ -14,7 +12,6 @@ import {
   IconDice5,
   IconHeartPlus,
   IconCoin,
-  IconAward,
   IconTrash,
   IconBolt,
   IconX,
@@ -55,12 +52,6 @@ const dropdownBase: CSSProperties = {
   color: "var(--theme-color-text-primary, #fff)",
 };
 
-const sectionLabel: CSSProperties = {
-  letterSpacing: "2px",
-  color: "var(--theme-color-text-secondary, #cbd5e1)",
-  fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-};
-
 function CountBadge({ count, style }: { count: number; style?: CSSProperties }) {
   return (
     <Box
@@ -85,55 +76,6 @@ function CountBadge({ count, style }: { count: number; style?: CSSProperties }) 
     >
       {count}
     </Box>
-  );
-}
-
-function ProficienciesList({ character }: { character: Character }) {
-  // Proficiencies items and other effects grant, unless the sheet already lists them.
-  const own = new Set((character.proficiencies ?? []).map((p) => p.trim().toLowerCase()));
-  const granted = computeEffects(character).proficiencies.filter((p) => !own.has(p.detail.toLowerCase()));
-
-  return (
-    <Stack gap="xs">
-      <Text fw={300} size="xs" tt="uppercase" style={sectionLabel}>
-        Weapons & Tools
-      </Text>
-      {character.proficiencies?.length || granted.length ? (
-        <Group gap={6}>
-          {(character.proficiencies ?? []).map((p: string, i: number) => (
-            <CustomBadge key={i} label={p} variant="themed" radius="sm" />
-          ))}
-          {granted.map((p) => (
-            <Tooltip key={`${p.source}:${p.detail}`} label={`From ${p.source}`} withArrow>
-              <span style={{ display: "inline-flex", borderBottom: "1px dotted currentColor" }}>
-                <CustomBadge label={p.detail} variant="themed" radius="sm" />
-              </span>
-            </Tooltip>
-          ))}
-        </Group>
-      ) : (
-        <Text size="xs" c="dimmed" style={{ fontStyle: "italic" }}>
-          None
-        </Text>
-      )}
-
-      <Divider color="rgba(255, 255, 255, 0.08)" my={4} />
-
-      <Text fw={300} size="xs" tt="uppercase" style={sectionLabel}>
-        Languages
-      </Text>
-      {character.languages?.length ? (
-        <Group gap={6}>
-          {character.languages.map((l: string, i: number) => (
-            <CustomBadge key={i} label={l} variant="themed" radius="sm" />
-          ))}
-        </Group>
-      ) : (
-        <Text size="xs" c="dimmed" style={{ fontStyle: "italic" }}>
-          None
-        </Text>
-      )}
-    </Stack>
   );
 }
 
@@ -223,20 +165,12 @@ function ConditionsList({
 }
 
 export function ActionRibbonPanel(props: ActionRibbonPanelProps) {
-  const { character, conditionsCount, onNavigate, onLongrest, onOpenRoll, onOpenHp, onOpenMoney } = props;
+  const { conditionsCount, onNavigate, onLongrest, onOpenRoll, onOpenHp, onOpenMoney } = props;
   const isMobile = useIsMobile();
 
   const actions: RibbonAction[] = [
     { label: "Edit", tooltip: "Edit Character", icon: <IconEdit size={18} />, onClick: () => onNavigate("/editCharacter") },
     { label: "Rest", tooltip: "Long Rest", icon: <IconMoon size={18} />, onClick: onLongrest },
-    {
-      label: "Proficiencies",
-      tooltip: "Proficiencies & Languages",
-      icon: <IconAward size={18} />,
-      dropdown: <ProficienciesList character={character} />,
-      dropdownPosition: "bottom",
-      dropdownStyle: { background: "var(--theme-bg-panel, rgba(15, 15, 15, 0.9))", maxWidth: "280px" },
-    },
     { label: "Roll", tooltip: "Roll Dice", icon: <IconDice5 size={18} />, onClick: onOpenRoll },
     { label: "Health", tooltip: "Manage HP", icon: <IconHeartPlus size={18} />, onClick: onOpenHp },
     { label: "Money", tooltip: "Manage Money", icon: <IconCoin size={18} />, onClick: onOpenMoney },
