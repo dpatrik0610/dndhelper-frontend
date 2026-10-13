@@ -122,7 +122,7 @@ export function MonsterFormModal({ opened, monster, onClose, onSaved, types }: M
   };
 
   return (
-    <AdminGlassModal opened={opened} onClose={onClose} size="xl" title={draft.id ? `Edit ${monster?.name ?? draft.name}` : "New monster"}>
+    <AdminGlassModal opened={opened} onClose={onClose} size={960} title={draft.id ? `Edit ${monster?.name ?? draft.name}` : "New monster"}>
       <Tabs defaultValue="basics" keepMounted={false} onChange={(tab) => tab === "json" && setJson(JSON.stringify(draft, null, 2))}>
         <Tabs.List mb="md">
           <Tabs.Tab value="basics">Basics</Tabs.Tab>
@@ -167,7 +167,7 @@ export function MonsterFormModal({ opened, monster, onClose, onSaved, types }: M
 
             <SimpleGrid cols={{ base: 3, sm: 6 }}>
               {(["walk", "fly", "swim", "climb", "burrow"] as const).map((key) => (
-                <NumberInput key={key} label={`${key} (ft.)`} min={0} step={5} value={draft.speed[key] ?? ""}
+                <NumberInput key={key} label={key} suffix=" ft." min={0} step={5} value={draft.speed[key] ?? ""}
                   onChange={(v) => set({ speed: { ...draft.speed, [key]: v === "" ? (key === "walk" ? 0 : null) : Number(v) } })} />
               ))}
               <Switch label="Hover" mt="xl" checked={!!draft.speed.hover} onChange={(e) => set({ speed: { ...draft.speed, hover: e.currentTarget.checked } })} />

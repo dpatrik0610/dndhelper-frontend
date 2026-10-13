@@ -22,7 +22,7 @@ html.admin-cyber[data-mantine-color-scheme] {
   --cyber-warning: #ffb800;
 
   --cyber-font-display: "Orbitron", "Share Tech Mono", monospace;
-  --cyber-font-body: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  --cyber-font-body: "Inter", system-ui, sans-serif;
   --cyber-font-label: "Share Tech Mono", "JetBrains Mono", monospace;
 
   --cyber-glow-sm: 0 0 3px #00ff88, 0 0 6px #00ff8830;
@@ -226,13 +226,46 @@ html.admin-cyber[data-mantine-color-scheme] {
   color: var(--mantine-color-placeholder);
 }
 
+/* Field labels: a terminal prompt ("> NAME") that lights up green while its field has focus.
+   glassyInput.css sets 10px with !important, so the size has to be overridden here too. */
 .admin-cyber .glassy-label,
 .admin-cyber .mantine-InputWrapper-label {
   font-family: var(--cyber-font-label) !important;
+  font-size: 0.8rem !important;
   font-weight: 400 !important;
   text-transform: uppercase;
-  letter-spacing: 0.2em !important;
+  letter-spacing: 0.1em !important;
   color: var(--cyber-accent-3) !important;
+  margin-bottom: 6px !important;
+  /* One line always: a wrapped label pushes its input below the rest of a grid row. */
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  transition: color var(--cyber-snap), text-shadow var(--cyber-snap);
+}
+
+.admin-cyber .glassy-label::before,
+.admin-cyber .mantine-InputWrapper-label::before {
+  content: ">";
+  margin-right: 0.5em;
+  color: var(--cyber-accent);
+  opacity: 0.45;
+  transition: opacity var(--cyber-snap);
+}
+
+.admin-cyber .mantine-InputWrapper-root:focus-within > .mantine-InputWrapper-label {
+  color: var(--cyber-accent) !important;
+  text-shadow: 0 0 6px #00ff8880;
+}
+
+.admin-cyber .mantine-InputWrapper-root:focus-within > .mantine-InputWrapper-label::before {
+  opacity: 1;
+}
+
+.admin-cyber .mantine-InputWrapper-required {
+  color: var(--cyber-accent-2);
 }
 
 .admin-cyber .mantine-InputWrapper-description {
