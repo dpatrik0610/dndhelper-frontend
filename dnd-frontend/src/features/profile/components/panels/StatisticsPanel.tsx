@@ -71,7 +71,7 @@ function OddsRow({ name, stat, dc }: { name: string; stat: StatResult; dc: numbe
     <Tooltip label={explain(name, stat, dc)} multiline w={280} withArrow openDelay={150} events={{ hover: true, focus: true, touch: true }}>
       <div className={classes.row} tabIndex={0}>
         <span className={classes.name}>
-          {name}
+          <span className={classes.nameText}>{name}</span>
           <RollMark roll={stat.roll} />
         </span>
         <span className={classes.mod}>{signed(stat.value)}</span>
