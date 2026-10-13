@@ -1,5 +1,5 @@
 /* ==========================================================================
-   💛 Cyber-Fantasy ("sunset" key, .theme-cyber-noir): golden-hour sky islands
+   💛 Cyber-Fantasy ("sunset" key, .theme-cyber-noir): golden-hour sky islands on emerald aether crystals
    Scene: backdrops/CyberFantasyBackdrop.tsx. Variables: theme.css.
    ========================================================================== */
 
@@ -7,60 +7,56 @@
 
 .cf-sky {
   inset: 0;
-  background:
-    radial-gradient(ellipse 60% 45% at 74% 69%, rgba(251, 146, 60, 0.35), transparent 70%),
-    linear-gradient(to bottom, #0b0812 0%, #1d1020 30%, #3d1a22 55%, #6b2d1a 72%, #a0521c 82%, #2a140c 100%);
+  background: linear-gradient(to bottom, #090512 0%, #170c26 22%, #3a1636 44%, #74303f 62%, #c0623f 76%, #eb9a55 84%, #4a1d33 100%);
 }
 
-.cf-world {
+/* Every layer is a full-size SVG on the same viewBox; motion goes on the layer element, not inside it. */
+.cf-layer {
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: visible; /* drifting layers must show what lies past the viewBox edge, not a seam */
 }
 
-.cf-rays {
-  fill: rgba(253, 224, 140, 0.07);
+.cf-spin {
   transform-box: view-box;
-  transform-origin: 1180px 620px;
-  animation: cfSpin 160s linear infinite;
+  transform-origin: 960px 650px;
+  animation: cfSpin linear infinite;
 }
+.cf-spin--rays     { animation-duration: 300s; }
+.cf-spin--ring     { animation-duration: 140s; }
+.cf-spin--ring-rev { animation-duration: 200s; animation-direction: reverse; }
 
-/* heat shimmer */
-.cf-sun {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: cfShimmer 5s ease-in-out infinite alternate;
+.cf-bob {
+  animation: cfBob ease-in-out infinite alternate;
 }
+.cf-bob--far  { animation-duration: 11s; animation-delay: -4s; }
+.cf-bob--near { animation-duration: 8s; }
 
-.cf-island {
-  animation: cfBob var(--bob, 8s) ease-in-out infinite alternate;
+.cf-drift {
+  animation: cfDrift ease-in-out infinite alternate;
 }
-
-.cf-island--far {
-  opacity: 0.7;
-  filter: brightness(0.75) saturate(0.85);
-}
-
-.cf-falls {
-  animation: cfFalls 1.1s ease-in-out infinite alternate;
-}
+.cf-drift--back  { animation-duration: 70s; }
+.cf-drift--front { animation-duration: 50s; animation-direction: alternate-reverse; }
 
 .cf-airship {
-  animation: cfFly 110s linear infinite;
+  top: 26%;
+  left: 0;
+  width: clamp(130px, 12vw, 220px);
+  opacity: 0.92;
+  animation: cfFly 150s linear infinite;
+  animation-delay: -40s;
 }
 
 .cf-airship__bob {
   animation: cfBob 5s ease-in-out infinite alternate;
 }
 
-.cf-lamp {
-  filter: drop-shadow(0 0 4px #fde68a);
-  animation: cfFlicker 1.7s steps(2, end) infinite;
+.cf-window,
+.cf-beacon {
+  animation: cfFlicker 2.3s steps(2, end) infinite;
 }
-
-.cf-clouds {
-  animation: cfDrift 40s ease-in-out infinite alternate;
-}
+.cf-beacon { animation-duration: 1.4s; }
 
 .cf-lanterns {
   inset: 0;
@@ -77,44 +73,37 @@
   animation: cfLantern linear infinite;
 }
 
-/* Static (mobile): lanterns have nowhere to rise to, so show a few mid-flight */
+/* Static (mobile): lanterns have nowhere to rise to, so show a few mid-flight; park the airship in view */
 .theme-scene--static .cf-lantern:nth-child(3n) {
   opacity: 0.7;
   transform: translateY(-45vh);
+}
+.theme-scene--static .cf-airship {
+  transform: translateX(58vw);
 }
 
 @keyframes cfSpin {
   to { transform: rotate(1turn); }
 }
 
-@keyframes cfShimmer {
-  from { transform: scale(1, 1); opacity: 0.95; }
-  to   { transform: scale(1.025, 0.975); opacity: 1; }
-}
-
 @keyframes cfBob {
   from { transform: translateY(0); }
-  to   { transform: translateY(-12px); }
-}
-
-@keyframes cfFalls {
-  from { opacity: 0.45; }
-  to   { opacity: 0.9; }
+  to   { transform: translateY(-10px); }
 }
 
 @keyframes cfFly {
-  from { transform: translate(-220px, 210px); }
-  to   { transform: translate(1820px, 160px); }
+  from { transform: translateX(-260px); }
+  to   { transform: translateX(calc(100vw + 40px)); }
 }
 
 @keyframes cfFlicker {
   0%   { opacity: 1; }
-  50%  { opacity: 0.55; }
+  50%  { opacity: 0.5; }
 }
 
 @keyframes cfDrift {
-  from { transform: translateX(-40px); }
-  to   { transform: translateX(40px); }
+  from { transform: translateX(-50px); }
+  to   { transform: translateX(50px); }
 }
 
 @keyframes cfLantern {
@@ -140,7 +129,7 @@
 /* ---------- UI signature ---------- */
 
 html.theme-cyber-noir {
-  scrollbar-color: rgba(245, 158, 11, 0.55) transparent;
+  scrollbar-color: rgba(251, 191, 36, 0.5) transparent;
 }
 
 .theme-cyber-noir ::selection {
@@ -161,7 +150,7 @@ html.theme-cyber-noir {
   filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.35));
 }
 
-/* Panels: warm gilt highlight behind the content… */
+/* Panels: warm gilt sheen behind the content, under a gold→aether hairline along the top edge… */
 .theme-cyber-noir .mantine-Paper-root::before {
   content: "";
   position: absolute;
@@ -169,8 +158,9 @@ html.theme-cyber-noir {
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(251, 191, 36, 0.06), transparent 40%);
-  box-shadow: inset 0 1px 0 rgba(253, 230, 138, 0.22);
+  background:
+    linear-gradient(90deg, transparent 6%, rgba(253, 230, 138, 0.55) 30%, rgba(52, 211, 153, 0.55) 70%, transparent 94%) top / 100% 1px no-repeat,
+    linear-gradient(180deg, rgba(251, 191, 36, 0.07), transparent 38%);
 }
 
 /* …and gilded filigree brackets in the four corners (top-left drawn once, mirrored per corner) */
@@ -196,11 +186,12 @@ html.theme-cyber-noir {
 }
 
 .theme-cyber-noir .mantine-Button-root:not(:disabled):hover {
-  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.5), 0 0 16px rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 0 0 1px rgba(253, 230, 138, 0.6), var(--theme-glow-shadow-primary) !important;
 }
 
 .theme-cyber-noir .glassy-input:focus-within,
 .theme-cyber-noir .glassy-input:focus {
+  /* gold rim, aether glow: the field "powers on" */
   border-color: #fbbf24 !important;
-  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35), 0 0 14px rgba(245, 158, 11, 0.3) !important;
+  box-shadow: 0 0 0 1px rgba(251, 191, 36, 0.35), var(--theme-glow-shadow-secondary) !important;
 }

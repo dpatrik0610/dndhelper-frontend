@@ -75,31 +75,32 @@
   --theme-gradient-active: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(6, 182, 212, 0.25));
 }
 
-/* 💛 Cyber-Fantasy Noir */
+/* 💛 Cyber-Fantasy (key "sunset"): dusk-plum panels, gold leaf, emerald aether. Scene + UI in themes/cyber-fantasy.css */
 .theme-cyber-noir {
-  --theme-bg-base: rgba(20, 15, 8, 0.35);
-  --theme-bg-panel: rgba(32, 24, 16, 0.6);
-  --theme-bg-panel-opaque: #1e1610;
-  --theme-bg-card: rgba(38, 28, 18, 0.5);
-  --theme-bg-hover: rgba(245, 158, 11, 0.12);
-  
-  --theme-border-glow: rgba(245, 158, 11, 0.4);
-  --theme-border-accent: rgba(16, 185, 129, 0.4);
-  --theme-border-subtle: rgba(245, 158, 11, 0.14); /* Gorgeous amber tinted edges! */
-  
-  --theme-color-accent-primary: #f59e0be6; /* Amber with 10% transparency */
-  --theme-color-accent-secondary: #10b981e6; /* Emerald with 10% transparency */
-  --theme-color-text-primary: #f9fafb;
-  --theme-color-text-secondary: #fcd34d; /* Tinted light amber text */
-  --theme-color-text-glow: #fef3c7;
-  --theme-color-text-on-accent: #121214;
-  
-  --theme-glow-shadow-primary: 0 0 15px rgba(245, 158, 11, 0.25);
-  --theme-glow-shadow-secondary: 0 0 15px rgba(16, 185, 129, 0.25);
-  
-  --theme-gradient-primary: linear-gradient(135deg, #f59e0b, #10b981);
-  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(245, 158, 11, 0.85), rgba(16, 185, 129, 0.85)); /* Gorgeous 15% transparent highlight */
-  --theme-gradient-active: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(16, 185, 129, 0.2));
+  --theme-bg-base: rgba(24, 12, 24, 0.4);
+  --theme-bg-panel: rgba(30, 16, 28, 0.72);
+  --theme-bg-panel-opaque: #1d0f1b;
+  --theme-bg-card: rgba(48, 26, 40, 0.55);
+  --theme-bg-hover: rgba(251, 191, 36, 0.1);
+
+  --theme-border-glow: rgba(251, 191, 36, 0.45);
+  --theme-border-accent: rgba(52, 211, 153, 0.4);
+  --theme-border-subtle: rgba(251, 191, 36, 0.16);
+
+  --theme-color-accent-primary: #fbbf24e6; /* gold leaf */
+  --theme-color-accent-secondary: #34d399e6; /* aether emerald */
+  --theme-color-text-primary: #fdf8f0;
+  --theme-color-text-secondary: #f3c98b;
+  --theme-color-text-glow: #fff1d6;
+  --theme-color-text-on-accent: #1f0f05;
+
+  --theme-glow-shadow-primary: 0 0 15px rgba(251, 191, 36, 0.28);
+  --theme-glow-shadow-secondary: 0 0 15px rgba(52, 211, 153, 0.28);
+
+  /* all-warm gold: an amber→emerald blend goes olive in the middle */
+  --theme-gradient-primary: linear-gradient(135deg, #fde68a, #fbbf24 45%, #f59e0b);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(253, 230, 138, 0.85), rgba(251, 191, 36, 0.85) 45%, rgba(245, 158, 11, 0.85));
+  --theme-gradient-active: linear-gradient(135deg, rgba(251, 191, 36, 0.22), rgba(52, 211, 153, 0.14));
 }
 
 /* 🗡️ Crimson Dynasty (key "crimson-vampire"; assassin scene + UI in themes/crimson.css) */
@@ -963,7 +964,7 @@
   }
   @keyframes modalThemeFadeCyber {
     0% { background: #030305 !important; }
-    100% { background: #1e1610 !important; }
+    100% { background: #1d0f1b !important; }
   }
   @keyframes modalThemeFadeCrimson {
     0% { background: #030305 !important; }

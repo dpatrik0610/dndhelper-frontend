@@ -12,7 +12,7 @@ export interface ThemeOption {
 
 export const themeOptions: ThemeOption[] = [
   { key: "midnight", name: "Midnight", icon: "🌌", accent: "#a855f7", accentSecondary: "#06b6d4", glow: "0 0 15px rgba(168, 85, 247, 0.3)" },
-  { key: "sunset", name: "Cyber-Fantasy", icon: "💛", accent: "#f59e0b", accentSecondary: "#10b981", glow: "0 0 15px rgba(245, 158, 11, 0.25)" },
+  { key: "sunset", name: "Cyber-Fantasy", icon: "💛", accent: "#fbbf24", accentSecondary: "#34d399", glow: "0 0 15px rgba(251, 191, 36, 0.28)" },
   { key: "crimson-vampire", name: "Crimson Dynasty", icon: "🗡️", accent: "#ef4444", accentSecondary: "#d97706", glow: "0 0 15px rgba(239, 68, 68, 0.3)" },
   { key: "frost-glacier", name: "Frost Glacier", icon: "❄️", accent: "#7dd3fc", accentSecondary: "#5eead4", glow: "0 0 15px rgba(125, 211, 252, 0.4)" },
   { key: "feywild", name: "Feywild Bloom", icon: "🌸", accent: "#f472b6", accentSecondary: "#fbbf24", glow: "0 0 15px rgba(244, 114, 182, 0.25)" },
