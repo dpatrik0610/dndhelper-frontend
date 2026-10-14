@@ -64,3 +64,9 @@ export const equipmentTierTheme: Record<
 export function tierTheme(tier?: string) {
     return equipmentTierTheme[tier as EquipmentTier] ?? equipmentTierTheme.default;
 }
+
+/** The tier's accent as a CSS colour readable on dark cards ("dark", used by Common, is not, so it becomes gray). */
+export function tierAccent(tier?: string) {
+    const accent = tierTheme(tier).accent;
+    return `var(--mantine-color-${accent === SectionColor.Dark ? SectionColor.Gray : accent}-5)`;
+}

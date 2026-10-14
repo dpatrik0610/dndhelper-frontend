@@ -1,5 +1,5 @@
 import { getAuthTokenSafe } from "@store/auth/authUtils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import {
   ActionIcon,
   Badge,
@@ -27,6 +27,7 @@ import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { ItemModal } from "./ItemModal";
 import { MoveItemModal } from "./MoveItemModal";
 import { EquipmentModal } from "@features/inventory/components/EquipmentModal";
+import { tierAccent } from "@features/inventory/components/styles/equipmentTheme";
 import styles from "@styles/InventoryDashboard.module.css";
 
 interface ItemCardProps {
@@ -92,7 +93,7 @@ export function ItemCard({ itemId }: ItemCardProps) {
 
   return (
     <>
-      <div className={styles.itemCard}>
+      <div className={styles.itemCard} style={{ "--tier-accent": tierAccent(equipment.tier) } as CSSProperties}>
         {/* Header: name + action icons */}
         <div className={styles.itemCardHeader}>
           <span className={styles.itemCardName}>

@@ -4,8 +4,7 @@ import { IconArrowsRightLeft, IconFlask, IconShirt, IconTrash } from "@tabler/ic
 import { isConsumable } from "@utils/effects";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import type { EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
-import { SectionColor } from "@appTypes/SectionColor";
-import { tierTheme } from "./styles/equipmentTheme";
+import { tierAccent } from "./styles/equipmentTheme";
 import classes from "./InventoryItemCard.module.css";
 
 interface InventoryItemCardProps {
@@ -25,9 +24,6 @@ export function InventoryItemCard({ item, details, layout, onOpen, onRemove, onM
   const name = item.equipmentName || details?.name || "Unnamed Item";
   const quantity = item.quantity ?? 1;
   const consumable = isConsumable(name);
-  // "dark" (Common) is unreadable as text on the dark cards.
-  const accent = tierTheme(details?.tier).accent;
-  const accentColor = accent === SectionColor.Dark ? SectionColor.Gray : accent;
 
   const stats = [
     details?.weight ? `${details.weight} lb${quantity > 1 ? " ea" : ""}` : null,
@@ -40,7 +36,7 @@ export function InventoryItemCard({ item, details, layout, onOpen, onRemove, onM
   return (
     <div
       className={layout === "row" ? `${classes.item} ${classes.row}` : classes.item}
-      style={{ "--tier-accent": `var(--mantine-color-${accentColor}-5)` } as CSSProperties}
+      style={{ "--tier-accent": tierAccent(details?.tier) } as CSSProperties}
     >
       <button
         type="button"

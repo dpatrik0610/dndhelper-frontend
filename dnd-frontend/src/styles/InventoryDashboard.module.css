@@ -432,10 +432,11 @@
   transition: border-color var(--cyber-snap), box-shadow var(--cyber-snap), transform var(--cyber-snap);
 }
 
+/* --tier-accent is set per card from the item's tier. */
 .itemCard:hover {
   transform: translateY(-1px);
-  border-color: var(--cyber-accent);
-  box-shadow: inset 0 0 18px rgba(var(--cyber-accent-rgb), 0.12);
+  border-color: var(--tier-accent, var(--cyber-accent));
+  box-shadow: inset 0 0 18px color-mix(in srgb, var(--tier-accent, var(--cyber-accent)) 12%, transparent);
 }
 
 .itemCardHeader {
