@@ -15,11 +15,9 @@ import {
 } from "@tabler/icons-react";
 import { getAllCampaigns } from "@services/campaignService";
 import { useCurrentUserId, useIsSuperAdmin } from "@store/auth/authSelectors";
-import { useTabletopStore } from "@store/tabletop/tabletopStore";
+import { TABLE_CODE_LENGTH as CODE_LENGTH, useTabletopStore } from "@store/tabletop/tabletopStore";
 import type { Campaign } from "@appTypes/Campaign";
 import { tabletop } from "./useTabletopHub";
-
-const CODE_LENGTH = 6;
 
 const FEATURES = [
   { icon: IconHexagons, title: "Square & hex grids", text: "Tokens snap, move and measure in real time." },

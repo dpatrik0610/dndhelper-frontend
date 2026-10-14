@@ -31,6 +31,8 @@ export const initiativeOrder = (tokens: TableToken[]) =>
         ordinal(a.id, b.id)
     );
 
+export const TABLE_CODE_LENGTH = 6;
+
 export interface TabletopSession {
   tableId: string;
   campaignId: string;

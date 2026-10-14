@@ -3,6 +3,7 @@ import { showNotification } from "@components/Notification/Notification";
 import { bulkLongRest, getCharacterById, updateCharacter } from "@services/characterService";
 import { rollByExpression } from "@services/rollService";
 import { useCharacterStore } from "@store/character/characterStore";
+import { TABLE_CODE_LENGTH } from "@store/tabletop/tabletopStore";
 import type { Character } from "@appTypes/Character/Character";
 import { classSummary } from "@utils/hitDice";
 import { applyHp } from "@utils/hp";
@@ -141,6 +142,18 @@ const COMMANDS: Command[] = [
           navigate("/profile");
         },
       })),
+  },
+  {
+    name: "join",
+    usage: "/join <code>",
+    meta: "Join a tabletop session by its room code",
+    dmOnly: false,
+    suggest: (args, { navigate }) => {
+      const code = args.toUpperCase();
+      if (!new RegExp(`^[A-Z0-9]{${TABLE_CODE_LENGTH}}$`).test(code))
+        return [hint("join-hint", "/join <code>", `Type the ${TABLE_CODE_LENGTH}-character room code from your DM`)];
+      return [{ key: "join", title: `Join table ${code}`, meta: "Opens the tabletop", run: async () => navigate(`/table/${code}`) }];
+    },
   },
   {
     name: "longrest",
