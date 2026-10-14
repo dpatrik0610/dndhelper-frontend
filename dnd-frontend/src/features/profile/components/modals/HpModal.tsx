@@ -7,8 +7,7 @@ import { SectionColor } from "@appTypes/SectionColor";
 import { BaseModal } from "@components/BaseModal";
 import { computeEffects } from "@utils/effects";
 import { FormNumberInput } from "@components/common/FormNumberInput";
-import { concentrationDc, isConcentration } from "@utils/concentration";
-import { signed } from "@utils/effects";
+import { applyHp } from "@utils/hp";
 
 interface HpModalProps {
   opened: boolean;
@@ -39,62 +38,22 @@ export function HpModal({ opened, onClose }: HpModalProps) {
 
     setSaving(true);
     try {
-      let newHp = currentHp;
-      let newTempHp = tempHp;
-      let conditions = character.conditions;
-      let concentrationPrompt = "";
-      let notificationMessage = "";
-
-      if (amount >= 0) {
-        newHp = currentHp + amount;
-        notificationMessage = `Healed ${amount} HP (now ${newHp}/${maxHp}).`;
-      } else {
-        const damageVal = Math.abs(amount);
-        const actualTempHp = Math.max(tempHp, 0);
-        const damageToTemp = Math.min(damageVal, actualTempHp);
-        const remainingDamage = damageVal - damageToTemp;
-
-        newTempHp = actualTempHp - damageToTemp;
-        newHp = currentHp - remainingDamage;
-        notificationMessage = `Took ${damageVal} damage (now ${newHp}/${maxHp}).`;
-
-        // Down ends concentration outright; otherwise the player rolls the Con save.
-        if (conditions.some(isConcentration)) {
-          if (newHp <= 0) {
-            conditions = conditions.filter((c) => !isConcentration(c));
-            notificationMessage += " Concentration lost.";
-          } else {
-            const save = computeEffects(character).stats["save:con"];
-            const mode = save.roll === "normal" ? "" : ` with ${save.roll}`;
-            concentrationPrompt = `Make a Con save (${signed(save.value)}${mode}) against DC ${concentrationDc(damageVal)}, or remove Concentrating.`;
-          }
-        }
-      }
-
-      const updated = await updateCharacter({
-        ...character,
-        hitPoints: newHp,
-        temporaryHitPoints: newTempHp,
-        conditions,
-      });
+      const { patch, message, concentration } = applyHp(character, amount);
+      const updated = await updateCharacter({ ...character, ...patch });
 
       if (updated) {
         setCharacter(updated);
       } else {
-        updateCharacterLocal({
-          hitPoints: newHp,
-          temporaryHitPoints: newTempHp,
-          conditions,
-        });
+        updateCharacterLocal(patch);
       }
 
       showNotification({
         title: amount >= 0 ? "Healed" : "Damage Applied",
-        message: notificationMessage,
+        message,
         color: amount >= 0 ? SectionColor.Green : SectionColor.Red,
       });
-      if (concentrationPrompt) {
-        showNotification({ title: "Concentration check", message: concentrationPrompt, color: SectionColor.Yellow });
+      if (concentration) {
+        showNotification({ title: "Concentration check", message: concentration, color: SectionColor.Yellow });
       }
 
       onClose();

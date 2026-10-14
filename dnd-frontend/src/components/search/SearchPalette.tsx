@@ -2,30 +2,36 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Avatar, Loader } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
-import { IconBackpack, IconBook2, IconBox, IconGhost2, IconSearch, IconSword } from "@tabler/icons-react";
+import { IconBackpack, IconBook2, IconBox, IconGhost2, IconMoonStars, IconSearch, IconSword } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import { MonsterViewModal } from "@features/admin/MonsterManager/components/MonsterViewModal";
 import { EquipmentModal } from "@features/inventory/components/EquipmentModal";
 import { SpellModal } from "@features/profile/components/modals/SpellModal";
 import { monsterService } from "@services/Admin/monsterService";
+import { getCampaignCharacters } from "@services/campaignService";
 import { searchEquipmentByName } from "@services/equipmentService";
 import { getAllInventories } from "@services/inventoryService";
 import { getSpellById, getSpellNames } from "@services/spellService";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
+import { useCampaignStore } from "@store/campaign/campaignStore";
 import { useIsDm } from "@store/campaign/campaignSelectors";
+import { useCharacterStore } from "@store/character/characterStore";
 import { useSpellStore } from "@store/spell/spellStore";
-import { useDmView } from "@store/tabletop/tabletopStore";
+import { useDmView, useTabletopStore } from "@store/tabletop/tabletopStore";
+import type { Character } from "@appTypes/Character/Character";
 import type { Equipment } from "@appTypes/Equipment/Equipment";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { Monster } from "@appTypes/Monster";
 import { crLabel } from "@utils/monster";
+import { suggestCommands } from "./commands";
 import { useSearchStore } from "./searchStore";
 import "./search.css";
 
 type Scope = "all" | "spells" | "monsters" | "items" | "inventories";
-type Group = "Spells" | "Monsters" | "Items" | "Inventories" | "Carried";
+type Group = "Commands" | "Spells" | "Monsters" | "Items" | "Inventories" | "Carried";
 
 const GROUPS: Record<Group, { icon: typeof IconBook2; color: string }> = {
+  Commands: { icon: IconMoonStars, color: "violet" },
   Spells: { icon: IconBook2, color: "violet" },
   Monsters: { icon: IconGhost2, color: "red" },
   Items: { icon: IconSword, color: "yellow" },
@@ -89,6 +95,7 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
 
   const names = useSpellStore((s) => s.spellNames);
   const ref = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [debounced] = useDebouncedValue(query.trim(), 250);
   const [scope, setScope] = useState<Scope>("all");
@@ -98,6 +105,13 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
   const [searching, setSearching] = useState(0);
   const [opening, setOpening] = useState(false);
   const [active, setActive] = useState(0);
+  const [armed, setArmed] = useState<string | null>(null);
+  const tableCampaignId = useTabletopStore((s) => s.session?.campaignId);
+  const selectedCampaignId = useCampaignStore((s) => s.selectedId);
+  const campaignId = onTable ? tableCampaignId : selectedCampaignId;
+  const mine = useCharacterStore((s) => s.characters);
+  const [roster, setRoster] = useState<Character[] | null>(null);
+  const commandMode = query.trimStart().startsWith("/");
 
   // A click anywhere else closes it, and still does what it does there. The search buttons toggle on their own.
   useEffect(() => {
@@ -125,12 +139,50 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
       .catch(() => setInventories([]));
   }, [dmView]);
 
-  const wants = (s: Scope) => dmView && (scope === "all" || scope === s) && debounced.length >= 2;
+  useEffect(() => {
+    if (!commandMode || !dmView || !campaignId || roster) return;
+    setSearching((n) => n + 1);
+    getCampaignCharacters(campaignId)
+      .then((list) => setRoster((list ?? []).filter((c) => c.id)))
+      .catch(() => setRoster([]))
+      .finally(() => setSearching((n) => n - 1));
+  }, [commandMode, dmView, campaignId, roster]);
+
+  const wants = (s: Scope) => dmView && !debounced.startsWith("/") && (scope === "all" || scope === s) && debounced.length >= 2;
   useServerSearch(wants("monsters"), debounced, (q) => monsterService.search({ query: q, pageSize: LIMIT }).then((r) => r.items), setMonsters, setSearching);
   useServerSearch(wants("items"), debounced, searchEquipmentByName, setItems, setSearching);
 
   const q = query.trim().toLowerCase();
-  const show = (s: Scope) => !!q && (scope === "all" || scope === s);
+  const show = (s: Scope) => !!q && !commandMode && (scope === "all" || scope === s);
+
+  const commandHits: Hit[] = !commandMode
+    ? []
+    : suggestCommands(query, { roster: roster ?? [], mine, navigate }, dmView && !!campaignId).map((c) => ({
+        key: `command-${c.key}`,
+        group: "Commands",
+        title: armed === c.key ? `${c.title}: press Enter again to confirm` : c.title,
+        meta: c.meta,
+        imageUrl: c.imageUrl,
+        pick: async () => {
+          if (c.complete !== undefined) {
+            setQuery(c.complete);
+            setActive(0);
+            setArmed(null);
+            return inputRef.current?.focus();
+          }
+          if (!c.run) return;
+          if (c.confirm && armed !== c.key) return setArmed(c.key);
+          setOpening(true);
+          try {
+            await c.run();
+            close();
+          } catch (err) {
+            showNotification({ title: "Command failed", message: err instanceof Error ? err.message : String(err), color: "red" });
+          } finally {
+            setOpening(false);
+          }
+        },
+      }));
 
   const spellHits: Hit[] = !show("spells")
     ? []
@@ -214,7 +266,7 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
     .sort((a, b) => byRelevance(q)(a.title, b.title))
     .slice(0, LIMIT);
 
-  const hits = [...spellHits, ...monsterHits, ...itemHits, ...inventoryHits, ...carriedHits];
+  const hits = [...commandHits, ...spellHits, ...monsterHits, ...itemHits, ...inventoryHits, ...carriedHits];
   const current = Math.min(active, Math.max(0, hits.length - 1));
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -228,13 +280,15 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
 
   const empty = !q
     ? dmView
-      ? "Search spells, monsters, items and inventories"
-      : "Search spells"
-    : searching && !hits.length
-      ? null
-      : !hits.length
-        ? `Nothing matches “${query.trim()}”`
-        : null;
+      ? "Search spells, monsters, items and inventories · / for commands"
+      : "Search spells · / for commands"
+    : commandMode && !hits.length && !searching
+      ? `No command or match for “${query.trim()}”`
+      : searching && !hits.length
+        ? null
+        : !hits.length
+          ? `Nothing matches “${query.trim()}”`
+          : null;
 
   return (
     <div className="gs-layer">
@@ -242,6 +296,7 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
         <div className="gs-bar">
           <IconSearch size={18} className="gs-icon" />
           <input
+            ref={inputRef}
             autoFocus
             className="gs-input"
             placeholder={dmView ? "Search spells, monsters, items, inventories…" : "Search spells…"}
@@ -249,6 +304,7 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
             onChange={(e) => {
               setQuery(e.currentTarget.value);
               setActive(0);
+              setArmed(null);
             }}
             onKeyDown={onKeyDown}
             role="combobox"
