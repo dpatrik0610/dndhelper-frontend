@@ -1,4 +1,4 @@
-export const CampaignRoles = { Dm: "DM", Player: "Player" } as const;
+export const CampaignRoles = { Dm: "DM", Player: "Player", Poll: "Poll" } as const;
 
 /** Core content types a campaign can import (read-only, shared). */
 export const CORE_CONTENT_TYPES = ["Spells", "Equipment", "Monsters", "Rules"] as const;
@@ -34,6 +34,10 @@ export interface Campaign {
     characterIds: string[];
     members: CampaignMember[];
     inviteCode: string | null;
+    hasTableWebhook: boolean;
+    hasPollWebhook: boolean;
+    tablePingRoleId: string | null;
+    pollPingRoleId: string | null;
     coreImports: CoreContentType[];
     /** Mirror of the DM members, kept by the server. */
     ownerIds: string[] | null;

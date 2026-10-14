@@ -24,7 +24,6 @@ import classes from "@features/polls/Polls.module.css";
 
 interface PollCardProps {
   poll: Poll;
-  isDm: boolean;
   now: number;
   onEdit: (poll: Poll) => void;
   onDelete: (poll: Poll) => void;
@@ -37,7 +36,7 @@ const fail = (err: unknown) =>
     color: SectionColor.Red,
   });
 
-export function PollCard({ poll, isDm, now, onEdit, onDelete }: PollCardProps) {
+export function PollCard({ poll, now, onEdit, onDelete }: PollCardProps) {
   // null = no unsaved picks: show the vote the server has.
   const [draft, setDraft] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
@@ -128,7 +127,7 @@ export function PollCard({ poll, isDm, now, onEdit, onDelete }: PollCardProps) {
 
         {busy && <Loader size="xs" color="var(--theme-color-accent-primary)" />}
 
-        {isDm && (
+        {poll.canManage && (
           <Menu position="bottom-end" withinPortal classNames={{ dropdown: "glassy-dropdown" }}>
             <Menu.Target>
               <button type="button" className={classes.iconButton} aria-label={`Manage ${poll.title}`}>

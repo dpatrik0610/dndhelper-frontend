@@ -1,5 +1,5 @@
 import { ActionIcon, Badge, Chip, CopyButton, Group, MultiSelect, Stack, Text, Tooltip } from "@mantine/core";
-import { IconCheck, IconCopy, IconLock, IconRefresh, IconUserMinus, IconUsers } from "@tabler/icons-react";
+import { IconBrandDiscord, IconCheck, IconCopy, IconLock, IconRefresh, IconUserMinus, IconUsers } from "@tabler/icons-react";
 import { useCallback, useEffect, useState } from "react";
 import { useCampaignStore } from "@store/campaign/campaignStore";
 import { AdminPanel } from "@features/admin/components/AdminPage";
@@ -10,15 +10,17 @@ import {
   regenerateInviteCode,
   removeCampaignMember,
   setCampaignCoreImports,
+  setCampaignDiscordWebhook,
   setCampaignMemberRoles,
 } from "@services/campaignService";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { loadSpells } from "@utils/loadSpells";
+import { GlassyTextInput } from "@components/common/GlassyTextInput";
 
-const ROLE_OPTIONS = [CampaignRoles.Dm, CampaignRoles.Player];
+const ROLE_OPTIONS = [CampaignRoles.Dm, CampaignRoles.Player, CampaignRoles.Poll];
 
-/** DM tools for the current campaign: invite code, member roles, imported core content. */
+/** DM tools for the current campaign: invite code, member roles, imported core content, Discord webhook. */
 export function CampaignMembersPanel() {
   const campaign = useCampaignStore((s) => s.selectedCampaign());
   const patch = useCampaignStore((s) => s.patch);
@@ -47,8 +49,10 @@ export function CampaignMembersPanel() {
       patch(await action());
       await loadMembers();
       if (done) showNotification({ title: done, message: campaign.name, color: SectionColor.Green });
+      return true;
     } catch (err) {
       showNotification({ title: "Not saved", message: (err as Error).message, color: SectionColor.Red });
+      return false;
     }
   };
 
@@ -142,6 +146,79 @@ export function CampaignMembersPanel() {
           ))}
         </Group>
       </Chip.Group>
+
+      <DiscordWebhookRow
+        key={`table-${campaign.tablePingRoleId ?? ""}`}
+        title="Tabletop Discord channel"
+        hint={'"Notify players" posts the table invite, with its join link, here.'}
+        connected={campaign.hasTableWebhook}
+        roleId={campaign.tablePingRoleId}
+        onSave={(changes, done) => apply(() => setCampaignDiscordWebhook(campaign.id, "Table", changes), done)}
+      />
+      <DiscordWebhookRow
+        key={`poll-${campaign.pollPingRoleId ?? ""}`}
+        title="Polls Discord channel"
+        hint="New polls and announced results are posted here."
+        connected={campaign.hasPollWebhook}
+        roleId={campaign.pollPingRoleId}
+        onSave={(changes, done) => apply(() => setCampaignDiscordWebhook(campaign.id, "Poll", changes), done)}
+      />
     </AdminPanel>
+  );
+}
+
+interface DiscordWebhookRowProps {
+  title: string;
+  hint: string;
+  connected: boolean;
+  roleId: string | null;
+  onSave: (changes: { url?: string; roleId?: string }, done: string) => Promise<boolean>;
+}
+
+function DiscordWebhookRow({ title, hint, connected, roleId, onSave }: DiscordWebhookRowProps) {
+  const [url, setUrl] = useState("");
+  const [role, setRole] = useState(roleId ?? "");
+  const urlChanged = url.trim() !== "";
+  const roleChanged = role.trim() !== (roleId ?? "");
+
+  const save = () =>
+    onSave(
+      { url: urlChanged ? url : undefined, roleId: roleChanged ? role : undefined },
+      urlChanged ? `${title} connected` : "Ping role saved",
+    ).then((saved) => saved && setUrl(""));
+
+  return (
+    <>
+      <Group mt="md" gap="xs" align="center">
+        <IconBrandDiscord size={16} color="var(--cyber-accent-3)" />
+        <Text size="sm" fw={600}>{title}</Text>
+        <Text size="xs" c="dimmed">{hint}</Text>
+        {connected && <Badge size="sm" variant="light" color="neon">Connected</Badge>}
+      </Group>
+      <Group mt="xs" gap="xs" wrap="nowrap" align="flex-end">
+        <GlassyTextInput
+          aria-label={`${title} webhook URL`}
+          placeholder={connected ? "Paste a new webhook URL to replace it" : "https://discord.com/api/webhooks/…"}
+          value={url}
+          onChange={(e) => setUrl(e.currentTarget.value)}
+          style={{ flex: 1 }}
+        />
+        <GlassyTextInput
+          aria-label={`${title} role to ping`}
+          placeholder="@role ID to ping (optional)"
+          value={role}
+          onChange={(e) => setRole(e.currentTarget.value)}
+          w={220}
+        />
+        <button type="button" className="glass-btn-primary" disabled={!urlChanged && !roleChanged} onClick={save}>
+          Save
+        </button>
+        {connected && (
+          <button type="button" className="glass-btn-secondary" onClick={() => onSave({ url: "", roleId: "" }, `${title} disconnected`)}>
+            Remove
+          </button>
+        )}
+      </Group>
+    </>
   );
 }

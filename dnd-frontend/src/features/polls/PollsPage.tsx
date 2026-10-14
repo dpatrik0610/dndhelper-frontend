@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Tabs, Text } from "@mantine/core";
 import { IconAlertCircle, IconChartBar, IconChartPie, IconHourglass, IconLock, IconPlus } from "@tabler/icons-react";
 import { isPollOpen, type Poll } from "@appTypes/Poll";
-import { useCurrentCampaignId, useIsDm } from "@store/campaign/campaignSelectors";
+import { CampaignRoles } from "@appTypes/Campaign";
+import { useCurrentCampaignId, useHasCampaignRole, useIsDm } from "@store/campaign/campaignSelectors";
 import { usePollStore } from "@store/poll/pollStore";
 import { BaseModal } from "@components/BaseModal";
 import { CardGridSkeleton } from "@components/common/Skeletons";
@@ -19,6 +20,8 @@ type PollTab = "active" | "closed" | "results";
 export default function PollsPage() {
   const campaignId = useCurrentCampaignId();
   const isDm = useIsDm();
+  const isPollMaker = useHasCampaignRole(CampaignRoles.Poll);
+  const canCreate = isDm || isPollMaker;
   const polls = usePollStore((s) => s.polls);
   const loading = usePollStore((s) => s.loading);
 
@@ -81,7 +84,7 @@ export default function PollsPage() {
       <div className={`${classes.panel} ${classes.empty}`}>
         <IconChartBar size={34} className={classes.emptyIcon} />
         <p className={classes.muted}>{emptyText}</p>
-        {isDm && tab === "active" && (
+        {canCreate && tab === "active" && (
           <button type="button" className={classes.primaryButton} onClick={() => openEditor(null)}>
             <IconPlus size={16} /> Start a poll
           </button>
@@ -90,7 +93,7 @@ export default function PollsPage() {
     ) : (
       <div className={classes.grid}>
         {items.map((poll) => (
-          <PollCard key={poll.id} poll={poll} isDm={isDm} now={now} onEdit={openEditor} onDelete={setDeleting} />
+          <PollCard key={poll.id} poll={poll} now={now} onEdit={openEditor} onDelete={setDeleting} />
         ))}
       </div>
     );
@@ -108,7 +111,7 @@ export default function PollsPage() {
             {awaitingMyVote > 0 && ` · ${awaitingMyVote} waiting for your vote`}
           </p>
         </div>
-        {isDm && (
+        {canCreate && (
           <button type="button" className={classes.primaryButton} onClick={() => openEditor(null)}>
             <IconPlus size={16} /> New poll
           </button>
@@ -135,7 +138,7 @@ export default function PollsPage() {
         </Tabs.List>
 
         <Tabs.Panel value="active">
-          {list(active, isDm ? "No open polls. Ask the party something!" : "No open polls right now.")}
+          {list(active, canCreate ? "No open polls. Ask the party something!" : "No open polls right now.")}
         </Tabs.Panel>
         <Tabs.Panel value="closed">{list(closed, "No closed polls yet.")}</Tabs.Panel>
         <Tabs.Panel value="results">

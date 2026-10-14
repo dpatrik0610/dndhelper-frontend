@@ -176,13 +176,13 @@ function RoomTab() {
 
   const invite = async () => {
     setInviting(true);
-    const count = await tabletop.invitePlayers();
+    const result = await tabletop.invitePlayers();
     setInviting(false);
-    if (count !== undefined)
-      showNotification({
-        message: count ? `Sent an invite to ${count} player${count === 1 ? "" : "s"}.` : "No players to invite in this campaign.",
-        color: count ? "green" : "yellow",
-      });
+    if (!result) return;
+    const { players, discord } = result;
+    const inApp = players ? `Sent an invite to ${players} player${players === 1 ? "" : "s"}.` : "No players to invite in this campaign.";
+    const posted = discord === true ? " Posted to Discord." : discord === false ? " Couldn't post to Discord." : "";
+    showNotification({ message: inApp + posted, color: discord === false ? "red" : players || discord ? "green" : "yellow" });
   };
 
   return (
@@ -215,7 +215,7 @@ function RoomTab() {
 
       <PeopleCard />
 
-      <Card icon={IconBell} title="Invite the party" description="Online players with a character in this campaign get a notification that opens the table.">
+      <Card icon={IconBell} title="Invite the party" description="Online players with a character in this campaign get a notification that opens the table. If the campaign has a tabletop Discord channel, the invite is posted there too.">
         <Button fullWidth size="md" className="tt-cta" leftSection={<IconBell size={17} />} onClick={invite} loading={inviting}>
           Notify players
         </Button>

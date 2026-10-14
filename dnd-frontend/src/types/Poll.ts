@@ -38,6 +38,7 @@ export interface Poll {
   voterCount: number;
   memberCount: number;
   resultsHidden: boolean;
+  canManage: boolean;
   /** Votes per option id; null while results are hidden. */
   tally: Record<string, number> | null;
   /** Who voted for what; null when anonymous or hidden. */

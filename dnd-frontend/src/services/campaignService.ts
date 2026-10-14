@@ -66,6 +66,14 @@ export async function setCampaignCoreImports(id: string, types: CoreContentType[
   return apiClient<Campaign>(`/Campaign/${id}/core-imports`, { method: "PUT", body: types })
 }
 
+export async function setCampaignDiscordWebhook(
+  id: string,
+  target: "Table" | "Poll",
+  changes: { url?: string; roleId?: string },
+): Promise<Campaign> {
+  return apiClient<Campaign>(`/Campaign/${id}/discord-webhook`, { method: "PUT", body: { target, ...changes } })
+}
+
 /** Superadmin only: move a campaign's spell/item/monster/rule into shared, read-only core content. */
 export async function promoteToCore(type: CoreContentType, id: string): Promise<void> {
   return apiClient<void>(`/core/${type}/${id}/promote`, { method: "POST" })

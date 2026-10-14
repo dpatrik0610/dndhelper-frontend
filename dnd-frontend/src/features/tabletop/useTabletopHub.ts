@@ -110,7 +110,7 @@ export const tabletop = {
   resetFog: (revealAll: boolean) => call("ResetFog", revealAll),
   roll: (request: { label?: string; expressions: string[]; as?: string; private?: boolean }) =>
     call<TableLogEntry>("Roll", { private: false, ...request }),
-  invitePlayers: () => call<number>("InvitePlayers"),
+  invitePlayers: () => call<{ players: number; discord: boolean | null }>("InvitePlayers"),
   listEncounters: () => call<TableEncounterSummary[]>("ListEncounters"),
   startEncounter: async (name: string) => (await invoke("StartEncounter", [name || null])).ok,
   endEncounter: async () => (await invoke("EndEncounter", [])).ok,
