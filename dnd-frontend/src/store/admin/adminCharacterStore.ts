@@ -1,7 +1,7 @@
 
 import { create } from "zustand";
 import { getCampaignCharacters } from "@services/campaignService";
-import { updateCharacter as updateCharacterService, longrest as longrestService, bulkLongRest } from "@services/characterService";
+import { updateCharacter as updateCharacterService, longrest as longrestService, bulkLongRest, getCharacterById } from "@services/characterService";
 
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
@@ -19,6 +19,11 @@ interface AdminCharacterStore {
 
   select: (id: string | null) => void;
   clearStorage: () => void;
+}
+
+async function refresh(set: (fn: (s: AdminCharacterStore) => Partial<AdminCharacterStore>) => void, ids: string[]) {
+  const fresh = (await Promise.all(ids.map(getCharacterById))).filter((c): c is Character => !!c);
+  set((state) => ({ characters: state.characters.map((c) => fresh.find((f) => f.id === c.id) ?? c) }));
 }
 
 export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => ({
@@ -93,17 +98,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
     try {
       const response = await longrestService(id);
       if (response.success) {
-        set((state) => ({
-          characters: state.characters.map(c => 
-            c.id === id ? { 
-              ...c, 
-              hitPoints: c.maxHitPoints, 
-              temporaryHitPoints: 0, 
-              deathSavesSuccesses: 0, 
-              deathSavesFailures: 0 
-            } : c
-          ),
-        }));
+        await refresh(set, [id]);
       } else {
         throw new Error(response.message);
       }
@@ -127,17 +122,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
       const { successful, failed } = await bulkLongRest(characterIds);
 
       if (successful.length > 0) {
-        set((state) => ({
-          characters: state.characters.map(c =>
-            successful.includes(c.id!) ? {
-              ...c,
-              hitPoints: c.maxHitPoints,
-              temporaryHitPoints: 0,
-              deathSavesSuccesses: 0,
-              deathSavesFailures: 0
-            } : c
-          ),
-        }));
+        await refresh(set, successful);
 
         showNotification({
           title: "Group Long Rest Complete",

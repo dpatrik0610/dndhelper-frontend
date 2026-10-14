@@ -64,6 +64,7 @@ const placeCharacter = tabletop.placeCharacter;
 import { CHARACTER_DRAG_TYPE, TOKEN_SWATCHES } from "./tools";
 import { EncounterSection } from "./EncounterSection";
 import { classSummary } from "@utils/hitDice";
+import { computeEffects } from "@utils/effects";
 
 const GRID_SWATCHES = ["#ffffff33", "#ffffff66", "#00000066", "#a78bfa66", "#f5c45166", "#22d3ee55"];
 const IMAGE_TYPES = "image/png,image/jpeg,image/webp,image/gif";
@@ -773,6 +774,7 @@ function PartyCard({ cellSize }: { cellSize: number }) {
 function RosterCard({ character: c, placed, cellSize }: { character: Character; placed: boolean; cellSize: number }) {
   const avatarRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
+  const { stats } = computeEffects(c);
 
   const onDragStart = (e: DragEvent) => {
     e.dataTransfer.setData(CHARACTER_DRAG_TYPE, c.id!);
@@ -804,7 +806,7 @@ function RosterCard({ character: c, placed, cellSize }: { character: Character; 
           {[c.race, classSummary(c)].filter(Boolean).join(" ")} · Lv {c.level ?? 1}
         </span>
         <span className="tt-roster-hp">
-          HP {c.hitPoints}/{c.maxHitPoints} · AC {c.armorClass}
+          HP {c.hitPoints}/{stats.maxHp.value} · AC {stats.ac.value}
         </span>
       </div>
       {placed ? (

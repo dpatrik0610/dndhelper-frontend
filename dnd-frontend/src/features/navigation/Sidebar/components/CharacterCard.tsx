@@ -5,6 +5,7 @@ import { CharacterSelectModal } from "@features/home/components/CharacterSelectM
 import type { Character } from "@appTypes/Character/Character";
 import classes from "./CharacterCard.module.css";
 import { classSummary } from "@utils/hitDice";
+import { computeEffects } from "@utils/effects";
 
 /** Active character at the top of the sidebar: portrait, name, class line, HP. Click to switch characters. */
 export function CharacterCard() {
@@ -13,7 +14,8 @@ export function CharacterCard() {
   const { setCharacter } = useCharacterCoreActions();
   const [selecting, setSelecting] = useState(false);
 
-  const hpPercent = character?.maxHitPoints ? Math.min(100, Math.max(0, (character.hitPoints / character.maxHitPoints) * 100)) : 0;
+  const maxHp = character ? computeEffects(character).stats.maxHp.value : 0;
+  const hpPercent = character && maxHp ? Math.min(100, Math.max(0, (character.hitPoints / maxHp) * 100)) : 0;
   const subtitle = character ? [character.race, classSummary(character)].filter(Boolean).join(" · ") : "Choose one to begin";
 
   return (
@@ -37,7 +39,7 @@ export function CharacterCard() {
           <span className={classes.name}>{character?.name ?? "No character"}</span>
           <span className={classes.subtitle}>{subtitle}</span>
           {character && (
-            <span className={classes.hp} title={`HP ${character.hitPoints}/${character.maxHitPoints}`}>
+            <span className={classes.hp} title={`HP ${character.hitPoints}/${maxHp}`}>
               <span className={classes.hpFill} style={{ width: `${hpPercent}%` }} />
             </span>
           )}

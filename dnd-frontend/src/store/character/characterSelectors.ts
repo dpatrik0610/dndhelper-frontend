@@ -6,11 +6,6 @@ import { useShallow } from "zustand/react/shallow";
 export const useCurrentCharacter = () => useCharacterStore((s) => s.character);
 export const useCharacterList = () => useCharacterStore((s) => s.characters);
 export const useCharacterName = () => useCharacterStore((s) => s.character?.name ?? "");
-export const useCharacterHp = () => useCharacterStore(useShallow((s) => s.character ? {
-  current: s.character.hitPoints,
-  max: s.character.maxHitPoints,
-  temp: s.character.temporaryHitPoints
-} : null));
 
 // Returns the actions so components can destructure without re-rendering on every state change
 

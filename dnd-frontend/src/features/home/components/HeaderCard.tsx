@@ -16,6 +16,7 @@ import type { Character } from "@appTypes/Character/Character";
 import { XpProgressCard } from "@components/common/XpProgressCard";
 import CustomBadge from "@components/common/CustomBadge";
 import { classSummary } from "@utils/hitDice";
+import { computeEffects } from "@utils/effects";
 
 interface Props {
   campaignName: string | null;
@@ -33,6 +34,8 @@ export function HeaderCard({
   characterSelector,
   isMobile = false,
 }: Props) {
+  const stats = character ? computeEffects(character).stats : null;
+
   return (
     <Paper
       radius="lg"
@@ -105,10 +108,10 @@ export function HeaderCard({
                   : "Select a character to initialize your adventure!"}
               </Text>
 
-              {character && (
+              {character && stats && (
                 <Group gap="xs" mt={4} wrap="wrap">
-                  <CustomBadge label={`HP ${character.hitPoints}/${character.maxHitPoints}`} variant="outline" color="red" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
-                  <CustomBadge label={`AC ${character.armorClass}`} variant="outline" color="yellow" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
+                  <CustomBadge label={`HP ${character.hitPoints}/${stats.maxHp.value}`} variant="outline" color="red" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
+                  <CustomBadge label={`AC ${stats.ac.value}`} variant="outline" color="yellow" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
                   <CustomBadge label={`Inspirations: ${character.inspiration ?? 0}`} variant="outline" color="violet" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
                 </Group>
               )}
