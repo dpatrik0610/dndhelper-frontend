@@ -27,9 +27,7 @@ import type {
 const API_BASE: string = import.meta.env.VITE_API_BASE || "https://localhost:7222/api";
 const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
 
-/** Uploaded table images are stored as "/api/tabletop/images/{id}" and served by the API origin. */
-export const resolveImageUrl = (url: string | null | undefined) =>
-  url ? (url.startsWith("/api/") ? API_ORIGIN + url : url) : undefined;
+export const resolveImageUrl = (url: string | null | undefined) => url || undefined;
 
 /** Maps land in images/maps/, tokens in images/tokens/ on the CDN. */
 export async function uploadTableImage(tableId: string, file: File, kind: "map" | "token"): Promise<string | null> {
