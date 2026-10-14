@@ -20,6 +20,7 @@ import { type SidebarThemeVariant, getActiveThemeClass } from "@appTypes/ThemeTy
 import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { PageSkeleton } from "@components/common/Skeletons";
+import { GlobalSearch } from "@components/search/GlobalSearch";
 
 // Route chunks: each import is shared by lazy() and the idle-time prefetch below.
 const pages = {
@@ -274,6 +275,8 @@ function AppRoutes() {
           </Suspense>
         </div>
       </AppShell.Main>
+
+      {activeToken && !hideSidebarRoutes.includes(location.pathname) && <GlobalSearch />}
 
       {showFloatingChat && (
         <Suspense fallback={null}>

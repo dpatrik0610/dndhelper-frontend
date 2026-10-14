@@ -78,8 +78,6 @@ interface TabletopState {
   /** A player's full-screen look at a monster or NPC token's art. */
   imagePreview: { url: string; name: string } | null;
   settingsOpen: boolean;
-  /** The centered search popup (spells, monsters…). */
-  searchOpen: boolean;
   /** DM only: the monster panel under the top bar. */
   monsterPanelOpen: boolean;
   /** DM only: right-click menu on a token, at a viewport point. */
@@ -143,7 +141,6 @@ const initial: TabletopState = {
   profileCharacterId: null,
   imagePreview: null,
   settingsOpen: false,
-  searchOpen: false,
   monsterPanelOpen: false,
   tokenMenu: null,
   focusTokenId: null,
