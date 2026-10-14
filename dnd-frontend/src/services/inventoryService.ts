@@ -35,6 +35,21 @@ export async function deleteInventory(id: string): Promise<void> {
   await apiClient(`${baseUrl}/${id}`, { method: "DELETE" });
 }
 
+/** Random mode rolls `count` items (tier first, at fixed rates); a non-empty `tierCounts` picks exact counts per tier instead. */
+export interface LootRequest {
+  name: string;
+  campaignId?: string | null;
+  characterIds: string[];
+  count: number;
+  tierCounts?: Record<string, number>;
+  tags: string[];
+}
+
+/** Rolls loot server-side into a new inventory with the given name. */
+export async function generateLoot(request: LootRequest): Promise<Inventory> {
+  return apiClient(`${baseUrl}/loot`, { method: "POST", body: request });
+}
+
 /** Sets the inventory's characters; the server keeps each character's inventoryIds in step. */
 export async function setInventoryCharacters(inventoryId: string, characterIds: string[]): Promise<Inventory> {
   return apiClient(`${baseUrl}/${inventoryId}/characters`, { method: "PUT", body: characterIds });

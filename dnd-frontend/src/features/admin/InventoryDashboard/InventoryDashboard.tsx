@@ -15,6 +15,7 @@ import {
 import {
   IconArchive,
   IconBox,
+  IconDiamond,
   IconFilterOff,
   IconInbox,
   IconPlus,
@@ -31,6 +32,7 @@ import type { Inventory } from "@appTypes/Inventory/Inventory";
 import type { InventoryItem } from "@appTypes/Inventory/InventoryItem";
 import { InventoryWorkspace } from "./components/InventoryWorkspace";
 import { InventoryListItem } from "./components/InventoryListItem";
+import { LootModal } from "./components/LootModal";
 import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import styles from "@styles/InventoryDashboard.module.css";
 
@@ -89,6 +91,7 @@ export function InventoryDashboard() {
   const [selectedCharacterFilter, setSelectedCharacterFilter] = useState<string | null>("all");
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [lootModalOpen, setLootModalOpen] = useState(false);
   const [newInventoryName, setNewInventoryName] = useState("");
   const [newInventoryCharId, setNewInventoryCharId] = useState<string | null>("none");
   const [newInventoryCampaignId, setNewInventoryCampaignId] = useState<string | null>("none");
@@ -307,8 +310,10 @@ export function InventoryDashboard() {
               )}
             </Stack>
 
-            <Group gap="xs" grow>
+            {/* No `grow`: it caps every child at a third, clipping the button labels. */}
+            <Group gap="xs" wrap="nowrap">
               <Button
+                style={{ flex: 1 }}
                 variant="filled"
                 color="neon"
                 leftSection={<IconPlus size={14} />}
@@ -316,6 +321,15 @@ export function InventoryDashboard() {
                 size="xs"
               >
                 Add
+              </Button>
+              <Button
+                style={{ flex: 1 }}
+                className="glass-btn-secondary"
+                leftSection={<IconDiamond size={14} />}
+                onClick={() => setLootModalOpen(true)}
+                size="xs"
+              >
+                Loot
               </Button>
               <Tooltip label="Refresh" withArrow>
                 <ActionIcon
@@ -421,6 +435,12 @@ export function InventoryDashboard() {
           </Group>
         </Stack>
       </AdminGlassModal>
+
+      <LootModal
+        opened={lootModalOpen}
+        onClose={() => setLootModalOpen(false)}
+        characters={characters.map((c) => ({ value: c.id!, label: c.name || "Unnamed" }))}
+      />
 
       <AdminGlassModal
         opened={deleteConfirmOpen}

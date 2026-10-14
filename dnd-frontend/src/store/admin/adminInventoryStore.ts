@@ -13,6 +13,8 @@ import {
   moveItem as moveItemService,
   addOrIncrementExisting,
   getAllInventories,
+  generateLoot as generateLootService,
+  type LootRequest,
   type MoveItemRequest,
   type ModifyEquipmentAmount,
 } from "@services/inventoryService";
@@ -40,6 +42,7 @@ interface AdminInventoryStore {
   select: (id: string | null) => void;
 
   create: (characterIds: string[] | null, name: string) => Promise<Inventory>;
+  generateLoot: (request: LootRequest) => Promise<Inventory>;
   duplicate: (inventoryId: string) => Promise<void>;
   rename: (id: string, name: string) => Promise<void>;
   remove: (id: string) => Promise<void>;
@@ -208,6 +211,18 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         color: SectionColor.Green,
       });
 
+      return created;
+    },
+
+    generateLoot: async (request) => {
+      const created = await generateLootService(request);
+      get().applyInventoryUpdate(created);
+      set({ selected: created });
+      showNotification({
+        title: "Loot generated",
+        message: `${created.name}: ${created.items?.length ?? 0} different items.`,
+        color: SectionColor.Green,
+      });
       return created;
     },
 
