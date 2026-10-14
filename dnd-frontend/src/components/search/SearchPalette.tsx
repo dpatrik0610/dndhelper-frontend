@@ -13,6 +13,7 @@ import { searchEquipmentByName } from "@services/equipmentService";
 import { getAllInventories } from "@services/inventoryService";
 import { getSpellById, getSpellNames } from "@services/spellService";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
+import { useCurrentUserId } from "@store/auth/authSelectors";
 import { useCampaignStore } from "@store/campaign/campaignStore";
 import { useIsDm } from "@store/campaign/campaignSelectors";
 import { useCharacterStore } from "@store/character/characterStore";
@@ -82,7 +83,7 @@ export default function SearchPalette() {
 }
 
 /**
- * The centered search: spells for everyone; monsters, items and inventories (by name, or by an item inside) for the DM.
+ * The centered search: spells and their own carried items for everyone; monsters, items and inventories (by name, or by an item inside) for the DM.
  * Escape or a click anywhere else closes it; picking a result opens its card.
  */
 function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMonster: (m: Monster) => void; onItem: (id: string) => void }) {
@@ -110,6 +111,7 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
   const selectedCampaignId = useCampaignStore((s) => s.selectedId);
   const campaignId = onTable ? tableCampaignId : selectedCampaignId;
   const mine = useCharacterStore((s) => s.characters);
+  const userId = useCurrentUserId();
   const [roster, setRoster] = useState<Character[] | null>(null);
   const commandMode = query.trimStart().startsWith("/");
 
@@ -133,11 +135,10 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
 
   // Inventories are few: fetch the campaign's once per open and filter here. The server scopes them to what the caller may see.
   useEffect(() => {
-    if (!dmView) return;
     getAllInventories()
       .then((list) => setInventories(list ?? []))
       .catch(() => setInventories([]));
-  }, [dmView]);
+  }, []);
 
   useEffect(() => {
     if (!commandMode || !dmView || !campaignId || roster) return;
@@ -238,8 +239,9 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
     navigate("/dashboard/inventories");
     close();
   };
-  const searchInventories = dmView && show("inventories");
-  const inventoryHits: Hit[] = (searchInventories ? inventories : [])
+  const searchInventories = show("inventories");
+  const owned = dmView ? inventories : inventories.filter((inv) => !!userId && inv.ownerIds?.includes(userId));
+  const inventoryHits: Hit[] = (dmView && searchInventories ? inventories : [])
     .filter((inv) => (inv.name ?? "").toLowerCase().includes(q))
     .sort((a, b) => byRelevance(q)(a.name ?? "", b.name ?? ""))
     .slice(0, LIMIT)
@@ -251,16 +253,20 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
       pick: () => openInventory(inv),
     }));
   // Where an item is: each match inside an inventory, "Longsword ×2 · in Bram's pack".
-  const carriedHits: Hit[] = (searchInventories ? inventories : [])
+  const carriedHits: Hit[] = (searchInventories ? owned : [])
     .flatMap((inv) =>
       (inv.items ?? [])
-        .filter((it) => (it.equipmentName ?? "").toLowerCase().includes(q))
+        .filter((it) => (dmView || it.equipmentId) && (it.equipmentName ?? "").toLowerCase().includes(q))
         .map((it) => ({
           key: `carried-${inv.id}-${it.equipmentId}`,
           group: "Carried" as const,
           title: it.equipmentName!,
           meta: `×${it.quantity ?? 1} · in ${inv.name || "Inventory"}`,
-          pick: () => openInventory(inv),
+          pick: () => {
+            if (dmView) return openInventory(inv);
+            onItem(it.equipmentId!);
+            close();
+          },
         })),
     )
     .sort((a, b) => byRelevance(q)(a.title, b.title))
@@ -281,7 +287,7 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
   const empty = !q
     ? dmView
       ? "Search spells, monsters, items and inventories · / for commands"
-      : "Search spells · / for commands"
+      : "Search spells and your items · / for commands"
     : commandMode && !hits.length && !searching
       ? `No command or match for “${query.trim()}”`
       : searching && !hits.length
@@ -299,7 +305,7 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
             ref={inputRef}
             autoFocus
             className="gs-input"
-            placeholder={dmView ? "Search spells, monsters, items, inventories…" : "Search spells…"}
+            placeholder={dmView ? "Search spells, monsters, items, inventories…" : "Search spells and your items…"}
             value={query}
             onChange={(e) => {
               setQuery(e.currentTarget.value);
