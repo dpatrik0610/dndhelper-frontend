@@ -3,7 +3,6 @@ import { computeEffects } from "@utils/effects";
 import { useCharacterStore } from "./characterStore";
 import { useShallow } from "zustand/react/shallow";
 
-// --- Data Selectors ---
 export const useCurrentCharacter = () => useCharacterStore((s) => s.character);
 export const useCharacterList = () => useCharacterStore((s) => s.characters);
 export const useCharacterName = () => useCharacterStore((s) => s.character?.name ?? "");
@@ -13,8 +12,7 @@ export const useCharacterHp = () => useCharacterStore(useShallow((s) => s.charac
   temp: s.character.temporaryHitPoints
 } : null));
 
-// --- Action Selectors ---
-// We use a selector to return the actions so components can destructure without re-rendering on every state change
+// Returns the actions so components can destructure without re-rendering on every state change
 
 export const useCharacterCoreActions = () => useCharacterStore(useShallow((s) => ({
   setCharacter: s.setCharacter,

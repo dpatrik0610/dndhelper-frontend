@@ -36,7 +36,6 @@ export function QuestDetailsModal({
   onAdjustProgress,
   onViewEquipment,
 }: QuestDetailsModalProps) {
-  // Inline Objective Form State
   const [showForm, setShowForm] = useState(false);
   const [editingObjectiveId, setEditingObjectiveId] = useState<string | null>(null);
   const [objectiveDesc, setObjectiveDesc] = useState("");
@@ -111,7 +110,6 @@ export function QuestDetailsModal({
       showSaveButton={false}
     >
       <Stack gap="md">
-        {/* Header Block */}
         <QuestCardHeader
           title={quest.title}
           type={quest.type}
@@ -122,7 +120,6 @@ export function QuestDetailsModal({
 
         <Divider style={{ borderColor: "rgba(255, 255, 255, 0.05)" }} />
 
-        {/* Full Markdown Description In Expandable Section*/}
         {quest.description ? (
           <ExpandableSection 
             title="Details"
@@ -142,7 +139,6 @@ export function QuestDetailsModal({
 
         <Divider style={{ borderColor: "rgba(255, 255, 255, 0.05)" }} />
 
-        {/* Objectives Section */}
         <Box>
           <Group justify="space-between" align="center" mb="sm">
             <Text
@@ -173,7 +169,6 @@ export function QuestDetailsModal({
             )}
           </Group>
 
-          {/* Objectives List */}
           {quest.objectives.length === 0 && !showForm ? (
             <Text size="xs" c="var(--theme-color-text-secondary, rgba(255,255,255,0.5))" fs="italic">
               No objectives recorded.
@@ -188,14 +183,13 @@ export function QuestDetailsModal({
                   isPersonal={isPersonal}
                   onToggle={onToggleObjective}
                   onAdjustProgress={onAdjustProgress}
-                  onEdit={handleEditClick} // hijacked edit callback to open inside the inline details form!
+                  onEdit={handleEditClick}
                   onDelete={onDeleteObjective}
                 />
               ))}
             </Stack>
           )}
 
-          {/* Inline Add/Edit Form */}
           {showForm && (
             <Box
               p="md"
@@ -288,7 +282,6 @@ export function QuestDetailsModal({
           )}
         </Box>
 
-        {/* Rewards Section */}
         <QuestRewards
           rewardCurrencies={quest.rewardCurrencies}
           rewardItemIds={quest.rewardItemIds}

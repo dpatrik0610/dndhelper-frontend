@@ -10,13 +10,10 @@
   position: fixed;
   inset: 0;
   z-index: 3; /* Sits on top of both fallback and video layers, underneath content */
-  background: transparent; /* Removed full-screen darkening so the site is bright and vibrant! */
+  background: transparent;
   pointer-events: none;
 }
 
-/* ==========================================================================
-   🌌 Silent Failsafe CSS Animation Layer
-   ========================================================================== */
 .cssFallbackWrapper {
   position: fixed;
   inset: 0;

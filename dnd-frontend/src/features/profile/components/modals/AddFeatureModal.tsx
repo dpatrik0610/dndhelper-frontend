@@ -20,7 +20,6 @@ export function AddFeatureModal({ opened, onClose }: AddFeatureModalProps) {
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Reset form on open
   useEffect(() => {
     if (opened) {
       setName("");
@@ -49,10 +48,8 @@ export function AddFeatureModal({ opened, onClose }: AddFeatureModalProps) {
 
       const updatedFeatures = [...(character.features ?? []), newFeature];
 
-      // Update local store
       updateCharacterLocal({ features: updatedFeatures });
 
-      // Persist to server
       await apiUpdateCharacter({
         ...character,
         features: updatedFeatures,

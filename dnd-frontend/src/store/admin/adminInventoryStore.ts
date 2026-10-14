@@ -30,7 +30,6 @@ interface AdminInventoryStore {
   selected: Inventory | null;
   loading: boolean;
 
-  // 🔍 SignalR / local helpers
   setInventories: (inventories: Inventory[]) => void;
   setSelected: (inventory: Inventory | null) => void;
   applyInventoryUpdate: (inventory: Inventory) => void;
@@ -102,7 +101,6 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
     selected: null,
     loading: false,
 
-    // --- SignalR / local helpers ---
     setInventories: (inventories) => set({ inventories }),
     setSelected: (inventory) => set({ selected: inventory }),
 
@@ -132,7 +130,6 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
         return { inventories, selected };
       }),
 
-    // === LOAD ALL INVENTORIES (ADMIN BROWSE) ===
     loadAll: async () => {
       set({ loading: true });
       try {
@@ -155,7 +152,6 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       }
     },
 
-    // === MANUALLY SELECT AN INVENTORY ===
     select: (id) => {
       const { inventories } = get();
       set({ selected: inventories.find((i) => i.id === id) ?? null });
@@ -187,13 +183,11 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       }
     },
 
-    // === REFRESH THE CURRENTLY SELECTED INVENTORY ===
     refreshSelected: async () => {
       const sel = get().selected;
       if (sel?.id) await get().reloadInventory(sel.id);
     },
 
-    // === CREATE NEW INVENTORY ===
     create: async (characterIds, name) => {
       characterIds = characterIds ?? [];
 
@@ -267,7 +261,6 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       if (!current) return;
 
       await updateInventory(id, { ...current, name });
-      // No need to fetch entire list, just update the changed inventory
       await get().reloadInventory(id);
 
       showNotification({
@@ -287,7 +280,6 @@ export const useAdminInventoryStore = create<AdminInventoryStore>((set, get) => 
       });
     },
 
-    // === ITEM OPERATIONS ===
     addItem: async (equipment) => {
       const sel = get().selected;
       if (!sel?.id) return;

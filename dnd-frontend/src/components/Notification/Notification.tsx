@@ -51,9 +51,8 @@ export const getUnifiedNotificationStyle = (color?: string): CSSProperties => {
   };
 };
 
-// Deduplication cache
 const recentNotifications = new Map<string, number>();
-const DEBOUNCE_MS = 1000; // 1 second debounce window to prevent duplicate notifications
+const DEBOUNCE_MS = 1000;
 
 /**
  * Fully customizable notification utility.
@@ -77,7 +76,6 @@ export const showNotification = ({
   style,
   loading,
 }: ShowNotificationOptions) => {
-  // Deduplicate notifications
   const cacheKey = id || `${title ?? ''}||${message}`;
   const now = Date.now();
   const lastTime = recentNotifications.get(cacheKey);
@@ -88,7 +86,6 @@ export const showNotification = ({
   }
   recentNotifications.set(cacheKey, now);
 
-  // Evict older entries from cache if it becomes too large
   if (recentNotifications.size > 100) {
     for (const [key, timestamp] of recentNotifications.entries()) {
       if (now - timestamp > 10000) {
@@ -146,7 +143,6 @@ export const updateNotification = ({
     return;
   }
 
-  // Update the deduplication cache timestamp to allow subsequent updates to register
   recentNotifications.set(id, Date.now());
 
   const mergedClassName = `glassy-notification ${className}`.trim();

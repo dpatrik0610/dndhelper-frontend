@@ -3,7 +3,6 @@ import type { Campaign, CampaignMemberView, CampaignSummary, CoreContentType } f
 import type { Character } from "@appTypes/Character/Character"
 import type { CampaignOverviewDto } from "@appTypes/CampaignOverview"
 
-// ----------- Base CRUD -----------
 export async function getAllCampaigns(): Promise<Campaign[]> {
   return apiClient<Campaign[]>("/Campaign", {})
 }
@@ -43,7 +42,6 @@ export async function getAllCampaignsOverview(): Promise<CampaignSummary[]> {
   return apiClient<CampaignSummary[]>("/Campaign/all", {})
 }
 
-// ----------- Membership -----------
 export async function joinCampaign(code: string): Promise<Campaign> {
   return apiClient<Campaign>("/Campaign/join", { method: "POST", body: { code } })
 }
@@ -73,7 +71,6 @@ export async function promoteToCore(type: CoreContentType, id: string): Promise<
   return apiClient<void>(`/core/${type}/${id}/promote`, { method: "POST" })
 }
 
-// ----------- Characters -----------
 export async function getCampaignCharacters(id: string): Promise<Character[]> {
   return apiClient(`/Campaign/${id}/characters`, {})
 }
@@ -91,7 +88,6 @@ export async function removeCharacterFromCampaign(id: string, characterId: strin
   return apiClient(`/Campaign/${id}/characters/${characterId}`, { method: "DELETE" })
 }
 
-// ----------- Worlds -----------
 export async function addWorldToCampaign(id: string, worldId: string) {
   return apiClient(`/Campaign/${id}/worlds/${worldId}`, { method: "POST" })
 }
@@ -100,7 +96,6 @@ export async function removeWorldFromCampaign(id: string, worldId: string) {
   return apiClient(`/Campaign/${id}/worlds/${worldId}`, { method: "DELETE" })
 }
 
-// ----------- Quests -----------
 export async function addQuestToCampaign(id: string, questId: string) {
   return apiClient(`/Campaign/${id}/quests/${questId}`, { method: "POST" })
 }
@@ -109,7 +104,6 @@ export async function removeQuestFromCampaign(id: string, questId: string) {
   return apiClient(`/Campaign/${id}/quests/${questId}`, { method: "DELETE" })
 }
 
-// ----------- Notes -----------
 export async function addNoteToCampaign(id: string, noteId: string) {
   return apiClient(`/Campaign/${id}/notes/${noteId}`, { method: "POST" })
 }
@@ -118,7 +112,6 @@ export async function removeNoteFromCampaign(id: string, noteId: string) {
   return apiClient(`/Campaign/${id}/notes/${noteId}`, { method: "DELETE" })
 }
 
-// ----------- Sessions -----------
 export async function addSessionToCampaign(id: string, sessionId: string) {
   return apiClient(`/Campaign/${id}/sessions/${sessionId}`, { method: "POST" })
 }

@@ -49,17 +49,14 @@ export default function QuestsPage() {
     deleteObjective,
   } = useQuestActions();
 
-  // Details Modal State
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
   const [detailsModalOpened, setDetailsModalOpened] = useState(false);
 
-  // Filters & Tabs State
   const [activeTab, setActiveTab] = useState<"campaign" | "personal">("campaign");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [typeFilter, setTypeFilter] = useState<string>("All");
 
-  // Fetch campaign characters for selecting co-participants (involved character IDs)
   const allCharacters = useCharacterList();
   const campaignMembers = useMemo(() => {
     if (!character || !allCharacters) return [];
@@ -73,11 +70,9 @@ export default function QuestsPage() {
     return quests.find((q) => q.id === selectedQuestId) || null;
   }, [quests, selectedQuestId]);
 
-  // Equipment Inspect Modal State
   const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(null);
   const [equipmentModalOpened, setEquipmentModalOpened] = useState(false);
 
-  // Create/Edit Quest Modal State (Spacious layout, supports involved character selection)
   const [questModal, setQuestModal] = useState<{
     opened: boolean;
     editId?: string;
@@ -97,20 +92,16 @@ export default function QuestsPage() {
   // so a DM without one still sees the campaign's quests.
   const campaignId = useCurrentCampaignId();
 
-  // Load campaign quests on mount / when campaignId changes
   useEffect(() => {
     if (campaignId) {
       void loadCampaignQuests(campaignId);
     }
   }, [campaignId, loadCampaignQuests]);
 
-  // Group and filter quests
   const filteredQuests = useMemo(() => {
     return quests.filter((q) => {
-      // 1. Hide unavailable quests
       if (q.status === QuestStatus.Unavailable) return false;
 
-      // 2. Separate Personal and Campaign with complete security isolation
       const isPersonal = q.type === QuestType.Personal;
       const isParticipant = !!character?.id && (q.involvedCharacterIds?.includes(character.id) ?? false);
 
@@ -121,13 +112,10 @@ export default function QuestsPage() {
       if (activeTab === "personal" && !isPersonal) return false;
       if (activeTab === "campaign" && isPersonal) return false;
 
-      // 3. Filter by status
       if (statusFilter !== "All" && q.status !== statusFilter) return false;
 
-      // 4. Filter by quest type
       if (typeFilter !== "All" && q.type !== typeFilter) return false;
 
-      // 5. Filter by search
       if (search.trim()) {
         const query = search.toLowerCase();
         const titleMatches = q.title.toLowerCase().includes(query);
@@ -140,7 +128,6 @@ export default function QuestsPage() {
     });
   }, [quests, activeTab, statusFilter, typeFilter, search, character]);
 
-  // Modal Handlers
   const handleOpenQuestModal = (q?: Quest) => {
     if (q) {
       // Exclude self (current character) from the edit selection so they don't unselect themselves
@@ -176,7 +163,6 @@ export default function QuestsPage() {
 
     if (!campaignId || !character?.id) return;
 
-    // Merge current character (self) and other selected co-participants
     const mergedInvolved = Array.from(
       new Set([character.id, ...questModal.involvedCharacterIds])
     );
@@ -242,7 +228,6 @@ export default function QuestsPage() {
     }
   };
 
-  // Inline Objective CRUD Handlers (Invoked seamlessly from the QuestDetailsModal inline form)
   const handleAddObjectiveInline = async (
     questId: string,
     description: string,
@@ -291,7 +276,6 @@ export default function QuestsPage() {
     setEquipmentModalOpened(true);
   };
 
-  // Style Specs from GEMINI.md
   const panelStyle: React.CSSProperties = {
     backdropFilter: "blur(24px) saturate(130%)",
     WebkitBackdropFilter: "blur(24px) saturate(130%)",
@@ -303,7 +287,6 @@ export default function QuestsPage() {
 
   return (
     <Box p={isMobile ? 0 : "md"} style={{ minHeight: "100%", position: "relative" }}>
-      {/* Page Header */}
       <Group justify="space-between" align="center" mb="lg" px={isMobile ? "md" : 0} pt={isMobile ? "md" : 0}>
         <Text
           size="xl"
@@ -333,7 +316,6 @@ export default function QuestsPage() {
         )}
       </Group>
 
-      {/* Main Container */}
       {!campaignId ? (
         <Paper withBorder p="xl" style={panelStyle} mx={isMobile ? 0 : undefined}>
           <Stack align="center" gap="md">
@@ -348,7 +330,6 @@ export default function QuestsPage() {
         </Paper>
       ) : (
         <Stack gap="md" mx={isMobile ? 0 : undefined}>
-          {/* Search and Filters panel */}
           <Paper withBorder p="md" style={panelStyle}>
             <Group gap="md" grow={!isMobile}>
               <GlassyTextInput
@@ -381,7 +362,6 @@ export default function QuestsPage() {
             </Group>
           </Paper>
 
-          {/* Quests Content */}
           <Paper withBorder p={isMobile ? "sm" : "lg"} style={panelStyle}>
             {loading ? (
               <CardGridSkeleton count={4} cols={{ base: 1, md: 2, lg: 4 }} height={190} />
@@ -417,12 +397,11 @@ export default function QuestsPage() {
         </Stack>
       )}
 
-      {/* Quest Editor Modal (Expanded size to xl, supports Involved Character Selection) */}
       <BaseModal
         opened={questModal.opened}
         onClose={() => setQuestModal((prev) => ({ ...prev, opened: false }))}
         title={questModal.editId ? "Edit Personal Quest" : "Create Personal Quest"}
-        size="xl" // spacious modal footprint
+        size="xl"
         onSave={handleSaveQuest}
         saveLabel={questModal.editId ? "Save Changes" : "Create Quest"}
       >
@@ -457,7 +436,6 @@ export default function QuestsPage() {
             }}
           />
 
-          {/* Co-participants/Involved Characters MultiSelect Dropdown */}
           {campaignMembers.length > 0 && (
             <MultiSelect
               label="Involved Characters (Co-participants)"
@@ -493,7 +471,6 @@ export default function QuestsPage() {
         </Stack>
       </BaseModal>
 
-      {/* Quest Details Modal (Directly contains full interactive checklists and rewards) */}
       <QuestDetailsModal
         quest={selectedQuestForDetails}
         opened={detailsModalOpened}
@@ -510,7 +487,6 @@ export default function QuestsPage() {
         onViewEquipment={handleInspectEquipment}
       />
 
-      {/* Equipment View Modal */}
       <EquipmentModal
         opened={equipmentModalOpened}
         onClose={() => setEquipmentModalOpened(false)}

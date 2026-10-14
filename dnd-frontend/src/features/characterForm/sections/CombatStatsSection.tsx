@@ -3,7 +3,6 @@ import { useCharacterFormStore } from "@store/character/characterFormStore";
 
 import { FormNumberInput } from "@components/common/FormNumberInput";
 import { classHitDice } from "@utils/hitDice";
-// import { WheelPickerInput } from "@components/common/WheelPickerInput"; // 🔧 Disabled for now
 
 export function CombatStatsSection() {
   const { characterForm, setCharacterForm } = useCharacterFormStore();
@@ -12,14 +11,7 @@ export function CombatStatsSection() {
   return (
     <Stack>
 
-      {/* ---------------------------------------- */}
-      {/* 🔀 HP + MAX HP -> NORMAL Number Inputs     */}
-      {/* ---------------------------------------- */}
       <Group grow>
-        {/* WheelPickerInput temporarily disabled */}
-        {/* 
-        <WheelPickerInput ... />
-        */}
         <FormNumberInput
           label="HP"
           min={0}
@@ -29,7 +21,6 @@ export function CombatStatsSection() {
           onChange={(v) => setCharacterForm({ hitPoints: v })}
         />
 
-        {/* WheelPickerInput temporarily disabled */}
         <FormNumberInput
           label="Max HP"
           min={1}
@@ -41,7 +32,6 @@ export function CombatStatsSection() {
       </Group>
 
       <Group grow>
-        {/* WheelPickerInput temporarily disabled */}
         <FormNumberInput
           label="Temp HP"
           min={0}
@@ -54,9 +44,6 @@ export function CombatStatsSection() {
         />
       </Group>
 
-      {/* ---------------------------------------- */}
-      {/* Armor Class + Speed                      */}
-      {/* ---------------------------------------- */}
       <Group grow>
         <FormNumberInput
           label="Armor Class"
@@ -75,9 +62,6 @@ export function CombatStatsSection() {
         />
       </Group>
 
-      {/* ---------------------------------------- */}
-      {/* Initiative + Hit Dice                    */}
-      {/* ---------------------------------------- */}
       <Group grow>
         <FormNumberInput
           label="Initiative"

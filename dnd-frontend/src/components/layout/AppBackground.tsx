@@ -30,19 +30,17 @@ export function AppBackground() {
     </Suspense>
   );
 
-  // Optimized particle generation for animated desktop backgrounds only
   const particles = useMemo(() => {
     if (!animated) return [];
     return Array.from({ length: 14 }).map((_, i) => ({
       id: i,
       left: `${Math.random() * 100}%`,
       delay: `${Math.random() * 6}s`,
-      duration: `${15 + Math.random() * 15}s`, // Slower, more calming drift speeds
+      duration: `${15 + Math.random() * 15}s`,
       size: `${2 + Math.random() * 2.5}px`,
     }));
   }, [animated]);
 
-  // High-performance static themed backdrop for mobile to completely bypass layout calculation, blurs, and animation threads
   if (isMobile) {
     return (
       <Box

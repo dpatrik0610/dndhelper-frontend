@@ -53,7 +53,6 @@ export function AdventureBag({
                 )}
             </Group>
 
-            {/* ACTIVE CHARACTER CURRENCY */}
             {activeCharacter && (
                 <Box bg="rgba(0,0,0,0.22)" p="xs" mb="sm" style={{ borderRadius: 6, border: "1px solid rgba(255,255,255,0.04)" }}>
                     <Group gap="xs" justify="center">
@@ -81,7 +80,6 @@ export function AdventureBag({
                             <Card key={item.equipmentId} bg="rgba(0,0,0,0.3)" p="xs" style={{ border: "1px solid rgba(255,255,255,0.05)", borderRadius: 6 }}>
                                 <Group justify="space-between" align="center" wrap="wrap" gap="xs">
                                     <Group gap="sm" style={{ flex: "1 1 200px", overflow: "hidden" }} wrap="nowrap" align="center">
-                                        {/* [QUANTITY] Owned Badge */}
                                         <Badge 
                                             size="md" 
                                             color="dark" 
@@ -96,7 +94,6 @@ export function AdventureBag({
                                         >
                                             {item.quantity} Owned
                                         </Badge>
-                                        {/* [NAME] */}
                                         <div style={{ overflow: "hidden", flexGrow: 1 }}>
                                             <Text fw={700} c="white" size="sm" lineClamp={1}>
                                                 {item.equipmentName || eqData?.name}
@@ -104,8 +101,6 @@ export function AdventureBag({
                                         </div>
                                     </Group>
 
-                                    {/* ACTIONS */}
-                                    {/* Desktop Actions */}
                                     <Group gap="xs" wrap="nowrap" visibleFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
                                         <ActionIcon size="md" variant="subtle" color="amber" onClick={() => handleDetailsOpen(item.equipmentId!)} title="Inspect properties">
                                             <IconSearch size={18} />
@@ -121,7 +116,6 @@ export function AdventureBag({
                                         </Button>
                                     </Group>
 
-                                    {/* Mobile 3-Dots Menu */}
                                     <Box hiddenFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
                                         <Menu shadow="md" width={140} position="bottom-end" styles={{
                                             dropdown: {

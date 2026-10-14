@@ -21,7 +21,6 @@ export function ItemManager() {
   const [allTags, setAllTags] = useState<string[]>([]);
   const [filteredData, setFilteredData] = useState<Equipment[]>([]);
 
-  // Filters State
   const [filters, setFilters] = useState({
     name: "",
     tier: "",
@@ -30,7 +29,6 @@ export function ItemManager() {
     tagsRule: "any" as "any" | "all",
   });
 
-  // Modals & Item Selection States
   const [formOpen, setFormOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
   const [detailsId, setDetailsId] = useState<string | null>(null);
@@ -38,19 +36,16 @@ export function ItemManager() {
 
   const [selectedItem, setSelectedItem] = useState<Equipment | null>(null);
 
-  // Pagination State
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
   const totalPages = Math.max(1, Math.ceil(filteredData.length / itemsPerPage));
 
-  // Load All Equipment
   const loadAllData = useCallback(async () => {
     try {
       const result = await getAllEquipment();
       setAllData(result);
       setFilteredData(result);
 
-      // Extract unique tags
       const tags = result.flatMap((item) => item.tags || []);
       const uniqueTags = Array.from(new Set(tags)).filter(Boolean);
       setAllTags(uniqueTags);
@@ -68,7 +63,6 @@ export function ItemManager() {
     loadAllData();
   }, [loadAllData]);
 
-  // Filter logic whenever filters or allData changes
   useEffect(() => {
     let data = allData;
 
@@ -98,10 +92,9 @@ export function ItemManager() {
     }
 
     setFilteredData(data);
-    setPage(1); // reset to page 1 on filter
+    setPage(1);
   }, [filters, allData]);
 
-  // Calculate Stat Summaries
   const stats = useMemo(() => {
     let customCount = 0;
     let legendaryOrArtifact = 0;
@@ -121,14 +114,12 @@ export function ItemManager() {
     };
   }, [allData]);
 
-  // Sliced paginated list
   const paginatedData = useMemo(() => {
     const start = (page - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     return filteredData.slice(start, end);
   }, [filteredData, page]);
 
-  // Handles
   const handleClearFilters = () => {
     setFilters({
       name: "",
@@ -197,7 +188,6 @@ export function ItemManager() {
         <AdminStat label="Deleted / archived" value={stats.deletedCount} tone="danger" />
       </SimpleGrid>
 
-      {/* Filter Controls */}
       <FilterControls
         filters={filters}
         onFilterChange={setFilters}
@@ -205,7 +195,6 @@ export function ItemManager() {
         allTags={allTags}
       />
 
-      {/* Item Table View */}
       <ItemList
         items={paginatedData}
         onEdit={openFormModal}
@@ -214,7 +203,6 @@ export function ItemManager() {
         onChanged={() => void loadAllData()}
       />
 
-      {/* Pagination Section */}
       {totalPages > 1 && (
         <Pagination
           page={page}
@@ -223,16 +211,12 @@ export function ItemManager() {
         />
       )}
 
-      {/* Modals Layer */}
-
-      {/* Details View Modal */}
       <EquipmentModal
         opened={!!detailsId}
         onClose={() => setDetailsId(null)}
         equipmentId={detailsId}
       />
 
-      {/* Edit / Create Form Modal */}
       <ItemFormModal
         opened={formOpen}
         onClose={() => {
@@ -243,14 +227,12 @@ export function ItemManager() {
         item={selectedItem}
       />
 
-      {/* Bulk JSON Import Modal */}
       <BulkImportModal
         opened={bulkOpen}
         onClose={() => setBulkOpen(false)}
         onImported={loadAllData}
       />
 
-      {/* Glassy Delete Confirmation Modal */}
       <AdminGlassModal
         opened={deleteOpen}
         onClose={() => {

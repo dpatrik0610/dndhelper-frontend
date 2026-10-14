@@ -1,4 +1,4 @@
-﻿// components/Admin/SelectCampaignModal.tsx
+﻿
 import { useEffect } from "react";
 import { Box, Group, Text, Loader, Paper, ScrollArea, SimpleGrid } from "@mantine/core";
 import { IconMapPin, IconCheck } from "@tabler/icons-react";

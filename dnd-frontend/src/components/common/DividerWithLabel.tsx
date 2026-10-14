@@ -4,8 +4,8 @@ import type { SectionColor } from "../../types/SectionColor";
 interface DividerWithLabelProps {
   label: string;
   color?: string | SectionColor;
-  thickness?: string; // line height
-  marginY?: string; // vertical spacing
+  thickness?: string;
+  marginY?: string;
 }
 
 export function DividerWithLabel({

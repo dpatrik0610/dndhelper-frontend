@@ -140,7 +140,6 @@ export function Board() {
     setGestureState(next);
   };
 
-  // Size
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -576,8 +575,6 @@ export function Board() {
     if (characterId) void tabletop.placeCharacter(characterId, p.x, p.y);
     else void tabletop.upsertToken({ ...(JSON.parse(monster) as Partial<TableToken>), x: p.x, y: p.y });
   };
-
-  // ── Render ──
 
   const tile = gridTile(grid);
   const visible = {

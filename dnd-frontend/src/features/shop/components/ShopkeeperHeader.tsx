@@ -23,7 +23,6 @@ export function ShopkeeperHeader({
     return (
         <Card p="xs" mb="xs" className={classes.headerCard}>
             <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-                {/* BRAND PLACARD */}
                 <Group gap="xs">
                     <ThemeIcon size="lg" variant="light" color="yellow" radius="md">
                         <IconBuildingStore size={22} />
@@ -34,9 +33,7 @@ export function ShopkeeperHeader({
                     </div>
                 </Group>
 
-                {/* CONTROLS */}
                 <Group gap="xs" style={{ marginLeft: "auto" }}>
-                    {/* RELOAD ICON */}
                     <ActionIcon 
                         variant="light" 
                         color="yellow" 
@@ -49,7 +46,6 @@ export function ShopkeeperHeader({
                         <IconRefresh size={18} />
                     </ActionIcon>
 
-                    {/* SHOP SELECTOR DROPDOWN */}
                     {visibleShops.length > 1 && (
                         <ShopSelectorDropdown
                             visibleShops={visibleShops}
@@ -59,7 +55,6 @@ export function ShopkeeperHeader({
                         />
                     )}
 
-                    {/* SINGLE SHOP PLACARD */}
                     {visibleShops.length === 1 && activeShop && (
                         <Box className={classes.singlePlacard}>
                             <div style={{ textAlign: "left", lineHeight: 1.1 }}>

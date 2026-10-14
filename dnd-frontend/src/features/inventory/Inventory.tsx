@@ -24,7 +24,6 @@ export function Inventory() {
   const { searchTerm, setSearchTerm, sortBy, setSortBy, viewMode, setViewMode } = useInventoryFilters();
   const navigate = useNavigate();
 
-  // Redirect if no character selected
   useEffect(() => {
     if (!character) {
       showNotification({
@@ -81,7 +80,6 @@ export function Inventory() {
     };
   }, [equipmentIds]);
 
-  // Render nothing if no character
   if (!character) return null;
 
   return (

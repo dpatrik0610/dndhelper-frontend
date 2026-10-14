@@ -28,7 +28,6 @@ export function TagsInput({
 
   return (
     <Stack gap="xs">
-      {/* Input + Button row */}
       <Group gap={8} wrap="nowrap">
         <TextInput
           classNames={{ input: "glassy-input", label: "glassy-label" }}
@@ -59,7 +58,6 @@ export function TagsInput({
         </Button>
       </Group>
 
-      {/* Tag Pills */}
       <Group gap={6}>
         {(equipment.tags ?? []).map((tag) => (
           <Badge

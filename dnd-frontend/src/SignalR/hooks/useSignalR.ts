@@ -132,7 +132,6 @@ export const useSignalR = () => {
       }
     );
 
-    // Connection state listeners
     newConnection.onreconnecting((error) => {
       console.debug("🔄 SignalR Reconnecting...", error);
       setIsConnected(false);

@@ -42,21 +42,18 @@ export function MerchantShelf({
                             <Card key={item.equipmentId} bg="rgba(0,0,0,0.3)" p="xs" style={{ border: "1px solid rgba(255,255,255,0.05)", borderRadius: 6 }}>
                                 <Group justify="space-between" align="center" wrap="wrap" gap="xs">
                                     <Group gap="sm" style={{ flex: "1 1 200px", overflow: "hidden" }} wrap="nowrap" align="center">
-                                        {/* [PRICE] Placard */}
                                         <Box className={classes.pricePlacard}>
                                             <Text size="xs" fw={800} c="amber.5" style={{ whiteSpace: "nowrap" }}>
                                                 {displayCost}
                                             </Text>
                                         </Box>
 
-                                        {/* [NAME] */}
                                         <div style={{ overflow: "hidden", flexGrow: 1 }}>
                                             <Text fw={700} c="white" size="sm" lineClamp={1}>
                                                 {item.equipmentName || eqData.name}
                                             </Text>
                                         </div>
 
-                                        {/* [QUANTITY] Stock Badge */}
                                         <Badge 
                                             size="md" 
                                             color="dark" 
@@ -73,8 +70,6 @@ export function MerchantShelf({
                                         </Badge>
                                     </Group>
 
-                                    {/* ACTIONS */}
-                                    {/* Desktop Actions */}
                                     <Group gap="xs" wrap="nowrap" visibleFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
                                         <ActionIcon size="md" variant="subtle" color="amber" onClick={() => handleDetailsOpen(item.equipmentId!)} title="Inspect properties">
                                             <IconSearch size={18} />
@@ -99,7 +94,6 @@ export function MerchantShelf({
                                         </Button>
                                     </Group>
 
-                                    {/* Mobile 3-Dots Menu */}
                                     <Box hiddenFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
                                         <Menu shadow="md" width={160} position="bottom-end" styles={{
                                             dropdown: {

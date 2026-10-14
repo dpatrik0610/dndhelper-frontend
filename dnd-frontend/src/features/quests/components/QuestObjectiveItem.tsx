@@ -45,7 +45,6 @@ export function QuestObjectiveItem({
     >
       <Group justify="space-between" align="center" wrap="wrap" gap="xs">
         <Group gap="xs" align="center" style={{ flex: 1, minWidth: 0 }}>
-          {/* Checkbox rendering */}
           {!isComplex ? (
             isPersonal ? (
               <ActionIcon
@@ -78,7 +77,6 @@ export function QuestObjectiveItem({
           </Text>
         </Group>
 
-        {/* Progress Display & Adjustments */}
         <Group gap="xs" align="center">
           {isComplex && (
             <Text size="xs" fw={500} c="var(--theme-color-text-secondary)">
@@ -131,7 +129,6 @@ export function QuestObjectiveItem({
         </Group>
       </Group>
 
-      {/* Progress Bar for complex objectives */}
       {isComplex && (
         <Box mt="xs" px="sm">
           <Progress

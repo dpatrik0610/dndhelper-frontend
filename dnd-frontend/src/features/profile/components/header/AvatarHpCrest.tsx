@@ -149,7 +149,6 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
   const canvasSize = size + glowMargin * 2;
   const centerCoord = canvasSize / 2;
 
-  // Dynamic color stops and drop-shadows based on health thresholds (80%, 50%, 25%, 0%)
   let stop0 = "#dc2626";
   let stop50 = "#ef4444";
   let stop100 = "#f87171";
@@ -161,25 +160,21 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
     stop100 = "#6b7280";
     glowColor = "none";
   } else if (hpPercent >= 80) {
-    // Healthy/Emerald Green
     stop0 = "#047857";
     stop50 = "#10b981";
     stop100 = "#34d399";
     glowColor = "rgba(16, 185, 129, 0.65)";
   } else if (hpPercent >= 50) {
-    // Caution/Gold Amber
     stop0 = "#d97706";
     stop50 = "#f59e0b";
     stop100 = "#fbbf24";
     glowColor = "rgba(245, 158, 11, 0.65)";
   } else if (hpPercent >= 25) {
-    // Danger/Orange
     stop0 = "#ea580c";
     stop50 = "#f97316";
     stop100 = "#fdba74";
     glowColor = "rgba(249, 115, 22, 0.65)";
   } else {
-    // Critical Danger/Crimson Red (<25%)
     stop0 = "#b91c1c";
     stop50 = "#dc2626";
     stop100 = "#f87171";
@@ -199,13 +194,12 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
         margin: 0,
       }}
     >
-      {/* 1. Concentric SVG HP Rings (Enlarged canvas to accommodate drop-shadow blur without clipping) */}
       <svg
         width={canvasSize}
         height={canvasSize}
         style={{
           position: "absolute",
-          transform: "rotate(-90deg)", // Flows clockwise from top center
+          transform: "rotate(-90deg)",
           top: -glowMargin,
           left: -glowMargin,
           zIndex: 2,
@@ -213,20 +207,17 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
         }}
       >
         <defs>
-          {/* Dynamic health threshold gradient */}
           <linearGradient id="hpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor={stop0} />
             <stop offset="50%" stopColor={stop50} />
             <stop offset="100%" stopColor={stop100} />
           </linearGradient>
-          {/* Temporary HP Golden gradient */}
           <linearGradient id="tempGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#d97706" />
             <stop offset="100%" stopColor="#fbbf24" />
           </linearGradient>
         </defs>
 
-        {/* Empty backing track (frosted glass feel) */}
         <circle
           cx={centerCoord}
           cy={centerCoord}
@@ -236,7 +227,6 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
           strokeWidth={strokeWidth}
         />
 
-        {/* Standard HP Fill (Dynamic color threshold) */}
         {!isDead && (
           <circle
             cx={centerCoord}
@@ -256,7 +246,6 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
           />
         )}
 
-        {/* Temporary HP Fill (Gold) */}
         {temp > 0 && (
           <circle
             cx={centerCoord}
@@ -276,7 +265,6 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
         )}
       </svg>
 
-      {/* 2. Flippable avatar token in dead center of the ring */}
       <button
         type="button"
         className={`${styles.coin} ${showingBack ? "" : styles.idle}`}

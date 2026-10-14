@@ -48,7 +48,6 @@ export function QuestRewards({
       }}
     >
       <Stack gap="xs">
-        {/* Coins Reward */}
         {hasCurrency ? (
           <Group gap="xs" align="center" wrap="nowrap">
             <IconCoins size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
@@ -62,7 +61,6 @@ export function QuestRewards({
         </Text>
         }
 
-        {/* Loot/Items Reward as Clickable themed boxes (1 per line) */}
         {hasItems && (
           <Group gap="xs" align="flex-start" wrap="nowrap">
             <IconGift

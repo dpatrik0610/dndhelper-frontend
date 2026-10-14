@@ -18,14 +18,12 @@ export interface ClassLevel {
 }
 
 export interface Character {
-  // METADATA
   id?: string;
   ownerIds?: string[];
   imageUrl?: string;
   createdAt?: string;
   updatedAt?: string;
 
-  // BASIC INFO
   name: string;
   isDead: boolean;
   isNPC: boolean; 
@@ -63,7 +61,6 @@ export interface Character {
   spells: CharacterSpell[];
   currencies: Currency[];
 
-  // STATBLOCK
   abilityScores: AbilityScores;
   savingThrows: SavingThrows;
   inspiration: number;
@@ -88,7 +85,6 @@ export interface Character {
   carryingCapacity: number;
   currentEncumbrance: number;
 
-  // FILLER
   backstory: string[];
   size: HeightLabel;
   age: number;
@@ -105,7 +101,6 @@ export interface Character {
   noteIds: string[];
   description: string;
 
-  // COLLECTIONS
   factionIds: string[];
   inventoryIds: string[];
   equipmentId: string;

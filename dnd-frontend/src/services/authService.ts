@@ -13,7 +13,6 @@ export async function registerUser(request: AuthRequest): Promise<AuthResponse> 
         });
         return response;
     } catch (err: any) {
-        // Try to extract API error message
         const message =
             err?.response?.data?.message ||
             err?.message ||

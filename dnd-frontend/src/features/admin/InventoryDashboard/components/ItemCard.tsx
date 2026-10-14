@@ -94,7 +94,6 @@ export function ItemCard({ itemId }: ItemCardProps) {
   return (
     <>
       <div className={styles.itemCard} style={{ "--tier-accent": tierAccent(equipment.tier) } as CSSProperties}>
-        {/* Header: name + action icons */}
         <div className={styles.itemCardHeader}>
           <span className={styles.itemCardName}>
             {equipment.name ?? "Unnamed"}
@@ -124,7 +123,6 @@ export function ItemCard({ itemId }: ItemCardProps) {
           </div>
         </div>
 
-        {/* Stat badges */}
         <div className={styles.itemCardBadges}>
           {equipment.damage && (
             <Badge color="red" variant="light" size="xs" radius="sm" leftSection={<IconSwords size={10} />}>
@@ -143,14 +141,12 @@ export function ItemCard({ itemId }: ItemCardProps) {
           )}
         </div>
 
-        {/* Description snippet */}
         {equipment.description && (
           <p className={styles.itemCardDesc}>
             {equipment.description.join(" ")}
           </p>
         )}
 
-        {/* Footer: quantity control */}
         <div className={styles.itemCardFooter}>
           <span className={styles.itemCardQtyLabel}>Qty</span>
           <NumberInput
@@ -176,12 +172,10 @@ export function ItemCard({ itemId }: ItemCardProps) {
         </div>
       </div>
 
-      {/* Modals */}
       <ItemModal opened={editOpen} onClose={() => setEditOpen(false)} equipmentId={itemId} editMode />
       <MoveItemModal opened={moveModal} onClose={() => setMoveModal(false)} itemId={itemId} />
       <EquipmentModal opened={inspectOpen} onClose={() => setInspectOpen(false)} equipmentId={itemId} />
 
-      {/* Delete confirmation */}
       <Modal
         opened={deleteWarningOpen}
         onClose={() => setDeleteWarningOpen(false)}

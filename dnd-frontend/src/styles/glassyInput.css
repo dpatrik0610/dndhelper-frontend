@@ -1,10 +1,3 @@
-/* ==========================================================================
-   🌌 Theme-Reactive Glassy Input Styles
-   Ensures all form inputs, labels, selects, datepickers, and controls
-   globally inherit theme colors, glows, and narrative-first typography.
-   ========================================================================== */
-
-/* 🧪 Core Text and Number Inputs */
 .glassy-input {
   background: rgba(255, 255, 255, 0.02) !important;
   border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08)) !important;
@@ -42,7 +35,6 @@
   background: transparent;
 }
 
-/* 🏷️ Premium RPG Input Labels */
 .glassy-label {
   font-family: "Plus Jakarta Sans", "Inter", sans-serif !important;
   font-weight: 300 !important;
@@ -53,13 +45,11 @@
   margin-bottom: 6px !important;
 }
 
-/* ✨ Section-Aware Fallbacks */
 .glassy-input--red:focus-within { border-color: var(--theme-color-accent-primary, #ef4444) !important; box-shadow: var(--theme-glow-shadow-primary) !important; }
 .glassy-input--blue:focus-within { border-color: var(--theme-color-accent-primary, #38bdf8) !important; box-shadow: var(--theme-glow-shadow-primary) !important; }
 .glassy-input--orange:focus-within { border-color: var(--theme-color-accent-primary, #f59e0b) !important; box-shadow: var(--theme-glow-shadow-primary) !important; }
 .glassy-input--teal:focus-within { border-color: var(--theme-color-accent-primary, #22c55e) !important; box-shadow: var(--theme-glow-shadow-primary) !important; }
 
-/* 🟦 Square Glass Switch */
 .sq-switch-track {
   background: rgba(0, 0, 0, 0.2) !important;
   border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08)) !important;
@@ -91,7 +81,6 @@
   box-shadow: var(--theme-glow-shadow-primary) !important;
 }
 
-/* ▾ Transparent Dropdown Overlays (Select Components) */
 .glassy-dropdown {
   background: var(--theme-bg-panel, rgba(15, 15, 15, 0.95)) !important;
   backdrop-filter: blur(24px) saturate(130%) !important;
@@ -101,7 +90,6 @@
   border-radius: 8px !important;
 }
 
-/* Default option look */
 .glassy-option {
   background: transparent !important;
   color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.75)) !important;
@@ -111,7 +99,6 @@
   font-size: 13px !important;
 }
 
-/* Hovered / Active Option */
 .glassy-option:hover,
 .glassy-option[data-combobox-selected],
 .glassy-option[data-hovered] {
@@ -121,7 +108,6 @@
   padding-left: 10px !important;
 }
 
-/* 📅 Glassy Calendar Date Picker */
 .glassy-date-dropdown {
   background: var(--theme-bg-panel, rgba(15, 15, 15, 0.95)) !important;
   backdrop-filter: blur(24px) saturate(130%) !important;
@@ -200,7 +186,6 @@
   box-shadow: var(--theme-glow-shadow-primary) !important;
 }
 
-/* 🎛️ Glassy Segmented Controls */
 .glassy-segmented {
   background: rgba(0, 0, 0, 0.15) !important;
   border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04)) !important;
@@ -228,7 +213,6 @@
   font-weight: 600 !important;
 }
 
-/* 🌌 Glassy Notification Styling */
 .glassy-notification {
   background: var(--theme-bg-panel, rgba(15, 15, 25, 0.8)) !important;
   backdrop-filter: blur(24px) saturate(130%) !important;

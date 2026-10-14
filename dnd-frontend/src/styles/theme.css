@@ -1,7 +1,3 @@
-/* ==========================================================================
-   🌌 Centralized Theme CSS Variables
-   ========================================================================== */
-
 /* 
    ⚠️ ACCESSIBILITY MANDATE:
    If any future themes employ light backgrounds, you must override:
@@ -58,12 +54,12 @@
   
   --theme-border-glow: rgba(168, 85, 247, 0.35);
   --theme-border-accent: rgba(6, 182, 212, 0.4);
-  --theme-border-subtle: rgba(168, 85, 247, 0.15); /* Gorgeous violet tinted edges! */
+  --theme-border-subtle: rgba(168, 85, 247, 0.15);
   
-  --theme-color-accent-primary: #a855f7e6; /* Violet with 10% transparency */
-  --theme-color-accent-secondary: #06b6d4e6; /* Teal/Cyan with 10% transparency */
+  --theme-color-accent-primary: #a855f7e6;
+  --theme-color-accent-secondary: #06b6d4e6;
   --theme-color-text-primary: #f3f4f6;
-  --theme-color-text-secondary: #c084fc; /* Tinted light purple text */
+  --theme-color-text-secondary: #c084fc;
   --theme-color-text-glow: #f3e8ff;
   --theme-color-text-on-accent: #ffffff;
   
@@ -71,7 +67,7 @@
   --theme-glow-shadow-secondary: 0 0 15px rgba(6, 182, 212, 0.3);
   
   --theme-gradient-primary: linear-gradient(135deg, #a855f7, #06b6d4);
-  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(168, 85, 247, 0.85), rgba(6, 182, 212, 0.85)); /* Gorgeous 15% transparent highlight */
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(168, 85, 247, 0.85), rgba(6, 182, 212, 0.85));
   --theme-gradient-active: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(6, 182, 212, 0.25));
 }
 
@@ -113,10 +109,10 @@
   
   --theme-border-glow: rgba(239, 68, 68, 0.45);
   --theme-border-accent: rgba(217, 119, 6, 0.45);
-  --theme-border-subtle: rgba(239, 68, 68, 0.16); /* Gorgeous red tinted edges! */
+  --theme-border-subtle: rgba(239, 68, 68, 0.16);
   
-  --theme-color-accent-primary: #ef4444e6; /* Blood Red with 10% transparency */
-  --theme-color-accent-secondary: #d97706e6; /* Royal Gold with 10% transparency */
+  --theme-color-accent-primary: #ef4444e6;
+  --theme-color-accent-secondary: #d97706e6;
   --theme-color-text-primary: #fef2f2;
   --theme-color-text-secondary: #fca5a5;
   --theme-color-text-glow: #fee2e2;
@@ -126,7 +122,7 @@
   --theme-glow-shadow-secondary: 0 0 15px rgba(217, 119, 6, 0.3);
   
   --theme-gradient-primary: linear-gradient(135deg, #ef4444, #d97706);
-  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(239, 68, 68, 0.85), rgba(217, 119, 6, 0.85)); /* Gorgeous 15% transparent highlight */
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(239, 68, 68, 0.85), rgba(217, 119, 6, 0.85));
   --theme-gradient-active: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(217, 119, 6, 0.2));
 }
 
@@ -169,10 +165,10 @@
   --theme-border-accent: rgba(251, 191, 36, 0.4);
   --theme-border-subtle: rgba(244, 114, 182, 0.16);
   
-  --theme-color-accent-primary: #f472b6e6; /* Sakura Pink with 10% transparency */
-  --theme-color-accent-secondary: #fbbf24e6; /* Sun Gold with 10% transparency */
+  --theme-color-accent-primary: #f472b6e6;
+  --theme-color-accent-secondary: #fbbf24e6;
   --theme-color-text-primary: #fff1f2;
-  --theme-color-text-secondary: #fbcfe8; /* Tinted fey pink */
+  --theme-color-text-secondary: #fbcfe8;
   --theme-color-text-glow: #fdf2f8;
   --theme-color-text-on-accent: #291022;
   
@@ -196,8 +192,8 @@
   --theme-border-accent: rgba(250, 204, 21, 0.45);
   --theme-border-subtle: rgba(34, 197, 94, 0.16);
   
-  --theme-color-accent-primary: #22c55ee6; /* Toxic Green with 10% transparency */
-  --theme-color-accent-secondary: #facc15e6; /* Sulfuric Gold with 10% transparency */
+  --theme-color-accent-primary: #22c55ee6;
+  --theme-color-accent-secondary: #facc15e6;
   --theme-color-text-primary: #f0fdf4;
   --theme-color-text-secondary: #86efac; /* Minty green */
   --theme-color-text-glow: #dcfce7;
@@ -223,8 +219,8 @@
   --theme-border-accent: rgba(99, 102, 241, 0.45);
   --theme-border-subtle: rgba(217, 70, 239, 0.16);
   
-  --theme-color-accent-primary: #d946efe6; /* Eldritch Magenta with 10% transparency */
-  --theme-color-accent-secondary: #6366f1e6; /* Cosmic Indigo with 10% transparency */
+  --theme-color-accent-primary: #d946efe6;
+  --theme-color-accent-secondary: #6366f1e6;
   --theme-color-text-primary: #fafafa;
   --theme-color-text-secondary: #f5d0fe; /* Cosmic Lilac */
   --theme-color-text-glow: #fdf4ff;
@@ -277,8 +273,8 @@
   --theme-border-accent: rgba(13, 148, 136, 0.4);
   --theme-border-subtle: rgba(2, 132, 199, 0.16);
   
-  --theme-color-accent-primary: #0284c7e6; /* Bioluminescent Blue with 10% transparency */
-  --theme-color-accent-secondary: #0d9488e6; /* Deep Coral Teal with 10% transparency */
+  --theme-color-accent-primary: #0284c7e6;
+  --theme-color-accent-secondary: #0d9488e6;
   --theme-color-text-primary: #f0fdfa;
   --theme-color-text-secondary: #99f6e4; /* Pale aquamarine */
   --theme-color-text-glow: #ccfbf1;
@@ -304,8 +300,8 @@
   --theme-border-accent: rgba(156, 163, 175, 0.4);
   --theme-border-subtle: rgba(255, 255, 255, 0.16);
   
-  --theme-color-accent-primary: #ffffffe6; /* Pure White with 10% transparency */
-  --theme-color-accent-secondary: #9ca3afe6; /* Ash Silver with 10% transparency */
+  --theme-color-accent-primary: #ffffffe6;
+  --theme-color-accent-secondary: #9ca3afe6;
   --theme-color-text-primary: #ffffff;
   --theme-color-text-secondary: #d1d5db; /* Light gray */
   --theme-color-text-glow: #f3f4f617;
@@ -444,10 +440,6 @@
   color: var(--theme-color-text-primary);
 }
 
-/* ==========================================================================
-   🛠️ Style System Variants
-   ========================================================================== */
-
 /* 🌌 Variant 1: Glassmorphic Modern */
 .style-variant-glass .theme-preview-container {
   border-radius: 20px;
@@ -496,9 +488,9 @@
   transition: all 0.3s ease;
 }
 .style-variant-gothic .theme-preview-card {
-  background: rgba(18, 15, 25, 0.98); /* Solid dark stone background */
-  border: 2px solid var(--theme-color-accent-primary); /* Chiseled colored border */
-  border-radius: 4px; /* Classic sharp RPG corners */
+  background: rgba(18, 15, 25, 0.98);
+  border: 2px solid var(--theme-color-accent-primary);
+  border-radius: 4px;
   color: var(--theme-color-text-primary);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(0, 0, 0, 0.9);
   transition: all 0.2s ease;
@@ -532,11 +524,11 @@
   transition: all 0.3s ease;
 }
 .style-variant-neon .theme-preview-card {
-  background: #060606; /* Flat pitch black background */
-  border: 2px solid var(--theme-color-accent-secondary); /* Neon outline */
-  border-radius: 0px; /* Completely square */
+  background: #060606;
+  border: 2px solid var(--theme-color-accent-secondary);
+  border-radius: 0px;
   color: var(--theme-color-text-primary);
-  box-shadow: 5px 5px 0px var(--theme-color-accent-primary); /* Harsh neon shadow offset */
+  box-shadow: 5px 5px 0px var(--theme-color-accent-primary);
   transition: all 0.15s ease;
 }
 .style-variant-neon .theme-preview-card--interactive:hover {
@@ -618,11 +610,6 @@
   text-shadow: 0 0 10px var(--theme-border-glow);
 }
 
-/* ==========================================================================
-   💎 Unified Glassmorphic Style System (Core Utility Classes)
-   ========================================================================== */
-
-/* A beautiful, high-end translucent glass panel */
 .glass-panel {
   border-radius: 20px;
   background: var(--theme-bg-base);
@@ -634,7 +621,6 @@
   transition: all 0.3s ease;
 }
 
-/* A premium glass card with interactive highlights */
 .glass-card {
   background: var(--theme-bg-card);
   backdrop-filter: blur(16px) saturate(130%);
@@ -672,7 +658,6 @@
   box-shadow: var(--theme-glow-shadow-primary) !important;
 }
 
-/* Premium Primary Button (Gradient fill with hover glow) */
 .glass-btn-primary {
   background: var(--theme-gradient-primary) !important;
   color: var(--theme-color-text-on-accent, #121214) !important;
@@ -689,7 +674,6 @@
   transform: translateY(-1px);
 }
 
-/* Premium Secondary Button (Transparent with subtle hover) */
 .glass-btn-secondary {
   background: rgba(255, 255, 255, 0.03) !important;
   border: 1px solid var(--theme-border-subtle) !important;
@@ -725,17 +709,12 @@
   text-shadow: 0 0 10px var(--theme-border-glow);
 }
 
-/* 🏷️ The Minimalist Narrative Title Utility */
 .narrative-title {
   font-family: "Plus Jakarta Sans", "Inter", sans-serif !important;
   font-weight: 300 !important;
   letter-spacing: 4px !important;
   text-transform: uppercase !important;
 }
-
-/* ==========================================================================
-   🔮 Magic Theme Selector Runes System
-   ========================================================================== */
 
 .runes-theme-switcher-inline {
   display: flex;
@@ -781,11 +760,6 @@
   box-shadow: var(--theme-glow-shadow-primary), inset 0 1px 1px rgba(255,255,255,0.1);
 }
 
-/* ==========================================================================
-   🌌 Living Cinematic Backdrop System (Global Application Background)
-   ========================================================================== */
-
-/* Full Screen Base Obsidian Background */
 .portal-background {
   position: absolute;
   inset: 0;
@@ -794,7 +768,6 @@
   background: #050507;
 }
 
-/* Topographic Radial Fluid Gradients - Highly Hardware Accelerated */
 .portal-backdrop-glow {
   position: absolute;
   width: 100%;
@@ -822,7 +795,6 @@
   100% { transform: translate3d(0, 0, 0) scale(1.3); }
 }
 
-/* Floating Particles (Layer 2) */
 .portal-particles {
   position: absolute;
   inset: 0;
@@ -830,7 +802,6 @@
   pointer-events: none;
 }
 
-/* Flat, hardware-accelerated base particle containers (invisible wrappers) */
 .portal-particle {
   position: absolute;
   background: transparent !important;
@@ -842,7 +813,6 @@
   animation: floatUp infinite linear;
 }
 
-/* Pseudo-element carrying the actual procedurally generated CSS shapes */
 .portal-particle::after {
   content: "" !important;
   display: block;
@@ -850,8 +820,6 @@
   height: 6px;
   box-sizing: border-box;
 }
-
-/* 🌀 Theme-Specific Background Particle Customizations (Desktop Only) */
 
 /* ❄️ Frost Glacier: drifting ice crystals (the snowfall itself lives in FrostBackdrop) */
 .theme-frost-glacier .portal-particle {
@@ -924,9 +892,6 @@
   }
 }
 
-/* ==========================================================================
-   📱 Mobile Performance Optimization (Disable Heavy Backdrop Filters & Shadows)
-   ========================================================================== */
 @media (max-width: 768px) {
   /* Completely disable expensive GPU-choking backdrop blurs on mobile */
   *,
@@ -953,7 +918,6 @@
     --theme-bg-card: rgba(255, 255, 255, 0.035) !important;
   }
 
-  /* Cinematic fade animations from dark black to bright themed backgrounds on mobile viewports */
   @keyframes modalThemeFadeDefault {
     0% { background: #030305 !important; }
     100% { background: #0c0c0e !important; }

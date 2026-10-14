@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 
-// Existing service and store dependencies
 import { loginUser, registerUser } from "@services/authService";
 import { processToken } from "@utils/processToken";
 import { useLoadingNotification } from "@components/Notification/LoadingNotification";
@@ -14,7 +13,6 @@ import AlreadyLoggedIn from "@features/auth/login/components/AlreadyLoggedIn";
 import { validateRegisterForm } from "@validations/registerValidation";
 import { showNotification } from "@components/Notification/Notification";
 
-// Modularized form components
 import { LoginPanel } from "./components/LoginPanel";
 import { RegisterPanel } from "./components/RegisterPanel";
 
@@ -30,18 +28,15 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
 
   const { sidebarTheme } = useUiStore();
 
-  // Unified panel toggler state
   const [activePanel, setActivePanel] = useState<"login" | "register">(mode);
 
   // Prevents brief "already logged in" page flash before redirect navigates
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  // Sync state if routing changes
   useEffect(() => {
     setActivePanel(mode);
   }, [mode]);
 
-  // Form Field States
   const [loginUserVal, setLoginUserVal] = useState("");
   const [loginPassVal, setLoginPasswordVal] = useState("");
 
@@ -49,7 +44,6 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
   const [regPassVal, setRegPassVal] = useState("");
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
 
-  // Loading Notification Helpers
   const toggleLoginNotification = useLoadingNotification({
     title: "Logging in...",
     message: "Please wait while we establish your session",
@@ -71,7 +65,6 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
     autoClose: 2000,
   });
 
-  // Handle Login submission
   const handleLoginSubmit = async () => {
     if (!loginUserVal.trim() || !loginPassVal.trim()) {
       showNotification({
@@ -95,7 +88,6 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
       setIsRedirecting(true);
       processToken(response.token);
 
-      // Fetch and apply user settings before closing notification and navigating
       await useUiStore.getState().fetchSettings();
 
       toggleLoginNotification(false, true);
@@ -105,7 +97,6 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
     }
   };
 
-  // Handle Registration submission
   const handleRegisterSubmit = async () => {
     const { valid, errors: validationErrors } = validateRegisterForm(regUserVal, regPassVal);
     setErrors(validationErrors);
@@ -136,7 +127,6 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
     }
   };
 
-  // Theme styling helpers
   const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
   if (token && !isRedirecting) {
@@ -153,7 +143,6 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
 
   return (
     <Box className={`portal-container ${activeThemeClass} style-variant-glass`}>
-      {/* 1. CENTRAL USER PORTAL CARDS (WITH SEAMLESS SLIDE TRANSITION) */}
       <Box className="portal-content-layer">
         <Box className="reforged-portal-card">
           <AnimatePresence mode="wait">

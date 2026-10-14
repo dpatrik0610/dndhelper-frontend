@@ -175,13 +175,11 @@ function AppRoutes() {
       const maxTime = 350;
 
       if (timeDiff <= maxTime && Math.abs(diffY) < maxVerticalDeviation) {
-        // Swipe right from the left edge -> open
         if (diffX >= minSwipeDistance) {
           if (!opened && startX < 60) {
             handlers.open();
           }
         }
-        // Swipe left -> close
         else if (diffX <= -minSwipeDistance) {
           if (opened) {
             handlers.close();

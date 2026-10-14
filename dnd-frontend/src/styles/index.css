@@ -30,8 +30,6 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
-/* index.css */
-
 .ai-message {
   font-family: var(--font-sans) !important;
   font-size: var(--fs-md) !important;

@@ -37,7 +37,6 @@ export function AbilityScores() {
     { key: "cha" as const, name: "Charisma", short: "CHA", saveKey: "charisma" as const },
   ], []);
 
-  // Enrich skills with their short ability name and sort alphabetically for a premium layout
   const enrichedSkills = useMemo(() => {
     return skills.map((s) => {
       const def = DEFAULT_SKILLS.find((d) => d.name === s.name);
@@ -73,10 +72,8 @@ export function AbilityScores() {
     >
       <Stack gap="lg">
         
-        {/* COMPACT DUAL-PANEL GRID LAYOUT */}
         <Grid gutter="xl" align="flex-start">
           
-          {/* LEFT PANEL: The 6 Core Attributes Grid */}
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Stack gap="md">
               <Text
@@ -129,7 +126,6 @@ export function AbilityScores() {
                         padding: "12px",
                       }}
                     >
-                      {/* Faint silhouette watermark on the right edge */}
                       <AbilityGlyphIcon
                         ability={ab.key}
                         aria-hidden
@@ -146,14 +142,12 @@ export function AbilityScores() {
                         }}
                       />
 
-                      {/* Name */}
                       <Group justify="space-between" w="100%" wrap="nowrap" style={{ width: "100%" }}>
                         <Text size="10px" fw={700} style={{ color: "var(--theme-color-text-secondary, rgba(255,255,255,0.6))", letterSpacing: "1px" }}>
                           {ab.short}
                         </Text>
                       </Group>
 
-                      {/* Modifier */}
                       <EffectHint stat={stat}>
                         <Text
                           fw={700}
@@ -168,7 +162,6 @@ export function AbilityScores() {
                         </Text>
                       </EffectHint>
 
-                      {/* Base Score Capsule */}
                       <Text
                         size="12px"
                         fw={700}
@@ -191,7 +184,6 @@ export function AbilityScores() {
             </Stack>
           </Grid.Col>
 
-          {/* RIGHT PANEL: Unified Master Skills List Table (Alphabetized, Space-Efficient) */}
           <Grid.Col span={{ base: 12, md: 8 }}>
             <Stack gap="md">
               <Text
@@ -297,7 +289,6 @@ export function AbilityScores() {
                       }}
                     >
                       <Group gap="xs" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
-                        {/* Gold Star if proficient, or a clean subtle empty circle */}
                         {isProf ? (
                           <span
                             style={{
@@ -326,7 +317,6 @@ export function AbilityScores() {
                           {skill.name}
                         </Text>
 
-                        {/* Small attribute tag badge */}
                         <CustomBadge
                           size="xs"
                           variant="themed"
@@ -347,7 +337,6 @@ export function AbilityScores() {
                         />
                       </Group>
 
-                      {/* Right side modifier text */}
                       <EffectHint stat={skillStat}>
                         <RollMark roll={skillStat?.roll} />
                         <Text

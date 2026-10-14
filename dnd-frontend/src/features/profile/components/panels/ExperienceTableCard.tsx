@@ -42,10 +42,8 @@ export function ExperienceTableCard() {
     >
       <Stack gap="md" style={{ padding: isMobile ? "0px" : "4px" }}>
         
-        {/* UPPER DECK: Experience Progress & Level Badge */}
         <Group wrap={isMobile ? "wrap" : "nowrap"} gap="md" align="center" style={{ width: "100%" }}>
           
-          {/* Level Crest */}
           <ThemeIcon
             size={isMobile ? 56 : 64}
             radius="md"
@@ -67,7 +65,6 @@ export function ExperienceTableCard() {
             </Stack>
           </ThemeIcon>
 
-          {/* Progress Bar & Details */}
           <Box style={{ flex: 1, minWidth: isMobile ? "100%" : 0 }}>
             <Group justify="space-between" mb={8} align="flex-end" gap="xs">
               <Stack gap={2} style={{ minWidth: "40%" }}>
@@ -122,7 +119,6 @@ export function ExperienceTableCard() {
 
         <Divider style={{ borderColor: "rgba(255, 255, 255, 0.06)" }} my={4} />
 
-        {/* LOWER DECK: Collapsible Progression Chart Header */}
         <Group
           justify="space-between"
           align="center"
@@ -170,7 +166,6 @@ export function ExperienceTableCard() {
           </Group>
         </Group>
 
-        {/* Collapse content containing the 5e table */}
         <Collapse in={expanded}>
           <Box
             style={{

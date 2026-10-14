@@ -31,8 +31,6 @@ interface MarkdownRendererProps {
   textColor?: string;
 }
 
-// --- Config / constants ---
-
 const WRAPPER_STYLE: CSSProperties = {
   wordBreak: "break-word",
   overflowWrap: "anywhere",
@@ -96,7 +94,7 @@ const MARK_HIGHLIGHT_STYLE: CSSProperties = {
   color: "#ffe9c4",
   padding: "0 2px",
   borderRadius: 3,
-  textShadow: "0 0 6px rgba(255, 200, 120, 0.9)", // warm glow
+  textShadow: "0 0 6px rgba(255, 200, 120, 0.9)",
 };
 
 // Not global: .test() on a /g regex keeps lastIndex between calls, which made every other #tag fail.
@@ -124,8 +122,6 @@ const TAG_BADGE_STYLE = {
     verticalAlign: "baseline",
   },
 };
-
-// --- Helpers ---
 
 type HastNode = { type: string; value?: string; children?: HastNode[] };
 
@@ -201,8 +197,6 @@ const transformChildren = (
     return child;
   });
 
-// --- Component ---
-
 export function MarkdownRenderer({
   content,
   highlightQuery,
@@ -271,7 +265,6 @@ export function MarkdownRenderer({
             </Text>
           ),
 
-          // unordered
           ul: ({ children, ...props }) => (
             <List
               size="sm"

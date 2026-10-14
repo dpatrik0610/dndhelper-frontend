@@ -49,14 +49,13 @@ export function HpModal({ opened, onClose }: HpModalProps) {
         newHp = currentHp + amount;
         notificationMessage = `Healed ${amount} HP (now ${newHp}/${maxHp}).`;
       } else {
-        // Damage (amount is negative)
         const damageVal = Math.abs(amount);
         const actualTempHp = Math.max(tempHp, 0);
         const damageToTemp = Math.min(damageVal, actualTempHp);
         const remainingDamage = damageVal - damageToTemp;
 
         newTempHp = actualTempHp - damageToTemp;
-        newHp = currentHp - remainingDamage; // Allows negatives, infinite/no clamp!
+        newHp = currentHp - remainingDamage;
         notificationMessage = `Took ${damageVal} damage (now ${newHp}/${maxHp}).`;
 
         // Down ends concentration outright; otherwise the player rolls the Con save.
@@ -82,7 +81,6 @@ export function HpModal({ opened, onClose }: HpModalProps) {
       if (updated) {
         setCharacter(updated);
       } else {
-        // Fallback local update if updateCharacter doesn't return anything or to ensure state matches
         updateCharacterLocal({
           hitPoints: newHp,
           temporaryHitPoints: newTempHp,

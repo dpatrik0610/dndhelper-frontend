@@ -17,7 +17,6 @@ export function useCharacterForm(editMode: boolean) {
 
   const [loading, setLoading] = useState(false);
 
-  // Load data on edit / reset on create
   useEffect(() => {
     if (editMode && character) replaceCharacterForm(character);
     else resetCharacterForm();

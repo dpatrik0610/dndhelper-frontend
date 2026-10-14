@@ -45,7 +45,6 @@ const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange
         </Group>
 
         <Group align="flex-end" gap="md" style={{ flexWrap: "wrap" }}>
-          {/* Name Search */}
           <TextInput
             placeholder="Search item by name..."
             label="Item Name"
@@ -59,7 +58,6 @@ const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange
             }}
           />
 
-          {/* Tier Select */}
           <Select
             placeholder="Select Rarity"
             label="Rarity Tier"
@@ -75,7 +73,6 @@ const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange
             }}
           />
 
-          {/* Damage Type Select */}
           <Select
             placeholder="Damage Type"
             label="Damage Type"
@@ -96,7 +93,6 @@ const FilterControls: React.FC<FilterControlsProps> = ({ filters, onFilterChange
 
         <Divider style={{ borderColor: "rgba(255,255,255,0.06)" }} />
 
-        {/* Tags filter line */}
         <Group align="flex-end" gap="md" style={{ flexWrap: "wrap" }}>
           <div style={{ flexGrow: 2, minWidth: "220px" }}>
             <Group gap="xs" mb={4}>

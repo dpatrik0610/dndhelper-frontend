@@ -220,8 +220,6 @@ export function computeEffects(c: Character): EffectiveStats {
   return { stats, notes, proficiencies, effects };
 }
 
-// ---------- Labels ----------
-
 const FIXED_TARGETS: Record<string, string> = {
   saves: "All saving throws",
   checks: "All ability checks",
@@ -287,8 +285,6 @@ function describeChange(m: StatModifier): string {
     case "note": return m.text ?? "";
   }
 }
-
-// ---------- Detection ----------
 
 const AB = "strength|dexterity|constitution|intelligence|wisdom|charisma|str|dex|con|int|wis|cha";
 const N = "([+-]\\d+)";

@@ -14,17 +14,14 @@ export function handleShopChange(event: EntityChangeEvent) {
     event.changedBy &&
     (event.changedBy === currentUser.username || event.changedBy === currentUser.id);
 
-  // If action is deleted, or action is updated but data is null/undefined, treat as a deletion
   const isDeletion = event.action === "deleted" || (event.action === "updated" && !event.data);
 
   if (isDeletion) {
     const id = event.entityId;
     if (!id) return;
 
-    // Update player shop store (removes shop)
     shopStore.syncShopDeleted(id);
 
-    // Update admin shop store
     adminShopStore.syncShopDeleted(id);
 
     if (!isCurrentUser) {
@@ -44,10 +41,8 @@ export function handleShopChange(event: EntityChangeEvent) {
       const updatedShop = event.data as Shop;
       if (!updatedShop || !updatedShop.id) return;
 
-      // Update player shop store
       shopStore.syncShopUpdated(updatedShop);
 
-      // Update admin shop store
       adminShopStore.syncShopUpdated(updatedShop);
 
       if (!isCurrentUser) {

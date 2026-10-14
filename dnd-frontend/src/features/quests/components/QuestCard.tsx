@@ -50,7 +50,6 @@ export function QuestCard({
   const remainingCount = Math.max(totalObjectives - 3, 0);
   const isCompleted = quest.status?.toLowerCase() === "completed";
 
-  // Dynamic Type-based Color Coding Theme Spec using Campaign CSS Variables (Adapts automatically to Feywild, Steampunk, Toxic, Glacier, etc.)
   const typeTheme = useMemo(() => {
     switch (quest.type?.toLowerCase()) {
       case "main":
@@ -119,7 +118,6 @@ export function QuestCard({
         }}
       >
         <Stack gap="md" style={{ flex: 1 }}>
-          {/* Title */}
           <Text 
           size="lg" 
           fw={900} 
@@ -139,7 +137,6 @@ export function QuestCard({
             onDelete={() => onDeleteQuest?.(quest.id || "", quest.title)} title={""}
             />
 
-          {/* Description (Markdown) */}
           {quest.description && (
             <Box
               style={{
@@ -154,7 +151,6 @@ export function QuestCard({
             </Box>
           )}
 
-          {/* Progress */}
           {totalObjectives > 0 && (
             <Box
               p="sm"
@@ -215,7 +211,6 @@ export function QuestCard({
             </Box>
           )}
 
-          {/* Objective preview */}
           {displayedObjectives.length > 0 && (
             <Stack
               gap={6}
@@ -283,7 +278,6 @@ export function QuestCard({
           )}
         </Stack>
 
-        {/* Footer */}
         <Group
           mt="lg"
           justify="space-between"

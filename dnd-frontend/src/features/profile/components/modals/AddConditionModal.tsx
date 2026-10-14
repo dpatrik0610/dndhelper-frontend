@@ -22,7 +22,6 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Reset form when modal opens/closes
   useEffect(() => {
     if (opened) {
       setSelected(null);
@@ -30,7 +29,6 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     }
   }, [opened]);
 
-  // Load conditions on open
   useEffect(() => {
     if (!opened) return;
 
@@ -56,7 +54,6 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     };
   }, [opened, character]);
 
-  // Compute filtered list based on search
   const filteredList = useMemo(() => {
     if (!search.trim()) return list;
     return list.filter((c) =>
@@ -64,7 +61,6 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     );
   }, [search, list]);
 
-  // Check if search perfectly matches an existing condition
   const exactMatchExists = useMemo(() => {
     return list.some((c) => c.toLowerCase() === search.trim().toLowerCase());
   }, [search, list]);
@@ -96,7 +92,6 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
     >
       <Stack gap="md" style={{ height: 450 }}>
         
-        {/* SEARCH BAR (Uses glassy-input class) */}
         {loading ? (
           <Stack justify="center" align="center" style={{ flex: 1 }}>
             <Loader size="sm" />
@@ -121,7 +116,6 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
                   minHeight: 0,
                 }}
               >
-                {/* CUSTOM CONDITION CHIP (Themed active glow pill) */}
                 {search.trim().length > 0 && !exactMatchExists && (
                   <Chip
                     key="custom-condition-add"
@@ -158,7 +152,6 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
                   </Chip>
                 )}
 
-                {/* STANDARD CONDITIONS (Themed glassy chips list) */}
                 {filteredList.map((cond) => {
                   const isSelected = selected === cond;
                   return (

@@ -20,7 +20,6 @@ interface ItemListProps {
 const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails, onChanged }) => {
   // Core rows are read-only for DMs; the superadmin edits and promotes.
   const canEdit = useCanEditContent();
-  // Map tier to custom class in CSS
   const getTierClass = (tier?: string) => {
     switch (tier) {
       case "Common": return styles.tierCommon;
@@ -50,7 +49,6 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails,
           <tbody>
             {items.map((item) => (
               <tr key={item.id || item.index} className={styles.glassRow}>
-                {/* Name & Index */}
                 <td>
                   <Group gap="xs" wrap="nowrap">
                     <Text
@@ -76,14 +74,12 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails,
                   </Group>
                 </td>
 
-                {/* Rarity Tier */}
                 <td>
                   <span className={`${styles.tierBadge} ${getTierClass(item.tier)}`}>
                     {item.tier || "Common"}
                   </span>
                 </td>
 
-                {/* Cost */}
                 <td>
                   <Group gap="xs" wrap="nowrap">
                     <IconCoins size={16} color="#eab308" />
@@ -93,7 +89,6 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails,
                   </Group>
                 </td>
 
-                {/* Damage */}
                 <td>
                   {item.damage ? (
                     <Group gap="xs" wrap="nowrap">
@@ -107,7 +102,6 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails,
                   )}
                 </td>
 
-                {/* Weight */}
                 <td>
                   {item.weight !== undefined ? (
                     <Group gap="xs" wrap="nowrap">
@@ -121,7 +115,6 @@ const ItemList: React.FC<ItemListProps> = ({ items, onEdit, onDelete, onDetails,
                   )}
                 </td>
 
-                {/* Actions */}
                 <td>
                   <Group justify="flex-end" gap="xs" wrap="nowrap">
                     <Tooltip label="View details" withArrow position="top">

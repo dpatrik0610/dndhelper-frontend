@@ -77,7 +77,6 @@ export function MarkdownTextarea({
 
     const selectedFull = value.slice(start, end);
 
-    // Detect internal trimmed section
     const leadingSpaces = selectedFull.match(/^\s*/)?.[0].length ?? 0;
     const trailingSpaces = selectedFull.match(/\s*$/)?.[0].length ?? 0;
 
@@ -91,7 +90,6 @@ export function MarkdownTextarea({
         value.slice(innerEnd, innerEnd + suffix.length) === suffix;
 
     if (alreadyWrapped) {
-        // --- UNWRAP ---
         const before = value.slice(0, innerStart - prefix.length);
         const after = value.slice(innerEnd + suffix.length);
 
@@ -107,7 +105,6 @@ export function MarkdownTextarea({
         setSelection({ start: newStart, end: newEnd });
         });
     } else {
-        // --- WRAP ---
         const wrapped = prefix + selected + suffix;
 
         const newValue =
@@ -156,7 +153,6 @@ export function MarkdownTextarea({
     let transformed: string;
 
     if (allBulleted) {
-      // remove bullets
       transformed = linesInBlock
         .map((l) =>
           l.trim().match(/^[-*]\s+/)
@@ -165,7 +161,6 @@ export function MarkdownTextarea({
         )
         .join("\n");
     } else {
-      // add bullets
       transformed = linesInBlock
         .map((l) =>
           l.trim().length ? `- ${l.replace(/^[-*]\s+/, "")}` : ""
@@ -206,7 +201,6 @@ export function MarkdownTextarea({
     let transformed: string;
 
     if (allNumbered) {
-      // remove numeric list formatting
       transformed = linesInBlock
         .map((l) =>
           l.trim().match(/^\d+\.\s+/)
@@ -215,7 +209,6 @@ export function MarkdownTextarea({
         )
         .join("\n");
     } else {
-      // add numeric list
       let index = 1;
       transformed = linesInBlock
         .map((l) => {
@@ -314,7 +307,6 @@ export function MarkdownTextarea({
     });
   }
 
-  // active states for buttons
   const boldActive = isWrapped("**");
   const italicActive = isWrapped("_");
 

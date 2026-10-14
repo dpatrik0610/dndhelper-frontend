@@ -23,7 +23,6 @@ export function handleInventoryChange(event: EntityChangeEvent) {
     case "created": {
       const newInventory = event.data as Inventory;
 
-      // --- Player store ---
       const playerExists = inventoryStore.inventories.some((i) => i.id === newInventory.id);
       inventoryStore.setInventories(
         playerExists
@@ -34,10 +33,8 @@ export function handleInventoryChange(event: EntityChangeEvent) {
         inventoryStore.selectInventory(newInventory);
       }
 
-      // --- Admin inventory store (holds every inventory) ---
       adminStore.applyInventoryUpdate(newInventory);
 
-      // --- Admin currency store (if this inventory is currently open there) ---
       if (adminCurrencyStore.selectedInventory?.id === newInventory.id) {
         adminCurrencyStore.applyInventoryUpdate(newInventory);
       }
@@ -60,7 +57,6 @@ export function handleInventoryChange(event: EntityChangeEvent) {
         return;
       }
 
-      // --- Player store ---
       inventoryStore.updateInventory({
         ...updatedInventory,
         id: updatedInventory.id!,
@@ -69,10 +65,8 @@ export function handleInventoryChange(event: EntityChangeEvent) {
         inventoryStore.selectInventory(updatedInventory);
       }
 
-      // --- Admin inventory list (holds every inventory) ---
       adminStore.applyInventoryUpdate(updatedInventory);
 
-      // --- Admin currency panel (the one you mentioned) ---
       if (adminCurrencyStore.selectedInventory?.id === updatedInventory.id) {
         adminCurrencyStore.applyInventoryUpdate(updatedInventory);
       }
@@ -95,7 +89,6 @@ export function handleInventoryChange(event: EntityChangeEvent) {
         return;
       }
 
-      // --- Player store ---
       inventoryStore.removeInventory(id);
       if (currentSelected?.id === id) {
         inventoryStore.selectInventory(null);
@@ -118,13 +111,11 @@ export function handleInventoryChange(event: EntityChangeEvent) {
         }
       }
 
-      // --- Admin inventory store ---
       const existsInAdmin = adminStore.inventories.some((i) => i.id === id);
       if (existsInAdmin) {
         adminStore.applyInventoryDelete(id);
       }
 
-      // --- Admin currency store: clear if it was looking at this inventory ---
       if (adminCurrencyStore.selectedInventory?.id === id) {
         adminCurrencyStore.setSelectedInventory(null);
       }

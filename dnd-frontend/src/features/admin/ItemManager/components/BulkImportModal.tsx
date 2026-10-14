@@ -63,7 +63,6 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
         return;
       }
 
-      // Quick validate
       const invalid = parsed.findIndex((item) => !item?.name);
       if (invalid >= 0) {
         setError(`Invalid item at index ${invalid}: 'name' is a required field.`);
@@ -72,7 +71,6 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
 
       setSaving(true);
 
-      // Map indices if missing
       const sanitized = parsed.map((item) => ({
         ...item,
         index: item.index || equipmentIndex(item.name),
@@ -170,7 +168,6 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
           </Text>
         )}
 
-        {/* Expandable Sample */}
         <Stack gap={4}>
           <Button
             variant="subtle"

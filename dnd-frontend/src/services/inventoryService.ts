@@ -4,12 +4,7 @@ import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { apiClient } from "@api/apiClient";
 
 
-// Base URL for all requests
 const baseUrl = "/inventory";
-
-// ------------------------
-// Inventory CRUD
-// ------------------------
 
 export async function getInventoriesByCharacter(characterId: string): Promise<Inventory[]> {
   return apiClient(`${baseUrl}/character/${characterId}`, { method: "GET" });
@@ -54,9 +49,6 @@ export async function generateLoot(request: LootRequest): Promise<Inventory> {
 export async function setInventoryCharacters(inventoryId: string, characterIds: string[]): Promise<Inventory> {
   return apiClient(`${baseUrl}/${inventoryId}/characters`, { method: "PUT", body: characterIds });
 }
-// ------------------------
-// Inventory Item Operations
-// ------------------------
 
 export interface ModifyEquipmentAmount{
   equipmentId: string;

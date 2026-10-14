@@ -17,7 +17,6 @@ import { showNotification } from "@components/Notification/Notification";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@hooks/useIsMobile";
 
-// Lazy-loaded sub-panels to optimize initial bundle size, memory footprint, and rendering latency on mobile
 const AbilityScores = lazy(() => import("./components/panels/AbilityScores").then(m => ({ default: m.AbilityScores })));
 const EffectsPanel = lazy(() => import("./components/panels/EffectsPanel").then(m => ({ default: m.EffectsPanel })));
 const StatisticsPanel = lazy(() => import("./components/panels/StatisticsPanel").then(m => ({ default: m.StatisticsPanel })));
@@ -105,7 +104,6 @@ export default function CharacterProfile() {
 
             {shownTab === "stats" && (
               <motion.div key="stats" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-                {/* <AbilityScores /> */}
                 <CombatStats />
                 <ExperienceTableCard />
               </motion.div>

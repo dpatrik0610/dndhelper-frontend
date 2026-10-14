@@ -178,7 +178,6 @@ export default function ShopkeeperPage() {
             showNotification({ title: "Purchase Complete", message: "Item added to your bag.", color: SectionColor.Green });
             setBuyModalOpen(false);
 
-            // Re-fetch inventories immediately to keep client responsive
             if (activeShop?.inventoryId) {
                 getInventory(activeShop.inventoryId).then(data => updateInventory({ ...data, id: data.id! })).catch(console.error);
             }
@@ -204,7 +203,6 @@ export default function ShopkeeperPage() {
             showNotification({ title: "Request Sent", message: "Item placed in escrow awaiting DM approval.", color: SectionColor.Green });
             setSellModalOpen(false);
 
-            // Re-fetch player inventories safely without wiping shop stock!
             void refreshPlayerInventories();
         } catch(e) {
             // Error handled in store
@@ -260,7 +258,6 @@ export default function ShopkeeperPage() {
     return (
         <div className={classes.wrapper}>
             <Container fluid style={{ maxWidth: "100%" }} p={0}>
-                {/* SHOP PLACARD HEADER */}
                 <ShopkeeperHeader
                     visibleShops={visibleShops}
                     activeShop={activeShop || null}
@@ -270,7 +267,6 @@ export default function ShopkeeperPage() {
                     refreshing={refreshing}
                 />
 
-                {/* NO SHOPS AVAILABLE EMPTY STATE */}
                 {visibleShops.length === 0 && <EmptyMarketplace />}
 
                 {!activeShop && selectedShopId && (
@@ -279,7 +275,6 @@ export default function ShopkeeperPage() {
 
                 {activeShop && (
                     <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xs">
-                        {/* MERCHANT SHELF (BUY) */}
                         <MerchantShelf
                             shopInventory={shopInventory}
                             equipments={equipments}
@@ -289,7 +284,6 @@ export default function ShopkeeperPage() {
                             handleBuyOpen={handleBuyOpen}
                         />
 
-                        {/* YOUR SATCHEL (SELL) */}
                         <AdventureBag
                             activeCharacter={activeCharacter}
                             inventories={inventories}
@@ -303,7 +297,6 @@ export default function ShopkeeperPage() {
                     </SimpleGrid>
                 )}
 
-                {/* BUY MODAL */}
                 <BuyModal
                     opened={buyModalOpen}
                     onClose={() => setBuyModalOpen(false)}
@@ -313,7 +306,6 @@ export default function ShopkeeperPage() {
                     actionLoading={actionLoading}
                 />
 
-                {/* SELL MODAL */}
                 <SellModal
                     opened={sellModalOpen}
                     onClose={() => setSellModalOpen(false)}
@@ -330,7 +322,6 @@ export default function ShopkeeperPage() {
                     actionLoading={actionLoading}
                 />
 
-                {/* STEAL MODAL */}
                 <StealModal
                     opened={stealModalOpen}
                     onClose={() => setStealModalOpen(false)}

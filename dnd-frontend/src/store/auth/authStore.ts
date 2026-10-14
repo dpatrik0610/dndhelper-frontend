@@ -22,13 +22,11 @@ export interface AuthActions {
 export const useAuthStore = create<AuthState & AuthActions>()(
   persist(
     (set) => ({
-      // State
       token: null,
       id: null,
       username: null,
       roles: [],
 
-      // Actions
       setAuthData: ({ token, id, username, roles = [] }) =>
         set({ token, id, username, roles }),
 

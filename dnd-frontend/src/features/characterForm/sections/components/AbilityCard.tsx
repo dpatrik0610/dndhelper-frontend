@@ -49,7 +49,6 @@ export function AbilityCard({
   const activeGroupMod = modifiers[activeGroup.key];
   const displayMod = activeGroupMod >= 0 ? `+${activeGroupMod}` : activeGroupMod;
 
-  // Filter skills belonging to this single selected ability
   const groupSkills = skills.filter((s) => {
     const def = DEFAULT_SKILLS.find((d) => d.name === s.name);
     return def && def.ability === activeGroup.key;
@@ -65,7 +64,6 @@ export function AbilityCard({
         boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
       }}
     >
-      {/* Card Header (Ability and Modifier Capsule) */}
       <Group justify="space-between" mb="lg">
         <Group gap={8}>
           <Text style={{ fontSize: isMobile ? "18px" : "20px" }}>{activeGroup.icon}</Text>
@@ -81,7 +79,6 @@ export function AbilityCard({
           </Text>
         </Group>
         
-        {/* Soft, Highlighted modifier pill capsule */}
         <Box
           style={{
             background: "rgba(255, 255, 255, 0.03)",
@@ -116,10 +113,8 @@ export function AbilityCard({
         </Box>
       </Group>
 
-      {/* Row 1: Core Score & Saving Throw Modifier (with inline popover icons) */}
       <Group grow gap="md" align="flex-end" mb={groupSkills.length > 0 ? "lg" : 0}>
         
-        {/* Score Input */}
         <Stack gap={0}>
           <FormNumberInput
             label={
@@ -146,7 +141,6 @@ export function AbilityCard({
           />
         </Stack>
 
-        {/* Saving Throw Input */}
         <Stack gap={0}>
           <FormNumberInput
             label={
@@ -175,7 +169,6 @@ export function AbilityCard({
 
       </Group>
 
-      {/* Row 2: Governed Skills list */}
       {groupSkills.length > 0 && (
         <>
           <Divider color="rgba(255,255,255,0.03)" my="md" />
@@ -188,7 +181,6 @@ export function AbilityCard({
               return (
                 <Group key={s.name} justify="space-between" align="center" wrap="nowrap">
                   
-                  {/* Left: Star Check-Bubble + Skill Name + Info */}
                   <Group gap="sm" style={{ flex: 1, minWidth: 0 }}>
                     <ActionIcon
                       onClick={() => {
@@ -262,7 +254,6 @@ export function AbilityCard({
                     )}
                   </Group>
 
-                  {/* Right: Mod Base + Number Input */}
                   <Group gap="xs" wrap="nowrap">
                     {!isMobile && (
                       <Text size="10px" c="dimmed" style={{ fontStyle: "italic" }}>

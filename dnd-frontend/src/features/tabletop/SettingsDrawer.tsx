@@ -169,8 +169,6 @@ function Card({
   );
 }
 
-// ── Room ──
-
 function RoomTab() {
   const code = useTabletopStore((s) => s.session?.joinCode ?? "");
   const [inviting, setInviting] = useState(false);
@@ -379,8 +377,6 @@ function KickAllButton({ count }: { count: number }) {
     </ConfirmPopover>
   );
 }
-
-// ── Board ──
 
 function GridPreview({ type, color }: { type: GridType; color: string }) {
   const tile = gridTile({ type, cellSize: 14 });
@@ -709,8 +705,6 @@ function MapCard() {
   );
 }
 
-// ── Tokens ──
-
 function TokensTab() {
   const cellSize = useTabletopStore((s) => s.snapshot!.grid.cellSize);
   return (
@@ -907,8 +901,6 @@ function CustomToken({ cellSize }: { cellSize: number }) {
     </>
   );
 }
-
-// ── Fog ──
 
 function FogTab() {
   const fog = useTabletopStore((s) => s.fog);

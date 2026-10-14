@@ -29,15 +29,12 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
   const [actionType, setActionType] = useState<MoneyActionType>("send");
   const [loading, setLoading] = useState(false);
 
-  // Common/Delete state
   const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
   const [amount, setAmount] = useState<number>(0);
 
-  // Send state
   const [characters, setCharacters] = useState<Character[]>([]);
   const [targetId, setTargetId] = useState<string | null>(null);
 
-  // Reset form when modal opens
   useEffect(() => {
     if (opened) {
       setActionType("send");
@@ -47,7 +44,6 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
     }
   }, [opened]);
 
-  // Load campaign characters for transfer
   useEffect(() => {
     async function load() {
       if (!character?.campaignId || !token) return;
@@ -75,7 +71,6 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
     setLoading(true);
     try {
       if (actionType === "delete") {
-        // Delete Money
         removeCurrencyLocal(selectedCurrency, amount);
         await updateCharacter(useCharacterStore.getState().character!);
         showNotification({
@@ -85,7 +80,6 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
         });
         onClose();
       } else {
-        // Send Money (Transfer)
         if (!targetId) {
           showNotification({
             title: "Error",
@@ -141,7 +135,6 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
     >
       <Stack gap="md">
         
-        {/* PREMIUM THEMED SEGMENTED CONTROL */}
         <SegmentedControl
           value={actionType}
           onChange={(v) => {

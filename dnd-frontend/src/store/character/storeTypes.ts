@@ -9,7 +9,7 @@ export interface CoreSliceState {
 export interface CoreSliceActions {
   setCharacter: (character: Character | null) => void;
   setCharacters: (characters: Character[]) => void;
-  updateCharacter: (updated: Partial<Character>) => void; // Keep for generic updates not covered by specific slices
+  updateCharacter: (updated: Partial<Character>) => void;
   clearStore: () => void;
 }
 

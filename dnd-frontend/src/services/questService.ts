@@ -39,7 +39,6 @@ export async function deleteQuest(id: string): Promise<void> {
   });
 }
 
-// Atomic Objective Management
 export async function addObjective(
   questId: string,
   objective: {

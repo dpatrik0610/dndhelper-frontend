@@ -1,11 +1,9 @@
 import { useNoteStore } from "./noteStore";
 import { useShallow } from "zustand/react/shallow";
 
-// Data Selectors
 export const useNoteList = () => useNoteStore((s) => s.notes);
 export const useNoteLoading = () => useNoteStore((s) => s.loading);
 
-// Action Selectors
 export const useNoteActions = () => useNoteStore(useShallow((s) => ({
   getById: s.getById,
   getForCharacter: s.getForCharacter,

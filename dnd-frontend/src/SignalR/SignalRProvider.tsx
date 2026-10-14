@@ -9,10 +9,10 @@ interface SignalRContextType {
 }
 
 const SignalRContext = createContext<SignalRContextType | undefined>(undefined);
-export { SignalRContext }; // exported so the hook can use it
+export { SignalRContext };
 
 export function SignalRProvider({ children }: { children: ReactNode }) {
-  const signalRState = useSignalR(); // Hook used inside component → OK
+  const signalRState = useSignalR();
 
   return (
     <SignalRContext.Provider value={signalRState}>

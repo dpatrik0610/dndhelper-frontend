@@ -47,9 +47,7 @@ export function HeaderCard({
         boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
       }}
     >
-      {/* Main Character Row Split: Info vs XP Bar */}
       <Grid gutter="xl" align="center">
-        {/* Left/Center side: Avatar, Name, Metadata, Core Stat Pills */}
         <Grid.Col span={{ base: 12, md: character ? 7 : 12 }}>
           <Group align="center" gap="lg" wrap="nowrap">
             {character?.imageUrl ? (
@@ -58,7 +56,7 @@ export function HeaderCard({
                 size={84}
                 radius="xl"
                 style={{
-                  border: "none", // Display without border!
+                  border: "none",
                 }}
               />
             ) : (
@@ -73,7 +71,7 @@ export function HeaderCard({
                 styles={{
                   root: {
                     boxShadow: "var(--theme-glow-shadow-primary)",
-                    border: "none", // Display without border!
+                    border: "none",
                   },
                 }}
               >
@@ -107,14 +105,10 @@ export function HeaderCard({
                   : "Select a character to initialize your adventure!"}
               </Text>
 
-              {/* Core Stat Pills Deck (only if character is selected) */}
               {character && (
                 <Group gap="xs" mt={4} wrap="wrap">
-                  {/* HP Pill */}
                   <CustomBadge label={`HP ${character.hitPoints}/${character.maxHitPoints}`} variant="outline" color="red" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
-                  {/* AC Pill */}
                   <CustomBadge label={`AC ${character.armorClass}`} variant="outline" color="yellow" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
-                  {/* Inspiration Pill */}
                   <CustomBadge label={`Inspirations: ${character.inspiration ?? 0}`} variant="outline" color="violet" size="sm" style={{ fontWeight: 700, fontSize: "11px" }} />
                 </Group>
               )}
@@ -122,7 +116,6 @@ export function HeaderCard({
           </Group>
         </Grid.Col>
 
-        {/* Right side: XP progress card (only if character is selected) */}
         {character && (
           <Grid.Col span={{ base: 12, md: 5 }}>
             <Box style={{ width: "100%" }}>
@@ -140,7 +133,6 @@ export function HeaderCard({
         )}
       </Grid>
 
-      {/* Subtle Divider before actions */}
       <Divider
         my="lg"
         style={{
@@ -148,7 +140,6 @@ export function HeaderCard({
         }}
       />
 
-      {/* Bottom Actions Row */}
       <Group
         gap="md"
         justify={isMobile ? "stretch" : "flex-end"}

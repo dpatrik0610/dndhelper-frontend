@@ -18,10 +18,8 @@ export function handleSellRequestChange(event: EntityChangeEvent) {
       const updatedRequest = event.data as SellRequest;
       if (!updatedRequest.id) return;
 
-      // Update admin shop store
       adminShopStore.syncSellRequestUpdated(updatedRequest);
 
-      // Show a descriptive notification based on status
       let notificationTitle = "Sell Request Updated";
       let notificationColor = "blue";
       

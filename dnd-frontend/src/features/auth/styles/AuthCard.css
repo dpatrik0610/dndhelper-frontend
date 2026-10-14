@@ -1,8 +1,3 @@
-/* ==========================================================================
-   D&D REFORGED — MINIMAL CINEMATIC PORTAL ENTRANCE AESTHETIC STYLESHEET
-   ========================================================================== */
-
-/* Full Screen Portal Root Wrapper */
 .portal-container {
   position: relative;
   width: 100vw;
@@ -15,7 +10,6 @@
   box-sizing: border-box;
 }
 
-/* Layered Living Background Container */
 .portal-background {
   position: absolute;
   inset: 0;
@@ -24,7 +18,6 @@
   background: #060608;
 }
 
-/* Topographic Radial Fluid Gradients (Layer 3) */
 .portal-backdrop-glow {
   position: absolute;
   width: 150%;
@@ -45,7 +38,6 @@
   100% { transform: rotate(5deg) scale(1.05); }
 }
 
-/* Floating Particles (Layer 2) */
 .portal-particles {
   position: absolute;
   inset: 0;
@@ -78,7 +70,6 @@
   }
 }
 
-/* Portal Content Layer (Layer 4) */
 .portal-content-layer {
   position: relative;
   z-index: 10;
@@ -92,7 +83,6 @@
   box-sizing: border-box;
 }
 
-/* Premium Glassmorphic Portal Card */
 .reforged-portal-card {
   width: 100%;
   max-width: 480px;
@@ -110,7 +100,6 @@
   transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
 }
 
-/* Form Titles & Subtitles */
 .portal-header-title {
   font-family: var(--font-sans) !important;
   color: var(--theme-color-text-primary, #ffffff) !important;
@@ -134,7 +123,6 @@
   margin-bottom: 32px !important;
 }
 
-/* Portal Specific Input & Label Upscaling */
 .reforged-portal-card .glassy-input {
   height: 48px !important;
   font-size: 15px !important;
@@ -147,7 +135,6 @@
   margin-bottom: 8px !important;
 }
 
-/* Mobile responsive fixes */
 @media (max-width: 768px) {
   .reforged-portal-card {
     max-width: 100%;

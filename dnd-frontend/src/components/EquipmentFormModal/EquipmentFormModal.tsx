@@ -35,7 +35,6 @@ export function EquipmentFormModal({
   const isMobile = useIsMobile();
   const [draft, setDraft] = useState<Equipment>(defaultEquipment);
 
-  // Reset draft when opening or when initial changes
   useEffect(() => {
     if (!opened) return;
     setDraft({
@@ -65,7 +64,7 @@ export function EquipmentFormModal({
       size="xl"
       fullScreen={isMobile}
       loading={saving}
-      padding={0} // We will handle padding inside
+      padding={0}
     >
       <ScrollArea h={isMobile ? "calc(100dvh - 128px)" : "70vh"} offsetScrollbars style={{ padding: "0 16px 16px 16px" }}>
         <Stack gap="lg" mt="sm">

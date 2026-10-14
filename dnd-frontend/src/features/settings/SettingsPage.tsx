@@ -32,7 +32,6 @@ export default function SettingsPage() {
       }}
     >
       <Stack gap="xl">
-        {/* Page Header */}
         <Box>
           <Title
             order={2}

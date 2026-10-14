@@ -27,7 +27,6 @@ interface AdminCurrencyStore {
   refresh: () => Promise<void>;
   clearStorage: () => void;
 
-  // For SignalR sync
   setSelectedInventory: (inv: Inventory | null) => void;
   setCurrencies: (currencies: Currency[]) => void;
   applyInventoryUpdate: (inv: Inventory) => void;

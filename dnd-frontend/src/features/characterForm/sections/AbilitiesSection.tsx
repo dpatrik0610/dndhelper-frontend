@@ -24,10 +24,8 @@ export function AbilitiesSection() {
   const characterForm = useCharacterFormStore((s) => s.characterForm);
   const setCharacterForm = useCharacterFormStore((s) => s.setCharacterForm);
 
-  // Local state to track which exact single ability is currently shown
   const [selectedAbility, setSelectedAbility] = useState<AbilityKey>("str");
 
-  // Unified modifiers calculator
   const modifiers = useMemo(() => {
     const s = characterForm.abilityScores;
     const M = (v: number) => {
@@ -46,7 +44,6 @@ export function AbilitiesSection() {
 
   const prof = characterForm.proficiencyBonus ?? 0;
 
-  // --- Skills calculations ---
   const skills = characterForm.skills ?? [];
 
   const calcBase = (s: { name: string; proficient?: boolean }) => {
@@ -77,7 +74,6 @@ export function AbilitiesSection() {
     modifiers.int +
     (hasSkillProficiency("Investigation") ? prof : 0);
 
-  // Auto-update characterForm.skills in the store when scores or proficiency bonus change
   useEffect(() => {
     if (!skills.length) return;
 
@@ -94,7 +90,6 @@ export function AbilitiesSection() {
       };
     });
 
-    // Safe change detection to completely prevent infinite rendering loops
     const hasChanges = updatedSkills.some((s, idx) => {
       const original = skills[idx];
       return s.value !== original.value || s.lastBase !== original.lastBase;
@@ -105,7 +100,6 @@ export function AbilitiesSection() {
     }
   }, [characterForm.abilityScores, characterForm.proficiencyBonus]);
 
-  // Sync computed attributes in store
   useEffect(() => {
     if (
       characterForm.passivePerception !== passivePerception ||
@@ -128,7 +122,6 @@ export function AbilitiesSection() {
     setCharacterForm,
   ]);
 
-  // Define RPG groups
   const abilityGroups = useMemo(
     () => [
       { key: "str" as AbilityKey, longKey: "strength" as AbilityLong, label: "Strength", icon: "💪" },
@@ -141,7 +134,6 @@ export function AbilitiesSection() {
     []
   );
 
-  // Retrieve the single active group to render
   const activeGroup = useMemo(() => {
     return abilityGroups.find((g) => g.key === selectedAbility)!;
   }, [selectedAbility, abilityGroups]);
@@ -172,7 +164,6 @@ export function AbilitiesSection() {
         }}
       />
 
-      {/* Render Exactly ONE chosen Ability Card Component */}
       <AbilityCard
         activeGroup={activeGroup}
         modifiers={modifiers}
@@ -184,7 +175,6 @@ export function AbilitiesSection() {
         saveKey={saveKey}
       />
 
-      {/* Passive Senses Card Component */}
       <PassiveSensesCard
         passivePerception={passivePerception}
         passiveInsight={passiveInsight}

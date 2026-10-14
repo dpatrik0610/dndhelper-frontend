@@ -23,7 +23,6 @@ export function CombatStats() {
   const initiative = stats.initiative.value;
   const isMobile = useIsMobile();
 
-  // Core Combat Stats (The Holy Trinity: AC, Initiative, Speed)
   const coreStats = [
     {
       label: "Armor Class",
@@ -51,7 +50,6 @@ export function CombatStats() {
     },
   ];
 
-  // Secondary & Passive Senses Stats
   const secondaryStats = [
     {
       label: "Proficiency",
@@ -94,7 +92,6 @@ export function CombatStats() {
     },
   ];
 
-  // Interactive Death Saves Click handlers
   const handleSuccessCircleClick = (index: number) => {
     const current = character.deathSavesSuccesses ?? 0;
     let next = index;
@@ -127,7 +124,6 @@ export function CombatStats() {
     });
   };
 
-  // Helper to render beautiful glowing indicator bubbles for Death Saves
   const renderDeathSaveBubbles = (
     type: "success" | "failure",
     count: number,
@@ -198,7 +194,6 @@ export function CombatStats() {
     >
       <Stack gap="md" style={{ padding: isMobile ? "0px" : "4px" }}>
         
-        {/* TOP SECTION: The Core Combat Trinity (AC, Initiative, Speed) */}
         <SimpleGrid cols={3} spacing="xs">
           {coreStats.map((stat) => (
             <Paper
@@ -231,7 +226,6 @@ export function CombatStats() {
                 padding: isMobile ? "10px 4px" : "18px 12px",
               }}
             >
-              {/* Radial backdrop highlight */}
               <div
                 style={{
                   position: "absolute",
@@ -245,12 +239,10 @@ export function CombatStats() {
                 }}
               />
 
-              {/* Icon */}
               <span style={{ color: stat.color, marginBottom: isMobile ? "4px" : "6px", display: "flex", alignItems: "center" }}>
                 {stat.icon}
               </span>
 
-              {/* Stat Value */}
               <EffectHint stat={stat.effect}>
                 <Text
                   fw={900}
@@ -266,7 +258,6 @@ export function CombatStats() {
                 </Text>
               </EffectHint>
 
-              {/* Label */}
               <Text
                 size="9px"
                 fw={700}
@@ -284,10 +275,8 @@ export function CombatStats() {
           ))}
         </SimpleGrid>
 
-        {/* MIDDLE SECTION: Split Layout with Interactive Death Saves & Secondary details */}
         <Grid gutter="xs" align="stretch">
           
-          {/* Death Saves Control Block */}
           <Grid.Col span={{ base: 12, md: 5 }}>
             <Paper
               withBorder
@@ -304,7 +293,6 @@ export function CombatStats() {
                 minHeight: isMobile ? "auto" : "154px",
               }}
             >
-              {/* Block Header */}
               <Group justify="space-between" align="center" mb="xs" wrap="nowrap">
                 <Text
                   size="xs"
@@ -318,7 +306,6 @@ export function CombatStats() {
                   Death Saves
                 </Text>
                 
-                {/* Reset Trigger */}
                 {((character.deathSavesSuccesses ?? 0) > 0 || (character.deathSavesFailures ?? 0) > 0) && (
                   <ActionIcon
                     size="sm"
@@ -335,10 +322,8 @@ export function CombatStats() {
                 )}
               </Group>
 
-              {/* Rows stack */}
               <Stack gap="sm" style={{ flex: 1, justifyContent: "center" }}>
                 
-                {/* Successes row */}
                 <Group justify="space-between" align="center" wrap="nowrap">
                   <Text
                     size="xs"
@@ -354,10 +339,8 @@ export function CombatStats() {
                   {renderDeathSaveBubbles("success", character.deathSavesSuccesses ?? 0, handleSuccessCircleClick)}
                 </Group>
 
-                {/* Micro divider */}
                 <div style={{ height: "1px", background: "rgba(255, 255, 255, 0.04)" }} />
 
-                {/* Failures row */}
                 <Group justify="space-between" align="center" wrap="nowrap">
                   <Text
                     size="xs"
@@ -376,7 +359,6 @@ export function CombatStats() {
             </Paper>
           </Grid.Col>
 
-          {/* Secondary Stats & Senses list (Flat List Table style) */}
           <Grid.Col span={{ base: 12, md: 7 }}>
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xs" style={{ height: "100%" }}>
               {secondaryStats.map((stat) => (

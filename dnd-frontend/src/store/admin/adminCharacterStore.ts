@@ -26,9 +26,6 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
   selectedId: null,
   loading: false,
 
-  // -------------------------
-  // LOAD ALL CHARACTERS
-  // -------------------------
   loadAll: async (campaignId) => {
 
     try {
@@ -60,9 +57,6 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
     }
   },
 
-  // -------------------------
-  // UPDATE CHARACTER
-  // -------------------------
   updateCharacter: async (id, patch) => {
 
     const existing = get().characters.find(c => c.id === id);
@@ -91,9 +85,6 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
     }
   },
 
-  // -------------------------
-  // LONG REST CHARACTER
-  // -------------------------
   longRestCharacter: async (id) => {
 
     const existing = get().characters.find(c => c.id === id);
@@ -126,9 +117,6 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
     }
   },
 
-  // -------------------------
-  // BULK LONG REST
-  // -------------------------
   bulkLongRest: async (characterIds) => {
 
     if (!characterIds.length) return;
@@ -178,9 +166,6 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
     }
   },
 
-  // -------------------------
-  // UI HELPERS
-  // -------------------------
   select: (id) => set({ selectedId: id }),
   clearStorage: () => set({ characters: [], selectedId: null, loading: false }),
 }));

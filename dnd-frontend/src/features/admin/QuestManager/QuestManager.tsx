@@ -69,18 +69,15 @@ function generateObjectId(): string {
 export function QuestManager() {
   const { selectedId: campaignId, characters, loadCharacters } = useCampaignStore();
 
-  // Component State
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null);
 
-  // Filters State
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<"campaign" | "personal">("campaign");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [typeFilter, setTypeFilter] = useState<string>("All");
 
-  // Editor Form State
   const [editTitle, setEditTitle] = useState("");
   const [editDesc, setEditDesc] = useState("");
   const [editLocation, setEditLocation] = useState("");
@@ -89,19 +86,16 @@ export function QuestManager() {
   const [editInvolvedIds, setEditInvolvedIds] = useState<string[]>([]);
   const [showMarkdownPreview, setShowMarkdownPreview] = useState(false);
 
-  // Unified Rewards States
   const [rewardCurrencies, setRewardCurrencies] = useState<Currency[]>([]);
   const [rewardItemIds, setRewardItemIds] = useState<string[]>([]);
   const [addCurrencyCode, setAddCurrencyCode] = useState("gp");
   const [addCurrencyAmount, setAddCurrencyAmount] = useState(1);
 
-  // Asynchronous Equipment Search States
   const [itemIdToNameMap, setItemIdToNameMap] = useState<Record<string, string>>({});
   const [itemSearchQuery, setItemSearchQuery] = useState("");
   const [searchedItems, setSearchedItems] = useState<Equipment[]>([]);
   const [searchingItems, setSearchingItems] = useState(false);
 
-  // Objectives Config State
   const [objectives, setObjectives] = useState<QuestObjective[]>([]);
   const [newObjDesc, setNewObjectiveDesc] = useState("");
   const [newObjThreshold, setNewObjectiveThreshold] = useState(1);
@@ -123,7 +117,6 @@ export function QuestManager() {
     }
   }, [campaignId]);
 
-  // Bulk resolve names for active quest reward item IDs
   const fetchRewardItemNames = useCallback(async (ids: string[]) => {
     if (ids.length === 0) {
       setItemIdToNameMap({});
@@ -141,7 +134,6 @@ export function QuestManager() {
     }
   }, []);
 
-  // 1. Initial Load of Quests, Characters, and Equipment
   useEffect(() => {
     if (campaignId) {
       void fetchQuests();
@@ -151,7 +143,6 @@ export function QuestManager() {
     }
   }, [campaignId, fetchQuests, loadCharacters]);
 
-  // 2. Map Quests List for filtering
   const filteredQuests = useMemo(() => {
     return quests.filter((q) => {
       const isPersonal = q.type === QuestType.Personal;
@@ -172,12 +163,10 @@ export function QuestManager() {
     });
   }, [quests, activeCategory, statusFilter, typeFilter, search]);
 
-  // Find currently active quest
   const activeQuest = useMemo(() => {
     return quests.find((q) => q.id === selectedQuestId) || null;
   }, [quests, selectedQuestId]);
 
-  // Bind Editor Form when activeQuest changes
   useEffect(() => {
     if (activeQuest) {
       setEditTitle(activeQuest.title);
@@ -190,10 +179,8 @@ export function QuestManager() {
       setRewardCurrencies(activeQuest.rewardCurrencies || []);
       setRewardItemIds(activeQuest.rewardItemIds || []);
 
-      // Async fetch item names
       void fetchRewardItemNames(activeQuest.rewardItemIds || []);
     } else {
-      // Clear form
       setEditTitle("");
       setEditDesc("");
       setEditLocation("");
@@ -212,7 +199,6 @@ export function QuestManager() {
     setShowMarkdownPreview(false);
   }, [activeQuest, fetchRewardItemNames]);
 
-  // 3. Quest Metadata CRUD handlers
   const handleCreateQuest = async () => {
     if (!campaignId) return;
     try {
@@ -319,7 +305,6 @@ export function QuestManager() {
     }
   };
 
-  // 4. Objectives Actions in Form
   const handleAddObjective = () => {
     if (!newObjDesc.trim()) return;
     const newObj: QuestObjective = {
@@ -380,7 +365,6 @@ export function QuestManager() {
     );
   };
 
-  // 5. Dynamic Currency Board Add/Remove handlers
   const handleAddCustomCurrency = () => {
     if (!addCurrencyCode.trim() || addCurrencyAmount <= 0) return;
     setRewardCurrencies((prev) => adjustCurrency(prev, addCurrencyCode, addCurrencyAmount));
@@ -391,13 +375,12 @@ export function QuestManager() {
     setRewardCurrencies((prev) => prev.filter((c) => !sameCurrency(c.type, type)));
   };
 
-  // 6. Asynchronous Equipment Search Board handlers
   const handleSearchEquipment = async () => {
     if (!itemSearchQuery.trim()) return;
     setSearchingItems(true);
     try {
       const results = await searchEquipmentByName(itemSearchQuery);
-      setSearchedItems(results.slice(0, 10)); // Display the top 10 most relevant matches
+      setSearchedItems(results.slice(0, 10));
     } catch (err) {
       console.error("Failed to query equipment by name", err);
     } finally {
@@ -411,7 +394,6 @@ export function QuestManager() {
       if (prev.includes(item.id!)) return prev;
       return [...prev, item.id!];
     });
-    // Dynamically store the item name in our resolve map to render it instantly
     setItemIdToNameMap((prev) => ({
       ...prev,
       [item.id!]: item.name || "Unnamed Item",
@@ -422,7 +404,6 @@ export function QuestManager() {
     setRewardItemIds((prev) => prev.filter((itemId) => itemId !== id));
   };
 
-  // 7. Stylings & Color Badges
   const getStatusColor = (status: QuestStatus) => {
     switch (status) {
       case QuestStatus.Active:
@@ -491,7 +472,6 @@ export function QuestManager() {
     <div className={styles.dashboardRoot}>
       <div className={styles.splitLayout}>
         
-        {/* LEFT PANEL: Directory Sidebar */}
         <div className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
             <Group gap="xs" mb="sm">
@@ -504,7 +484,6 @@ export function QuestManager() {
               </div>
             </Group>
 
-            {/* Switch Category */}
             <Group grow gap="xs" mb="xs">
               <Button
                 size="xs"
@@ -550,7 +529,6 @@ export function QuestManager() {
               </Button>
             </Group>
 
-            {/* Search Input */}
             <GlassyTextInput
               placeholder="Search quests..."
               leftSection={<IconSearch size={14} />}
@@ -560,7 +538,6 @@ export function QuestManager() {
               mb="xs"
             />
 
-            {/* Quick Filters */}
             <Stack gap={6} mb="sm">
               <CustomSelect
                 placeholder="Quest Type"
@@ -580,7 +557,6 @@ export function QuestManager() {
               />
             </Stack>
 
-            {/* Quick Action bar */}
             <Group gap="xs" grow>
               <Button
                 variant="filled"
@@ -606,7 +582,6 @@ export function QuestManager() {
             </Group>
           </div>
 
-          {/* Scrollable list section */}
           <ScrollArea className={styles.sidebarScroll} offsetScrollbars>
             {loading && quests.length === 0 ? (
               <Group justify="center" py="xl">
@@ -671,7 +646,6 @@ export function QuestManager() {
           </ScrollArea>
         </div>
 
-        {/* RIGHT PANEL: Workspace WorkspaceArea */}
         <div className={styles.workspaceArea}>
           <Paper
             p="md"
@@ -688,7 +662,6 @@ export function QuestManager() {
           >
             {activeQuest ? (
               <Stack gap="md" style={{ flex: 1, overflow: "hidden" }}>
-                {/* Workspace Header */}
                 <Group justify="space-between" align="center" style={{ flexShrink: 0 }}>
                   <Box>
                     <Text size="sm" tt="uppercase" fw={700} c="var(--theme-color-accent-primary, #f59e0b)" style={{ letterSpacing: "1px" }}>
@@ -711,10 +684,8 @@ export function QuestManager() {
 
                 <Divider style={{ borderColor: "rgba(255,255,255,0.05)" }} />
 
-                {/* Main Scroll Content */}
                 <ScrollArea style={{ flex: 1 }} offsetScrollbars>
                   <Stack gap="md" pr="xs" pb="lg">
-                    {/* Metadata Section */}
                     <SimpleGrid cols={2} spacing="md">
                       <TextInput
                         label="Quest Title"
@@ -759,7 +730,6 @@ export function QuestManager() {
                       />
                     </SimpleGrid>
 
-                    {/* Involved Characters Selector */}
                     {characters.length > 0 && (
                       <MultiSelect
                         label="Assigned Participants / Involved Characters"
@@ -780,7 +750,6 @@ export function QuestManager() {
                       />
                     )}
 
-                    {/* Description Textarea with Markdown Preview toggle */}
                     <Box>
                       <Group justify="space-between" align="center" mb={6}>
                         <Text size="sm" fw={700} tt="uppercase" c="rgba(255, 255, 255, 0.95)" style={{ letterSpacing: "0.5px" }}>
@@ -827,13 +796,11 @@ export function QuestManager() {
 
                     <Divider style={{ borderColor: "rgba(255,255,255,0.05)" }} my="xs" />
 
-                    {/* Objectives Checklist Manager */}
                     <Box>
                       <Text size="sm" fw={700} tt="uppercase" c="rgba(255, 255, 255, 0.95)" style={{ letterSpacing: "0.5px" }} mb="sm">
                         Quest Objectives ({objectives.length})
                       </Text>
                       
-                      {/* Inline Add Objective Form */}
                       <Paper p="xs" style={{ background: "rgba(0,0,0,0.15)", border: "1px solid rgba(255,255,255,0.04)" }} mb="md">
                         <Group align="flex-end" gap="sm">
                           <TextInput
@@ -863,7 +830,6 @@ export function QuestManager() {
                         </Group>
                       </Paper>
 
-                      {/* Current Objectives List */}
                       {objectives.length === 0 ? (
                         <Text size="xs" c="rgba(255,255,255,0.4)" fs="italic">
                           No objectives configured for this quest.
@@ -949,7 +915,6 @@ export function QuestManager() {
                                 </Box>
                               </Group>
 
-                              {/* Action controls */}
                               <Group gap={4} wrap="nowrap">
                                 {obj.completionThreshold > 1 && (
                                   <>
@@ -985,7 +950,6 @@ export function QuestManager() {
 
                     <Divider style={{ borderColor: "rgba(255,255,255,0.05)" }} my="xs" />
 
-                    {/* Rewards Manager Section: Dynamic Currency Board */}
                     <Box>
                       <Group gap="xs" mb="sm" align="center">
                         <IconCoins size={15} color="var(--theme-color-accent-primary)" />
@@ -994,7 +958,6 @@ export function QuestManager() {
                         </Text>
                       </Group>
                       
-                      {/* Current Currencies list panel */}
                       <Paper p="xs" style={{ background: "rgba(0,0,0,0.15)", border: "1px solid rgba(255,255,255,0.04)" }} mb="sm">
                         {rewardCurrencies.length === 0 ? (
                           <Text size="xs" c="rgba(255,255,255,0.45)" fs="italic">
@@ -1038,7 +1001,6 @@ export function QuestManager() {
                         )}
                       </Paper>
 
-                      {/* Add Currency Inline Form */}
                       <Paper p="xs" style={{ background: "rgba(0,0,0,0.15)", border: "1px solid rgba(255,255,255,0.04)" }}>
                         <Group align="flex-end" gap="sm">
                           <CurrencyTypeInput
@@ -1074,7 +1036,6 @@ export function QuestManager() {
 
                     <Divider style={{ borderColor: "rgba(255,255,255,0.05)" }} my="xs" />
 
-                    {/* Rewards Manager Section: Asynchronous Equipment Search Board */}
                     <Box>
                       <Group gap="xs" mb="sm" align="center">
                         <IconBackpack size={15} color="var(--theme-color-accent-primary)" />
@@ -1083,7 +1044,6 @@ export function QuestManager() {
                         </Text>
                       </Group>
                       
-                      {/* Current Items list panel */}
                       <Paper p="xs" style={{ background: "rgba(0,0,0,0.15)", border: "1px solid rgba(255,255,255,0.04)" }} mb="sm">
                         {rewardItemIds.length === 0 ? (
                           <Text size="xs" c="rgba(255,255,255,0.45)" fs="italic">
@@ -1128,7 +1088,6 @@ export function QuestManager() {
                         )}
                       </Paper>
 
-                      {/* Asynchronous Search Form */}
                       <Paper p="xs" style={{ background: "rgba(0,0,0,0.15)", border: "1px solid rgba(255,255,255,0.04)" }}>
                         <Group align="flex-end" gap="sm" mb={searchedItems.length > 0 ? "xs" : 0}>
                           <TextInput
@@ -1161,7 +1120,6 @@ export function QuestManager() {
                           </Button>
                         </Group>
 
-                        {/* Search Results Display List */}
                         {searchedItems.length > 0 && (
                           <Box
                             p="xs"

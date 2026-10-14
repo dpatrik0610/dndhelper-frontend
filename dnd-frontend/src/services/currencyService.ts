@@ -3,12 +3,10 @@ import type { Currency } from "@appTypes/Currency";
 
 const baseUrl = "/currency";
 
-// GET: /api/currency/{characterId}
 export async function getCharacterCurrencies(characterId: string): Promise<Currency[]> {
   return apiClient<Currency[]>(`${baseUrl}/${characterId}`, {})
 }
 
-// PUT: /api/currency/remove/{characterId}
 export async function removeCurrencies(characterId: string, currencies: Currency[]): Promise<string> {
   return apiClient<string>(`${baseUrl}/remove/${characterId}`, {
     method: "PUT",
@@ -17,7 +15,6 @@ export async function removeCurrencies(characterId: string, currencies: Currency
   })
 }
 
-// PUT: /api/currency/transfer/{targetId}
 export async function transferCurrenciesToCharacter(characterId: string, currencies: Currency[]): Promise<void> {  
   try {
     await apiClient<string>(`${baseUrl}/transfer/${characterId}`, {
@@ -44,7 +41,6 @@ export async function transferCurrenciesToInventory(
   });
 }
 
-// PUT: /api/currency/inventory/{inventoryId}/remove
 export async function removeCurrenciesFromInventory(inventoryId: string, currencies: Currency[]): Promise<string> {
   return apiClient<string>(`${baseUrl}/inventory/${inventoryId}/remove`, {
     method: "PUT",
@@ -60,7 +56,6 @@ export async function transferBetweenCharacters(fromCharacterId: string, toChara
   });
 }
 
-// PUT: /api/currency/claim/{characterId}/{inventoryId}
 export async function claimFromInventory( characterId: string, inventoryId: string, currencies: Currency[] ): Promise<void> {
   return apiClient<void>(`${baseUrl}/claim/${characterId}/${inventoryId}`, {
     method: "PUT",

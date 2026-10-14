@@ -67,7 +67,6 @@ export function ShopWorkspace() {
 
   return (
     <div className={styles.workspacePanel} style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px", minHeight: "100%" }}>
-        {/* TOP CONTROL BAR: Compact & Modern */}
         <Paper p="md" radius="md" style={{ backgroundColor: "rgba(30, 27, 24, 0.6)", border: "1px solid rgba(255,255,255,0.06)" }}>
             <Group justify="space-between" align="center" wrap="wrap" gap="md">
                 <div>
@@ -86,7 +85,6 @@ export function ShopWorkspace() {
                 </div>
 
                 <Group gap="lg" align="center">
-                    {/* Compact controls */}
                     <Switch
                         label="Open to Players"
                         checked={shop.isOpened}
@@ -121,9 +119,7 @@ export function ShopWorkspace() {
             </Group>
         </Paper>
 
-        {/* MAIN split content area */}
         <Grid gutter="md">
-            {/* LEFT COLUMN: Pending Requests */}
             <Grid.Col span={{ base: 12, lg: 6 }}>
                 <Paper 
                     p="md" 
@@ -147,7 +143,6 @@ export function ShopWorkspace() {
                         )}
                     </Group>
 
-                    {/* Scrollable container for Requests */}
                     <Box style={{ flexGrow: 1, overflowY: "auto", paddingRight: "4px" }}>
                         {shopSellRequests.length === 0 ? (
                             <Center style={{ height: "100%" }}>
@@ -185,7 +180,6 @@ export function ShopWorkspace() {
                                             }}
                                          >
                                             <Stack gap="sm">
-                                                {/* Header row inside card */}
                                                 <Group justify="space-between" align="center">
                                                     <Group gap="xs">
                                                         <ThemeIcon size="md" radius="md" color={isSteal ? "red" : "amber"} variant="light">
@@ -217,7 +211,6 @@ export function ShopWorkspace() {
                                                     </Stack>
                                                 </Group>
 
-                                                {/* Details Section */}
                                                 <Paper p="xs" radius="sm" bg="rgba(0,0,0,0.2)" style={{ border: "1px solid rgba(255,255,255,0.03)" }}>
                                                     <Group justify="space-between" align="center" wrap="nowrap">
                                                         <Group gap="xs">
@@ -243,7 +236,6 @@ export function ShopWorkspace() {
                                                     </Group>
                                                 </Paper>
 
-                                                {/* Action buttons inside Card */}
                                                 <Group gap="xs" grow>
                                                     <Button 
                                                         size="xs" 
@@ -276,7 +268,6 @@ export function ShopWorkspace() {
                 </Paper>
             </Grid.Col>
 
-            {/* RIGHT COLUMN: Shop Register & Stock */}
             <Grid.Col span={{ base: 12, lg: 6 }}>
                 <Paper 
                     p="md" 
@@ -293,7 +284,6 @@ export function ShopWorkspace() {
                         Register & Stock
                     </Text>
 
-                    {/* Scrollable container for Stock */}
                     <Box style={{ flexGrow: 1, overflowY: "auto", paddingRight: "4px" }}>
                         {shop.inventoryId && selectedInventory?.id === shop.inventoryId ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

@@ -34,13 +34,10 @@ export function InventoryCurrencyClaim({ inventoryId }: InventoryCurrencyClaimPr
 
     try {
       if (!character) throw new Error("No character selected");
-      // 1) Backend: claim currencies
       await claimFromInventory(character.id!, inventory.id!, inventory.currencies);
 
-      // 2) Store: remove currencies locally
       claimCurrencies(inventory.id!, inventory.currencies);
 
-      // 3) Reload global state from backend
       await loadInventories();
       await loadCharacters();
 

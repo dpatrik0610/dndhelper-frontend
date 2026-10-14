@@ -28,18 +28,15 @@ export function ItemModal({
   const token = useToken();
   const { updateEquipment, addItem } = useAdminInventoryStore();
 
-  // Load or initialize equipment
   useEffect(() => {
     const load = async () => {
       if (!opened) return;
 
-      // 🆕 Create mode
       if (!equipmentId && !editMode) {
         setEquipment(defaultEquipment);
         return;
       }
 
-      // 🧩 Edit mode
       if (equipmentId) {
         setLoading(true);
         try {

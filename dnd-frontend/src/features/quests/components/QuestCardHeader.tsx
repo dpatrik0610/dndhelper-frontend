@@ -46,7 +46,6 @@ export function QuestCardHeader({
         wrap="nowrap"
         gap="sm"
       >
-        {/* Title + badges */}
         <Group
           gap="sm"
           align="center"
@@ -110,7 +109,6 @@ export function QuestCardHeader({
           </Group>
         </Group>
 
-        {/* Actions */}
         {isPersonal && (
           <Group gap={4} style={{ flexShrink: 0 }}>
             <ActionIcon
@@ -134,7 +132,6 @@ export function QuestCardHeader({
         )}
       </Group>
 
-      {/* Location */}
       {location && (
         <Group
           gap={5}

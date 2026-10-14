@@ -1,5 +1,3 @@
-/* 🎲 Shaped dice + roll animations (used by Dice.tsx) */
-
 .die {
   position: relative;
   display: inline-flex;

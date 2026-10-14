@@ -22,7 +22,6 @@ export const createPersistSlice: StateCreator<
       if (saved) {
         get().setCharacter(saved);
         
-        // Also update in characters array
         set((state) => {
           const idx = state.characters.findIndex((c) => c.id === saved.id);
           if (idx !== -1) {
@@ -47,7 +46,6 @@ export const createPersistSlice: StateCreator<
     const normalized = normalizeCharacter(updated);
     if (!normalized) return;
 
-    // Apply locally first
     get().setCharacter(normalized);
     
     set((state) => {
@@ -57,7 +55,6 @@ export const createPersistSlice: StateCreator<
       }
     });
 
-    // Then persist asynchronously
     void get().persistCharacter();
   },
 });

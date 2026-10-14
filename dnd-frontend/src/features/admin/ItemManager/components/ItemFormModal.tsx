@@ -68,7 +68,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
   const [activeTab, setActiveTab] = useState<"form" | "json">("form");
   const [saving, setSaving] = useState(false);
 
-  // Form states
   const [name, setName] = useState("");
   const [index, setIndex] = useState("");
   const [tier, setTier] = useState<string | null>("Common");
@@ -85,17 +84,14 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
   const [description, setDescription] = useState("");
   const [dmDescription, setDmDescription] = useState("");
 
-  // JSON states
   const [jsonPayload, setJsonPayload] = useState("");
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  // Populate states when item changes or modal opens
   useEffect(() => {
     if (opened) {
       setActiveTab("form");
       setJsonError(null);
       if (item) {
-        // Edit mode
         setName(item.name || "");
         setIndex(item.index || "");
         setTier(item.tier || "Common");
@@ -112,10 +108,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
         setDescription((item.description || []).join("\n"));
         setDmDescription((item.dmDescription || []).join("\n"));
 
-        // Format to JSON
         setJsonPayload(JSON.stringify(item, null, 2));
       } else {
-        // Create mode
         setName("");
         setIndex("");
         setTier("Common");
@@ -148,7 +142,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
     }
   }, [opened, item]);
 
-  // Construct Equipment object from current Form states
   const getEquipmentFromForm = (): Equipment => {
     const equip: Equipment = {
       ...(item?.id ? { id: item.id } : {}),
@@ -192,12 +185,10 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
   const handleTabChange = (value: string) => {
     const targetTab = value as "form" | "json";
     if (targetTab === "json" && activeTab === "form") {
-      // Sync from Visual Form to JSON
       const currentEquip = getEquipmentFromForm();
       setJsonPayload(JSON.stringify(currentEquip, null, 2));
       setJsonError(null);
     } else if (targetTab === "form" && activeTab === "json") {
-      // Sync from JSON to Visual Form
       try {
         const parsed = JSON.parse(jsonPayload) as Equipment;
         setName(parsed.name || "");
@@ -222,13 +213,12 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
           message: "Cannot switch to visual form. Raw JSON is invalid: " + String(err),
           color: SectionColor.Red,
         });
-        return; // Prevent tab switch
+        return;
       }
     }
     setActiveTab(targetTab);
   };
 
-  // Validate JSON on the fly
   const handleJsonChange = (val: string) => {
     setJsonPayload(val);
     if (!val.trim()) {
@@ -268,7 +258,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
       setDescription((d.description || []).join("\n"));
       setDmDescription((d.dmDescription || []).join("\n"));
 
-      // Also update JSON editor so the tabs stay beautifully synced!
       const finalGenerated = {
         ...d,
         index: d.name ? equipmentIndex(d.name) : "",
@@ -283,7 +272,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
     }
   };
 
-  // Save changes
   const handleSave = async () => {
     let finalItem: Equipment;
 
@@ -310,7 +298,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
         return;
       }
     } else {
-      // Visual form
       if (!name.trim()) {
         showNotification({
           title: "Validation Error",
@@ -325,7 +312,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
     setSaving(true);
     try {
       if (item?.id) {
-        // Update
         await updateEquipmentById(item.id, finalItem);
         showNotification({
           title: "Success",
@@ -333,7 +319,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
           color: SectionColor.Green,
         });
       } else {
-        // Create
         await createEquipment(finalItem);
         showNotification({
           title: "Success",
@@ -362,7 +347,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
       size="xl"
     >
       <Stack gap="md">
-        {/* Modern Segmented Control for switcher */}
         <SegmentedControl
           value={activeTab}
           onChange={handleTabChange}
@@ -396,12 +380,8 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
         />
 
         {activeTab === "form" ? (
-          /* ====================================================
-             Visual Form Input Mode
-             ==================================================== */
           <Box p="xs">
             <Grid gutter="md">
-              {/* Template Selection Dropdown (Only in Create Mode) */}
               {!item && (
                 <Grid.Col span={12}>
                   <Select
@@ -419,7 +399,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 </Grid.Col>
               )}
 
-              {/* Item Name */}
               <Grid.Col span={12}>
                 <TextInput
                   label="Item Name"
@@ -434,7 +413,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Rarity Tier */}
               <Grid.Col span={{ base: 12, sm: 4 }}>
                 <Select
                   label="Rarity Tier"
@@ -451,7 +429,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Weight */}
               <Grid.Col span={{ base: 12, sm: 4 }}>
                 <NumberInput
                   label="Weight (lbs)"
@@ -466,7 +443,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Cost Quantity */}
               <Grid.Col span={{ base: 6, sm: 2 }}>
                 <NumberInput
                   label="Cost Quantity"
@@ -481,7 +457,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Cost Unit */}
               <Grid.Col span={{ base: 6, sm: 2 }}>
                 <Select
                   label="Unit"
@@ -497,7 +472,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Combat: Damage Dice */}
               <Grid.Col span={{ base: 12, sm: 4 }}>
                 <TextInput
                   label="Damage Dice"
@@ -511,7 +485,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Combat: Damage Type */}
               <Grid.Col span={{ base: 12, sm: 4 }}>
                 <Select
                   label="Damage Type"
@@ -529,7 +502,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Range: Normal */}
               <Grid.Col span={{ base: 6, sm: 2 }}>
                 <NumberInput
                   label="Normal Range"
@@ -544,7 +516,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Range: Long */}
               <Grid.Col span={{ base: 6, sm: 2 }}>
                 <NumberInput
                   label="Long Range"
@@ -559,7 +530,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Tags TagsInput */}
               <Grid.Col span={12}>
                 <TagsInput
                   label="Tags"
@@ -575,7 +545,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* Switches */}
               <Grid.Col span={{ base: 6, sm: 6 }}>
                 <Group align="center" mt="xs">
                   <Switch
@@ -603,7 +572,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 </Group>
               </Grid.Col>
 
-              {/* Description */}
               <Grid.Col span={12}>
                 <Textarea
                   label="Item Description"
@@ -619,7 +587,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
                 />
               </Grid.Col>
 
-              {/* DM Secret Description */}
               <Grid.Col span={12}>
                 <Textarea
                   label="DM-Only Secret Notes"
@@ -637,9 +604,6 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
             </Grid>
           </Box>
         ) : (
-          /* ====================================================
-             Raw JSON Editor Mode
-             ==================================================== */
           <Stack gap="xs">
             <Text size="xs" c="dimmed">
               Directly edit the raw JSON fields. Ensure it conforms to the Equipment schema.

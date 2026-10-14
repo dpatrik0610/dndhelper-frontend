@@ -1,7 +1,6 @@
 ﻿import { getSpellById, getSpellNames } from "@services/spellService";
 import { useSpellStore } from "@store/spell/spellStore";
 
-// Load all spell names and populate the store
 export async function loadSpells(): Promise<void> {
   try {
     const spells = await getSpellNames();
@@ -11,7 +10,6 @@ export async function loadSpells(): Promise<void> {
   }
 }
 
-// Load a single spell by ID and set as current
 export async function loadCurrentSpell(spellId: string): Promise<void> {
   try {
     const spell = await getSpellById(spellId);

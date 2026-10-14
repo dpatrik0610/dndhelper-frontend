@@ -34,7 +34,6 @@ export function BasicInfoSection() {
   const updateClass = (index: number, patch: Partial<ClassLevel>) =>
     setCharacterForm({ multiclasses: multiclasses.map((m, i) => (i === index ? { ...m, ...patch } : m)) });
 
-  // label helper
   const L = (label: string, info: string | null = null) => (
     <Group gap={4} align="center" wrap="nowrap">
       <span>{label}</span>
@@ -60,7 +59,6 @@ export function BasicInfoSection() {
   return (
     <Stack gap={8}>
 
-      {/* NAME */}
       <TextInput
         classNames={cls}
         label={L("Name", "Your character's chosen name.")}
@@ -69,7 +67,6 @@ export function BasicInfoSection() {
         onChange={(e) => setCharacterForm({ name: e.currentTarget.value })}
       />
 
-      {/* RACE + BACKGROUND + ALIGNMENT */}
       <Group grow gap={8}>
         <TextInput
           classNames={cls}
@@ -94,7 +91,6 @@ export function BasicInfoSection() {
         />
       </Group>
 
-      {/* PROGRESSION: XP (EDITABLE), LEVEL (AUTO), PROF BONUS (AUTO) */}
       <Group grow gap={8}>
         <FormNumberInput
           classNames={cls}
@@ -222,7 +218,6 @@ export function BasicInfoSection() {
         </Group>
       </Stack>
 
-      {/* INSPIRATION */}
       <FormNumberInput
         classNames={cls}
         label={L("Inspiration", "Spend for advantage on a roll.")}

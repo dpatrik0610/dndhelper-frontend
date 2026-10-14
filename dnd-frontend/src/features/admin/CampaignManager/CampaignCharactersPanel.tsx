@@ -50,12 +50,10 @@ export function CampaignCharactersPanel() {
   const [selectedChar, setSelectedChar] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 🔍 Load campaign members
   useEffect(() => {
     if (campaign?.id) void fetchMembers();
   }, [campaign?.id]);
 
-  // 🔍 Load all characters (light list)
   useEffect(() => {
     if (allCharacters.length === 0) void loadAllCharacters();
   }, [allCharacters.length, loadAllCharacters]);
@@ -151,7 +149,6 @@ const handleRemove = async (charId: string) => {
         </>
       }
     >
-      {/* === Add form === */}
       {adding && (
         <Group mt="xs" gap="xs" wrap="nowrap">
           <Select
@@ -176,7 +173,6 @@ const handleRemove = async (charId: string) => {
         </Group>
       )}
 
-      {/* === Member list === */}
       <Stack mt="sm" gap="xs">
         {members.length === 0 ? (
           <Text size="sm" c="dimmed">
