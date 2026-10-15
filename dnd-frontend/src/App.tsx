@@ -27,6 +27,7 @@ const pages = {
   home: () => import("@features/home/Home"),
   profile: () => import("@features/profile/CharacterProfile"),
   spells: () => import("@features/spells/SpellPage"),
+  schools: () => import("@features/spells/SchoolsPage"),
   characterForm: () => import("@features/characterForm/CharacterFormPage").then((m) => ({ default: m.CharacterFormPage })),
   notes: () => import("@features/notes/NotesPage"),
   quests: () => import("@features/quests/QuestsPage"),
@@ -45,6 +46,7 @@ const adminPages = {
 const Home = lazy(pages.home);
 const CharacterProfile = lazy(pages.profile);
 const SpellPage = lazy(pages.spells);
+const SchoolsPage = lazy(pages.schools);
 const CharacterFormPage = lazy(pages.characterForm);
 const NotesPage = lazy(pages.notes);
 const QuestsPage = lazy(pages.quests);
@@ -250,6 +252,7 @@ function AppRoutes() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/profile" element={<CharacterProfile />} />
                 <Route path="/spells" element={<SpellPage />} />
+                <Route path="/spells/schools" element={<SchoolsPage />} />
                 <Route path="/spells/:spellName" element={<SpellPage />} />
                 <Route path="/newCharacter" element={<CharacterFormPage />} />
                 <Route path="/editCharacter" element={<CharacterFormPage editMode />} />

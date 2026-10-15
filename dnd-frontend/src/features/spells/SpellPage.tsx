@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActionIcon, Box, Button, Grid, Group, Skeleton, Stack, Text, Title, Tooltip } from "@mantine/core";
-import { IconArrowLeft, IconBook2, IconPencil, IconPlus, IconRefresh } from "@tabler/icons-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { IconArrowLeft, IconBook2, IconPencil, IconPentagram, IconPlus, IconRefresh } from "@tabler/icons-react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { useSpellStore } from "@store/spell/spellStore";
 import { loadSpells } from "@utils/loadSpells";
@@ -18,6 +18,8 @@ import classes from "./Spellbook.module.css";
 export default function SpellPage() {
   const { spellName } = useParams<{ spellName?: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialSchool = searchParams.get("school");
   const isMobile = useIsMobile();
   const isDm = useIsDm();
   const canEdit = useCanEditContent();
@@ -114,6 +116,9 @@ export default function SpellPage() {
       <Text size="sm" maw={280}>
         Search by name, or narrow the list by level and school of magic.
       </Text>
+      <button type="button" className="glass-btn-secondary" style={{ padding: "6px 12px", cursor: "pointer" }} onClick={() => navigate("/spells/schools")}>
+        Explore the schools of magic
+      </button>
     </div>
   );
 
@@ -155,6 +160,11 @@ export default function SpellPage() {
               </ActionIcon>
             </Tooltip>
           )}
+          <Tooltip label="Schools of magic" withArrow>
+            <ActionIcon variant="subtle" size="lg" onClick={() => navigate("/spells/schools")} aria-label="Schools of magic">
+              <IconPentagram size={18} />
+            </ActionIcon>
+          </Tooltip>
           <Tooltip label="Reload spells" withArrow>
             <ActionIcon variant="subtle" size="lg" onClick={reload} loading={reloading} aria-label="Reload spells">
               <IconRefresh size={18} />
@@ -188,12 +198,12 @@ export default function SpellPage() {
             {detail}
           </Stack>
         ) : (
-          <SpellIndex onSelect={openSpell} activeName={currentSpell?.name} />
+          <SpellIndex onSelect={openSpell} activeName={currentSpell?.name} initialSchool={initialSchool} />
         )
       ) : (
         <Grid gutter="lg" align="flex-start">
           <Grid.Col span={{ base: 12, md: 4, xl: 3 }} style={{ position: "sticky", top: 16 }}>
-            <SpellIndex onSelect={openSpell} activeName={spellName} scrollHeight="calc(100vh - 290px)" />
+            <SpellIndex onSelect={openSpell} activeName={spellName} scrollHeight="calc(100vh - 290px)" initialSchool={initialSchool} />
           </Grid.Col>
           <Grid.Col span={{ base: 12, md: 8, xl: 9 }}>{detail}</Grid.Col>
         </Grid>

@@ -10,13 +10,14 @@ interface SpellIndexProps {
   onSelect: (name: string) => void;
   /** Fixed list height (desktop pane). Omit to let the list flow with the page (mobile). */
   scrollHeight?: string;
+  initialSchool?: string | null;
 }
 
-export function SpellIndex({ activeName, onSelect, scrollHeight }: SpellIndexProps) {
+export function SpellIndex({ activeName, onSelect, scrollHeight, initialSchool = null }: SpellIndexProps) {
   const spellNames = useSpellStore((s) => s.spellNames);
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState<number | null>(null);
-  const [school, setSchool] = useState<string | null>(null);
+  const [school, setSchool] = useState<string | null>(initialSchool);
   const activeRef = useRef<HTMLButtonElement>(null);
 
   const levels = useMemo(() => [...new Set(spellNames.map((s) => s.level))].sort((a, b) => a - b), [spellNames]);
