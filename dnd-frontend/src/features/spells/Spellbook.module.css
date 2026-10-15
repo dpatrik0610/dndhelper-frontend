@@ -45,6 +45,16 @@
   box-shadow: var(--theme-glow-shadow-primary);
 }
 
+.schoolChips {
+  flex-wrap: nowrap;
+}
+
+.schoolChips > .chip {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0;
+}
+
 /* School chips colour themselves via --school */
 .schoolChip[data-active] {
   background: color-mix(in srgb, var(--school) 22%, transparent);

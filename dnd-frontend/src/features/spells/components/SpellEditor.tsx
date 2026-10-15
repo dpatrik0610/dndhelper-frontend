@@ -16,7 +16,8 @@ import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { createSpell, deleteSpell, updateSpell } from "@services/spellService";
 import { useIsMobile } from "@hooks/useIsMobile";
-import { SCHOOLS, getSchool, levelChip, levelHeading, spellSubtitle } from "@features/spells/spellMeta";
+import { useSpellStore } from "@store/spell/spellStore";
+import { OTHER_META, SCHOOLS, getSchool, isCustomSchool, levelChip, levelHeading, spellSubtitle } from "@features/spells/spellMeta";
 import { SpellCard } from "./SpellCard";
 import classes from "@features/spells/Spellbook.module.css";
 
@@ -108,8 +109,11 @@ function EditorBody({ initial, onClose, onSaved, onDeleted, isMobile }: EditorBo
   const [pane, setPane] = useState<"edit" | "preview">("edit");
   const editing = !!initial?.id;
   const school = getSchool(spell.school.name);
+  const [customSchool, setCustomSchool] = useState(isCustomSchool(initial?.school.name));
+  const spellNames = useSpellStore((s) => s.spellNames);
+  const customSchools = [...new Set(spellNames.map((s) => s.school?.name).filter(isCustomSchool))];
   const dirty = JSON.stringify(spell) !== JSON.stringify(initial ?? EMPTY);
-  const canSave = !!spell.name.trim() && !!spell.school.name;
+  const canSave = !!spell.name.trim() && !!spell.school.name.trim();
 
   const set = <K extends keyof Spell>(key: K, value: Spell[K]) => setSpell((s) => ({ ...s, [key]: value }));
   const toggle = (list: string[], value: string) => (list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
@@ -145,6 +149,7 @@ function EditorBody({ initial, onClose, onSaved, onDeleted, isMobile }: EditorBo
       const payload: Spell = {
         ...spell,
         name: spell.name.trim(),
+        school: { name: spell.school.name.trim() },
         index: spell.index || slug(spell.name),
         description: spell.description.filter((l) => l.trim()),
         higherLevel: spell.higherLevel.filter((l) => l.trim()),
@@ -205,17 +210,46 @@ function EditorBody({ initial, onClose, onSaved, onDeleted, isMobile }: EditorBo
                 key={name}
                 type="button"
                 role="radio"
-                aria-checked={spell.school.name === name}
+                aria-checked={!customSchool && spell.school.name === name}
                 className={`${classes.chip} ${classes.schoolChip} ${classes.edSchool}`}
                 style={{ "--school": meta.color } as CSSProperties}
-                data-active={spell.school.name === name || undefined}
-                onClick={() => set("school", { name })}
+                data-active={(!customSchool && spell.school.name === name) || undefined}
+                onClick={() => {
+                  setCustomSchool(false);
+                  set("school", { name });
+                }}
               >
                 <meta.icon size={15} color={meta.color} aria-hidden />
                 {name}
               </button>
             ))}
+            <button
+              type="button"
+              role="radio"
+              aria-checked={customSchool}
+              className={`${classes.chip} ${classes.schoolChip} ${classes.edSchool}`}
+              style={{ "--school": OTHER_META.color } as CSSProperties}
+              data-active={customSchool || undefined}
+              onClick={() => {
+                if (customSchool) return;
+                setCustomSchool(true);
+                set("school", { name: "" });
+              }}
+            >
+              <OTHER_META.icon size={15} color={OTHER_META.color} aria-hidden />
+              Other
+            </button>
           </div>
+          {customSchool && (
+            <Autocomplete
+              mt="xs"
+              placeholder="Dunamancy"
+              aria-label="Custom school"
+              data={customSchools}
+              value={spell.school.name}
+              onChange={(v) => set("school", { name: v })}
+            />
+          )}
         </Field>
       </EdSection>
 

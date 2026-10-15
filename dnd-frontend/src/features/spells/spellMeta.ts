@@ -32,6 +32,11 @@ const FALLBACK: SchoolMeta = { color: "#9ca3af", icon: IconSparkles };
 
 export const getSchool = (name?: string | null): SchoolMeta => (name && SCHOOLS[name]) || FALLBACK;
 
+export const OTHER_SCHOOL = "Other";
+export const OTHER_META = FALLBACK;
+
+export const isCustomSchool = (name?: string | null): name is string => !!name && !(name in SCHOOLS);
+
 const ordinal = (n: number) => {
   const suffix = n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th";
   return `${n}${suffix}`;

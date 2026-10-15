@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNod
 import { ScrollArea, Text, TextInput, Tooltip } from "@mantine/core";
 import { IconSearch, IconX } from "@tabler/icons-react";
 import { useSpellStore } from "@store/spell/spellStore";
-import { SCHOOLS, getSchool, levelChip, levelHeading } from "@features/spells/spellMeta";
+import { OTHER_META, OTHER_SCHOOL, SCHOOLS, getSchool, isCustomSchool, levelChip, levelHeading } from "@features/spells/spellMeta";
 import classes from "@features/spells/Spellbook.module.css";
 
 interface SpellIndexProps {
@@ -26,7 +26,7 @@ export function SpellIndex({ activeName, onSelect, scrollHeight }: SpellIndexPro
     const matches = spellNames.filter(
       (s) =>
         (level === null || s.level === level) &&
-        (school === null || s.school?.name === school) &&
+        (school === null || (school === OTHER_SCHOOL ? isCustomSchool(s.school?.name) : s.school?.name === school)) &&
         (!q || s.name.toLowerCase().includes(q))
     );
     const byLevel = new Map<number, typeof matches>();
@@ -109,8 +109,8 @@ export function SpellIndex({ activeName, onSelect, scrollHeight }: SpellIndexPro
         ))}
       </Chips>
 
-      <Chips label="School of magic">
-        {Object.entries(SCHOOLS).map(([name, meta]) => (
+      <Chips label="School of magic" className={classes.schoolChips}>
+        {[...Object.entries(SCHOOLS), [OTHER_SCHOOL, OTHER_META] as const].map(([name, meta]) => (
           <Tooltip key={name} label={name} withArrow openDelay={250}>
             <button
               type="button"
@@ -138,9 +138,9 @@ export function SpellIndex({ activeName, onSelect, scrollHeight }: SpellIndexPro
   );
 }
 
-function Chips({ label, children }: { label: string; children: ReactNode }) {
+function Chips({ label, className, children }: { label: string; className?: string; children: ReactNode }) {
   return (
-    <div className={classes.chips} role="group" aria-label={label}>
+    <div className={`${classes.chips} ${className ?? ""}`} role="group" aria-label={label}>
       {children}
     </div>
   );
