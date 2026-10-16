@@ -88,7 +88,7 @@ export function appliedEffects(c: Character): AppliedEffect[] {
 
 export const abilityMod = (score: number) => Math.floor((score - 10) / 2);
 export const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
-const toAbility = (word?: string) => ABILITIES.find((a) => a.key === word?.slice(0, 3).toLowerCase())?.key;
+export const toAbility = (word?: string) => ABILITIES.find((a) => a.key === word?.slice(0, 3).toLowerCase())?.key;
 
 /** Layers the active effects over the base sheet. Nothing on the character is changed. */
 const situationKey = (s: string) => s.trim().toLowerCase();

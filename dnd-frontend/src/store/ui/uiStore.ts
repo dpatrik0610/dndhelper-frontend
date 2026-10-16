@@ -9,6 +9,8 @@ export type NotificationPosition = (typeof NOTIFICATION_POSITIONS)[number];
 /** The DM dashboard / superadmin console look: neon terminal or torchlit dungeon. */
 export const ADMIN_STYLES = ["cyber", "dungeon"] as const;
 export type AdminStyle = (typeof ADMIN_STYLES)[number];
+export const ITEM_LAYOUTS = ["auto", "list", "cards"] as const;
+export type ItemLayout = (typeof ITEM_LAYOUTS)[number];
 
 /** Site preferences. Stored as flat string keys next to sidebarTheme, both in localStorage and the backend. */
 export interface SitePrefs {
@@ -28,6 +30,8 @@ export interface SitePrefs {
   /** Overview of the whole board in a corner of the tabletop. */
   tabletopMinimap: boolean;
   adminStyle: AdminStyle;
+  spellLayout: ItemLayout;
+  inventoryLayout: ItemLayout;
 }
 
 export const defaultPrefs: SitePrefs = {
@@ -41,6 +45,8 @@ export const defaultPrefs: SitePrefs = {
   chatSound: true,
   tabletopMinimap: true,
   adminStyle: "cyber",
+  spellLayout: "list",
+  inventoryLayout: "auto",
 };
 
 const PREFS_STORAGE_KEY = "sitePrefs";
@@ -56,6 +62,8 @@ const prefsToRecord = (prefs: SitePrefs): Record<string, string> => ({
   chatSound: String(prefs.chatSound),
   tabletopMinimap: String(prefs.tabletopMinimap),
   adminStyle: prefs.adminStyle,
+  spellLayout: prefs.spellLayout,
+  inventoryLayout: prefs.inventoryLayout,
 });
 
 /** Parses untrusted strings (localStorage, backend); anything unknown falls back to the default. */
@@ -63,6 +71,8 @@ export const prefsFromRecord = (record: Record<string, string | undefined>): Sit
   const scale = Number(record.uiScale);
   const position = record.notificationPosition as NotificationPosition;
   const adminStyle = record.adminStyle as AdminStyle;
+  const spellLayout = record.spellLayout as ItemLayout;
+  const inventoryLayout = record.inventoryLayout as ItemLayout;
   return {
     uiScale: (UI_SCALES as readonly number[]).includes(scale) ? scale : defaultPrefs.uiScale,
     animatedBackground: record.animatedBackground !== "false",
@@ -74,6 +84,8 @@ export const prefsFromRecord = (record: Record<string, string | undefined>): Sit
     chatSound: record.chatSound !== "false",
     tabletopMinimap: record.tabletopMinimap !== "false",
     adminStyle: ADMIN_STYLES.includes(adminStyle) ? adminStyle : defaultPrefs.adminStyle,
+    spellLayout: ITEM_LAYOUTS.includes(spellLayout) ? spellLayout : defaultPrefs.spellLayout,
+    inventoryLayout: ITEM_LAYOUTS.includes(inventoryLayout) ? inventoryLayout : defaultPrefs.inventoryLayout,
   };
 };
 

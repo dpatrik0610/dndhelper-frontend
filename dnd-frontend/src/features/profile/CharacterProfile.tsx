@@ -22,8 +22,7 @@ const EffectsPanel = lazy(() => import("./components/panels/EffectsPanel").then(
 const StatisticsPanel = lazy(() => import("./components/panels/StatisticsPanel").then(m => ({ default: m.StatisticsPanel })));
 const CombatStats = lazy(() => import("./components/panels/CombatStats").then(m => ({ default: m.CombatStats })));
 const ExperienceTableCard = lazy(() => import("./components/panels/ExperienceTableCard").then(m => ({ default: m.ExperienceTableCard })));
-const SpellsPanel = lazy(() => import("./components/panels/SpellsPanel").then(m => ({ default: m.SpellsPanel })));
-const SpellCastingBlock = lazy(() => import("./components/panels/SpellCastingBlock").then(m => ({ default: m.SpellCastingBlock })));
+const SpellcastingPanel = lazy(() => import("./components/panels/SpellcastingPanel").then(m => ({ default: m.SpellcastingPanel })));
 const ClassResourcesPanel = lazy(() => import("./components/panels/ClassResourcesPanel").then(m => ({ default: m.ClassResourcesPanel })));
 const ExtraInfo = lazy(() => import("./components/panels/ExtraInfo").then(m => ({ default: m.ExtraInfo })));
 const FeaturesPanel = lazy(() => import("./components/panels/FeaturesPanel").then(m => ({ default: m.FeaturesPanel })));
@@ -117,8 +116,7 @@ export default function CharacterProfile() {
 
             {shownTab === "spellcasting" && (
               <motion.div key="spellcasting" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.25 }}>
-                <SpellsPanel />
-                <SpellCastingBlock />
+                <SpellcastingPanel />
               </motion.div>
             )}
 

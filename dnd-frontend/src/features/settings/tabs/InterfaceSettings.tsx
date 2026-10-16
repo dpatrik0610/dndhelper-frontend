@@ -1,6 +1,6 @@
 import { Button, Divider, Group, SegmentedControl, Select, Stack, Switch } from "@mantine/core";
-import { IconAdjustments, IconBolt, IconMessageCircle, IconRestore } from "@tabler/icons-react";
-import { useUiStore, type NotificationPosition, type SitePrefs } from "@store/ui/uiStore";
+import { IconAdjustments, IconBolt, IconLayoutGrid, IconMessageCircle, IconRestore } from "@tabler/icons-react";
+import { useUiStore, type ItemLayout, type NotificationPosition, type SitePrefs } from "@store/ui/uiStore";
 import { SettingRow, SettingsSection } from "@features/settings/SettingsSection";
 
 const scaleOptions = [
@@ -15,6 +15,12 @@ const positionOptions: { value: NotificationPosition; label: string }[] = [
   { value: "top-right", label: "Top right" },
   { value: "bottom-left", label: "Bottom left" },
   { value: "bottom-right", label: "Bottom right" },
+];
+
+const layoutOptions: { value: ItemLayout; label: string }[] = [
+  { value: "auto", label: "Auto" },
+  { value: "list", label: "Rows" },
+  { value: "cards", label: "Boxes" },
 ];
 
 const accent = "var(--theme-color-accent-primary, #f59e0b)";
@@ -88,6 +94,33 @@ export function InterfaceSettings() {
             label="Chat bubble"
             description="Your campaign chat in a bubble at the bottom right. The tabletop always has its own chat tab."
           />
+        </Stack>
+      </SettingsSection>
+
+      <SettingsSection
+        icon={<IconLayoutGrid size={20} color={accent} />}
+        title="Layout"
+        description="How lists show on the character sheet. Auto uses rows on phones and boxes on bigger screens."
+      >
+        <Stack gap={0}>
+          <SettingRow label="Spells" description="Your spellbook on the Spellcasting tab.">
+            <SegmentedControl
+              size="xs"
+              data={layoutOptions}
+              value={prefs.spellLayout}
+              onChange={(v) => setPref("spellLayout", v as ItemLayout)}
+            />
+          </SettingRow>
+          {divider}
+
+          <SettingRow label="Inventory items" description="Items in your inventories. The toggle on the inventory tab changes this too.">
+            <SegmentedControl
+              size="xs"
+              data={layoutOptions}
+              value={prefs.inventoryLayout}
+              onChange={(v) => setPref("inventoryLayout", v as ItemLayout)}
+            />
+          </SettingRow>
         </Stack>
       </SettingsSection>
 
