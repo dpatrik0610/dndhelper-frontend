@@ -40,7 +40,7 @@ export function NoteCard({ note, query, onOpen, onTogglePin, onDelete }: NoteCar
     <article className={classes.card} data-pinned={pinned || undefined}>
       <header className={classes.cardHeader}>
         <div className={classes.cardHeading}>
-          <button type="button" className={classes.cardTitle} onClick={onOpen}>
+          <button type="button" className={classes.cardTitle} onClick={onOpen} data-note-nav>
             {highlight(title, query)}
           </button>
           {note.updatedAt && (

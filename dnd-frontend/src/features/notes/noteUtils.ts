@@ -5,6 +5,9 @@ const TAG_REGEX = /#[a-zA-Z0-9_-]+/g;
 /** The note's Markdown body (stored one line per entry). */
 export const noteBody = (note: Note) => (note.lines ?? []).join("\n");
 
+export const noteMatches = (note: Note, query: string) =>
+  !query || `${note.title ?? ""}\n${noteBody(note)}`.toLowerCase().includes(query.toLowerCase());
+
 /** #tags written anywhere in the title or body, lowercased and without the #. */
 export const noteTags = (note: Note) => {
   const matches = `${note.title ?? ""} ${noteBody(note)}`.match(TAG_REGEX) ?? [];

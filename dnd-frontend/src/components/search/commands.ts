@@ -23,6 +23,7 @@ export interface CommandContext {
   roster: Character[];
   mine: Character[];
   navigate: NavigateFunction;
+  openNotes: () => void;
 }
 
 interface Command {
@@ -47,6 +48,8 @@ export function parseAmount(args: string): { amount: number; rest: string } | nu
 
 const named = (list: Character[], q: string) =>
   list.filter((c) => (c.name ?? "").toLowerCase().includes(q.toLowerCase())).sort((a, b) => a.name.localeCompare(b.name)).slice(0, LIMIT);
+
+const bare = (c: Command) => c.usage === `/${c.name}`;
 
 const hint = (key: string, title: string, meta: string): Suggestion => ({ key, title, meta });
 
@@ -144,6 +147,17 @@ const COMMANDS: Command[] = [
       })),
   },
   {
+    name: "notes",
+    usage: "/notes",
+    meta: "Open your character's notes",
+    dmOnly: false,
+    suggest: (_, { openNotes }) => {
+      const character = useCharacterStore.getState().character;
+      if (!character) return [hint("notes-hint", "/notes", "Select a character first")];
+      return [{ key: "notes", title: `${character.name}'s notes`, meta: "Search, open or add a note", run: async () => openNotes() }];
+    },
+  },
+  {
     name: "join",
     usage: "/join <code>",
     meta: "Join a tabletop session by its room code",
@@ -202,8 +216,8 @@ export function suggestCommands(input: string, ctx: CommandContext, dm: boolean)
   if (!parsed) return [];
   const available = COMMANDS.filter((c) => dm || !c.dmOnly);
   const exact = available.find((c) => c.name === parsed.name);
-  if (exact && (parsed.args !== null || exact.name === "longrest")) return exact.suggest(parsed.args ?? "", ctx);
+  if (exact && (parsed.args !== null || bare(exact))) return exact.suggest(parsed.args ?? "", ctx);
   return available
     .filter((c) => c.name.startsWith(parsed.name))
-    .map((c) => ({ key: `cmd-${c.name}`, title: c.usage, meta: c.meta, complete: c.name === "longrest" ? "/longrest" : `/${c.name} ` }));
+    .map((c) => ({ key: `cmd-${c.name}`, title: c.usage, meta: c.meta, complete: bare(c) ? c.usage : `/${c.name} ` }));
 }

@@ -6,6 +6,7 @@ import { IconBackpack, IconBook2, IconBox, IconGhost2, IconMoonStars, IconSearch
 import { showNotification } from "@components/Notification/Notification";
 import { MonsterViewModal } from "@features/admin/MonsterManager/components/MonsterViewModal";
 import { EquipmentModal } from "@features/inventory/components/EquipmentModal";
+import { NotesPanelModal } from "@features/notes/components/NotesPanelModal";
 import { SpellModal } from "@features/profile/components/modals/SpellModal";
 import { monsterService } from "@services/Admin/monsterService";
 import { getCampaignCharacters } from "@services/campaignService";
@@ -72,12 +73,14 @@ export default function SearchPalette() {
   const [spellOpen, setSpellOpen] = useState(false);
   const [monster, setMonster] = useState<Monster | null>(null);
   const [itemId, setItemId] = useState<string | null>(null);
+  const [notesOpen, setNotesOpen] = useState(false);
   return (
     <>
-      {open && <SearchPopup onSpell={() => setSpellOpen(true)} onMonster={setMonster} onItem={setItemId} />}
+      {open && <SearchPopup onSpell={() => setSpellOpen(true)} onMonster={setMonster} onItem={setItemId} onNotes={() => setNotesOpen(true)} />}
       <SpellModal opened={spellOpen} onClose={() => setSpellOpen(false)} />
       <MonsterViewModal monster={monster} onClose={() => setMonster(null)} />
       <EquipmentModal opened={!!itemId} equipmentId={itemId} onClose={() => setItemId(null)} />
+      <NotesPanelModal opened={notesOpen} onClose={() => setNotesOpen(false)} />
     </>
   );
 }
@@ -86,7 +89,17 @@ export default function SearchPalette() {
  * The centered search: spells and their own carried items for everyone; monsters, items and inventories (by name, or by an item inside) for the DM.
  * Escape or a click anywhere else closes it; picking a result opens its card.
  */
-function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMonster: (m: Monster) => void; onItem: (id: string) => void }) {
+function SearchPopup({
+  onSpell,
+  onMonster,
+  onItem,
+  onNotes,
+}: {
+  onSpell: () => void;
+  onMonster: (m: Monster) => void;
+  onItem: (id: string) => void;
+  onNotes: () => void;
+}) {
   const navigate = useNavigate();
   // On a joined table the table's own DM view rules (a DM can preview as a player); everywhere else, the campaign role.
   const onTable = useLocation().pathname.startsWith("/table/");
@@ -158,7 +171,7 @@ function SearchPopup({ onSpell, onMonster, onItem }: { onSpell: () => void; onMo
 
   const commandHits: Hit[] = !commandMode
     ? []
-    : suggestCommands(query, { roster: roster ?? [], mine, navigate }, dmView && !!campaignId).map((c) => ({
+    : suggestCommands(query, { roster: roster ?? [], mine, navigate, openNotes: onNotes }, dmView && !!campaignId).map((c) => ({
         key: `command-${c.key}`,
         group: "Commands",
         title: armed === c.key ? `${c.title}: press Enter again to confirm` : c.title,

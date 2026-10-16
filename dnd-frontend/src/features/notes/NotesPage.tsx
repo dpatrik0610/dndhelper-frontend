@@ -5,27 +5,23 @@ import { useNavigate } from "react-router-dom";
 import type { Note } from "@appTypes/Note";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
-import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
-import { useNoteActions, useNoteList, useNoteLoading } from "@store/note/noteSelectors";
+import { useCharacterCoreActions } from "@store/character/characterSelectors";
+import { useNoteActions } from "@store/note/noteSelectors";
 import { NoteCard } from "@features/notes/components/NoteCard";
 import { NoteEditorModal } from "@features/notes/components/NoteEditorModal";
-import { noteBody, noteTags } from "@features/notes/noteUtils";
+import { useCharacterNotes, useNoteKeyNav } from "@features/notes/noteHooks";
+import { noteMatches, noteTags } from "@features/notes/noteUtils";
 import { timeAgo } from "@utils/timeAgo";
 import classes from "@features/notes/Notes.module.css";
 
-// Stable fallback, so the memos below don't recompute on every render.
-const NO_IDS: string[] = [];
-
-const byNewest = (a: Note, b: Note) => Date.parse(b.updatedAt ?? "0") - Date.parse(a.updatedAt ?? "0");
-
 export default function NotesPage() {
-  const character = useCurrentCharacter();
+  const { character, notes: characterNotes, loading } = useCharacterNotes();
   const { updateCharacter } = useCharacterCoreActions();
   const navigate = useNavigate();
-  const notes = useNoteList();
-  const loading = useNoteLoading();
-  const { loadForCharacter, create, update, remove } = useNoteActions();
+  const { create, update, remove } = useNoteActions();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  useNoteKeyNav(pageRef);
 
   // Kept apart from `editorOpen` so the dialog doesn't switch to "New note" while it fades out.
   const [editorOpen, setEditorOpen] = useState(false);
@@ -52,29 +48,13 @@ export default function NotesPage() {
     }
   }, [character, navigate]);
 
-  const noteIds = character?.noteIds ?? NO_IDS;
-
-  useEffect(() => {
-    if (!noteIds.length) return;
-    loadForCharacter(noteIds).catch(() =>
-      showNotification({ id: "notes-load-failed", title: "Could not load notes", message: "Showing the last saved copy.", color: "red" })
-    );
-  }, [noteIds, loadForCharacter]);
-
-  const characterNotes = useMemo(
-    () => notes.filter((n) => n.id && noteIds.includes(n.id)).sort(byNewest),
-    [notes, noteIds]
-  );
-
   const allTags = useMemo(() => [...new Set(characterNotes.flatMap(noteTags))].sort(), [characterNotes]);
 
   const query = search.trim();
   const visible = useMemo(() => {
-    const q = query.toLowerCase();
     return characterNotes.filter((note) => {
-      const matchesText = !q || `${note.title ?? ""}\n${noteBody(note)}`.toLowerCase().includes(q);
       const tags = noteTags(note);
-      return matchesText && activeTags.every((tag) => tags.includes(tag));
+      return noteMatches(note, query) && activeTags.every((tag) => tags.includes(tag));
     });
   }, [characterNotes, query, activeTags]);
 
@@ -142,7 +122,7 @@ export default function NotesPage() {
   );
 
   return (
-    <div className={`${classes.page} readable-surfaces`}>
+    <div ref={pageRef} className={`${classes.page} readable-surfaces`}>
       <header className={classes.header}>
         <span className={classes.headerIcon}>
           <IconNotebook size={22} stroke={1.75} />
@@ -173,6 +153,7 @@ export default function NotesPage() {
           <TextInput
             aria-label="Search notes"
             placeholder="Search notes"
+            data-note-nav
             leftSection={<IconSearch size={15} />}
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
