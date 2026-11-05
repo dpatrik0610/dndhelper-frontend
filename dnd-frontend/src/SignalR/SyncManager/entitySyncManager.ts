@@ -38,6 +38,7 @@ export class EntitySyncManager {
         break;
 
       case "Encounter":
+      case "Session":
         break;
 
       // The superadmin promoted (or moved) core content: refresh the cached spell list. The server decides

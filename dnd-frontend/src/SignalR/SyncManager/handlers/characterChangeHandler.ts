@@ -22,9 +22,11 @@ export function handleCharacterChange(event: EntityChangeEvent) {
     case "created": {
       const newCharacter = event.data as Character;
 
-      if (hasSameTimestamp(existing, newCharacter)) break;
-
-      characterStore.setCharacters([...characterStore.characters, newCharacter]);
+      characterStore.setCharacters(
+        existing
+          ? characterStore.characters.map((c) => (c.id === newCharacter.id ? newCharacter : c))
+          : [...characterStore.characters, newCharacter]
+      );
 
       if (!isCurrentUser) {
         showNotification({
@@ -78,6 +80,7 @@ export function handleCharacterChange(event: EntityChangeEvent) {
         ]);
       }
 
+      if (isCurrentUser) break;
       showNotification({
         title: "New character",
         message: `${event.changedBy} gave you ${character.name}.`,
@@ -91,6 +94,7 @@ export function handleCharacterChange(event: EntityChangeEvent) {
       characterStore.setCharacters(characterStore.characters.filter((c) => c.id !== event.entityId));
       if (currentCharacter?.id === event.entityId) characterStore.setCharacter(null);
 
+      if (isCurrentUser) break;
       showNotification({
         title: "Character reassigned",
         message: `${event.changedBy} gave ${(event.data as Character).name} to someone else.`,
