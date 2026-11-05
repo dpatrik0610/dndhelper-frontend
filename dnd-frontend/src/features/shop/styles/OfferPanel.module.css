@@ -1,0 +1,203 @@
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 12px;
+    padding: 14px;
+    border-radius: var(--mantine-radius-md);
+    border: 1px solid var(--theme-color-accent-primary, #f59e0b);
+    background: var(--theme-bg-panel, rgba(15, 15, 15, 0.55));
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    box-shadow: var(--theme-glow-shadow-primary, none);
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.title {
+    margin: 0;
+    font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--theme-color-text-primary, #fff);
+}
+
+.subtitle {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.sides {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 12px;
+    align-items: stretch;
+}
+
+.side {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 10px;
+    border-radius: var(--mantine-radius-md);
+    border: 1px dashed var(--theme-border-subtle, rgba(255, 255, 255, 0.1));
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.sideHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.sideTitle {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--theme-color-text-primary, #fff);
+}
+
+.sideCount {
+    font-size: 11px;
+    color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+.sideGrid {
+    max-height: 340px;
+    overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-width: thin;
+}
+
+.empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 110px;
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+.swap {
+    display: flex;
+    align-items: center;
+    color: var(--theme-color-accent-primary, #f59e0b);
+}
+
+.footer {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 12px;
+    border-top: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.direction {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.coins {
+    display: flex;
+    gap: 8px;
+}
+
+.hint {
+    align-self: center;
+    font-size: 12px;
+    color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.link {
+    margin-left: 6px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--theme-color-accent-primary, #f59e0b);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.smallBtn {
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.sendBtn {
+    margin-left: auto;
+    padding: 8px 18px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.sendBtn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    transform: none;
+}
+
+.bar {
+    position: sticky;
+    bottom: 8px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 8px 10px 8px 14px;
+    border-radius: var(--mantine-radius-md);
+    border: 1px solid var(--theme-color-accent-primary, #f59e0b);
+    background: var(--theme-bg-panel-opaque, var(--theme-bg-panel, rgba(15, 15, 15, 0.92)));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.barText {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--theme-color-text-primary, #fff);
+}
+
+@media (max-width: 48em) {
+    .panel {
+        padding: 12px 10px;
+    }
+
+    .sides {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .swap {
+        justify-content: center;
+        transform: rotate(90deg);
+    }
+
+    .sideGrid {
+        max-height: none;
+        overflow: visible;
+    }
+
+    .sendBtn {
+        width: 100%;
+    }
+}

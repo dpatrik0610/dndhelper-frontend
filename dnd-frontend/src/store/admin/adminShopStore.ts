@@ -4,6 +4,7 @@ import { immer } from "zustand/middleware/immer";
 import type { Shop, SellRequest } from "@appTypes/Shop/Shop";
 import * as shopService from "@services/shopService";
 import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface AdminShopState {
   shops: Shop[];
@@ -20,6 +21,7 @@ interface AdminShopState {
   deleteShop: (id: string) => Promise<void>;
   approveSellRequest: (id: string) => Promise<void>;
   rejectSellRequest: (id: string) => Promise<void>;
+  counterSellRequest: (id: string, priceGp: number) => Promise<boolean>;
   selectShop: (id: string | null) => void;
   syncShopUpdated: (updatedShop: Shop) => void;
   syncShopDeleted: (shopId: string) => void;
@@ -147,6 +149,7 @@ export const useAdminShopStore = create<AdminShopState>()(
           });
         } catch (error: any) {
           set({ error: error.message || "Failed to approve sell request" });
+          showNotification({ title: "Approval Failed", message: error.message || "Failed to approve request", color: SectionColor.Red });
         } finally {
           set({ loading: false });
         }
@@ -191,6 +194,16 @@ export const useAdminShopStore = create<AdminShopState>()(
             state.selectedShopId = null;
           }
         });
+      },
+
+      counterSellRequest: async (id, priceGp) => {
+        try {
+          get().syncSellRequestUpdated(await shopService.counterSellRequest(id, priceGp));
+          return true;
+        } catch (error) {
+          showNotification({ title: "Counter Failed", message: error instanceof Error ? error.message : "Failed to send counter-offer", color: SectionColor.Red });
+          return false;
+        }
       },
 
       syncSellRequestUpdated: (updatedRequest: SellRequest) => {

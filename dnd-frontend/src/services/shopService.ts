@@ -40,6 +40,18 @@ export async function rejectSellRequest(id: string): Promise<SellRequest> {
     return apiClient(`${baseUrl}/sell-requests/${id}/reject`, { method: "PATCH" });
 }
 
+export async function getCharacterSellRequests(characterId: string): Promise<SellRequest[]> {
+    return apiClient(`${baseUrl}/character/${characterId}/sell-requests`, { method: "GET" });
+}
+
+export async function counterSellRequest(id: string, priceGp: number): Promise<SellRequest> {
+    return apiClient(`${baseUrl}/sell-requests/${id}/counter?priceGp=${priceGp}`, { method: "PATCH" });
+}
+
+export async function respondToCounterOffer(id: string, accept: boolean): Promise<SellRequest> {
+    return apiClient(`${baseUrl}/sell-requests/${id}/respond?accept=${accept}`, { method: "PATCH" });
+}
+
 export async function updateShop(id: string, shop: Shop): Promise<Shop> {
     return apiClient(`${baseUrl}/${id}`, { method: "PUT", body: shop });
 }

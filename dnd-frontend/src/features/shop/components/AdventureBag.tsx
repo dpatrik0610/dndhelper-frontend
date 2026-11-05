@@ -1,18 +1,33 @@
-import { Card, Group, Title, Select, Box, Stack, Badge, Text, ActionIcon, Button, Menu } from "@mantine/core";
-import { IconSearch, IconDotsVertical, IconCoins } from "@tabler/icons-react";
+import { useMemo } from "react";
+import { Box, Select } from "@mantine/core";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
-import { SectionColor } from "@appTypes/SectionColor";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
+import type { Character } from "@appTypes/Character/Character";
+import { formatCostToDisplay } from "@utils/currencyConverter";
+import { itemKind } from "@utils/itemKind";
 import { CharacterCurrencyArea } from "@features/profile/components/header/CharacterCurrencyArea";
+import { ItemShelf, type ShelfEntry } from "@features/shop/components/ItemShelf";
+import { ShopItemCard } from "@features/shop/components/ShopItemCard";
+import { describeStats } from "@features/shop/itemStats";
+import type { OfferPicker } from "@features/shop/offer";
+import cardClasses from "@features/shop/styles/ShopItemCard.module.css";
 
 interface AdventureBagProps {
-    activeCharacter: any;
+    activeCharacter: Character;
     inventories: Inventory[];
     playerInventory: Inventory | null | undefined;
     selectedInventoryId: string | null;
     setSelectedInventoryId: (id: string | null) => void;
-    equipments: any[];
+    equipments: Equipment[];
     handleDetailsOpen: (id: string) => void;
     handleSellOpen: (id: string) => void;
+    offer?: OfferPicker;
+}
+
+interface BagEntry extends ShelfEntry {
+    equipmentId: string;
+    equipment?: Equipment;
+    quantity: number;
 }
 
 export function AdventureBag({
@@ -24,145 +39,81 @@ export function AdventureBag({
     equipments,
     handleDetailsOpen,
     handleSellOpen,
+    offer,
 }: AdventureBagProps) {
-    const items = playerInventory?.items || [];
+    const bagOptions = (activeCharacter.inventoryIds ?? [])
+        .map(id => {
+            const inv = inventories.find(i => i.id === id);
+            return inv ? { value: id, label: inv.name ?? "Bag" } : null;
+        })
+        .filter((opt): opt is { value: string; label: string } => opt !== null);
 
-    const selectData = (activeCharacter?.inventoryIds && activeCharacter.inventoryIds.length > 1)
-        ? activeCharacter.inventoryIds
-            .map((id: string) => {
-                const inv = inventories.find(i => i.id === id);
-                return inv ? { value: id, label: inv.name } : null;
-            })
-            .filter((opt: any): opt is { value: string; label: string } => opt !== null)
-        : [];
+    const entries = useMemo<BagEntry[]>(() => {
+        const byId = new Map(equipments.map(e => [e.id, e]));
+        return (playerInventory?.items ?? [])
+            .filter(item => item.equipmentId)
+            .map(item => {
+                const equipment = byId.get(item.equipmentId!);
+                const name = item.equipmentName || equipment?.name || "Unknown item";
+                return {
+                    key: item.equipmentId!,
+                    equipmentId: item.equipmentId!,
+                    name,
+                    kind: itemKind({ ...equipment, name }),
+                    equipment,
+                    quantity: item.quantity ?? 1,
+                };
+            });
+    }, [playerInventory?.items, equipments]);
+
+    const sourceId = selectedInventoryId ?? undefined;
 
     return (
-        <Card p="xs" bg="rgba(15, 12, 10, 0.45)" style={{ border: "1px solid rgba(255,255,255,0.03)", borderRadius: 8 }}>
-            <Group justify="space-between" mb="xs" wrap="nowrap" gap="xs">
-                <Title order={3} c="amber.5" size="h5" style={{ textTransform: "uppercase", letterSpacing: 1 }}>Your Adventure Bag</Title>
-                {selectData.length > 1 && (
-                    <Select
-                        size="xs"
-                        data={selectData}
-                        value={selectedInventoryId}
-                        onChange={setSelectedInventoryId}
-                        styles={{
-                            input: { backgroundColor: "rgba(0,0,0,0.35)", color: "white", border: "1px solid rgba(255,255,255,0.08)", fontSize: "11px", height: "24px" }
-                        }}
+        <ItemShelf
+            title="Your Bag"
+            entries={entries}
+            emptyText="Your satchel is empty."
+            headerExtra={
+                <Box style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                    <CharacterCurrencyArea
+                        character={activeCharacter}
+                        containerStyle={{ background: "transparent", border: "none", boxShadow: "none", padding: 0 }}
                     />
-                )}
-            </Group>
-
-            {activeCharacter && (
-                <Box bg="rgba(0,0,0,0.22)" p="xs" mb="sm" style={{ borderRadius: 6, border: "1px solid rgba(255,255,255,0.04)" }}>
-                    <Group gap="xs" justify="center">
-                        <CharacterCurrencyArea
-                            character={activeCharacter}
-                            containerStyle={{
-                                background: "transparent",
-                                border: "none",
-                                boxShadow: "none",
-                                padding: 0,
-                            }}
+                    {bagOptions.length > 1 && (
+                        <Select
+                            size="xs"
+                            data={bagOptions}
+                            value={selectedInventoryId}
+                            onChange={setSelectedInventoryId}
+                            allowDeselect={false}
+                            classNames={{ input: "glass-input" }}
+                            w={150}
+                            aria-label="Choose bag"
                         />
-                    </Group>
+                    )}
                 </Box>
+            }
+            renderCard={entry => (
+                <ShopItemCard
+                    name={entry.name}
+                    kind={entry.kind}
+                    tier={entry.equipment?.tier}
+                    quantity={entry.quantity}
+                    meta={describeStats(entry.equipment)}
+                    price={entry.equipment?.cost?.quantity ? `worth ${formatCostToDisplay(entry.equipment.cost)}` : null}
+                    onOpen={() => handleDetailsOpen(entry.equipmentId)}
+                    offer={offer && {
+                        picked: offer.picked("give", entry.equipmentId, sourceId),
+                        max: entry.quantity,
+                        onChange: quantity => offer.set({ side: "give", equipmentId: entry.equipmentId, name: entry.name, quantity, max: entry.quantity, sourceInventoryId: sourceId }),
+                    }}
+                    actions={
+                        <button type="button" className={`glass-btn-secondary ${cardClasses.actionBtn}`} onClick={() => handleSellOpen(entry.equipmentId)}>
+                            Sell
+                        </button>
+                    }
+                />
             )}
-
-            {items.length === 0 ? (
-                <Text c="dimmed" size="xs" py="md">Your satchel is empty.</Text>
-            ) : (
-                <Stack gap="xs">
-                    {items.map((item: any) => {
-                        const eqData = equipments.find((e: any) => e.id === item.equipmentId);
-
-                        return (
-                            <Card key={item.equipmentId} bg="rgba(0,0,0,0.3)" p="xs" style={{ border: "1px solid rgba(255,255,255,0.05)", borderRadius: 6 }}>
-                                <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-                                    <Group gap="sm" style={{ flex: "1 1 200px", overflow: "hidden" }} wrap="nowrap" align="center">
-                                        <Badge 
-                                            size="md" 
-                                            color="dark" 
-                                            variant="filled"
-                                            style={{ 
-                                                color: SectionColor.Orange,
-                                                flexShrink: 0,
-                                                fontWeight: 800,
-                                                fontSize: "0.8rem",
-                                                padding: "4px 10px"
-                                            }}
-                                        >
-                                            {item.quantity} Owned
-                                        </Badge>
-                                        <div style={{ overflow: "hidden", flexGrow: 1 }}>
-                                            <Text fw={700} c="white" size="sm" lineClamp={1}>
-                                                {item.equipmentName || eqData?.name}
-                                            </Text>
-                                        </div>
-                                    </Group>
-
-                                    <Group gap="xs" wrap="nowrap" visibleFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
-                                        <ActionIcon size="md" variant="subtle" color="amber" onClick={() => handleDetailsOpen(item.equipmentId!)} title="Inspect properties">
-                                            <IconSearch size={18} />
-                                        </ActionIcon>
-                                        <Button 
-                                            size="xs" 
-                                            variant="filled" 
-                                            color="orange" 
-                                            onClick={() => handleSellOpen(item.equipmentId!)}
-                                            styles={{ root: { backgroundColor: "#ea580c", color: "white", fontWeight: 700, "&:hover": { backgroundColor: "#c2410c" } } }}
-                                        >
-                                            Sell
-                                        </Button>
-                                    </Group>
-
-                                    <Box hiddenFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
-                                        <Menu shadow="md" width={140} position="bottom-end" styles={{
-                                            dropdown: {
-                                                backgroundColor: "#1c1917",
-                                                border: "1px solid rgba(245, 158, 11, 0.2)",
-                                                padding: "4px",
-                                                borderRadius: "8px"
-                                            },
-                                            item: {
-                                                backgroundColor: "transparent",
-                                                "&[data-hovered]": {
-                                                    backgroundColor: "rgba(255, 255, 255, 0.05)"
-                                                }
-                                            }
-                                        }}>
-                                            <Menu.Target>
-                                                <ActionIcon size="md" variant="subtle" color="amber">
-                                                    <IconDotsVertical size={18} />
-                                                </ActionIcon>
-                                            </Menu.Target>
-
-                                            <Menu.Dropdown>
-                                                <Stack gap="xs" p={4}>
-                                                    <Menu.Item 
-                                                        leftSection={<IconSearch size={14} color="#f59e0b" />} 
-                                                        onClick={() => handleDetailsOpen(item.equipmentId!)}
-                                                        style={{ color: "white", fontWeight: 600, fontSize: "12px" }}
-                                                    >
-                                                        Inspect
-                                                    </Menu.Item>
-                                                    <Menu.Item 
-                                                        leftSection={<IconCoins size={14} color="#ea580c" />} 
-                                                        onClick={() => handleSellOpen(item.equipmentId!)}
-                                                        style={{ color: "#f97316", fontWeight: 700, fontSize: "12px" }}
-                                                    >
-                                                        Sell
-                                                    </Menu.Item>
-                                                </Stack>
-                                            </Menu.Dropdown>
-                                        </Menu>
-                                    </Box>
-                                </Group>
-                            </Card>
-                        );
-                    })}
-                </Stack>
-            )}
-        </Card>
+        />
     );
 }

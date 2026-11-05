@@ -1,144 +1,95 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  ActionIcon,
-  Button,
-  Group,
-  Loader,
-  ScrollArea,
-  Stack,
-  Text,
-  TextInput,
-  ThemeIcon,
-  Tooltip,
-} from "@mantine/core";
-import {
-  IconBuildingStore,
-  IconInbox,
-  IconPlus,
-  IconRefresh,
-  IconSearch,
-  IconTrash,
-} from "@tabler/icons-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ActionIcon, Button, Group, Loader, ScrollArea, Stack, Text, TextInput, ThemeIcon, Tooltip } from "@mantine/core";
+import { IconBuildingStore, IconInbox, IconPlus, IconRefresh, IconSearch } from "@tabler/icons-react";
+import { isOpenRequest, type Shop } from "@appTypes/Shop/Shop";
 import { useAdminShopStore } from "@store/admin/adminShopStore";
+import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { useCampaignStore } from "@store/campaign/campaignStore";
-import { showNotification } from "@components/Notification/Notification";
-import { SectionColor } from "@appTypes/SectionColor";
+import { useCurrentUserId } from "@store/auth/authSelectors";
+import { BaseModal } from "@components/BaseModal";
 import { ShopWorkspace } from "./components/ShopWorkspace";
 import { ShopListItem } from "./components/ShopListItem";
-import { AdminGlassModal } from "@components/admin/AdminGlassModal";
 import styles from "@styles/InventoryDashboard.module.css";
-import { useToken } from "@store/auth/authSelectors";
-import { jwtDecode } from "jwt-decode";
+
+type NameDialog = { mode: "create" } | { mode: "rename"; shop: Shop };
+
+const inputStyle = {
+  input: {
+    backgroundColor: "rgba(0,0,0,0.25)",
+    border: "1px solid rgba(255,255,255,0.06)",
+  },
+};
 
 export function ShopManager() {
-  const {
-    shops,
-    selectedShopId,
-    loading,
-    loadShops,
-    selectShop,
-    createShop,
-    updateShop,
-    deleteShop,
-  } = useAdminShopStore();
-
+  const { shops, sellRequests, selectedShopId, loading, loadShops, loadSellRequests, selectShop, createShop, updateShop, deleteShop } = useAdminShopStore();
+  const { loadAll: loadCharacters } = useAdminCharacterStore();
   const { selectedId: activeCampaignId } = useCampaignStore();
-  const token = useToken();
+  const userId = useCurrentUserId();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [newShopName, setNewShopName] = useState("");
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  const [shopToDelete, setShopToDelete] = useState<{ id: string; name: string } | null>(null);
-  const [creating, setCreating] = useState(false);
+  const [nameDialog, setNameDialog] = useState<NameDialog | null>(null);
+  const [nameInput, setNameInput] = useState("");
+  const [shopToDelete, setShopToDelete] = useState<Shop | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    if (activeCampaignId) {
-      void loadShops(activeCampaignId);
-    }
-  }, [activeCampaignId, loadShops]);
+  const refresh = useCallback(() => {
+    if (!activeCampaignId) return;
+    void loadShops(activeCampaignId);
+    void loadSellRequests(activeCampaignId);
+    void loadCharacters(activeCampaignId);
+  }, [activeCampaignId, loadShops, loadSellRequests, loadCharacters]);
 
-  const filteredShops = useMemo(() => {
-    return shops.filter((shop) => {
-      const matchesSearch = (shop.name ?? "").toLowerCase().includes(searchQuery.trim().toLowerCase());
-      return matchesSearch;
-    });
+  useEffect(refresh, [refresh]);
+
+  const pendingByShop = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const r of sellRequests) if (isOpenRequest(r)) counts[r.shopId] = (counts[r.shopId] ?? 0) + 1;
+    return counts;
+  }, [sellRequests]);
+
+  const groups = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const visible = shops
+      .filter((s) => (s.name ?? "").toLowerCase().includes(q))
+      .sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
+    return [
+      { key: "open", label: "Open", items: visible.filter((s) => s.isOpened) },
+      { key: "closed", label: "Closed", items: visible.filter((s) => !s.isOpened) },
+    ].filter((g) => g.items.length > 0);
   }, [shops, searchQuery]);
 
-  const handleRename = (id: string, currentName: string) => {
-    const next = prompt("Rename shop:", currentName || "Shop");
-    if (next && next.trim()) {
-      const shop = shops.find(s => s.id === id);
-      if(shop) {
-          void updateShop(id, { ...shop, name: next.trim() });
-      }
-    }
+  const shownCount = groups.reduce((n, g) => n + g.items.length, 0);
+
+  const openNameDialog = (dialog: NameDialog) => {
+    setNameInput(dialog.mode === "rename" ? dialog.shop.name : "");
+    setNameDialog(dialog);
   };
 
-  const triggerDeleteConfirm = (id: string, name: string) => {
-    setShopToDelete({ id, name });
-    setDeleteConfirmOpen(true);
-  };
-
-  const executeDelete = async () => {
-    if (shopToDelete) {
-      await deleteShop(shopToDelete.id);
-      setDeleteConfirmOpen(false);
-      setShopToDelete(null);
-    }
-  };
-
-  const executeCreate = async () => {
-    if (creating || !newShopName.trim() || !activeCampaignId) {
-      if (!newShopName.trim()) {
-        showNotification({
-          title: "Validation Error",
-          message: "Please enter a shop name.",
-          color: SectionColor.Red,
-        });
-      }
-      return;
-    }
-
-    setCreating(true);
+  const submitName = async () => {
+    const name = nameInput.trim();
+    if (!nameDialog || !name || !activeCampaignId) return;
+    setBusy(true);
     try {
-        let currentUserId = "system";
-        if(token) {
-           const decoded: any = jwtDecode(token);
-           currentUserId = decoded.nameid || decoded.sub || "system";
-        }
-        
-      await createShop({
-          name: newShopName.trim(),
-          campaignId: activeCampaignId,
-          ownerIds: [currentUserId],
-          isOpened: false,
-          priceMultiplier: 1.0,
-      });
-
-      setCreateModalOpen(false);
-      setNewShopName("");
-    } catch (err) {
-      showNotification({
-        title: "Creation failed",
-        message: String(err),
-        color: SectionColor.Red,
-      });
+      if (nameDialog.mode === "rename") {
+        await updateShop(nameDialog.shop.id!, { ...nameDialog.shop, name });
+      } else {
+        await createShop({ name, campaignId: activeCampaignId, ownerIds: userId ? [userId] : [], isOpened: false, priceMultiplier: 1 });
+      }
+      setNameDialog(null);
     } finally {
-      setCreating(false);
+      setBusy(false);
     }
   };
 
-  const inputStyle = {
-    input: {
-      backgroundColor: "rgba(0,0,0,0.25)",
-      border: "1px solid rgba(255,255,255,0.06)",
-      color: "white"
-    },
-  };
-
-  const handleRefresh = () => {
-    if (activeCampaignId) void loadShops(activeCampaignId);
+  const confirmDelete = async () => {
+    if (!shopToDelete) return;
+    setBusy(true);
+    try {
+      await deleteShop(shopToDelete.id!);
+      setShopToDelete(null);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -152,7 +103,7 @@ export function ShopManager() {
               </ThemeIcon>
               <div>
                 <Text fw={700} size="sm" c="white">Shops</Text>
-                <Text size="xs" c="dimmed">{filteredShops.length} shown</Text>
+                <Text size="xs" c="dimmed">{shownCount} shown</Text>
               </div>
             </Group>
 
@@ -166,26 +117,19 @@ export function ShopManager() {
               styles={inputStyle}
             />
 
-            <Group gap="xs" grow>
+            <Group gap="xs" wrap="nowrap">
               <Button
-                variant="filled"
-                color="neon"
+                style={{ flex: 1 }}
+                className="glass-btn-primary"
                 leftSection={<IconPlus size={14} />}
-                onClick={() => setCreateModalOpen(true)}
+                onClick={() => openNameDialog({ mode: "create" })}
                 size="xs"
                 disabled={!activeCampaignId}
               >
-                Add Shop
+                New Shop
               </Button>
               <Tooltip label="Refresh" withArrow>
-                <ActionIcon
-                  variant="light"
-                  color="gray"
-                  onClick={handleRefresh}
-                  loading={loading}
-                  size="md"
-                  disabled={!activeCampaignId}
-                >
+                <ActionIcon variant="light" color="gray" onClick={refresh} loading={loading} size="md" disabled={!activeCampaignId} aria-label="Refresh">
                   <IconRefresh size={14} />
                 </ActionIcon>
               </Tooltip>
@@ -193,34 +137,35 @@ export function ShopManager() {
           </div>
 
           <ScrollArea className={styles.sidebarScroll} offsetScrollbars>
-            {loading && filteredShops.length === 0 ? (
+            {loading && shownCount === 0 ? (
               <Group justify="center" py="xl">
                 <Loader color="neon" size="sm" />
               </Group>
-            ) : filteredShops.length === 0 ? (
+            ) : shownCount === 0 ? (
               <Stack align="center" py="xl" gap="xs">
                 <IconInbox size={22} color="gray" />
-                <Text c="dimmed" size="xs">No shops found.</Text>
+                <Text c="dimmed" size="xs">{shops.length === 0 ? "No shops yet." : "No shops match."}</Text>
               </Stack>
             ) : (
-              <Stack gap={0}>
-                  <div key="all">
-                    <div className={styles.listGroupHeader}>
-                      <span>All Shops</span>
-                      <span className={styles.listGroupCount}>{filteredShops.length}</span>
-                    </div>
-                    {filteredShops.map((shop) => (
-                      <ShopListItem
-                        key={shop.id}
-                        shop={shop}
-                        isSelected={selectedShopId === shop.id}
-                        onSelect={() => selectShop(shop.id!)}
-                        onRename={() => handleRename(shop.id!, shop.name || "")}
-                        onDelete={() => triggerDeleteConfirm(shop.id!, shop.name || "")}
-                      />
-                    ))}
+              groups.map((group) => (
+                <div key={group.key}>
+                  <div className={styles.listGroupHeader}>
+                    <span>{group.label}</span>
+                    <span className={styles.listGroupCount}>{group.items.length}</span>
                   </div>
-              </Stack>
+                  {group.items.map((shop) => (
+                    <ShopListItem
+                      key={shop.id}
+                      shop={shop}
+                      pending={pendingByShop[shop.id!] ?? 0}
+                      isSelected={selectedShopId === shop.id}
+                      onSelect={() => selectShop(shop.id!)}
+                      onRename={() => openNameDialog({ mode: "rename", shop })}
+                      onDelete={() => setShopToDelete(shop)}
+                    />
+                  ))}
+                </div>
+              ))
             )}
           </ScrollArea>
         </div>
@@ -230,61 +175,45 @@ export function ShopManager() {
         </div>
       </div>
 
-      <AdminGlassModal
-        opened={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
-        title="Create New Shop"
-        size="md"
-        loading={creating}
+      <BaseModal
+        opened={!!nameDialog}
+        onClose={() => setNameDialog(null)}
+        title={nameDialog?.mode === "rename" ? "Rename Shop" : "New Shop"}
+        size="sm"
+        loading={busy}
+        onSave={submitName}
+        saveLabel={nameDialog?.mode === "rename" ? "Save" : "Create"}
       >
-        <Stack gap="md">
-          <TextInput
-             label="Shop Name"
-             placeholder="e.g. The Blacksmith, General Store..."
-             value={newShopName}
-             onChange={(e) => setNewShopName(e.currentTarget.value)}
-             required
-             styles={inputStyle}
-          />
-          <Group justify="flex-end" mt="lg">
-            <Button variant="subtle" color="gray" onClick={() => setCreateModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="filled" color="neon" onClick={executeCreate} loading={creating}>
-              Create
-            </Button>
-          </Group>
-        </Stack>
-      </AdminGlassModal>
+        <TextInput
+          label="Shop name"
+          placeholder="e.g. The Gilded Anvil"
+          value={nameInput}
+          onChange={(e) => setNameInput(e.currentTarget.value)}
+          onKeyDown={(e) => e.key === "Enter" && void submitName()}
+          data-autofocus
+          required
+          styles={inputStyle}
+        />
+        {nameDialog?.mode === "create" && (
+          <Text size="xs" c="dimmed" mt="xs">
+            New shops start closed with a ×1.00 markup and their own register inventory.
+          </Text>
+        )}
+      </BaseModal>
 
-      <AdminGlassModal
-        opened={deleteConfirmOpen}
-        onClose={() => setDeleteConfirmOpen(false)}
+      <BaseModal
+        opened={!!shopToDelete}
+        onClose={() => setShopToDelete(null)}
         title="Delete Shop"
-        variant="danger"
-        size="md"
+        size="sm"
+        loading={busy}
+        onSave={confirmDelete}
+        saveLabel="Delete"
       >
-        <Stack gap="md">
-          <Text size="sm" c="gray.2">
-            Are you sure you want to delete{" "}
-            <Text span fw={700} c="red.2">
-              "{shopToDelete?.name}"
-            </Text>
-            ?
-          </Text>
-          <Text size="xs" c="red.4" fw={500}>
-            This action is permanent and cannot be undone. Its inventory register will be orphaned.
-          </Text>
-          <Group justify="flex-end" mt="md">
-            <Button variant="subtle" color="gray" onClick={() => setDeleteConfirmOpen(false)}>
-              Cancel
-            </Button>
-            <Button color="red" leftSection={<IconTrash size={14} />} onClick={executeDelete}>
-              Delete
-            </Button>
-          </Group>
-        </Stack>
-      </AdminGlassModal>
+        <Text size="sm">
+          Delete <b>{shopToDelete?.name}</b>? This can't be undone, and its register inventory will be left orphaned.
+        </Text>
+      </BaseModal>
     </div>
   );
 }

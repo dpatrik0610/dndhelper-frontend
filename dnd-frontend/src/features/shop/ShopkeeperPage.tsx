@@ -17,11 +17,20 @@ import { AdventureBag } from "./components/AdventureBag";
 import { BuyModal } from "./components/BuyModal";
 import { SellModal } from "./components/SellModal";
 import { StealModal } from "./components/StealModal";
+import { HaggleModal } from "./components/HaggleModal";
+import { CounterOffersPanel } from "./components/CounterOffersPanel";
+import { OfferPanel, OfferSummaryBar } from "./components/OfferPanel";
+import { isCountered } from "@appTypes/Shop/Shop";
+import { Switch } from "@mantine/core";
+import { useIsMobile } from "@hooks/useIsMobile";
+import { convertCostToSilver } from "@utils/currencyConverter";
+import { offerKey, type OfferLine, type OfferPicker } from "@features/shop/offer";
 
 import classes from "./styles/ShopkeeperPage.module.css";
 
 export default function ShopkeeperPage() {
-    const { shops, loadShops, loading, buyItem, submitSellRequest } = useShopStore();
+    const { shops, loadShops, loading, buyItem, submitSellRequest, myRequests, loadMyRequests, respondToCounterOffer } = useShopStore();
+    const [respondingId, setRespondingId] = useState<string | null>(null);
     const activeCharacter = useCurrentCharacter();
     const inventories = useInventoryStore(s => s.inventories);
     const setInventories = useInventoryStore(s => s.setInventories);
@@ -34,6 +43,7 @@ export default function ShopkeeperPage() {
     const [sellModalOpen, setSellModalOpen] = useState(false);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
     const [stealModalOpen, setStealModalOpen] = useState(false);
+    const [haggleModalOpen, setHaggleModalOpen] = useState(false);
 
     const [selectedEquipmentId, setSelectedEquipmentId] = useState<string | null>(null);
     const [selectedDetailsEquipmentId, setSelectedDetailsEquipmentId] = useState<string | null>(null);
@@ -45,6 +55,28 @@ export default function ShopkeeperPage() {
     const [askedSp, setAskedSp] = useState<number>(0);
     const [actionLoading, setActionLoading] = useState(false);
     const [selectedInventoryId, setSelectedInventoryId] = useState<string | null>(null);
+
+    const isMobile = useIsMobile();
+    const [mobileTab, setMobileTab] = useState<"merchant" | "bag" | "offer">("merchant");
+    const [offerMode, setOfferMode] = useState(false);
+    const [offerLines, setOfferLines] = useState<Record<string, OfferLine>>({});
+
+    const selectShop = (id: string | null) => {
+        setSelectedShopId(id);
+        setOfferLines({});
+    };
+
+    const offerPicker: OfferPicker = {
+        picked: (side, equipmentId, sourceInventoryId) => offerLines[offerKey(side, equipmentId, sourceInventoryId)]?.quantity ?? 0,
+        set: (line) => setOfferLines(prev => {
+            const key = offerKey(line.side, line.equipmentId, line.sourceInventoryId);
+            const next = { ...prev };
+            const quantity = line.max != null ? Math.min(line.quantity, line.max) : line.quantity;
+            if (quantity > 0) next[key] = { ...line, quantity };
+            else delete next[key];
+            return next;
+        }),
+    };
 
     const visibleShops = shops.filter(s => s.isOpened);
     const activeShop = selectedShopId ? visibleShops.find(s => s.id === selectedShopId) : null;
@@ -58,6 +90,12 @@ export default function ShopkeeperPage() {
             loadAll();
         }
     }, [activeCharacter?.campaignId, loadShops, loadAll, equipments.length]);
+
+    useEffect(() => {
+        if (activeCharacter?.id) {
+            void loadMyRequests(activeCharacter.id);
+        }
+    }, [activeCharacter?.id, loadMyRequests]);
 
     useEffect(() => {
         if (activeCharacter?.id) {
@@ -242,6 +280,86 @@ export default function ShopkeeperPage() {
         setActionLoading(false);
     };
 
+    const handleHaggleOpen = (equipmentId: string) => {
+        setSelectedEquipmentId(equipmentId);
+        setHaggleModalOpen(true);
+    };
+
+    const executeHaggle = async (quantity: number, offeredPriceGp: number) => {
+        if(!activeShop || !selectedEquipmentId || !activeCharacter) return;
+        setActionLoading(true);
+        try {
+            await submitSellRequest({
+                campaignId: activeCharacter.campaignId!,
+                shopId: activeShop.id!,
+                characterId: activeCharacter.id!,
+                equipmentId: selectedEquipmentId,
+                sourceInventoryId: selectedInventoryId || undefined,
+                quantity,
+                offeredPriceGp,
+                isHaggle: true
+            });
+            showNotification({ title: "Offer Made", message: "The shopkeeper is considering your offer.", color: SectionColor.Green });
+            setHaggleModalOpen(false);
+        } catch(e) {
+            showNotification({ title: "Offer Refused", message: e instanceof Error ? e.message : "Could not place your offer.", color: SectionColor.Red });
+        }
+        setActionLoading(false);
+    };
+
+    const offerList = Object.values(offerLines);
+    const offerFairValueSp = offerList.reduce((sum, line) => {
+        const baseSp = convertCostToSilver(equipments.find(e => e.id === line.equipmentId)?.cost);
+        return line.side === "want"
+            ? sum + Math.round(baseSp * (activeShop?.priceMultiplier ?? 1)) * line.quantity
+            : sum - baseSp * line.quantity;
+    }, 0);
+
+    const executeTrade = async (offeredPriceGp: number) => {
+        if (!activeShop || !activeCharacter || offerList.length === 0) return false;
+        setActionLoading(true);
+        try {
+            const toTradeItem = (line: OfferLine) => ({ equipmentId: line.equipmentId, quantity: line.quantity, sourceInventoryId: line.sourceInventoryId });
+            await submitSellRequest({
+                campaignId: activeCharacter.campaignId!,
+                shopId: activeShop.id!,
+                characterId: activeCharacter.id!,
+                sourceInventoryId: selectedInventoryId || undefined,
+                quantity: 1,
+                offeredPriceGp,
+                isTrade: true,
+                giveItems: offerList.filter(l => l.side === "give").map(toTradeItem),
+                wantItems: offerList.filter(l => l.side === "want").map(toTradeItem),
+            });
+            showNotification({ title: "Offer Sent", message: "The shopkeeper is looking over your offer.", color: SectionColor.Green });
+            setOfferLines({});
+            setOfferMode(false);
+            void refreshPlayerInventories();
+            return true;
+        } catch (e) {
+            showNotification({ title: "Offer Refused", message: e instanceof Error ? e.message : "Could not send your offer.", color: SectionColor.Red });
+            return false;
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleCounterResponse = async (id: string, accept: boolean) => {
+        setRespondingId(id);
+        if (await respondToCounterOffer(id, accept)) {
+            showNotification({ title: accept ? "Deal!" : "Counter Declined", message: accept ? "The trade went through." : "You walked away from the deal.", color: accept ? SectionColor.Green : SectionColor.Orange });
+            void refreshPlayerInventories();
+            if (activeShop?.inventoryId) {
+                getInventory(activeShop.inventoryId).then(data => updateInventory({ ...data, id: data.id! })).catch(console.error);
+            }
+        }
+        setRespondingId(null);
+    };
+
+    const tab = mobileTab === "offer" && !offerMode ? "merchant" : mobileTab;
+    const tabs = offerMode ? (["merchant", "bag", "offer"] as const) : (["merchant", "bag"] as const);
+    const tabLabel = { merchant: "Merchant", bag: "Your bag", offer: `Offer${offerList.length ? ` (${offerList.length})` : ""}` };
+
     if (!activeCharacter) {
         return <Center mt="20vh"><Text c="dimmed">No active character selected.</Text></Center>;
     }
@@ -262,9 +380,17 @@ export default function ShopkeeperPage() {
                     visibleShops={visibleShops}
                     activeShop={activeShop || null}
                     selectedShopId={selectedShopId}
-                    setSelectedShopId={setSelectedShopId}
+                    setSelectedShopId={selectShop}
                     handleRefresh={handleRefresh}
                     refreshing={refreshing}
+                />
+
+                <CounterOffersPanel
+                    requests={myRequests.filter(isCountered)}
+                    shops={shops}
+                    equipments={equipments}
+                    busyId={respondingId}
+                    onRespond={handleCounterResponse}
                 />
 
                 {visibleShops.length === 0 && <EmptyMarketplace />}
@@ -274,27 +400,82 @@ export default function ShopkeeperPage() {
                 )}
 
                 {activeShop && (
-                    <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xs">
-                        <MerchantShelf
-                            shopInventory={shopInventory}
-                            equipments={equipments}
-                            activeShop={activeShop}
-                            handleDetailsOpen={handleDetailsOpen}
-                            handleStealOpen={handleStealOpen}
-                            handleBuyOpen={handleBuyOpen}
-                        />
+                    <>
+                        <div className={classes.toolbar}>
+                            {isMobile && (
+                                <div className={classes.tabs} role="tablist" aria-label="Shelves">
+                                    {tabs.map(t => (
+                                        <button
+                                            key={t}
+                                            type="button"
+                                            role="tab"
+                                            aria-selected={tab === t}
+                                            className={`${tab === t ? "glass-btn-primary" : "glass-btn-secondary"} ${classes.tab}`}
+                                            onClick={() => setMobileTab(t)}
+                                        >
+                                            {tabLabel[t]}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            <Switch
+                                label="Offer mode"
+                                checked={offerMode}
+                                onChange={e => setOfferMode(e.currentTarget.checked)}
+                                classNames={{ root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" }}
+                                styles={{ label: { color: "var(--theme-color-text-primary, #fff)", fontSize: 13 } }}
+                                className={classes.offerSwitch}
+                            />
+                        </div>
 
-                        <AdventureBag
-                            activeCharacter={activeCharacter}
-                            inventories={inventories}
-                            playerInventory={playerInventory}
-                            selectedInventoryId={selectedInventoryId}
-                            setSelectedInventoryId={setSelectedInventoryId}
-                            equipments={equipments}
-                            handleDetailsOpen={handleDetailsOpen}
-                            handleSellOpen={handleSellOpen}
-                        />
-                    </SimpleGrid>
+                        {offerMode && (!isMobile || tab === "offer") && (
+                            <OfferPanel
+                                lines={offerList}
+                                equipments={equipments}
+                                priceMultiplier={activeShop.priceMultiplier}
+                                fairValueSp={offerFairValueSp}
+                                busy={actionLoading}
+                                onSet={offerPicker.set}
+                                onClear={() => setOfferLines({})}
+                                onSubmit={executeTrade}
+                            />
+                        )}
+
+                        {(!isMobile || tab !== "offer") && (
+                        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="sm">
+                            {(!isMobile || tab === "merchant") && (
+                                <MerchantShelf
+                                    shopInventory={shopInventory}
+                                    equipments={equipments}
+                                    activeShop={activeShop}
+                                    handleDetailsOpen={handleDetailsOpen}
+                                    handleStealOpen={handleStealOpen}
+                                    handleBuyOpen={handleBuyOpen}
+                                    handleHaggleOpen={handleHaggleOpen}
+                                    offer={offerMode ? offerPicker : undefined}
+                                />
+                            )}
+
+                            {(!isMobile || tab === "bag") && (
+                                <AdventureBag
+                                    activeCharacter={activeCharacter}
+                                    inventories={inventories}
+                                    playerInventory={playerInventory}
+                                    selectedInventoryId={selectedInventoryId}
+                                    setSelectedInventoryId={setSelectedInventoryId}
+                                    equipments={equipments}
+                                    handleDetailsOpen={handleDetailsOpen}
+                                    handleSellOpen={handleSellOpen}
+                                    offer={offerMode ? offerPicker : undefined}
+                                />
+                            )}
+                        </SimpleGrid>
+                        )}
+
+                        {offerMode && isMobile && tab !== "offer" && (
+                            <OfferSummaryBar lines={offerList} onView={() => setMobileTab("offer")} />
+                        )}
+                    </>
                 )}
 
                 <BuyModal
@@ -334,7 +515,18 @@ export default function ShopkeeperPage() {
                     actionLoading={actionLoading}
                 />
 
-                <EquipmentModal 
+                <HaggleModal
+                    opened={haggleModalOpen}
+                    onClose={() => setHaggleModalOpen(false)}
+                    selectedEquipmentId={selectedEquipmentId}
+                    equipments={equipments}
+                    shopInventory={shopInventory}
+                    priceMultiplier={activeShop?.priceMultiplier ?? 1}
+                    executeHaggle={executeHaggle}
+                    actionLoading={actionLoading}
+                />
+
+                <EquipmentModal
                     opened={detailsModalOpen} 
                     onClose={() => setDetailsModalOpen(false)} 
                     equipmentId={selectedDetailsEquipmentId} 

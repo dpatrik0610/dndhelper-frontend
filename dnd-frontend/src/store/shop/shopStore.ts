@@ -3,13 +3,19 @@ import { devtools } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import type { Shop, SellRequest, BuyRequest } from "@appTypes/Shop/Shop";
 import * as shopService from "@services/shopService";
+import { showNotification } from "@components/Notification/Notification";
+import { SectionColor } from "@appTypes/SectionColor";
 
 interface ShopState {
   shops: Shop[];
   loading: boolean;
   error: string | null;
   selectedShopId: string | null;
+  myRequests: SellRequest[];
 
+  loadMyRequests: (characterId: string) => Promise<void>;
+  respondToCounterOffer: (id: string, accept: boolean) => Promise<boolean>;
+  syncMyRequest: (request: SellRequest) => void;
   loadShops: (campaignId: string) => Promise<void>;
   buyItem: (shopId: string, request: BuyRequest) => Promise<boolean>;
   submitSellRequest: (request: SellRequest) => Promise<void>;
@@ -20,11 +26,41 @@ interface ShopState {
 
 export const useShopStore = create<ShopState>()(
   devtools(
-    immer((set) => ({
+    immer((set, get) => ({
       shops: [],
       loading: false,
       error: null,
       selectedShopId: null,
+      myRequests: [],
+
+      loadMyRequests: async (characterId) => {
+        try {
+          set({ myRequests: await shopService.getCharacterSellRequests(characterId) });
+        } catch (error) {
+          console.error("Failed to load your shop requests", error);
+        }
+      },
+
+      respondToCounterOffer: async (id, accept) => {
+        try {
+          get().syncMyRequest(await shopService.respondToCounterOffer(id, accept));
+          return true;
+        } catch (error) {
+          showNotification({ title: "Could Not Respond", message: error instanceof Error ? error.message : "Failed to respond to the counter-offer", color: SectionColor.Red });
+          return false;
+        }
+      },
+
+      syncMyRequest: (request) => {
+        set((state) => {
+          const index = state.myRequests.findIndex((r) => r.id === request.id);
+          if (index !== -1) {
+            state.myRequests[index] = request;
+          } else {
+            state.myRequests.push(request);
+          }
+        });
+      },
 
       loadShops: async (campaignId) => {
         set({ loading: true, error: null });

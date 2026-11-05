@@ -1,8 +1,9 @@
-import { useEffect } from "react";
-import { Text, Group, Button, Stack, Switch, NumberInput, Loader, Card, Badge, Grid, Paper, Avatar, ThemeIcon, Center, Box } from "@mantine/core";
-import { IconBuildingStore, IconCheck, IconX, IconPackage } from "@tabler/icons-react";
+import { useEffect, useState } from "react";
+import { Loader, NumberInput, ScrollArea, SimpleGrid, Stack, Switch, Text } from "@mantine/core";
+import { IconBuildingStore, IconInbox } from "@tabler/icons-react";
+import { BaseModal } from "@components/BaseModal";
+import { isOpenRequest, type SellRequest } from "@appTypes/Shop/Shop";
 import { useAdminShopStore } from "@store/admin/adminShopStore";
-import { useCampaignStore } from "@store/campaign/campaignStore";
 import { useAdminEquipmentStore } from "@store/admin/adminEquipmentStore";
 import { useAdminInventoryStore } from "@store/admin/adminInventoryStore";
 import { useAdminCurrencyStore } from "@store/admin/adminCurrencyStore";
@@ -10,51 +11,56 @@ import { useAdminCharacterStore } from "@store/admin/adminCharacterStore";
 import { getInventory } from "@services/inventoryService";
 import { MetaPanel } from "@features/admin/InventoryDashboard/components/MetaPanel";
 import { ItemsPanel } from "@features/admin/InventoryDashboard/components/ItemsPanel";
-import { formatCostToDisplay, formatSilverToDisplay } from "@utils/currencyConverter";
+import { formatSilverToDisplay } from "@utils/currencyConverter";
+import { RequestCard } from "./RequestCard";
 import styles from "@styles/InventoryDashboard.module.css";
+import classes from "@features/admin/ShopManager/ShopManager.module.css";
 
 export function ShopWorkspace() {
-  const { selectedShopId, shops, updateShop, toggleShopOpen, sellRequests, loadSellRequests, approveSellRequest, rejectSellRequest } = useAdminShopStore();
-  const { selectedId: activeCampaignId } = useCampaignStore();
+  const { selectedShopId, shops, updateShop, toggleShopOpen, sellRequests, approveSellRequest, rejectSellRequest, counterSellRequest } = useAdminShopStore();
   const { equipments, loadAll: loadEquipments } = useAdminEquipmentStore();
   const { selected: selectedInventory, setSelected: setSelectedInventory } = useAdminInventoryStore();
   const { loadInventoryById } = useAdminCurrencyStore();
-  const { characters, loadAll: loadCharacters } = useAdminCharacterStore();
-  
-  const shop = shops.find(s => s.id === selectedShopId);
+  const { characters } = useAdminCharacterStore();
+
+  const [counterRequestId, setCounterRequestId] = useState<string | null>(null);
+  const [counterGp, setCounterGp] = useState(0);
+  const [counterSp, setCounterSp] = useState(0);
+  const [counterShopPays, setCounterShopPays] = useState(false);
+  const [counterBusy, setCounterBusy] = useState(false);
+
+  const shop = shops.find((s) => s.id === selectedShopId);
+  const [markup, setMarkup] = useState<number | string>(shop?.priceMultiplier ?? 1);
 
   useEffect(() => {
-    if (activeCampaignId) {
-      loadSellRequests(activeCampaignId);
-      loadCharacters(activeCampaignId);
-    }
-  }, [activeCampaignId, loadSellRequests, loadCharacters]);
+    setMarkup(shop?.priceMultiplier ?? 1);
+  }, [shop?.id, shop?.priceMultiplier]);
 
   useEffect(() => {
-    if (equipments.length === 0) {
-      loadEquipments();
-    }
+    if (equipments.length === 0) void loadEquipments();
   }, [equipments.length, loadEquipments]);
 
   useEffect(() => {
-    if (shop?.inventoryId) {
-      getInventory(shop.inventoryId).then(data => {
+    if (!shop?.inventoryId) {
+      setSelectedInventory(null);
+      return;
+    }
+    getInventory(shop.inventoryId)
+      .then((data) => {
         setSelectedInventory(data);
         void loadInventoryById(shop.inventoryId!);
-      }).catch(err => {
+      })
+      .catch((err) => {
         console.error("Failed to fetch shop inventory", err);
         setSelectedInventory(null);
       });
-    } else {
-      setSelectedInventory(null);
-    }
   }, [shop?.inventoryId, loadInventoryById, setSelectedInventory]);
 
   if (!shop) {
     return (
       <div className={styles.emptyState}>
         <div className={styles.emptyStateInner}>
-          <IconBuildingStore size={36} color="var(--cyber-accent)" stroke={1.3} />
+          <IconBuildingStore size={36} stroke={1.3} />
           <Text size="sm" c="dimmed" maw={280}>
             Select a shop from the sidebar to manage its settings and stock.
           </Text>
@@ -63,242 +69,165 @@ export function ShopWorkspace() {
     );
   }
 
-  const shopSellRequests = sellRequests.filter(r => r.shopId === shop.id && (r.status === "Pending" || r.status === 0));
+  const requests = sellRequests.filter((r) => r.shopId === shop.id && isOpenRequest(r));
+  const counterTarget = sellRequests.find((r) => r.id === counterRequestId);
+
+  const commitMarkup = () => {
+    const next = Number(markup);
+    if (!Number.isFinite(next) || next <= 0) {
+      setMarkup(shop.priceMultiplier);
+      return;
+    }
+    if (next !== shop.priceMultiplier) void updateShop(shop.id!, { ...shop, priceMultiplier: next });
+  };
+
+  const openCounter = (req: SellRequest) => {
+    const totalSp = Math.round(Math.abs(req.offeredPriceGp) * 100);
+    setCounterShopPays(!!req.isTrade && req.offeredPriceGp < 0);
+    setCounterGp(Math.floor(totalSp / 100));
+    setCounterSp(totalSp % 100);
+    setCounterRequestId(req.id!);
+  };
+
+  const submitCounter = async () => {
+    if (!counterRequestId) return;
+    setCounterBusy(true);
+    const amountGp = counterGp + counterSp / 100;
+    if (await counterSellRequest(counterRequestId, counterShopPays ? -amountGp : amountGp)) {
+      setCounterRequestId(null);
+    }
+    setCounterBusy(false);
+  };
 
   return (
-    <div className={styles.workspacePanel} style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px", minHeight: "100%" }}>
-        <Paper p="md" radius="md" style={{ backgroundColor: "rgba(30, 27, 24, 0.6)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <Group justify="space-between" align="center" wrap="wrap" gap="md">
-                <div>
-                    <Group gap="xs" align="center">
-                        <IconBuildingStore size={24} color="#fbbf24" />
-                        <Text size="xl" fw={800} c="white" style={{ letterSpacing: 0.5 }}>
-                            {shop.name}
-                        </Text>
-                        <Badge color={shop.isOpened ? "green" : "red"} variant="light">
-                            {shop.isOpened ? "Open to Players" : "Closed"}
-                        </Badge>
-                    </Group>
-                    <Text size="xs" c="dimmed" mt={2}>
-                        Inventory ID: <code style={{ color: "var(--cyber-accent)", backgroundColor: "rgba(0,0,0,0.2)", padding: "2px 4px", borderRadius: 4 }}>{shop.inventoryId}</code>
-                    </Text>
-                </div>
+    <div className={styles.workspacePanel}>
+      <div className={styles.metaBar}>
+        <Text fw={700} size="sm" c="white" className={styles.metaBarTitle}>
+          {shop.name || "Unnamed Shop"}
+        </Text>
 
-                <Group gap="lg" align="center">
-                    <Switch
-                        label="Open to Players"
-                        checked={shop.isOpened}
-                        onChange={(event) => toggleShopOpen(shop.id!, event.currentTarget.checked)}
-                        size="sm"
-                        styles={{ label: { color: "white", fontWeight: 600 } }}
+        <span className={styles.metaBarRule} />
+
+        <label className={`${styles.metaChip} ${classes.statusChip}`}>
+          <span className={styles.metaChipLabel}>Status</span>
+          <Switch
+            size="xs"
+            checked={shop.isOpened}
+            onChange={(e) => void toggleShopOpen(shop.id!, e.currentTarget.checked)}
+            classNames={{ root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" }}
+            aria-label="Open to players"
+          />
+          <span className={classes.statusText} data-open={shop.isOpened || undefined}>
+            {shop.isOpened ? "Open to players" : "Closed"}
+          </span>
+        </label>
+
+        <div className={styles.metaChip}>
+          <span className={styles.metaChipLabel}>Markup</span>
+          <NumberInput
+            className={classes.markupInput}
+            size="xs"
+            value={markup}
+            onChange={setMarkup}
+            onBlur={commitMarkup}
+            onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
+            min={0.1}
+            max={5}
+            step={0.1}
+            decimalScale={2}
+            prefix="×"
+            hideControls
+            aria-label="Price multiplier"
+          />
+        </div>
+
+        {requests.length > 0 && (
+          <span className={classes.pendingCount}>{requests.length} pending</span>
+        )}
+      </div>
+
+      <div className={classes.columns}>
+        <section className={classes.pane}>
+          <div className={styles.itemsPanelHeader}>
+            <span className={styles.itemsPanelTitle}>Requests ({requests.length})</span>
+          </div>
+          <ScrollArea className={styles.itemsPanelBody} offsetScrollbars>
+            {requests.length === 0 ? (
+              <div className={styles.itemsEmpty}>
+                <IconInbox size={32} stroke={1.2} />
+                <Text size="xs" c="dimmed" maw={220} ta="center">
+                  No open requests. Player sells, haggles, trades and steal attempts land here.
+                </Text>
+              </div>
+            ) : (
+              <div className={classes.requestList}>
+                {requests.map((req) => {
+                  const char = characters.find((c) => c.id === req.characterId);
+                  return (
+                    <RequestCard
+                      key={req.id}
+                      request={req}
+                      equipment={equipments.find((e) => e.id === req.equipmentId)}
+                      characterName={char?.name ?? "Unknown"}
+                      chaScore={char?.abilityScores?.cha ?? 10}
+                      priceMultiplier={shop.priceMultiplier}
+                      onCounter={() => openCounter(req)}
+                      onReject={() => void rejectSellRequest(req.id!)}
+                      onApprove={() => void approveSellRequest(req.id!)}
                     />
-                    
-                    <Group gap="xs" align="center">
-                        <Text size="sm" fw={600} c="gray.3">Price Multiplier:</Text>
-                        <NumberInput
-                            value={shop.priceMultiplier}
-                            onChange={(val) => updateShop(shop.id!, { ...shop, priceMultiplier: Number(val) })}
-                            min={0.1}
-                            step={0.1}
-                            max={5.0}
-                            decimalScale={2}
-                            size="xs"
-                            styles={{
-                                input: {
-                                    backgroundColor: "rgba(0,0,0,0.3)",
-                                    border: "1px solid rgba(255,255,255,0.1)",
-                                    color: "white",
-                                    fontWeight: 700,
-                                    width: "80px",
-                                    textAlign: "center"
-                                }
-                            }}
-                        />
-                    </Group>
-                </Group>
-            </Group>
-        </Paper>
+                  );
+                })}
+              </div>
+            )}
+          </ScrollArea>
+        </section>
 
-        <Grid gutter="md">
-            <Grid.Col span={{ base: 12, lg: 6 }}>
-                <Paper 
-                    p="md" 
-                    radius="md" 
-                    style={{ 
-                        backgroundColor: "rgba(20, 17, 15, 0.4)", 
-                        border: "1px solid rgba(255,255,255,0.04)", 
-                        height: "650px",
-                        display: "flex",
-                        flexDirection: "column"
-                    }}
-                >
-                    <Group justify="space-between" mb="md" align="center" style={{ flexShrink: 0 }}>
-                        <Text size="lg" fw={700} c="white" style={{ letterSpacing: 0.5 }}>
-                            Pending Player Requests
-                        </Text>
-                        {shopSellRequests.length > 0 && (
-                            <Badge color="red" variant="filled" size="xs">
-                                {shopSellRequests.length} Active
-                            </Badge>
-                        )}
-                    </Group>
+        <section className={classes.pane}>
+          {shop.inventoryId && selectedInventory?.id === shop.inventoryId ? (
+            <>
+              <MetaPanel />
+              <ItemsPanel />
+            </>
+          ) : (
+            <div className={styles.itemsEmpty}>
+              <Loader color="neon" size="sm" />
+            </div>
+          )}
+        </section>
+      </div>
 
-                    <Box style={{ flexGrow: 1, overflowY: "auto", paddingRight: "4px" }}>
-                        {shopSellRequests.length === 0 ? (
-                            <Center style={{ height: "100%" }}>
-                                <Stack align="center" gap="xs">
-                                    <IconPackage size={32} color="rgba(255,255,255,0.15)" />
-                                    <Text size="sm" c="dimmed">No pending requests for this shop.</Text>
-                                </Stack>
-                            </Center>
-                        ) : (
-                            <Stack gap="sm">
-                                {shopSellRequests.map(req => {
-                                    const eq = equipments.find(e => e.id === req.equipmentId);
-                                    const itemName = eq?.name || `Item ID: ${req.equipmentId.substring(0, 8)}...`;
-                                    const originalPrice = formatCostToDisplay(eq?.cost);
-                                    const askingPrice = formatSilverToDisplay(req.offeredPriceGp * 100);
-                                    
-                                    const char = characters.find(c => c.id === req.characterId);
-                                    const charName = char?.name || "Unknown Seller";
-                                    
-                                    const chaScore = char?.abilityScores?.cha ?? 10;
-                                    const chaMod = Math.floor((chaScore - 10) / 2);
-                                    const chaDisplay = `${chaScore} (${chaMod >= 0 ? '+' : ''}${chaMod})`;
-
-                                    const isSteal = !!req.isSteal;
-
-                                    return (
-                                         <Card 
-                                            key={req.id} 
-                                            p="md" 
-                                            bg={isSteal ? "rgba(139, 0, 0, 0.12)" : "rgba(30, 27, 24, 0.4)"} 
-                                            style={{ 
-                                                borderRadius: 8, 
-                                                border: isSteal ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid rgba(255,255,255,0.06)',
-                                                boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
-                                            }}
-                                         >
-                                            <Stack gap="sm">
-                                                <Group justify="space-between" align="center">
-                                                    <Group gap="xs">
-                                                        <ThemeIcon size="md" radius="md" color={isSteal ? "red" : "amber"} variant="light">
-                                                            <IconPackage size={18} />
-                                                        </ThemeIcon>
-                                                        <div>
-                                                            <Text size="md" fw={700} c="white">
-                                                                {isSteal ? "Stealing: " : ""}{itemName}
-                                                            </Text>
-                                                            <Text size="xs" c="dimmed">
-                                                                Qty: <b style={{ color: "white" }}>{req.quantity}</b> | Original: {originalPrice}
-                                                            </Text>
-                                                        </div>
-                                                    </Group>
-
-                                                    <Stack gap={4} align="flex-end">
-                                                        {isSteal ? (
-                                                            <Badge color="red" size="sm" variant="filled" style={{ letterSpacing: 0.5 }}>
-                                                                STEAL ATTEMPT
-                                                        </Badge>
-                                                        ) : (
-                                                            <Badge color="amber" size="sm" variant="filled" style={{ letterSpacing: 0.5 }}>
-                                                                SELL OFFER
-                                                            </Badge>
-                                                        )}
-                                                        <Text size="xs" c="dimmed">
-                                                            {new Date(req.createdAt || "").toLocaleDateString()}
-                                                        </Text>
-                                                    </Stack>
-                                                </Group>
-
-                                                <Paper p="xs" radius="sm" bg="rgba(0,0,0,0.2)" style={{ border: "1px solid rgba(255,255,255,0.03)" }}>
-                                                    <Group justify="space-between" align="center" wrap="nowrap">
-                                                        <Group gap="xs">
-                                                            <Avatar color="neon" radius="xl" size="sm">
-                                                                {charName.substring(0, 2).toUpperCase()}
-                                                            </Avatar>
-                                                            <div>
-                                                                <Text size="xs" fw={700} c="neon">{charName}</Text>
-                                                                <Text size="xxs" c="dimmed" title="Charisma score and modifier">
-                                                                    CHA Score: <b style={{ color: "#2dd4bf" }}>{chaDisplay}</b>
-                                                                </Text>
-                                                            </div>
-                                                        </Group>
-
-                                                        <div style={{ textAlign: "right" }}>
-                                                            <Text size="xxs" c="dimmed" style={{ textTransform: "uppercase", letterSpacing: 0.5 }}>
-                                                                {isSteal ? "Offer Price" : "Asking Price"}
-                                                            </Text>
-                                                            <Text size="md" fw={800} c={isSteal ? "red.4" : "yellow.4"}>
-                                                                {isSteal ? "Free" : askingPrice}
-                                                            </Text>
-                                                        </div>
-                                                    </Group>
-                                                </Paper>
-
-                                                <Group gap="xs" grow>
-                                                    <Button 
-                                                        size="xs" 
-                                                        color="red" 
-                                                        variant="light" 
-                                                        leftSection={<IconX size={14}/>} 
-                                                        onClick={() => rejectSellRequest(req.id!)}
-                                                        styles={{ root: { fontWeight: 700 } }}
-                                                    >
-                                                        Reject
-                                                    </Button>
-                                                    <Button 
-                                                        size="xs" 
-                                                        color="green" 
-                                                        variant="filled" 
-                                                        leftSection={<IconCheck size={14}/>} 
-                                                        onClick={() => approveSellRequest(req.id!)}
-                                                        styles={{ root: { backgroundColor: "#10b981", color: "white", fontWeight: 700, "&:hover": { backgroundColor: "#059669" } } }}
-                                                    >
-                                                        Approve
-                                                    </Button>
-                                                </Group>
-                                            </Stack>
-                                         </Card>
-                                    );
-                                })}
-                            </Stack>
-                        )}
-                    </Box>
-                </Paper>
-            </Grid.Col>
-
-            <Grid.Col span={{ base: 12, lg: 6 }}>
-                <Paper 
-                    p="md" 
-                    radius="md" 
-                    style={{ 
-                        backgroundColor: "rgba(20, 17, 15, 0.4)", 
-                        border: "1px solid rgba(255,255,255,0.04)",
-                        height: "650px",
-                        display: "flex",
-                        flexDirection: "column"
-                    }}
-                >
-                    <Text size="lg" fw={700} c="white" mb="md" style={{ letterSpacing: 0.5, flexShrink: 0 }}>
-                        Register & Stock
-                    </Text>
-
-                    <Box style={{ flexGrow: 1, overflowY: "auto", paddingRight: "4px" }}>
-                        {shop.inventoryId && selectedInventory?.id === shop.inventoryId ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                <MetaPanel />
-                                <ItemsPanel />
-                            </div>
-                        ) : (
-                            <Center style={{ height: "100%" }}>
-                                <Loader color="neon" size="sm" />
-                            </Center>
-                        )}
-                    </Box>
-                </Paper>
-            </Grid.Col>
-        </Grid>
+      <BaseModal
+        opened={!!counterTarget}
+        onClose={() => setCounterRequestId(null)}
+        title="Counter Offer"
+        size="sm"
+        loading={counterBusy}
+        onSave={submitCounter}
+        saveLabel="Send Counter"
+      >
+        <Stack gap="md">
+          <Text size="sm" c="dimmed">
+            {counterTarget?.isTrade
+              ? `The player offered a trade where ${(counterTarget.offeredPriceGp ?? 0) < 0 ? "the shop pays" : "they pay"}`
+              : counterTarget?.isHaggle ? "The player wants to buy for" : "The player wants to sell for"}{" "}
+            <b>{formatSilverToDisplay(Math.round(Math.abs(counterTarget?.offeredPriceGp ?? 0) * 100))}</b>. Name your price; they can accept or walk away.
+          </Text>
+          {counterTarget?.isTrade && (
+            <SimpleGrid cols={2} spacing="xs">
+              <button type="button" className={!counterShopPays ? "glass-btn-primary" : "glass-btn-secondary"} onClick={() => setCounterShopPays(false)} aria-pressed={!counterShopPays}>
+                Player pays
+              </button>
+              <button type="button" className={counterShopPays ? "glass-btn-primary" : "glass-btn-secondary"} onClick={() => setCounterShopPays(true)} aria-pressed={counterShopPays}>
+                Shop pays
+              </button>
+            </SimpleGrid>
+          )}
+          <SimpleGrid cols={2} spacing="xs">
+            <NumberInput label="Gold (gp)" value={counterGp} onChange={(v) => setCounterGp(Number(v) || 0)} min={0} />
+            <NumberInput label="Silver (sp)" value={counterSp} onChange={(v) => setCounterSp(Number(v) || 0)} min={0} max={99} />
+          </SimpleGrid>
+        </Stack>
+      </BaseModal>
     </div>
   );
 }

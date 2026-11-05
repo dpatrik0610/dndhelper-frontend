@@ -18,18 +18,37 @@ export interface BuyRequest {
     quantity: number;
 }
 
-export type SellRequestStatus = "Pending" | "Approved" | "Rejected" | 0 | 1 | 2;
+export type SellRequestStatus = "Pending" | "Approved" | "Rejected" | "Countered" | 0 | 1 | 2 | 3;
+
+export interface TradeItem {
+    equipmentId: string;
+    equipmentName?: string | null;
+    quantity: number;
+    sourceInventoryId?: string | null;
+}
+
+export const describeTradeItems = (items: TradeItem[] = []) =>
+    items.map(i => `${i.quantity}× ${i.equipmentName ?? "item"}`).join(", ");
+
+export const isCountered =(r: { status?: SellRequestStatus }) => r.status === "Countered" || r.status === 3;
+
+export const isOpenRequest = (r: { status?: SellRequestStatus }) => r.status === "Pending" || r.status === 0 || isCountered(r);
 
 export interface SellRequest {
     id?: string;
     campaignId: string;
     shopId: string;
     characterId: string;
-    equipmentId: string;
+    equipmentId?: string | null;
     sourceInventoryId?: string;
     quantity: number;
     offeredPriceGp: number;
     isSteal?: boolean;
+    isHaggle?: boolean;
+    counterPriceGp?: number | null;
+    isTrade?: boolean;
+    giveItems?: TradeItem[];
+    wantItems?: TradeItem[];
     status?: SellRequestStatus;
     ownerIds?: string[];
     createdAt?: string;

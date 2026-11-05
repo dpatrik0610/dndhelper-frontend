@@ -1,18 +1,32 @@
-import { Box, Card, Title, Text, Stack, Group, Badge, ActionIcon, Button, Menu } from "@mantine/core";
-import { IconSearch, IconDotsVertical, IconPackage, IconBuildingStore } from "@tabler/icons-react";
+import { useMemo } from "react";
+import { Menu } from "@mantine/core";
+import { IconCoins, IconDotsVertical, IconHandGrab, IconSearch } from "@tabler/icons-react";
 import type { Shop } from "@appTypes/Shop/Shop";
 import type { Inventory } from "@appTypes/Inventory/Inventory";
-import { SectionColor } from "@appTypes/SectionColor";
+import type { Equipment } from "@appTypes/Equipment/Equipment";
 import { formatCostToDisplay } from "@utils/currencyConverter";
-import classes from "../styles/ShopkeeperPage.module.css";
+import { itemKind } from "@utils/itemKind";
+import { ItemShelf, type ShelfEntry } from "@features/shop/components/ItemShelf";
+import { ShopItemCard } from "@features/shop/components/ShopItemCard";
+import { describeStats } from "@features/shop/itemStats";
+import type { OfferPicker } from "@features/shop/offer";
+import cardClasses from "@features/shop/styles/ShopItemCard.module.css";
 
 interface MerchantShelfProps {
     shopInventory: Inventory | null | undefined;
-    equipments: any[];
+    equipments: Equipment[];
     activeShop: Shop;
     handleDetailsOpen: (id: string) => void;
     handleStealOpen: (id: string) => void;
     handleBuyOpen: (id: string) => void;
+    handleHaggleOpen: (id: string) => void;
+    offer?: OfferPicker;
+}
+
+interface MerchantEntry extends ShelfEntry {
+    equipmentId: string;
+    equipment?: Equipment;
+    quantity: number | null;
 }
 
 export function MerchantShelf({
@@ -22,132 +36,68 @@ export function MerchantShelf({
     handleDetailsOpen,
     handleStealOpen,
     handleBuyOpen,
+    handleHaggleOpen,
+    offer,
 }: MerchantShelfProps) {
-    const items = shopInventory?.items || [];
+    const entries = useMemo<MerchantEntry[]>(() => {
+        const byId = new Map(equipments.map(e => [e.id, e]));
+        return (shopInventory?.items ?? [])
+            .filter(item => item.equipmentId)
+            .map(item => {
+                const equipment = byId.get(item.equipmentId!);
+                const name = item.equipmentName || equipment?.name || "Unknown item";
+                return {
+                    key: item.equipmentId!,
+                    equipmentId: item.equipmentId!,
+                    name,
+                    kind: itemKind({ ...equipment, name }),
+                    equipment,
+                    quantity: item.quantity ?? null,
+                };
+            });
+    }, [shopInventory?.items, equipments]);
 
     return (
-        <Card p="xs" bg="rgba(15, 12, 10, 0.45)" style={{ border: "1px solid rgba(255,255,255,0.03)", borderRadius: 8 }}>
-            <Title order={3} c="amber.5" mb="xs" size="h5" style={{ textTransform: "uppercase", letterSpacing: 1 }}>Merchant Shelves</Title>
-            {items.length === 0 ? (
-                <Text c="dimmed" size="xs" py="md">The merchant's shelves are currently bare.</Text>
-            ) : (
-                <Stack gap="xs">
-                    {items.map((item: any) => {
-                        const eqData = equipments.find((e: any) => e.id === item.equipmentId);
-                        if (!eqData) return null;
-
-                        const displayCost = formatCostToDisplay(eqData.cost, activeShop.priceMultiplier);
-
-                        return (
-                            <Card key={item.equipmentId} bg="rgba(0,0,0,0.3)" p="xs" style={{ border: "1px solid rgba(255,255,255,0.05)", borderRadius: 6 }}>
-                                <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-                                    <Group gap="sm" style={{ flex: "1 1 200px", overflow: "hidden" }} wrap="nowrap" align="center">
-                                        <Box className={classes.pricePlacard}>
-                                            <Text size="xs" fw={800} c="amber.5" style={{ whiteSpace: "nowrap" }}>
-                                                {displayCost}
-                                            </Text>
-                                        </Box>
-
-                                        <div style={{ overflow: "hidden", flexGrow: 1 }}>
-                                            <Text fw={700} c="white" size="sm" lineClamp={1}>
-                                                {item.equipmentName || eqData.name}
-                                            </Text>
-                                        </div>
-
-                                        <Badge 
-                                            size="md" 
-                                            color="dark" 
-                                            variant="filled" 
-                                            style={{ 
-                                                color: SectionColor.Orange,
-                                                flexShrink: 0,
-                                                fontWeight: 800,
-                                                fontSize: "0.8rem",
-                                                padding: "4px 10px"
-                                            }}
-                                        >
-                                            {item.quantity} LEFT
-                                        </Badge>
-                                    </Group>
-
-                                    <Group gap="xs" wrap="nowrap" visibleFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
-                                        <ActionIcon size="md" variant="subtle" color="amber" onClick={() => handleDetailsOpen(item.equipmentId!)} title="Inspect properties">
-                                            <IconSearch size={18} />
-                                        </ActionIcon>
-                                        <Button 
-                                            size="xs" 
-                                            variant="light" 
-                                            color="red" 
-                                            onClick={() => handleStealOpen(item.equipmentId!)}
-                                            styles={{ root: { fontWeight: 700 } }}
-                                        >
-                                            Steal
-                                        </Button>
-                                        <Button 
-                                            size="xs" 
-                                            variant="filled" 
-                                            color="yellow" 
-                                            onClick={() => handleBuyOpen(item.equipmentId!)}
-                                            styles={{ root: { backgroundColor: "#fbbf24", color: "#1e1b18", fontWeight: 700, "&:hover": { backgroundColor: "#f59e0b" } } }}
-                                        >
-                                            Buy
-                                        </Button>
-                                    </Group>
-
-                                    <Box hiddenFrom="xs" style={{ flexShrink: 0, marginLeft: "auto" }}>
-                                        <Menu shadow="md" width={160} position="bottom-end" styles={{
-                                            dropdown: {
-                                                backgroundColor: "#1c1917",
-                                                border: "1px solid rgba(245, 158, 11, 0.2)",
-                                                padding: "4px",
-                                                borderRadius: "8px"
-                                            },
-                                            item: {
-                                                backgroundColor: "transparent",
-                                                "&[data-hovered]": {
-                                                    backgroundColor: "rgba(255, 255, 255, 0.05)"
-                                                }
-                                            }
-                                        }}>
-                                            <Menu.Target>
-                                                <ActionIcon size="md" variant="subtle" color="amber">
-                                                    <IconDotsVertical size={18} />
-                                                </ActionIcon>
-                                            </Menu.Target>
-
-                                            <Menu.Dropdown>
-                                                <Stack gap="xs" p={4}>
-                                                    <Menu.Item 
-                                                        leftSection={<IconSearch size={14} color="#f59e0b" />} 
-                                                        onClick={() => handleDetailsOpen(item.equipmentId!)}
-                                                        style={{ color: "white", fontWeight: 600, fontSize: "12px" }}
-                                                    >
-                                                        Inspect
-                                                    </Menu.Item>
-                                                    <Menu.Item 
-                                                        leftSection={<IconPackage size={14} color="#ef4444" />} 
-                                                        onClick={() => handleStealOpen(item.equipmentId!)}
-                                                        style={{ color: "#f87171", fontWeight: 700, fontSize: "12px" }}
-                                                    >
-                                                        Steal
-                                                    </Menu.Item>
-                                                    <Menu.Item 
-                                                        leftSection={<IconBuildingStore size={14} color="#fbbf24" />} 
-                                                        onClick={() => handleBuyOpen(item.equipmentId!)}
-                                                        style={{ color: "#fbbf24", fontWeight: 700, fontSize: "12px" }}
-                                                    >
-                                                        Buy
-                                                    </Menu.Item>
-                                                </Stack>
-                                            </Menu.Dropdown>
-                                        </Menu>
-                                    </Box>
-                                </Group>
-                            </Card>
-                        );
-                    })}
-                </Stack>
+        <ItemShelf
+            title="Merchant"
+            entries={entries}
+            emptyText="The merchant's shelves are bare."
+            renderCard={entry => (
+                <ShopItemCard
+                    name={entry.name}
+                    kind={entry.kind}
+                    tier={entry.equipment?.tier}
+                    quantity={entry.quantity}
+                    quantityLabel={entry.quantity != null ? `${entry.quantity} left` : undefined}
+                    meta={describeStats(entry.equipment)}
+                    price={entry.equipment ? formatCostToDisplay(entry.equipment.cost, activeShop.priceMultiplier) : null}
+                    onOpen={() => handleDetailsOpen(entry.equipmentId)}
+                    offer={offer && {
+                        picked: offer.picked("want", entry.equipmentId),
+                        max: entry.quantity,
+                        onChange: quantity => offer.set({ side: "want", equipmentId: entry.equipmentId, name: entry.name, quantity, max: entry.quantity }),
+                    }}
+                    actions={
+                        <>
+                            <button type="button" className={`glass-btn-primary ${cardClasses.actionBtn}`} onClick={() => handleBuyOpen(entry.equipmentId)}>
+                                Buy
+                            </button>
+                            <Menu position="bottom-end" withinPortal shadow="md" width={160}>
+                                <Menu.Target>
+                                    <button type="button" className={cardClasses.iconBtn} aria-label={`More actions for ${entry.name}`}>
+                                        <IconDotsVertical size={15} />
+                                    </button>
+                                </Menu.Target>
+                                <Menu.Dropdown>
+                                    <Menu.Item leftSection={<IconSearch size={14} />} onClick={() => handleDetailsOpen(entry.equipmentId)}>Inspect</Menu.Item>
+                                    <Menu.Item leftSection={<IconCoins size={14} />} onClick={() => handleHaggleOpen(entry.equipmentId)}>Haggle</Menu.Item>
+                                    <Menu.Item leftSection={<IconHandGrab size={14} />} color="red" onClick={() => handleStealOpen(entry.equipmentId)}>Steal</Menu.Item>
+                                </Menu.Dropdown>
+                            </Menu>
+                        </>
+                    }
+                />
             )}
-        </Card>
+        />
     );
 }
