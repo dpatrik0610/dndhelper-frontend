@@ -2,6 +2,7 @@ import { Suspense, lazy } from "react";
 import { Loader, Menu, Modal, Stack, TextInput } from "@mantine/core";
 import { IconDeviceFloppy, IconEye, IconPencil, IconTemplate } from "@tabler/icons-react";
 import type { Note } from "@appTypes/Note";
+import type { Character } from "@appTypes/Character/Character";
 import { MarkdownTextarea } from "@components/common/MarkdownTextarea";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useNoteDraft, type NoteDraft } from "@features/notes/noteHooks";
@@ -21,6 +22,8 @@ interface NoteEditorModalProps {
   /** The note to edit; null writes a new one. */
   note: Note | null;
   onClose: () => void;
+  /** Who a new note belongs to; defaults to the character open in the profile. */
+  owner?: Character | null;
 }
 
 interface NoteEditorFormProps {
@@ -116,9 +119,9 @@ export function NoteEditorForm({ note, draft, onCancel, onSaved }: NoteEditorFor
   );
 }
 
-export function NoteEditorModal({ opened, note, onClose }: NoteEditorModalProps) {
+export function NoteEditorModal({ opened, note, onClose, owner }: NoteEditorModalProps) {
   const isMobile = useIsMobile();
-  const draft = useNoteDraft(note, opened);
+  const draft = useNoteDraft(note, opened, owner);
 
   return (
     <Modal

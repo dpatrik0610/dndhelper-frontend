@@ -1525,6 +1525,9 @@
   gap: 10px;
   width: 300px;
   padding: 12px;
+  max-height: calc(100dvh - 150px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border-radius: 18px;
   transform-origin: bottom left;
   animation: tt-bubble-open 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
@@ -1539,8 +1542,9 @@
 }
 
 .tt-bubble-dice {
+  flex-shrink: 0;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.025);
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(255, 255, 255, 0.02));
   border: 1px solid var(--tt-line);
 }
 
@@ -3622,6 +3626,10 @@
     bottom: calc(var(--tt-sheet-h) + 16px);
   }
 
+  .tt-root.side-open .tt-bubble-panel {
+    max-height: calc(100dvh - var(--tt-sheet-h) - 150px);
+  }
+
   .tt-bubble-panel {
     width: min(300px, calc(100vw - 16px));
   }
@@ -3665,6 +3673,10 @@
   .tt-root.side-open .tt-turnbar,
   .tt-root.side-open .tt-bubble {
     bottom: 12px;
+  }
+
+  .tt-root.side-open .tt-bubble-panel {
+    max-height: calc(100dvh - 150px);
   }
 }
 
@@ -4002,4 +4014,14 @@
   margin: 4px 0 2px;
   font-size: 12px;
   color: rgba(231, 233, 240, 0.65);
+}
+
+.tt-new-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: var(--mantine-font-size-sm);
+  cursor: pointer;
 }

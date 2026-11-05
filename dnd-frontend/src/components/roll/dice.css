@@ -68,6 +68,61 @@
   animation: die-pop 0.25s cubic-bezier(0.2, 1.6, 0.4, 1);
 }
 
+/* Compact result: dice and detail on the left, the total on the right */
+.dice-compact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 10px 14px;
+  border-radius: inherit;
+  transition: background 0.3s ease;
+}
+
+.dice-compact__dice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.dice-compact__more {
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+.dice-compact .roll-total {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  min-width: 2ch;
+  font-size: 40px;
+  text-align: right;
+}
+
+.dice-compact__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  min-width: 0;
+}
+
+.dice-compact__detail {
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.dice-compact .roll-banner {
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.dice-compact--crit { background: radial-gradient(circle at 100% 50%, rgba(251, 191, 36, 0.2), transparent 65%); }
+.dice-compact--fumble { background: radial-gradient(circle at 100% 50%, rgba(239, 68, 68, 0.18), transparent 65%); }
+
 /* Rolling → landing */
 .die--rolling { animation: die-tumble 0.32s ease-in-out infinite; }
 .die--landed { animation: die-land 0.4s cubic-bezier(0.2, 1.6, 0.4, 1) both; }

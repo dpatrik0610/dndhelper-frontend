@@ -132,7 +132,7 @@ export function DiceBubble() {
 
           {(dice.rolling || dice.result) && (
             <div className="tt-bubble-dice">
-              <DiceResult result={dice.result} rolling={dice.rolling} sides={dice.sides} count={dice.count} />
+              <DiceResult result={dice.result} rolling={dice.rolling} sides={dice.sides} count={dice.count} compact />
             </div>
           )}
 

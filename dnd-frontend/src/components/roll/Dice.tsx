@@ -8,6 +8,7 @@ import "./dice.css";
 
 const SHAPED = new Set([4, 6, 8, 10, 12, 20, 100]);
 const MAX_VISIBLE = 24;
+const COMPACT_VISIBLE = 6;
 
 interface DieProps {
   sides: number;
@@ -37,9 +38,11 @@ interface DiceResultProps {
   /** Dice being rolled, used for the tumble before the result exists. */
   sides: number;
   count: number;
+  /** One short row with a smaller total, for tight spots like the tabletop dice tray. */
+  compact?: boolean;
 }
 
-export function DiceResult({ result, rolling = false, sides, count }: DiceResultProps) {
+export function DiceResult({ result, rolling = false, sides, count, compact = false }: DiceResultProps) {
   const diceAnimation = useUiStore((s) => s.prefs.diceAnimation);
   const reduceMotion = useReduceMotion() || !diceAnimation;
   const [faces, setFaces] = useState<number[]>([]);
@@ -49,7 +52,7 @@ export function DiceResult({ result, rolling = false, sides, count }: DiceResult
 
   const dieSides = rolling ? sides : result?.sides ?? sides;
   const totalDice = rolling ? count : result?.rolls.length ?? 0;
-  const visible = Math.min(totalDice, MAX_VISIBLE);
+  const visible = Math.min(totalDice, compact ? COMPACT_VISIBLE : MAX_VISIBLE);
 
   // Tumble: random faces until the server answers.
   useEffect(() => {
@@ -94,63 +97,85 @@ export function DiceResult({ result, rolling = false, sides, count }: DiceResult
   const singleD20 = !rolling && result?.numberOfDice === 1 && result.sides === 20;
   const crit = singleD20 && result!.rolls[0] === 20;
   const fumble = singleD20 && result!.rolls[0] === 1;
-  const dieSize = visible <= 3 ? 64 : visible <= 8 ? 48 : 36;
+  const dieSize = compact ? 30 : visible <= 3 ? 64 : visible <= 8 ? 48 : 36;
+  const hidden = totalDice - visible;
+
+  const dice = faces.map((face, i) => (
+    <Die
+      key={`${rollKey}-${i}`}
+      sides={dieSides}
+      value={face}
+      size={dieSize}
+      active
+      className={rolling ? "die--rolling" : `die--landed ${crit ? "die--crit" : ""} ${fumble ? "die--fumble" : ""}`}
+      style={{ animationDelay: rolling ? `${(i % 4) * -80}ms` : `${i * 35}ms` }}
+    />
+  ));
+
+  const total = (
+    <div
+      key={rollKey}
+      className={[
+        "roll-total",
+        settled && "roll-total--pulse",
+        settled && crit && "roll-total--crit",
+        settled && fumble && "roll-total--fumble",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={{ opacity: rolling ? 0.25 : 1 }}
+      aria-live="polite"
+    >
+      {rolling ? "–" : shownTotal}
+    </div>
+  );
+
+  const banner = settled && (crit || fumble) && (
+    <Text className="roll-banner" c={crit ? "#fbbf24" : "#f87171"}>
+      {crit ? "Natural 20!" : "Natural 1"}
+    </Text>
+  );
+
+  const detail = !rolling && result && (
+    <Text size="xs" c="dimmed" ta={compact ? "left" : "center"} className={compact ? "dice-compact__detail" : undefined}>
+      {formatRollExpression(result)}
+      {result.rolls.length <= MAX_VISIBLE && ` · [${result.rolls.join(", ")}]`}
+      {typeof result.min === "number" && typeof result.max === "number" && ` · range ${result.min}–${result.max}`}
+    </Text>
+  );
+
+  if (compact) {
+    const tone = settled && crit ? " dice-compact--crit" : settled && fumble ? " dice-compact--fumble" : "";
+    return (
+      <div className={`dice-compact${tone}${reduceMotion ? " dice-still" : ""}`}>
+        <div className="dice-compact__dice">
+          {dice}
+          {hidden > 0 && <span className="dice-compact__more">+{hidden}</span>}
+        </div>
+        {total}
+        <div className="dice-compact__meta">
+          {banner}
+          {detail}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Stack align="center" gap="sm" py="xs" className={reduceMotion ? "dice-still" : undefined}>
       <Group justify="center" gap="sm" wrap="wrap">
-        {faces.map((face, i) => (
-          <Die
-            key={`${rollKey}-${i}`}
-            sides={dieSides}
-            value={face}
-            size={dieSize}
-            active
-            className={
-              rolling
-                ? "die--rolling"
-                : `die--landed ${crit ? "die--crit" : ""} ${fumble ? "die--fumble" : ""}`
-            }
-            style={{ animationDelay: rolling ? `${(i % 4) * -80}ms` : `${i * 35}ms` }}
-          />
-        ))}
+        {dice}
       </Group>
 
-      {totalDice > visible && (
+      {hidden > 0 && (
         <Text size="xs" c="dimmed">
-          +{totalDice - visible} more dice
+          +{hidden} more dice
         </Text>
       )}
 
-      <div
-        key={rollKey}
-        className={[
-          "roll-total",
-          settled && "roll-total--pulse",
-          settled && crit && "roll-total--crit",
-          settled && fumble && "roll-total--fumble",
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        style={{ opacity: rolling ? 0.25 : 1 }}
-        aria-live="polite"
-      >
-        {rolling ? "–" : shownTotal}
-      </div>
-
-      {settled && (crit || fumble) && (
-        <Text className="roll-banner" c={crit ? "#fbbf24" : "#f87171"}>
-          {crit ? "Natural 20!" : "Natural 1"}
-        </Text>
-      )}
-
-      {!rolling && result && (
-        <Text size="xs" c="dimmed" ta="center">
-          {formatRollExpression(result)}
-          {result.rolls.length <= MAX_VISIBLE && ` · [${result.rolls.join(", ")}]`}
-          {typeof result.min === "number" && typeof result.max === "number" && ` · range ${result.min}–${result.max}`}
-        </Text>
-      )}
+      {total}
+      {banner}
+      {detail}
     </Stack>
   );
 }

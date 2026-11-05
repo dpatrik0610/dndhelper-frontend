@@ -1,7 +1,8 @@
 import { Suspense, lazy, useEffect, useState } from "react";
 import { ActionIcon, Center, Group, Loader, Modal, Spoiler, Stack, Text, TextInput, Tooltip } from "@mantine/core";
-import { IconNotebook, IconPencil, IconPinFilled, IconSearch } from "@tabler/icons-react";
+import { IconNotebook, IconPencil, IconPinFilled, IconPlus, IconSearch } from "@tabler/icons-react";
 import type { Note } from "@appTypes/Note";
+import type { Character } from "@appTypes/Character/Character";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useNoteActions, useNoteList } from "@store/note/noteSelectors";
 import { NoteEditorModal } from "@features/notes/components/NoteEditorModal";
@@ -28,13 +29,14 @@ export function NotesButton() {
           <IconNotebook size={18} />
         </ActionIcon>
       </Tooltip>
-      <NotesModal opened={opened} onClose={() => setOpened(false)} name={character.name} noteIds={character.noteIds ?? []} />
+      <NotesModal opened={opened} onClose={() => setOpened(false)} character={character} />
     </>
   );
 }
 
-/** The character's notes over the table, searchable; the pencil opens the regular note editor. */
-function NotesModal({ opened, onClose, name, noteIds }: { opened: boolean; onClose: () => void; name: string; noteIds: string[] }) {
+/** The character's notes over the table, searchable; the pencil and "New note" open the regular note editor. */
+function NotesModal({ opened, onClose, character }: { opened: boolean; onClose: () => void; character: Character }) {
+  const noteIds = character.noteIds ?? [];
   const isMobile = useIsMobile();
   const notes = useNoteList();
   const { loadForCharacter } = useNoteActions();
@@ -43,7 +45,7 @@ function NotesModal({ opened, onClose, name, noteIds }: { opened: boolean; onClo
   // Kept apart from `editorOpen` so the editor doesn't switch to "New note" while it fades out.
   const [editorOpen, setEditorOpen] = useState(false);
   const [editing, setEditing] = useState<Note | null>(null);
-  const edit = (note: Note) => {
+  const edit = (note: Note | null) => {
     setEditing(note);
     setEditorOpen(true);
   };
@@ -77,10 +79,15 @@ function NotesModal({ opened, onClose, name, noteIds }: { opened: boolean; onClo
         title={
           <Group gap={8}>
             <IconNotebook size={18} />
-            <Text fw={700}>{name}'s notes</Text>
+            <Text fw={700}>{character.name}'s notes</Text>
           </Group>
         }
       >
+        <Group justify="flex-end" mb="sm">
+          <button type="button" className="glass-btn-primary tt-new-note" onClick={() => edit(null)}>
+            <IconPlus size={14} /> New note
+          </button>
+        </Group>
         {!loaded && mine.length === 0 ? (
           <Center py="xl">
             <Loader />
@@ -138,7 +145,7 @@ function NotesModal({ opened, onClose, name, noteIds }: { opened: boolean; onClo
           </Stack>
         )}
       </Modal>
-      <NoteEditorModal opened={editorOpen} note={editing} onClose={() => setEditorOpen(false)} />
+      <NoteEditorModal opened={editorOpen} note={editing} owner={character} onClose={() => setEditorOpen(false)} />
     </>
   );
 }

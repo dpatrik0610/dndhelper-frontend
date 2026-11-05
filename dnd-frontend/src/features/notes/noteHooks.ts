@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState, type RefObject } from "react";
 import type { Note } from "@appTypes/Note";
+import type { Character } from "@appTypes/Character/Character";
 import { showNotification } from "@components/Notification/Notification";
 import { useCharacterCoreActions, useCurrentCharacter } from "@store/character/characterSelectors";
+import { useCharacterStore } from "@store/character/characterStore";
+import { saveCharacter } from "@features/tabletop/characterSheet";
 import { useNoteActions, useNoteList, useNoteLoading } from "@store/note/noteSelectors";
 import { noteBody } from "@features/notes/noteUtils";
 
@@ -55,8 +58,9 @@ export function useNoteKeyNav(ref: RefObject<HTMLElement | null>) {
 
 export type NoteDraft = ReturnType<typeof useNoteDraft>;
 
-export function useNoteDraft(note: Note | null, active: boolean) {
-  const character = useCurrentCharacter();
+export function useNoteDraft(note: Note | null, active: boolean, owner?: Character | null) {
+  const current = useCurrentCharacter();
+  const character = owner ?? current;
   const { updateCharacter } = useCharacterCoreActions();
   const { create, update } = useNoteActions();
 
@@ -89,7 +93,12 @@ export function useNoteDraft(note: Note | null, active: boolean) {
       if (note?.id) return await update(note.id, { title: title.trim() || "Untitled note", lines });
       if (!character) return null;
       const created = await create({ title: title.trim() || "Untitled note", lines });
-      updateCharacter({ noteIds: [...(character.noteIds ?? []), created.id!] });
+      if (character.id === current?.id) {
+        updateCharacter({ noteIds: [...(character.noteIds ?? []), created.id!] });
+      } else {
+        const latest = useCharacterStore.getState().characters.find((c) => c.id === character.id) ?? character;
+        await saveCharacter(latest, { noteIds: [...(latest.noteIds ?? []), created.id!] }, "Couldn't add the note to the character.");
+      }
       return created;
     } catch (error) {
       showNotification({ title: "Could not save the note", message: (error as Error).message, color: "red" });
