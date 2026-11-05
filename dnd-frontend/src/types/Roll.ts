@@ -1,4 +1,4 @@
-﻿export interface RollResult {
+export interface RollResult {
   numberOfDice: number;
   sides: number;
   modifier?: number | null;
@@ -21,13 +21,17 @@ export interface SubtleRollEvent extends RollResult {
   timestampUtc: string;
 }
 
+export const RollType = { Public: 0, Subtle: 1 } as const;
+export type RollType = (typeof RollType)[keyof typeof RollType];
+
 export interface RollHistoryEntry {
   id?: string | null;
   userId?: string | null;
   username?: string | null;
   characterId?: string | null;
+  characterName?: string | null;
   campaignId?: string | null;
-  type: number;
+  type: RollType;
   expression: string;
   numberOfDice: number;
   sides: number;

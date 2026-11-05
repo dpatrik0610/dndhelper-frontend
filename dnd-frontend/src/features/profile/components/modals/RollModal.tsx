@@ -120,7 +120,7 @@ export function RollModal({ opened, onClose }: RollModalProps) {
     setResult(null);
     setLoading(true);
     try {
-      const [roll] = await Promise.all([rollByExpression(rollExpression), wait(reduceMotion ? 0 : 650)]);
+      const [roll] = await Promise.all([rollByExpression(rollExpression, character?.id), wait(reduceMotion ? 0 : 650)]);
       setResult(roll);
     } catch (error) {
       handleError(error);

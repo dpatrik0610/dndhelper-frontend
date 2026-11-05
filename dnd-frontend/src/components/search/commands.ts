@@ -123,7 +123,7 @@ const COMMANDS: Command[] = [
               title: `Roll ${args}`,
               meta: "Rolled on the server",
               run: async () => {
-                const r = await rollByExpression(args);
+                const r = await rollByExpression(args, useCharacterStore.getState().character?.id);
                 showNotification({ title: `${formatRollExpression(r)} = ${r.total}`, message: `Rolls: ${formatRollsList(r)}`, color: "violet" });
               },
             },

@@ -15,7 +15,7 @@ import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapChar
 import { useEquipmentInventoryEffects } from "@hooks/useEquipmentInventoryEffects";
 import { AppBackground } from "@components/layout/AppBackground";
 import { getAppShellStyles } from "@components/layout/appShellStyles";
-import { SubtleRollDetailsModal } from "@components/roll/SubtleRollDetailsModal";
+import { SubtleRollDetailsModal } from "@components/roll/RollDetailsModal";
 import { type SidebarThemeVariant, getActiveThemeClass } from "@appTypes/ThemeTypes";
 import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";

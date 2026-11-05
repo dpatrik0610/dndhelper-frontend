@@ -1,5 +1,5 @@
-﻿import { apiClient } from "@api/apiClient";
-import type { RollHistoryEntry, RollResult } from "@appTypes/Roll";
+import { apiClient } from "@api/apiClient";
+import type { RollHistoryEntry, RollResult, RollType } from "@appTypes/Roll";
 
 export interface SubtleRollRequest {
   characterId: string;
@@ -9,41 +9,20 @@ export interface SubtleRollRequest {
   note?: string;
 }
 
-export interface RollHistoryParams {
-  page: number;
-  pageSize: number;
-  campaignId?: string;
+/** Rolling as a character puts the roll in that character's campaign roll log. */
+export async function rollByExpression(expression: string, characterId?: string | null) {
+  const query = new URLSearchParams({ expression });
+  if (characterId) query.set("characterId", characterId);
+  return apiClient<RollResult>(`/roll?${query}`);
 }
 
-export async function rollByExpression(expression: string | null) {
-  return apiClient<RollResult>(`/roll?expression=${encodeURIComponent(expression ?? "")}`, { method: "GET" });
+export async function subtleRoll(payload: SubtleRollRequest) {
+  return apiClient<void>(`/roll/subtle`, { method: "POST", body: payload });
 }
 
-export async function rollByDice(numberOfDice: number, sides: number | null) {
-  return apiClient<RollResult>(`/roll/${numberOfDice}d${sides}`, {
-
-  });
-}
-
-export async function subtleRoll(payload: SubtleRollRequest | null) {
-  return apiClient<void>(`/roll/subtle`, {
-    method: "POST",
-    body: payload,
-
-  });
-}
-
-export async function getRollHistory(params: RollHistoryParams | null) {
-  const query = new URLSearchParams({
-    page: (params?.page || 1).toString(),
-    pageSize: (params?.pageSize || 20).toString(),
-  });
-
-  if (params?.campaignId) {
-    query.set("campaignId", params?.campaignId || "");
-  }
-
-  return apiClient<RollHistoryEntry[]>(`/roll/history?${query.toString()}`, {
-
-  });
+/** The current campaign's roll log (sent via X-Campaign-Id), or my own rolls when no campaign is selected. */
+export async function getRollHistory(page: number, pageSize: number, type?: RollType) {
+  const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  if (type != null) query.set("type", String(type));
+  return apiClient<RollHistoryEntry[]>(`/roll/history?${query}`);
 }

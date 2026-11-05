@@ -1,412 +1,241 @@
-import { useEffect, useMemo, useState } from "react";
-import {
-  ActionIcon,
-  Badge,
-  Box,
-  Button,
-  Group,
-  Modal,
-  Paper,
-  Pagination,
-  ScrollArea,
-  Stack,
-  Text,
-} from "@mantine/core";
-
-import { IconX } from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { SegmentedControl, Text } from "@mantine/core";
+import { IconDice5, IconEyeOff, IconRefresh } from "@tabler/icons-react";
+import { useSignalRConnection } from "@signalr/hooks/useSignalRConnection";
 import { showNotification } from "@components/Notification/Notification";
 import { ListSkeleton } from "@components/common/Skeletons";
-import { useToken } from "@store/auth/authSelectors";
-import { useCurrentCampaignId, useIsDm } from "@store/campaign/campaignSelectors";
-import { useCurrentCharacter } from "@store/character/characterSelectors";
+import { Die } from "@components/roll/Dice";
+import { RollDetailsModal, type RollDetails } from "@components/roll/RollDetailsModal";
+import { useCurrentUserId } from "@store/auth/authSelectors";
+import { useCurrentCampaign, useIsDm } from "@store/campaign/campaignSelectors";
 import { getRollHistory } from "@services/rollService";
-import type { RollHistoryEntry } from "@appTypes/Roll";
-import { formatRollExpression } from "@utils/rollFormat";
+import { RollType, type RollHistoryEntry } from "@appTypes/Roll";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useIsMobile } from "@hooks/useIsMobile";
+import { formatRollExpression } from "@utils/rollFormat";
+import classes from "./RollHistory.module.css";
 
-const pageSize = 10;
+const PAGE_SIZE = 40;
+const MAX_FACES = 8;
 
-function getErrorStatus(error: unknown) {
-  if (!error || typeof error !== "object") return null;
-  if ("status" in error && typeof (error as { status?: number }).status === "number") {
-    return (error as { status?: number }).status ?? null;
-  }
-  return null;
-}
+type Filter = "all" | "public" | "subtle";
+const FILTER_TYPE: Record<Filter, RollType | undefined> = {
+  all: undefined,
+  public: RollType.Public,
+  subtle: RollType.Subtle,
+};
 
-function getRollTimestamp(entry: RollHistoryEntry) {
-  const raw = entry.createdAt ?? entry.updatedAt;
-  if (!raw) return null;
-  const date = new Date(raw);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
+const who = (e: RollHistoryEntry) => e.characterName || e.username || "Unknown";
 
-function isSubtleRoll(entry: RollHistoryEntry) {
-  return entry.type === 1;
-}
+const dayLabel = (date: Date) => {
+  const day = new Date(date).setHours(0, 0, 0, 0);
+  const today = new Date().setHours(0, 0, 0, 0);
+  if (day === today) return "Today";
+  if (day === today - 86_400_000) return "Yesterday";
+  return date.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+};
+
+const natural = (e: RollHistoryEntry) =>
+  e.numberOfDice === 1 && e.sides === 20 ? (e.rolls[0] === 20 ? "crit" : e.rolls[0] === 1 ? "fumble" : null) : null;
+
+const toDetails = (e: RollHistoryEntry): RollDetails => ({
+  id: e.id ?? `${e.createdAt}-${e.total}`,
+  who: who(e),
+  by: e.username,
+  at: e.createdAt,
+  note: e.note,
+  subtle: e.type === RollType.Subtle,
+  result: e,
+});
 
 export default function RollHistoryPage() {
-  const isMobile = useIsMobile();
-  const navigate = useNavigate();
-  const token = useToken();
-  const character = useCurrentCharacter();
-  // DMs see the whole campaign's rolls (including subtle ones); players their own public rolls.
-  const isAdmin = useIsDm();
-  const campaignId = useCurrentCampaignId();
+  const me = useCurrentUserId();
+  const campaign = useCurrentCampaign();
+  const campaignId = campaign?.id ?? null;
+  const isDm = useIsDm() && campaignId != null;
+  const { connection } = useSignalRConnection();
 
+  const [filter, setFilter] = useState<Filter>("all");
   const [entries, setEntries] = useState<RollHistoryEntry[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState<RollHistoryEntry | null>(null);
+  const [selected, setSelected] = useState<RollDetails | null>(null);
+  // Bumped on every reload so a slow response for an old campaign/filter is dropped.
+  const generation = useRef(0);
+
+  const load = useCallback(
+    async (pageToLoad: number) => {
+      const gen = pageToLoad === 1 ? ++generation.current : generation.current;
+      setLoading(true);
+      try {
+        const items = await getRollHistory(pageToLoad, PAGE_SIZE, FILTER_TYPE[filter]);
+        if (gen !== generation.current) return;
+        setEntries((prev) => {
+          if (pageToLoad === 1) return items;
+          const seen = new Set(prev.map((e) => e.id));
+          return [...prev, ...items.filter((e) => !seen.has(e.id))];
+        });
+        setPage(pageToLoad);
+        setHasMore(items.length === PAGE_SIZE);
+      } catch (error) {
+        if (gen !== generation.current) return;
+        const status = (error as { status?: number })?.status;
+        showNotification({
+          title: status === 401 || status === 403 ? "Access denied" : "Load failed",
+          message: status === 401 || status === 403 ? "You can't view this roll log." : "Could not load roll history.",
+          color: SectionColor.Red,
+        });
+      } finally {
+        if (gen === generation.current) setLoading(false);
+      }
+    },
+    [filter]
+  );
 
   useEffect(() => {
-    if (!character) {
-      showNotification({
-        id: "no-character-selected",
-        title: "No Character Selected",
-        message: "Please select a character to view roll history.",
-        color: SectionColor.Red,
-        withBorder: true,
-      });
-      navigate("/home", { replace: true });
-    }
-  }, [character, navigate]);
-
-  const loadPage = async (pageToLoad: number) => {
-    if (!token) return;
-
-    setLoading(true);
-    try {
-      if (isAdmin && !campaignId) {
-        showNotification({
-          title: "Missing campaign",
-          message: "Select a character with a campaign to view DM roll history.",
-          color: "red",
-        });
-        setLoading(false);
-        return;
-      }
-
-      const items = await getRollHistory({
-          page: pageToLoad, pageSize, campaignId: isAdmin ? campaignId ?? undefined : undefined, });
-
-      setEntries(items ?? []);
-      setPage(pageToLoad);
-      setTotalPages(items.length === pageSize ? pageToLoad + 1 : pageToLoad);
-    } catch (error) {
-      const status = getErrorStatus(error);
-      if (status === 401 || status === 403) {
-        showNotification({
-          title: "Access denied",
-          message: "You are not allowed to view roll history.",
-          color: "red",
-        });
-      } else {
-        showNotification({
-          title: "Load failed",
-          message: "Could not load roll history.",
-          color: "red",
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!token || !character) return;
     setEntries([]);
-    setTotalPages(1);
-    void loadPage(1);
-  }, [token, character?.id, isAdmin, campaignId]);
+    setHasMore(false);
+    void load(1);
+  }, [load, campaignId]);
 
-  const modalData = useMemo(() => {
-    if (!selected) return null;
-    return {
-      ...selected,
-      timestamp: getRollTimestamp(selected),
-      expression: selected.expression || formatRollExpression(selected),
-      subtle: isSubtleRoll(selected),
+  // Live: the server pushes each new roll to whoever may see it.
+  useEffect(() => {
+    if (!connection) return;
+    const onRoll = (roll: RollHistoryEntry) => {
+      const inScope = campaignId ? roll.campaignId === campaignId : roll.userId === me;
+      const type = FILTER_TYPE[filter];
+      if (!inScope || (type != null && roll.type !== type)) return;
+      setEntries((prev) => (prev.some((e) => e.id === roll.id) ? prev : [roll, ...prev]));
     };
-  }, [selected]);
+    connection.on("RollRecorded", onRoll);
+    return () => connection.off("RollRecorded", onRoll);
+  }, [connection, campaignId, me, filter]);
 
-  if (!character) return null;
+  const subtitle = !campaignId
+    ? "Your own rolls. Select a campaign to see the party's."
+    : isDm
+      ? `Every roll in ${campaign?.name}, subtle ones included.`
+      : `The party's rolls in ${campaign?.name}, plus your own subtle ones.`;
+
+  let lastDay = "";
 
   return (
-    <Box
-      p={isMobile ? 0 : "md"}
-      m={isMobile ? 0 : "0 auto"}
-      maw={isMobile ? "100%" : 1200}
-      w="100%"
-      mih={isMobile ? "100%" : "100vh"}
-      h={isMobile ? "100%" : "auto"}
-    >
-      <Modal
-        opened={!!selected}
-        onClose={() => setSelected(null)}
-        withCloseButton={false}
-        centered
-        styles={{
-          header: { display: "none" },
-          content: {
-            background: "rgba(20,0,0,0.45)",
-            backdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,100,100,0.2)",
-            boxShadow: "0 0 12px rgba(255,60,60,0.25)",
-          },
-        }}
-      >
-        {modalData && (
-          <Stack gap="xs">
-            <Group justify="space-between" align="center">
-              <Text fw={600} size="lg">
-                Roll Details
-              </Text>
-              <ActionIcon
-                variant="subtle"
-                size="lg"
-                onClick={() => setSelected(null)}
-                aria-label="Close roll details"
-              >
-                <IconX size={18} />
-              </ActionIcon>
-            </Group>
+    <div className={classes.page}>
+      <header className={classes.header}>
+        <span className={classes.headerIcon}>
+          <IconDice5 size={22} stroke={1.75} />
+        </span>
+        <div className={classes.headerText}>
+          <h1 className={`${classes.title} narrative-title`} data-themed>
+            Roll Log
+          </h1>
+          <p className={classes.subtitle}>{subtitle}</p>
+        </div>
+        <button
+          type="button"
+          className={classes.iconButton}
+          onClick={() => void load(1)}
+          disabled={loading}
+          aria-label="Refresh"
+          title="Refresh"
+        >
+          <IconRefresh size={18} className={loading ? classes.spin : undefined} />
+        </button>
+      </header>
 
-            <Paper
-              p="sm"
-              radius="md"
-              withBorder
-              style={{
-                background: "rgba(0,0,0,0.22)",
-                borderColor: "rgba(255,255,255,0.08)",
-              }}
-            >
-              <Stack gap="xs">
-                <Group justify="space-between" align="center">
-                  <Text fw={600}>{modalData.username ?? modalData.characterId ?? "Unknown"}</Text>
-                  <Group gap="xs">
-                    {modalData.subtle && (
-                      <Badge color="grape" variant="light">
-                        Subtle
-                      </Badge>
-                    )}
-                    {modalData.timestamp && (
-                      <Badge color="violet" variant="light">
-                        {modalData.timestamp.toLocaleString()}
-                      </Badge>
-                    )}
-                  </Group>
-                </Group>
-                {modalData.note && (
-                  <Text size="sm" c="dimmed">
-                    Note: {modalData.note}
-                  </Text>
-                )}
-              </Stack>
-            </Paper>
+      <SegmentedControl
+        value={filter}
+        onChange={(v) => setFilter(v as Filter)}
+        data={[
+          { label: "All", value: "all" },
+          { label: "Public", value: "public" },
+          { label: "Subtle", value: "subtle" },
+        ]}
+        size="xs"
+        classNames={{ root: `glassy-segmented ${classes.filter}`, control: "glassy-segmented__control", label: "glassy-segmented__label" }}
+      />
 
-            <Paper
-              p="sm"
-              radius="md"
-              withBorder
-              style={{
-                background: "rgba(0,0,0,0.25)",
-                borderColor: "rgba(255,255,255,0.12)",
-              }}
-            >
-              <Stack gap="xs">
-                <Group justify="space-between" align="center">
-                  <Text fw={600}>Result</Text>
-                  <Badge
-                    color="violet"
-                    variant="filled"
-                    size="lg"
-                    style={{
-                      boxShadow: "0 0 12px rgba(128, 90, 255, 0.65)",
-                      border: "1px solid rgba(150,120,255,0.6)",
-                    }}
-                  >
-                    Total {modalData.total}
-                  </Badge>
-                </Group>
-                <Text size="sm">Expression: {modalData.expression}</Text>
-                <Stack gap={4}>
-                  <Text size="sm">Rolls:</Text>
-                  <Group gap="xs" wrap="wrap">
-                    {modalData.rolls.map((roll, idx) => (
-                      <Badge
-                        key={`${modalData.id ?? "roll"}-${idx}`}
-                        color="gray"
-                        variant="light"
-                        size="lg"
-                        radius="sm"
-                        style={{ fontSize: 16, fontWeight: 500, border: "none" }}
-                      >
-                        {roll}
-                      </Badge>
-                    ))}
-                  </Group>
-                </Stack>
-                <Group gap="xs" wrap="wrap">
-                  <Badge color="gray" variant="light">
-                    Min {modalData.min}
-                  </Badge>
-                  <Badge color="gray" variant="light">
-                    Max {modalData.max}
-                  </Badge>
-                  <Badge color="gray" variant="light">
-                    Avg {modalData.average.toFixed(2)}
-                  </Badge>
-                </Group>
-              </Stack>
-            </Paper>
-
-            {modalData.username && (
-              <Text size="xs" c="dimmed">
-                Rolled by {modalData.username}
-              </Text>
-            )}
-          </Stack>
-        )}
-      </Modal>
-
-      <Paper
-        p={isMobile ? "sm" : "md"}
-        withBorder
-        style={{
-          background: "linear-gradient(175deg, #0009336b 0%, rgba(48,0,0,0.37) 100%)",
-          height: isMobile ? "100%" : "auto",
-        }}
-      >
-        <Group justify="space-between" align="center" mb="md">
-          <Stack gap={0}>
-            <Text fw={700} size="lg">
-              Roll History
-            </Text>
-            <Text size="sm" c="dimmed">
-              {isAdmin ? "Campaign rolls (public + subtle)" : "Your public rolls"}
-            </Text>
-          </Stack>
-          <Button
-            variant="light"
-            onClick={() => void loadPage(1)}
-            loading={loading}
-          >
-            Refresh
-          </Button>
-        </Group>
-
+      <div className={classes.panel}>
         {loading && entries.length === 0 ? (
-          <ListSkeleton rows={8} height={64} />
+          <ListSkeleton rows={6} height={58} />
         ) : entries.length === 0 ? (
-          <Text c="dimmed">No rolls found.</Text>
+          <div className={classes.empty}>
+            <IconDice5 size={36} className={classes.emptyIcon} />
+            <Text fw={600}>No rolls yet</Text>
+            <Text size="xs" className={classes.muted}>
+              {filter === "subtle" ? "No subtle rolls here." : "Rolls made from a character sheet show up here."}
+            </Text>
+          </div>
         ) : (
-          <ScrollArea
-            h={isMobile ? "calc(100vh - 220px)" : 650}
-            type="hover"
-            offsetScrollbars
-          >
-            <Stack gap="xs">
-              {entries.map((entry, index) => {
-                const expression = entry.expression || formatRollExpression(entry);
-                const timestamp = getRollTimestamp(entry);
-                const subtle = isSubtleRoll(entry);
+          entries.map((e) => {
+            const at = e.createdAt ? new Date(e.createdAt) : null;
+            const day = at ? dayLabel(at) : "";
+            const showDay = day !== lastDay;
+            lastDay = day;
+            const subtle = e.type === RollType.Subtle;
+            const nat = natural(e);
+            const hidden = e.rolls.length - MAX_FACES;
 
-                return (
-                  <Paper
-                    key={entry.id ?? `${entry.characterId ?? "roll"}-${index}`}
-                    p="sm"
-                    radius="md"
-                    withBorder
-                    style={{
-                      background: "rgba(0,0,0,0.25)",
-                      borderColor: "rgba(255,255,255,0.08)",
-                      transition: "background-color 0.15s ease, transform 0.15s ease",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(ev) => {
-                      ev.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
-                    }}
-                    onMouseLeave={(ev) => {
-                      ev.currentTarget.style.backgroundColor = "rgba(0,0,0,0.25)";
-                    }}
-                    onClick={() => setSelected(entry)}
-                  >
-                    <Group justify="space-between" align="flex-start" wrap="nowrap">
-                      <Stack gap={4}>
-                        <Group gap="xs">
-                          <Text fw={600} size="sm">
-                            {entry.username ?? entry.characterId ?? "Unknown"}
-                          </Text>
-                          {subtle && (
-                            <Badge color="grape" variant="light" size="xs">
-                              Subtle
-                            </Badge>
-                          )}
-                        </Group>
-                        <Text size="xs" c="dimmed" lineClamp={1}>
-                          {expression}
-                        </Text>
-                        <Group gap="xs" wrap="wrap">
-                          <Text size="xs" c="dimmed">
-                            Rolls:
-                          </Text>
-                          {entry.rolls.map((roll, idx) => (
-                            <Badge
-                              key={`${entry.id ?? "roll"}-${idx}`}
-                              color="gray"
-                              variant="light"
-                              size="sm"
-                              radius="sm"
-                              style={{ fontSize: 14, fontWeight: 500, border: "none" }}
-                            >
-                              {roll}
-                            </Badge>
-                          ))}
-                        </Group>
-                        {entry.note && (
-                          <Text size="xs" c="dimmed" lineClamp={1}>
-                            Note: {entry.note}
-                          </Text>
-                        )}
-                      </Stack>
-                      <Stack gap={4} align="flex-end">
-                        <Badge
-                          color="violet"
-                          variant="filled"
-                          size="sm"
-                          style={{
-                            boxShadow: "0 0 10px rgba(128, 90, 255, 0.55)",
-                            border: "1px solid rgba(150,120,255,0.5)",
-                          }}
-                        >
-                          Total {entry.total}
-                        </Badge>
-                        {timestamp && (
-                          <Text size="xs" c="dimmed">
-                            {timestamp.toLocaleString()}
-                          </Text>
-                        )}
-                      </Stack>
-                    </Group>
-                  </Paper>
-                );
-              })}
-            </Stack>
-          </ScrollArea>
+            return (
+              <div key={e.id ?? `${e.createdAt}-${e.total}`}>
+                {showDay && day && <div className={classes.day}>{day}</div>}
+                <button
+                  type="button"
+                  className={`${classes.row} ${subtle ? classes.rowSubtle : ""} ${e.userId === me ? classes.rowMine : ""}`}
+                  onClick={() => setSelected(toDetails(e))}
+                >
+                  <span className={`${classes.total} ${nat ? classes[nat] : ""}`}>{e.total}</span>
+
+                  <span className={classes.body}>
+                    <span className={classes.who}>
+                      <span className={classes.name}>{who(e)}</span>
+                      {e.characterName && e.username && <span className={classes.muted}>{e.username}</span>}
+                      {subtle && (
+                        <span className={classes.subtleTag}>
+                          <IconEyeOff size={11} /> Subtle
+                        </span>
+                      )}
+                    </span>
+                    <span className={classes.dice}>
+                      <span className={classes.expr}>{formatRollExpression(e)}</span>
+                      {e.rolls.slice(0, MAX_FACES).map((face, i) => (
+                        <Die
+                          key={i}
+                          sides={e.sides}
+                          value={face}
+                          size={22}
+                          className={nat ? `die--${nat}` : face === e.sides ? "die--active" : undefined}
+                        />
+                      ))}
+                      {hidden > 0 && <span className={classes.muted}>+{hidden}</span>}
+                    </span>
+                    {e.note && <span className={classes.note}>“{e.note}”</span>}
+                  </span>
+
+                  {at && (
+                    <time className={classes.time} dateTime={e.createdAt!} title={at.toLocaleString()}>
+                      {at.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
+                    </time>
+                  )}
+                </button>
+              </div>
+            );
+          })
         )}
 
-        <Group justify="center" mt="md">
-          <Pagination
-            value={page}
-            onChange={(next) => void loadPage(next)}
-            total={totalPages}
-          />
-        </Group>
-      </Paper>
-    </Box>
+        {hasMore && (
+          <button
+            type="button"
+            className={`glass-btn-secondary ${classes.more}`}
+            onClick={() => void load(page + 1)}
+            disabled={loading}
+          >
+            {loading ? "Loading…" : "Load older rolls"}
+          </button>
+        )}
+      </div>
+
+      <RollDetailsModal details={selected} onClose={() => setSelected(null)} />
+    </div>
   );
 }
