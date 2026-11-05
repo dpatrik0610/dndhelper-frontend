@@ -1,36 +1,28 @@
-import { apiClient } from "../api/apiClient";
-import type { Session } from "../types/Session";
+import { apiClient } from "@api/apiClient";
+import type { Session, SessionDetails, SessionNoteInput } from "@appTypes/Session";
 
 const baseUrl = "/Session";
 
-export async function getAllSessions(): Promise<Session[]> {
-  return apiClient(baseUrl, { method: "GET" });
-}
+export const getSessionsByCampaign = (campaignId: string) =>
+  apiClient<Session[]>(`${baseUrl}/campaign/${campaignId}`);
 
-export async function getSessionById(id: string): Promise<Session> {
-  return apiClient(`${baseUrl}/${id}`, { method: "GET" });
-}
+export const createSession = (campaignId: string, details: Partial<SessionDetails> = {}) =>
+  apiClient<Session>(baseUrl, { method: "POST", body: { ...details, campaignId } });
 
-export async function getSessionsByCampaign(campaignId: string): Promise<Session[]> {
-  return apiClient(`${baseUrl}/campaign/${campaignId}`, { method: "GET" });
-}
+export const updateSession = (id: string, details: SessionDetails) =>
+  apiClient<Session>(`${baseUrl}/${id}`, { method: "PUT", body: details });
 
-export async function createSession(session: Session): Promise<Session> {
-  return apiClient(baseUrl, {
-    method: "POST",
+export const startSession = (id: string) => apiClient<Session>(`${baseUrl}/${id}/start`, { method: "POST" });
 
-    body: session,
-  });
-}
+export const endSession = (id: string) => apiClient<Session>(`${baseUrl}/${id}/end`, { method: "POST" });
 
-export async function updateSession(id: string, session: Session): Promise<Session> {
-  return apiClient(`${baseUrl}/${id}`, {
-    method: "PUT",
+export const deleteSession = (id: string) => apiClient<void>(`${baseUrl}/${id}`, { method: "DELETE" });
 
-    body: session,
-  });
-}
+export const addSessionNote = (id: string, note: SessionNoteInput) =>
+  apiClient<Session>(`${baseUrl}/${id}/notes`, { method: "POST", body: note });
 
-export async function deleteSession(id: string): Promise<void> {
-  return apiClient(`${baseUrl}/${id}`, { method: "DELETE" });
-}
+export const updateSessionNote = (id: string, noteId: string, note: SessionNoteInput) =>
+  apiClient<Session>(`${baseUrl}/${id}/notes/${noteId}`, { method: "PUT", body: note });
+
+export const deleteSessionNote = (id: string, noteId: string) =>
+  apiClient<Session>(`${baseUrl}/${id}/notes/${noteId}`, { method: "DELETE" });

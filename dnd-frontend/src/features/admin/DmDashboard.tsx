@@ -8,7 +8,7 @@ import {
   IconGhost,
   IconRefresh,
   IconSettings,
-  IconUsersGroup,
+  IconCalendarTime,
 } from "@tabler/icons-react";
 import { useState } from "react";
 import { useCampaignStore } from "@store/campaign/campaignStore";
@@ -29,7 +29,7 @@ const sections: AdminSectionDef[] = [
   { path: "monsters", label: "Monsters", icon: IconGhost, component: MonsterManager },
   { path: "items", label: "Items", icon: IconCategory, component: ItemManager },
   { path: "shops", label: "Shop Manager", icon: IconBuildingStore, component: ShopManager },
-  { path: "sessions", label: "Sessions", icon: IconUsersGroup, component: SessionManager },
+  { path: "sessions", label: "Sessions", icon: IconCalendarTime, component: SessionManager },
   { path: "rules", label: "Rules", icon: IconBook2, component: RuleManager },
   { path: "quests", label: "Quests", icon: IconCompass, component: QuestManager },
 ];

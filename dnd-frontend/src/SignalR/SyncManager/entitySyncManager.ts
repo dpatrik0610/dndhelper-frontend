@@ -7,6 +7,7 @@ import { handleSellRequestChange } from "./handlers/sellRequestChangeHandler";
 import { handleQuestChange } from "./handlers/questChangeHandler";
 import { handlePollChange } from "./handlers/pollChangeHandler";
 import { loadSpells } from "@utils/loadSpells";
+import { useSessionStore } from "@store/session/sessionStore";
 
 export class EntitySyncManager {
   static handleEntityChange(event: EntityChangeEvent) {
@@ -38,8 +39,13 @@ export class EntitySyncManager {
         break;
 
       case "Encounter":
-      case "Session":
         break;
+
+      case "Session": {
+        const sessions = useSessionStore.getState();
+        if (event.data?.campaignId && event.data.campaignId === sessions.campaignId) void sessions.reload();
+        break;
+      }
 
       // The superadmin promoted (or moved) core content: refresh the cached spell list. The server decides
       // whether the current campaign imports core spells, so a plain reload is enough.

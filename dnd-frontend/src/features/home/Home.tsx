@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Stack } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import dayjs from "dayjs";
 
 import { useCharacterList, useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { useCurrentUserId, useToken } from "@store/auth/authSelectors";
 import { useSessionStore } from "@store/session/sessionStore";
+import { featuredSession, nextPlanned } from "@store/session/sessionSelectors";
 import { getCampaignOverviewByCharacter } from "@services/campaignService";
 import type { Character } from "@appTypes/Character/Character";
 import type { CampaignOverviewDto } from "@appTypes/CampaignOverview";
@@ -20,7 +20,7 @@ export default function Home() {
   const characters = useCharacterList();
   const { setCharacter } = useCharacterCoreActions();
   const character = useCurrentCharacter();
-  const { sessions, loadByCampaign } = useSessionStore();
+  const { sessions, campaignId: sessionsCampaignId, load: loadSessions } = useSessionStore();
 
   const [modalOpened, setModalOpened] = useState(false);
   const [campaign, setCampaign] = useState<CampaignOverviewDto | null>(null);
@@ -54,26 +54,20 @@ export default function Home() {
           return;
         }
         setCampaign(overview);
-        void loadByCampaign(overview.id);
+        void loadSessions(overview.id);
       } catch (error) {
         console.warn("[Home] Failed to load campaign overview", { characterId: character.id, error });
         setCampaign(null);
       }
     };
     void load();
-  }, [character?.id, loadByCampaign, token]);
+  }, [character?.id, loadSessions, token]);
 
-  const activeSession = useMemo(() => {
-    const live = sessions.find((s) => s.isLive);
-    if (live) return live;
-    return sessions.length
-      ? [...sessions].sort((a, b) => {
-          const aTime = a.scheduledFor ? dayjs(a.scheduledFor).valueOf() : 0;
-          const bTime = b.scheduledFor ? dayjs(b.scheduledFor).valueOf() : 0;
-          return bTime - aTime;
-        })[0]
-      : null;
-  }, [sessions]);
+  const { activeSession, upcoming } = useMemo(() => {
+    const own = campaign && sessionsCampaignId === campaign.id ? sessions : [];
+    const active = featuredSession(own);
+    return { activeSession: active, upcoming: nextPlanned(own, active) };
+  }, [campaign, sessions, sessionsCampaignId]);
 
   const handleSelectCharacter = (char: Character) => {
     setCharacter(char);
@@ -106,7 +100,7 @@ export default function Home() {
         isMobile={isMobile}
       />
 
-      {activeSession && <ActiveSessionCard session={activeSession} />}
+      {activeSession && <ActiveSessionCard session={activeSession} next={upcoming} />}
     </Stack>
   );
 }

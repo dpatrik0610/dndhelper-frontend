@@ -120,18 +120,6 @@ export async function removeNoteFromCampaign(id: string, noteId: string) {
   return apiClient(`/Campaign/${id}/notes/${noteId}`, { method: "DELETE" })
 }
 
-export async function addSessionToCampaign(id: string, sessionId: string) {
-  return apiClient(`/Campaign/${id}/sessions/${sessionId}`, { method: "POST" })
-}
-
-export async function removeSessionFromCampaign(id: string, sessionId: string) {
-  return apiClient(`/Campaign/${id}/sessions/${sessionId}`, { method: "DELETE" })
-}
-
-export async function setCurrentSessionForCampaign(id: string, sessionId: string) {
-  return apiClient(`/Campaign/${id}/current-session/${sessionId}`, { method: "PUT" })
-}
-
 export async function setActiveEncounterForCampaign(campaignId: string, encounterId: string) {
   return apiClient(`/Campaign/${campaignId}/active-encounter/${encounterId}`, { method: "PUT" })
 }

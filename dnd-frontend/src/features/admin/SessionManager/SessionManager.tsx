@@ -1,134 +1,181 @@
 ﻿import { useEffect, useMemo, useState } from "react";
-import { ActionIcon, Button, Tooltip } from "@mantine/core";
-import { IconCalendarTime, IconPlus, IconRefresh } from "@tabler/icons-react";
+import { ActionIcon, Button, Group, Loader, ScrollArea, Stack, Text, ThemeIcon, Tooltip } from "@mantine/core";
+import { IconCalendarPlus, IconCalendarTime, IconInbox, IconRefresh } from "@tabler/icons-react";
 import dayjs from "dayjs";
+import type { Session } from "@appTypes/Session";
 import { useSessionStore } from "@store/session/sessionStore";
-import { sessionTemplate, type Session } from "@appTypes/Session";
+import { groupSessions } from "@store/session/sessionSelectors";
 import { useCampaignStore } from "@store/campaign/campaignStore";
-import SessionTable from "./components/SessionTable";
-import SessionModal from "./components/SessionModal";
-import SessionViewModal from "./components/SessionViewModal";
-import { AdminPage } from "@features/admin/components/AdminPage";
+import { BaseModal } from "@components/BaseModal";
+import styles from "@styles/InventoryDashboard.module.css";
+import classes from "./SessionManager.module.css";
+import { SessionWorkspace } from "./components/SessionWorkspace";
 
-export function SessionManager() {
-  const { sessions, selected, loading, loadAll, select, create, update, setLive, loadByCampaign } =
-    useSessionStore();
-  const { selectedId: selectedCampaignId, campaigns } = useCampaignStore();
-
-  const [editMode, setEditMode] = useState<"create" | "edit" | null>(null);
-  const [draft, setDraft] = useState<Session>(sessionTemplate);
-  const [saving, setSaving] = useState(false);
-  const [viewSession, setViewSession] = useState<Session | null>(null);
-
-  const sortedSessions = useMemo(
-    () =>
-      [...sessions].sort((a, b) => {
-        const aTime = a.scheduledFor ? dayjs(a.scheduledFor).valueOf() : 0;
-        const bTime = b.scheduledFor ? dayjs(b.scheduledFor).valueOf() : 0;
-        return bTime - aTime;
-      }),
-    [sessions]
-  );
-
-  const strippedDescriptions = useMemo(
-    () =>
-      Object.fromEntries(
-        sortedSessions.map((s) => [
-          s.id ?? "",
-          (s.description ?? "")
-            .replace(/[#*_`>~-]/g, "")
-            .replace(/\[(.*?)\]\(.*?\)/g, "$1")
-            .trim(),
-        ])
-      ),
-    [sortedSessions]
-  );
-
-  useEffect(() => {
-    if (selectedCampaignId) void loadByCampaign(selectedCampaignId);
-  }, [loadByCampaign, selectedCampaignId]);
-
-  const handleRefresh = () => {
-    if (selectedCampaignId) {
-      void loadByCampaign(selectedCampaignId);
-    } else {
-      void loadAll();
-    }
-  };
-
-  const openEdit = (session?: Session) => {
-    if (session) {
-      setDraft(session);
-      select(session.id ?? null);
-      setEditMode("edit");
-    } else {
-      setDraft({ ...sessionTemplate, campaignId: selectedCampaignId ?? "" });
-      select(null);
-      setEditMode("create");
-    }
-  };
-
-  const openView = (session: Session) => {
-    setViewSession(session);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    if (editMode === "edit" && draft.id) {
-      await update(draft);
-    } else if (editMode === "create") {
-      await create({ ...draft, campaignId: selectedCampaignId ?? "" });
-    }
-    setSaving(false);
-    setEditMode(null);
-  };
+function SessionListItem({ session, selected, onSelect }: { session: Session; selected: boolean; onSelect: () => void }) {
+  const live = session.status === "Live";
+  const when = session.status === "Completed" ? session.startedAt ?? session.scheduledFor : session.scheduledFor;
 
   return (
-    <AdminPage
-      icon={IconCalendarTime}
-      title="Sessions"
-      subtitle={campaigns.find((c) => c.id === selectedCampaignId)?.name}
-      actions={
-        <>
-          <Tooltip label="Reload" withArrow>
-            <ActionIcon variant="default" size="lg" onClick={handleRefresh} loading={loading} aria-label="Reload sessions">
-              <IconRefresh size={16} />
-            </ActionIcon>
-          </Tooltip>
-          <Button color="neon" leftSection={<IconPlus size={16} />} onClick={() => openEdit()}>
-            New session
-          </Button>
-        </>
-      }
+    <div
+      role="button"
+      tabIndex={0}
+      aria-current={selected || undefined}
+      className={`${styles.listItem} ${selected ? styles.listItemSelected : ""}`}
+      onClick={onSelect}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), onSelect())}
     >
-      <SessionTable
-        sessions={sortedSessions}
-        selectedId={selected?.id ?? null}
-        strippedDescriptions={strippedDescriptions}
-        onView={(s) => openView(s)}
-        onEdit={(s) => openEdit(s)}
-        onSetLive={(id) => void setLive(id)}
-      />
+      <div className={`${styles.listItemAvatar} ${classes.number}`}>{session.number}</div>
+      <div className={styles.listItemInfo}>
+        <span className={styles.listItemName}>{session.name}</span>
+        <span className={styles.listItemMeta}>
+          {live && <span className={classes.liveDot} />}
+          <span>{live ? "Live now" : when ? dayjs(when).format("ddd, MMM D") : "No date"}</span>
+          {session.notes.length > 0 && <span>· {session.notes.length} notes</span>}
+        </span>
+      </div>
+    </div>
+  );
+}
 
-      <SessionModal
-        opened={!!editMode}
-        mode={editMode}
-        draft={draft}
-        campaigns={campaigns}
-        saving={saving}
-        onClose={() => {
-          setEditMode(null);
-        }}
-        onChangeDraft={setDraft}
-        onSave={() => void handleSave()}
-      />
+export function SessionManager() {
+  const campaignId = useCampaignStore((s) => s.selectedId);
+  const { sessions, loading, load, create, remove } = useSessionStore();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [toDelete, setToDelete] = useState<Session | null>(null);
+  const [busy, setBusy] = useState(false);
 
-      <SessionViewModal
-        opened={!!viewSession}
-        session={viewSession}
-        campaigns={campaigns}
-        onClose={() => setViewSession(null)}
-      />
-    </AdminPage>
+  useEffect(() => {
+    if (campaignId) void load(campaignId);
+  }, [campaignId, load]);
+
+  const groups = useMemo(() => groupSessions(sessions), [sessions]);
+  const selected =
+    sessions.find((s) => s.id === selectedId) ?? groups.live[0] ?? groups.upcoming[0] ?? groups.played[0] ?? null;
+
+  const planNext = async () => {
+    setBusy(true);
+    const created = await create();
+    if (created) setSelectedId(created.id);
+    setBusy(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!toDelete) return;
+    setBusy(true);
+    if (await remove(toDelete.id)) setToDelete(null);
+    setBusy(false);
+  };
+
+  const sections = [
+    { key: "live", label: "Live", items: groups.live },
+    { key: "upcoming", label: "Upcoming", items: groups.upcoming },
+    { key: "played", label: "Played", items: groups.played },
+  ].filter((g) => g.items.length > 0);
+
+  return (
+    <div className={styles.dashboardRoot}>
+      <div className={styles.splitLayout}>
+        <div className={styles.sidebar}>
+          <div className={styles.sidebarHeader}>
+            <Group gap="xs" mb="sm">
+              <ThemeIcon variant="light" color="neon" size="md" radius="sm">
+                <IconCalendarTime size={16} />
+              </ThemeIcon>
+              <div>
+                <Text fw={700} size="sm" c="white">Sessions</Text>
+                <Text size="xs" c="dimmed">
+                  {groups.played.length} played · {groups.upcoming.length} planned
+                </Text>
+              </div>
+            </Group>
+
+            <Group gap="xs" wrap="nowrap">
+              <Button
+                style={{ flex: 1 }}
+                className="glass-btn-primary"
+                leftSection={<IconCalendarPlus size={14} />}
+                onClick={() => void planNext()}
+                loading={busy && !toDelete}
+                size="xs"
+                disabled={!campaignId}
+              >
+                Plan next session
+              </Button>
+              <Tooltip label="Refresh" withArrow>
+                <ActionIcon
+                  variant="light"
+                  color="gray"
+                  onClick={() => campaignId && void load(campaignId)}
+                  loading={loading}
+                  size="md"
+                  disabled={!campaignId}
+                  aria-label="Refresh"
+                >
+                  <IconRefresh size={14} />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+          </div>
+
+          <ScrollArea className={styles.sidebarScroll} offsetScrollbars>
+            {loading && sessions.length === 0 ? (
+              <Group justify="center" py="xl">
+                <Loader color="neon" size="sm" />
+              </Group>
+            ) : sessions.length === 0 ? (
+              <Stack align="center" py="xl" gap="xs">
+                <IconInbox size={22} color="gray" />
+                <Text c="dimmed" size="xs">No sessions yet.</Text>
+              </Stack>
+            ) : (
+              sections.map((group) => (
+                <div key={group.key}>
+                  <div className={styles.listGroupHeader}>
+                    <span>{group.label}</span>
+                    <span className={styles.listGroupCount}>{group.items.length}</span>
+                  </div>
+                  {group.items.map((s) => (
+                    <SessionListItem key={s.id} session={s} selected={selected?.id === s.id} onSelect={() => setSelectedId(s.id)} />
+                  ))}
+                </div>
+              ))
+            )}
+          </ScrollArea>
+        </div>
+
+        <div className={styles.workspaceArea}>
+          {selected ? (
+            <SessionWorkspace
+              key={selected.id}
+              session={selected}
+              sessions={sessions}
+              onSelect={setSelectedId}
+              onDelete={() => setToDelete(selected)}
+            />
+          ) : (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyStateInner}>
+                <IconCalendarTime size={28} />
+                <span>{campaignId ? "Plan your first session" : "Select a campaign first"}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <BaseModal
+        opened={!!toDelete}
+        onClose={() => setToDelete(null)}
+        title="Delete Session"
+        size="sm"
+        loading={busy}
+        onSave={() => void confirmDelete()}
+        saveLabel="Delete"
+      >
+        <Text size="sm">
+          Delete <b>#{toDelete?.number} {toDelete?.name}</b> with its plan, recap and {toDelete?.notes.length ?? 0} log entries? This can't be undone.
+        </Text>
+      </BaseModal>
+    </div>
   );
 }

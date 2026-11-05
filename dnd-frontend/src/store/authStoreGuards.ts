@@ -62,7 +62,6 @@ const clearScopedStores = () => {
   useSpellStore.setState({ spellNames: [], currentSpell: null });
 
   useSessionStore.getState().clear();
-  useSessionStore.persist?.clearStorage?.();
 
   useQuestStore.getState().clearStore();
   useQuestStore.persist?.clearStorage?.();

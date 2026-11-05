@@ -6,7 +6,6 @@ import { useToken } from "@store/auth/authSelectors";
 import { AdminPage } from "@features/admin/components/AdminPage";
 import { CampaignActions } from "./CampaignActions";
 import { CampaignCharactersPanel } from "./CampaignCharactersPanel";
-import { CampaignSessionsPanel } from "./CampaignSessionsPanel";
 import { CampaignNotesPanel } from "./CampaignNotesPanel";
 import { CampaignMembersPanel } from "./CampaignMembersPanel";
 
@@ -33,7 +32,7 @@ export function CampaignManager() {
         </Group>
       }
       subtitle={
-        campaign?.createdAt ? `Created ${new Date(campaign.createdAt).toLocaleDateString()}` : "Members, characters, sessions and notes"
+        campaign?.createdAt ? `Created ${new Date(campaign.createdAt).toLocaleDateString()}` : "Members, characters and notes"
       }
       actions={<CampaignActions />}
     >
@@ -45,7 +44,6 @@ export function CampaignManager() {
         <SimpleGrid cols={{ base: 1, xl: 2 }} spacing="md">
           <CampaignMembersPanel />
           <CampaignCharactersPanel />
-          <CampaignSessionsPanel />
           <CampaignNotesPanel />
         </SimpleGrid>
       ) : (
