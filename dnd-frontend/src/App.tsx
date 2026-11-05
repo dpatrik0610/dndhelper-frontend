@@ -21,6 +21,7 @@ import { useUiStore } from "@store/ui/uiStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { PageSkeleton } from "@components/common/Skeletons";
 import { GlobalSearch } from "@components/search/GlobalSearch";
+import { RestClock } from "@components/animations/RestClock";
 
 // Route chunks: each import is shared by lazy() and the idle-time prefetch below.
 const pages = {
@@ -296,6 +297,7 @@ export default function App() {
   return (
     <MotionConfig reducedMotion={reduceMotion ? "always" : "user"}>
       <Notifications position={notificationPosition} />
+      <RestClock />
       <AppRoutes />
     </MotionConfig>
   );

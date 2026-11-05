@@ -1,6 +1,7 @@
 
 import { create } from "zustand";
 import { getCampaignCharacters } from "@services/campaignService";
+import { playRestClock } from "@store/ui/restClockStore";
 import { updateCharacter as updateCharacterService, longrest as longrestService, bulkLongRest, getCharacterById } from "@services/characterService";
 
 import { showNotification } from "@components/Notification/Notification";
@@ -99,6 +100,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
       const response = await longrestService(id);
       if (response.success) {
         await refresh(set, [id]);
+        playRestClock(`${existing.name || "The character"} wakes refreshed.`);
       } else {
         throw new Error(response.message);
       }
@@ -124,11 +126,7 @@ export const useAdminCharacterStore = create<AdminCharacterStore>((set, get) => 
       if (successful.length > 0) {
         await refresh(set, successful);
 
-        showNotification({
-          title: "Group Long Rest Complete",
-          message: `Successfully rested ${successful.length} character(s).`,
-          color: SectionColor.Green,
-        });
+        playRestClock(`${successful.length} character(s) wake refreshed.`);
       }
 
       if (failed.length > 0) {

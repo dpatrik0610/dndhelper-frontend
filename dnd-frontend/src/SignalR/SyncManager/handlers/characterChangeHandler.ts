@@ -4,6 +4,7 @@ import type { EntityChangeEvent } from "./entitySyncTypes";
 import type { Character } from "@appTypes/Character/Character";
 import { showNotification } from "@components/Notification/Notification";
 import { getCurrentCampaignId } from "@api/campaignContext";
+import { playRestClock } from "@store/ui/restClockStore";
 
 export function handleCharacterChange(event: EntityChangeEvent) {
   const characterStore = useCharacterStore.getState();
@@ -36,6 +37,7 @@ export function handleCharacterChange(event: EntityChangeEvent) {
       break;
     }
 
+    case "longrested":
     case "updated": {
       const updatedCharacter = event.data as Character;
 
@@ -51,7 +53,9 @@ export function handleCharacterChange(event: EntityChangeEvent) {
         if (hasSameTimestamp(currentCharacter, updatedCharacter)) break;
         characterStore.setCharacter(updatedCharacter);
 
-        if (!isCurrentUser) {
+        if (!isCurrentUser && event.action === "longrested") {
+          playRestClock(`${updatedCharacter.name} wakes refreshed.`);
+        } else if (!isCurrentUser) {
           showNotification({
             title: "Character Updated",
             message: `${updatedCharacter.name} was updated by ${event.changedBy}`,

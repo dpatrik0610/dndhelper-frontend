@@ -1,5 +1,6 @@
 import type { NavigateFunction } from "react-router-dom";
 import { showNotification } from "@components/Notification/Notification";
+import { playRestClock } from "@store/ui/restClockStore";
 import { bulkLongRest, getCharacterById, updateCharacter } from "@services/characterService";
 import { rollByExpression } from "@services/rollService";
 import { useCharacterStore } from "@store/character/characterStore";
@@ -183,7 +184,7 @@ const COMMANDS: Command[] = [
         run: roster.length
           ? async () => {
               const { successful, failed } = await bulkLongRest(roster.map((c) => c.id!));
-              if (successful.length) showNotification({ title: "Long rest", message: `${successful.length} character(s) rested.`, color: "green" });
+              if (successful.length) playRestClock(`${successful.length} character(s) wake refreshed.`);
               if (failed.length) showNotification({ title: "Long rest incomplete", message: `${failed.length} character(s) couldn't rest.`, color: "orange" });
             }
           : undefined,

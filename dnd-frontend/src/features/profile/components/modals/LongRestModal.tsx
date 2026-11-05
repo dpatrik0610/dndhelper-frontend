@@ -8,6 +8,7 @@ import { SectionColor } from "@appTypes/SectionColor";
 import { BaseModal } from "@components/BaseModal";
 import { computeEffects } from "@utils/effects";
 import { hitDicePool } from "@utils/hitDice";
+import { playRestClock } from "@store/ui/restClockStore";
 
 interface LongRestModalProps {
   opened: boolean;
@@ -34,7 +35,7 @@ export function LongRestModal({ opened, onClose }: LongRestModalProps) {
       const { success, message } = await longrest(character.id!);
       if (!success) throw new Error(message);
       await loadCharacters();
-      showNotification({ id: "longrest-success", title: "Long rest", message: "You slept through the night 🙂", color: SectionColor.Green });
+      playRestClock(`${character.name || "You"} wakes refreshed.`);
       onClose();
     } catch (err) {
       showNotification({ title: "Long rest failed", message: String(err), color: SectionColor.Red });
