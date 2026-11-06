@@ -29,6 +29,8 @@ interface MarkdownRendererProps {
   className?: string;
   style?: CSSProperties;
   textColor?: string;
+  /** In-page "#..." links go here instead of opening a new tab. */
+  onInternalLink?: (href: string) => void;
 }
 
 const WRAPPER_STYLE: CSSProperties = {
@@ -203,6 +205,7 @@ export function MarkdownRenderer({
   className,
   style,
   textColor,
+  onInternalLink,
 }: MarkdownRendererProps) {
   const normalizedContent = normalizeQuoteBlocks(content);
 
@@ -290,17 +293,31 @@ export function MarkdownRenderer({
 
           li: ({ children }) => <List.Item>{transformChildren(children, highlightQuery)}</List.Item>,
           
-          a: ({ href, children, ...props }) => (
-            <Anchor
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              size="sm"
-              {...withoutNode(props)}
-            >
-              {children}
-            </Anchor>
-          ),
+          a: ({ href, children, ...props }) =>
+            onInternalLink && href?.startsWith("#") ? (
+              <Anchor
+                href={href}
+                size="sm"
+                fw={600}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onInternalLink(href);
+                }}
+                {...withoutNode(props)}
+              >
+                {children}
+              </Anchor>
+            ) : (
+              <Anchor
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                size="sm"
+                {...withoutNode(props)}
+              >
+                {children}
+              </Anchor>
+            ),
 
           // react-markdown v10 has no `inline` flag. Code blocks arrive wrapped in <pre>, which renders the whole block
           // from its source text, so `code` only ever renders inline code.

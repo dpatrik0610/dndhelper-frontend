@@ -33,6 +33,7 @@ const pages = {
   notes: () => import("@features/notes/NotesPage"),
   quests: () => import("@features/quests/QuestsPage"),
   polls: () => import("@features/polls/PollsPage"),
+  chronicle: () => import("@features/chronicle/ChroniclePage"),
   rollHistory: () => import("@features/rollHistory/RollHistoryPage"),
   rules: () => import("@features/rules/RulesPage"),
   tabletop: () => import("@features/tabletop/TabletopPage"),
@@ -52,6 +53,7 @@ const CharacterFormPage = lazy(pages.characterForm);
 const NotesPage = lazy(pages.notes);
 const QuestsPage = lazy(pages.quests);
 const PollsPage = lazy(pages.polls);
+const ChroniclePage = lazy(pages.chronicle);
 const RollHistoryPage = lazy(pages.rollHistory);
 const RulesPage = lazy(pages.rules);
 const TabletopPage = lazy(pages.tabletop);
@@ -94,7 +96,8 @@ function AppRoutes() {
   const hideSidebarRoutes = useMemo(() => ["/login", "/register"], []);
   // The tabletop is a full-screen app of its own: no sidebar, no animated background.
   const isTableRoute = location.pathname === "/table" || location.pathname.startsWith("/table/");
-  const showSidebar = !hideSidebarRoutes.includes(location.pathname) && !isTableRoute;
+  const isChronicleRoute = location.pathname === "/chronicle";
+  const showSidebar = !hideSidebarRoutes.includes(location.pathname) && !isTableRoute && !isChronicleRoute;
 
   const token = useToken();
   const characters = useCharacterList();
@@ -223,7 +226,7 @@ function AppRoutes() {
   return (
     <AppShell 
       header={{ height: 0 }} 
-      styles={getAppShellStyles(isMobile, isDashboardRoute, showSidebar)} 
+      styles={getAppShellStyles(isMobile, isDashboardRoute, showSidebar, isChronicleRoute)} 
       className={isDashboardRoute ? "" : `${activeThemeClass} style-variant-glass`}
     >
       {showSidebar && (
@@ -241,7 +244,7 @@ function AppRoutes() {
           style={{
             position: "relative",
             zIndex: 2,
-            padding: isDashboardRoute || isTableRoute ? 0 : (isMobile ? 0 : "md"),
+            padding: isDashboardRoute || isTableRoute || section === "chronicle" ? 0 : (isMobile ? 0 : "md"),
           }}
         >
           <Suspense fallback={<div className="route-fallback"><PageSkeleton /></div>}>
@@ -262,6 +265,7 @@ function AppRoutes() {
                 <Route path="/notes" element={<NotesPage />} />
                 <Route path="/quests" element={<QuestsPage />} />
                 <Route path="/polls" element={<PollsPage />} />
+                <Route path="/chronicle" element={<ChroniclePage />} />
                 <Route path="/table" element={<TabletopPage />} />
                 <Route path="/table/:code" element={<TabletopPage />} />
                 <Route path="/roll-history" element={<RollHistoryPage />} />
@@ -280,7 +284,7 @@ function AppRoutes() {
         </div>
       </AppShell.Main>
 
-      {activeToken && !hideSidebarRoutes.includes(location.pathname) && <GlobalSearch />}
+      {activeToken && !hideSidebarRoutes.includes(location.pathname) && !isChronicleRoute && <GlobalSearch />}
 
       {showFloatingChat && (
         <Suspense fallback={null}>

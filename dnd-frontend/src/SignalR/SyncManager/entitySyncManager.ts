@@ -6,6 +6,7 @@ import { handleShopChange } from "./handlers/shopChangeHandler";
 import { handleSellRequestChange } from "./handlers/sellRequestChangeHandler";
 import { handleQuestChange } from "./handlers/questChangeHandler";
 import { handlePollChange } from "./handlers/pollChangeHandler";
+import { handleChronicleChange } from "./handlers/chronicleChangeHandler";
 import { loadSpells } from "@utils/loadSpells";
 import { useSessionStore } from "@store/session/sessionStore";
 
@@ -17,6 +18,9 @@ export class EntitySyncManager {
         break;
       case "Poll":
         handlePollChange(event);
+        break;
+      case "Chronicle":
+        handleChronicleChange(event);
         break;
       case "Character":
         handleCharacterChange(event);

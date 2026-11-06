@@ -11,14 +11,19 @@ import {
   IconListNumbers,
   IconTable,
   IconMinus,
+  IconPhoto,
 } from "@tabler/icons-react";
 import {
   useRef,
   useState,
   useMemo,
+  type ClipboardEvent,
   type CSSProperties,
+  type DragEvent,
+  type KeyboardEvent,
   type SyntheticEvent,
 } from "react";
+import { showNotification } from "@components/Notification/Notification";
 
 // Toolbar buttons follow the theme: muted at rest, accent while the selection already has that format.
 const toolStyle = (active: boolean): CSSProperties =>
@@ -34,16 +39,109 @@ interface MarkdownTextareaProps {
   value: string;
   onChange: (value: string) => void;
   minHeightRem?: number;
+  /** Titles offered while typing a [[wiki link]]. */
+  linkSuggestions?: string[];
+  /** Enables the image button, paste and drop. Resolves to the uploaded image's URL; throw to reject the file. */
+  onUploadImage?: (file: File) => Promise<string>;
 }
+
+const LINK_QUERY = /\[\[([^\]\n|]*)$/;
+const MAX_SUGGESTIONS = 8;
 
 export function MarkdownTextarea({
   label = "Details",
   value,
   onChange,
   minHeightRem = 8,
+  linkSuggestions,
+  onUploadImage,
 }: MarkdownTextareaProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
+  const [activeSuggestion, setActiveSuggestion] = useState(0);
+  const [suggestionsClosed, setSuggestionsClosed] = useState(false);
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  const linkQuery =
+    linkSuggestions && selection.start === selection.end ? LINK_QUERY.exec(value.slice(0, selection.start))?.[1] : undefined;
+  const suggestions = useMemo(() => {
+    if (linkQuery === undefined || !linkSuggestions) return [];
+    const q = linkQuery.trim().toLowerCase();
+    return linkSuggestions.filter((t) => t.toLowerCase().includes(q)).slice(0, MAX_SUGGESTIONS);
+  }, [linkQuery, linkSuggestions]);
+  const showSuggestions = suggestions.length > 0 && !suggestionsClosed;
+
+  function moveCaret(pos: number) {
+    const el = textareaRef.current;
+    requestAnimationFrame(() => {
+      el?.focus();
+      el?.setSelectionRange(pos, pos);
+      setSelection({ start: pos, end: pos });
+    });
+  }
+
+  function insertLink(title: string) {
+    if (linkQuery === undefined) return;
+    const start = selection.start - linkQuery.length;
+    const rest = value.slice(selection.start);
+    const after = rest.startsWith("]]") ? rest.slice(2) : rest;
+    onChange(`${value.slice(0, start)}${title}]]${after}`);
+    moveCaret(start + title.length + 2);
+  }
+
+  function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if (!showSuggestions) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      setActiveSuggestion((i) => (i + step + suggestions.length) % suggestions.length);
+    } else if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      insertLink(suggestions[Math.min(activeSuggestion, suggestions.length - 1)]);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setSuggestionsClosed(true);
+    }
+  }
+
+  // A placeholder marks where each image lands, so typing during the upload doesn't lose its place.
+  async function uploadImages(files: File[]) {
+    if (!onUploadImage) return;
+    for (const file of files.filter((f) => f.type.startsWith("image/"))) {
+      const name = file.name.replace(/[[\]()]/g, "") || "image";
+      const placeholder = `![Uploading ${name}...]()`;
+      const pos = textareaRef.current?.selectionStart ?? valueRef.current.length;
+      onChange(`${valueRef.current.slice(0, pos)}${placeholder}${valueRef.current.slice(pos)}`);
+      try {
+        const url = await onUploadImage(file);
+        onChange(valueRef.current.replace(placeholder, `![${name}](${url})`));
+      } catch (error) {
+        onChange(valueRef.current.replace(placeholder, ""));
+        showNotification({ title: "Image not added", message: (error as Error).message, color: "red" });
+      }
+    }
+  }
+
+  function imageFiles(list: FileList) {
+    const files = [...list];
+    return onUploadImage && files.some((f) => f.type.startsWith("image/")) ? files : null;
+  }
+
+  function handlePaste(e: ClipboardEvent<HTMLTextAreaElement>) {
+    const files = imageFiles(e.clipboardData.files);
+    if (!files) return;
+    e.preventDefault();
+    void uploadImages(files);
+  }
+
+  function handleDrop(e: DragEvent<HTMLTextAreaElement>) {
+    const files = imageFiles(e.dataTransfer.files);
+    if (!files) return;
+    e.preventDefault();
+    void uploadImages(files);
+  }
 
   function updateSelectionFromElement(el: HTMLTextAreaElement) {
     setSelection({
@@ -412,6 +510,33 @@ export function MarkdownTextarea({
             <IconMinus size={14} />
           </ActionIcon>
         </Tooltip>
+
+        {onUploadImage && (
+          <Tooltip label="Add image (or paste / drop one)" withArrow>
+            <ActionIcon
+              size="sm"
+              variant="subtle"
+              color="gray"
+              style={toolStyle(false)}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <IconPhoto size={14} />
+            </ActionIcon>
+          </Tooltip>
+        )}
+        {onUploadImage && (
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              const files = [...(e.currentTarget.files ?? [])];
+              e.currentTarget.value = "";
+              void uploadImages(files);
+            }}
+          />
+        )}
       </Group>
 
       <Textarea
@@ -422,10 +547,17 @@ export function MarkdownTextarea({
         onChange={(e) => {
           onChange(e.currentTarget.value);
           updateSelectionFromElement(e.currentTarget);
+          setSuggestionsClosed(false);
+          setActiveSuggestion(0);
         }}
         onSelect={handleSelect}
         onKeyUp={handleSelect}
+        onKeyDown={handleKeyDown}
         onClick={handleSelect}
+        onPaste={handlePaste}
+        onDrop={handleDrop}
+        onBlur={() => setSuggestionsClosed(true)}
+        onFocus={() => setSuggestionsClosed(false)}
         ref={textareaRef}
         styles={{
           input: {
@@ -434,6 +566,42 @@ export function MarkdownTextarea({
           },
         }}
       />
+      {showSuggestions && (
+        <div role="listbox" aria-label="Link to entry" style={SUGGESTION_LIST_STYLE}>
+          {suggestions.map((title, i) => (
+            <div
+              key={title}
+              role="option"
+              aria-selected={i === activeSuggestion}
+              style={suggestionStyle(i === activeSuggestion)}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                insertLink(title);
+              }}
+            >
+              {title}
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }
+
+const SUGGESTION_LIST_STYLE: CSSProperties = {
+  marginTop: 4,
+  padding: 4,
+  borderRadius: 8,
+  border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
+  background: "var(--theme-bg-panel-opaque, var(--theme-bg-panel, rgba(15, 15, 15, 0.95)))",
+  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
+};
+
+const suggestionStyle = (active: boolean): CSSProperties => ({
+  padding: "6px 10px",
+  borderRadius: 6,
+  fontSize: "var(--mantine-font-size-sm)",
+  cursor: "pointer",
+  color: active ? "var(--theme-color-accent-primary, #f59e0b)" : "var(--theme-color-text-primary, #fff)",
+  background: active ? "color-mix(in srgb, var(--theme-color-accent-primary, #f59e0b) 14%, transparent)" : "transparent",
+});

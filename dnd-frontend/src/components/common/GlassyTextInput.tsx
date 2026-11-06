@@ -1,6 +1,7 @@
+import type { Ref } from "react";
 import { TextInput, type TextInputProps } from "@mantine/core";
 
-export function GlassyTextInput(props: TextInputProps) {
+export function GlassyTextInput(props: TextInputProps & { ref?: Ref<HTMLInputElement> }) {
   return (
     <TextInput
       {...props}
