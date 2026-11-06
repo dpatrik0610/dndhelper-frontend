@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useMusicStore } from "@store/music/musicStore";
-import { musicFetch } from "@services/musicService";
-import { MAX_MB, message, useMusicCampaign } from "./lib";
+import { MAX_MB, message, useAddFile } from "./lib";
 import { ErrorLine } from "./shared";
 import { Icon } from "./icons";
 
+const HELPER = "http://127.0.0.1:47821";
+const DOWNLOAD = "https://github.com/dpatrik0610/dndhelper/releases/latest/download/SpotFetcher-windows.zip";
 const BITRATES = [320, 256, 192, 128];
 const HEALTH_MS = 15_000;
 const STAGES: Record<string, string> = {
@@ -30,7 +31,15 @@ type Row = {
 };
 
 type Found = { video_id: string; title: string; artists: string[]; duration_s: number | null; kind: string };
-type HelperEvent = { stage?: string; progress?: number | null; title?: string; artists?: string[]; done?: boolean; error?: string; notFound?: boolean };
+type HelperEvent = { stage?: string; progress?: number | null; title?: string; artists?: string[]; file?: string; name?: string; error?: string; notFound?: boolean };
+
+const helper = (path: string, body?: unknown, signal?: AbortSignal) =>
+  fetch(`${HELPER}/${path}`, {
+    method: body === undefined ? "GET" : "POST",
+    headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+    signal,
+  });
 
 async function* events(res: Response) {
   const reader = res.body!.pipeThrough(new TextDecoderStream()).getReader();
@@ -45,18 +54,17 @@ async function* events(res: Response) {
   }
 }
 
-const unreachable = (err: unknown) => (err instanceof TypeError ? "Could not reach the server. Check the connection and try again." : message(err));
+const unreachable = (err: unknown) => (err instanceof TypeError ? "Could not reach SpotFetcher on this computer. Is its window still open?" : message(err));
 
 async function readJson(res: Response) {
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || body.message || "The server could not do that.");
+  if (!res.ok) throw new Error(body.error || "SpotFetcher could not do that.");
   return body;
 }
 
 const length = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
 function Picker({ start, onPick }: { start: string; onPick: (videoId: string) => void }) {
-  const cid = useMusicCampaign();
   const [query, setQuery] = useState(start);
   const [results, setResults] = useState<Found[]>([]);
   const [status, setStatus] = useState("");
@@ -72,7 +80,7 @@ function Picker({ start, onPick }: { start: string; onPick: (videoId: string) =>
       }
       setStatus("Searching…");
       try {
-        const found = await readJson(await musicFetch(cid, "search", { query: q }, stale.signal));
+        const found = await readJson(await helper("search", { query: q }, stale.signal));
         setResults(found.results);
         setStatus(found.results.length ? "" : "Nothing found. Try another spelling.");
       } catch (err) {
@@ -83,7 +91,7 @@ function Picker({ start, onPick }: { start: string; onPick: (videoId: string) =>
       clearTimeout(t);
       stale.abort();
     };
-  }, [query, cid]);
+  }, [query]);
 
   return (
     <div className="sb-fetch-picker">
@@ -117,9 +125,9 @@ function Picker({ start, onPick }: { start: string; onPick: (videoId: string) =>
 }
 
 export default function FetchTab({ active, onOpenLibrary }: { active: boolean; onOpenLibrary?: () => void }) {
-  const cid = useMusicCampaign();
   const loadLibrary = useMusicStore((s) => s.loadLibrary);
-  const [helper, setHelper] = useState<{ ffmpeg: boolean } | null | undefined>(undefined);
+  const addFile = useAddFile();
+  const [status, setStatus] = useState<{ ffmpeg: boolean } | null | undefined>(undefined);
   const [link, setLink] = useState("");
   const [bitrate, setBitrate] = useState(320);
   const [rows, setRows] = useState<Row[]>([]);
@@ -139,10 +147,10 @@ export default function FetchTab({ active, onOpenLibrary }: { active: boolean; o
     let stop = false;
     const ask = async () => {
       try {
-        const health = await readJson(await musicFetch(cid, "health"));
-        if (!stop) setHelper(health.available ? health : null);
+        const health = await readJson(await helper("health"));
+        if (!stop) setStatus(health);
       } catch {
-        if (!stop) setHelper(null);
+        if (!stop) setStatus(null);
       }
     };
     void ask();
@@ -151,19 +159,29 @@ export default function FetchTab({ active, onOpenLibrary }: { active: boolean; o
       stop = true;
       clearInterval(t);
     };
-  }, [active, cid]);
+  }, [active]);
+
+  const store = async (row: Row, path: string, name: string) => {
+    patch(row.key, { stage: STAGES.saving, progress: 0 });
+    const res = await helper(path.replace(/^\//, ""));
+    if (!res.ok) await readJson(res);
+    const file = new File([await res.blob()], name, { type: "audio/mpeg" });
+    await addFile(null, file, (progress) => patch(row.key, { progress }));
+  };
 
   const fetchOne = async (row: Row) => {
     patch(row.key, { state: "working", stage: STAGES.metadata, progress: null, error: undefined });
     try {
-      const res = await musicFetch(cid, "track", { id: row.id, bitrate: row.bitrate, pick: row.pick });
+      const res = await helper("fetch", { id: row.id, bitrate: row.bitrate, pick: row.pick, maxBytes: MAX_MB * 1024 * 1024 });
       if (!res.ok) await readJson(res);
       let stored = false;
       for await (const e of events(res)) {
         if (e.error) throw new Error(e.error);
         if (e.notFound) return patch(row.key, { state: "unmatched", stage: "No confident match", progress: null });
-        if (e.done) stored = true;
-        else if (e.stage && STAGES[e.stage]) {
+        if (e.file) {
+          await store(row, e.file, e.name || "song.mp3");
+          stored = true;
+        } else if (e.stage && STAGES[e.stage]) {
           patch(row.key, {
             stage: STAGES[e.stage],
             progress: e.progress ?? null,
@@ -172,7 +190,7 @@ export default function FetchTab({ active, onOpenLibrary }: { active: boolean; o
           });
         }
       }
-      if (!stored) throw new Error("The server stopped before the song was ready.");
+      if (!stored) throw new Error("SpotFetcher stopped before the song was ready.");
       patch(row.key, { state: "done", stage: "In Unsorted", progress: 1 });
       void loadLibrary().catch(() => {});
     } catch (err) {
@@ -194,7 +212,7 @@ export default function FetchTab({ active, onOpenLibrary }: { active: boolean; o
     setError(null);
     setAdding(true);
     try {
-      const found = await readJson(await musicFetch(cid, "resolve", { url: link.trim() }));
+      const found = await readJson(await helper("resolve", { url: link.trim() }));
       const stamp = Date.now();
       const added = (found.tracks as { id: string; title: string | null; artists: string[] }[]).map(
         (t, i): Row => ({ key: `${stamp}-${i}`, id: t.id, bitrate, title: t.title ?? "A song", artist: t.artists.join(", "), state: "waiting", stage: "Waiting", progress: null }),
@@ -215,16 +233,27 @@ export default function FetchTab({ active, onOpenLibrary }: { active: boolean; o
   return (
     <div className="sb-tab">
       <section className="sb-panel sb-fetch">
-        {helper ? (
+        {status ? (
           <p className="sb-fetch-status is-on">
             <span className="sb-dot" aria-hidden="true" />
-            {helper.ffmpeg ? "SpotFetcher is ready on the server." : "SpotFetcher is running on the server, but it cannot find ffmpeg."}
+            {status.ffmpeg ? "SpotFetcher is ready on this computer." : "SpotFetcher is running, but it cannot find ffmpeg. Download it again."}
           </p>
         ) : (
-          <p className="sb-fetch-status">
-            <span className="sb-dot" aria-hidden="true" />
-            {helper === undefined ? "Checking SpotFetcher on the server…" : "SpotFetcher is not running on the server right now. It restarts by itself; try again in a minute."}
-          </p>
+          <>
+            <p className="sb-fetch-status">
+              <span className="sb-dot" aria-hidden="true" />
+              {status === undefined ? "Looking for SpotFetcher on this computer…" : "SpotFetcher is not running on this computer."}
+            </p>
+            {status === null && (
+              <p className="sb-hint">
+                SpotFetcher downloads the songs on your own computer (Windows). Download it, unzip it, and open SpotFetcher.exe. Keep its window open
+                while you fetch. If the browser asks to reach devices on your network, allow it.{" "}
+                <a className="sb-btn" href={DOWNLOAD} rel="noopener noreferrer">
+                  Download SpotFetcher
+                </a>
+              </p>
+            )}
+          </>
         )}
         <form
           className="sb-fetch-form"
@@ -235,7 +264,7 @@ export default function FetchTab({ active, onOpenLibrary }: { active: boolean; o
         >
           <label className="sb-field">
             <span className="sb-eyebrow">Spotify link</span>
-            <input className="sb-input is-tall" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://open.spotify.com/…" disabled={!helper} />
+            <input className="sb-input is-tall" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://open.spotify.com/…" disabled={!status} />
           </label>
           <label className="sb-field">
             <span className="sb-eyebrow">Quality</span>
@@ -247,7 +276,7 @@ export default function FetchTab({ active, onOpenLibrary }: { active: boolean; o
               ))}
             </select>
           </label>
-          <button type="submit" className="sb-btn is-gold is-tall" disabled={!helper || adding || !link.trim()}>
+          <button type="submit" className="sb-btn is-gold is-tall" disabled={!status || adding || !link.trim()}>
             {adding ? "Reading the link…" : <><Icon name="sparkle" /> Fetch</>}
           </button>
         </form>

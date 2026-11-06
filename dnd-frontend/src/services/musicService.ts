@@ -58,19 +58,6 @@ export const library = {
   playAmbience: (c: string, collectionId: string | null) => send(c, "ambience", "PUT", { collectionId }),
 };
 
-export function musicFetch(campaignId: string, path: string, body?: unknown, signal?: AbortSignal) {
-  const token = getAuthTokenSafe();
-  const headers: Record<string, string> = { "X-Campaign-Id": campaignId };
-  if (token) headers.Authorization = `Bearer ${token}`;
-  if (body !== undefined) headers["Content-Type"] = "application/json";
-  return fetch(`${import.meta.env.VITE_API_BASE}${base(campaignId)}/fetch/${path}`, {
-    method: body === undefined ? "GET" : "POST",
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-    signal,
-  });
-}
-
 export function uploadWithProgress(campaignId: string, path: string, form: FormData, onProgress?: (f: number) => void) {
   return new Promise<void>((resolve, reject) => {
     const x = new XMLHttpRequest();
