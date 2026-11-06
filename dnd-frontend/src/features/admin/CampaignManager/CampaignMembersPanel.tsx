@@ -18,7 +18,7 @@ import { SectionColor } from "@appTypes/SectionColor";
 import { loadSpells } from "@utils/loadSpells";
 import { GlassyTextInput } from "@components/common/GlassyTextInput";
 
-const ROLE_OPTIONS = [CampaignRoles.Dm, CampaignRoles.Player, CampaignRoles.Poll];
+const ROLE_OPTIONS = [CampaignRoles.Dm, CampaignRoles.Player, CampaignRoles.Poll, CampaignRoles.Bard];
 
 /** DM tools for the current campaign: invite code, member roles, imported core content, Discord webhook. */
 export function CampaignMembersPanel() {

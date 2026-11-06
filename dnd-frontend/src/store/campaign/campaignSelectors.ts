@@ -23,6 +23,12 @@ export const useIsDm = () => {
   return isSuperAdmin || isCampaignDm;
 };
 
+export const useCanDriveMusic = () => {
+  const isDm = useIsDm();
+  const isBard = useHasCampaignRole(CampaignRoles.Bard);
+  return isDm || isBard;
+};
+
 /**
  * Whether a spell/item/monster/rule can be edited: core content (campaignId null) only by the
  * superadmin, campaign content by that campaign's DM.

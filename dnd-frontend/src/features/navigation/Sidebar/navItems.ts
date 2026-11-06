@@ -1,5 +1,5 @@
 import type { Icon } from "@tabler/icons-react";
-import { IconBook, IconBook2, IconDashboard, IconShieldLock, IconDice5, IconHome, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconCompass, IconChartBar } from "@tabler/icons-react";
+import { IconBook, IconBook2, IconDashboard, IconShieldLock, IconDice5, IconHome, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconCompass, IconChartBar, IconMusic } from "@tabler/icons-react";
 
 export interface NavItemData {
   link: string;
@@ -14,6 +14,7 @@ export interface NavSectionData {
   dmOnly?: boolean;
   /** Only for the superadmin. */
   superAdminOnly?: boolean;
+  bardOnly?: boolean;
 }
 
 /** Sidebar navigation, in display order. Settings lives in the footer. */
@@ -38,6 +39,11 @@ export const navSections: NavSectionData[] = [
       { link: "/chronicle", label: "Chronicle", icon: IconBook },
       { link: "/rules", label: "Rules", icon: IconBook2 },
     ],
+  },
+  {
+    label: "Bard",
+    bardOnly: true,
+    items: [{ link: "/bardify", label: "Bardify", icon: IconMusic }],
   },
   {
     label: "Dungeon Master",

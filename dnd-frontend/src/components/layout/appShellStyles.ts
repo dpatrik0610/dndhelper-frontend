@@ -17,7 +17,7 @@ export function getAppShellStyles(isMobile: boolean, isDashboardRoute: boolean, 
       // Admin routes have no site backdrop; the console wall (adminCyber.css / adminDungeon.css) fills main, toggle lane included.
       background: isDashboardRoute ? "var(--cyber-wall)" : "transparent",
       padding,
-      paddingLeft: showToggle && !isMobile ? TOGGLE_LANE : padding,
+      paddingLeft: showToggle && !isMobile && !fullBleed ? TOGGLE_LANE : padding,
     },
   };
 }

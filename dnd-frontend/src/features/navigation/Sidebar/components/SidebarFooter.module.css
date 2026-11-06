@@ -58,3 +58,31 @@
   outline: 2px solid var(--theme-color-accent-primary, #a855f7);
   outline-offset: 1px;
 }
+
+.listening {
+  color: var(--theme-color-accent-primary, #a855f7);
+}
+
+.playing {
+  position: relative;
+}
+
+.playing::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 8px;
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 55%, transparent);
+  animation: bardify-pulse 2.2s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes bardify-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 55%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 8px transparent; }
+}
+
+:global([data-reduce-motion]) .playing::after {
+  animation: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-color-accent-primary, #a855f7) 45%, transparent);
+}

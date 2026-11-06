@@ -9,6 +9,7 @@ import PrivateRoute from "@components/PrivateRoute";
 import { useIsSuperAdmin, useToken } from "@store/auth/authSelectors";
 import { useIsDm } from "@store/campaign/campaignSelectors";
 import { useCampaignStore } from "@store/campaign/campaignStore";
+import { useMusicStore } from "@store/music/musicStore";
 import { useCharacterList } from "@store/character/characterSelectors";
 import { useTokenExpiryGuard } from "@features/auth/hooks/useTokenExpiryGuard";
 import { useBootstrapCharacters } from "@features/profile/hooks/useBootstrapCharacters";
@@ -39,6 +40,7 @@ const pages = {
   tabletop: () => import("@features/tabletop/TabletopPage"),
   shop: () => import("@features/shop/ShopkeeperPage"),
   settings: () => import("@features/settings/SettingsPage"),
+  bardify: () => import("@features/bardify/BardifyPage"),
 };
 const adminPages = {
   dm: () => import("@features/admin/DmDashboard").then((m) => ({ default: m.DmDashboard })),
@@ -61,6 +63,10 @@ const TabletopPage = lazy(pages.tabletop);
 const FloatingChat = lazy(() => import("@features/chat/FloatingChat").then((m) => ({ default: m.FloatingChat })));
 const ShopkeeperPage = lazy(pages.shop);
 const SettingsPage = lazy(pages.settings);
+const BardifyPage = lazy(pages.bardify);
+const MusicPlayer = lazy(() => import("@features/bardify/MusicPlayer"));
+
+const EDGE_TO_EDGE_SECTIONS = new Set(["table", "chronicle", "bardify"]);
 const DmDashboard = lazy(adminPages.dm);
 const SuperAdminConsole = lazy(adminPages.superAdmin);
 const Login = lazy(() => import("@features/auth/login/Login"));
@@ -104,6 +110,10 @@ function AppRoutes() {
   const isDm = useIsDm();
   const isSuperAdmin = useIsSuperAdmin();
   const reloadCampaigns = useCampaignStore((s) => s.reload);
+  const selectedCampaignId = useCampaignStore((s) => s.selectedId);
+  const openMusic = useMusicStore((s) => s.open);
+  const listening = useMusicStore((s) => s.listening);
+  const musicCampaignId = useMusicStore((s) => s.campaignId);
 
   const localToken = useMemo(() => {
     if (!token) return null;
@@ -134,6 +144,10 @@ function AppRoutes() {
   useEffect(() => {
     if (activeToken) void reloadCampaigns();
   }, [activeToken, reloadCampaigns]);
+
+  useEffect(() => {
+    void openMusic(activeToken ? selectedCampaignId : null);
+  }, [activeToken, selectedCampaignId, openMusic]);
 
   // Top-level section ("spells" for /spells/Fireball). Changing it replays the page enter animation
   // and scrolls to top; moving within a section (e.g. between spells) does neither.
@@ -206,6 +220,7 @@ function AppRoutes() {
 
   // The DM dashboard and the superadmin console are full-screen tools: no backdrop, no page padding.
   const isDashboardRoute = section === "dashboard" || section === "admin";
+  const edgeToEdge = EDGE_TO_EDGE_SECTIONS.has(section);
 
   const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
 
@@ -226,7 +241,7 @@ function AppRoutes() {
   return (
     <AppShell 
       header={{ height: 0 }} 
-      styles={getAppShellStyles(isMobile, isDashboardRoute, showSidebar, isChronicleRoute)} 
+      styles={getAppShellStyles(isMobile, isDashboardRoute, showSidebar, edgeToEdge)} 
       className={isDashboardRoute ? "" : `${activeThemeClass} style-variant-glass`}
     >
       {showSidebar && (
@@ -244,7 +259,7 @@ function AppRoutes() {
           style={{
             position: "relative",
             zIndex: 2,
-            padding: isDashboardRoute || isTableRoute || section === "chronicle" ? 0 : (isMobile ? 0 : "md"),
+            padding: isDashboardRoute || edgeToEdge ? 0 : (isMobile ? 0 : "md"),
           }}
         >
           <Suspense fallback={<div className="route-fallback"><PageSkeleton /></div>}>
@@ -271,6 +286,7 @@ function AppRoutes() {
                 <Route path="/roll-history" element={<RollHistoryPage />} />
                 <Route path="/settings/:tab?" element={<SettingsPage />} />
                 <Route path="/scoreboard" element={<ScoreboardPage />} />
+                <Route path="/bardify" element={<BardifyPage />} />
                 {isDm && <Route path="/dashboard/:section?" element={<DmDashboard />} />}
                 {isSuperAdmin && <Route path="/admin/:section?" element={<SuperAdminConsole />} />}
               </Route>
@@ -289,6 +305,12 @@ function AppRoutes() {
       {showFloatingChat && (
         <Suspense fallback={null}>
           <FloatingChat />
+        </Suspense>
+      )}
+
+      {listening && musicCampaignId && (
+        <Suspense fallback={null}>
+          <MusicPlayer key={musicCampaignId} />
         </Suspense>
       )}
     </AppShell>

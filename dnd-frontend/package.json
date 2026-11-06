@@ -32,6 +32,7 @@
     "immer": "^11.1.8",
     "jwt-decode": "^4.0.0",
     "katex": "^0.16.27",
+    "music-metadata": "^12.3.5",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",
