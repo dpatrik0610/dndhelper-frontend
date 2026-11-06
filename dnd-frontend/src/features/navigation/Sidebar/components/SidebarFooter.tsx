@@ -1,10 +1,11 @@
 import { Tooltip } from "@mantine/core";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { IconLogout, IconSearch, IconSettings } from "@tabler/icons-react";
+import { IconLogout, IconMusic, IconMusicOff, IconSearch, IconSettings } from "@tabler/icons-react";
 import { useSearchStore } from "@components/search/searchStore";
 import { handleLogout } from "@utils/handleLogout";
 import { ThemeBubble } from "./ThemeBubble";
 import { ServerStatusDot } from "./ServerStatusDot";
+import { useMusicStore } from "@store/music/musicStore";
 import classes from "./SidebarFooter.module.css";
 
 interface SidebarFooterProps {
@@ -15,6 +16,10 @@ interface SidebarFooterProps {
 export function SidebarFooter({ onNavigate }: SidebarFooterProps) {
   const navigate = useNavigate();
   const onSettings = useLocation().pathname.startsWith("/settings");
+  const campaignId = useMusicStore((s) => s.campaignId);
+  const listening = useMusicStore((s) => s.listening);
+  const setListening = useMusicStore((s) => s.setListening);
+  const sounding = useMusicStore((s) => !!s.state && ((s.state.playing && !!s.state.track) || !!s.state.ambience));
 
   return (
     <footer className={classes.footer}>
@@ -22,6 +27,20 @@ export function SidebarFooter({ onNavigate }: SidebarFooterProps) {
 
       <div className={classes.actions}>
         <ServerStatusDot />
+
+        {campaignId && (
+          <Tooltip label={listening ? "Bardify · stop listening" : sounding ? "Bardify · the bard is playing, listen in" : "Bardify · listen when the bard plays"} withArrow>
+            <button
+              type="button"
+              className={`${classes.action} ${listening ? classes.listening : ""} ${sounding ? classes.playing : ""}`}
+              aria-label={listening ? "Stop listening to the bard" : "Listen to the bard"}
+              aria-pressed={listening}
+              onClick={() => setListening(!listening)}
+            >
+              {listening || sounding ? <IconMusic size={18} stroke={1.7} /> : <IconMusicOff size={18} stroke={1.7} />}
+            </button>
+          </Tooltip>
+        )}
 
         <Tooltip label="Search · Ctrl K" withArrow>
           <button

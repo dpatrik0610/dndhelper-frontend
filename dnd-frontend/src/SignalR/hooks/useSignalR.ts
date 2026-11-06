@@ -15,6 +15,9 @@ const TABLE_INVITE_SOUND = "/assets/sounds/notification.mp3";
 import { EntitySyncManager } from "@signalr/SyncManager/entitySyncManager";
 import type { EntityChangeEvent } from "@signalr/SyncManager/handlers/entitySyncTypes";
 import type { SubtleRollEvent } from "@appTypes/Roll";
+import type { MusicState } from "@appTypes/Music";
+import { useMusicStore } from "@store/music/musicStore";
+import { getMusicState } from "@services/musicService";
 
 interface SignalRMessage {
   id: string;
@@ -132,6 +135,15 @@ export const useSignalR = () => {
       }
     );
 
+    newConnection.on("MusicState", (e: { campaignId: string; state: MusicState }) => {
+      useMusicStore.getState().receive(e.campaignId, e.state);
+    });
+
+    newConnection.on("MusicLibraryChanged", (e: { campaignId: string }) => {
+      const store = useMusicStore.getState();
+      if (store.campaignId === e.campaignId && store.library) void store.loadLibrary().catch(() => {});
+    });
+
     newConnection.onreconnecting((error) => {
       console.debug("🔄 SignalR Reconnecting...", error);
       setIsConnected(false);
@@ -140,6 +152,12 @@ export const useSignalR = () => {
     newConnection.onreconnected((connectionId) => {
       console.debug("SignalR Reconnected!", connectionId);
       setIsConnected(true);
+
+      const music = useMusicStore.getState();
+      if (music.campaignId) {
+        const campaignId = music.campaignId;
+        void getMusicState(campaignId).then((state) => useMusicStore.getState().receive(campaignId, state)).catch(() => {});
+      }
 
       showNotification({
         message: "Reconnected to server",
@@ -176,6 +194,8 @@ export const useSignalR = () => {
       newConnection.off("EntityChanged");
       newConnection.off("EntityBatchChanged");
       newConnection.off("SubtleRoll");
+      newConnection.off("MusicState");
+      newConnection.off("MusicLibraryChanged");
       newConnection.stop();
     };
   }, [token, userId]);

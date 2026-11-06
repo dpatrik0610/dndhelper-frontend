@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react";
 import { Drawer, type MantineTransition } from "@mantine/core";
 import { useLocation } from "react-router-dom";
-import { useIsDm } from "@store/campaign/campaignSelectors";
+import { useCanDriveMusic, useIsDm } from "@store/campaign/campaignSelectors";
 import { useIsSuperAdmin } from "@store/auth/authSelectors";
 import { getActiveThemeClass, type SidebarThemeVariant } from "@appTypes/ThemeTypes";
 import { navSections } from "./navItems";
@@ -33,6 +33,7 @@ export default function Sidebar({ opened, onOpenedChange, themeVariant = "midnig
   const shown = dragging ? (opened ? 1 : 0) + drag : 0; // how much of the drawer is out, 0..1
   const onClose = () => onOpenedChange(false);
   const isDm = useIsDm();
+  const canDriveMusic = useCanDriveMusic();
   const isSuperAdmin = useIsSuperAdmin();
   const { pathname } = useLocation();
 
@@ -69,7 +70,7 @@ export default function Sidebar({ opened, onOpenedChange, themeVariant = "midnig
 
         <nav className={classes.nav} aria-label="Main">
           {navSections
-            .filter((section) => (!section.dmOnly || isDm) && (!section.superAdminOnly || isSuperAdmin))
+            .filter((section) => (!section.dmOnly || isDm) && (!section.superAdminOnly || isSuperAdmin) && (!section.bardOnly || canDriveMusic))
             .map((section) => (
               <NavSection key={section.label ?? "root"} section={section} activeLink={activeLink} onNavigate={onClose} />
             ))}

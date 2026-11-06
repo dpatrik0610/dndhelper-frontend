@@ -1,4 +1,4 @@
-export const CampaignRoles = { Dm: "DM", Player: "Player", Poll: "Poll" } as const;
+export const CampaignRoles = { Dm: "DM", Player: "Player", Poll: "Poll", Bard: "Bardify" } as const;
 
 /** Core content types a campaign can import (read-only, shared). */
 export const CORE_CONTENT_TYPES = ["Spells", "Equipment", "Monsters", "Rules"] as const;
