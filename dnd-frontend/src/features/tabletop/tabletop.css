@@ -4025,3 +4025,19 @@
   font-size: var(--mantine-font-size-sm);
   cursor: pointer;
 }
+
+.tt-music-modal {
+  position: relative;
+  background: #100e1b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.tt-music-modal .bardify {
+  min-height: 0;
+  padding: 32px clamp(16px, 3vw, 40px);
+}
+.tt-music-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+}

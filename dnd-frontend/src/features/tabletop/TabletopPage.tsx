@@ -5,10 +5,12 @@ import {
   Avatar,
   Badge,
   Button,
+  CloseButton,
   CopyButton,
   Group,
   Indicator,
   Loader,
+  Modal,
   SegmentedControl,
   Stack,
   Tabs,
@@ -34,7 +36,6 @@ import { useCurrentUserId } from "@store/auth/authSelectors";
 import { useCampaignStore } from "@store/campaign/campaignStore";
 import { useCanDriveMusic } from "@store/campaign/campaignSelectors";
 import { useMusicStore } from "@store/music/musicStore";
-import { BaseModal } from "@components/BaseModal";
 import { useChatStore } from "@store/chat/chatStore";
 import { useChatHub } from "@features/chat/chatHub";
 import { initiativeOrder, useDmView, useTabletopStore } from "@store/tabletop/tabletopStore";
@@ -297,6 +298,7 @@ function MusicButton() {
   const canDrive = useCanDriveMusic();
   const playing = useMusicStore((s) => !!s.state && ((s.state.playing && !!s.state.track) || !!s.state.ambience));
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
   if (!canDrive) return null;
   return (
     <>
@@ -305,11 +307,21 @@ function MusicButton() {
           <IconMusic size={18} />
         </ActionIcon>
       </Tooltip>
-      <BaseModal opened={open} onClose={() => setOpen(false)} title="Bardify" fullScreen showSaveButton={false} showCancelButton={false}>
-        <Suspense fallback={<Loader color="violet" />}>
+      <Modal
+        opened={open}
+        onClose={() => setOpen(false)}
+        size="90rem"
+        fullScreen={isMobile}
+        withCloseButton={false}
+        padding={0}
+        overlayProps={{ backgroundOpacity: 0.35, blur: 12 }}
+        classNames={{ content: "tt-music-modal" }}
+      >
+        <CloseButton className="tt-music-modal-close" onClick={() => setOpen(false)} aria-label="Close Bardify" />
+        <Suspense fallback={<Loader color="violet" m="xl" />}>
           <BardifyPage />
         </Suspense>
-      </BaseModal>
+      </Modal>
     </>
   );
 }
