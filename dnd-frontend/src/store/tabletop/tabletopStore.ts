@@ -149,12 +149,38 @@ const initial: TabletopState = {
   tokenDialog: null,
 };
 
+const LAST_TABLE_KEY = "tt-last-table";
+
+export type LastTable = { code: string; campaignName: string };
+
+export function readLastTable(): LastTable | null {
+  try {
+    return JSON.parse(localStorage.getItem(LAST_TABLE_KEY) ?? "null");
+  } catch {
+    return null;
+  }
+}
+
+function saveLastTable(table: LastTable | null) {
+  try {
+    if (table) localStorage.setItem(LAST_TABLE_KEY, JSON.stringify(table));
+    else localStorage.removeItem(LAST_TABLE_KEY);
+  } catch {
+    void 0;
+  }
+}
+
+export const forgetLastTable = (code: string) => {
+  if (readLastTable()?.code === code) saveLastTable(null);
+};
+
 export const useTabletopStore = create<TabletopState & TabletopActions>()((set) => ({
   ...initial,
 
   setConnected: (connected) => set({ connected }),
   setJoinError: (joinError) => set({ joinError }),
-  joined: (r) =>
+  joined: (r) => {
+    saveLastTable({ code: r.joinCode, campaignName: r.campaignName });
     set({
       joinError: null,
       session: {
@@ -169,7 +195,8 @@ export const useTabletopStore = create<TabletopState & TabletopActions>()((set) 
       fog: r.fog,
       log: r.log,
       measures: {},
-    }),
+    });
+  },
   setSnapshot: (snapshot) => set({ snapshot }),
   resync: (r) => set({ snapshot: r.state, strokes: r.strokes, fog: r.fog, log: r.log, measures: {}, editingTokenId: null }),
   previewGrid: (grid) => set((s) => (s.snapshot ? { snapshot: { ...s.snapshot, grid } } : s)),

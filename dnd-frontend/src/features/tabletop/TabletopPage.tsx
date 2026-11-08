@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { lazy, Suspense, useEffect, useState, type CSSProperties } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   ActionIcon,
@@ -24,12 +24,17 @@ import {
   IconLayoutSidebarRightExpand,
   IconListNumbers,
   IconMessageCircle,
+  IconMusic,
   IconEye,
   IconEyeOff,
   IconPlayerTrackNext,
   IconSettings,
 } from "@tabler/icons-react";
 import { useCurrentUserId } from "@store/auth/authSelectors";
+import { useCampaignStore } from "@store/campaign/campaignStore";
+import { useCanDriveMusic } from "@store/campaign/campaignSelectors";
+import { useMusicStore } from "@store/music/musicStore";
+import { BaseModal } from "@components/BaseModal";
 import { useChatStore } from "@store/chat/chatStore";
 import { useChatHub } from "@features/chat/chatHub";
 import { initiativeOrder, useDmView, useTabletopStore } from "@store/tabletop/tabletopStore";
@@ -55,6 +60,8 @@ import { TokenMenu } from "./panels/TokenMenu";
 import { SettingsDrawer } from "./SettingsDrawer";
 import { TokenImageViewer, TokenProfileModal } from "./TokenProfileModal";
 import { resolveImageUrl, tabletop, useTabletopHub } from "./useTabletopHub";
+
+const BardifyPage = lazy(() => import("@features/bardify/BardifyPage"));
 import "./tabletop.css";
 
 export default function TabletopPage() {
@@ -100,8 +107,13 @@ function TableView() {
   const dmView = useDmView();
   const campaignId = useTabletopStore((s) => s.session!.campaignId);
   const chatUnread = useChatStore((s) => s.unread);
+  const visitCampaign = useCampaignStore((s) => s.visit);
+  const selectedCampaignId = useCampaignStore((s) => s.selectedId);
   // Here the chat lives in the side panel; the floating chat stays off on the table.
   useChatHub(campaignId);
+  useEffect(() => {
+    if (selectedCampaignId !== campaignId) void visitCampaign(campaignId);
+  }, [campaignId, selectedCampaignId, visitCampaign]);
   useShortcuts(dmView);
 
   return (
@@ -174,7 +186,7 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
     <div className="tt-topbar">
       <Group gap="xs" className="tt-glass tt-pillbar" wrap="nowrap">
         <Tooltip label="Leave table">
-          <ActionIcon variant="subtle" color="gray" onClick={() => navigate("/home")} aria-label="Leave table">
+          <ActionIcon variant="subtle" color="gray" onClick={() => navigate("/table")} aria-label="Leave table">
             <IconArrowLeft size={18} />
           </ActionIcon>
         </Tooltip>
@@ -220,6 +232,7 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
 
       <Group gap="xs" className={`tt-glass tt-pillbar${playerView ? " player-view" : ""}`} wrap="nowrap">
         <SearchButton />
+        <MusicButton />
         <InventoryButton />
         <NotesButton />
         {session.isDm && !playerView && (
@@ -277,6 +290,27 @@ function TopBar({ sideOpen, onToggleSide }: { sideOpen: boolean; onToggleSide: (
         </Tooltip>
       </Group>
     </div>
+  );
+}
+
+function MusicButton() {
+  const canDrive = useCanDriveMusic();
+  const playing = useMusicStore((s) => !!s.state && ((s.state.playing && !!s.state.track) || !!s.state.ambience));
+  const [open, setOpen] = useState(false);
+  if (!canDrive) return null;
+  return (
+    <>
+      <Tooltip label="Bardify · manage music">
+        <ActionIcon variant={playing ? "light" : "subtle"} color={playing ? "violet" : "gray"} onClick={() => setOpen(true)} aria-label="Manage music">
+          <IconMusic size={18} />
+        </ActionIcon>
+      </Tooltip>
+      <BaseModal opened={open} onClose={() => setOpen(false)} title="Bardify" fullScreen showSaveButton={false} showCancelButton={false}>
+        <Suspense fallback={<Loader color="violet" />}>
+          <BardifyPage />
+        </Suspense>
+      </BaseModal>
+    </>
   );
 }
 

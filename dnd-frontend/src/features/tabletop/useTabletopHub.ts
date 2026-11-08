@@ -4,7 +4,7 @@ import { showNotification } from "@components/Notification/Notification";
 import { apiClient } from "@api/apiClient";
 import { useToken } from "@store/auth/authSelectors";
 import { useAuthStore } from "@store/auth/authStore";
-import { useTabletopStore } from "@store/tabletop/tabletopStore";
+import { forgetLastTable, useTabletopStore } from "@store/tabletop/tabletopStore";
 import type {
   AoeTemplate,
   FogOp,
@@ -223,6 +223,7 @@ export function useTabletopHub(code: string | undefined) {
         if (!cancelled) store().joined(result);
       })
       .catch((err) => {
+        forgetLastTable(code);
         if (!cancelled) store().setJoinError(hubError(err));
       });
 

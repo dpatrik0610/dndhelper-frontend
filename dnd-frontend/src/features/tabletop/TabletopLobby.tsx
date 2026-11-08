@@ -15,7 +15,7 @@ import {
 } from "@tabler/icons-react";
 import { getAllCampaigns } from "@services/campaignService";
 import { useCurrentUserId, useIsSuperAdmin } from "@store/auth/authSelectors";
-import { TABLE_CODE_LENGTH as CODE_LENGTH, useTabletopStore } from "@store/tabletop/tabletopStore";
+import { TABLE_CODE_LENGTH as CODE_LENGTH, readLastTable, useTabletopStore } from "@store/tabletop/tabletopStore";
 import type { Campaign } from "@appTypes/Campaign";
 import { tabletop } from "./useTabletopHub";
 
@@ -37,6 +37,7 @@ export function TabletopLobby() {
   const [campaigns, setCampaigns] = useState<Campaign[] | null>(null);
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [opening, setOpening] = useState(false);
+  const [lastTable] = useState(readLastTable);
 
   useEffect(() => {
     let active = true;
@@ -108,6 +109,17 @@ export function TabletopLobby() {
         </section>
 
         <section className="tt-lobby-card tt-glass">
+          {lastTable && (
+            <div className="tt-lobby-block">
+              <h2>Rejoin</h2>
+              <p>
+                {lastTable.campaignName} · <span className="tt-code">{lastTable.code}</span>
+              </p>
+              <Button fullWidth size="md" variant="light" rightSection={<IconArrowRight size={16} />} onClick={() => join(lastTable.code)}>
+                Rejoin table
+              </Button>
+            </div>
+          )}
           <div className="tt-lobby-block">
             <h2>Join a table</h2>
             <p>Enter the 6-character room code from your DM.</p>
