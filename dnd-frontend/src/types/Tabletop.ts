@@ -77,6 +77,8 @@ export interface TableToken {
   id: string;
   name: string;
   characterId: string | null;
+  /** DM only: the bestiary monster the token was placed from. */
+  monsterId?: string | null;
   ownerIds: string[];
   imageUrl: string | null;
   color: string;

@@ -21,6 +21,7 @@ const monsterToken = (m: Monster, layer: TableLayer): Partial<TableToken> => {
   const hp = m.hitPoints || 10;
   return {
     layer,
+    monsterId: m.id,
     name: m.name || "Monster",
     hp,
     maxHp: hp,

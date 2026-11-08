@@ -1,6 +1,7 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { Avatar, Menu } from "@mantine/core";
 import {
+  IconBook,
   IconCopy,
   IconDice5,
   IconDroplet,
@@ -17,6 +18,10 @@ import {
 import { useDmView, useTabletopStore } from "@store/tabletop/tabletopStore";
 import { resolveImageUrl, tabletop } from "@features/tabletop/useTabletopHub";
 import { LAYERS } from "@features/tabletop/tools";
+import { MonsterViewModal } from "@features/admin/MonsterManager/components/MonsterViewModal";
+import { monsterService } from "@services/Admin/monsterService";
+import { showNotification } from "@components/Notification/Notification";
+import type { Monster } from "@appTypes/Monster";
 
 const MENU_CLASSES = { dropdown: "tt-menu", item: "tt-menu-item", itemSection: "tt-menu-icon", divider: "tt-menu-divider" };
 
@@ -28,7 +33,23 @@ export function TokenMenu() {
   const cellSize = useTabletopStore((s) => s.snapshot?.grid.cellSize ?? 50);
   const set = useTabletopStore((s) => s.set);
   const dmView = useDmView();
-  if (!menu || !token || !turn) return null;
+  const [statBlock, setStatBlock] = useState<Monster | null>(null);
+  const statModal = <MonsterViewModal monster={statBlock} onClose={() => setStatBlock(null)} />;
+  if (!menu || !token || !turn) return statModal;
+
+  const openStats = async () => {
+    try {
+      const monster = token.monsterId
+        ? await monsterService.getById(token.monsterId)
+        : (await monsterService.search({ query: token.name, pageSize: 10 })).items.find(
+            (m) => m.name.toLowerCase() === token.name.toLowerCase()
+          );
+      if (monster) setStatBlock(monster);
+      else showNotification({ message: `No bestiary entry named “${token.name}”.`, color: "yellow" });
+    } catch (err) {
+      showNotification({ message: (err as Error).message, color: "red" });
+    }
+  };
 
   const close = () => set({ tokenMenu: null });
   const dialog = (kind: "heal" | "damage" | "condition") => set({ tokenDialog: { tokenId: token.id, kind } });
@@ -37,6 +58,8 @@ export function TokenMenu() {
   const layer = LAYERS.find((l) => l.layer === token.layer);
 
   return (
+    <>
+    {statModal}
     <Menu
       opened
       onChange={(opened) => !opened && close()}
@@ -102,9 +125,13 @@ export function TokenMenu() {
             <Menu.Item leftSection={<IconEdit size={16} />} onClick={() => set({ editingTokenId: token.id })}>
               Edit token…
             </Menu.Item>
-            {token.characterId && (
+            {token.characterId ? (
               <Menu.Item leftSection={<IconUser size={16} />} onClick={() => set({ profileCharacterId: token.characterId })}>
                 Character sheet
+              </Menu.Item>
+            ) : (
+              <Menu.Item leftSection={<IconBook size={16} />} onClick={() => void openStats()}>
+                Stat block
               </Menu.Item>
             )}
 
@@ -158,5 +185,6 @@ export function TokenMenu() {
         )}
       </Menu.Dropdown>
     </Menu>
+    </>
   );
 }
