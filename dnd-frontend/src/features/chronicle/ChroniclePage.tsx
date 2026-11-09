@@ -249,6 +249,24 @@ export default function ChroniclePage() {
       .updateFolder(folder.id, { ...toFolderInput(folder), parentId })
       .catch(fail("Could not move the folder"));
 
+  const setVisibility = (
+    entry: ChronicleEntry,
+    visibility: "All" | "Private",
+  ) =>
+    void useChronicleStore
+      .getState()
+      .update(entry.id, { ...toInput(entry), visibility, sharedWith: [] })
+      .then(() =>
+        showNotification({
+          message:
+            visibility === "All"
+              ? `${entry.title} is now readable by all players.`
+              : `${entry.title} is hidden from players again.`,
+          color: "green",
+        }),
+      )
+      .catch(fail("Could not change who can read it"));
+
   const confirmDeleteEntry = async () => {
     if (!deletingEntry) return;
     try {
@@ -322,7 +340,7 @@ export default function ChroniclePage() {
         players={players}
         index={index}
         onDirtyChange={setDirty}
-        onCancel={() => setEditor(null)}
+        onCancel={() => guard(() => setEditor(null))}
         onSaved={(entry) => {
           setEditor(null);
           setParams({ entry: entry.id });
@@ -334,6 +352,7 @@ export default function ChroniclePage() {
   else if (selected)
     main = (
       <EntryView
+        key={selected.id}
         entry={selected}
         index={index}
         folders={folders}
@@ -341,6 +360,7 @@ export default function ChroniclePage() {
         isDm={isDm}
         onLink={onLink}
         onEdit={() => editEntry(selected)}
+        onSetVisibility={(v) => setVisibility(selected, v)}
         onDelete={() => setDeletingEntry(selected)}
       />
     );
@@ -349,9 +369,11 @@ export default function ChroniclePage() {
     main = (
       <ChronicleIndex
         entries={entries}
+        index={index}
         campaignName={campaign?.name ?? null}
         isDm={isDm}
         onOpen={(id) => select(id)}
+        onCreate={(title) => newEntry(null, title)}
         onNewEntry={() => newEntry(null)}
         onNewFolder={() =>
           setFolderModal({

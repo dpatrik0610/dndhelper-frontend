@@ -729,7 +729,21 @@
 
 .sheet {
   position: relative;
+  max-width: 1040px;
+  margin-inline: auto;
   padding: 40px 48px 64px;
+}
+
+.sheet,
+.index {
+  animation: turnPage 0.28s ease both;
+}
+
+@keyframes turnPage {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
 
 .crumbs {
@@ -758,6 +772,7 @@
   line-height: 1;
   letter-spacing: -0.025em;
   overflow-wrap: anywhere;
+  text-wrap: balance;
   color: var(--ink);
 }
 
@@ -831,7 +846,8 @@
       transparent 65%,
       rgba(0, 0, 0, 0.14)
     ),
-    var(--accent);
+    color-mix(in srgb, var(--ribbon, var(--accent)) 80%, #3a2412);
+  filter: drop-shadow(0 3px 3px rgba(40, 20, 5, 0.3));
   clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 84%, 0 100%);
 }
 
@@ -857,6 +873,10 @@
   font-size: inherit !important;
   line-height: inherit !important;
   font-family: inherit !important;
+}
+
+.content > div {
+  text-wrap: pretty;
 }
 
 .content > div:first-child {
@@ -935,6 +955,66 @@
 
 .content h3 {
   font-size: 22px !important;
+}
+
+.content h2 {
+  padding-bottom: 0.22em;
+  border-bottom: 1px solid var(--line);
+}
+
+.content li::marker {
+  color: var(--accent);
+}
+
+.content :global(.mantine-Divider-root) {
+  width: min(280px, 60%);
+  height: 1px;
+  margin: 2.2em auto !important;
+  border: 0 !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--line-strong),
+    transparent
+  );
+}
+
+.content :global(.mantine-Code-root) {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--well) !important;
+  font-size: 0.78em !important;
+  color: var(--ink) !important;
+}
+
+.content pre:global(.mantine-Code-root) {
+  margin: 1.2em 0;
+  padding: 16px 20px;
+  border-radius: 10px;
+  background: var(--ink-box) !important;
+  font-size: 14px !important;
+  line-height: 1.6;
+  color: var(--ink-box-text) !important;
+}
+
+.content :global(.mantine-Table-table) {
+  --table-border-color: var(--line);
+  --table-striped-color: color-mix(in srgb, var(--well) 40%, transparent);
+  --table-hover-color: var(--accent-wash);
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.content :global(.mantine-Table-th) {
+  background: var(--well) !important;
+  font-weight: 700;
+  color: var(--ink) !important;
+}
+
+.content :global(.mantine-Table-td) {
+  color: var(--ink) !important;
 }
 
 .content :is(ul, ol) {
@@ -1170,7 +1250,18 @@
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.025em;
+  text-wrap: balance;
   color: var(--ink);
+}
+
+.indexTitle::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 3px;
+  margin-top: 20px;
+  border-radius: 2px;
+  background: var(--accent);
 }
 
 .indexLead {
@@ -1192,15 +1283,16 @@
 
 .spread {
   display: flex;
-  height: 6px;
+  gap: 3px;
+  height: 10px;
   margin: 36px 0 12px;
-  border-radius: 3px;
-  overflow: hidden;
-  background: var(--well);
 }
 
 .spread span {
+  min-width: 6px;
   height: 100%;
+  border-radius: 3px;
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
 }
 
 .legend {
@@ -1255,6 +1347,14 @@
 
 .indexItem:hover {
   background: var(--hover);
+}
+
+.indexItem .rowLabel {
+  transition: transform 0.15s ease;
+}
+
+.indexItem:hover .rowLabel {
+  transform: translateX(3px);
 }
 
 .indexWhen {
@@ -1342,11 +1442,16 @@
   text-align: left;
   color: var(--ink);
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .linkButton:hover {
   border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--lift);
 }
 
 .railNote {
@@ -1720,6 +1825,34 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 22%, transparent);
 }
 
+/* ── Polish ── */
+
+.workspace ::selection {
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: var(--ink);
+}
+
+.pane,
+.tree,
+.graphCard,
+.devText {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.row,
+.indexItem,
+.entryTab,
+.segButton,
+.tab,
+.outlineItem,
+.back {
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
 /* ── Small screens: the leather becomes a header; its tree folds open ── */
 
 @media (max-width: 860px) {
@@ -1787,7 +1920,25 @@
 @media (prefers-reduced-motion: reduce) {
   .iconButton,
   .chip,
-  .linkButton {
+  .linkButton,
+  .row,
+  .indexItem,
+  .indexItem .rowLabel,
+  .entryTab,
+  .segButton,
+  .tab,
+  .outlineItem,
+  .back {
     transition: none;
+  }
+
+  .sheet,
+  .index {
+    animation: none;
+  }
+
+  .linkButton:hover,
+  .indexItem:hover .rowLabel {
+    transform: none;
   }
 }

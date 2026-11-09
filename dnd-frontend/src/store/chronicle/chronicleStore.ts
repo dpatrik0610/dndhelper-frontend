@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import type { ChronicleEntry, ChronicleEntryInput, ChronicleFolder, ChronicleFolderInput } from "@appTypes/Chronicle";
 import * as api from "@services/chronicleService";
+import { showNotification } from "@components/Notification/Notification";
+import { renameLinks, sameTitle } from "@features/chronicle/chronicleLinks";
+import { toInput } from "@features/chronicle/chronicleUtils";
 
 interface ChronicleStore {
   entries: ChronicleEntry[];
@@ -84,8 +87,36 @@ export const useChronicleStore = create<ChronicleStore>((set, get) => ({
     return entry;
   },
   update: async (id, input) => {
+    const before = get().entries.find((e) => e.id === id);
     const entry = await api.updateEntry(id, input);
     get().upsert(entry);
+
+    const oldTitle = before?.title;
+    if (
+      oldTitle &&
+      !sameTitle(oldTitle, entry.title) &&
+      !get().entries.some((e) => e.id !== id && sameTitle(e.title, oldTitle))
+    ) {
+      const stale = get()
+        .entries.filter((e) => e.id !== id)
+        .map((e) => ({ e, content: renameLinks(e.content, oldTitle, entry.title) }))
+        .filter(({ e, content }) => content !== e.content);
+      const results = await Promise.allSettled(
+        stale.map(async ({ e, content }) => get().upsert(await api.updateEntry(e.id, { ...toInput(e), content }))),
+      );
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed)
+        showNotification({
+          title: "Some links still use the old title",
+          message: `${failed} of ${stale.length} linking entries could not be updated. Their [[${oldTitle}]] links now show as missing.`,
+          color: "red",
+        });
+      else if (stale.length)
+        showNotification({
+          message: `Links in ${stale.length} ${stale.length === 1 ? "entry" : "entries"} now point to ${entry.title}.`,
+          color: "green",
+        });
+    }
     return entry;
   },
   remove: async (id) => {

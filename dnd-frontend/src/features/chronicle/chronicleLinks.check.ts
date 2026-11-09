@@ -4,6 +4,8 @@ import {
   backlinks,
   decodeNewLink,
   linkEdges,
+  missingLinks,
+  renameLinks,
   outgoing,
   parseLinks,
   parseOutline,
@@ -90,5 +92,29 @@ assert.deepEqual(parseOutline(doc), [
 ]);
 assert.equal(plainText("a [x](#chronicle/b) \\[y\\] `z`"), "a x [y] z");
 assert.equal(wordCount("Hello **brave** world - [[x]]\n\n- one"), 5);
+
+assert.equal(
+  renameLinks(
+    "Meet [[volo]], [[ Volo | the bard ]] and [[Volothamp]] in [[Waterdeep]].",
+    "Volo",
+    "Volo $1 Geddarm",
+  ),
+  "Meet [[Volo $1 Geddarm]], [[Volo $1 Geddarm|the bard]] and [[Volothamp]] in [[Waterdeep]].",
+  "rewrites every spelling, keeps aliases, leaves other titles alone",
+);
+assert.deepEqual(
+  missingLinks(
+    [
+      e("m1", "One", "[[Ghost]] [[ghost]] [[Volo]] [[Abyss]]"),
+      e("m2", "Two", "[[GHOST]]"),
+    ],
+    index,
+  ),
+  [
+    { title: "Ghost", count: 2 },
+    { title: "Abyss", count: 1 },
+  ],
+  "unwritten titles, counted once per entry, most mentioned first",
+);
 
 console.log("chronicleLinks ok");

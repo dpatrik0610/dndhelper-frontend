@@ -84,6 +84,41 @@ export function linkEdges<T extends Linkable>(
   return edges;
 }
 
+export const sameTitle = (a: string, b: string) => key(a) === key(b);
+
+export const renameLinks = (content: string, from: string, to: string) =>
+  content.replace(LINK, (whole, target: string, alias?: string) =>
+    sameTitle(target, from)
+      ? `[[${to}${alias ? `|${alias.trim()}` : ""}]]`
+      : whole,
+  );
+
+export interface MissingLink {
+  title: string;
+  count: number;
+}
+
+export function missingLinks<T extends Linkable>(
+  entries: T[],
+  index: TitleIndex<T>,
+): MissingLink[] {
+  const found = new Map<string, MissingLink>();
+  for (const e of entries) {
+    const seen = new Set<string>();
+    for (const { target } of parseLinks(e.content)) {
+      const k = key(target);
+      if (index.has(k) || seen.has(k)) continue;
+      seen.add(k);
+      const hit = found.get(k);
+      if (hit) hit.count++;
+      else found.set(k, { title: target, count: 1 });
+    }
+  }
+  return [...found.values()].sort(
+    (a, b) => b.count - a.count || a.title.localeCompare(b.title),
+  );
+}
+
 export const INTERNAL_LINK = "#chronicle/";
 export const NEW_LINK = "#chronicle-new/";
 

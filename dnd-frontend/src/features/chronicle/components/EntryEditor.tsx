@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { MultiSelect, Switch, TagsInput, Text } from "@mantine/core";
-import { IconDeviceFloppy } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconTemplate } from "@tabler/icons-react";
 import {
   CHRONICLE_CATEGORIES,
   CHRONICLE_CATEGORY_LABELS,
@@ -31,6 +31,25 @@ import { Segmented } from "@features/chronicle/components/Segmented";
 import classes from "@features/chronicle/Chronicle.module.css";
 
 const ROOT = "__root";
+const SECRETS = "## Secrets\n\n%%What the players don't know yet.%%\n";
+const sections = (...names: string[]) =>
+  names.map((n) => `## ${n}\n\n`).join("");
+const TEMPLATES: Partial<Record<ChronicleCategory, string>> = {
+  Npc: sections("Appearance", "Personality", "Goals", "Connections") + SECRETS,
+  Location:
+    sections("Description", "Notable people", "Points of interest", "Rumours") +
+    SECRETS,
+  Faction:
+    sections("Goals", "Leadership", "Members", "Allies and enemies") + SECRETS,
+  Item: sections("Description", "Properties", "History", "Where it is now"),
+  Quest: sections("Hook", "Objectives", "Rewards", "Complications") + SECRETS,
+  Session: sections(
+    "Recap",
+    "Key moments",
+    "Loot and rewards",
+    "Loose threads",
+  ),
+};
 const ACCENT = "var(--theme-color-accent-primary)";
 const glassy = { input: "glassy-input", label: "glassy-label" };
 const switchClasses = {
@@ -72,6 +91,21 @@ export function EntryEditor({
   const dirty = JSON.stringify(draft) !== JSON.stringify(initial);
   useEffect(() => onDirtyChange(dirty), [dirty, onDirtyChange]);
   useEffect(() => () => onDirtyChange(false), [onDirtyChange]);
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  const twin = index.get(draft.title.trim().toLowerCase());
+  const titleNote =
+    twin && twin.id !== entryId
+      ? "Another entry already has this title, so [[links]] will keep going to that one."
+      : entryId && draft.title.trim() !== initial.title.trim()
+        ? "Links to this entry in other entries will follow the new title."
+        : undefined;
+  const template = TEMPLATES[draft.category];
 
   const titles = useMemo(
     () =>
@@ -140,6 +174,7 @@ export function EntryEditor({
         value={draft.title}
         onChange={(e) => patch({ title: e.currentTarget.value })}
         maxLength={200}
+        description={titleNote}
         data-autofocus
         autoFocus={!entryId}
       />
@@ -229,7 +264,7 @@ export function EntryEditor({
         />
       )}
 
-      <div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
         <Segmented<"write" | "preview">
           label="Editor mode"
           value={mode}
@@ -239,6 +274,16 @@ export function EntryEditor({
             { value: "preview", label: "Preview" },
           ]}
         />
+        {template && !draft.content.trim() && (
+          <button
+            type="button"
+            className={`glass-btn-secondary ${classes.button}`}
+            onClick={() => patch({ content: template })}
+          >
+            <IconTemplate size={15} /> Start from the{" "}
+            {CHRONICLE_CATEGORY_LABELS[draft.category]} template
+          </button>
+        )}
       </div>
 
       {mode === "write" ? (

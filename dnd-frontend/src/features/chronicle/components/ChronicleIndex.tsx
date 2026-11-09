@@ -3,6 +3,7 @@ import {
   IconClock,
   IconFlag,
   IconFolderPlus,
+  IconLinkOff,
   IconPin,
   IconPlus,
 } from "@tabler/icons-react";
@@ -16,25 +17,34 @@ import {
 import { timeAgo } from "@utils/timeAgo";
 import { useChronicleStore } from "@store/chronicle/chronicleStore";
 import { isShared } from "@features/chronicle/chronicleUtils";
+import {
+  missingLinks,
+  type TitleIndex,
+} from "@features/chronicle/chronicleLinks";
 import classes from "@features/chronicle/Chronicle.module.css";
 
 interface ChronicleIndexProps {
   entries: ChronicleEntry[];
+  index: TitleIndex<ChronicleEntry>;
   campaignName: string | null;
   isDm: boolean;
   onOpen: (id: string) => void;
+  onCreate: (title: string) => void;
   onNewEntry: () => void;
   onNewFolder: () => void;
 }
 
 const RECENT = 8;
+const MISSING = 12;
 
 /** The landing view: what the Chronicle holds, and the entries most likely needed next. */
 export function ChronicleIndex({
   entries,
+  index,
   campaignName,
   isDm,
   onOpen,
+  onCreate,
   onNewEntry,
   onNewFolder,
 }: ChronicleIndexProps) {
@@ -52,6 +62,10 @@ export function ChronicleIndex({
         .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))
         .slice(0, RECENT),
     [entries],
+  );
+  const missing = useMemo(
+    () => (isDm ? missingLinks(entries, index).slice(0, MISSING) : []),
+    [entries, index, isDm],
   );
   const pinned = entries.filter((e) => e.pinned);
   const flagged = entries.filter((e) => e.flag !== "None" && e.flag !== "Done");
@@ -180,6 +194,28 @@ export function ChronicleIndex({
                   </span>,
                 ),
               )}
+            </section>
+          )}
+          {missing.length > 0 && (
+            <section>
+              <h2 className={classes.indexHeading}>
+                <IconLinkOff size={14} /> Mentioned, not written yet
+              </h2>
+              {missing.map((m) => (
+                <button
+                  key={m.title}
+                  type="button"
+                  className={classes.indexItem}
+                  onClick={() => onCreate(m.title)}
+                  title={`Write the ${m.title} entry`}
+                >
+                  <IconPlus size={13} />
+                  <span className={classes.rowLabel}>{m.title}</span>
+                  <span className={classes.indexWhen}>
+                    {m.count} {m.count === 1 ? "mention" : "mentions"}
+                  </span>
+                </button>
+              ))}
             </section>
           )}
         </div>

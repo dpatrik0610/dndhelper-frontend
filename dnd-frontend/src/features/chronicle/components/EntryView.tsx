@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import {
   IconChevronRight,
   IconEye,
+  IconEyeOff,
   IconFlag,
   IconFolder,
   IconLock,
@@ -36,6 +37,7 @@ interface EntryViewProps {
   onLink: (href: string) => void;
   onEdit: () => void;
   onDelete: () => void;
+  onSetVisibility: (visibility: "All" | "Private") => void;
 }
 
 const badge = (color: string) => ({ ["--badge-color" as string]: color });
@@ -49,6 +51,7 @@ export function EntryView({
   onLink,
   onEdit,
   onDelete,
+  onSetVisibility,
 }: EntryViewProps) {
   const markdown = useMemo(
     () => toMarkdown(entry.content, index, isDm),
@@ -84,6 +87,27 @@ export function EntryView({
         <h1 className={classes.folioTitle}>{entry.title}</h1>
         {isDm && (
           <div className={classes.folioActions}>
+            {entry.visibility !== "Private" ? (
+              <button
+                type="button"
+                className={`glass-btn-secondary ${classes.button}`}
+                onClick={() => onSetVisibility("Private")}
+                title="Stop sharing this entry with players"
+              >
+                <IconEyeOff size={14} /> Hide
+              </button>
+            ) : (
+              !via && (
+                <button
+                  type="button"
+                  className={`glass-btn-secondary ${classes.button}`}
+                  onClick={() => onSetVisibility("All")}
+                  title="Share with all players. %%secret%% text stays hidden."
+                >
+                  <IconEye size={14} /> Reveal
+                </button>
+              )
+            )}
             <button
               type="button"
               className={`glass-btn-secondary ${classes.button}`}
@@ -142,7 +166,12 @@ export function EntryView({
         ))}
       </div>
 
-      <div className={classes.page}>
+      <div
+        className={classes.page}
+        style={{
+          ["--ribbon" as string]: CHRONICLE_CATEGORY_COLORS[entry.category],
+        }}
+      >
         {entry.content.trim() ? (
           <div data-chronicle-content>
             <MarkdownRenderer
