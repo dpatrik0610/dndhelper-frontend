@@ -31,9 +31,11 @@ export interface CritterScore {
   caught: CritterCounts;
 }
 
-/** Records a caught theme critter; returns the user's new score row (also broadcast as CritterScoreChanged). */
-export const catchCritter = (name: string) =>
-  apiClient<CritterScore>(`/user/me/critters/${encodeURIComponent(name)}`, { method: "POST" });
+/** Claims the server's current critter spawn: the new score row if this user was first, null if it was already gone. */
+export const catchCritter = (name: string, spawnId: string) =>
+  apiClient<CritterScore | null>(`/user/me/critters/${encodeURIComponent(name)}?spawn=${encodeURIComponent(spawnId)}`, {
+    method: "POST",
+  });
 
 /** Everyone's catches, most first (the hidden /scoreboard page). */
 export const getCritterScoreboard = () => apiClient<CritterScore[]>("/user/critters/scoreboard");

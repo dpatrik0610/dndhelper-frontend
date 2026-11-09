@@ -49,7 +49,7 @@ export default function ScoreboardPage() {
             Critter Scoreboard
           </Title>
           <Text c="dimmed" size="sm" mt={4}>
-            Every theme has a critter that wanders by now and then. Click it to catch it.
+            Now and then a critter wanders by for everyone at once, in the shape of your theme. First click catches it.
           </Text>
           <Group gap="sm" mt="md">
             {ALL_CRITTERS.map(({ theme, name }) => {

@@ -1,19 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { SidebarThemeVariant } from "@appTypes/ThemeTypes";
-import { catchCritter } from "@services/userService";
+import { useSignalRConnection } from "@signalr/hooks/useSignalRConnection";
+import { catchCritter, type CritterScore } from "@services/userService";
 import { CRITTERS, type Critter, type Motion } from "./critters";
 import s from "./ThemeCritter.module.css";
 
 /**
- * Every few minutes the active theme's critter wanders across the screen. Clicking it "catches" it;
- * catches are stored on the user's account (see the hidden /scoreboard page). It sits above the page
- * but only its own few pixels take clicks. The critters themselves are in critters.tsx.
+ * The server spawns a critter for everyone at once (CritterSpawned); each player sees their theme's
+ * critter cross the screen and the first click wins it (see the hidden /scoreboard page). It sits above
+ * the page but only its own few pixels take clicks. The critters themselves are in critters.tsx.
  */
-
-const FIRST_VISIT_MS: [number, number] = [25_000, 60_000];
-const NEXT_VISIT_MS: [number, number] = [180_000, 360_000];
-
-const between = ([min, max]: [number, number]) => min + Math.random() * (max - min);
 
 /** A critter's art at a given size (still uses its idle animation). */
 export function CritterIcon({ name, size = 28 }: { name: string; size?: number }) {
@@ -83,13 +79,21 @@ function plan(motion: Motion): Route {
   }
 }
 
-function Visit({ critter, onDone }: { critter: Critter; onDone: () => void }) {
+interface VisitProps {
+  critter: Critter;
+  spawnId: string;
+  takenBy: string | null;
+  onDone: () => void;
+}
+
+function Visit({ critter, spawnId, takenBy, onDone }: VisitProps) {
   const rootRef = useRef<HTMLButtonElement>(null);
   const bodyRef = useRef<HTMLSpanElement>(null);
   const flight = useRef<Animation | null>(null);
   const [route] = useState(() => plan(critter.motion));
-  const [caught, setCaught] = useState(false);
-  const [count, setCount] = useState<number | null>(null);
+  const [clicked, setClicked] = useState(false);
+  const [result, setResult] = useState<CritterScore | null | undefined>(undefined);
+  const gone = clicked || takenBy !== null;
 
   useEffect(() => {
     const anim = rootRef.current?.animate(route.frames, { duration: route.duration, fill: "forwards" });
@@ -99,17 +103,12 @@ function Visit({ critter, onDone }: { critter: Critter; onDone: () => void }) {
     return () => anim.cancel();
   }, [route, onDone]);
 
-  const catchIt = () => {
-    if (caught) return;
+  useEffect(() => {
+    if (!gone) return;
     if (flight.current) {
       flight.current.pause();
       flight.current.onfinish = null;
     }
-    setCaught(true);
-    // The label shows the stored total once the server answers; if it can't, it just says "caught".
-    catchCritter(critter.name)
-      .then((score) => setCount(score.caught[critter.name] ?? null))
-      .catch(() => undefined);
     bodyRef.current?.animate(
       [
         { transform: "scale(1) rotate(0deg)", opacity: 1 },
@@ -117,8 +116,27 @@ function Visit({ critter, onDone }: { critter: Critter; onDone: () => void }) {
       ],
       { duration: 380, easing: "ease-out", fill: "forwards" }
     );
-    window.setTimeout(onDone, 1500);
+    const timer = window.setTimeout(onDone, 2000);
+    return () => window.clearTimeout(timer);
+  }, [gone, onDone]);
+
+  const catchIt = () => {
+    if (gone) return;
+    setClicked(true);
+    catchCritter(critter.name, spawnId)
+      .then(setResult)
+      .catch(() => setResult(null));
   };
+
+  const count = result?.caught[critter.name] ?? 0;
+  const lost = result === null || (!clicked && takenBy !== null);
+  const label = result
+    ? `${critter.name} caught${count > 1 ? ` ×${count}` : ""}`
+    : lost
+      ? takenBy
+        ? `${takenBy} got it first`
+        : "It got away"
+      : null;
 
   return (
     <button
@@ -134,33 +152,42 @@ function Visit({ critter, onDone }: { critter: Critter; onDone: () => void }) {
           {critter.art}
         </svg>
       </span>
-      {caught && (
-        <span className={s.label}>
-          {critter.name} caught{count !== null && count > 1 ? ` ×${count}` : ""}
-        </span>
-      )}
+      {label && <span className={s.label}>{label}</span>}
     </button>
   );
 }
 
 export function ThemeCritter({ theme }: { theme: SidebarThemeVariant }) {
   const critter = CRITTERS[theme];
-  const [visit, setVisit] = useState<number | null>(null);
-  const [retry, setRetry] = useState(0);
-  const firstVisit = useRef(true);
+  const { connection } = useSignalRConnection();
+  const [spawnId, setSpawnId] = useState<string | null>(null);
+  const [taken, setTaken] = useState<{ spawnId: string; username: string } | null>(null);
 
   useEffect(() => {
-    if (!critter || visit !== null) return;
-    const wait = between(firstVisit.current ? FIRST_VISIT_MS : NEXT_VISIT_MS);
-    firstVisit.current = false;
-    // Nobody is watching a hidden tab; wait again instead of wasting the visit.
-    const timer = window.setTimeout(() => (document.hidden ? setRetry((r) => r + 1) : setVisit(Date.now())), wait);
-    return () => window.clearTimeout(timer);
-  }, [critter, visit, retry]);
+    if (!connection) return;
+    const onSpawned = (id: string) => {
+      if (!document.hidden) setSpawnId(id);
+    };
+    const onCaught = (id: string, username: string) => setTaken({ spawnId: id, username });
+    connection.on("CritterSpawned", onSpawned);
+    connection.on("CritterCaught", onCaught);
+    return () => {
+      connection.off("CritterSpawned", onSpawned);
+      connection.off("CritterCaught", onCaught);
+    };
+  }, [connection]);
 
   // Stable so the flight animation isn't restarted on re-render.
-  const [end] = useState(() => () => setVisit(null));
+  const [end] = useState(() => () => setSpawnId(null));
 
-  if (!critter || visit === null) return null;
-  return <Visit key={visit} critter={critter} onDone={end} />;
+  if (!critter || spawnId === null) return null;
+  return (
+    <Visit
+      key={spawnId}
+      critter={critter}
+      spawnId={spawnId}
+      takenBy={taken?.spawnId === spawnId ? taken.username : null}
+      onDone={end}
+    />
+  );
 }
