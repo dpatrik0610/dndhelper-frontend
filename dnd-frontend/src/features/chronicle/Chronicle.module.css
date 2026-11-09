@@ -1419,39 +1419,255 @@
 /* ── Graph ── */
 
 .graph {
-  position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
   min-height: 0;
-  background: radial-gradient(60% 60% at 50% 45%, var(--sheet), var(--paper));
+}
+
+.graphCanvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(circle, var(--line-strong) 1px, transparent 1.6px),
+    radial-gradient(70% 70% at 50% 45%, var(--sheet), transparent);
+  background-repeat: repeat, no-repeat;
 }
 
 .graphSvg {
   display: block;
-  flex: 1;
   width: 100%;
-  min-height: 0;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.graphSvg:active {
+  cursor: grabbing;
+}
+
+.graphCanvas[data-glide] {
+  transition:
+    background-position 0.35s ease,
+    background-size 0.35s ease;
+}
+
+.graphCanvas[data-glide] .graphWorld {
+  transition: transform 0.35s ease;
+}
+
+.graphEdge {
+  stroke: var(--line-strong);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+  transition:
+    opacity 0.2s ease,
+    stroke 0.2s ease;
+}
+
+.graphEdge[data-lit] {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+}
+
+.graphEdge[data-dim] {
+  opacity: 0.15;
+}
+
+.graphNode {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.2s ease;
+}
+
+.graphNode[data-dim] {
+  opacity: 0.2;
+}
+
+.graphHalo {
+  fill: var(--c);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.graphNode:hover .graphHalo,
+.graphNode[data-match] .graphHalo,
+.graphNode[data-picked] .graphHalo {
+  opacity: 0.28;
+}
+
+.graphDot {
+  fill: var(--c);
+  stroke: color-mix(in srgb, var(--c) 55%, var(--ink));
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.graphNode[data-open] .graphDot {
+  stroke: var(--ink);
+  stroke-width: 3;
+}
+
+.graphNode[data-picked] .graphDot,
+.graphNode:focus-visible .graphDot {
+  stroke: var(--accent);
+  stroke-width: 3.5;
+}
+
+.graphLabel {
+  font-family: var(--ui);
+  font-weight: 500;
+  fill: var(--ink);
+  stroke: var(--paper);
+  stroke-linejoin: round;
+  paint-order: stroke;
+  pointer-events: none;
+}
+
+.graphNode[data-picked] .graphLabel {
+  font-weight: 700;
+}
+
+.graphSearch {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: min(260px, calc(100% - 76px));
+}
+
+.graphControls {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--sheet);
+  box-shadow: var(--lift);
+}
+
+.graphCard {
+  position: absolute;
+  top: 62px;
+  left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 300px;
+  max-height: calc(100% - 76px);
+  padding: 12px 14px 14px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--sheet);
+  box-shadow: var(--sheet-shadow);
+}
+
+.graphCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.graphCardKind {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.graphCardTitle {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+}
+
+.graphCardText {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 14.5px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  color: var(--soft);
+}
+
+.graphChipLabel {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graphHint {
+  position: absolute;
+  bottom: 10px;
+  left: 16px;
+  margin: 0;
+  font-size: 12px;
+  color: var(--faint);
+  pointer-events: none;
 }
 
 .graphLegend {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 18px;
-  padding: 12px 20px;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 88px 10px 16px;
   border-top: 1px solid var(--line);
   font-size: 12.5px;
   color: var(--soft);
-  padding-right: 88px;
 }
 
-.graphNode {
-  cursor: pointer;
+.graphLegend .chip:not([data-active]) {
+  opacity: 0.55;
+  text-decoration: line-through;
 }
 
-.graphNode:focus-visible circle {
-  stroke: var(--accent);
-  stroke-width: 3;
+.graphStats {
+  margin-left: auto;
+  color: var(--faint);
+}
+
+@media (max-width: 700px) {
+  .graphCard {
+    top: auto;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    width: auto;
+    max-height: 48%;
+  }
+
+  .graphHint {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .graphCanvas[data-glide],
+  .graphCanvas[data-glide] .graphWorld,
+  .graphEdge,
+  .graphNode,
+  .graphHalo {
+    transition: none;
+  }
 }
 
 .centered {
