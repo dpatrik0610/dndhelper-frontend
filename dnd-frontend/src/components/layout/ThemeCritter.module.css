@@ -17,6 +17,73 @@
   will-change: transform;
 }
 
+.golden {
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  filter: drop-shadow(0 0 4px #ffe58a) drop-shadow(0 0 12px #f5a800);
+}
+
+.golden .body,
+.golden .body svg {
+  width: 38px;
+  height: 38px;
+}
+
+.golden .label {
+  color: #ffe58a;
+  text-shadow: 0 0 10px #f5a800, 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.goldFlash {
+  position: fixed;
+  inset: 0;
+  z-index: 149;
+  pointer-events: none;
+  box-shadow: inset 0 0 140px rgba(255, 200, 60, 0.55);
+  opacity: 0;
+  animation: goldFlash 1.6s ease-out forwards;
+}
+
+@keyframes goldFlash {
+  15% { opacity: 1; }
+  40% { opacity: 0.35; }
+  60% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+.spark {
+  position: fixed;
+  z-index: 149;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  pointer-events: none;
+  background: #ffe58a;
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+}
+
+.bubble {
+  clip-path: none;
+  background: none;
+  border: 1px solid #ffe58a;
+  border-radius: 50%;
+}
+
+.ink,
+.snow,
+.dust,
+.drip {
+  clip-path: none;
+  border-radius: 50%;
+}
+
+.ink { width: 6px; height: 6px; background: #312e81; }
+.snow { width: 5px; height: 5px; background: #fff; }
+.dust { width: 4px; height: 4px; background: #f5c542; }
+.drip { width: 5px; height: 7px; background: #be123c; }
+.pixel { clip-path: none; width: 5px; height: 5px; background: #00f0ff; box-shadow: 4px 3px 0 #ff2bd6; }
+
 .critter:focus {
   outline: none;
 }
@@ -76,6 +143,19 @@
 .sway { transform-box: view-box; transform-origin: 16px 4px; animation: sway 1.8s ease-in-out infinite alternate; }
 .scuttle { animation: scuttle 0.14s steps(2) infinite; }
 .sting { transform-box: view-box; transform-origin: 10px 20px; animation: sting 0.9s ease-in-out infinite alternate; }
+.tilt { transform-box: view-box; transform-origin: 16px 16px; animation: tilt 1.4s ease-in-out infinite alternate; }
+.wag { transform-box: view-box; transform-origin: 9px 19px; animation: wag 0.35s ease-in-out infinite alternate; }
+.breathe { transform-box: view-box; transform-origin: 16px 26px; animation: breathe 0.9s ease-in-out infinite alternate; }
+.twinkle { transform-box: view-box; transform-origin: 19px 17px; animation: twinkle 0.7s ease-in-out infinite alternate; }
+.key { transform-box: fill-box; transform-origin: center; animation: rotor 0.5s linear infinite alternate; }
+.wink { transform-box: fill-box; transform-origin: center; animation: blink 2.4s ease-in-out infinite; }
+.chomp { animation: chomp 1.1s ease-in-out infinite alternate; }
+.fan { transform-box: view-box; transform-origin: 13px 22px; animation: fan 1.6s ease-in-out infinite alternate; }
+.spinBox { transform-box: fill-box; transform-origin: center; animation: spin 1.4s linear infinite; }
+.coin { transform-box: view-box; transform-origin: 16px 16px; animation: coin 0.9s linear infinite; }
+.glitch { animation: glitch 2.2s steps(1) infinite; }
+.mane { transform-box: fill-box; transform-origin: center; animation: mane 0.9s steps(3) infinite alternate; }
+.flicker { transform-box: fill-box; transform-origin: 50% 100%; animation: flicker 0.25s ease-in-out infinite alternate; }
 
 @keyframes flapX { from { transform: scaleX(1); } to { transform: scaleX(0.3); } }
 @keyframes flapY { from { transform: scaleY(1); } to { transform: scaleY(0.25); } }
@@ -88,4 +168,19 @@
 @keyframes flutter { from { transform: skewY(-7deg) rotate(-5deg); } to { transform: skewY(7deg) rotate(5deg); } }
 @keyframes sway { from { transform: rotate(-22deg); } to { transform: rotate(18deg); } }
 @keyframes scuttle { 50% { transform: translateX(1px); } }
+@keyframes tilt { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+@keyframes wag { from { transform: rotate(-9deg); } to { transform: rotate(12deg); } }
+@keyframes breathe { from { transform: scale(1, 1); } to { transform: scale(1.07, 0.92); } }
+@keyframes twinkle { from { transform: scale(0.85) rotate(-10deg); } to { transform: scale(1.12) rotate(10deg); } }
+@keyframes chomp { from { transform: translateY(0); } to { transform: translateY(-2.4px); } }
+@keyframes fan { from { transform: scale(0.82); } to { transform: scale(1.04); } }
+@keyframes coin { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0.08); } }
+@keyframes flicker { from { transform: scale(1, 1); } to { transform: scale(0.85, 1.15); } }
+@keyframes glitch {
+  0%, 100% { transform: none; filter: none; }
+  84% { transform: translateX(-1.5px) skewX(-10deg); filter: drop-shadow(2px 0 0 #00f0ff) drop-shadow(-2px 0 0 #ff2bd6); }
+  89% { transform: translate(1.5px, 0.6px); filter: drop-shadow(-2px 0 0 #00f0ff) drop-shadow(2px 0 0 #ff2bd6); }
+  94% { transform: none; filter: none; }
+}
+@keyframes mane { from { transform: scale(0.94) rotate(-5deg); } to { transform: scale(1.06) rotate(5deg); } }
 @keyframes sting { from { transform: rotate(-5deg); } to { transform: rotate(7deg); } }

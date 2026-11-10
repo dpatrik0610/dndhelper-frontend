@@ -4,6 +4,7 @@ import { Paper, Title, Tooltip } from "@mantine/core";
 import { ListSkeleton } from "@components/common/Skeletons";
 import { CritterIcon } from "@components/layout/ThemeCritter";
 import { ALL_CRITTERS } from "@components/layout/critters";
+import { ALL_GOLDEN } from "@components/layout/goldenCritters";
 import { getCritterScoreboard, type CritterScore } from "@services/userService";
 import { useUsername } from "@store/auth/authSelectors";
 import { themeOptions } from "@appTypes/ThemeTypes";
@@ -36,6 +37,7 @@ export default function ScoreboardPage() {
 
   const mine = scores?.find((s) => s.username === me)?.caught ?? {};
   const found = ALL_CRITTERS.filter((c) => mine[c.name]).length;
+  const foundGolden = ALL_GOLDEN.filter((c) => mine[c.name]).length;
 
   return (
     <div className={styles.page}>
@@ -70,6 +72,26 @@ export default function ScoreboardPage() {
             );
           })}
         </div>
+
+        <div className={styles.progressHead}>
+          <span className={`${styles.eyebrow} ${styles.goldText}`}>Golden critters</span>
+          <span className={styles.progressValue}>
+            {foundGolden} / {ALL_GOLDEN.length} found
+          </span>
+        </div>
+        <div className={styles.collection}>
+          {ALL_GOLDEN.map(({ theme, name }) => {
+            const n = mine[name] ?? 0;
+            const themeName = themeOptions.find((t) => t.key === theme)?.name;
+            return (
+              <Tooltip key={name} label={n ? `${name} (${themeName}): caught ×${n}` : `??? (${themeName}): extremely rare`} withArrow>
+                <div className={`${styles.slot} ${n ? styles.slotGolden : styles.slotUnknown}`}>
+                  <CritterIcon name={name} size={26} />
+                </div>
+              </Tooltip>
+            );
+          })}
+        </div>
       </Paper>
 
       {!failed && !scores ? (
@@ -89,6 +111,7 @@ export default function ScoreboardPage() {
               </div>
               {scores!.map((s, i) => {
                 const caught = ALL_CRITTERS.filter((c) => s.caught[c.name]);
+                const golden = ALL_GOLDEN.filter((c) => s.caught[c.name]);
                 return (
                   <div key={s.username} className={`${styles.row} ${s.username === me ? styles.rowMe : ""}`}>
                     <div className={styles.rank} data-place={i + 1}>
@@ -110,6 +133,14 @@ export default function ScoreboardPage() {
                       {caught.map((c) => (
                         <Tooltip key={c.name} label={c.name} withArrow>
                           <div className={styles.catch}>
+                            <CritterIcon name={c.name} size={18} />
+                            <span className={styles.count}>×{s.caught[c.name]}</span>
+                          </div>
+                        </Tooltip>
+                      ))}
+                      {golden.map((c) => (
+                        <Tooltip key={c.name} label={c.name} withArrow>
+                          <div className={`${styles.catch} ${styles.catchGolden}`}>
                             <CritterIcon name={c.name} size={18} />
                             <span className={styles.count}>×{s.caught[c.name]}</span>
                           </div>

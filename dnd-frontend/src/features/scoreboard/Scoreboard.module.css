@@ -81,6 +81,31 @@
   border-style: dashed;
 }
 
+.goldText {
+  color: #f5c542;
+}
+
+.slotGolden {
+  border-color: rgba(245, 197, 66, 0.7);
+  background: rgba(245, 197, 66, 0.1);
+  box-shadow: 0 0 10px rgba(245, 168, 0, 0.3);
+}
+
+.slotUnknown {
+  border-style: dashed;
+  border-color: rgba(245, 197, 66, 0.3);
+}
+
+.slotUnknown svg {
+  filter: brightness(0);
+  opacity: 0.55;
+}
+
+.catchGolden {
+  background: rgba(245, 197, 66, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(245, 197, 66, 0.55);
+}
+
 .listHead,
 .row {
   display: grid;

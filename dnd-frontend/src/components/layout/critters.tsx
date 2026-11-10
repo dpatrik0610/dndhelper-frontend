@@ -9,18 +9,20 @@ import s from "./ThemeCritter.module.css";
  * also the backend's allowlist in UserService.Critters: keep the two in step.
  */
 
-export type Motion = "fly" | "sink" | "rise" | "roll" | "lurk";
+export type Motion = "fly" | "sink" | "rise" | "roll" | "lurk" | "swoop" | "bob" | "hop" | "dart" | "shoot" | "strut" | "loop" | "toss" | "glitch";
+export type Trail = "sparkle" | "bubble" | "ink" | "snow" | "dust" | "drip" | "pixel";
 
 export interface Critter {
   name: string;
   motion: Motion;
   /** Art faces right; mirror it when travelling left. */
   facing?: boolean;
+  trail?: Trail;
   art: ReactNode;
 }
 
 /** Path plus its mirror across the vertical centre line, for symmetric wings. */
-const pair = (d: string, fill: string, opacity?: number) => (
+export const pair = (d: string, fill: string, opacity?: number) => (
   <>
     <path d={d} fill={fill} fillOpacity={opacity} />
     <path d={d} fill={fill} fillOpacity={opacity} transform="matrix(-1 0 0 1 32 0)" />
