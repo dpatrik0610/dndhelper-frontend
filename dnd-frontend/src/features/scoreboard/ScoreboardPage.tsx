@@ -1,23 +1,19 @@
 import { useEffect, useState } from "react";
 import { useSignalRConnection } from "@signalr/hooks/useSignalRConnection";
-import { Badge, Box, Group, Paper, Stack, Text, Title, Tooltip } from "@mantine/core";
+import { Paper, Title, Tooltip } from "@mantine/core";
 import { ListSkeleton } from "@components/common/Skeletons";
 import { CritterIcon } from "@components/layout/ThemeCritter";
 import { ALL_CRITTERS } from "@components/layout/critters";
 import { getCritterScoreboard, type CritterScore } from "@services/userService";
 import { useUsername } from "@store/auth/authSelectors";
-import { useIsMobile } from "@hooks/useIsMobile";
 import { themeOptions } from "@appTypes/ThemeTypes";
-
-const MEDALS = ["🥇", "🥈", "🥉"];
+import styles from "./Scoreboard.module.css";
 
 const byScore = (a: CritterScore, b: CritterScore) =>
   b.total - a.total || a.username.localeCompare(b.username, undefined, { sensitivity: "base" });
-const ACCENT = "var(--theme-color-accent-primary)";
 
 /** Hidden page (no nav link, reached at /scoreboard): who has caught the most theme critters. */
 export default function ScoreboardPage() {
-  const isMobile = useIsMobile();
   const me = useUsername();
   const [scores, setScores] = useState<CritterScore[] | null>(null);
   const [failed, setFailed] = useState(false);
@@ -39,87 +35,98 @@ export default function ScoreboardPage() {
   }, [connection]);
 
   const mine = scores?.find((s) => s.username === me)?.caught ?? {};
+  const found = ALL_CRITTERS.filter((c) => mine[c.name]).length;
+  const top = scores?.[0]?.total || 1;
 
   return (
-    <Box p={isMobile ? "xs" : "md"} m="0 auto" maw={900} w="100%">
-      <Stack gap="md">
-        {/* Your collection: every critter, the ones you haven't caught yet greyed out */}
-        <Paper p="md" radius="md" withBorder>
-          <Title order={2} className="narrative-title">
-            Critter Scoreboard
-          </Title>
-          <Text c="dimmed" size="sm" mt={4}>
-            Now and then a critter wanders by for everyone at once, in the shape of your theme. First click catches it.
-          </Text>
-          <Group gap="sm" mt="md">
-            {ALL_CRITTERS.map(({ theme, name }) => {
-              const n = mine[name] ?? 0;
-              const themeName = themeOptions.find((t) => t.key === theme)?.name;
-              return (
-                <Tooltip key={name} label={`${name} (${themeName}): ${n ? `caught ×${n}` : "not caught yet"}`} withArrow>
-                  <Box c={ACCENT} style={n ? undefined : { opacity: 0.25, filter: "grayscale(1)" }}>
-                    <CritterIcon name={name} size={30} />
-                  </Box>
-                </Tooltip>
-              );
-            })}
-          </Group>
-        </Paper>
+    <div className={styles.page}>
+      <Paper radius="md" withBorder className={`${styles.panel} ${styles.header}`}>
+        <Title order={2} className={`narrative-title ${styles.title}`}>
+          Critter Scoreboard
+        </Title>
+        <p className={styles.lede}>
+          Now and then a critter wanders by for everyone at once, in the shape of your theme. First click catches it.
+        </p>
 
-        {failed ? (
-          <Text c="red">Couldn't load the scoreboard.</Text>
-        ) : !scores ? (
-          <ListSkeleton rows={4} />
-        ) : scores.length === 0 ? (
-          <Text c="dimmed">Nobody has caught a critter yet.</Text>
-        ) : (
-          <Stack gap="xs">
-            {scores.map((s, i) => (
-              <Paper
-                key={s.username}
-                p="sm"
-                radius="md"
-                withBorder
-                style={s.username === me ? { borderColor: "var(--theme-border-glow)" } : undefined}
-              >
-                <Group justify="space-between" wrap="nowrap">
-                  <Group gap="sm" wrap="nowrap">
-                    <Text fw={700} w={36} ta="center" size={i < MEDALS.length ? "xl" : "md"}>
-                      {MEDALS[i] ?? `#${i + 1}`}
-                    </Text>
-                    <Stack gap={4}>
-                      <Text fw={600}>
-                        {s.username}
-                        {s.username === me && (
-                          <Text span c="dimmed" size="sm">
-                            {" "}
-                            (you)
-                          </Text>
-                        )}
-                      </Text>
-                      <Group gap={10}>
-                        {ALL_CRITTERS.filter((c) => s.caught[c.name]).map((c) => (
-                          <Tooltip key={c.name} label={c.name} withArrow>
-                            <Group gap={2} wrap="nowrap" c={ACCENT}>
-                              <CritterIcon name={c.name} size={20} />
-                              <Text size="xs" c="var(--theme-color-text-secondary)">
-                                ×{s.caught[c.name]}
-                              </Text>
-                            </Group>
-                          </Tooltip>
-                        ))}
-                      </Group>
-                    </Stack>
-                  </Group>
-                  <Badge size="lg" variant="light">
-                    {s.total}
-                  </Badge>
-                </Group>
-              </Paper>
-            ))}
-          </Stack>
-        )}
-      </Stack>
-    </Box>
+        <div className={styles.progressHead}>
+          <span className={styles.eyebrow}>Your collection</span>
+          <span className={styles.progressValue}>
+            {found} / {ALL_CRITTERS.length} species
+          </span>
+        </div>
+        <div className="glass-progress">
+          <div className="glass-progress-bar" style={{ width: `${(found / ALL_CRITTERS.length) * 100}%` }} />
+        </div>
+
+        <div className={styles.collection}>
+          {ALL_CRITTERS.map(({ theme, name }) => {
+            const n = mine[name] ?? 0;
+            const themeName = themeOptions.find((t) => t.key === theme)?.name;
+            return (
+              <Tooltip key={name} label={`${name} (${themeName}): ${n ? `caught ×${n}` : "not caught yet"}`} withArrow>
+                <div className={`${styles.slot} ${n ? "" : styles.slotMissing}`}>
+                  <CritterIcon name={name} size={26} />
+                </div>
+              </Tooltip>
+            );
+          })}
+        </div>
+      </Paper>
+
+      {!failed && !scores ? (
+        <ListSkeleton rows={4} />
+      ) : (
+        <Paper radius="md" withBorder className={styles.panel}>
+          {failed ? (
+            <div className={styles.state}>Couldn't load the scoreboard.</div>
+          ) : scores!.length === 0 ? (
+            <div className={styles.state}>Nobody has caught a critter yet.</div>
+          ) : (
+            <>
+              <div className={styles.listHead}>
+                <span className={styles.eyebrow}>#</span>
+                <span className={styles.eyebrow}>Player</span>
+                <span className={styles.eyebrow}>Caught</span>
+              </div>
+              {scores!.map((s, i) => {
+                const caught = ALL_CRITTERS.filter((c) => s.caught[c.name]);
+                return (
+                  <div key={s.username} className={`${styles.row} ${s.username === me ? styles.rowMe : ""}`}>
+                    <div className={styles.rank} data-place={i + 1}>
+                      {i + 1}
+                    </div>
+                    <div className={styles.who}>
+                      <div className={styles.name}>
+                        <span className={styles.nameText}>{s.username}</span>
+                        {s.username === me && <span className={styles.you}>You</span>}
+                      </div>
+                      <div className={`glass-progress ${styles.share}`}>
+                        <div className="glass-progress-bar" style={{ width: `${(s.total / top) * 100}%` }} />
+                      </div>
+                    </div>
+                    <div className={styles.total}>
+                      {s.total}
+                      <span className={styles.species}>
+                        {caught.length}/{ALL_CRITTERS.length} species
+                      </span>
+                    </div>
+                    <div className={styles.catches}>
+                      {caught.map((c) => (
+                        <Tooltip key={c.name} label={c.name} withArrow>
+                          <div className={styles.catch}>
+                            <CritterIcon name={c.name} size={18} />
+                            <span className={styles.count}>×{s.caught[c.name]}</span>
+                          </div>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </Paper>
+      )}
+    </div>
   );
 }
