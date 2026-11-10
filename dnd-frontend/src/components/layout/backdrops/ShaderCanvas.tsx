@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { shaderResolution } from "./shaderResolution";
 
 /**
@@ -42,6 +42,7 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
 
 export function ShaderCanvas({ fragment, scale = 1, fps = 30, isStatic = false, staticTime = 6, pixelated = false, className }: ShaderCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [contextVersion, setContextVersion] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -51,20 +52,37 @@ export function ShaderCanvas({ fragment, scale = 1, fps = 30, isStatic = false, 
 
     const vs = compile(gl, gl.VERTEX_SHADER, VERTEX);
     const fs = compile(gl, gl.FRAGMENT_SHADER, fragment);
-    if (!vs || !fs) return;
+    if (!vs || !fs) {
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      return;
+    }
     const prog = gl.createProgram();
-    if (!prog) return;
+    if (!prog) {
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      return;
+    }
     gl.attachShader(prog, vs);
     gl.attachShader(prog, fs);
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
       console.error("[ShaderCanvas] link error:", gl.getProgramInfoLog(prog));
+      gl.deleteProgram(prog);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
       return;
     }
     gl.useProgram(prog);
 
     // one triangle covering the screen
     const buf = gl.createBuffer();
+    if (!buf) {
+      gl.deleteProgram(prog);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      return;
+    }
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
     const aPos = gl.getAttribLocation(prog, "aPos");
@@ -101,19 +119,37 @@ export function ShaderCanvas({ fragment, scale = 1, fps = 30, isStatic = false, 
 
     let raf = 0;
     let last = 0;
+    let contextLost = false;
     const start = performance.now();
     const frameGap = 1000 / fps;
     const loop = (now: number) => {
+      raf = 0;
+      if (document.hidden || contextLost) return;
       raf = requestAnimationFrame(loop);
-      if (document.hidden || now - last < frameGap) return;
-      last = now;
+      if (now - last < frameGap) return;
+      last = now - ((now - last) % frameGap);
       draw((now - start) / 1000);
     };
 
     const onResize = () => {
+      if (contextLost || document.hidden) return;
       resize();
       if (isStatic) draw(staticTime);
     };
+    const onVisibilityChange = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+      if (document.hidden || contextLost) return;
+      onResize();
+      if (!isStatic) raf = requestAnimationFrame(loop);
+    };
+    const onContextLost = (event: Event) => {
+      event.preventDefault();
+      contextLost = true;
+      cancelAnimationFrame(raf);
+      raf = 0;
+    };
+    const onContextRestored = () => setContextVersion((version) => version + 1);
     const observer = new ResizeObserver(onResize);
     observer.observe(canvas);
     let densityQuery: MediaQueryList;
@@ -125,22 +161,29 @@ export function ShaderCanvas({ fragment, scale = 1, fps = 30, isStatic = false, 
     };
     onDensityChange();
     window.addEventListener("resize", onResize);
-    if (isStatic) draw(staticTime);
-    else raf = requestAnimationFrame(loop);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    canvas.addEventListener("webglcontextlost", onContextLost);
+    canvas.addEventListener("webglcontextrestored", onContextRestored);
+    if (!isStatic && !document.hidden) raf = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      canvas.removeEventListener("webglcontextrestored", onContextRestored);
       observer.disconnect();
       densityQuery.removeEventListener("change", onDensityChange);
-      gl.deleteBuffer(buf);
-      gl.deleteProgram(prog);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
+      if (!contextLost) {
+        gl.deleteBuffer(buf);
+        gl.deleteProgram(prog);
+        gl.deleteShader(vs);
+        gl.deleteShader(fs);
+      }
       // no WEBGL_lose_context here: the effect re-runs on the same canvas (StrictMode, prop changes)
       // and a lost context can't be reused; the browser frees it when the canvas is removed.
     };
-  }, [fragment, scale, fps, isStatic, staticTime, pixelated]);
+  }, [fragment, scale, fps, isStatic, staticTime, pixelated, contextVersion]);
 
   return (
     <canvas
