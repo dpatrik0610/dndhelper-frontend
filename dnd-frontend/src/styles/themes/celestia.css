@@ -1,0 +1,275 @@
+.ce-scene {
+  background: #e9f1fb;
+}
+
+.ce-sky {
+  inset: 0;
+  background: linear-gradient(180deg, #4f7cc0 0%, #7fa6db 22%, #b9d3f0 44%, #e2edf9 60%, #fbf6ea 78%, #f2f6fc 100%);
+}
+
+.ce-stars {
+  inset: 0;
+}
+
+.ce-star {
+  position: absolute;
+  background: #ffffff;
+  clip-path: polygon(50% 0, 57% 43%, 100% 50%, 57% 57%, 50% 100%, 43% 57%, 0 50%, 43% 43%);
+  opacity: 0.7;
+  animation: ceTwinkle 4s ease-in-out infinite alternate;
+}
+
+.ce-star--gold {
+  background: #f6dc8e;
+}
+
+.ce-stage {
+  --u: max(calc(100vw / 1600), calc(100vh / 900));
+  left: 50%;
+  bottom: 0;
+  width: calc(1600 * var(--u));
+  height: calc(900 * var(--u));
+  transform: translateX(-50%);
+}
+
+.ce-stage > * {
+  position: absolute;
+}
+
+.ce-world {
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ce-sun {
+  background: radial-gradient(closest-side, rgba(255, 252, 240, 0.95), rgba(255, 246, 220, 0.75) 28%, rgba(255, 240, 205, 0.3) 55%, transparent);
+  animation: ceBreathe 12s ease-in-out infinite alternate;
+}
+
+.ce-rays {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 250, 232, 0) 0deg,
+    rgba(255, 250, 232, 0.4) 3deg,
+    rgba(255, 250, 232, 0) 6deg,
+    rgba(255, 250, 232, 0) 15deg
+  );
+  -webkit-mask-image: radial-gradient(closest-side, #000 16%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 16%, transparent 100%);
+  animation: ceSpin 600s linear infinite;
+}
+
+.ce-halo {
+  animation: ceSpin 360s linear infinite;
+}
+
+.ce-halo--inner {
+  animation-duration: 240s;
+  animation-direction: reverse;
+}
+
+.ce-cloud {
+  --drift: 30;
+  animation: ceDrift 90s ease-in-out infinite alternate;
+}
+
+.ce-cloud--mid {
+  --drift: 40;
+  animation-duration: 60s;
+}
+
+.ce-cloud--front {
+  --drift: -50;
+  animation-duration: 75s;
+}
+
+.ce-isle {
+  animation: ceBob 11s ease-in-out infinite alternate;
+}
+
+.ce-isle--right {
+  animation-duration: 13s;
+  animation-delay: -5s;
+}
+
+.ce-birds {
+  inset: 0;
+}
+
+.ce-bird {
+  position: absolute;
+  animation: ceFly 90s linear infinite;
+}
+
+.ce-bird__body {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: ceGlide 6s ease-in-out infinite alternate;
+}
+
+.ce-bird__body svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ce-bird__wing {
+  transform-box: view-box;
+  transform-origin: 20px 12px;
+  animation: ceFlap var(--flap, 1.6s) ease-in-out infinite;
+}
+
+.ce-beam {
+  clip-path: polygon(44.2% 0, 55.8% 0, 82% 100%, 18% 100%);
+  background: linear-gradient(to bottom, rgba(255, 238, 180, 0.6), rgba(255, 238, 180, 0.18) 55%, transparent);
+  animation: ceBeam 7s ease-in-out infinite alternate;
+}
+
+.ce-lamp {
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 244, 200, 0.95), rgba(255, 214, 120, 0.4) 45%, transparent);
+  animation: ceLamp 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes ceTwinkle {
+  from { opacity: 0.15; transform: scale(0.6); }
+  to   { opacity: 0.9; transform: scale(1); }
+}
+
+@keyframes ceSpin {
+  to { transform: rotate(1turn); }
+}
+
+@keyframes ceBreathe {
+  from { opacity: 0.85; }
+  to   { opacity: 1; }
+}
+
+@keyframes ceDrift {
+  from { transform: translateX(calc(var(--drift) * -1 * var(--u))); }
+  to   { transform: translateX(calc(var(--drift) * var(--u))); }
+}
+
+@keyframes ceBob {
+  from { transform: translateY(0); }
+  to   { transform: translateY(calc(-9 * var(--u))); }
+}
+
+@keyframes ceFly {
+  from { transform: translate3d(calc(-80 * var(--u)), 0, 0); }
+  to   { transform: translate3d(calc(1680 * var(--u)), 0, 0); }
+}
+
+@keyframes ceGlide {
+  from { transform: translateY(0); }
+  to   { transform: translateY(calc(-14 * var(--u))); }
+}
+
+@keyframes ceFlap {
+  0%, 45%, 100% { transform: scaleY(1); }
+  60% { transform: scaleY(-0.45); }
+  75% { transform: scaleY(1); }
+}
+
+@keyframes ceBeam {
+  from { opacity: 0.55; }
+  to   { opacity: 1; }
+}
+
+@keyframes ceLamp {
+  from { opacity: 0.55; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1.08); }
+}
+
+.theme-celestia .portal-particle {
+  animation-name: floatUp;
+}
+
+.theme-celestia .portal-particle::after {
+  width: 7px;
+  height: 7px;
+  background: #f3d27a;
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+}
+
+html.theme-celestia {
+  scrollbar-color: rgba(232, 196, 104, 0.6) transparent;
+}
+
+.theme-celestia ::selection {
+  background: #e8c468;
+  color: #1a1405;
+}
+
+.theme-celestia .narrative-title {
+  font-family: "Cinzel", "Plus Jakarta Sans", serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 3px !important;
+  background: linear-gradient(180deg, #fffaf0 0%, #f6e3a6 48%, #d4a948 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  text-shadow: none !important;
+  filter: drop-shadow(0 0 6px rgba(232, 196, 104, 0.25));
+}
+
+.theme-celestia {
+  --ce-crest: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 20'%3E%3Cg fill='none' stroke='%23e8c468' stroke-width='1' stroke-linecap='round'%3E%3Cpath d='M20.5 10Q16 4.5 11 8.5Q8.5 11.5 11 13Q13.5 14 13.2 11.4'/%3E%3Cpath d='M39.5 10Q44 4.5 49 8.5Q51.5 11.5 49 13Q46.5 14 46.8 11.4'/%3E%3Ccircle cx='30' cy='10' r='6.2' stroke-width='.7' stroke-dasharray='.6 1.6'/%3E%3C/g%3E%3Cpath fill='%23e8c468' d='M30 1.5Q31.4 8.6 38.5 10Q31.4 11.4 30 18.5Q28.6 11.4 21.5 10Q28.6 8.6 30 1.5Z'/%3E%3Ccircle cx='30' cy='10' r='1.3' fill='%23fffaf0'/%3E%3Ccircle cx='4.5' cy='10' r='1.2' fill='%23e8c468'/%3E%3Ccircle cx='55.5' cy='10' r='1.2' fill='%23e8c468'/%3E%3C/svg%3E");
+  --ce-gem: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%23e8c468' d='M6 0Q6.8 5.2 12 6Q6.8 6.8 6 12Q5.2 6.8 0 6Q5.2 5.2 6 0Z'/%3E%3C/svg%3E");
+  --ce-corner-tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cg fill='none' stroke='%23e8c468' stroke-linecap='round'%3E%3Cpath stroke-width='1.2' d='M1.5 21V9Q1.5 1.5 9 1.5H21'/%3E%3Cpath stroke-width='.7' stroke-opacity='.6' d='M5 21V11Q5 5 11 5H21'/%3E%3C/g%3E%3Ccircle cx='9' cy='9' r='1.4' fill='%23e8c468'/%3E%3C/svg%3E");
+  --ce-corner-tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cg transform='matrix(-1 0 0 1 22 0)'%3E%3Cg fill='none' stroke='%23e8c468' stroke-linecap='round'%3E%3Cpath stroke-width='1.2' d='M1.5 21V9Q1.5 1.5 9 1.5H21'/%3E%3Cpath stroke-width='.7' stroke-opacity='.6' d='M5 21V11Q5 5 11 5H21'/%3E%3C/g%3E%3Ccircle cx='9' cy='9' r='1.4' fill='%23e8c468'/%3E%3C/g%3E%3C/svg%3E");
+  --ce-corner-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cg transform='matrix(1 0 0 -1 0 22)'%3E%3Cg fill='none' stroke='%23e8c468' stroke-linecap='round'%3E%3Cpath stroke-width='1.2' d='M1.5 21V9Q1.5 1.5 9 1.5H21'/%3E%3Cpath stroke-width='.7' stroke-opacity='.6' d='M5 21V11Q5 5 11 5H21'/%3E%3C/g%3E%3Ccircle cx='9' cy='9' r='1.4' fill='%23e8c468'/%3E%3C/g%3E%3C/svg%3E");
+  --ce-corner-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 22'%3E%3Cg transform='matrix(-1 0 0 -1 22 22)'%3E%3Cg fill='none' stroke='%23e8c468' stroke-linecap='round'%3E%3Cpath stroke-width='1.2' d='M1.5 21V9Q1.5 1.5 9 1.5H21'/%3E%3Cpath stroke-width='.7' stroke-opacity='.6' d='M5 21V11Q5 5 11 5H21'/%3E%3C/g%3E%3Ccircle cx='9' cy='9' r='1.4' fill='%23e8c468'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.theme-celestia .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: -1;
+  border: 1px solid rgba(214, 226, 245, 0.13);
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(156, 201, 255, 0.07), transparent 35%);
+}
+
+.theme-celestia .mantine-Paper-root:not(.mantine-Paper-root .mantine-Paper-root)::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+  opacity: 0.9;
+  background:
+    var(--ce-crest) no-repeat 50% 0 / calc(var(--panel-reveal) * 48px) calc(var(--panel-reveal) * 16px),
+    linear-gradient(90deg, transparent 6%, rgba(232, 196, 104, 0.5) calc(50% - 30px), transparent calc(50% - 29px), transparent calc(50% + 29px), rgba(232, 196, 104, 0.5) calc(50% + 30px), transparent 94%)
+      no-repeat 50% 8px / calc(var(--panel-reveal) * 100%) 1px,
+    var(--ce-gem) no-repeat 50% 100% / calc(var(--panel-reveal) * 9px) calc(var(--panel-reveal) * 9px),
+    linear-gradient(90deg, transparent 20%, rgba(214, 226, 245, 0.35) calc(50% - 12px), transparent calc(50% - 11px), transparent calc(50% + 11px), rgba(214, 226, 245, 0.35) calc(50% + 12px), transparent 80%)
+      no-repeat 50% calc(100% - 4px) / calc(var(--panel-reveal) * 100%) 1px,
+    var(--ce-corner-tl) no-repeat 0 0 / calc(var(--panel-reveal) * 22px) calc(var(--panel-reveal) * 22px),
+    var(--ce-corner-tr) no-repeat 100% 0 / calc(var(--panel-reveal) * 22px) calc(var(--panel-reveal) * 22px),
+    var(--ce-corner-bl) no-repeat 0 100% / calc(var(--panel-reveal) * 22px) calc(var(--panel-reveal) * 22px),
+    var(--ce-corner-br) no-repeat 100% 100% / calc(var(--panel-reveal) * 22px) calc(var(--panel-reveal) * 22px);
+  animation: panelReveal 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.theme-celestia .mantine-Button-root:not(:disabled):hover {
+  box-shadow: 0 0 0 1px rgba(243, 220, 149, 0.7), 0 0 18px rgba(232, 196, 104, 0.35) !important;
+}
+
+.theme-celestia .glassy-input:focus-within,
+.theme-celestia .glassy-input:focus {
+  border-color: #f3dc95 !important;
+  background: rgba(156, 201, 255, 0.05) !important;
+  box-shadow: 0 0 0 1px rgba(243, 220, 149, 0.35), 0 0 14px rgba(156, 201, 255, 0.3) !important;
+}
+
+@media (max-width: 768px) {
+  :root.theme-celestia {
+    --theme-bg-panel: rgba(15, 28, 58, 0.96) !important;
+    --theme-bg-card: rgba(38, 60, 108, 0.45) !important;
+  }
+}

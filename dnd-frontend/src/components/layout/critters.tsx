@@ -10,7 +10,7 @@ import s from "./ThemeCritter.module.css";
  */
 
 export type Motion = "fly" | "sink" | "rise" | "roll" | "lurk" | "swoop" | "bob" | "hop" | "dart" | "shoot" | "strut" | "loop" | "toss" | "glitch";
-export type Trail = "sparkle" | "bubble" | "ink" | "snow" | "dust" | "drip" | "pixel";
+export type Trail = "sparkle" | "bubble" | "ink" | "snow" | "dust" | "drip" | "pixel" | "feather";
 
 export interface Critter {
   name: string;
@@ -265,6 +265,20 @@ export const CRITTERS: Partial<Record<SidebarThemeVariant, Critter>> = {
         <path d="M13.9 15q2.1 1.5 4.2 0" stroke="#2a0705" strokeWidth="0.7" strokeLinecap="round" fill="none" />
         <path d="M14.7 15.4l.45 1.1.45-.9ZM16.4 15.6l.45.9.45-1.1Z" fill="#fff" />
       </>
+    ),
+  },
+  celestia: {
+    name: "Lodestar",
+    motion: "fly",
+    art: (
+      <g className={s.spin}>
+        <g className={s.pulse}>
+          <path d="M16 1Q17.6 14.4 31 16Q17.6 17.6 16 31Q14.4 17.6 1 16Q14.4 14.4 16 1Z" fill={ACCENT} />
+          <path d="M16 7.5Q16.9 15.1 24.5 16Q16.9 16.9 16 24.5Q15.1 16.9 7.5 16Q15.1 15.1 16 7.5Z" fill="#fffaf0" fillOpacity={0.75} />
+          <path d="M16 9Q16.8 15.2 23 16Q16.8 16.8 16 23Q15.2 16.8 9 16Q15.2 15.2 16 9Z" fill={SECOND} fillOpacity={0.55} transform="rotate(45 16 16)" />
+          <circle cx="16" cy="16" r="2" fill="#fff" />
+        </g>
+      </g>
     ),
   },
 };

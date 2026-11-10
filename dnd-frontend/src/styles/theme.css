@@ -452,6 +452,32 @@
   --theme-gradient-active: linear-gradient(135deg, rgba(255, 77, 26, 0.22), rgba(255, 210, 63, 0.12));
 }
 
+.theme-celestia {
+  --theme-bg-base: rgba(14, 27, 56, 0.74);
+  --theme-bg-panel: rgba(15, 28, 58, 0.9);
+  --theme-bg-panel-opaque: #0f1c3a;
+  --theme-bg-card: rgba(38, 60, 108, 0.5);
+  --theme-bg-hover: rgba(232, 196, 104, 0.12);
+
+  --theme-border-glow: rgba(232, 196, 104, 0.55);
+  --theme-border-accent: rgba(156, 201, 255, 0.45);
+  --theme-border-subtle: rgba(214, 226, 245, 0.18);
+
+  --theme-color-accent-primary: #e8c468;
+  --theme-color-accent-secondary: #9cc9ff;
+  --theme-color-text-primary: #f4f7fc;
+  --theme-color-text-secondary: #c3d3ea;
+  --theme-color-text-glow: #fdf6e0;
+  --theme-color-text-on-accent: #1a1405;
+
+  --theme-glow-shadow-primary: 0 0 14px rgba(232, 196, 104, 0.32);
+  --theme-glow-shadow-secondary: 0 0 14px rgba(156, 201, 255, 0.3);
+
+  --theme-gradient-primary: linear-gradient(135deg, #fbe7a6, #e8c468 50%, #c99a3a);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(251, 231, 166, 0.9), rgba(232, 196, 104, 0.88) 50%, rgba(201, 154, 58, 0.88));
+  --theme-gradient-active: linear-gradient(135deg, rgba(232, 196, 104, 0.2), rgba(156, 201, 255, 0.16));
+}
+
 /* Default styling helper fallbacks */
 .theme-preview-card--interactive {
   cursor: pointer;
@@ -1009,6 +1035,10 @@
     0% { background: #030305 !important; }
     100% { background: #110a0b !important; }
   }
+  @keyframes modalThemeFadeCelestia {
+    0% { background: #030305 !important; }
+    100% { background: #0f1c3a !important; }
+  }
   @keyframes modalThemeFadeDanger {
     0% { background: #030305 !important; }
     100% { background: rgb(40, 12, 18) !important; }
@@ -1063,6 +1093,9 @@
   }
   .mantine-Modal-content.theme-nine-hells {
     animation: modalThemeFadeNineHells 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-celestia {
+    animation: modalThemeFadeCelestia 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .mantine-Modal-content.modal-variant-danger {
     animation: modalThemeFadeDanger 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;

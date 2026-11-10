@@ -350,6 +350,46 @@ export const GOLDEN_CRITTERS: Record<SidebarThemeVariant, Critter> = {
       </g>
     ),
   },
+  celestia: {
+    name: "Golden Dove",
+    motion: "swoop",
+    facing: true,
+    trail: "feather",
+    art: (() => {
+      const body = (
+        <>
+          <path d="M10 17Q4 15 1.5 13.5Q2.5 17 1.5 20.5Q5 19.8 10 20Z" />
+          <path d="M8 18.5Q12 14 19 14.5Q22.5 15 23.5 13.5Q26.5 16 23.5 19.5Q19 23 12 21.5Q9 20.8 8 18.5Z" />
+          <circle cx="24" cy="12" r="3.2" />
+        </>
+      );
+      const wing = <path d="M12.5 17Q8 8 11 2Q15 5 19 9Q21.5 12.5 20 16Z" />;
+      return (
+        <>
+          <g className={s.flapSlowY}>
+            <path d="M15 16Q13 7 18 2Q20 8 21.5 15Z" fill="#dfe8f5" stroke={G2} strokeWidth="1" />
+          </g>
+          <g stroke={G2} strokeWidth="1.8" strokeLinejoin="round">
+            {body}
+          </g>
+          <g fill="#fff">{body}</g>
+          <path d="M26.8 11.2l3.2 1-3.2.9Z" fill={G3} />
+          <circle cx="25" cy="11.3" r="0.65" fill={DARK} />
+          <ellipse className={s.pulse} cx="24" cy="6.8" rx="3.4" ry="1.1" fill="none" stroke={G1} strokeWidth="0.9" />
+          <path d="M28.6 13Q30.6 15.6 29 19" stroke={G3} strokeWidth="0.6" fill="none" />
+          <ellipse cx="30.1" cy="15" rx="1.2" ry="0.55" transform="rotate(50 30.1 15)" fill={G1} />
+          <ellipse cx="29.2" cy="17.2" rx="1.2" ry="0.55" transform="rotate(-30 29.2 17.2)" fill={G2} />
+          <g className={s.flapSlowY}>
+            <g stroke={G2} strokeWidth="1.6" strokeLinejoin="round">
+              {wing}
+            </g>
+            <g fill="#fff">{wing}</g>
+            <path d="M12.6 6.5l3 4M11.8 10.2l3.4 3.2M14.8 4.8l2.8 4.2" stroke={G2} strokeWidth="0.6" strokeLinecap="round" />
+          </g>
+        </>
+      );
+    })(),
+  },
 };
 
 export const ALL_GOLDEN: { theme: SidebarThemeVariant; name: string }[] = Object.entries(GOLDEN_CRITTERS).map(([theme, c]) => ({

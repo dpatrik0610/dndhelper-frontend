@@ -82,6 +82,7 @@
 .snow { width: 5px; height: 5px; background: #fff; }
 .dust { width: 4px; height: 4px; background: #f5c542; }
 .drip { width: 5px; height: 7px; background: #be123c; }
+.feather { clip-path: none; width: 4px; height: 9px; background: #fff; border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%; box-shadow: 0 0 4px #ffe58a; }
 .pixel { clip-path: none; width: 5px; height: 5px; background: #00f0ff; box-shadow: 4px 3px 0 #ff2bd6; }
 
 .critter:focus {
@@ -119,6 +120,7 @@
 .flap,
 .flapSlow,
 .flapY,
+.flapSlowY,
 .spin,
 .spinFast,
 .pulse,
@@ -132,6 +134,7 @@
 .flap { animation: flapX 0.16s ease-in-out infinite alternate; }
 .flapSlow { animation: flapX 0.32s ease-in-out infinite alternate; }
 .flapY { animation: flapY 0.13s ease-in-out infinite alternate; }
+.flapSlowY { animation: flapY 0.34s ease-in-out infinite alternate; }
 .spin { animation: spin 7s linear infinite; }
 .spinFast { animation: spin 1.6s linear infinite; }
 .pulse { animation: pulse 1.8s ease-in-out infinite; }
