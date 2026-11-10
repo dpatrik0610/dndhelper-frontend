@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import { seededRandom } from "@utils/seededRandom";
 import { pixels, type Palette } from "@utils/pixelArt";
 import { BOTTLE, BROOM, CANDLE, MOUSE, POTION_COLOURS, SKULL, SPELLBOOK, type Sprite } from "./librarySprites";
@@ -339,23 +339,27 @@ const FLOATING_CANDLES = [
   { x: 326, y: 38, bob: "3.2s", flick: "0.62s" },
 ];
 
+function buildLibraryArt() {
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+  if (ctx) paintRoom(ctx);
+  const r = seededRandom(77);
+  const motes = Array.from({ length: 16 }, () => ({
+    x: 8 + Math.floor(r() * 368),
+    y: 30 + Math.floor(r() * 150),
+    color: MOTE_COLOURS[Math.floor(r() * MOTE_COLOURS.length)],
+    duration: 5 + r() * 5,
+    delay: r() * 8,
+  }));
+  return { room: canvas.toDataURL(), mouse: strip(MOUSE), broom: strip(BROOM), candle: strip(CANDLE), book: strip(SPELLBOOK), motes };
+}
+
+let libraryArt: ReturnType<typeof buildLibraryArt> | undefined;
+
 export function LibraryBackdrop({ isStatic = false }: BackdropProps) {
-  const art = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = W;
-    canvas.height = H;
-    const ctx = canvas.getContext("2d");
-    if (ctx) paintRoom(ctx);
-    const r = seededRandom(77);
-    const motes = Array.from({ length: 16 }, () => ({
-      x: 8 + Math.floor(r() * 368),
-      y: 30 + Math.floor(r() * 150),
-      color: MOTE_COLOURS[Math.floor(r() * MOTE_COLOURS.length)],
-      duration: 5 + r() * 5,
-      delay: r() * 8,
-    }));
-    return { room: canvas.toDataURL(), mouse: strip(MOUSE), broom: strip(BROOM), candle: strip(CANDLE), book: strip(SPELLBOOK), motes };
-  }, []);
+  const art = libraryArt ??= buildLibraryArt();
 
   return (
     <div className={`theme-scene wl-scene ${isStatic ? "theme-scene--static" : ""}`}>

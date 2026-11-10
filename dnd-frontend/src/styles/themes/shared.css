@@ -126,13 +126,21 @@
 }
 
 .theme-scene--static,
-.theme-scene--static * {
+.theme-scene--static::before,
+.theme-scene--static::after,
+.theme-scene--static *,
+.theme-scene--static *::before,
+.theme-scene--static *::after {
   animation: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .theme-scene,
-  .theme-scene * {
+  .theme-scene::before,
+  .theme-scene::after,
+  .theme-scene *,
+  .theme-scene *::before,
+  .theme-scene *::after {
     animation: none !important;
   }
 

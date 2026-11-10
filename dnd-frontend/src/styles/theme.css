@@ -839,7 +839,7 @@
 }
 
 /* Theme scenes with an opaque base cover the glow completely: don't render it under them */
-.portal-background:has(> .theme-scene) > .portal-backdrop-glow {
+.portal-background:has(> .theme-scene, > .cp-overlay) > .portal-backdrop-glow {
   display: none;
 }
 
