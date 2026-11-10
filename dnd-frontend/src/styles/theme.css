@@ -425,6 +425,33 @@
   --theme-gradient-active: linear-gradient(135deg, rgba(224, 179, 90, 0.2), rgba(210, 65, 74, 0.16));
 }
 
+/* 🔥 Nine Hells (basalt black, molten ember, brimstone yellow) */
+.theme-nine-hells {
+  --theme-bg-base: rgba(12, 8, 9, 0.45);
+  --theme-bg-panel: rgba(17, 10, 11, 0.8);
+  --theme-bg-panel-opaque: #110a0b;
+  --theme-bg-card: rgba(34, 16, 15, 0.6);
+  --theme-bg-hover: rgba(255, 77, 26, 0.13);
+
+  --theme-border-glow: rgba(255, 77, 26, 0.5);
+  --theme-border-accent: rgba(255, 210, 63, 0.4);
+  --theme-border-subtle: rgba(255, 100, 60, 0.18);
+
+  --theme-color-accent-primary: #ff4d1a;
+  --theme-color-accent-secondary: #ffd23f;
+  --theme-color-text-primary: #fbeee6;
+  --theme-color-text-secondary: #d8a892;
+  --theme-color-text-glow: #ffe0cc;
+  --theme-color-text-on-accent: #1a0704;
+
+  --theme-glow-shadow-primary: 0 0 14px rgba(255, 77, 26, 0.4);
+  --theme-glow-shadow-secondary: 0 0 14px rgba(255, 210, 63, 0.28);
+
+  --theme-gradient-primary: linear-gradient(135deg, #ffd23f, #ff7a1a 50%, #ff3d1a);
+  --theme-gradient-primary-glass: linear-gradient(135deg, rgba(255, 210, 63, 0.88), rgba(255, 122, 26, 0.88) 50%, rgba(255, 61, 26, 0.88));
+  --theme-gradient-active: linear-gradient(135deg, rgba(255, 77, 26, 0.22), rgba(255, 210, 63, 0.12));
+}
+
 /* Default styling helper fallbacks */
 .theme-preview-card--interactive {
   cursor: pointer;
@@ -978,6 +1005,10 @@
     0% { background: #030305 !important; }
     100% { background: #26110e !important; }
   }
+  @keyframes modalThemeFadeNineHells {
+    0% { background: #030305 !important; }
+    100% { background: #110a0b !important; }
+  }
   @keyframes modalThemeFadeDanger {
     0% { background: #030305 !important; }
     100% { background: rgb(40, 12, 18) !important; }
@@ -1029,6 +1060,9 @@
   }
   .mantine-Modal-content.theme-wizards-library {
     animation: modalThemeFadeLibrary 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .mantine-Modal-content.theme-nine-hells {
+    animation: modalThemeFadeNineHells 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .mantine-Modal-content.modal-variant-danger {
     animation: modalThemeFadeDanger 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;

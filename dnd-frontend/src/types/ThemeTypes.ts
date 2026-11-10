@@ -1,4 +1,4 @@
-export type SidebarThemeVariant = "midnight" | "sunset" | "crimson-vampire" | "frost-glacier" | "feywild" | "toxic" | "void" | "steampunk" | "deep-ocean" | "darkvision" | "cyberpunk" | "art-deco" | "scorching-desert" | "wizards-library";
+export type SidebarThemeVariant = "midnight" | "sunset" | "crimson-vampire" | "frost-glacier" | "feywild" | "toxic" | "void" | "steampunk" | "deep-ocean" | "darkvision" | "cyberpunk" | "art-deco" | "scorching-desert" | "wizards-library" | "nine-hells";
 
 /** Display data for theme pickers (settings page, sidebar theme bubble). Order = display order. */
 export interface ThemeOption {
@@ -25,6 +25,7 @@ export const themeOptions: ThemeOption[] = [
   { key: "art-deco", name: "Art Deco", icon: "🍸", accent: "#d4af37", accentSecondary: "#3aa58f", glow: "0 0 15px rgba(212, 175, 55, 0.3)" },
   { key: "scorching-desert", name: "Scorching Desert", icon: "🏜️", accent: "#ff7a1a", accentSecondary: "#40c2c9", glow: "0 0 15px rgba(255, 122, 26, 0.35)" },
   { key: "wizards-library", name: "Wizard's Library", icon: "📚", accent: "#e0b35a", accentSecondary: "#d2414a", glow: "0 0 15px rgba(224, 179, 90, 0.3)" },
+  { key: "nine-hells", name: "Nine Hells", icon: "🔥", accent: "#ff4d1a", accentSecondary: "#ffd23f", glow: "0 0 15px rgba(255, 77, 26, 0.4)" },
 ];
 
 export const getThemeOption = (key: SidebarThemeVariant): ThemeOption =>
@@ -61,6 +62,8 @@ export function getActiveThemeClass(theme: SidebarThemeVariant): string {
       return "theme-scorching-desert";
     case "wizards-library":
       return "theme-wizards-library";
+    case "nine-hells":
+      return "theme-nine-hells";
     case "sunset":
     default:
       return "theme-cyber-noir";

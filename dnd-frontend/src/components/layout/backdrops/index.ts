@@ -27,5 +27,6 @@ export const themeBackdrops: Partial<Record<SidebarThemeVariant, Backdrop>> = {
   "art-deco": lazy(() => import("./ArtDecoBackdrop").then((m) => ({ default: m.ArtDecoBackdrop }))),
   "scorching-desert": lazy(() => import("./DesertBackdrop").then((m) => ({ default: m.DesertBackdrop }))),
   "wizards-library": lazy(() => import("./LibraryBackdrop").then((m) => ({ default: m.LibraryBackdrop }))),
+  "nine-hells": lazy(() => import("./NineHellsBackdrop").then((m) => ({ default: m.NineHellsBackdrop }))),
   darkvision: lazy(() => import("./DarkvisionBackdrop").then((m) => ({ default: m.DarkvisionBackdrop }))),
 };

@@ -241,6 +241,30 @@ export const CRITTERS: Partial<Record<SidebarThemeVariant, Critter>> = {
       </>
     ),
   },
+  "nine-hells": {
+    name: "Imp",
+    motion: "fly",
+    art: (
+      <>
+        <g className={s.flapY}>
+          {pair("M16 16c-3-5-8-7-14-5 3 1 4 3 3 5 2-1 4 0 4 2 2-2 4-2 7-1Z", "#8f1a12")}        </g>
+        <g className={s.sting}>
+          <path d="M14 22.5Q7 26 8.6 19.5" stroke="#d8321e" strokeWidth="1.4" strokeLinecap="round" fill="none" />
+          <path d="M8.8 16.4l2.2 3.4-4.4.2Z" fill="#ffd23f" />
+        </g>
+        <path d="M14.6 23l-1 3.4M17.4 23l1 3.4" stroke="#b3261a" strokeWidth="1.5" strokeLinecap="round" />
+        <ellipse cx="16" cy="19.6" rx="3.5" ry="4.3" fill="#d8321e" />
+        <ellipse cx="16" cy="20.6" rx="1.9" ry="2.7" fill="#f0683a" />
+        {pair("M12.6 11.6l-4-2.2 3.2 4.4Z", "#d8321e")}
+        {pair("M13.4 9.8Q11.6 6.6 12.4 4.2Q14.8 6.4 15.6 9Z", "#ffd23f")}
+        <circle cx="16" cy="12.6" r="4.1" fill="#e23a22" />
+        {pair("M12.8 11.6l2.6 1.1-.3 1.2q-1.9-.3-2.3-2.3Z", "#ffe66b")}
+        {pair("M14.3 12.6a.55.55 0 1 0 .1 0Z", "#2a0705")}
+        <path d="M13.9 15q2.1 1.5 4.2 0" stroke="#2a0705" strokeWidth="0.7" strokeLinecap="round" fill="none" />
+        <path d="M14.7 15.4l.45 1.1.45-.9ZM16.4 15.6l.45.9.45-1.1Z" fill="#fff" />
+      </>
+    ),
+  },
 };
 
 /** Every critter in display order, for the scoreboard. */
