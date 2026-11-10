@@ -125,23 +125,27 @@
   position: absolute;
 }
 
-.theme-scene--static,
-.theme-scene--static::before,
-.theme-scene--static::after,
-.theme-scene--static *,
-.theme-scene--static *::before,
-.theme-scene--static *::after {
+:is(.portal-background--static, .theme-scene--static, .cp-overlay--static),
+:is(.portal-background--static, .theme-scene--static, .cp-overlay--static)::before,
+:is(.portal-background--static, .theme-scene--static, .cp-overlay--static)::after,
+:is(.portal-background--static, .theme-scene--static, .cp-overlay--static) *,
+:is(.portal-background--static, .theme-scene--static, .cp-overlay--static) *::before,
+:is(.portal-background--static, .theme-scene--static, .cp-overlay--static) *::after {
   animation: none !important;
+  transition: none !important;
+  will-change: auto !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .theme-scene,
-  .theme-scene::before,
-  .theme-scene::after,
-  .theme-scene *,
-  .theme-scene *::before,
-  .theme-scene *::after {
+  .portal-background,
+  .portal-background::before,
+  .portal-background::after,
+  .portal-background *,
+  .portal-background *::before,
+  .portal-background *::after {
     animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
   }
 
   :root[class*="theme-"] .mantine-Paper-root::after {

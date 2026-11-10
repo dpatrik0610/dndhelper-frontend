@@ -7,15 +7,6 @@ import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 import { themeBackdrops } from "./backdrops";
 import { ThemeCritter } from "./ThemeCritter";
 
-/**
- * AppBackground
- * 
- * The global living backdrop for the application.
- * Fully optimized to run at locked, stutter-free 60FPS.
- * On mobile devices, all active animations, particle generators, and costly blur filters 
- * are disabled to conserve mobile CPU/GPU performance and battery life, while preserving
- * a static theme-reactive visual style.
- */
 export function AppBackground() {
   const isMobile = useIsMobile();
   const sidebarTheme = useUiStore((s) => s.sidebarTheme);
@@ -23,6 +14,7 @@ export function AppBackground() {
   const { animatedBackground, performanceMode } = useUiStore((s) => s.prefs);
   const animated = animatedBackground && !performanceMode && !reduceMotion && !isMobile;
   const activeThemeClass = useMemo(() => getActiveThemeClass(sidebarTheme), [sidebarTheme]);
+  const backgroundClass = `portal-background ${activeThemeClass}${animated ? "" : " portal-background--static"}`;
   const Backdrop = themeBackdrops[sidebarTheme];
   const scene = Backdrop && (
     <Suspense fallback={null}>
@@ -44,7 +36,7 @@ export function AppBackground() {
   if (isMobile) {
     return (
       <Box
-        className={`portal-background ${activeThemeClass}`}
+        className={backgroundClass}
         style={{
           position: "fixed",
           inset: 0,
@@ -70,7 +62,7 @@ export function AppBackground() {
   return (
     <>
     {animated && <ThemeCritter key={sidebarTheme} theme={sidebarTheme} />}
-    <Box className={`portal-background ${activeThemeClass}`} style={{ position: "fixed", pointerEvents: "none" }}>
+    <Box className={backgroundClass} style={{ position: "fixed", pointerEvents: "none" }}>
       <Box className="portal-backdrop-glow" />
       {scene}
 

@@ -399,14 +399,6 @@
   }
 }
 
-/* Mobile / static: keep the scene, stop everything moving */
-.cp-overlay--static,
-.cp-overlay--static *,
-.cp-overlay--static *::before,
-.cp-overlay--static *::after {
-  animation: none !important;
-}
-
 .cp-overlay--static .cp-tear {
   display: none;
 }
