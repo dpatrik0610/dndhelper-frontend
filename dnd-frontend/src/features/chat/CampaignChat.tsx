@@ -15,6 +15,7 @@ export function CampaignChat({ characterId }: { characterId?: string | null }) {
   const messages = useChatStore((s) => s.messages);
   const hasMore = useChatStore((s) => s.hasMore);
   const error = useChatStore((s) => s.error);
+  const connected = useChatStore((s) => s.connected);
 
   useEffect(() => {
     const store = useChatStore.getState;
@@ -44,6 +45,9 @@ export function CampaignChat({ characterId }: { characterId?: string | null }) {
 
   return (
     <ChatView
+      key={room.campaignId}
+      draftKey={room.campaignId}
+      offline={!connected}
       messages={messages}
       hasMore={hasMore}
       speaker={room.isDm ? "the DM" : (speaker?.name ?? "yourself")}

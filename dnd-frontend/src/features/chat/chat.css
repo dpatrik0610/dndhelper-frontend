@@ -208,6 +208,43 @@
   animation: chat-slide-in 0.18s ease-out;
 }
 
+.chat-offline {
+  color: var(--mantine-color-yellow-5);
+}
+
+.chat-link {
+  color: var(--chat-accent-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.chat-jump {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--chat-line-color);
+  background: var(--theme-bg-panel-opaque, var(--theme-bg-panel, #16161e));
+  color: var(--mantine-color-dimmed);
+  font: inherit;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.chat-jump:hover,
+.chat-jump.new {
+  color: var(--chat-accent-color);
+  border-color: color-mix(in srgb, var(--chat-accent-color) 55%, transparent);
+}
+
 .chat-replying-text {
   min-width: 0;
   overflow: hidden;

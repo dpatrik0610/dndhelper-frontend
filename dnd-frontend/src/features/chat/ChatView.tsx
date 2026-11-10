@@ -1,6 +1,6 @@
 import { Fragment, lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { ActionIcon, Badge, Button, Center, Loader, Menu, Popover, Portal, ScrollArea, Stack, Text, Textarea, Tooltip } from "@mantine/core";
-import { IconArrowBackUp, IconCheck, IconDots, IconEdit, IconMoodSmile, IconSend, IconSpy, IconTrash, IconUsersGroup, IconX } from "@tabler/icons-react";
+import { IconArrowBackUp, IconArrowDown, IconCheck, IconCopy, IconDots, IconEdit, IconMoodSmile, IconSend, IconSpy, IconTrash, IconUsersGroup, IconX } from "@tabler/icons-react";
 import { useCurrentUserId } from "@store/auth/authSelectors";
 import { useIsMobile } from "@hooks/useIsMobile";
 import type { ChatMessage } from "@appTypes/Chat";
@@ -14,9 +14,11 @@ import {
   type ShortcodeTable,
 } from "./shortcodes";
 import { ChatAvatar } from "./ChatAvatar";
+import { splitLinks } from "./links";
 import "./chat.css";
 
 const MAX_LENGTH = 2000;
+const drafts = new Map<string, string>();
 // The picker and its emoji data load on first open, not with the page.
 const EmojiPickerPanel = lazy(() => import("./EmojiPickerPanel"));
 /** Messages from the same speaker closer than this share one card. */
@@ -45,7 +47,11 @@ export function ChatView({
   onDelete,
   onLoadMore,
   avatarOf,
+  offline = false,
+  draftKey = "",
 }: {
+  offline?: boolean;
+  draftKey?: string;
   messages: ChatMessage[];
   hasMore: boolean;
   speaker: string;
@@ -62,13 +68,21 @@ export function ChatView({
   const me = useCurrentUserId();
   const viewport = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraftState] = useState(() => drafts.get(draftKey) ?? "");
+  const [away, setAway] = useState<{ lastId?: string } | null>(null);
   const [sending, setSending] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [whisperTo, setWhisperTo] = useState<WhisperTarget | null>(null);
   const [editingState, setEditing] = useState<ChatMessage | null>(null);
   // A message deleted elsewhere can't be edited any more.
   const editing = editingState && messages.some((m) => m.id === editingState.id) ? editingState : null;
+  const setDraft = (value: string) => {
+    if (!editing) drafts.set(draftKey, value);
+    setDraftState(value);
+  };
+  const restoreDraft = () => setDraftState(drafts.get(draftKey) ?? "");
+  const awayIndex = away ? messages.findIndex((m) => m.id === away.lastId) : -1;
+  const unseen = awayIndex < 0 ? 0 : messages.slice(awayIndex + 1).filter((m) => m.userId !== me).length;
   const [replyState, setReplyTo] = useState<ChatMessage | null>(null);
   // Same for replies; the quoted text follows edits to the original.
   const replyTo = replyState ? (messages.find((m) => m.id === replyState.id) ?? null) : null;
@@ -107,8 +121,13 @@ export function ChatView({
     let lastTop = el.scrollTop;
     // Only the reader turns following off (by scrolling up); our own scrolling only ever goes down.
     const onScroll = () => {
-      if (el.scrollHeight - el.clientHeight - el.scrollTop < 48) following.current = true;
-      else if (el.scrollTop < lastTop) following.current = false;
+      if (el.scrollHeight - el.clientHeight - el.scrollTop < 48) {
+        following.current = true;
+        setAway(null);
+      } else if (el.scrollTop < lastTop) {
+        following.current = false;
+        setAway((a) => a ?? { lastId: [...box.querySelectorAll<HTMLElement>("[data-message-id]")].at(-1)?.dataset.messageId });
+      }
       lastTop = el.scrollTop;
     };
     const grew = new ResizeObserver(() => {
@@ -150,7 +169,7 @@ export function ChatView({
   const startEdit = (message: ChatMessage) => {
     setReplyTo(null);
     setEditing(message);
-    setDraft(message.text);
+    setDraftState(message.text);
     input.current?.focus();
   };
 
@@ -202,6 +221,10 @@ export function ChatView({
   const startReply = (message: ChatMessage) => {
     if (editing) cancelEdit();
     setReplyTo(message);
+    const target = message.whisper
+      ? whisperTargets.find((t) => t.characterId === message.characterId || t.characterId === message.toCharacterId)
+      : undefined;
+    if (target) setWhisperTo(target);
     input.current?.focus();
   };
 
@@ -217,7 +240,7 @@ export function ChatView({
 
   const cancelEdit = () => {
     setEditing(null);
-    setDraft("");
+    restoreDraft();
   };
 
   const send = async () => {
@@ -230,7 +253,8 @@ export function ChatView({
       ? text === editing.text || (await onEdit(editing.id, text))
       : await onSend(text, whisperTo, replyTo?.id ?? null);
     if (ok) {
-      setDraft("");
+      if (editing) restoreDraft();
+      else setDraft("");
       setEditing(null);
       setReplyTo(null);
     }
@@ -290,7 +314,15 @@ export function ChatView({
                     >
                       <Text size="sm" className="chat-text" title={fullDate(m.createdAt)} component="div">
                         {m.replyToId && <Quote original={byId.get(m.replyToId)} onJump={() => jumpTo(m.replyToId!)} />}
-                        {m.text}
+                        {splitLinks(m.text).map((part, n) =>
+                          n % 2 ? (
+                            <a key={n} href={part} target="_blank" rel="noopener noreferrer" className="chat-link">
+                              {part}
+                            </a>
+                          ) : (
+                            part
+                          )
+                        )}
                         {m.editedAt && (
                           <Text span size="xs" c="dimmed" title={`Edited ${fullDate(m.editedAt)}`}>
                             {" "}
@@ -353,6 +385,12 @@ export function ChatView({
               <Menu.Item leftSection={<IconArrowBackUp size={14} />} onClick={() => startReply(menu.message)}>
                 Reply
               </Menu.Item>
+              <Menu.Item
+                leftSection={<IconCopy size={14} />}
+                onClick={() => void navigator.clipboard?.writeText(menu.message.text).catch(() => undefined)}
+              >
+                Copy text
+              </Menu.Item>
               {canEdit(menu.message) && (
                 <Menu.Item leftSection={<IconEdit size={14} />} onClick={() => startEdit(menu.message)}>
                   Edit
@@ -388,6 +426,36 @@ export function ChatView({
                 <span className="chat-suggest-name">:{code.name}:</span>
               </div>
             ))}
+          </div>
+        )}
+        {away && suggestions.length === 0 && (
+          <button
+            type="button"
+            className={`chat-jump${unseen ? " new" : ""}`}
+            onClick={() => {
+              following.current = true;
+              if (viewport.current) scrollToBottom(viewport.current, true);
+            }}
+          >
+            <IconArrowDown size={12} />
+            {unseen ? `${unseen} new message${unseen > 1 ? "s" : ""}` : "Latest"}
+          </button>
+        )}
+        {offline && (
+          <div className="chat-editing chat-offline">
+            <Loader size={10} color="yellow" />
+            <span>Reconnecting…</span>
+          </div>
+        )}
+        {whisperTo && !editing && (
+          <div className="chat-editing">
+            <IconSpy size={12} />
+            <span className="chat-replying-text">
+              Whispering to <b>{whisperTo.label}</b> · private
+            </span>
+            <ActionIcon size="xs" variant="subtle" color="gray" ml="auto" onClick={() => setWhisperTo(null)} aria-label="Stop whispering">
+              <IconX size={12} />
+            </ActionIcon>
           </div>
         )}
         {replyTo && !editing && (
@@ -495,6 +563,8 @@ export function ChatView({
                 cancelEdit();
               } else if (e.key === "Escape" && replyTo) {
                 setReplyTo(null);
+              } else if (e.key === "Escape" && whisperTo) {
+                setWhisperTo(null);
               } else if (e.key === "ArrowUp" && !draft) {
                 // Up in an empty box edits your last message.
                 const last = [...messages].reverse().find(canEdit);
