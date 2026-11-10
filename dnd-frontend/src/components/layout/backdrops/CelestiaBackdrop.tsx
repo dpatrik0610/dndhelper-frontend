@@ -1,6 +1,7 @@
 import { useMemo, type CSSProperties, type ReactNode } from "react";
 import { seededRandom } from "@utils/seededRandom";
 import type { BackdropProps } from "./index";
+import { POSTS, STEPS, buildStairs, depthAt, halfAt, outline, railY, riseAt, type Step } from "./celestiaStairs";
 
 const CX = 800;
 const HALO_Y = 285;
@@ -18,9 +19,6 @@ const star4 =(cx: number, cy: number, r: number, k = 0.16) => {
   const a = r * k;
   return `M${n(cx)} ${n(cy - r)}Q${n(cx + a)} ${n(cy - a)} ${n(cx + r)} ${n(cy)}Q${n(cx + a)} ${n(cy + a)} ${n(cx)} ${n(cy + r)}Q${n(cx - a)} ${n(cy + a)} ${n(cx - r)} ${n(cy)}Q${n(cx - a)} ${n(cy - a)} ${n(cx)} ${n(cy - r)}Z`;
 };
-
-const quad = (y1: number, y2: number, hw: (y: number) => number, cx = CX) =>
-  `${n(cx - hw(y1))},${n(y1)} ${n(cx + hw(y1))},${n(y1)} ${n(cx + hw(y2))},${n(y2)} ${n(cx - hw(y2))},${n(y2)}`;
 
 interface Puff {
   x: number;
@@ -106,23 +104,6 @@ function Bank({ id, className, x, y, w, h, puffs, floor, dark, shade }: BankProp
       {floor < h && <rect y={floor - 0.5} width={w} height={h - floor + 0.5} fill={`url(#${id}-haze)`} />}
     </svg>
   );
-}
-
-const STEPS = 16;
-const stairHalf = (y: number) => 110 + (270 * (y - 500)) / 400;
-const runnerHalf = (y: number) => stairHalf(y) * 0.3;
-const depth = (y: number) => stairHalf(y) / 380;
-
-function buildStairs() {
-  const rises = Array.from({ length: STEPS }, (_, i) => 0.885 ** i);
-  const total = rises.reduce((a, b) => a + b, 0);
-  let y = 900;
-  return rises.map((h) => {
-    const rise = (400 * h) / total;
-    const step = { bottom: y, nose: y - rise * 0.62, top: y - rise };
-    y -= rise;
-    return step;
-  });
 }
 
 const COLUMNS = [-180, -108, -36, 36, 108, 180];
@@ -226,57 +207,51 @@ function Temple() {
   );
 }
 
-function Stairway({ steps }: { steps: ReturnType<typeof buildStairs> }) {
-  const posts = [0, 3, 6, 9, 12, 15].map((i) => steps[i].bottom);
+const pts = (p: [number, number][]) => p.map(([x, y]) => `${n(CX + x)},${n(y)}`).join(" ");
+
+function postAt(i: number, side: number) {
+  const z = depthAt(i);
+  const k = 1 / z;
+  const top = railY(z) - 40 * k;
+  return { x: CX + side * halfAt(z), k, top, orb: top - 10 * k };
+}
+
+function Stairway({ steps }: { steps: Step[] }) {
+  const rail = Array.from({ length: 33 }, (_, i) => depthAt((STEPS * i) / 32));
   return (
     <g>
-      {steps.map((s, i) => (
-        <g key={i}>
-          <polygon points={quad(s.bottom, s.nose, stairHalf)} fill="url(#ce-riser)" />
-          <polygon points={quad(s.nose, s.top, stairHalf)} fill="#fdfeff" />
-          <polygon points={quad(s.bottom, s.nose, runnerHalf)} fill="#9fc2e9" />
-          <polygon points={quad(s.nose, s.top, runnerHalf)} fill="#d6e8fb" />
-          <path
-            d={`M${n(CX - stairHalf(s.nose))} ${n(s.nose)}H${n(CX + stairHalf(s.nose))}`}
-            stroke="#c9a24a"
-            strokeOpacity={0.55}
-            strokeWidth={n(0.6 + depth(s.nose))}
-          />
-        </g>
-      ))}
+      {steps.map((s, i) => {
+        const inlay = s.nose - (s.nose - s.top) * 0.22;
+        const inlayHalf = s.front + (s.back - s.front) * 0.22;
+        return (
+          <g key={i}>
+            <rect x={n(CX - s.front)} y={n(s.nose)} width={n(s.front * 2)} height={n(s.bottom - s.nose)} fill="url(#ce-riser)" />
+            <polygon points={pts([[-s.front, s.nose], [s.front, s.nose], [s.back, s.top], [-s.back, s.top]])} fill="url(#ce-tread)" />
+            <rect x={n(CX - s.front * 0.3)} y={n(s.nose)} width={n(s.front * 0.6)} height={n(s.bottom - s.nose)} fill="url(#ce-runner-riser)" />
+            <polygon points={pts([[-s.front * 0.3, s.nose], [s.front * 0.3, s.nose], [s.back * 0.3, s.top], [-s.back * 0.3, s.top]])} fill="#dcebfb" />
+            <path d={`M${n(CX - s.front)} ${n(s.nose)}H${n(CX + s.front)}`} stroke="#ffffff" strokeWidth={n(1.6 / s.z)} />
+            <path d={`M${n(CX - inlayHalf)} ${n(inlay)}H${n(CX + inlayHalf)}`} stroke="#c9a24a" strokeOpacity={0.5} strokeWidth={n(0.9 / s.z)} />
+          </g>
+        );
+      })}
       {[-1, 1].map((side) => (
-        <path
-          key={side}
-          d={`M${n(CX + side * runnerHalf(900))} 900L${n(CX + side * runnerHalf(500))} 500`}
-          stroke="url(#ce-gold)"
-          strokeWidth="2"
-        />
+        <polyline key={side} points={pts(outline(steps, side).map(([x, y]) => [x * 0.3, y]))} fill="none" stroke="url(#ce-gold)" strokeWidth="1.6" />
       ))}
 
       {[-1, 1].map((side) => {
-        const edge = (y: number) => CX + side * (stairHalf(y) + 2);
-        const rail = (y: number) => y - 30 * depth(y);
+        const railLine = rail.map((z) => [side * halfAt(z), railY(z)] as [number, number]);
+        const capLine = rail.map((z) => [side * halfAt(z), railY(z) - 0.22 * riseAt(z)] as [number, number]);
         return (
           <g key={side}>
-            <polygon
-              points={`${n(edge(900))},900 ${n(edge(500))},500 ${n(edge(500))},${n(rail(500))} ${n(edge(900))},${n(rail(900))}`}
-              fill="url(#ce-parapet)"
-              stroke="#a8b7cf"
-              strokeWidth="0.8"
-            />
-            <polygon
-              points={`${n(edge(900))},${n(rail(900))} ${n(edge(500))},${n(rail(500))} ${n(edge(500))},${n(rail(500) - 4 * depth(500))} ${n(edge(900))},${n(rail(900) - 4)}`}
-              fill="url(#ce-gold)"
-            />
-            {posts.map((y) => {
-              const k = depth(y);
-              const x = edge(y) + side * 3 * k;
-              const top = y - 50 * k;
+            <polygon points={pts([...outline(steps, side), ...[...railLine].reverse()])} fill="url(#ce-parapet)" stroke="#a8b7cf" strokeWidth="0.8" strokeLinejoin="round" />
+            <polygon points={pts([...railLine, ...[...capLine].reverse()])} fill="url(#ce-gold)" />
+            {POSTS.map((i) => {
+              const { x, k, top, orb } = postAt(i, side);
               return (
-                <g key={y}>
-                  <rect x={n(x - 8 * k)} y={n(top)} width={n(16 * k)} height={n(50 * k)} fill="url(#ce-col)" stroke="#a8b7cf" strokeWidth={n(0.8 * k)} />
+                <g key={i}>
+                  <rect x={n(x - 8 * k)} y={n(top)} width={n(16 * k)} height={n(40 * k)} fill="url(#ce-col)" stroke="#a8b7cf" strokeWidth={n(0.8 * k)} />
                   <rect x={n(x - 10 * k)} y={n(top - 4 * k)} width={n(20 * k)} height={n(4 * k)} fill="url(#ce-gold)" />
-                  <circle cx={n(x)} cy={n(top - 10 * k)} r={n(6 * k)} fill="url(#ce-orb)" />
+                  <circle cx={n(x)} cy={n(orb)} r={n(6 * k)} fill="url(#ce-orb)" />
                 </g>
               );
             })}
@@ -311,8 +286,17 @@ function Defs() {
         <stop offset="1" stopColor="#e3eaf4" />
       </linearGradient>
       <linearGradient id="ce-riser" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#b6c6dc" />
+        <stop offset="0.3" stopColor="#d5dfec" />
+        <stop offset="1" stopColor="#e8eef6" />
+      </linearGradient>
+      <linearGradient id="ce-tread" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stopColor="#eef3f9" />
-        <stop offset="1" stopColor="#cdd9ea" />
+        <stop offset="1" stopColor="#ffffff" />
+      </linearGradient>
+      <linearGradient id="ce-runner-riser" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#6c94ca" />
+        <stop offset="1" stopColor="#9cbde4" />
       </linearGradient>
       <linearGradient id="ce-parapet" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stopColor="#f4f7fb" />
@@ -491,15 +475,12 @@ export function CelestiaBackdrop({ isStatic = false }: BackdropProps) {
     return { far, mid, front, podium, stars, birds, steps: buildStairs() };
   }, []);
 
-  const lamps = [0, 3, 6, 9, 12, 15].flatMap((i) => {
-    const y = scene.steps[i].bottom;
-    const k = depth(y);
-    return [-1, 1].map((side) => {
-      const x = CX + side * (stairHalf(y) + 2 + 3 * k);
-      const cy = y - 60 * k;
-      return { key: `${i}-${side}`, style: box(x - 34 * k, cy - 34 * k, 68 * k, 68 * k), delay: i * 0.4 + (side > 0 ? 1.1 : 0) };
-    });
-  });
+  const lamps = POSTS.flatMap((i) =>
+    [-1, 1].map((side) => {
+      const { x, k, orb } = postAt(i, side);
+      return { key: `${i}-${side}`, style: box(x - 34 * k, orb - 34 * k, 68 * k, 68 * k), delay: i * 0.4 + (side > 0 ? 1.1 : 0) };
+    })
+  );
 
   return (
     <div className={`theme-scene ce-scene ${isStatic ? "theme-scene--static" : ""}`}>
