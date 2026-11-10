@@ -36,7 +36,6 @@ export default function ScoreboardPage() {
 
   const mine = scores?.find((s) => s.username === me)?.caught ?? {};
   const found = ALL_CRITTERS.filter((c) => mine[c.name]).length;
-  const top = scores?.[0]?.total || 1;
 
   return (
     <div className={styles.page}>
@@ -99,9 +98,6 @@ export default function ScoreboardPage() {
                       <div className={styles.name}>
                         <span className={styles.nameText}>{s.username}</span>
                         {s.username === me && <span className={styles.you}>You</span>}
-                      </div>
-                      <div className={`glass-progress ${styles.share}`}>
-                        <div className="glass-progress-bar" style={{ width: `${(s.total / top) * 100}%` }} />
                       </div>
                     </div>
                     <div className={styles.total}>

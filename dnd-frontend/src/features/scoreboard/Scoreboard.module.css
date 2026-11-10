@@ -178,11 +178,6 @@
   color: var(--theme-color-text-secondary);
 }
 
-.share {
-  height: 4px;
-  margin-top: 8px;
-}
-
 .total {
   text-align: right;
   font-size: 1.375rem;
