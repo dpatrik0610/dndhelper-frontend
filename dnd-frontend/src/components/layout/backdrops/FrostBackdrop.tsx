@@ -16,6 +16,7 @@ import { ShaderCanvas } from "./ShaderCanvas";
 const FRAGMENT = /* glsl */ `
 precision highp float;
 uniform vec2 uResolution;
+uniform vec2 uCssResolution;
 uniform float uTime;
 
 float hash(float n) { return fract(sin(n) * 43758.5453); }
@@ -371,7 +372,7 @@ vec4 spruce(vec2 p, float bx, float hgt, float seed) {
 void main() {
   vec2 uv = gl_FragCoord.xy / uResolution;
   gAspect = uResolution.x / uResolution.y;
-  gPx = 1.0 / uResolution.y;
+  gPx = 2.0 / max(uCssResolution.y, 1.0);
   vec2 p = vec2(uv.x * gAspect, uv.y);
 
   vec3 col = p.y >= HZ ? landscape(uv, p, false) : lake(uv, p);
@@ -414,7 +415,7 @@ export function FrostBackdrop({ isStatic = false }: BackdropProps) {
 
   return (
     <div className={`theme-scene fr-scene ${isStatic ? "theme-scene--static" : ""}`}>
-      <ShaderCanvas fragment={FRAGMENT} scale={0.5} fps={30} isStatic={isStatic} staticTime={30} />
+      <ShaderCanvas fragment={FRAGMENT} fps={30} isStatic={isStatic} staticTime={30} />
 
       {!isStatic && (
         <div className="fr-snow">

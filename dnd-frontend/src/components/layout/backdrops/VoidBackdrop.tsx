@@ -118,7 +118,7 @@ void main() {
 export function VoidBackdrop({ isStatic = false }: BackdropProps) {
   return (
     <div className={`theme-scene ev-scene ${isStatic ? "theme-scene--static" : ""}`}>
-      <ShaderCanvas fragment={FRAGMENT} scale={0.5} fps={24} isStatic={isStatic} staticTime={8} />
+      <ShaderCanvas fragment={FRAGMENT} fps={24} isStatic={isStatic} staticTime={8} />
     </div>
   );
 }

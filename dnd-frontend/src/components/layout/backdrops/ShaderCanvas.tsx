@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
+import { shaderResolution } from "./shaderResolution";
 
 /**
  * Minimal WebGL host for full-screen fragment-shader backdrops (no dependencies).
  *
  * The shader gets `uniform vec2 uResolution` (pixels of the drawing buffer) and `uniform float uTime`
- * (seconds). It renders at `scale` × the CSS size (e.g. 0.5 for performance, or small for deliberate
+ * (seconds). It renders at `scale` × the device-pixel size (or CSS size for deliberate
  * pixel art with `pixelated`), draws a single frame when `isStatic`, pauses while the tab is hidden,
  * and frees its GPU resources on unmount. If WebGL is unavailable or lost it renders nothing.
  */
@@ -39,7 +40,7 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
   return sh;
 }
 
-export function ShaderCanvas({ fragment, scale = 0.5, fps = 30, isStatic = false, staticTime = 6, pixelated = false, className }: ShaderCanvasProps) {
+export function ShaderCanvas({ fragment, scale = 1, fps = 30, isStatic = false, staticTime = 6, pixelated = false, className }: ShaderCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -70,21 +71,30 @@ export function ShaderCanvas({ fragment, scale = 0.5, fps = 30, isStatic = false
     gl.enableVertexAttribArray(aPos);
     gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
     const uRes = gl.getUniformLocation(prog, "uResolution");
+    const uCssRes = gl.getUniformLocation(prog, "uCssResolution");
     const uTime = gl.getUniformLocation(prog, "uTime");
+    const maxViewport = gl.getParameter(gl.MAX_VIEWPORT_DIMS) as Int32Array;
+    const maxBuffer = gl.getParameter(gl.MAX_RENDERBUFFER_SIZE) as number;
+    let cssWidth = canvas.clientWidth;
+    let cssHeight = canvas.clientHeight;
 
     const resize = () => {
-      const w = Math.max(1, Math.round(canvas.clientWidth * scale));
-      const h = Math.max(1, Math.round(canvas.clientHeight * scale));
+      cssWidth = canvas.clientWidth;
+      cssHeight = canvas.clientHeight;
+      const { width: w, height: h } = shaderResolution(
+        cssWidth, cssHeight, scale, pixelated ? 1 : window.devicePixelRatio,
+        Math.min(maxViewport[0], maxBuffer), Math.min(maxViewport[1], maxBuffer),
+      );
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
-        gl.viewport(0, 0, w, h);
       }
+      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     };
 
     const draw = (t: number) => {
-      resize();
-      gl.uniform2f(uRes, canvas.width, canvas.height);
+      gl.uniform2f(uRes, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      gl.uniform2f(uCssRes, cssWidth, cssHeight);
       gl.uniform1f(uTime, t);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
@@ -100,7 +110,20 @@ export function ShaderCanvas({ fragment, scale = 0.5, fps = 30, isStatic = false
       draw((now - start) / 1000);
     };
 
-    const onResize = () => isStatic && draw(staticTime);
+    const onResize = () => {
+      resize();
+      if (isStatic) draw(staticTime);
+    };
+    const observer = new ResizeObserver(onResize);
+    observer.observe(canvas);
+    let densityQuery: MediaQueryList;
+    const onDensityChange = () => {
+      densityQuery?.removeEventListener("change", onDensityChange);
+      densityQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+      densityQuery.addEventListener("change", onDensityChange);
+      onResize();
+    };
+    onDensityChange();
     window.addEventListener("resize", onResize);
     if (isStatic) draw(staticTime);
     else raf = requestAnimationFrame(loop);
@@ -108,6 +131,8 @@ export function ShaderCanvas({ fragment, scale = 0.5, fps = 30, isStatic = false
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", onResize);
+      observer.disconnect();
+      densityQuery.removeEventListener("change", onDensityChange);
       gl.deleteBuffer(buf);
       gl.deleteProgram(prog);
       gl.deleteShader(vs);
@@ -115,7 +140,7 @@ export function ShaderCanvas({ fragment, scale = 0.5, fps = 30, isStatic = false
       // no WEBGL_lose_context here: the effect re-runs on the same canvas (StrictMode, prop changes)
       // and a lost context can't be reused; the browser frees it when the canvas is removed.
     };
-  }, [fragment, scale, fps, isStatic, staticTime]);
+  }, [fragment, scale, fps, isStatic, staticTime, pixelated]);
 
   return (
     <canvas

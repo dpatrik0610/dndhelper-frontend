@@ -298,7 +298,7 @@ void main() {
 export function DesertBackdrop({ isStatic = false }: BackdropProps) {
   return (
     <div className={`theme-scene sd-scene ${isStatic ? "theme-scene--static" : ""}`}>
-      <ShaderCanvas fragment={FRAGMENT} scale={0.5} fps={24} isStatic={isStatic} staticTime={32} />
+      <ShaderCanvas fragment={FRAGMENT} fps={24} isStatic={isStatic} staticTime={32} />
     </div>
   );
 }
