@@ -40,6 +40,7 @@ export function useEquipmentInventoryEffects() {
   }, [inventories, characterId, choice]);
   const itemKey = items.map((i) => `${i.equipmentId}:${i.equipmentName ?? ""}`).sort().join("|");
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: itemKey stands in for items (see below)
   useEffect(() => {
     if (!characterId || loadedFor !== characterId) return;
     let cancelled = false;
@@ -73,6 +74,5 @@ export function useEquipmentInventoryEffects() {
       cancelled = true;
     };
     // itemKey stands in for `items`, which is a new array on every inventory update.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [characterId, loadedFor, itemKey]);
 }

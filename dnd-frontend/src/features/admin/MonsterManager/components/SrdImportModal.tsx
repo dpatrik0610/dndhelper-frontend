@@ -34,9 +34,9 @@ export function SrdImportModal({ opened, onClose, onImported }: { opened: boolea
       });
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reload on open and ruleset change only
   useEffect(() => {
     if (opened) load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload on open and ruleset change only
   }, [opened, ruleset]);
 
   const shown = useMemo(() => {

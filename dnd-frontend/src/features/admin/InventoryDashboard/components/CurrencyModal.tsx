@@ -37,9 +37,9 @@ export function CurrencyModal({ opened, onClose, inventoryId, inventoryName, cur
     setAmount(1);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset only when the modal opens
   useEffect(() => {
     if (opened) switchMode("add");
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when the modal opens
   }, [opened]);
 
   const confirm = async () => {

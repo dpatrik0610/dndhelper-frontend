@@ -26,12 +26,12 @@ It gives my players and me a clean UI where:
 * **Markdown Descriptions**
 * Integrated with a **C# / ASP.NET API**
 * Built for quick iteration during campaign prep
-* Currently deployed on Vercel.
+* Deployed on Cloudflare Workers.
 ## 🚀 Running
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Set API URL in `./dnd-frontend/.env`:

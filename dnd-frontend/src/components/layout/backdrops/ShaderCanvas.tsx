@@ -73,6 +73,7 @@ export function ShaderCanvas({ fragment, scale = 1, fps = 30, isStatic = false, 
       gl.deleteShader(fs);
       return;
     }
+    // biome-ignore lint/correctness/useHookAtTopLevel: WebGL method, not a React hook
     gl.useProgram(prog);
 
     // one triangle covering the screen

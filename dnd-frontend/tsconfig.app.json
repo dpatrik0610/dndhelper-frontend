@@ -23,22 +23,21 @@
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
     "paths": {
-      "@features/*": ["src/features/*"],
-      "@components/*": ["src/components/*"],
-      "@appTypes/*": ["src/types/*"],
-      "@store/*": ["src/store/*"],
-      "@utils/*": ["src/utils/*"],
-      "@pages/*": ["src/pages/*"],
-      "@services/*": ["src/services/*"],
-      "@validations/*": ["src/validations/*"],
-      "@styles/*": ["src/styles/*"],
-      "@signalr/*": ["src/SignalR/*"],
-      "@api/*": ["src/api/*"],
-      "@hooks/*": ["src/hooks/*"]
+      "@features/*": ["./src/features/*"],
+      "@components/*": ["./src/components/*"],
+      "@appTypes/*": ["./src/types/*"],
+      "@store/*": ["./src/store/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@services/*": ["./src/services/*"],
+      "@validations/*": ["./src/validations/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@signalr/*": ["./src/SignalR/*"],
+      "@api/*": ["./src/api/*"],
+      "@hooks/*": ["./src/hooks/*"]
     }
   },
   "include": ["src"],
-  "exclude": ["src/**/*.check.ts"]
+  "exclude": ["./src/**/*.check.ts"]
 }

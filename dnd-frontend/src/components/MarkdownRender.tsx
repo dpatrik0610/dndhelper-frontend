@@ -131,7 +131,6 @@ const hastText = (node?: HastNode): string =>
   node?.type === "text" ? node.value ?? "" : (node?.children ?? []).map(hastText).join("");
 
 /** react-markdown passes every component its hast `node`; spread onto an element it renders as node="[object Object]". */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const withoutNode = <T extends { node?: unknown }>({ node: _node, ...rest }: T) => rest;
 
 const escapeRegex = (value: string) =>
@@ -279,7 +278,6 @@ export function MarkdownRenderer({
           ),
 
           // ordered
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           ol: ({ children, type: _ignored, ...props }) => (
             <List
               type="ordered"

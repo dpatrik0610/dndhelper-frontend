@@ -397,6 +397,7 @@ function useServerSearch<T>(
   setResults: (r: T[]) => void,
   busy: (f: (n: number) => number) => void,
 ) {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: fetch and the setters are stable for a given call site
   useEffect(() => {
     if (!enabled) return;
     let current = true;
@@ -409,6 +410,5 @@ function useServerSearch<T>(
       current = false;
     };
     // fetch and the setters are stable for a given call site.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, query]);
 }
