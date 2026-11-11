@@ -1,6 +1,5 @@
 import { Paper, Group, Text } from "@mantine/core";
 import type { ReactNode, CSSProperties, MouseEventHandler } from "react";
-import styles from "@features/profile/styles/StatBox.module.css";
 
 interface StatBoxProps {
   label: string;
@@ -49,7 +48,6 @@ export function StatBox({
 
   return (
     <Paper
-      className={styles.statBox}
       onClick={onClick}
       w={fullWidth ? "100%" : undefined}
       maw={fullWidth ? "100%" : undefined}
