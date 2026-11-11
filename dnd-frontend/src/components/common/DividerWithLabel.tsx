@@ -1,5 +1,5 @@
 import { Text, Box } from "@mantine/core";
-import type { SectionColor } from "../../types/SectionColor";
+import type { SectionColor } from "@appTypes/SectionColor";
 
 interface DividerWithLabelProps {
   label: string;

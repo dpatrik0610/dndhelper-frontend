@@ -1,5 +1,5 @@
 import { TextInput, Button, Group, Text, Stack, Title } from "@mantine/core";
-import { PasswordStrength } from "../../register/PasswordRequirement";
+import { PasswordStrength } from "@features/auth/register/PasswordRequirement";
 
 interface RegisterPanelProps {
   regUserVal: string;

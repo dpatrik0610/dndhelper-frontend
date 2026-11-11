@@ -1,5 +1,5 @@
 import type { StateCreator } from "zustand";
-import type { CharacterStoreState, CoreSliceState, CoreSliceActions } from "../storeTypes";
+import type { CharacterStoreState, CoreSliceState, CoreSliceActions } from "@store/character/storeTypes";
 import type { Character } from "@appTypes/Character/Character";
 
 const normalizeSpells = (spells?: Character["spells"]) =>

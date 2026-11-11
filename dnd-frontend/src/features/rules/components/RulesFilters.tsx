@@ -1,13 +1,10 @@
 import { Badge, Button, Group, Paper, TextInput } from "@mantine/core";
 import { IconBook2, IconBookmark } from "@tabler/icons-react";
-import { useRulesPalette } from "../hooks/useRulesPalette";
-import { useRulesDataStore } from "../store/useRulesDataStore";
-import { useRulesUiStore } from "../store/useRulesUiStore";
+import { useRulesPalette } from "@features/rules/hooks/useRulesPalette";
+import { useRulesDataStore } from "@features/rules/store/useRulesDataStore";
+import { useRulesUiStore } from "@features/rules/store/useRulesUiStore";
 
-interface RulesFiltersProps {
-}
-
-export function RulesFilters({}: RulesFiltersProps) {
+export function RulesFilters() {
   const { palette, cardStyle } = useRulesPalette();
   const topics = useRulesDataStore((s) => s.topics);
   const topic = useRulesUiStore((s) => s.topic);

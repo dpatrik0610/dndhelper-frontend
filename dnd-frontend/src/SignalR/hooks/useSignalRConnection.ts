@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { SignalRContext } from "../SignalRProvider";
+import { SignalRContext } from "@signalr/SignalRProvider";
 
 export function useSignalRConnection() {
   const ctx = useContext(SignalRContext);

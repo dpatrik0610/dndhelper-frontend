@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { RuleCategory, type RuleSnippet } from "@appTypes/Rules/Rule";
-import { useRulesUiStore } from "../store/useRulesUiStore";
+import { useRulesUiStore } from "@features/rules/store/useRulesUiStore";
 
 export function useRuleFilters(rules: RuleSnippet[], topic: string, search: string, pageSize = 15) {
   const page = useRulesUiStore((s) => s.page);

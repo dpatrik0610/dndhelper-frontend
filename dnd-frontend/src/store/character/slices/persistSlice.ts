@@ -1,5 +1,5 @@
 import type { StateCreator } from "zustand";
-import type { CharacterStoreState, PersistSliceActions } from "../storeTypes";
+import type { CharacterStoreState, PersistSliceActions } from "@store/character/storeTypes";
 import { updateCharacter as updateCharacterApi } from "@services/characterService";
 import { getAuthTokenSafe } from "@store/auth/authUtils";
 import { normalizeCharacter } from "./coreSlice";

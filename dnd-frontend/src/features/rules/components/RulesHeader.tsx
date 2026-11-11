@@ -2,7 +2,7 @@ import { Group, Text, Title } from "@mantine/core";
 import { IconSparkles } from "@tabler/icons-react";
 import CustomBadge from "@components/common/CustomBadge";
 import { magicGlowTheme } from "@styles/magic/glowTheme";
-import { useRulesPalette } from "../hooks/useRulesPalette";
+import { useRulesPalette } from "@features/rules/hooks/useRulesPalette";
 
 export function RulesHeader() {
   const { palette } = useRulesPalette();

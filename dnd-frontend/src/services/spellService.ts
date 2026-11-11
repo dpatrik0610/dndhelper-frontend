@@ -1,5 +1,5 @@
-import { apiClient } from "../api/apiClient"
-import type { Spell } from "../types/Spell"
+import { apiClient } from "@api/apiClient"
+import type { Spell } from "@appTypes/Spell"
 
 const baseUrl = "/Spells"
 

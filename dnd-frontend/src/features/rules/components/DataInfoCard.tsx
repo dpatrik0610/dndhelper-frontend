@@ -1,5 +1,5 @@
 import { Paper, Stack, Text } from "@mantine/core";
-import { useRulesPalette } from "../hooks/useRulesPalette";
+import { useRulesPalette } from "@features/rules/hooks/useRulesPalette";
 
 interface DataInfoCardProps {
   rulesCount: number;

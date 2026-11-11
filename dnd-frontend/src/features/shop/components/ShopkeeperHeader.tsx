@@ -1,7 +1,7 @@
 import { Box, Card, Group, ThemeIcon, Title, Text, Menu, UnstyledButton, Stack, ActionIcon } from "@mantine/core";
 import { IconBuildingStore, IconChevronDown, IconRefresh } from "@tabler/icons-react";
 import type { Shop } from "@appTypes/Shop/Shop";
-import classes from "../styles/ShopkeeperPage.module.css";
+import classes from "@features/shop/styles/ShopkeeperPage.module.css";
 
 interface ShopkeeperHeaderProps {
     visibleShops: Shop[];

@@ -16,7 +16,7 @@ import { showNotification } from "@components/Notification/Notification";
 import { LoginPanel } from "./components/LoginPanel";
 import { RegisterPanel } from "./components/RegisterPanel";
 
-import "../styles/AuthCard.css";
+import "@features/auth/styles/AuthCard.css";
 
 interface ReforgedPortalPageProps {
   mode: "login" | "register";

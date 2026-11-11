@@ -4,7 +4,7 @@ import { Badge, Group, Paper, ScrollArea, Stack, Text, Loader, Center } from "@m
 import { CustomDrawer } from "@components/overlay/CustomDrawer";
 const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then(m => ({ default: m.MarkdownRenderer })));
 import { type RuleDetail } from "@appTypes/Rules/Rule";
-import { useRulesPalette } from "../hooks/useRulesPalette";
+import { useRulesPalette } from "@features/rules/hooks/useRulesPalette";
 
 interface RuleDetailDrawerProps {
   opened: boolean;

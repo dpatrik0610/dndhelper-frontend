@@ -1,5 +1,5 @@
 import type { StateCreator } from "zustand";
-import type { CharacterStoreState, SpellSliceActions } from "../storeTypes";
+import type { CharacterStoreState, SpellSliceActions } from "@store/character/storeTypes";
 
 export const createSpellSlice: StateCreator<
   CharacterStoreState,

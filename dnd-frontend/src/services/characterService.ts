@@ -1,5 +1,5 @@
-import type { Character } from "../types/Character/Character";
-import { apiClient } from "../api/apiClient";
+import type { Character } from "@appTypes/Character/Character";
+import { apiClient } from "@api/apiClient";
 
 export interface ApiResponse {
   message?: string;

@@ -1,5 +1,5 @@
 import type { StateCreator } from "zustand";
-import type { CharacterStoreState, CombatSliceActions } from "../storeTypes";
+import type { CharacterStoreState, CombatSliceActions } from "@store/character/storeTypes";
 import { computeEffects } from "@utils/effects";
 
 export const createCombatSlice: StateCreator<

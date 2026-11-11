@@ -1,5 +1,5 @@
-import { apiClient } from "../api/apiClient";
-import type { Note } from "../types/Note";
+import { apiClient } from "@api/apiClient";
+import type { Note } from "@appTypes/Note";
 
 const baseUrl = "/Note";
 
