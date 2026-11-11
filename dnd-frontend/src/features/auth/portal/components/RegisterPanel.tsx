@@ -41,7 +41,7 @@ export function RegisterPanel({
         <PasswordStrength value={regPassVal} onChange={setRegPassVal} />
 
         {errors.password && (
-          <Text color="red" size="sm" mt={4} style={{ fontFamily: "var(--font-sans)" }}>
+          <Text c="red" size="sm" mt={4} style={{ fontFamily: "var(--font-sans)" }}>
             {errors.password}
           </Text>
         )}

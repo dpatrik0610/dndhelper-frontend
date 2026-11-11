@@ -381,7 +381,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ opened, onClose, o
 
         {activeTab === "form" ? (
           <Box p="xs">
-            <Grid gutter="md">
+            <Grid gap="md">
               {!item && (
                 <Grid.Col span={12}>
                   <Select

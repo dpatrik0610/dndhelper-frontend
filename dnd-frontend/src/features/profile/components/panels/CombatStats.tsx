@@ -275,7 +275,7 @@ export function CombatStats() {
           ))}
         </SimpleGrid>
 
-        <Grid gutter="xs" align="stretch">
+        <Grid gap="xs" align="stretch">
           
           <Grid.Col span={{ base: 12, md: 5 }}>
             <Paper

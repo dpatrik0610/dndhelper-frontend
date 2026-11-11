@@ -109,7 +109,7 @@ export function ExpandableSection({
       </Group>
 
       {expandable ? (
-        <Collapse in={opened} transitionDuration={200}>
+        <Collapse expanded={opened} transitionDuration={200}>
           {animated ? (
             <BaseTransition show={opened} variant="fade" layout={false}>
               <div style={{ marginTop: "0.75rem" }}>{children}</div>

@@ -181,7 +181,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({ opened, onClos
             Show Quick Sample Array
           </Button>
 
-          <Collapse in={showSample}>
+          <Collapse expanded={showSample}>
             <Stack gap={6} mt="xs" p="xs" style={{ background: "rgba(0,0,0,0.2)", borderRadius: "6px" }}>
               <Group justify="space-between">
                 <Text size="xs" c="neon" fw={600}>Sample Structure</Text>

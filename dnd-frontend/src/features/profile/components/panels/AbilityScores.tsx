@@ -72,7 +72,7 @@ export function AbilityScores() {
     >
       <Stack gap="lg">
         
-        <Grid gutter="xl" align="flex-start">
+        <Grid gap="xl" align="flex-start">
           
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Stack gap="md">

@@ -53,7 +53,7 @@ export default function RulesPage() {
 
   return (
     <Box p={isMobile ? "2" : "md"} m={isMobile ? "0 auto" : "0 auto"} maw={isMobile ? "100%" : 1400}>
-      <Grid gutter="md">
+      <Grid gap="md">
         <Grid.Col span={{ base: 12 }}>
           <Stack gap="lg">
             <RulesHeader />

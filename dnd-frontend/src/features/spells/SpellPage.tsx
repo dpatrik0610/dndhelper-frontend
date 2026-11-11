@@ -201,7 +201,7 @@ export default function SpellPage() {
           <SpellIndex onSelect={openSpell} activeName={currentSpell?.name} initialSchool={initialSchool} />
         )
       ) : (
-        <Grid gutter="lg" align="flex-start">
+        <Grid gap="lg" align="flex-start">
           <Grid.Col span={{ base: 12, md: 4, xl: 3 }} style={{ position: "sticky", top: 16 }}>
             <SpellIndex onSelect={openSpell} activeName={spellName} scrollHeight="calc(100vh - 290px)" initialSchool={initialSchool} />
           </Grid.Col>

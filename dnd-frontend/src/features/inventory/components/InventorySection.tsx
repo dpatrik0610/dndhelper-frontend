@@ -130,7 +130,7 @@ export function InventorySection({
       </span>
       </div>
 
-      <Collapse in={opened} transitionDuration={200}>
+      <Collapse expanded={opened} transitionDuration={200}>
         <div ref={bodyRef} id={bodyId} className={classes.body}>
           {children}
         </div>

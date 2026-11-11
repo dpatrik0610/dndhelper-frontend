@@ -166,7 +166,7 @@ export function ExperienceTableCard() {
           </Group>
         </Group>
 
-        <Collapse in={expanded}>
+        <Collapse expanded={expanded}>
           <Box
             style={{
               maxHeight: "360px",

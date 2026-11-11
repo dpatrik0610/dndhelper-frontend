@@ -66,7 +66,7 @@ export function ListRow({ title, meta, actions, active, children }: ListRowProps
         {actions && <div className={s.rowActions}>{actions}</div>}
       </div>
       {children && (
-        <Collapse in={open}>
+        <Collapse expanded={open}>
           <div className={s.rowBody}>{children}</div>
         </Collapse>
       )}

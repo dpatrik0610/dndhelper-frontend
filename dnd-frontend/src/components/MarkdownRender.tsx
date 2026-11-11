@@ -267,7 +267,8 @@ export function MarkdownRenderer({
             </Text>
           ),
 
-          ul: ({ children, ...props }) => (
+          // Mantine 9 types List's ref as <ol>; react-markdown never passes one.
+          ul: ({ children, ref: _ref, ...props }) => (
             <List
               size="sm"
               styles={{ root: { margin: 0, paddingLeft: "1rem" } }}

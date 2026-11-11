@@ -13,7 +13,7 @@ export function ThemeBubble() {
 
   return (
     <div className={classes.bubble} data-open={open || undefined}>
-      <Collapse in={open} transitionDuration={250}>
+      <Collapse expanded={open} transitionDuration={250}>
         <div className={classes.panel} id="theme-bubble-panel">
           <MagicThemeSelector />
         </div>

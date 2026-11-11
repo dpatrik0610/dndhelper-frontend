@@ -50,7 +50,7 @@ export function HeaderCard({
         boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
       }}
     >
-      <Grid gutter="xl" align="center">
+      <Grid gap="xl" align="center">
         <Grid.Col span={{ base: 12, md: character ? 7 : 12 }}>
           <Group align="center" gap="lg" wrap="nowrap">
             {character?.imageUrl ? (

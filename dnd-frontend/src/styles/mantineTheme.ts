@@ -18,6 +18,7 @@ import {
   Textarea,
   TextInput,
   Tooltip,
+  v8CssVariablesResolver,
   type CSSVariablesResolver,
 } from "@mantine/core";
 import { RuneLoader } from "@components/common/RuneLoader";
@@ -28,6 +29,9 @@ const input = { input: "glassy-input", label: "glassy-label" };
 const combobox = { ...input, dropdown: "glassy-dropdown", option: "glassy-option" };
 
 export const mantineTheme = createTheme({
+  // Mantine 9 changed these defaults (md radius, 600 medium); kept at 8.x so the themed look doesn't shift.
+  defaultRadius: "sm",
+  fontWeights: { medium: "500" },
   // The admin console's accents (adminCyber.css, retuned by adminDungeon.css): color="neon" | "magenta" | "electric".
   // CSS variables, so they follow the console style; Mantine turns their alphas into color-mix().
   colors: {
@@ -64,7 +68,7 @@ export const mantineTheme = createTheme({
  * new — a default or gray button, a hover, a checkbox, a tab underline — matches the theme without
  * per-component styling. Fallbacks are Mantine's own values, for a page with no theme class yet.
  */
-export const cssVariablesResolver: CSSVariablesResolver = () => ({
+const themeVariables = {
   variables: {
     "--mantine-primary-color-filled": "var(--theme-color-accent-primary, var(--mantine-color-blue-filled))",
     "--mantine-primary-color-filled-hover": "var(--theme-color-accent-primary, var(--mantine-color-blue-filled-hover))",
@@ -81,4 +85,14 @@ export const cssVariablesResolver: CSSVariablesResolver = () => ({
     "--mantine-color-gray-light": "var(--theme-bg-card, rgba(134, 142, 150, 0.15))",
     "--mantine-color-gray-light-hover": "var(--theme-bg-hover, rgba(134, 142, 150, 0.2))",
   },
-});
+};
+
+/** Mantine 9 made variant="light" colors solid; the v8 resolver underneath keeps the 8.x translucent ones. */
+export const cssVariablesResolver: CSSVariablesResolver = (theme) => {
+  const v8 = v8CssVariablesResolver(theme);
+  return {
+    variables: { ...v8.variables, ...themeVariables.variables },
+    light: { ...v8.light, ...themeVariables.light },
+    dark: { ...v8.dark, ...themeVariables.dark },
+  };
+};
