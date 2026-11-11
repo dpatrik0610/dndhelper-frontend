@@ -45,15 +45,13 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
-    "@babel/core": "^8.1.0",
     "@biomejs/biome": "^2.6.6",
-    "@rolldown/plugin-babel": "^0.3.1",
     "@types/node": "^24.6.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^6.3.0",
-    "babel-plugin-react-compiler": "^19.1.0-rc.3",
     "baseline-browser-mapping": "^2.9.3",
+    "oxc-transform-react": "^0.158.0",
     "typescript": "^7",
     "vite": "^8"
   }

@@ -1,13 +1,12 @@
 import { defineConfig } from 'vite'
-import babel from '@rolldown/plugin-babel'
-import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react'
 import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
-    babel({ presets: [reactCompilerPreset()] }),
+    // Experimental Rust port of React Compiler (oxc-transform-react).
+    react({ compiler: true }),
   ],
   resolve: {
     alias: {
