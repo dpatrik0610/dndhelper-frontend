@@ -4,7 +4,7 @@ import {
   Stack,
 } from "@mantine/core";
 import { CardGridSkeleton, LinesSkeleton } from "@components/common/Skeletons";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { CharacterHeader } from "./components/header/CharacterHeader";
@@ -14,7 +14,7 @@ import tabClasses from "./styles/ProfileTabs.module.css";
 import { IconBackpack, IconBolt, IconFlask, IconListCheck, IconNotes, IconShieldHalf, IconSparkles, IconStars } from "@tabler/icons-react";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useIsMobile } from "@hooks/useIsMobile";
 
 const AbilityScores = lazy(() => import("./components/panels/AbilityScores").then(m => ({ default: m.AbilityScores })));

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, type MotionProps } from "framer-motion";
+import { AnimatePresence, motion, type MotionProps } from "motion/react";
 import type { ReactNode } from "react";
 
 type TransitionVariant = "slide" | "fade" | "scale";

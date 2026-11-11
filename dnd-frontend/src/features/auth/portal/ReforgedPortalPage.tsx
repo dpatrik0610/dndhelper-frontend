@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Box } from "@mantine/core";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 

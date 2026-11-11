@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ActionIcon, Box, Button, Grid, Group, Skeleton, Stack, Text, Title, Tooltip } from "@mantine/core";
 import { IconArrowLeft, IconBook2, IconPencil, IconPentagram, IconPlus, IconRefresh } from "@tabler/icons-react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 
 import { useSpellStore } from "@store/spell/spellStore";
 import { loadSpells } from "@utils/loadSpells";

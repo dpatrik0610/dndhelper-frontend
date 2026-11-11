@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 import { Avatar, Loader } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { IconBackpack, IconBook2, IconBox, IconGhost2, IconMoonStars, IconSearch, IconSword } from "@tabler/icons-react";

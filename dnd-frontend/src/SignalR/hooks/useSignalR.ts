@@ -4,7 +4,7 @@ import {
   HubConnectionBuilder,
   LogLevel,
 } from "@microsoft/signalr";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { notifications } from "@mantine/notifications";
 import { showNotification } from "@components/Notification/Notification";
 import { useToken, useCurrentUserId } from "@store/auth/authSelectors";

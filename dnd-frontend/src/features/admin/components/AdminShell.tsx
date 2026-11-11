@@ -1,7 +1,7 @@
 import { ActionIcon, Group, ScrollArea, Stack, Tooltip } from "@mantine/core";
 import { IconBuildingCastle, IconChevronLeft, IconChevronRight, IconCpu, type Icon } from "@tabler/icons-react";
 import { useState, type ComponentType, type ReactNode } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router";
 import { useUiStore } from "@store/ui/uiStore";
 import { AdminNavItem } from "./AdminNavItem";
 import styles from "@styles/AdminDashboard.module.css";

@@ -1,6 +1,6 @@
 import { useState, type CSSProperties } from "react";
 import { Drawer, type MantineTransition } from "@mantine/core";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "react-router";
 import { useCanDriveMusic, useIsDm } from "@store/campaign/campaignSelectors";
 import { useIsSuperAdmin } from "@store/auth/authSelectors";
 import { getActiveThemeClass, type SidebarThemeVariant } from "@appTypes/ThemeTypes";

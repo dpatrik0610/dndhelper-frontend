@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { Modal, Skeleton, Stack, Text, TextInput, Tooltip } from "@mantine/core";
 import { IconFileImport, IconNotebook, IconPin, IconPlus, IconSearch } from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import type { Note } from "@appTypes/Note";
 import { SectionColor } from "@appTypes/SectionColor";
 import { showNotification } from "@components/Notification/Notification";

@@ -14,7 +14,7 @@ import {
   IconSun,
   IconX,
 } from "@tabler/icons-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router";
 import { useLocalStorage, useMediaQuery } from "@mantine/hooks";
 import {
   CHRONICLE_CATEGORY_COLORS,

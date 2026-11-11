@@ -1,4 +1,4 @@
-import type { NavigateFunction } from "react-router-dom";
+import type { NavigateFunction } from "react-router";
 import { showNotification } from "@components/Notification/Notification";
 import { playRestClock } from "@store/ui/restClockStore";
 import { bulkLongRest, getCharacterById, updateCharacter } from "@services/characterService";

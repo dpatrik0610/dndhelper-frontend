@@ -6,7 +6,7 @@ import { useInventoryStore } from "@store/inventory/inventoryStore";
 import type { EquipmentUserResponse } from "@appTypes/Equipment/Equipment";
 
 import { Box } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { ListSkeleton } from "@components/common/Skeletons";
 import { InventoryFilters } from '@features/inventory/components/InventoryFilters';
 import { InventoryList } from '@features/inventory/components/InventoryList';

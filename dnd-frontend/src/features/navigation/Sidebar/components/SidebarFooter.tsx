@@ -1,5 +1,5 @@
 import { Tooltip } from "@mantine/core";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router";
 import { IconLogout, IconMusic, IconMusicOff, IconSearch, IconSettings } from "@tabler/icons-react";
 import { useSearchStore } from "@components/search/searchStore";
 import { handleLogout } from "@utils/handleLogout";

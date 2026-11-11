@@ -14,7 +14,7 @@ import {
 import { IconUserCircle, IconUserCog } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
 import type { Character } from "@appTypes/Character/Character";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";

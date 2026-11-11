@@ -1,5 +1,5 @@
 import { Button, Text, Title, Stack } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 import { handleLogout } from '@utils/handleLogout';
 
 export default function AlreadyLoggedIn() {

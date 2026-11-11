@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Stack, Box, Group, Divider } from "@mantine/core";
 import { useCurrentCharacter, useCharacterCoreActions, useCharacterCombatActions } from "@store/character/characterSelectors";
 import { updateCharacter as apiUpdateCharacter } from "@services/characterService";

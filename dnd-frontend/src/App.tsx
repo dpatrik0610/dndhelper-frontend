@@ -1,7 +1,7 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router";
 import { AppShell } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
-import { MotionConfig } from "framer-motion";
+import { MotionConfig } from "motion/react";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useMemo, lazy, Suspense } from "react";
 import Sidebar from "@features/navigation/Sidebar/Sidebar";

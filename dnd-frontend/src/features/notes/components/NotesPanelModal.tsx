@@ -1,7 +1,7 @@
 import { Suspense, lazy, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Loader, Modal, Skeleton, Stack, TextInput, Tooltip } from "@mantine/core";
 import { IconArrowLeft, IconArrowsMaximize, IconPencil, IconPinFilled, IconPlus, IconSearch } from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import type { Note } from "@appTypes/Note";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { useNoteList } from "@store/note/noteSelectors";

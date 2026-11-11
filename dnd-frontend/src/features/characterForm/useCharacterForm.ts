@@ -4,7 +4,7 @@ import { useCurrentCharacter, useCharacterCoreActions } from "@store/character/c
 import { createCharacter, updateCharacter } from "@services/characterService";
 import { useIsDm } from "@store/campaign/campaignSelectors";
 import { loadCharacters } from "@utils/loadCharacter";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { showNotification } from "@components/Notification/Notification";
 import { classHitDice } from "@utils/hitDice";
 

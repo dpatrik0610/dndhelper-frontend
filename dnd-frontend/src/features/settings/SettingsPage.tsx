@@ -1,6 +1,6 @@
 import { Box, Title, Text, Stack, Tabs } from "@mantine/core";
 import { IconAdjustments, IconShieldLock, IconUserCircle } from "@tabler/icons-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { InterfaceSettings } from "./tabs/InterfaceSettings";
 import { CharacterSettings } from "./tabs/CharacterSettings";

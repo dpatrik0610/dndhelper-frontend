@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { Badge, Button, Group, Loader, Table, Text } from "@mantine/core";
 import { IconDoorEnter, IconWorld } from "@tabler/icons-react";
 import { getAllCampaignsOverview } from "@services/campaignService";

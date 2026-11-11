@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router";
 import { decodeToken } from "@utils/decodeToken";
 import { handleLogout } from "@utils/handleLogout";
 import { showNotification } from "@components/Notification/Notification";

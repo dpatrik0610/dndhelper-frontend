@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Avatar, Button, Group, Paper, Select, Stack, Text } from "@mantine/core";
 import { IconPlus, IconUserCircle } from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useCharacterList, useCurrentCharacter } from "@store/character/characterSelectors";
 import type { Character } from "@appTypes/Character/Character";
 import { TokenSection } from "@features/settings/characters/TokenSection";

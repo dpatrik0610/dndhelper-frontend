@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Stack } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 import { useCharacterList, useCurrentCharacter, useCharacterCoreActions } from "@store/character/characterSelectors";
 import { useCurrentUserId, useToken } from "@store/auth/authSelectors";

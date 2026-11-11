@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router";
 import { IconArrowLeft, IconHome } from "@tabler/icons-react";
 import { Die } from "@components/roll/Dice";
 import classes from "./NotFound.module.css";

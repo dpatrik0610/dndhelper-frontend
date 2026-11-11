@@ -8,7 +8,7 @@ import {
   Title,
   Select,
 } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import {
   IconEdit,
   IconUserPlus,

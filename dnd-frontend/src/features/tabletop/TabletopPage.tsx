@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState, type CSSProperties } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import {
   ActionIcon,
   Avatar,

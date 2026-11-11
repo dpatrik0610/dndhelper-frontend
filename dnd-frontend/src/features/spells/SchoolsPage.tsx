@@ -2,7 +2,7 @@ import { memo, useEffect, useId, useMemo, useRef, useState, type CSSProperties, 
 import { Text, Title } from "@mantine/core";
 import { IconArrowLeft, IconChevronLeft, IconChevronRight, IconLayoutGrid } from "@tabler/icons-react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useSpellStore } from "@store/spell/spellStore";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { loadSpells } from "@utils/loadSpells";
