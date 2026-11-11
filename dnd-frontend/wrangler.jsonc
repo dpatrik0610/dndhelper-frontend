@@ -1,0 +1,10 @@
+{
+  "name": "dndreforged",
+  "compatibility_date": "2026-11-10",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  // Lets `wrangler preview` give each non-production branch its own preview URL.
+  "previews": {}
+}
