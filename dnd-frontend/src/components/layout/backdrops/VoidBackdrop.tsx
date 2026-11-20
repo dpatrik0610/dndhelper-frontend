@@ -75,31 +75,37 @@ void main() {
   float r = length(p);
   vec2 dir = p / max(r, 1e-4);
 
-  // gravitational lensing + a fixed eldritch twist of the background (static: the stars stay put)
-  float bend = RS * RS * 1.9 / max(r, RS * 0.6);
-  vec2 q = p - dir * bend;
-  q = rot(0.5 * RS / (r + 0.04)) * q;
-  vec3 col = sky(q + CENTER);
+  vec3 col = vec3(0.0);
+  float horizon = smoothstep(RS * 0.93, RS * 1.03, r);
+  if (horizon > 0.0) {
+    // gravitational lensing + a fixed eldritch twist of the background (static: the stars stay put)
+    float bend = RS * RS * 1.9 / max(r, RS * 0.6);
+    vec2 q = p - dir * bend;
+    q = rot(0.5 * RS / (r + 0.04)) * q;
+    col = sky(q + CENTER);
 
-  // faint portal glow
-  col += vec3(0.45, 0.08, 0.6) * 0.035 / (r * r * 6.0 + 0.04);
+    // faint portal glow
+    col += vec3(0.45, 0.08, 0.6) * 0.035 / (r * r * 6.0 + 0.04);
 
-  // far half of the disk
-  col += disk(p, -1.0);
+    // far half of the disk
+    col += disk(p, -1.0);
 
-  // its lensed image: a bright band wrapped around the shadow, thick over the top, thin underneath.
-  // Texture is sampled on the unit circle (no atan seam) and swirls with the disk.
-  vec2 dr = rot(0.21) * dir;
-  float top = smoothstep(-0.4, 0.6, dr.y);
-  float lensR = RS * mix(1.16, 1.34, top);
-  float lensW = RS * mix(0.035, 0.2, top);
-  float band = exp(-pow((r - lensR) / lensW, 2.0)) * mix(0.35, 1.0, top);
-  float streak = fbm(rot(uTime * 0.35) * dr * 4.0 + vec2(r * 30.0, 0.0));
-  float lensHeat = band * (0.45 + 0.9 * streak) * (0.55 + 0.6 * smoothstep(1.0, -1.0, dr.x));
-  col += mix(vec3(0.55, 0.1, 0.78), vec3(1.0, 0.8, 1.0), clamp(lensHeat, 0.0, 1.0)) * lensHeat * 1.1;
+    // its lensed image: a bright band wrapped around the shadow, thick over the top, thin underneath.
+    // Texture is sampled on the unit circle (no atan seam) and swirls with the disk.
+    vec2 dr = rot(0.21) * dir;
+    float top = smoothstep(-0.4, 0.6, dr.y);
+    float lensR = RS * mix(1.16, 1.34, top);
+    float lensW = RS * mix(0.035, 0.2, top);
+    float band = exp(-pow((r - lensR) / lensW, 2.0)) * mix(0.35, 1.0, top);
+    if (band > 1e-6) {
+      float streak = fbm(rot(uTime * 0.35) * dr * 4.0 + vec2(r * 30.0, 0.0));
+      float lensHeat = band * (0.45 + 0.9 * streak) * (0.55 + 0.6 * smoothstep(1.0, -1.0, dr.x));
+      col += mix(vec3(0.55, 0.1, 0.78), vec3(1.0, 0.8, 1.0), clamp(lensHeat, 0.0, 1.0)) * lensHeat * 1.1;
+    }
 
-  // event horizon
-  col *= smoothstep(RS * 0.93, RS * 1.03, r);
+    // event horizon
+    col *= horizon;
+  }
   // photon ring
   col += vec3(1.0, 0.82, 1.0) * exp(-pow((r - RS * 1.07) / (RS * 0.045), 2.0)) * 0.95;
 
