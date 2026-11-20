@@ -1,7 +1,7 @@
-import { forwardRef, useState } from "react";
-import { Box } from "@mantine/core";
+import { forwardRef, type CSSProperties } from "react";
 import { motion } from "motion/react";
 import { useIsMobile } from "@hooks/useIsMobile";
+import classes from "./ActionBubble.module.css";
 
 interface ActionBubbleProps {
   label: string;
@@ -10,13 +10,13 @@ interface ActionBubbleProps {
   color?: string;
 }
 
-export const ActionBubble = forwardRef<HTMLDivElement, ActionBubbleProps>(
+export const ActionBubble = forwardRef<HTMLButtonElement, ActionBubbleProps>(
   ({ label, icon, onClick, color }, ref) => {
     const isMobile = useIsMobile();
-    const [hovered, setHovered] = useState(false);
-    const size = isMobile ? 50 : 60;
-
-    const resolvedActiveColor = color || "var(--theme-color-accent-primary, #f59e0b)";
+    const style = {
+      "--bubble-size": `${isMobile ? 50 : 60}px`,
+      ...(color && { "--bubble-color": color }),
+    } as CSSProperties;
 
     return (
       <motion.div
@@ -29,47 +29,11 @@ export const ActionBubble = forwardRef<HTMLDivElement, ActionBubbleProps>(
           flex: "1 1 auto",
         }}
       >
-        <Box
-          ref={ref}
-          onClick={onClick}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          aria-label={label}
-          style={{
-            position: "relative",
-            width: size,
-            height: size,
-            borderRadius: "70%",
-            background: hovered
-              ? resolvedActiveColor
-              : "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
-            border: hovered
-              ? `1px solid ${resolvedActiveColor}`
-              : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-            boxShadow: hovered
-              ? `0 0 16px ${resolvedActiveColor}, var(--theme-glow-shadow-primary)`
-              : "inset 0 1px 1.5px rgba(255, 255, 255, 0.08), 0 2px 8px rgba(0, 0, 0, 0.20)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            // Wrappers may set pointer-events: none so only the circle is the hit area.
-            pointerEvents: "auto",
-            transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
-          }}
-        >
-          <Box
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: hovered ? "#121214" : "var(--theme-color-accent-secondary, #06b6d4)",
-              transition: "color 0.15s ease",
-            }}
-          >
+        <button ref={ref} type="button" onClick={onClick} aria-label={label} className={classes.bubble} style={style}>
+          <span className={classes.icon} aria-hidden>
             {icon}
-          </Box>
-        </Box>
+          </span>
+        </button>
       </motion.div>
     );
   }

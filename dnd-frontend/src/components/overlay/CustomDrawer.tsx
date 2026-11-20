@@ -84,7 +84,7 @@ export function CustomDrawer({
           <Box style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
             <Box style={{ flex: 1 }}>{headerContent}</Box>
             {withCloseButton && (
-              <ActionIcon variant="subtle" size="sm" onClick={onClose}>
+              <ActionIcon variant="subtle" size="sm" onClick={onClose} aria-label="Close">
                 {closeIcon ?? <IconX size={16} />}
               </ActionIcon>
             )}

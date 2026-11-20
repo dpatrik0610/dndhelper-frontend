@@ -2,6 +2,7 @@ import { Modal, Group, Button, Text } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useIsMobile } from "@hooks/useIsMobile";
+import ix from "@styles/Interactive.module.css";
 
 interface BaseModalProps {
   opened: boolean;
@@ -115,16 +116,8 @@ export const BaseModal: React.FC<BaseModalProps> = ({
           paddingBottom: "1.25rem",
           background: "transparent",
         },
-        close: {
-          color: "var(--theme-color-text-secondary, rgba(255,255,255,0.6))",
-          background: "transparent",
-          transition: "all 0.2s ease",
-          "&:hover": {
-            color: "#fff",
-            background: "var(--theme-bg-hover, rgba(255,255,255,0.04))",
-          },
-        },
       }}
+      classNames={{ close: ix.modalClose }}
     >
       {children}
 

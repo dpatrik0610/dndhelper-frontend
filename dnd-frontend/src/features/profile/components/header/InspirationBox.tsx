@@ -53,39 +53,25 @@ export function InspirationBox({ value, onClick, containerStyle }: Props) {
   return (
     <Group
       gap="md"
-      className={fun.inspiration}
+      className={onClick ? `${fun.inspiration} ${fun.inspirationClickable}` : fun.inspiration}
       onClick={onClick}
+      onKeyDown={onClick && ((e) => {
+        if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+        e.preventDefault();
+        onClick();
+      })}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-label={onClick ? `Use inspiration (${capped} of 3)` : undefined}
       style={{
-        cursor: onClick ? "pointer" : "default",
         background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
         border: hasInspiration
           ? "1px solid var(--theme-border-glow, rgba(245, 158, 11, 0.25))"
           : "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
         padding: "8px 16px",
         borderRadius: "12px",
-        transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
         userSelect: "none",
         ...containerStyle,
-      }}
-      onMouseEnter={(e) => {
-        if (onClick) {
-          e.currentTarget.style.transform = "translateY(-1px)";
-          e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.25))";
-          e.currentTarget.style.boxShadow = hasInspiration
-            ? "0 6px 24px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)"
-            : "0 6px 24px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (onClick) {
-          e.currentTarget.style.transform = "none";
-          e.currentTarget.style.borderColor = hasInspiration
-            ? "var(--theme-border-glow, rgba(245, 158, 11, 0.25))"
-            : "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
-          e.currentTarget.style.boxShadow = hasInspiration
-            ? "0 4px 20px rgba(0, 0, 0, 0.15), var(--theme-glow-shadow-primary)"
-            : "0 4px 20px rgba(0, 0, 0, 0.15)";
-        }
       }}
     >
       {hasInspiration && <InspirationFlame />}
@@ -116,7 +102,7 @@ export function InspirationBox({ value, onClick, containerStyle }: Props) {
                 justifyContent: "center",
                 width: 20,
                 height: 20,
-                transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                transition: "transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
                 transform: isActive ? "scale(1.15)" : "scale(1)",
               }}
             >
@@ -124,8 +110,9 @@ export function InspirationBox({ value, onClick, containerStyle }: Props) {
                 viewBox="0 0 24 24"
                 width={18}
                 height={18}
+                aria-hidden
                 style={{
-                  transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                  transition: "filter 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
                   filter: isActive
                     ? "drop-shadow(0 0 3px var(--theme-color-accent-primary, #f59e0b)) drop-shadow(0 0 8px var(--theme-color-accent-primary, rgba(245, 158, 11, 0.5)))"
                     : "none",
@@ -137,7 +124,7 @@ export function InspirationBox({ value, onClick, containerStyle }: Props) {
                   stroke={isActive ? "var(--theme-color-accent-primary, #f59e0b)" : "rgba(255, 255, 255, 0.25)"}
                   strokeWidth={2.5}
                   style={{
-                    transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                    transition: "fill 0.25s ease, stroke 0.25s ease",
                   }}
                 />
               </svg>

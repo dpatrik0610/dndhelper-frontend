@@ -1,9 +1,10 @@
 import { useState, type CSSProperties, type ReactNode } from "react";
-import { Group, Popover, Portal, Stack, Text, Divider, ActionIcon, Button, Tooltip, Box, type PopoverProps } from "@mantine/core";
+import { Group, Popover, Portal, Stack, Text, Divider, ActionIcon, Button, Tooltip, Box, UnstyledButton, type PopoverProps } from "@mantine/core";
 import type { Character } from "@appTypes/Character/Character";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { ActionBubble } from "./ActionBubble";
 import classes from "./ActionRibbonPanel.module.css";
+import ix from "@styles/Interactive.module.css";
 
 import {
   IconEdit,
@@ -131,28 +132,29 @@ function ConditionsList({
               borderRadius: "8px",
               padding: "6px 12px",
             }}>
-              <Text
+              <UnstyledButton
                 onClick={() => onOpenDetails(cond)}
+                className={ix.focusRing}
                 style={{
-                  cursor: "pointer",
                   fontSize: "13px",
                   fontWeight: 600,
                   fontFamily: "var(--font-sans)",
                   color: "var(--theme-color-accent-primary, #f59e0b)",
                   textDecoration: "underline",
                   textTransform: "uppercase",
+                  borderRadius: "4px",
                 }}
               >
                 {cond}
-              </Text>
+              </UnstyledButton>
               <ActionIcon
                 size="xs"
                 variant="transparent"
                 color="red"
                 onClick={() => onRemoveCondition(cond)}
-                title={`Remove ${cond}`}
+                aria-label={`Remove ${cond}`}
               >
-                <IconTrash size={14} />
+                <IconTrash size={14} aria-hidden />
               </ActionIcon>
             </Group>
           ))}

@@ -11,6 +11,63 @@ import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
 import { MarkdownRenderer } from "@components/MarkdownRender";
 import { AddFeatureModal } from "@features/profile/components/modals/AddFeatureModal";
+import ix from "@styles/Interactive.module.css";
+
+function FeatureCard({ name, description }: { name: string; description?: string }) {
+  const hasDesc = !!description;
+
+  return (
+    <Box
+      className={`${ix.lift} ${ix.accentLeft}`}
+      style={{
+        background: "var(--theme-bg-card, rgba(255, 255, 255, 0.02))",
+        borderRadius: "0 12px 12px 0",
+        border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
+        borderLeft: "4px solid var(--theme-color-accent-primary, #f59e0b)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
+      }}
+    >
+      <ExpandableSection
+        title={name}
+        titleContent={
+          <Text
+            fw={300}
+            size="sm"
+            style={{
+              textTransform: "uppercase",
+              maxWidth: "100%",
+              color: "var(--theme-color-text-primary, #fff)",
+              letterSpacing: "3px",
+              fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
+            }}
+          >
+            {name}
+          </Text>
+        }
+        color={SectionColor.Grape}
+        expandable={hasDesc}
+        defaultOpen={false}
+        padding="sm"
+        marginTop={0}
+        marginBottom={0}
+        style={{
+          background: "transparent",
+          border: "none",
+          boxShadow: "none",
+        }}
+      >
+        {description && (
+          <MarkdownRenderer
+            content={description}
+            textColor="rgba(255, 255, 255, 0.8)"
+          />
+        )}
+      </ExpandableSection>
+    </Box>
+  );
+}
 
 export function FeaturesPanel() {
   const character = useCurrentCharacter();
@@ -19,72 +76,6 @@ export function FeaturesPanel() {
   if (!character) return null;
 
   const features = character.features ?? [];
-
-  const FeatureCard = ({ name, description }: { name: string; description?: string }) => {
-    const hasDesc = !!description;
-
-    return (
-      <Box
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "translateY(-1.5px)";
-          e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
-          e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.2), var(--theme-glow-shadow-primary)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "none";
-          e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
-          e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.15)";
-        }}
-        style={{
-          transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
-          background: "var(--theme-bg-card, rgba(255, 255, 255, 0.02))",
-          borderRadius: "0 12px 12px 0",
-          border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
-          borderLeft: "4px solid var(--theme-color-accent-primary, #f59e0b)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
-        }}
-      >
-        <ExpandableSection
-          title={name}
-          titleContent={
-            <Text
-              fw={300}
-              size="sm"
-              style={{
-                textTransform: "uppercase",
-                maxWidth: "100%",
-                color: "var(--theme-color-text-primary, #fff)",
-                letterSpacing: "3px",
-                fontFamily: '"Plus Jakarta Sans", "Inter", sans-serif',
-              }}
-            >
-              {name}
-            </Text>
-          }
-          color={SectionColor.Grape}
-          expandable={hasDesc}
-          defaultOpen={false}
-          padding="sm"
-          marginTop={0}
-          marginBottom={0}
-          style={{
-            background: "transparent",
-            border: "none",
-            boxShadow: "none",
-          }}
-        >
-          {description && (
-            <MarkdownRenderer
-              content={description}
-              textColor="rgba(255, 255, 255, 0.8)"
-            />
-          )}
-        </ExpandableSection>
-      </Box>
-    );
-  };
 
   return (
     <>
@@ -96,26 +87,14 @@ export function FeaturesPanel() {
           <ActionIcon
             size="md"
             radius="xl"
-            style={{
-              background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
-              border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
-              color: "var(--theme-color-accent-primary, #fff)",
-              transition: "all 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.08))";
-              e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.04))";
-              e.currentTarget.style.boxShadow = "none";
-            }}
+            className={ix.iconBtn}
+            aria-label="Add feature"
             onClick={(e) => {
               e.stopPropagation();
               setAddModalOpened(true);
             }}
           >
-            <IconPlus size={16} />
+            <IconPlus size={16} aria-hidden />
           </ActionIcon>
         }
         style={{

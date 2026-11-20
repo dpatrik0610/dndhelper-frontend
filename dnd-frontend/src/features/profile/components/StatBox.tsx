@@ -1,5 +1,6 @@
 import { Paper, Group, Text } from "@mantine/core";
 import type { ReactNode, CSSProperties, MouseEventHandler } from "react";
+import ix from "@styles/Interactive.module.css";
 
 interface StatBoxProps {
   label: string;
@@ -17,6 +18,8 @@ interface StatBoxProps {
   fullWidth?: boolean;
   onClick?: MouseEventHandler<HTMLDivElement>;
 }
+
+const MANTINE_PALETTE_NAMES = new Set(["white", "blue", "gray", "teal", "orange", "green", "grape"]);
 
 export function StatBox({
   label,
@@ -42,13 +45,19 @@ export function StatBox({
 
   const s = sizeMap[size];
 
-  const resolvedValueColor = color && color !== "white" && color !== "blue" && color !== "gray" && color !== "teal" && color !== "orange" && color !== "green" && color !== "grape"
-    ? color
-    : "var(--theme-color-accent-primary, #f59e0b)";
+  const resolvedValueColor = color && !MANTINE_PALETTE_NAMES.has(color) ? color : "var(--theme-color-accent-primary, #f59e0b)";
 
   return (
     <Paper
       onClick={onClick}
+      onKeyDown={onClick && ((e) => {
+        if (e.target !== e.currentTarget || (e.key !== "Enter" && e.key !== " ")) return;
+        e.preventDefault();
+        e.currentTarget.click();
+      })}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      className={onClick || hoverEffect ? ix.lift : undefined}
       w={fullWidth ? "100%" : undefined}
       maw={fullWidth ? "100%" : undefined}
       miw={fullWidth ? undefined : "100px"}
@@ -57,7 +66,6 @@ export function StatBox({
       withBorder
       style={{
         textAlign: "center",
-        transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
         transformOrigin: "center",
         cursor: onClick || hoverEffect ? "pointer" : "default",
         background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
@@ -67,18 +75,6 @@ export function StatBox({
         borderRadius: "12px",
         boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
         ...style,
-      }}
-      onMouseEnter={(e) => {
-        if (!hoverEffect && !onClick) return;
-        e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
-        e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)";
-      }}
-      onMouseLeave={(e) => {
-        if (!hoverEffect && !onClick) return;
-        e.currentTarget.style.transform = "none";
-        e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
-        e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.15)";
       }}
     >
       <Group gap={s.gap} justify="center" mb="xs">

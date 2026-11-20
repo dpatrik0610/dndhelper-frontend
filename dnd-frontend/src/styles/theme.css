@@ -486,7 +486,8 @@
   color: var(--theme-color-text-secondary);
   font-weight: 500;
   padding: 8px 16px;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 .theme-preview-tab:hover {
   background: var(--theme-bg-hover);
@@ -500,7 +501,8 @@
   border: 1px solid var(--theme-border-subtle);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 .style-variant-glass .theme-preview-card {
   background: var(--theme-bg-card);
@@ -510,7 +512,8 @@
   border-radius: 16px;
   color: var(--theme-color-text-primary);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  transition: all 0.25s ease-in-out;
+  transition: 0.25s ease-in-out;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 .style-variant-glass .theme-preview-card--interactive:hover {
   border-color: var(--theme-border-glow);
@@ -538,7 +541,8 @@
   border-radius: 6px;
   background: rgba(10, 8, 14, 0.95);
   border: 2px solid rgba(255, 255, 255, 0.15);
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 .style-variant-gothic .theme-preview-card {
   background: rgba(18, 15, 25, 0.98);
@@ -546,7 +550,8 @@
   border-radius: 4px;
   color: var(--theme-color-text-primary);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7), inset 0 0 12px rgba(0, 0, 0, 0.9);
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 .style-variant-gothic .theme-preview-card--interactive:hover {
   border-color: var(--theme-color-accent-secondary);
@@ -574,7 +579,8 @@
   border-radius: 0px;
   background: #030303;
   border: 3px double var(--theme-color-accent-primary);
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 .style-variant-neon .theme-preview-card {
   background: #060606;
@@ -582,7 +588,8 @@
   border-radius: 0px;
   color: var(--theme-color-text-primary);
   box-shadow: 5px 5px 0px var(--theme-color-accent-primary);
-  transition: all 0.15s ease;
+  transition: 0.15s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 .style-variant-neon .theme-preview-card--interactive:hover {
   transform: translate(-2px, -2px);
@@ -608,7 +615,8 @@
   border: 1px solid var(--theme-border-subtle) !important;
   color: var(--theme-color-text-primary) !important;
   border-radius: 6px;
-  transition: all 0.25s ease;
+  transition: 0.25s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .theme-preview-input:focus {
@@ -622,7 +630,8 @@
   border: none !important;
   font-weight: 600;
   box-shadow: var(--theme-glow-shadow-primary);
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .theme-preview-btn-primary:hover {
@@ -635,7 +644,8 @@
   background: rgba(255, 255, 255, 0.04) !important;
   border: 1px solid var(--theme-border-subtle) !important;
   color: var(--theme-color-text-primary) !important;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .theme-preview-btn-secondary:hover {
@@ -671,7 +681,8 @@
   -webkit-backdrop-filter: blur(24px) saturate(130%);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
   color: var(--theme-color-text-primary);
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .glass-card {
@@ -682,7 +693,8 @@
   border-radius: 16px;
   color: var(--theme-color-text-primary);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  transition: all 0.25s ease-in-out;
+  transition: 0.25s ease-in-out;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .glass-card--interactive {
@@ -703,7 +715,8 @@
   border-radius: 8px;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  transition: all 0.25s ease;
+  transition: 0.25s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .glass-input:focus {
@@ -718,7 +731,8 @@
   font-weight: 600;
   border-radius: 8px;
   box-shadow: var(--theme-glow-shadow-primary);
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .glass-btn-primary:hover {
@@ -732,7 +746,8 @@
   border: 1px solid var(--theme-border-subtle) !important;
   color: var(--theme-color-text-primary) !important;
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .glass-btn-secondary:hover {
@@ -791,10 +806,14 @@
   color: inherit;
   padding: 0;
   font-size: 14px;
-  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
-.magic-rune-button:focus-visible {
+.magic-rune-button:focus-visible,
+.glass-btn-primary:focus-visible,
+.glass-btn-secondary:focus-visible,
+.glass-card--interactive:focus-visible {
   outline: 2px solid var(--theme-color-accent-primary, #f59e0b);
   outline-offset: 2px;
 }

@@ -24,6 +24,7 @@ export function InfoIconPopover({ title, children }: InfoIconPopoverProps) {
           size="sm"
           variant="subtle"
           onClick={() => setOpened(o => !o)}
+          aria-label={title ? `About ${title}` : "More info"}
         >
           <IconInfoCircle size={18} />
         </ActionIcon>

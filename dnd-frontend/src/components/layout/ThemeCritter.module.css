@@ -187,3 +187,11 @@
 }
 @keyframes mane { from { transform: scale(0.94) rotate(-5deg); } to { transform: scale(1.06) rotate(5deg); } }
 @keyframes sting { from { transform: rotate(-5deg); } to { transform: rotate(7deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .critter,
+  .critter *,
+  .goldFlash {
+    animation: none !important;
+  }
+}

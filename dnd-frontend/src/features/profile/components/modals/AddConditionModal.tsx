@@ -99,7 +99,7 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
         ) : (
           <>
             <TextInput
-              placeholder="Search or enter custom condition..."
+              placeholder="Search or enter custom condition…"
               value={search}
               onChange={(e) => setSearch(e.currentTarget.value)}
               leftSection={<IconSearch size={16} style={{ color: "var(--theme-color-text-secondary, rgba(255,255,255,0.5))" }} />}

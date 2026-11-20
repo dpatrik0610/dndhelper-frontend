@@ -1,0 +1,214 @@
+.lift,
+.liftSubtle {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.lift:hover,
+.lift:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--theme-border-glow, rgba(255, 255, 255, 0.15)) !important;
+  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.04)) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary) !important;
+}
+
+.liftSubtle:hover,
+.liftSubtle:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--theme-border-glow, rgba(255, 255, 255, 0.12)) !important;
+  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.03)) !important;
+}
+
+.glow,
+.rowHover {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease !important;
+}
+
+.glow:hover {
+  border-color: var(--theme-border-glow, rgba(255, 255, 255, 0.12)) !important;
+  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.04)) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), var(--theme-glow-shadow-primary) !important;
+}
+
+.rowHover:hover {
+  border-color: var(--theme-border-glow, rgba(255, 255, 255, 0.15)) !important;
+  background: var(--row-hover-bg, var(--theme-bg-hover, rgba(255, 255, 255, 0.04))) !important;
+}
+
+.accentLeft,
+.accentLeft:hover,
+.accentLeft:focus-within {
+  border-left-color: var(--theme-color-accent-primary, #f59e0b) !important;
+}
+
+.iconBtn {
+  background: var(--theme-bg-card, rgba(255, 255, 255, 0.04)) !important;
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08)) !important;
+  color: var(--theme-color-accent-primary, #f59e0b) !important;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.iconBtn:hover,
+.iconBtn:focus-visible {
+  transform: scale(1.1);
+  background: var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.08)) !important;
+  border-color: var(--theme-border-glow, rgba(245, 158, 11, 0.3)) !important;
+  box-shadow: var(--theme-glow-shadow-primary);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-xs);
+  width: 100%;
+  border-radius: 8px;
+}
+
+.chevron {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--theme-bg-card, rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
+  color: var(--theme-color-accent-primary, #f59e0b);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sectionHeader:hover .chevron,
+.sectionHeader:focus-visible .chevron {
+  transform: scale(1.1);
+  background: var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.08));
+  border-color: var(--theme-border-glow, rgba(245, 158, 11, 0.3));
+  box-shadow: var(--theme-glow-shadow-primary);
+}
+
+.modalClose {
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.6)) !important;
+  background: transparent !important;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.modalClose:hover,
+.modalClose:focus-visible {
+  color: var(--theme-color-text-primary, #fff) !important;
+  background: var(--theme-bg-hover, rgba(255, 255, 255, 0.04)) !important;
+}
+
+.spinOnHover {
+  transition: transform 0.2s ease;
+}
+
+.spinOnHover:hover,
+.spinOnHover:focus-visible {
+  transform: rotate(90deg);
+}
+
+.pip {
+  width: var(--pip-size, 18px);
+  height: var(--pip-size, 18px);
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.12));
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.02);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pip:hover,
+.pip:focus-visible {
+  transform: scale(1.2);
+  border-color: var(--pip-color);
+}
+
+.pip[aria-pressed="true"] {
+  background: var(--pip-color);
+  border-color: var(--pip-color);
+  box-shadow: 0 0 10px var(--pip-color), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.dangerBtn {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  color: #f87171 !important;
+  border-radius: 8px !important;
+  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.05);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+.dangerBtn:not(:disabled):hover,
+.dangerBtn:focus-visible {
+  transform: translateY(-1px);
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25), 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.dangerBtn:focus-visible {
+  outline: 2px solid #f87171;
+  outline-offset: 2px;
+}
+
+.lift:focus-visible,
+.liftSubtle:focus-visible,
+.iconBtn:focus-visible,
+.spinOnHover:focus-visible,
+.sectionHeader:focus-visible,
+.modalClose:focus-visible,
+.pip:focus-visible,
+.focusRing:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #f59e0b);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lift:hover,
+  .lift:focus-visible,
+  .liftSubtle:hover,
+  .liftSubtle:focus-visible,
+  .iconBtn:hover,
+  .iconBtn:focus-visible,
+  .spinOnHover:hover,
+  .spinOnHover:focus-visible,
+  .sectionHeader:hover .chevron,
+  .sectionHeader:focus-visible .chevron,
+  .pip:hover,
+  .pip:focus-visible,
+  .dangerBtn:hover,
+  .dangerBtn:focus-visible {
+    transform: none;
+  }
+}

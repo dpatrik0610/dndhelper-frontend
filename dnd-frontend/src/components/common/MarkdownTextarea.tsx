@@ -446,6 +446,8 @@ export function MarkdownTextarea({
             color="gray"
             style={toolStyle(boldActive)}
             onClick={applyBold}
+            aria-label="Bold"
+            aria-pressed={boldActive}
           >
             <IconBold size={14} />
           </ActionIcon>
@@ -458,6 +460,8 @@ export function MarkdownTextarea({
             color="gray"
             style={toolStyle(italicActive)}
             onClick={applyItalic}
+            aria-label="Italic"
+            aria-pressed={italicActive}
           >
             <IconItalic size={14} />
           </ActionIcon>
@@ -470,6 +474,8 @@ export function MarkdownTextarea({
             color="gray"
             style={toolStyle(listActive)}
             onClick={applyBulletList}
+            aria-label="Bulleted list"
+            aria-pressed={listActive}
           >
             <IconList size={14} />
           </ActionIcon>
@@ -482,6 +488,8 @@ export function MarkdownTextarea({
             color="gray"
             style={toolStyle(numberedListActive)}
             onClick={applyNumberedList}
+            aria-label="Numbered list"
+            aria-pressed={numberedListActive}
           >
             <IconListNumbers size={14} />
           </ActionIcon>
@@ -494,6 +502,7 @@ export function MarkdownTextarea({
             color="gray"
             style={toolStyle(false)}
             onClick={insertTableTemplate}
+            aria-label="Insert table"
           >
             <IconTable size={14} />
           </ActionIcon>
@@ -506,6 +515,7 @@ export function MarkdownTextarea({
             color="gray"
             style={toolStyle(false)}
             onClick={insertHorizontalRule}
+            aria-label="Insert horizontal rule"
           >
             <IconMinus size={14} />
           </ActionIcon>
@@ -519,6 +529,7 @@ export function MarkdownTextarea({
               color="gray"
               style={toolStyle(false)}
               onClick={() => fileInputRef.current?.click()}
+              aria-label="Add image"
             >
               <IconPhoto size={14} />
             </ActionIcon>

@@ -15,6 +15,8 @@ import { formatPool, hitDicePool } from "@utils/hitDice";
 import { EffectHint } from "@features/profile/components/EffectHint";
 import { SectionColor } from "@appTypes/SectionColor";
 import { useIsMobile } from "@hooks/useIsMobile";
+import ix from "@styles/Interactive.module.css";
+import type { CSSProperties } from "react";
 
 export function CombatStats() {
   const character = useCurrentCharacter()!;
@@ -139,35 +141,14 @@ export function CombatStats() {
         {[1, 2, 3].map((index) => {
           const isActive = count >= index;
           return (
-            <div
+            <button
               key={index}
+              type="button"
+              className={ix.pip}
               onClick={() => onClick(index)}
-              style={{
-                width: isMobile ? "16px" : "18px",
-                height: isMobile ? "16px" : "18px",
-                borderRadius: "50%",
-                cursor: "pointer",
-                transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
-                background: isActive ? activeColor : "rgba(255, 255, 255, 0.03)",
-                border: isActive
-                  ? `2px solid ${activeColor}`
-                  : "2px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.12))",
-                boxShadow: isActive
-                  ? `0 0 10px ${activeColor}, inset 0 1px 1px rgba(255, 255, 255, 0.2)`
-                  : "inset 0 1px 1px rgba(255, 255, 255, 0.02)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.2)";
-                if (!isActive) {
-                  e.currentTarget.style.borderColor = activeColor;
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1.0)";
-                if (!isActive) {
-                  e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.12))";
-                }
-              }}
+              aria-pressed={isActive}
+              aria-label={`${isSuccess ? "Success" : "Failure"} ${index}`}
+              style={{ "--pip-size": isMobile ? "16px" : "18px", "--pip-color": activeColor } as CSSProperties}
             />
           );
         })}
@@ -187,7 +168,6 @@ export function CombatStats() {
         borderRadius: 16,
         border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
         boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
-        transition: "all 0.25s ease",
         overflow: "hidden",
       }}
       expandable={false}
@@ -199,24 +179,12 @@ export function CombatStats() {
             <Paper
               key={stat.label}
               withBorder
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
-                e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.04))";
-                e.currentTarget.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.25), var(--theme-glow-shadow-primary)";
-                e.currentTarget.style.transform = "translateY(-3px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
-                e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.015))";
-                e.currentTarget.style.boxShadow = "inset 0 1px 1px rgba(255, 255, 255, 0.05)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
+              className={ix.lift}
               style={{
                 background: "var(--theme-bg-card, rgba(255, 255, 255, 0.015))",
                 border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
                 borderRadius: "14px",
                 boxShadow: "inset 0 1px 1px rgba(255, 255, 255, 0.05)",
-                transition: "all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -312,10 +280,8 @@ export function CombatStats() {
                     variant="subtle"
                     color="gray"
                     onClick={handleResetDeathSaves}
-                    title="Reset Death Saves"
-                    style={{ transition: "transform 0.2s ease" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.transform = "rotate(90deg)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.transform = "rotate(0deg)")}
+                    aria-label="Reset death saves"
+                    className={ix.spinOnHover}
                   >
                     <IconRefresh size={14} />
                   </ActionIcon>
@@ -366,21 +332,11 @@ export function CombatStats() {
                   key={stat.label}
                   withBorder
                   p="xs"
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.12))";
-                    e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.03))";
-                    e.currentTarget.style.transform = "translateY(-1px)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.04))";
-                    e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.01))";
-                    e.currentTarget.style.transform = "translateY(0)";
-                  }}
+                  className={ix.liftSubtle}
                   style={{
                     background: "var(--theme-bg-card, rgba(255, 255, 255, 0.01))",
                     border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
                     borderRadius: "10px",
-                    transition: "all 0.2s ease",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",

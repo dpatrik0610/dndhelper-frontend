@@ -108,7 +108,7 @@ export function AddFeatureModal({ opened, onClose }: AddFeatureModalProps) {
 
         <Textarea
           label="Description (Markdown supported)"
-          placeholder="e.g., When you are reduced to 0 hit points but not killed outright..."
+          placeholder="e.g., When you are reduced to 0 hit points but not killed outright…"
           value={description}
           onChange={(e) => setDescription(e.currentTarget.value)}
           minRows={isMobile ? 12 : 8}

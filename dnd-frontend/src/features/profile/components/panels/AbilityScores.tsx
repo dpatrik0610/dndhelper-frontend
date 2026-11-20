@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
+import ix from "@styles/Interactive.module.css";
 import type { Skill } from "@appTypes/Character/Skill";
 import {
   Grid,
@@ -65,7 +66,6 @@ export function AbilityScores() {
         border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
         borderRadius: "16px",
         boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
-        transition: "all 0.25s ease-in-out",
         padding: "20px",
       }}
       expandable={false}
@@ -99,21 +99,11 @@ export function AbilityScores() {
                       key={ab.key}
                       withBorder
                       p="xs"
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.12))";
-                        e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.04))";
-                        e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.1), var(--theme-glow-shadow-primary)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))";
-                        e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.015))";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
+                      className={ix.glow}
                       style={{
                         background: "var(--theme-bg-card, rgba(255, 255, 255, 0.015))",
                         borderColor: "var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
                         borderRadius: "10px",
-                        transition: "all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1)",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
@@ -266,27 +256,16 @@ export function AbilityScores() {
                       align="center"
                       wrap="nowrap"
                       p="6px 12px"
+                      className={ix.rowHover}
                       style={{
+                        "--row-hover-bg": isProf ? "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.08))" : undefined,
                         background: rowBg,
                         border: rowBorder,
                         borderRadius: "8px",
                         boxShadow: rowShadow,
-                        transition: "all 0.15s ease",
                         breakInside: "avoid",
                         marginBottom: "var(--mantine-spacing-xs)",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = isProf
-                          ? "var(--theme-gradient-primary-glass, rgba(245, 158, 11, 0.08))"
-                          : "var(--theme-bg-hover, rgba(255,255,255,0.04))";
-                        e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.15))";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = rowBg;
-                        e.currentTarget.style.borderColor = isProf
-                          ? "var(--theme-border-glow, rgba(245, 158, 11, 0.25))"
-                          : "var(--theme-border-subtle, rgba(255, 255, 255, 0.04))";
-                      }}
+                      } as CSSProperties}
                     >
                       <Group gap="xs" wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
                         {isProf ? (

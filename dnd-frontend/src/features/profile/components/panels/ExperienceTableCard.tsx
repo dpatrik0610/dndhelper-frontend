@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Badge, Group, Table, Text, Progress, Box, Stack, ThemeIcon, Collapse, Divider } from "@mantine/core";
+import { Badge, Group, Table, Text, Progress, Box, Stack, ThemeIcon, Collapse, Divider, UnstyledButton } from "@mantine/core";
 import { IconAward, IconChevronDown, IconChevronUp, IconSparkles } from "@tabler/icons-react";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { EXPERIENCE_TABLE, getLevelForExperience, getExperienceProgress } from "@utils/experienceTable";
 import { useIsMobile } from "@hooks/useIsMobile";
 import { ExpandableSection } from "@components/ExpandableSection";
 import { SectionColor } from "@appTypes/SectionColor";
+import ix from "@styles/Interactive.module.css";
 
 export function ExperienceTableCard() {
   const character = useCurrentCharacter();
@@ -34,7 +35,6 @@ export function ExperienceTableCard() {
         borderRadius: 16,
         border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.08))",
         boxShadow: "0 20px 50px rgba(0, 0, 0, 0.35), var(--theme-glow-shadow-primary)",
-        transition: "all 0.25s ease",
         overflow: "hidden",
         marginTop: "16px",
       }}
@@ -119,25 +119,19 @@ export function ExperienceTableCard() {
 
         <Divider style={{ borderColor: "rgba(255, 255, 255, 0.06)" }} my={4} />
 
-        <Group
-          justify="space-between"
-          align="center"
+        <UnstyledButton
           onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          className={ix.liftSubtle}
           style={{
-            cursor: "pointer",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "100%",
             padding: "10px 14px",
             borderRadius: "10px",
             background: "var(--theme-bg-card, rgba(255, 255, 255, 0.015))",
             border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.04))",
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--theme-bg-hover, rgba(255, 255, 255, 0.03))";
-            e.currentTarget.style.borderColor = "var(--theme-border-glow, rgba(255, 255, 255, 0.12))";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "var(--theme-bg-card, rgba(255, 255, 255, 0.015))";
-            e.currentTarget.style.borderColor = "var(--theme-border-subtle, rgba(255, 255, 255, 0.04))";
           }}
         >
           <Group gap="xs">
@@ -164,7 +158,7 @@ export function ExperienceTableCard() {
               <IconChevronDown size={14} color="var(--theme-color-accent-primary, #f59e0b)" />
             )}
           </Group>
-        </Group>
+        </UnstyledButton>
 
         <Collapse expanded={expanded}>
           <Box
@@ -204,7 +198,7 @@ export function ExperienceTableCard() {
                         background: isCurrent ? "var(--theme-bg-hover, rgba(255, 255, 255, 0.03))" : "transparent",
                         color: isCurrent ? "var(--theme-color-accent-primary, #f59e0b)" : "var(--theme-color-text-primary, #fff)",
                         fontWeight: isCurrent ? 750 : 500,
-                        transition: "all 200ms ease",
+                        transition: "background-color 200ms ease, color 200ms ease",
                       }}
                     >
                       <Table.Td style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.04)" }}>
