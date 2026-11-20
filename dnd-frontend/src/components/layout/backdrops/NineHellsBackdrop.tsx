@@ -98,38 +98,43 @@ vec3 ground(vec2 p, float t) {
   float cx = 1.6 * sin(g.y * 0.22 + 1.0) + 0.5 * sin(g.y * 0.6);
   float dx = abs(g.x - cx);
   float w = 0.9;
-
-  vec2 c = cracks(g + (fbm(g * 2.0) - 0.5) * 0.5);
-  vec3 col = vec3(0.05, 0.03, 0.035) * (0.5 + 0.9 * c.y) * (0.8 + 0.4 * noise(g * 14.0));
-  float hot = 0.3 + 0.7 * smoothstep(0.3, 0.7, noise(g * 0.35 + vec2(0.0, t * 0.05)));
-  hot = max(hot, exp(-max(dx - w, 0.0) * 1.6));
-  hot *= 0.8 + 0.35 * sin(t * 1.2 - g.y * 1.5 + c.y * 6.28);
-  float heat = smoothstep(0.1, 0.0, c.x) * hot;
-  col += mix(vec3(0.9, 0.15, 0.02), vec3(1.0, 0.85, 0.35), heat) * heat;
-  col += vec3(0.5, 0.07, 0.01) * smoothstep(0.35, 0.0, c.x) * hot * 0.3;
-
-  float breath = 0.8 + 0.2 * sin(t * 0.9 + g.y * 0.8);
-  col += vec3(0.95, 0.24, 0.03) * exp(-max(dx - w, 0.0) * 1.3) * 0.4 * breath;
-
-  vec2 fl = vec2((g.x - cx) * 1.2, g.y + t * 0.5);
-  vec2 warp = vec2(fbm(fl * 0.9 + vec2(0.0, t * 0.15)), fbm(fl * 0.9 + vec2(5.2, -t * 0.12))) - 0.5;
-  float n = fbm(fl * 1.3 + warp * 1.8);
-  float veins = pow(1.0 - abs(2.0 * fbm(fl * 2.4 + warp * 2.5 + vec2(0.0, t * 0.2)) - 1.0), 4.0);
-  float temp = (0.35 + 0.6 * n + 0.75 * veins) * (0.85 + 0.15 * sin(t * 1.3 + n * 12.0));
-  temp *= mix(0.55, 1.0, smoothstep(w, w * 0.2, dx));
-  vec3 lava = molten(temp) * (0.7 + 0.6 * temp);
-  float crust = smoothstep(0.56, 0.68, fbm(fl * 2.0 + 3.0 + warp)) * (1.0 - veins);
-  lava = mix(lava, vec3(0.1, 0.025, 0.02) + molten(temp) * 0.15, crust * 0.85);
-
-  vec2 bq = fl * 2.5;
-  vec2 bid = floor(bq);
-  float bh = hash(bid);
-  float pop = fract(t * (0.25 + 0.3 * bh) + bh * 7.0);
-  float bd = length(fract(bq) - 0.5 - (hash2(bid + 2.0) - 0.5) * 0.5);
-  lava += vec3(1.0, 0.85, 0.4) * smoothstep(0.04, 0.0, abs(bd - pop * 0.3)) * (1.0 - pop) * step(0.6, bh);
-
   float river = smoothstep(w, w - 0.25, dx);
-  col = mix(col, lava, river);
+
+  vec3 col = vec3(0.0);
+  if (river < 1.0) {
+    vec2 c = cracks(g + (fbm(g * 2.0) - 0.5) * 0.5);
+    col = vec3(0.05, 0.03, 0.035) * (0.5 + 0.9 * c.y) * (0.8 + 0.4 * noise(g * 14.0));
+    float hot = 0.3 + 0.7 * smoothstep(0.3, 0.7, noise(g * 0.35 + vec2(0.0, t * 0.05)));
+    hot = max(hot, exp(-max(dx - w, 0.0) * 1.6));
+    hot *= 0.8 + 0.35 * sin(t * 1.2 - g.y * 1.5 + c.y * 6.28);
+    float heat = smoothstep(0.1, 0.0, c.x) * hot;
+    col += mix(vec3(0.9, 0.15, 0.02), vec3(1.0, 0.85, 0.35), heat) * heat;
+    col += vec3(0.5, 0.07, 0.01) * smoothstep(0.35, 0.0, c.x) * hot * 0.3;
+
+    float breath = 0.8 + 0.2 * sin(t * 0.9 + g.y * 0.8);
+    col += vec3(0.95, 0.24, 0.03) * exp(-max(dx - w, 0.0) * 1.3) * 0.4 * breath;
+  }
+
+  if (river > 0.0) {
+    vec2 fl = vec2((g.x - cx) * 1.2, g.y + t * 0.5);
+    vec2 warp = vec2(fbm(fl * 0.9 + vec2(0.0, t * 0.15)), fbm(fl * 0.9 + vec2(5.2, -t * 0.12))) - 0.5;
+    float n = fbm(fl * 1.3 + warp * 1.8);
+    float veins = pow(1.0 - abs(2.0 * fbm(fl * 2.4 + warp * 2.5 + vec2(0.0, t * 0.2)) - 1.0), 4.0);
+    float temp = (0.35 + 0.6 * n + 0.75 * veins) * (0.85 + 0.15 * sin(t * 1.3 + n * 12.0));
+    temp *= mix(0.55, 1.0, smoothstep(w, w * 0.2, dx));
+    vec3 lava = molten(temp) * (0.7 + 0.6 * temp);
+    float crust = smoothstep(0.56, 0.68, fbm(fl * 2.0 + 3.0 + warp)) * (1.0 - veins);
+    lava = mix(lava, vec3(0.1, 0.025, 0.02) + molten(temp) * 0.15, crust * 0.85);
+
+    vec2 bq = fl * 2.5;
+    vec2 bid = floor(bq);
+    float bh = hash(bid);
+    float pop = fract(t * (0.25 + 0.3 * bh) + bh * 7.0);
+    float bd = length(fract(bq) - 0.5 - (hash2(bid + 2.0) - 0.5) * 0.5);
+    lava += vec3(1.0, 0.85, 0.4) * smoothstep(0.04, 0.0, abs(bd - pop * 0.3)) * (1.0 - pop) * step(0.6, bh);
+
+    col = mix(col, lava, river);
+  }
 
   float fog = 1.0 - exp(-max(z - 0.4, 0.0) * 0.5);
   return mix(col, HAZE, fog * (0.9 - 0.35 * river));
@@ -154,14 +159,19 @@ void main() {
 
   vec3 col;
   if (p.y > HORIZON) {
-    col = sky(p);
-    meteor(col, p, t, aspect, 1.7);
-    meteor(col, p, t + 4.3, aspect, 5.2);
     float px = 1.5 / uResolution.y;
-    float farTop = HORIZON + 0.24 * spires(p.x, 5.0, 2.0);
-    col = mix(col, mix(vec3(0.14, 0.03, 0.02), HAZE, 0.3 * exp(-(p.y - HORIZON) * 14.0)), smoothstep(px, -px, p.y - farTop));
-    float nearTop = HORIZON + 0.13 * spires(p.x, 8.0, 7.0);
-    col = mix(col, mix(vec3(0.03, 0.01, 0.012), vec3(0.4, 0.08, 0.02), exp(-(p.y - HORIZON) * 40.0)), smoothstep(px, -px, p.y - nearTop));
+    float near = smoothstep(px, -px, p.y - (HORIZON + 0.13 * spires(p.x, 8.0, 7.0)));
+    col = vec3(0.0);
+    if (near < 1.0) {
+      float far = smoothstep(px, -px, p.y - (HORIZON + 0.24 * spires(p.x, 5.0, 2.0)));
+      if (far < 1.0) {
+        col = sky(p);
+        meteor(col, p, t, aspect, 1.7);
+        meteor(col, p, t + 4.3, aspect, 5.2);
+      }
+      col = mix(col, mix(vec3(0.14, 0.03, 0.02), HAZE, 0.3 * exp(-(p.y - HORIZON) * 14.0)), far);
+    }
+    col = mix(col, mix(vec3(0.03, 0.01, 0.012), vec3(0.4, 0.08, 0.02), exp(-(p.y - HORIZON) * 40.0)), near);
   } else {
     col = ground(p, t);
   }
