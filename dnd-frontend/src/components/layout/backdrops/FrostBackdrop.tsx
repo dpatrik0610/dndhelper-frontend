@@ -229,18 +229,24 @@ vec3 mist(vec3 col, vec2 p, float base, float layer, bool cheap) {
 }
 
 vec3 landscape(vec2 uv, vec2 p, bool cheap) {
-  vec3 col = skyAt(uv, p);
-  for (int i = 0; i < 2; i++) {
-    float layer = float(i);
-    vec4 r = range(p.x, layer);
-    float a = smoothstep(gPx, -gPx, p.y - r.x);
-    if (a > 0.0) col = mix(col, face(p, r.x, layer, cheap), a);
-    col = mist(col, p, HZ + (layer < 0.5 ? 0.06 : 0.015), layer, cheap);
-  }
   float ground = hillsH(p.x);
   float top = ground + treeline(p.x);
-  float a = smoothstep(gPx, -gPx, p.y - top);
-  if (a > 0.0) col = mix(col, forest(p, top, ground), a);
+  float af = smoothstep(gPx, -gPx, p.y - top);
+  vec3 col = vec3(0.0);
+  if (af < 1.0) {
+    float near = range(p.x, 1.0).x;
+    float an = smoothstep(gPx, -gPx, p.y - near);
+    if (an < 1.0) {
+      float far = range(p.x, 0.0).x;
+      float a = smoothstep(gPx, -gPx, p.y - far);
+      if (a < 1.0) col = skyAt(uv, p);
+      if (a > 0.0) col = mix(col, face(p, far, 0.0, cheap), a);
+      col = mist(col, p, HZ + 0.06, 0.0, cheap);
+    }
+    if (an > 0.0) col = mix(col, face(p, near, 1.0, cheap), an);
+    col = mist(col, p, HZ + 0.015, 1.0, cheap);
+  }
+  if (af > 0.0) col = mix(col, forest(p, top, ground), af);
   return mist(col, p, HZ - 0.01, 2.0, cheap);
 }
 
@@ -375,20 +381,27 @@ void main() {
   gPx = 2.0 / max(uCssResolution.y, 1.0);
   vec2 p = vec2(uv.x * gAspect, uv.y);
 
-  vec3 col = p.y >= HZ ? landscape(uv, p, false) : lake(uv, p);
-
-  float e = 0.004;
-  float bank = bankH(p.x);
-  float ba = smoothstep(gPx, -gPx, p.y - bank);
-  if (ba > 0.0) col = mix(col, drift(p, bank, (bankH(p.x + e) - bankH(p.x - e)) / (2.0 * e)), ba);
-
   float k = clamp(gAspect / 1.6, 0.5, 1.0); // smaller on narrow (phone) screens
-  vec4 t;
-  t = spruce(p, gAspect - 0.06 * k, 0.5 * k, 0.0);  col = mix(col, t.rgb, t.a);
-  t = spruce(p, gAspect - 0.17 * k, 0.34 * k, 1.0); col = mix(col, t.rgb, t.a);
-  t = spruce(p, gAspect - 0.25 * k, 0.22 * k, 2.0); col = mix(col, t.rgb, t.a);
-  t = spruce(p, 0.13 * k, 0.26 * k, 1.0);           col = mix(col, t.rgb, t.a);
-  t = spruce(p, 0.04 * k, 0.42 * k, 0.0);           col = mix(col, t.rgb, t.a);
+  vec4 t1 = spruce(p, gAspect - 0.06 * k, 0.5 * k, 0.0);
+  vec4 t2 = spruce(p, gAspect - 0.17 * k, 0.34 * k, 1.0);
+  vec4 t3 = spruce(p, gAspect - 0.25 * k, 0.22 * k, 2.0);
+  vec4 t4 = spruce(p, 0.13 * k, 0.26 * k, 1.0);
+  vec4 t5 = spruce(p, 0.04 * k, 0.42 * k, 0.0);
+
+  vec3 col = vec3(0.0);
+  if (max(max(max(t1.a, t2.a), max(t3.a, t4.a)), t5.a) < 1.0) {
+    float e = 0.004;
+    float bank = bankH(p.x);
+    float ba = smoothstep(gPx, -gPx, p.y - bank);
+    if (ba < 1.0) col = p.y >= HZ ? landscape(uv, p, false) : lake(uv, p);
+    if (ba > 0.0) col = mix(col, drift(p, bank, (bankH(p.x + e) - bankH(p.x - e)) / (2.0 * e)), ba);
+  }
+
+  col = mix(col, t1.rgb, t1.a);
+  col = mix(col, t2.rgb, t2.a);
+  col = mix(col, t3.rgb, t3.a);
+  col = mix(col, t4.rgb, t4.a);
+  col = mix(col, t5.rgb, t5.a);
 
   // vignette
   vec2 v = uv - 0.5;
