@@ -236,45 +236,50 @@ void main() {
   gSun = vec2(min(0.42, 0.5 * aspect - 0.13), 0.26); // stays on screen on narrow phones
   gOasisX = -min(0.32, 0.5 * aspect - 0.12);
 
-  // Heat haze: the air rippling just above the ground
-  float hz = exp(-abs(p.y - HORIZON) * 16.0);
-  vec2 hp = p + vec2(noise(vec2(p.y * 70.0 - t * 1.3, p.x * 3.0)) - 0.5, noise(vec2(p.x * 9.0, p.y * 50.0 - t * 1.0)) - 0.5) * 0.012 * hz;
+  vec3 col = vec3(0.0);
+  if (p.y > -0.22 + 0.11 * ridge(p.x, 1.4, 4.1)) {
+    // Heat haze: the air rippling just above the ground
+    float hz = exp(-abs(p.y - HORIZON) * 16.0);
+    vec2 hp = p + vec2(noise(vec2(p.y * 70.0 - t * 1.3, p.x * 3.0)) - 0.5, noise(vec2(p.x * 9.0, p.y * 50.0 - t * 1.0)) - 0.5) * 0.012 * hz;
 
-  vec3 col;
-  if (hp.y > HORIZON) col = farView(hp);
-  else {
-    // Mirage: the ground near the horizon becomes a wavering pool reflecting the sky and mesas
-    vec2 mp = vec2(hp.x + (noise(vec2(p.y * 120.0 - t * 1.6, p.x * 4.0)) - 0.5) * 0.02, 2.0 * HORIZON - hp.y);
-    col = mix(vec3(0.80, 0.50, 0.28), farView(mp) * 0.95, exp((p.y - HORIZON) * 28.0) * 0.75);
-  }
+    if (hp.y > HORIZON) col = farView(hp);
+    else {
+      // Mirage: the ground near the horizon becomes a wavering pool reflecting the sky and mesas
+      vec2 mp = vec2(hp.x + (noise(vec2(p.y * 120.0 - t * 1.6, p.x * 4.0)) - 0.5) * 0.02, 2.0 * HORIZON - hp.y);
+      col = mix(vec3(0.80, 0.50, 0.28), farView(mp) * 0.95, exp((p.y - HORIZON) * 28.0) * 0.75);
+    }
 
-  // Fake oasis: a mirage of palms around a blue pool resting on the horizon, wavering in the heat and
-  // fading in and out (opposite the sun, pulled in on narrow screens)
-  vec2 oc = vec2(gOasisX, HORIZON + 0.003);
-  vec2 op = hp + vec2((noise(vec2(p.y * 90.0 - t * 1.2, 3.0)) - 0.5) * 0.008, 0.0);
-  float fade = 0.25 + 0.6 * smoothstep(-0.4, 0.6, sin(t * 0.09));
-  vec2 oq = op - oc;
-  float pool = smoothstep(1.0, 0.75, length(oq / vec2(0.11, 0.0065)));
-  float bush = step(oq.y, 0.003 + 0.004 * noise(vec2(op.x * 140.0, 1.0))) * step(-0.001, oq.y) * step(abs(oq.x), 0.085 - 0.3 * abs(oq.y));
-  vec3 green = mix(vec3(0.16, 0.26, 0.15), HAZE, 0.38);
-  vec3 water = mix(vec3(0.36, 0.68, 0.74), HAZE, 0.3) * (0.92 + 0.12 * sin(op.y * 1400.0 + noise(vec2(op.x * 60.0, t * 0.4)) * 6.0));
-  water = mix(water, green * 0.8, palms(vec2(op.x, 2.0 * oc.y - op.y), oc) * 0.6); // palms reflected in the pool
-  float land = max(bush, palms(op, oc + vec2(0.0, 0.002)));
-  col = mix(col, mix(water, green, land), max(pool, land) * fade);
+    // Fake oasis: a mirage of palms around a blue pool resting on the horizon, wavering in the heat and
+    // fading in and out (opposite the sun, pulled in on narrow screens)
+    vec2 oc = vec2(gOasisX, HORIZON + 0.003);
+    vec2 oz = hp - oc;
+    if (abs(oz.x) < 0.12 && oz.y > -0.01 && oz.y < 0.075) {
+      vec2 op = hp + vec2((noise(vec2(p.y * 90.0 - t * 1.2, 3.0)) - 0.5) * 0.008, 0.0);
+      float fade = 0.25 + 0.6 * smoothstep(-0.4, 0.6, sin(t * 0.09));
+      vec2 oq = op - oc;
+      float pool = smoothstep(1.0, 0.75, length(oq / vec2(0.11, 0.0065)));
+      float bush = step(oq.y, 0.003 + 0.004 * noise(vec2(op.x * 140.0, 1.0))) * step(-0.001, oq.y) * step(abs(oq.x), 0.085 - 0.3 * abs(oq.y));
+      vec3 green = mix(vec3(0.16, 0.26, 0.15), HAZE, 0.38);
+      vec3 water = mix(vec3(0.36, 0.68, 0.74), HAZE, 0.3) * (0.92 + 0.12 * sin(op.y * 1400.0 + noise(vec2(op.x * 60.0, t * 0.4)) * 6.0));
+      water = mix(water, green * 0.8, palms(vec2(op.x, 2.0 * oc.y - op.y), oc) * 0.6); // palms reflected in the pool
+      float land = max(bush, palms(op, oc + vec2(0.0, 0.002)));
+      col = mix(col, mix(water, green, land), max(pool, land) * fade);
+    }
 
-  // far dunes shimmer with the haze too
-  dunes(col, hp, -0.085, 0.06, 2.2, 1.3, vec3(0.95, 0.62, 0.36), vec3(0.70, 0.38, 0.24), 0.0, 0.35, 0.25, gOasisX);
+    // far dunes shimmer with the haze too
+    dunes(col, hp, -0.085, 0.06, 2.2, 1.3, vec3(0.95, 0.62, 0.36), vec3(0.70, 0.38, 0.24), 0.0, 0.35, 0.25, gOasisX);
 
-  // Dust devil: a leaning, swirling column crossing the middle distance, fading in and out at the ends
-  float ph = fract(t * 0.011 + 0.3);
-  float hgt = p.y + 0.11;
-  if (hgt > -0.01 && hgt < 0.3) {
-    float cx = mix(-1.1, 1.1, ph) + hgt * 0.08 + sin(hgt * 14.0 - t * 1.3) * 0.015;
-    float xn = (p.x - cx) / (0.01 + hgt * 0.16);
-    if (abs(xn) < 1.0) {
-      float swirl = fbm(vec2(xn * 2.5 + t * 3.5, hgt * 18.0 - t * 1.6));
-      float dens = (1.0 - xn * xn) * smoothstep(0.3, 0.05, hgt) * smoothstep(-0.01, 0.02, hgt) * (0.35 + 0.65 * swirl);
-      col = mix(col, vec3(0.86, 0.58, 0.34), dens * 0.6 * smoothstep(0.0, 0.15, ph) * smoothstep(1.0, 0.85, ph));
+    // Dust devil: a leaning, swirling column crossing the middle distance, fading in and out at the ends
+    float ph = fract(t * 0.011 + 0.3);
+    float hgt = p.y + 0.11;
+    if (hgt > -0.01 && hgt < 0.3) {
+      float cx = mix(-1.1, 1.1, ph) + hgt * 0.08 + sin(hgt * 14.0 - t * 1.3) * 0.015;
+      float xn = (p.x - cx) / (0.01 + hgt * 0.16);
+      if (abs(xn) < 1.0) {
+        float swirl = fbm(vec2(xn * 2.5 + t * 3.5, hgt * 18.0 - t * 1.6));
+        float dens = (1.0 - xn * xn) * smoothstep(0.3, 0.05, hgt) * smoothstep(-0.01, 0.02, hgt) * (0.35 + 0.65 * swirl);
+        col = mix(col, vec3(0.86, 0.58, 0.34), dens * 0.6 * smoothstep(0.0, 0.15, ph) * smoothstep(1.0, 0.85, ph));
+      }
     }
   }
 
@@ -283,9 +288,11 @@ void main() {
   dunes(col, p, -0.46, 0.15, 0.9, 8.7, vec3(0.78, 0.38, 0.16), vec3(0.32, 0.13, 0.07), 1.0, 0.0, 0.6, 99.0);
 
   // Blowing sand: faint streams always, thick sheets when a gust comes through
-  float gust = pow(0.5 + 0.5 * sin(t * 0.16), 3.0);
-  float sheet = fbm(vec2(p.x * 2.2 + t * 0.9, p.y * 9.0 + sin(p.x * 3.0 + t * 0.4)));
-  col = mix(col, vec3(0.92, 0.64, 0.38), smoothstep(0.5, 0.9, sheet) * smoothstep(0.15, -0.3, p.y) * (0.08 + 0.32 * gust));
+  if (p.y < 0.15) {
+    float gust = pow(0.5 + 0.5 * sin(t * 0.16), 3.0);
+    float sheet = fbm(vec2(p.x * 2.2 + t * 0.9, p.y * 9.0 + sin(p.x * 3.0 + t * 0.4)));
+    col = mix(col, vec3(0.92, 0.64, 0.38), smoothstep(0.5, 0.9, sheet) * smoothstep(0.15, -0.3, p.y) * (0.08 + 0.32 * gust));
+  }
 
   // vignette + overall dimming so panels stay readable
   float v = smoothstep(1.3, 0.3, length(uv * vec2(0.8, 1.0)));
