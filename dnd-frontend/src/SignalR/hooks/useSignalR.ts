@@ -70,7 +70,7 @@ export const useSignalR = () => {
           return 30000;
         },
       })
-      .configureLogging(LogLevel.Information)
+      .configureLogging(import.meta.env.DEV ? LogLevel.Information : LogLevel.Warning)
       .build();
 
     connectionRef.current = newConnection;
