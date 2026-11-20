@@ -70,8 +70,6 @@ export function StatBox({
         cursor: onClick || hoverEffect ? "pointer" : "default",
         background: "var(--theme-bg-card, rgba(255, 255, 255, 0.04))",
         border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
         borderRadius: "12px",
         boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
         ...style,

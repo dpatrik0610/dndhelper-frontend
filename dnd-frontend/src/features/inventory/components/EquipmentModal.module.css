@@ -34,7 +34,8 @@
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .glassPaper:hover {
@@ -50,7 +51,8 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--mantine-color-gray-3);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
 }
 
 .editButton:hover {

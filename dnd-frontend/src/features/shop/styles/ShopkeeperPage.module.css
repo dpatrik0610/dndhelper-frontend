@@ -25,7 +25,8 @@
     border: 1px solid rgba(245, 158, 11, 0.25);
     padding: 8px 12px;
     border-radius: 6px;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
     width: 100%;
     display: flex;
     align-items: center;
@@ -57,7 +58,8 @@
 .dropdownCard {
     cursor: pointer;
     width: 100%;
-    transition: all 0.2s ease;
+    transition: 0.2s ease;
+    transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.05);
 }

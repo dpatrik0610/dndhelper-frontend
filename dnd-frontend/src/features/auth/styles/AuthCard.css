@@ -97,7 +97,8 @@
     var(--theme-glow-shadow-primary, 0 0 0 transparent) !important;
   padding: 48px !important;
   box-sizing: border-box;
-  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter !important;
 }
 
 .portal-header-title {

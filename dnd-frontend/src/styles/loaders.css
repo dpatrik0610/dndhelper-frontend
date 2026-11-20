@@ -69,21 +69,27 @@
 
 /* ---------- Skeletons: themed shimmer instead of a grey pulse ---------- */
 
+.mantine-Skeleton-root[data-visible] {
+  overflow: hidden;
+}
+
 .mantine-Skeleton-root[data-visible]::before {
-  background-color: transparent;
+  background-color: var(--theme-bg-card, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
+  border-radius: inherit;
 }
 
 .mantine-Skeleton-root[data-visible]::after {
-  background-color: var(--theme-bg-card, rgba(255, 255, 255, 0.05));
-  background-image: linear-gradient(
+  inset: 0 auto 0 0;
+  width: 220%;
+  background: linear-gradient(
     100deg,
     transparent 20%,
     color-mix(in srgb, var(--theme-color-accent-primary, #fff) 14%, transparent) 50%,
     transparent 80%
   );
-  background-size: 220% 100%;
-  border: 1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06));
-  border-radius: inherit;
+  border-radius: 0;
+  transform: translateX(-65.45%);
 }
 
 .mantine-Skeleton-root[data-animate]::after {
@@ -91,8 +97,8 @@
 }
 
 @keyframes skeletonShimmer {
-  from { background-position: 120% 0; }
-  to   { background-position: -120% 0; }
+  from { transform: translateX(-65.45%); }
+  to   { transform: translateX(65.45%); }
 }
 
 /* ---------- Route transitions (App.tsx) ----------

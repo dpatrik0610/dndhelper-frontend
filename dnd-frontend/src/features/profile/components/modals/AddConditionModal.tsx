@@ -128,7 +128,6 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
                       },
                       label: {
                         width: "100%",
-                        backdropFilter: "blur(12px)",
                         background:
                           selected === search.trim()
                             ? "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))"
@@ -166,7 +165,6 @@ export function AddConditionModal({ opened, onClose }: AddConditionModalProps) {
                         },
                         label: {
                           width: "100%",
-                          backdropFilter: "blur(12px)",
                           background: isSelected
                             ? "var(--theme-gradient-primary-glass, var(--theme-gradient-primary))"
                             : "rgba(255, 255, 255, 0.01)",

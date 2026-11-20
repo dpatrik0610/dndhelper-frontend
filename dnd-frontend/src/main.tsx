@@ -20,6 +20,10 @@ import { cssVariablesResolver, mantineTheme } from './styles/mantineTheme'
 
 registerAuthStoreGuards();
 
+if (import.meta.env.DEV) {
+  import('@utils/gpuAudit').then(({ gpuAudit }) => Object.assign(window, { gpuAudit }));
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <MantineProvider defaultColorScheme="dark" theme={mantineTheme} cssVariablesResolver={cssVariablesResolver}>

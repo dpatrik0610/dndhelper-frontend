@@ -24,8 +24,6 @@ function FeatureCard({ name, description }: { name: string; description?: string
         borderRadius: "0 12px 12px 0",
         border: "1px solid var(--theme-border-subtle, rgba(255, 255, 255, 0.06))",
         borderLeft: "4px solid var(--theme-color-accent-primary, #f59e0b)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
         boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
       }}
     >
