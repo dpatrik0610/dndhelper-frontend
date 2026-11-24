@@ -12,6 +12,7 @@
   -webkit-backdrop-filter: blur(24px) saturate(130%);
   overflow-x: auto;
   scrollbar-width: none;
+  container-type: inline-size;
 }
 
 .list::-webkit-scrollbar {
@@ -22,8 +23,9 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  flex-shrink: 0;
+  flex: 1 0 auto;
   padding: 14px 14px 13px;
   border: 0;
   background: none;
@@ -81,13 +83,15 @@
   color: var(--theme-color-accent-primary, #f59e0b);
 }
 
-/* Phones: six equal columns, icon over a short label, no sideways scrolling. */
 @media (max-width: 48em) {
   .list {
     padding: 0 4px;
     gap: 0;
   }
+}
 
+/* Too narrow for one row of labels (phones, narrow windows): equal columns, icon over label, no sideways scrolling. */
+@container (max-width: 800px) {
   .tab {
     flex: 1 1 0;
     min-width: 0;
