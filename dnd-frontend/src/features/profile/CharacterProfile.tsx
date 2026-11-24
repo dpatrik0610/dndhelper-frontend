@@ -5,7 +5,7 @@ import {
 } from "@mantine/core";
 import { CardGridSkeleton, LinesSkeleton } from "@components/common/Skeletons";
 import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, lazy, Suspense } from "react";
 import { useCurrentCharacter } from "@store/character/characterSelectors";
 import { CharacterHeader } from "./components/header/CharacterHeader";
 
@@ -45,6 +45,29 @@ export default function CharacterProfile() {
   const [activeTab, setActiveTab] = useState<string | null>("overview");
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const listRef = useRef<HTMLDivElement>(null);
+  const tabCount = (character?.classResources?.length ?? 0) > 0 ? PROFILE_TABS.length : PROFILE_TABS.length - 1;
+
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const fit = () => {
+      delete list.dataset.compact;
+      if (isMobile || list.scrollWidth > list.clientWidth) list.dataset.compact = "";
+    };
+    fit();
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(fit);
+    });
+    observer.observe(list);
+    document.fonts.ready.then(fit);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [isMobile, tabCount]);
 
   useEffect(() => {
     if (!character) {
@@ -77,7 +100,7 @@ export default function CharacterProfile() {
         unstyled
         classNames={{ list: tabClasses.list, tab: tabClasses.tab, tabSection: tabClasses.icon, tabLabel: tabClasses.label }}
       >
-        <Tabs.List aria-label="Character sections">
+        <Tabs.List ref={listRef} aria-label="Character sections">
           {tabs.map(({ value, label, short, Icon }) => (
             <Tabs.Tab key={value} value={value} aria-label={label} leftSection={<Icon size={isMobile ? 18 : 16} stroke={1.75} />}>
               {isMobile ? short ?? label : label}

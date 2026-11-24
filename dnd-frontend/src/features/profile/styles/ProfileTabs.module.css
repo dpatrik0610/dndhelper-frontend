@@ -12,7 +12,6 @@
   -webkit-backdrop-filter: blur(24px) saturate(130%);
   overflow-x: auto;
   scrollbar-width: none;
-  container-type: inline-size;
 }
 
 .list::-webkit-scrollbar {
@@ -90,8 +89,8 @@
   }
 }
 
-/* Too narrow for one row of labels (phones, narrow windows): equal columns, icon over label, no sideways scrolling. */
-@container (max-width: 800px) {
+/* Set from CharacterProfile when the labels don't fit one row: equal columns, icon over label, no sideways scrolling. */
+.list[data-compact] {
   .tab {
     flex: 1 1 0;
     min-width: 0;
