@@ -66,7 +66,7 @@ const SettingsPage = lazy(pages.settings);
 const BardifyPage = lazy(pages.bardify);
 const MusicPlayer = lazy(() => import("@features/bardify/MusicPlayer"));
 
-const EDGE_TO_EDGE_SECTIONS = new Set(["table", "chronicle", "bardify", "rules"]);
+const EDGE_TO_EDGE_SECTIONS = new Set(["table", "chronicle", "bardify", "rules", "mine"]);
 const DmDashboard = lazy(adminPages.dm);
 const SuperAdminConsole = lazy(adminPages.superAdmin);
 const Login = lazy(() => import("@features/auth/login/Login"));
@@ -74,6 +74,7 @@ const Register = lazy(() => import("@features/auth/register/Register"));
 const NotFound = lazy(() => import("@features/notFound/NotFound"));
 // Hidden: no nav link and not prefetched, only reachable by typing /scoreboard.
 const ScoreboardPage = lazy(() => import("@features/scoreboard/ScoreboardPage"));
+const MinePage = lazy(() => import("@features/mine/MinePage"));
 
 /** After login, fetch every page chunk while the browser is idle, so later navigation never waits on the network. */
 function usePrefetchPages(enabled: boolean, isDm: boolean, isSuperAdmin: boolean) {
@@ -286,6 +287,7 @@ function AppRoutes() {
                 <Route path="/roll-history" element={<RollHistoryPage />} />
                 <Route path="/settings/:tab?" element={<SettingsPage />} />
                 <Route path="/scoreboard" element={<ScoreboardPage />} />
+                <Route path="/mine" element={<MinePage />} />
                 <Route path="/bardify" element={<BardifyPage />} />
                 {isDm && <Route path="/dashboard/:section?" element={<DmDashboard />} />}
                 {isSuperAdmin && <Route path="/admin/:section?" element={<SuperAdminConsole />} />}

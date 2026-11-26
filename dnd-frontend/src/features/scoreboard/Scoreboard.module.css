@@ -245,6 +245,23 @@
   color: var(--theme-color-text-primary);
 }
 
+.mineHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.mineBtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+
 .state {
   padding: 28px 20px;
   text-align: center;
@@ -269,6 +286,10 @@
     column-gap: 10px;
     padding-left: 12px;
     padding-right: 12px;
+  }
+
+  .mineHead {
+    flex-direction: column;
   }
 
   .catches {

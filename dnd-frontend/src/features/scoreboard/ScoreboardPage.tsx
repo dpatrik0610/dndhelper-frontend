@@ -8,6 +8,7 @@ import { ALL_GOLDEN } from "@components/layout/goldenCritters";
 import { getCritterScoreboard, type CritterScore } from "@services/userService";
 import { useUsername } from "@store/auth/authSelectors";
 import { themeOptions } from "@appTypes/ThemeTypes";
+import { MiningBoard } from "./MiningBoard";
 import styles from "./Scoreboard.module.css";
 
 const byScore = (a: CritterScore, b: CritterScore) =>
@@ -154,6 +155,8 @@ export default function ScoreboardPage() {
           )}
         </Paper>
       )}
+
+      <MiningBoard />
     </div>
   );
 }
