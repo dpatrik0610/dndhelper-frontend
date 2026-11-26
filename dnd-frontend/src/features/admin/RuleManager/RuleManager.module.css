@@ -22,9 +22,13 @@
 .item {
   width: 100%;
   justify-content: space-between;
-  border: 0;
   font: inherit;
   text-align: left;
+}
+
+:where(.item) {
+  background: none;
+  color: inherit;
 }
 
 .lock {

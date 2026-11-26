@@ -140,7 +140,7 @@ export default function RulesPage() {
               value={query}
               onChange={(e) => setQuery(e.currentTarget.value)}
               onKeyDown={onSearchKey}
-              placeholder="Search rules, or narrow with #tag and cat:combat"
+              placeholder="Search rules, #tags or cat:combat"
               aria-label="Search rules"
               spellCheck={false}
             />
@@ -218,6 +218,14 @@ export default function RulesPage() {
                       {current.category}
                     </button>
                     {current.source && <span className={s.source}>{current.source}</span>}
+                    {current.tags.map((t) => (
+                      <button key={t} type="button" className={s.tag} onClick={() => addFilter(`#${quoted(t)}`)}>
+                        #{t}
+                      </button>
+                    ))}
+                  </div>
+                  <div className={s.titleRow}>
+                    <h2 className={`narrative-title ${s.title}`} data-themed>{current.title}</h2>
                     {canEdit(current.campaignId) && (
                       <button
                         type="button"
@@ -228,16 +236,6 @@ export default function RulesPage() {
                       </button>
                     )}
                   </div>
-                  <h2 className={`narrative-title ${s.title}`} data-themed>{current.title}</h2>
-                  {current.tags.length > 0 && (
-                    <div className={s.tags}>
-                      {current.tags.map((t) => (
-                        <button key={t} type="button" className={s.tag} onClick={() => addFilter(`#${quoted(t)}`)}>
-                          #{t}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </header>
 
                 <div className={s.content}>
@@ -246,6 +244,7 @@ export default function RulesPage() {
                       <MarkdownRenderer
                         content={current.content}
                         highlightQuery={parsed.terms[0]}
+                        className={s.prose}
                         textColor="var(--theme-color-text-primary)"
                         onInternalLink={(href) => open(rules.find((r) => r.slug === href.slice(1)))}
                       />
@@ -259,14 +258,14 @@ export default function RulesPage() {
                   <footer className={s.pager}>
                     {list[index - 1] ? (
                       <button type="button" onClick={() => open(list[index - 1])}>
-                        <span><IconArrowLeft size={14} /> Previous</span>
-                        <strong>{list[index - 1].title}</strong>
+                        <IconArrowLeft size={16} />
+                        <span>{list[index - 1].title}</span>
                       </button>
                     ) : <span />}
                     {list[index + 1] && (
                       <button type="button" className={s.next} onClick={() => open(list[index + 1])}>
-                        <span>Next <IconArrowRight size={14} /></span>
-                        <strong>{list[index + 1].title}</strong>
+                        <span>{list[index + 1].title}</span>
+                        <IconArrowRight size={16} />
                       </button>
                     )}
                   </footer>

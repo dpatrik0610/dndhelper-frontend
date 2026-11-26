@@ -11,7 +11,7 @@ import { PromoteToCoreButton } from "@components/common/CoreContentBadge";
 import { showNotification } from "@components/Notification/Notification";
 import { SectionColor } from "@appTypes/SectionColor";
 import { searchRules } from "@features/rules/ruleSearch";
-import { toRuleInput } from "./ruleImport";
+import { onlyNew, toRuleInput } from "./ruleImport";
 import shared from "@styles/InventoryDashboard.module.css";
 import session from "@features/admin/SessionManager/SessionManager.module.css";
 import classes from "./RuleManager.module.css";
@@ -118,13 +118,15 @@ export function RuleManager() {
       showNotification({ message: "That file isn't valid JSON.", color: SectionColor.Red });
       return;
     }
+    const fresh = onlyNew(items, rules);
+    const skipped = items.length - fresh.length;
     setBusy(true);
     let created = 0;
-    for (const item of items) if (await save(null, item)) created++;
+    for (const item of fresh) if (await save(null, item)) created++;
     setBusy(false);
     showNotification({
-      message: `Imported ${created} of ${items.length} rules.`,
-      color: created === items.length ? SectionColor.Green : SectionColor.Yellow,
+      message: `Imported ${created} of ${fresh.length} new rules${skipped ? `, skipped ${skipped} you already have` : ""}.`,
+      color: created === fresh.length ? SectionColor.Green : SectionColor.Yellow,
     });
   };
 
