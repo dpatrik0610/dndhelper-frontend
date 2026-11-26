@@ -114,7 +114,7 @@ export const useAdminEquipmentStore = create<AdminEquipmentStore>()(
           try {
             const data = await getEquipmentByIds(ids);
             set((s) => ({
-              equipments: [...s.equipments, ...data],
+              equipments: [...new Map([...s.equipments, ...data].map((e) => [e.id ?? e.index, e])).values()],
             }));
           } catch (err) {
             showNotification({
