@@ -1,71 +1,13 @@
-export const RuleCategory = {
-  Core: "Core",
-  Combat: "Combat",
-  Magic: "Magic",
-  Status: "Status",
-  Equipment: "Equipment",
-  Exploration: "Exploration",
-  Downtime: "Downtime",
-  Homebrew: "Homebrew",
-} as const;
-
-export type RuleCategory = typeof RuleCategory[keyof typeof RuleCategory] | string;
-
-export interface RuleSource {
-  title: string;
-  page?: string;
-  edition?: string;
-  url?: string;
-}
-
-export interface RuleExample {
-  title?: string;
-  description: string;
-  outcome?: string;
-}
-
-export interface RuleReference {
-  type: "spell" | "condition" | "item" | "feature" | "class" | "rule" | string;
-  id?: string;
-  name: string;
-  url?: string;
-}
-
-export interface RuleSnippet {
-  id?: string;
-  /** null = core (shared, read-only). */
-  campaignId?: string | null;
+export interface Rule {
+  id: string;
+  campaignId: string | null;
   slug: string;
   title: string;
-  category: RuleCategory | string;
-  summary: string;
+  category: string;
   tags: string[];
+  content: string;
+  source?: string | null;
   updatedAt?: string;
-  source?: RuleSource;
 }
 
-export interface RuleDetail extends RuleSnippet {
-  body?: string[];
-  sources?: RuleSource[];
-  examples?: RuleExample[];
-  references?: RuleReference[];
-  relatedRuleSlugs?: string[];
-}
-
-export interface RuleListResponse {
-  items: RuleSnippet[];
-  total: number;
-  nextCursor?: string;
-}
-
-export interface RuleDetailResponse {
-  rule: RuleDetail;
-}
-
-export interface RuleCategoryResponse {
-  id?: string;
-  slug: string;
-  name: string;
-  description?: string;
-  order: number;
-}
+export type RuleInput = Pick<Rule, "title" | "category" | "tags" | "content" | "source">;

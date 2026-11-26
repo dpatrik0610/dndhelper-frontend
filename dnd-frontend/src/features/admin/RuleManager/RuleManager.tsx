@@ -1,536 +1,351 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import { Button, FileInput, Group, MultiSelect, Select, Stack, Text, TextInput, Textarea } from "@mantine/core";
-import { IconBook2, IconCategory, IconCheck, IconFileUpload, IconPencilPlus, IconPlaylistAdd, IconUpload, IconX, IconPlus } from "@tabler/icons-react";
-import { RuleCategory, type RuleDetail, type RuleCategoryResponse } from "@appTypes/Rules/Rule";
-import { createRule } from "@services/ruleService";
+﻿import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActionIcon, Autocomplete, Button, Loader, ScrollArea, TagsInput, Text, TextInput, ThemeIcon, Tooltip } from "@mantine/core";
+import { IconBook2, IconDeviceFloppy, IconExternalLink, IconFileImport, IconInbox, IconLock, IconPlus, IconTrash } from "@tabler/icons-react";
+import { useNavigate, useSearchParams } from "react-router";
+import type { Rule, RuleInput } from "@appTypes/Rules/Rule";
+import { useRulesStore } from "@store/rules/rulesStore";
+import { useCanEditContent, useCurrentCampaignId } from "@store/campaign/campaignSelectors";
+import { MarkdownTextarea } from "@components/common/MarkdownTextarea";
+import { BaseModal } from "@components/BaseModal";
+import { PromoteToCoreButton } from "@components/common/CoreContentBadge";
 import { showNotification } from "@components/Notification/Notification";
-import { mockRuleDetails } from "@features/rules/mockRules";
-import { ExpandableSection } from "@components/ExpandableSection";
-import { createRuleCategory, getRuleCategories } from "@services/ruleCategoryService";
-import { AdminPage, AdminPanel } from "@features/admin/components/AdminPage";
 import { SectionColor } from "@appTypes/SectionColor";
-import { useIsSuperAdmin, useToken } from "@store/auth/authSelectors";
+import { searchRules } from "@features/rules/ruleSearch";
+import { toRuleInput } from "./ruleImport";
+import shared from "@styles/InventoryDashboard.module.css";
+import session from "@features/admin/SessionManager/SessionManager.module.css";
+import classes from "./RuleManager.module.css";
 
-const fallbackCategoryOptions = Object.values(RuleCategory).map((c) => ({ value: c, label: c }));
+const MarkdownRenderer = lazy(() => import("@components/MarkdownRender").then((m) => ({ default: m.MarkdownRenderer })));
 
-const defaultRule: RuleDetail = {
-  slug: "",
-  title: "",
-  category: RuleCategory.Core,
-  summary: "",
-  tags: [],
-};
+const NEW = "new";
+const blank = (category = "General"): RuleInput => ({ title: "", category, tags: [], content: "", source: "" });
+const inputOf = (r: Rule): RuleInput => ({ title: r.title, category: r.category, tags: r.tags, content: r.content, source: r.source ?? "" });
+const same = (a: RuleInput, b: RuleInput) => JSON.stringify(a) === JSON.stringify(b);
 
 export function RuleManager() {
-  const token = useToken();
-  // Categories are a site-wide taxonomy; only the superadmin adds them.
-  const isSuperAdmin = useIsSuperAdmin();
-  const [rule, setRule] = useState<RuleDetail>(() => ({ ...defaultRule }));
-  const [bodyText, setBodyText] = useState("");
-  const [sourceTitle, setSourceTitle] = useState("");
-  const [sourcePage, setSourcePage] = useState("");
-  const [importJson, setImportJson] = useState("");
-  const [importing, setImporting] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [jsonFile, setJsonFile] = useState<File | null>(null);
-  const [categories, setCategories] = useState<RuleCategoryResponse[]>([]);
-  const [catName, setCatName] = useState("");
-  const [catSlug, setCatSlug] = useState("");
-  const [catDescription, setCatDescription] = useState("");
-  const [catOrder, setCatOrder] = useState<number | "">("");
-  const [creatingCategory, setCreatingCategory] = useState(false);
+  const campaignId = useCurrentCampaignId();
+  const { rules, loading, load, save, remove } = useRulesStore();
+  const canEdit = useCanEditContent();
+  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<RuleInput>(blank());
+  const [filter, setFilter] = useState("");
+  const [preview, setPreview] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const cats = await getRuleCategories();
-        setCategories(cats ?? []);
-      } catch (error) {
-        console.error("Failed to load rule categories:", error);
-      }
-    };
-    void loadCategories();
-  }, []);
+    setSelectedId(null);
+    void load(campaignId ?? null);
+  }, [campaignId, load]);
 
-  const categoryOptions = useMemo(() => {
-    if (categories && categories.length) {
-      return categories
-        .slice()
-        .sort((a, b) => a.order - b.order)
-        .map((c) => ({ value: c.name, label: c.name }));
-    }
-    return fallbackCategoryOptions;
-  }, [categories]);
+  const selected = rules.find((r) => r.id === selectedId) ?? null;
+  const isNew = selectedId === NEW;
+  const baseline = selected ? inputOf(selected) : blank(draft.category);
+  const dirty = (isNew || !!selected) && !same(draft, baseline);
+  const editable = isNew || (!!selected && canEdit(selected.campaignId));
 
-  const sanitizeRule = (raw: Partial<RuleDetail>): RuleDetail => ({
-    id: undefined,
-    slug: raw.slug?.trim() ?? "",
-    title: raw.title?.trim() ?? "",
-    category: (raw.category as string) ?? RuleCategory.Core,
-    summary: raw.summary ?? "",
-    tags: raw.tags ?? [],
-    updatedAt: raw.updatedAt,
-    source: raw.source
-      ? {
-          title: raw.source.title ?? "",
-          page: raw.source.page,
-          edition: raw.source.edition,
-          url: raw.source.url,
-        }
-      : undefined,
-    body: raw.body,
-    sources: raw.sources,
-    examples: raw.examples,
-    references: raw.references,
-    relatedRuleSlugs: raw.relatedRuleSlugs,
-  });
+  const fallbackCategory = selected?.category ?? draft.category;
+  const select = useCallback(
+    (id: string) => {
+      const rule = rules.find((r) => r.id === id);
+      setSelectedId(id);
+      setDraft(rule ? inputOf(rule) : blank(fallbackCategory));
+      setPending(null);
+    },
+    [rules, fallbackCategory],
+  );
+  const requestSelect = (id: string) => (dirty && id !== selectedId ? setPending(id) : select(id));
 
-  const handleSave = async () => {
-    if (!token) {
-      showNotification({ message: "Login as admin to create rules.", color: "red", icon: <IconX size={16} /> });
+  const linked = params.get("rule");
+  useEffect(() => {
+    if (!linked || !rules.length) return;
+    const rule = rules.find((r) => r.slug === linked);
+    if (rule) select(rule.id);
+    setParams({}, { replace: true });
+  }, [linked, rules, select, setParams]);
+
+  useEffect(() => {
+    if (!selectedId && !linked && rules.length) select(rules[0].id);
+  }, [rules, selectedId, linked, select]);
+
+  const categories = useMemo(() => [...new Set(rules.map((r) => r.category))], [rules]);
+  const allTags = useMemo(() => [...new Set(rules.flatMap((r) => r.tags))].sort(), [rules]);
+  const visible = useMemo(() => searchRules(rules, filter).map((h) => h.rule), [rules, filter]);
+  const groups = useMemo(() => {
+    const map = new Map<string, Rule[]>();
+    for (const r of visible) map.set(r.category, [...(map.get(r.category) ?? []), r]);
+    return [...map.entries()];
+  }, [visible]);
+
+  const patch = (p: Partial<RuleInput>) => setDraft((d) => ({ ...d, ...p }));
+
+  const submit = async (asCopy = false) => {
+    if (!draft.title.trim()) {
+      showNotification({ message: "Give the rule a title first.", color: SectionColor.Yellow });
       return;
     }
-    const payload = sanitizeRule({
-      ...rule,
-      body: bodyText
-        .split("\n")
-        .map((p) => p.trim())
-        .filter(Boolean),
-      tags: rule.tags.map((t) => t.trim()).filter(Boolean),
-      source: sourceTitle
-        ? {
-            title: sourceTitle,
-            page: sourcePage || undefined,
-          }
-        : undefined,
-    });
-
-    if (!payload.slug || !payload.title || !payload.summary) {
-      showNotification({ message: "Slug, title, and summary are required.", color: "yellow" });
-      return;
+    setBusy(true);
+    const saved = await save(asCopy || isNew ? null : selectedId, draft);
+    setBusy(false);
+    if (saved) {
+      setSelectedId(saved.id);
+      setDraft(inputOf(saved));
+      showNotification({ message: `Saved "${saved.title}".`, color: SectionColor.Green });
     }
+  };
 
-    setSaving(true);
+  const doDelete = async () => {
+    if (!selected) return;
+    setBusy(true);
+    const ok = await remove(selected.id);
+    setBusy(false);
+    setConfirmDelete(false);
+    if (ok) setSelectedId(null);
+  };
+
+  const importFile = async (file: File | undefined) => {
+    if (!file) return;
+    let items: RuleInput[];
     try {
-      await createRule(payload);
-      showNotification({ message: `Rule "${payload.title}" created.`, color: "green", icon: <IconCheck size={16} /> });
-      setRule({ ...defaultRule });
-      setBodyText("");
-      setSourceTitle("");
-      setSourcePage("");
-    } catch (error) {
-      console.error("Failed to create rule", error);
-      showNotification({ message: "Failed to create rule.", color: "red", icon: <IconX size={16} /> });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const parseJsonInput = async (text: string): Promise<RuleDetail[]> => {
-    const parsed = JSON.parse(text);
-    if (Array.isArray(parsed)) return parsed.map((r) => sanitizeRule(r));
-    return [sanitizeRule(parsed)];
-  };
-
-  const handleImport = async (rules: RuleDetail[]) => {
-    if (!token) {
-      showNotification({ message: "Login as admin to import rules.", color: "red", icon: <IconX size={16} /> });
+      const parsed: unknown = JSON.parse(await file.text());
+      items = (Array.isArray(parsed) ? parsed : [parsed]).map(toRuleInput).filter((r): r is RuleInput => !!r);
+    } catch {
+      showNotification({ message: "That file isn't valid JSON.", color: SectionColor.Red });
       return;
     }
-    setImporting(true);
-    let success = 0;
-    let failed = 0;
-    for (const r of rules) {
-      try {
-        await createRule(r);
-        success += 1;
-      } catch (error) {
-        failed += 1;
-        console.error(`Failed to import rule ${r.slug}`, error);
-      }
-    }
-    setImporting(false);
+    setBusy(true);
+    let created = 0;
+    for (const item of items) if (await save(null, item)) created++;
+    setBusy(false);
     showNotification({
-      message: `Import complete: ${success} created${failed ? `, ${failed} failed` : ""}.`,
-      color: failed ? "yellow" : "green",
-      icon: failed ? <IconUpload size={16} /> : <IconCheck size={16} />,
+      message: `Imported ${created} of ${items.length} rules.`,
+      color: created === items.length ? SectionColor.Green : SectionColor.Yellow,
     });
   };
 
-  const handleImportClick = async () => {
-    try {
-      if (jsonFile) {
-        const text = await jsonFile.text();
-        const rules = await parseJsonInput(text);
-        await handleImport(rules);
-        return;
-      }
-      if (importJson.trim()) {
-        const rules = await parseJsonInput(importJson);
-        await handleImport(rules);
-        return;
-      }
-      showNotification({ message: "Provide JSON via file or text area.", color: "yellow" });
-    } catch (error) {
-      console.error("Failed to import JSON", error);
-      showNotification({ message: "Invalid JSON input.", color: "red", icon: <IconX size={16} /> });
-    }
-  };
-
-  const handleImportMocks = async () => {
-    await handleImport(mockRuleDetails.map((r) => sanitizeRule(r)));
-  };
-
-  const handleCreateCategory = async () => {
-    if (!token) {
-      showNotification({ message: "Login as admin to create categories.", color: "red", icon: <IconX size={16} /> });
-      return;
-    }
-    if (!catName.trim()) {
-      showNotification({ message: "Category name is required.", color: "yellow" });
-      return;
-    }
-    const payload: RuleCategoryResponse = {
-      name: catName.trim(),
-      slug: (catSlug || catName).trim().toLowerCase().replace(/\s+/g, "-"),
-      description: catDescription.trim() || undefined,
-      order: typeof catOrder === "number" ? catOrder : categories.length + 1,
-    };
-    setCreatingCategory(true);
-    try {
-      const created = await createRuleCategory(payload);
-      if (created) {
-        setCategories((prev) => [...prev, created]);
-        showNotification({ message: `Category "${created.name}" created.`, color: "green", icon: <IconCheck size={16} /> });
-        setCatName("");
-        setCatSlug("");
-        setCatDescription("");
-        setCatOrder("");
-      }
-    } catch (error) {
-      console.error("Failed to create category", error);
-      showNotification({ message: "Failed to create category.", color: "red", icon: <IconX size={16} /> });
-    } finally {
-      setCreatingCategory(false);
-    }
-  };
-
   return (
-    <AdminPage
-      icon={IconBook2}
-      title="Rules"
-      subtitle="Create a single rule or import many via JSON."
-      actions={
-        <Button variant="default" leftSection={<IconPlaylistAdd size={16} />} onClick={handleImportMocks}>
-          Import mocks
-        </Button>
-      }
-    >
-      <AdminPanel
-        icon={IconPencilPlus}
-        title="New rule"
-        actions={
-          <Button size="xs" color="neon" leftSection={<IconCheck size={14} />} loading={saving} onClick={handleSave}>
-            Save rule
-          </Button>
-        }
-      >
-        <SimpleRuleForm
-          rule={rule}
-          bodyText={bodyText}
-          sourceTitle={sourceTitle}
-          sourcePage={sourcePage}
-          categoryOptions={categoryOptions}
-          onUpdateRule={setRule}
-          onUpdateBody={setBodyText}
-          onUpdateTags={(tags) => setRule((prev) => ({ ...prev, tags }))}
-          onUpdateSourceTitle={setSourceTitle}
-          onUpdateSourcePage={setSourcePage}
-        />
-      </AdminPanel>
-
-      <AdminPanel
-        icon={IconUpload}
-        title="Import via JSON"
-        actions={
-          <Button size="xs" variant="light" color="neon" leftSection={<IconUpload size={14} />} loading={importing} onClick={handleImportClick}>
-            Import
-          </Button>
-        }
-      >
-        <Stack gap="sm">
-          <Text size="sm" c="dimmed">
-            Paste JSON (single object or array) or upload a .json file. Fields should match the RuleDetail shape.
-          </Text>
-          <FileInput
-            label="Upload JSON file"
-            placeholder="Select .json file"
-            accept="application/json"
-            leftSection={<IconFileUpload size={16} />}
-            value={jsonFile}
-            onChange={setJsonFile}
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-          />
-
-          <Textarea
-            label="JSON text"
-            minRows={6}
-            autosize
-            placeholder='[ { "slug": "cover", "title": "Cover", ... } ]'
-            value={importJson}
-            onChange={(e) => setImportJson(e.currentTarget.value)}
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-          />
-
-          <ExpandableSection title="Example RuleDetail JSON" color={SectionColor.Grape} defaultOpen>
-            <Textarea
-              readOnly
-              minRows={10}
-              autosize
-              value={`{
-  "id": "optional-id",
-  "slug": "opportunity-attacks",
-  "title": "Opportunity attacks",
-  "category": "Combat",
-  "summary": "Leaving a hostile creature's reach provokes a melee attack.",
-  "tags": ["combat", "reaction"],
-  "updatedAt": "2024-06-01T12:00:00Z",
-  "source": { "title": "SRD", "page": "13" },
-  "sources": [{ "title": "Homebrew Compendium", "page": "5" }],
-  "body": [
-    "You can make one melee attack as a reaction when a hostile creature you can see leaves your reach.",
-    "Does not trigger if the creature Disengages or is moved without using its own movement."
-  ],
-  "examples": [{ "title": "Long reach", "description": "Reach weapon can trigger at 10 ft." }],
-  "references": [{ "type": "condition", "name": "Prone" }],
-  "relatedRuleSlugs": ["disengage", "grappling"]
-}`}
-              classNames={{ input: "glassy-input", label: "glassy-label" }}
-            />
-          </ExpandableSection>
-
-          <Text size="sm" c="dimmed">
-            Tips: tags should be an array of strings; body is an array of paragraphs. Missing fields will be defaulted.
-          </Text>
-        </Stack>
-      </AdminPanel>
-
-      <AdminPanel
-        icon={IconCategory}
-        title="Categories"
-        actions={
-          isSuperAdmin && (
-            <Button
+    <div className={shared.dashboardRoot}>
+      <div className={shared.splitLayout}>
+        <div className={shared.sidebar}>
+          <div className={shared.sidebarHeader}>
+            <div className={classes.heading}>
+              <ThemeIcon variant="light" color="neon" size="md" radius="sm">
+                <IconBook2 size={16} />
+              </ThemeIcon>
+              <div>
+                <Text fw={700} size="sm" c="white">Rules</Text>
+                <Text size="xs" c="dimmed">{rules.length} rules in {categories.length} categories</Text>
+              </div>
+            </div>
+            <div className={classes.toolbar}>
+              <Button
+                size="xs"
+                className="glass-btn-primary"
+                leftSection={<IconPlus size={14} />}
+                onClick={() => requestSelect(NEW)}
+                disabled={!campaignId}
+                style={{ flex: 1 }}
+              >
+                New rule
+              </Button>
+              <Tooltip label="Import rules from a JSON file" withArrow>
+                <ActionIcon variant="light" color="gray" size="md" onClick={() => fileRef.current?.click()} loading={busy} aria-label="Import JSON">
+                  <IconFileImport size={15} />
+                </ActionIcon>
+              </Tooltip>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="application/json,.json"
+                hidden
+                onChange={(e) => {
+                  void importFile(e.currentTarget.files?.[0]);
+                  e.currentTarget.value = "";
+                }}
+              />
+            </div>
+            <TextInput
               size="xs"
-              variant="light"
-              color="neon"
-              leftSection={<IconPlus size={14} />}
-              loading={creatingCategory}
-              onClick={handleCreateCategory}
-            >
-              Add category
-            </Button>
-          )
-        }
+              placeholder="Filter: cover, #reaction, cat:magic"
+              value={filter}
+              onChange={(e) => setFilter(e.currentTarget.value)}
+              aria-label="Filter rules"
+            />
+          </div>
+
+          <ScrollArea className={shared.sidebarScroll} offsetScrollbars>
+            {loading && rules.length === 0 ? (
+              <div className={classes.center}><Loader color="neon" size="sm" /></div>
+            ) : visible.length === 0 ? (
+              <div className={classes.center}>
+                <IconInbox size={22} color="gray" />
+                <Text c="dimmed" size="xs">{rules.length ? "No matches." : "No rules yet."}</Text>
+              </div>
+            ) : (
+              groups.map(([category, items]) => (
+                <div key={category}>
+                  <div className={shared.listGroupHeader}>
+                    <span>{category}</span>
+                    <span className={shared.listGroupCount}>{items.length}</span>
+                  </div>
+                  {items.map((r) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      aria-current={r.id === selectedId || undefined}
+                      className={`${shared.listItem} ${classes.item} ${r.id === selectedId ? shared.listItemSelected : ""}`}
+                      onClick={() => requestSelect(r.id)}
+                    >
+                      <span className={shared.listItemName}>{r.title}</span>
+                      {r.campaignId === null && <IconLock size={12} className={classes.lock} aria-label="Core rule" />}
+                    </button>
+                  ))}
+                </div>
+              ))
+            )}
+          </ScrollArea>
+        </div>
+
+        <div className={shared.workspaceArea}>
+          {isNew || selected ? (
+            <div className={shared.workspacePanel}>
+              <div className={shared.metaBar}>
+                <TextInput
+                  className={session.nameInput}
+                  placeholder="Rule title"
+                  value={draft.title}
+                  onChange={(e) => patch({ title: e.currentTarget.value })}
+                  readOnly={!editable}
+                  aria-label="Title"
+                  autoFocus={isNew}
+                />
+                <div className={session.actions}>
+                  {dirty && <span className={session.saveState}>Unsaved</span>}
+                  {selected && (
+                    <Tooltip label="Open in the rules reference" withArrow>
+                      <ActionIcon variant="subtle" color="gray" onClick={() => navigate(`/rules/${selected.slug}`)} aria-label="Open in rules">
+                        <IconExternalLink size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                  {selected && <PromoteToCoreButton type="Rules" id={selected.id} campaignId={selected.campaignId} onPromoted={() => void load(campaignId ?? null, true)} />}
+                  {selected && editable && (
+                    <Tooltip label="Delete rule" withArrow>
+                      <ActionIcon variant="subtle" color="red" onClick={() => setConfirmDelete(true)} aria-label="Delete rule">
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Tooltip>
+                  )}
+                  {editable ? (
+                    <Button size="xs" className="glass-btn-primary" leftSection={<IconDeviceFloppy size={14} />} loading={busy} disabled={!dirty} onClick={() => void submit()}>
+                      {isNew ? "Create rule" : "Save"}
+                    </Button>
+                  ) : (
+                    <Button size="xs" className="glass-btn-secondary" loading={busy} disabled={!campaignId} onClick={() => void submit(true)}>
+                      Copy to campaign
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <div className={session.detailsBar}>
+                <div className={session.field}>
+                  <span className={session.fieldLabel}>Category</span>
+                  <Autocomplete aria-label="Category" size="xs" data={categories} value={draft.category} onChange={(category) => patch({ category })} readOnly={!editable} />
+                </div>
+                <div className={`${session.field} ${classes.grow}`}>
+                  <span className={session.fieldLabel}>Tags</span>
+                  <TagsInput aria-label="Tags" size="xs" data={allTags} value={draft.tags} onChange={(tags) => patch({ tags })} readOnly={!editable} placeholder="Add tag" clearable={false} className={classes.grow} />
+                </div>
+                <div className={session.field}>
+                  <span className={session.fieldLabel}>Source</span>
+                  <TextInput aria-label="Source" size="xs" placeholder="PHB p.195" value={draft.source ?? ""} onChange={(e) => patch({ source: e.currentTarget.value })} readOnly={!editable} />
+                </div>
+              </div>
+
+              {!editable && (
+                <p className={classes.notice}>
+                  Core rule, shared by every campaign. Copy it to your campaign to change it; your copy replaces it for your players.
+                </p>
+              )}
+
+              <div className={`${session.columns} ${preview ? "" : classes.single}`}>
+                <section className={session.pane}>
+                  <div className={shared.itemsPanelHeader}>
+                    <span className={session.hint}>Markdown. Link another rule with [Cover](#cover).</span>
+                    <fieldset className={`${session.tabs} ${classes.fieldset}`} aria-label="Preview">
+                      <button type="button" className={session.tab} aria-pressed={!preview} onClick={() => setPreview(false)}>Write</button>
+                      <button type="button" className={session.tab} aria-pressed={preview} onClick={() => setPreview(true)}>Side by side</button>
+                    </fieldset>
+                  </div>
+                  <ScrollArea className={shared.itemsPanelBody} offsetScrollbars>
+                    {editable ? (
+                      <MarkdownTextarea label="" value={draft.content} onChange={(content) => patch({ content })} minHeightRem={26} />
+                    ) : (
+                      <Suspense fallback={<Loader size="sm" />}>
+                        <MarkdownRenderer content={draft.content} textColor="var(--cyber-fg)" />
+                      </Suspense>
+                    )}
+                  </ScrollArea>
+                </section>
+                {preview && (
+                  <section className={session.pane}>
+                    <div className={shared.itemsPanelHeader}>
+                      <span className={session.hint}>Preview</span>
+                    </div>
+                    <ScrollArea className={shared.itemsPanelBody} offsetScrollbars>
+                      {draft.content.trim() ? (
+                        <Suspense fallback={<Loader size="sm" />}>
+                          <MarkdownRenderer content={draft.content} textColor="var(--cyber-fg)" />
+                        </Suspense>
+                      ) : (
+                        <span className={session.empty}>Nothing written yet.</span>
+                      )}
+                    </ScrollArea>
+                  </section>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className={shared.emptyState}>
+              <div className={shared.emptyStateInner}>
+                <IconBook2 size={28} />
+                <span>{campaignId ? "Write your first rule" : "Select a campaign first"}</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <BaseModal
+        opened={!!pending}
+        onClose={() => setPending(null)}
+        title="Discard changes"
+        size="sm"
+        onSave={() => pending && select(pending)}
+        saveLabel="Discard"
       >
-        <Stack gap="sm">
-          <Text size="sm" c="dimmed">
-            Create new categories; they show up in filters and the rule form.
-          </Text>
-          <Group grow>
-            <TextInput
-              label="Name"
-              placeholder="Exploration"
-              value={catName}
-              onChange={(e) => setCatName(e.currentTarget.value)}
-              classNames={{ input: "glassy-input", label: "glassy-label" }}
-            />
-            <TextInput
-              label="Slug"
-              placeholder="exploration"
-              value={catSlug}
-              onChange={(e) => setCatSlug(e.currentTarget.value)}
-              classNames={{ input: "glassy-input", label: "glassy-label" }}
-            />
-            <TextInput
-              label="Order"
-              placeholder="1"
-              value={catOrder}
-              onChange={(e) => setCatOrder(e.currentTarget.value ? Number(e.currentTarget.value) : "")}
-              classNames={{ input: "glassy-input", label: "glassy-label" }}
-            />
-          </Group>
-          <Textarea
-            label="Description (optional)"
-            value={catDescription}
-            onChange={(e) => setCatDescription(e.currentTarget.value)}
-            classNames={{ input: "glassy-input", label: "glassy-label" }}
-          />
+        <Text size="sm">You have unsaved changes to this rule. Discard them?</Text>
+      </BaseModal>
 
-          <ExpandableSection title="Existing categories" color={SectionColor.Violet} defaultOpen>
-            <Stack gap="xs">
-              {(categories.length ? categories : fallbackCategoryOptions.map((c, idx) => ({ name: c.label, order: idx + 1 } as any))).map((cat) => (
-                <Group key={cat.slug ?? cat.name} justify="space-between">
-                  <Text fw={600}>{cat.name}</Text>
-                  <Text size="xs" c="dimmed">
-                    Order: {"order" in cat ? cat.order : "-"}
-                  </Text>
-                </Group>
-              ))}
-            </Stack>
-          </ExpandableSection>
-        </Stack>
-      </AdminPanel>
-    </AdminPage>
-  );
-}
-
-interface SimpleRuleFormProps {
-  rule: RuleDetail;
-  bodyText: string;
-  sourceTitle: string;
-  sourcePage: string;
-  categoryOptions: { value: string; label: string }[];
-  onUpdateRule: (rule: RuleDetail) => void;
-  onUpdateBody: (text: string) => void;
-  onUpdateTags: (tags: string[]) => void;
-  onUpdateSourceTitle: (title: string) => void;
-  onUpdateSourcePage: (page: string) => void;
-}
-
-function SimpleRuleForm({
-  rule,
-  bodyText,
-  sourceTitle,
-  sourcePage,
-  categoryOptions,
-  onUpdateRule,
-  onUpdateBody,
-  onUpdateTags,
-  onUpdateSourceTitle,
-  onUpdateSourcePage,
-}: SimpleRuleFormProps) {
-  const [newTag, setNewTag] = useState("");
-
-  const tagOptions = useMemo(
-    () => Array.from(new Set(rule.tags ?? [])).map((t) => ({ value: t, label: t })),
-    [rule.tags],
-  );
-
-  const addTag = () => {
-    const trimmed = newTag.trim();
-    if (!trimmed) return;
-    if ((rule.tags ?? []).includes(trimmed)) {
-      setNewTag("");
-      return;
-    }
-    onUpdateTags([...(rule.tags ?? []), trimmed]);
-    setNewTag("");
-  };
-
-  return (
-    <Stack gap="sm">
-      <Group grow align="flex-start">
-        <TextInput
-          label="Slug"
-          placeholder="opportunity-attacks"
-          required
-          value={rule.slug}
-          onChange={(e) => onUpdateRule({ ...rule, slug: e.currentTarget.value })}
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-        />
-        <TextInput
-          label="Title"
-          placeholder="Opportunity attacks"
-          required
-          value={rule.title}
-          onChange={(e) => onUpdateRule({ ...rule, title: e.currentTarget.value })}
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-        />
-      </Group>
-
-      <Group grow align="flex-start">
-        <Select
-          label="Category"
-          data={categoryOptions.length ? categoryOptions : fallbackCategoryOptions}
-          value={rule.category?.toString()}
-          onChange={(value) => onUpdateRule({ ...rule, category: value ?? RuleCategory.Core })}
-          classNames={{ input: "glassy-input", label: "glassy-label", dropdown: "glassy-dropdown", option: "glassy-option" }}
-        />
-        <TextInput
-          label="Source title (optional)"
-          placeholder="SRD"
-          value={sourceTitle}
-          onChange={(e) => onUpdateSourceTitle(e.currentTarget.value)}
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-        />
-        <TextInput
-          label="Source page (optional)"
-          placeholder="12"
-          value={sourcePage}
-          onChange={(e) => onUpdateSourcePage(e.currentTarget.value)}
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-        />
-      </Group>
-
-      <Textarea
-        label="Summary"
-        placeholder="Short description used in the list"
-        required
-        minRows={2}
-        value={rule.summary}
-        onChange={(e) => onUpdateRule({ ...rule, summary: e.currentTarget.value })}
-        classNames={{ input: "glassy-input", label: "glassy-label" }}
-      />
-
-      <Textarea
-        label="Body (one paragraph per line)"
-        placeholder="Paragraph 1\nParagraph 2"
-        minRows={4}
-        value={bodyText}
-        onChange={(e) => onUpdateBody(e.currentTarget.value)}
-        classNames={{ input: "glassy-input", label: "glassy-label" }}
-      />
-
-      <Group align="flex-end" gap="xs">
-        <MultiSelect
-          label="Tags"
-          placeholder="combat, reaction"
-          data={tagOptions}
-          searchable
-          value={rule.tags}
-          onChange={(values) => onUpdateTags(values)}
-          classNames={{ input: "glassy-input", label: "glassy-label", dropdown: "glassy-dropdown", option: "glassy-option" }}
-        />
-        <TextInput
-          label="New tag"
-          placeholder="Add tag"
-          value={newTag}
-          onChange={(e) => setNewTag(e.currentTarget.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              addTag();
-            }
-          }}
-          classNames={{ input: "glassy-input", label: "glassy-label" }}
-          w="30%"
-        />
-        <Button
-          variant="light"
-          color="neon"
-          mt="xs"
-          onClick={addTag}
-        >
-          Add
-        </Button>
-      </Group>
-
-      <Group justify="flex-end">
-        <Text size="xs" c="dimmed">
-          Required: slug, title, summary. Tags help filtering.
+      <BaseModal
+        opened={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        title="Delete rule"
+        size="sm"
+        loading={busy}
+        onSave={() => void doDelete()}
+        saveLabel="Delete"
+      >
+        <Text size="sm">
+          Delete <b>{selected?.title}</b>? Players lose access to it right away. This can't be undone.
         </Text>
-      </Group>
-    </Stack>
+      </BaseModal>
+    </div>
   );
 }

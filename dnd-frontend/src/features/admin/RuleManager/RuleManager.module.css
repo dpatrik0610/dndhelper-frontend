@@ -1,0 +1,57 @@
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 0;
+}
+
+.item {
+  width: 100%;
+  justify-content: space-between;
+  border: 0;
+  font: inherit;
+  text-align: left;
+}
+
+.lock {
+  flex-shrink: 0;
+  color: var(--cyber-muted-fg);
+}
+
+.grow {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.notice {
+  margin: 0;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--cyber-border);
+  color: var(--cyber-muted-fg);
+  font-size: 0.75rem;
+}
+
+.single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}

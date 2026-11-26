@@ -275,7 +275,7 @@ function AppRoutes() {
                 <Route path="/spells/:spellName" element={<SpellPage />} />
                 <Route path="/newCharacter" element={<CharacterFormPage />} />
                 <Route path="/editCharacter" element={<CharacterFormPage editMode />} />
-                <Route path="/rules" element={<RulesPage />} />
+                <Route path="/rules/:slug?" element={<RulesPage />} />
                 <Route path="/shop" element={<ShopkeeperPage />} />
                 <Route path="/notes" element={<NotesPage />} />
                 <Route path="/quests" element={<QuestsPage />} />
