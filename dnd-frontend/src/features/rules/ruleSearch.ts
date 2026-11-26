@@ -39,6 +39,7 @@ export const plainText = (markdown: string) =>
   markdown
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/^\s*\|?[\s:|-]*-{3,}[\s:|-]*$/gm, " ")
     .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "")
     .replace(/[*_`~|]/g, "")
     .replace(/\s+/g, " ")

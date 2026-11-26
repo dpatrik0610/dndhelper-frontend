@@ -12,6 +12,7 @@ assert.deepEqual(parseQuery("dc:15").terms, ["dc:15"]);
 
 assert.equal(plainText("## Cover\n\n- **Half** cover: see [AC](#ac)"), "Cover Half cover: see AC");
 assert.equal(excerpt("one two three four", 9), "one two…");
+assert.equal(plainText("| Size | Space |\n|---|:---:|\n| Tiny | 2 ft |"), "Size Space Tiny 2 ft");
 
 const rules = [
   { title: "Opportunity attacks", category: "Combat", tags: ["reaction"], content: "Leaving reach provokes." },

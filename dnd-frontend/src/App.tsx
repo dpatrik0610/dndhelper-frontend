@@ -66,7 +66,7 @@ const SettingsPage = lazy(pages.settings);
 const BardifyPage = lazy(pages.bardify);
 const MusicPlayer = lazy(() => import("@features/bardify/MusicPlayer"));
 
-const EDGE_TO_EDGE_SECTIONS = new Set(["table", "chronicle", "bardify"]);
+const EDGE_TO_EDGE_SECTIONS = new Set(["table", "chronicle", "bardify", "rules"]);
 const DmDashboard = lazy(adminPages.dm);
 const SuperAdminConsole = lazy(adminPages.superAdmin);
 const Login = lazy(() => import("@features/auth/login/Login"));
