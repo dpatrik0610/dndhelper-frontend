@@ -1,7 +1,7 @@
 import type { MiningConfig, MiningState } from "@services/miningService";
 import { item, itemName, SETS } from "./art/gear";
 import { PanelHead } from "./CampMenus";
-import { characterSheet, compact, critHit, SET_BONUSES, tiersOf } from "./mine";
+import { characterSheet, compact, critHit, DASH_PERKS, SET_BONUSES, tiersOf } from "./mine";
 import { Sprite } from "./Sprite";
 import styles from "./Mine.module.css";
 
@@ -20,6 +20,7 @@ export function CharacterPanel({
   const fight = [
     ["Hit", compact(s.power)],
     ["Crit hit", compact(critHit(s))],
+    ["Dash strike", compact(set === 10 ? critHit(s) : set === 9 ? s.power * 2 : s.power)],
     ["Damage taken", s.armor ? `${Math.round((1 - s.armor) * 100)}%` : "100%"],
     ["Most you can haul", `${compact(Math.floor(s.capacity * config.overload))} (slow past ${compact(s.capacity)})`],
   ];
@@ -71,6 +72,7 @@ export function CharacterPanel({
                 {SETS[set].name} · tier {set}
               </span>
               <span className={styles.setDoes}>{SET_BONUSES[set][1]}</span>
+              <span className={styles.setDoes}>{DASH_PERKS[set]}</span>
             </div>
           </div>
         </>

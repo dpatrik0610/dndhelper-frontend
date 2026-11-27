@@ -550,6 +550,26 @@ assert.ok(dodger.player.invulnUntil > dodger.now, "dashing grants a moment of sa
 run(dodger, 600);
 assert.equal(dodger.player.hp, hp2, "dashing away dodges the bite");
 assert.ok(dodger.player.nextDash > dodger.now, "the dash has a cooldown");
+
+const rusher = newGame(-1);
+rusher.monsters = [];
+const passed = foe(rusher, 1, 4, 2);
+passed.moveMs = 1e9;
+passed.nextMove = 1e12;
+const hp3 = passed.hp;
+run(rusher, 50, { right: true, dash: true });
+assert.equal(rusher.player.x, 5, "the dash carries you through the monster");
+assert.equal(hp3 - passed.hp, stats.power, "and strikes it on the way");
+
+const feather = newGame(-1);
+feather.monsters = [];
+feather.stats = { ...stats, setBonus: 8 };
+run(feather, 50, { right: true, dash: true });
+assert.equal(feather.player.x, 6, "Mithral dashes three tiles");
+const quick = newGame(-1);
+quick.stats = { ...stats, setBonus: 5 };
+run(quick, 50, { right: true, dash: true });
+assert.ok(quick.player.nextDash - quick.now <= 800, "Darksteel recharges the dash faster");
 console.log("combat ok");
 
 assert.equal(pickSwing(1e9, false).active, false, "a resting pick isn't swinging");

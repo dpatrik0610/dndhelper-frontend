@@ -161,5 +161,19 @@ export const SET_BONUSES: [string, string][] = [
   ["Fallen Star", "Half again as much ore from every block, and a full block more light."],
 ];
 
+export const DASH_PERKS = [
+  "",
+  "Dash leaves a trail of warm sparks.",
+  "Dash shoulder-checks monsters a tile back.",
+  "Dash scatters gold glitter.",
+  "Dash frosts monsters, slowing them for 2 s.",
+  "Dash recharges in 0.8 s instead of 1.2 s.",
+  "Dash staggers monsters for half a second.",
+  "Dash sets monsters burning, and its fire hurts mimics.",
+  "Dash carries you 3 tiles instead of 2.",
+  "Dash hits twice as hard, staggers and knocks monsters 2 tiles back.",
+  "Every dash hit is a crit, trailing stardust.",
+];
+
 export const tiersOf = (state: MiningState): Tiers =>
   Object.fromEntries(GEAR_SLOTS.map((s) => [s, state.gear[s] ?? 0])) as Tiers;

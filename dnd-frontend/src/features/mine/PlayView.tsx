@@ -6,6 +6,7 @@ import {
   ascend,
   descend,
   dig,
+  dropOre,
   faint,
   getMiningState,
   mossSell,
@@ -62,7 +63,7 @@ import { createRenderer, oreIcon } from "./render";
 import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
 import { CharacterPanel } from "./CharacterPanel";
 import { Hotbar } from "./Hotbar";
-import { LootPile } from "./LootPile";
+import { DropOre, LootPile } from "./LootPile";
 import { Sprite } from "./Sprite";
 import { type AchToast, AchievementToasts, TrophyPanel } from "./Trophies";
 import { ARRIVAL, dreamsFor, engraving } from "./story";
@@ -70,7 +71,7 @@ import styles from "./Mine.module.css";
 
 const SWITCH_CLASSES = { root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" };
 const GOAL_OPEN_KEY = "deepdelve-goal-open";
-type Panel = "pouch" | "controls" | "settings" | "trophies" | "character";
+type Panel = "pouch" | "controls" | "settings" | "trophies" | "character" | "drop";
 const TOAST_MS = 5000;
 const MAX_TOASTS = 3;
 const LOW_HP = 0.3;
@@ -741,6 +742,26 @@ export function PlayView({
     onState({ ...s, trip: stateRef.current.trip });
   };
 
+  const onDrop = async (drop: OreCounts) => {
+    await inflight.current;
+    await flush();
+    let s: MiningState | null = null;
+    try {
+      for (const [key, n] of Object.entries(drop)) if (n > 0) s = await dropOre(key, n);
+    } catch (e) {
+      showNotification({ title: "Can't drop that", message: (e as Error).message, color: "red" });
+      s = await getMiningState().catch(() => null);
+    }
+    if (!s?.trip) return;
+    play("land");
+    const left = s.trip.satchel;
+    setSatchel(left);
+    const g = gameRef.current;
+    if (g) g.carried = total(left);
+    pileSize.current = total(s.trip.pile ?? {});
+    setPile(s.trip.pile ?? {});
+  };
+
   const carried = total(satchel);
   const full = carried > state.stats.capacity;
   const maxCarry = Math.floor(state.stats.capacity * config.overload);
@@ -837,6 +858,15 @@ export function PlayView({
         <AchievementToasts toasts={toasts} />
         <div className={styles.hudRight}>
           <div className={styles.btnRow}>
+            {trip && carried > 0 && (
+              <button
+                type="button"
+                className={`glass-btn-secondary ${styles.hudBtn}`}
+                onClick={() => togglePanel("drop")}
+              >
+                {panel === "drop" ? "Hide drop ore" : "Drop ore"}
+              </button>
+            )}
             {trip && total(pile) > 0 && !pileOpen && (
               <button type="button" className={`glass-btn-primary ${styles.hudBtn}`} onClick={() => setPileOpen(true)}>
                 Loot pile · {compact(total(pile))}
@@ -905,6 +935,16 @@ export function PlayView({
             />
           )}
 
+          {panel === "drop" && trip && carried > 0 && (
+            <DropOre
+              config={config}
+              satchel={satchel}
+              capacity={state.stats.capacity}
+              onDrop={onDrop}
+              onClose={() => setPanel(null)}
+            />
+          )}
+
           {panel === "character" && <CharacterPanel config={config} state={state} onClose={() => setPanel(null)} />}
 
           {panel === "trophies" && (
@@ -959,7 +999,7 @@ export function PlayView({
                   <kbd>Click</kbd> or <kbd>Enter</kbd> attack and mine
                 </span>
                 <span>
-                  <kbd>Shift</kbd> dash, dodges hits
+                  <kbd>Shift</kbd> dash, dodges hits and strikes anything you pass through
                 </span>
                 <span>
                   <kbd>T</kbd> torch

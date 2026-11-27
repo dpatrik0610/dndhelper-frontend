@@ -204,6 +204,7 @@ export const trade = (item: string) => post<MiningState>(`/trade/${item}`);
 export const buyWare = (item: string, count: number) => post<MiningState>(`/buy/${item}/${count}`);
 export const sellOre = (key: string, amount: number) => post<MiningState>(`/sell/${key}/${amount}`);
 export const takePile = (take: OreCounts) => post<MiningState>("/pile/take", take);
+export const dropOre = (key: string, amount: number) => post<MiningState>(`/drop/${key}/${amount}`);
 export const mossSell = (key: string, amount: number) => post<MiningState>(`/moss/sell/${key}/${amount}`);
 export const upgradeHouse = () => post<MiningState>("/house");
 export const recordFeats = (req: { feats?: Record<string, number>; unlocked?: string[] }) => post<MiningState>("/feats", req);

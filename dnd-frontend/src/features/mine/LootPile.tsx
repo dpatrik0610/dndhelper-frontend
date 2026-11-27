@@ -103,3 +103,89 @@ export function LootPile({
     </section>
   );
 }
+
+export function DropOre({
+  config,
+  satchel,
+  capacity,
+  onDrop,
+  onClose,
+}: {
+  config: MiningConfig;
+  satchel: OreCounts;
+  capacity: number;
+  onDrop: (drop: OreCounts) => Promise<void>;
+  onClose: () => void;
+}) {
+  const cheapest = config.ores.map((o) => o.key);
+  const keys = [...cheapest].reverse().filter((k) => (satchel[k] ?? 0) > 0);
+  const [drop, setDrop] = useState<OreCounts>({});
+  const [busy, setBusy] = useState(false);
+  const carried = total(satchel);
+  const n = total(drop);
+
+  const submit = async () => {
+    setBusy(true);
+    try {
+      await onDrop(drop);
+      setDrop({});
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <section className={styles.hudPanel} aria-label="Drop ore">
+      <PanelHead title="Drop ore" onClose={onClose} />
+      <span className={styles.dim}>
+        Dropped ore goes on your loot pile. Pick it back up any time before you ride up; after that it's gone.
+      </span>
+      {keys.map((key) => {
+        const i = config.ores.findIndex((o) => o.key === key);
+        const have = satchel[key] ?? 0;
+        const name = config.ores[i]?.name ?? key;
+        return (
+          <label key={key} className={styles.pileRow}>
+            <Sprite grid={oreIcon(i)} scale={1} />
+            <span className={styles.pileName}>{name}</span>
+            <input
+              type="range"
+              min={0}
+              max={have}
+              value={Math.min(have, drop[key] ?? 0)}
+              className={styles.pileRange}
+              aria-label={`Drop ${name}`}
+              onChange={(e) => setDrop({ ...drop, [key]: Number(e.currentTarget.value) })}
+            />
+            <span className={styles.pileCount}>
+              {compact(drop[key] ?? 0)} / {compact(have)}
+            </span>
+          </label>
+        );
+      })}
+      <span className={carried - n > capacity ? styles.encumbered : styles.dim}>
+        Satchel after: {compact(carried - n)} / {compact(capacity)}
+      </span>
+      <div className={styles.btnRow}>
+        {carried > capacity && (
+          <button
+            type="button"
+            className={`glass-btn-secondary ${styles.actBtn}`}
+            disabled={busy}
+            onClick={() => setDrop(fillUpTo(satchel, cheapest, carried - capacity))}
+          >
+            Shed the cheapest overflow
+          </button>
+        )}
+        <button
+          type="button"
+          className={`glass-btn-primary ${styles.actBtn}`}
+          disabled={busy || n === 0}
+          onClick={() => void submit()}
+        >
+          Drop {compact(n)}
+        </button>
+      </div>
+    </section>
+  );
+}

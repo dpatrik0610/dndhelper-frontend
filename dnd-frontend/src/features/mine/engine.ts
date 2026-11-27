@@ -1,5 +1,5 @@
 import type { Break, DepthInfo, MiningStats, MiningTrip } from "@services/miningService";
-import { itemName, type Tiers } from "./art/gear";
+import { itemName, SETS, type Tiers } from "./art/gear";
 import { canSolo, type PetArt } from "./art/pets";
 import { ENEMIES, type Enemy } from "./art/world";
 import { compact, critHit } from "./mine";
@@ -46,6 +46,8 @@ export const burden = (g: Game) =>
   encumbered(g) ? Math.min(1, (g.carried - g.stats.capacity) / Math.max(1, hardCap(g) - g.stats.capacity)) : 0;
 const DASH_MS = 110;
 export const DASH_COOLDOWN_MS = 1200;
+export const dashCooldown = (g: Game) => (g.stats.setBonus === 5 ? 800 : DASH_COOLDOWN_MS);
+export const dashColor = (set: number) => (set > 0 ? (SETS[set].gem ?? SETS[set].base) : "#9fe6ff");
 const IFRAME_MS = 380;
 const COMBO_MS = 1100;
 const HITSTUN_MS = 260;
@@ -1156,23 +1158,49 @@ function attack(g: Game, m: Monster) {
   }
 }
 
+function dashStrike(g: Game, m: Monster) {
+  const set = g.stats.setBonus;
+  const crit = set === 10;
+  const dmg = (crit ? critHit(g.stats) : g.stats.power) * (set === 9 ? 2 : 1);
+  say(g, (m.x + 0.5) * T, m.y * T - 12, "Dash strike!", dashColor(set), 600);
+  damageMonster(g, m, Math.round(dmg), crit, null, set === 7);
+  if (m.hp <= 0) {
+    feat(g, "dashKill");
+    return;
+  }
+  if (set === 4) m.slowUntil = g.now + 2000;
+  if (set === 7) {
+    m.burnUntil = g.now + 3000;
+    m.nextBurn = g.now + 600;
+  }
+  if (set === 6 || set === 9) m.stunUntil = Math.max(m.stunUntil, g.now + 500);
+  if (set === 2 || set === 9) knockback(g, m, set === 9 ? 2 : 1);
+}
+
 function dash(g: Game, keys: Keys) {
   const p = g.player;
+  const set = g.stats.setBonus;
   const d = keys.left ? -1 : keys.right ? 1 : p.face;
   let to = p.x;
-  for (let k = 1; k <= 2; k++) {
+  for (let k = 1; k <= (set === 8 ? 3 : 2); k++) {
     const nx = p.x + d * k;
     if (!isOpen(g, nx, p.y) || !isOpen(g, nx, p.y - 1)) break;
     to = nx;
   }
   if (to === p.x) return false;
-  p.nextDash = g.now + DASH_COOLDOWN_MS;
+  const from = p.x;
+  p.nextDash = g.now + dashCooldown(g);
   p.dashUntil = g.now + DASH_MS;
   p.invulnUntil = g.now + IFRAME_MS;
   dust(g, p.x + 0.5, p.y + 1, 6);
   g.sfx.push("dash");
   feat(g, "dash");
   tweenTo(p, to, p.y, DASH_MS);
+  if (set > 0)
+    for (let x = from; x !== to + d; x += d) burst(g, (x + 0.5) * T, (p.y + 0.5) * T, dashColor(set), set >= 8 ? 5 : 3, 1.2);
+  const lo = Math.min(from, to);
+  const hi = Math.max(from, to);
+  for (const m of liveMonsters(g)) if (m.x >= lo && m.x <= hi && (m.y === p.y || m.y === p.y - 1)) dashStrike(g, m);
   return true;
 }
 
