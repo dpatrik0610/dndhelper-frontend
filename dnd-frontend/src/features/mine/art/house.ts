@@ -1,8 +1,9 @@
 import { blank, type Grid, mix, rng } from "./pixel";
 
-export const HOUSE_W = 88;
+export const HOUSE_W = 176;
 export const HOUSE_H = 84;
 const G = HOUSE_H - 1;
+const OX = 44;
 
 export interface HouseSpots {
   door: number;
@@ -11,7 +12,9 @@ export interface HouseSpots {
   lights: [number, number, number][];
 }
 
-export const HOUSE_LEVELS: { level: number; name: string; perk: string; blurb: string; spots: HouseSpots }[] = [
+type Level = { level: number; name: string; perk: string; blurb: string; spots: HouseSpots; grounds?: [number, number, number][] };
+
+const LEVELS: Level[] = [
   {
     level: 1,
     name: "Driftwood Shed",
@@ -54,7 +57,11 @@ export const HOUSE_LEVELS: { level: number; name: string; perk: string; blurb: s
     level: 4,
     name: "Dwarven Longhouse",
     perk: "Ore sells for 20% more, and the belt holds two extra potions.",
-    blurb: "Dressed stone, a slate roof and a rune-door your grandfather would have wept at.",
+    blurb: "Dressed stone, a slate roof, a walled garden and a rune-door your grandfather would have wept at.",
+    grounds: [
+      [10, G - 16, 8],
+      [165, G - 16, 8],
+    ],
     spots: {
       door: 44,
       top: G - 70,
@@ -72,7 +79,12 @@ export const HOUSE_LEVELS: { level: number; name: string; perk: string; blurb: s
     level: 5,
     name: "Anvilhold Hall",
     perk: "Ore sells for 35% more, and the belt holds three extra potions.",
-    blurb: "A hall fit for a thane, with a gold anvil over the door. Gullrock seems very far away.",
+    blurb: "A hall fit for a thane: a fountain, clipped hedges and a gold anvil on a plinth. Gullrock seems very far away.",
+    grounds: [
+      [5, G - 25, 10],
+      [171, G - 25, 10],
+      [24, G - 12, 9],
+    ],
     spots: {
       door: 38,
       top: G - 83,
@@ -89,8 +101,19 @@ export const HOUSE_LEVELS: { level: number; name: string; perk: string; blurb: s
   },
 ];
 
+export const HOUSE_LEVELS = LEVELS.map(({ grounds, ...L }) => ({
+  ...L,
+  spots: {
+    door: L.spots.door + OX,
+    top: L.spots.top,
+    smoke: L.spots.smoke && ([L.spots.smoke[0] + OX, L.spots.smoke[1]] as [number, number]),
+    lights: [...L.spots.lights.map(([x, y, r]) => [x + OX, y, r] as [number, number, number]), ...(grounds ?? [])],
+  },
+}));
+
 type Paint = {
   g: Grid;
+  dx: number;
   put: (x: number, y: number, c: string) => void;
   rect: (x: number, y: number, w: number, h: number, c: string) => void;
   r: () => number;
@@ -98,13 +121,19 @@ type Paint = {
 
 const painter = (seed: number): Paint => {
   const g = blank(HOUSE_W, HOUSE_H);
-  const put = (x: number, y: number, c: string) => {
-    if (x >= 0 && x < HOUSE_W && y >= 0 && y < HOUSE_H) g[y][x] = c;
+  const p: Paint = {
+    g,
+    dx: 0,
+    put: (x, y, c) => {
+      const X = x + p.dx;
+      if (X >= 0 && X < HOUSE_W && y >= 0 && y < HOUSE_H) g[y][X] = c;
+    },
+    rect: (x, y, w, h, c) => {
+      for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) p.put(x + i, y + j, c);
+    },
+    r: rng(seed),
   };
-  const rect = (x: number, y: number, w: number, h: number, c: string) => {
-    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) put(x + i, y + j, c);
-  };
-  return { g, put, rect, r: rng(seed) };
+  return p;
 };
 
 const pick = (r: () => number, list: string[]) => list[Math.floor(r() * list.length)];
@@ -422,10 +451,152 @@ function hall(p: Paint) {
   }
 }
 
+function blob(p: Paint, cx: number, cy: number, r: number, dark: string, mid: string, light: string) {
+  for (let y = -r; y <= r; y++)
+    for (let x = -r; x <= r; x++) {
+      const d = Math.hypot(x, y * 1.1);
+      if (d > r + 0.3) continue;
+      p.put(cx + x, cy + y, d > r - 1.2 || x + y > r * 0.6 ? dark : x + y < -r * 0.5 ? light : mid);
+    }
+}
+
+function flowers(p: Paint, x0: number, x1: number, colors: string[]) {
+  for (let x = x0; x < x1; x += 2) {
+    p.put(x, G, "#2e5a2a");
+    p.put(x, G - 1, "#3a7a3a");
+    if (p.r() < 0.6) p.put(x, G - 2, pick(p.r, colors));
+  }
+}
+
+function longhouseGrounds(p: Paint) {
+  const stone = "#6b707c";
+  const cap = "#8e929e";
+  const seam = "#3e424c";
+  for (const [x0, x1, px] of [
+    [12, 47, 7],
+    [129, 164, 163],
+  ]) {
+    p.rect(x0, G - 7, x1 - x0, 8, stone);
+    for (let y = G - 4; y <= G; y += 4) p.rect(x0, y, x1 - x0, 1, seam);
+    for (let x = x0 + 3; x < x1; x += 6) {
+      p.put(x, G - 6, seam);
+      p.put(x + 3, G - 3, seam);
+    }
+    p.rect(x0 - 1, G - 9, x1 - x0 + 2, 2, cap);
+    p.rect(x0 - 1, G - 9, x1 - x0 + 2, 1, "#a8acb8");
+    p.rect(px, G - 13, 6, 14, stone);
+    p.rect(px, G - 13, 1, 14, cap);
+    p.rect(px - 1, G - 14, 8, 2, cap);
+    p.rect(px + 1, G - 18, 4, 4, "#2a2430");
+    p.rect(px + 2, G - 17, 2, 2, "#ffc860");
+    p.put(px + 2, G - 19, "#2a2430");
+  }
+  p.rect(28, G - 24, 2, 16, "#5a3a22");
+  p.put(27, G - 15, "#5a3a22");
+  p.put(30, G - 18, "#5a3a22");
+  blob(p, 29, G - 28, 8, "#2e5a2a", "#3e7a34", "#5aa04a");
+  for (const [ax, ay] of [
+    [25, G - 30],
+    [32, G - 27],
+    [28, G - 24],
+    [33, G - 32],
+    [24, G - 25],
+  ])
+    p.put(ax, ay, "#d83a3a");
+  p.rect(14, G - 1, 32, 2, "#4a3020");
+  for (let x = 15; x < 45; x += 5) {
+    blob(p, x + 1, G - 3, 2, "#2e6a2a", "#4a8a3a", "#7ab85a");
+    p.put(x + 1, G - 1, "#2e6a2a");
+  }
+  flowers(p, 131, 162, ["#e05a6a", "#f2c14e", "#e8e0f0", "#c84a8a", "#7a8af0"]);
+  for (const bx of [136, 148]) blob(p, bx, G - 12, 4, "#2e5a2a", "#3e7a34", "#5aa04a");
+  p.rect(153, G - 15, 7, 1, "#8a6a2a");
+  for (let y = 0; y < 6; y++) {
+    const half = [2, 3, 4, 4, 4, 3][y];
+    p.rect(156 - half, G - 21 + y, half * 2 + 1, 1, y % 2 ? "#c89a3a" : "#e0b84a");
+  }
+  p.put(156, G - 17, "#3a2a10");
+}
+
+function hallGrounds(p: Paint) {
+  const stone = "#e2dccc";
+  const shade = "#b8b0a0";
+  const gold = "#e8c060";
+  const iron = "#2a2a34";
+  for (const [x0, x1, px] of [
+    [9, 47, 1],
+    [135, 168, 168],
+  ]) {
+    p.rect(x0, G - 11, x1 - x0, 12, stone);
+    for (let y = G - 7; y <= G; y += 4) p.rect(x0, y, x1 - x0, 1, shade);
+    p.rect(x0 - 1, G - 12, x1 - x0 + 2, 2, gold);
+    for (let x = x0 + 1; x < x1; x += 3) {
+      p.rect(x, G - 19, 1, 7, iron);
+      p.put(x, G - 20, gold);
+    }
+    p.rect(x0, G - 16, x1 - x0, 1, iron);
+    p.rect(px, G - 22, 7, 23, stone);
+    p.rect(px + 5, G - 22, 2, 23, shade);
+    p.rect(px - 1, G - 23, 9, 2, gold);
+    p.rect(px + 1, G - 26, 5, 3, "#3a3440");
+    p.rect(px + 2, G - 29, 3, 3, "#ff8a2a");
+    p.put(px + 3, G - 30, "#ffd23f");
+  }
+  const fx = 24;
+  p.rect(fx - 11, G - 5, 23, 6, stone);
+  p.rect(fx - 12, G - 6, 25, 2, "#f4efe2");
+  p.rect(fx - 10, G - 4, 21, 2, "#4aa0d8");
+  p.rect(fx - 1, G - 15, 3, 10, shade);
+  p.rect(fx - 5, G - 16, 11, 2, "#f4efe2");
+  p.rect(fx - 4, G - 14, 9, 1, shade);
+  p.rect(fx, G - 20, 1, 4, "#bfe6ff");
+  p.put(fx, G - 21, "#ffffff");
+  for (let k = 1; k < 7; k++) {
+    p.put(fx - 6 - Math.floor(k / 2), G - 16 + k, "#8ad0f8");
+    p.put(fx + 6 + Math.floor(k / 2), G - 16 + k, "#8ad0f8");
+  }
+  p.put(fx - 3, G - 18, "#8ad0f8");
+  p.put(fx + 3, G - 18, "#8ad0f8");
+  flowers(p, 37, 47, ["#e05a6a", "#f2c14e", "#e8e0f0"]);
+  for (const [tx, top] of [
+    [139, 22],
+    [146, 16],
+  ]) {
+    p.rect(tx, G - 6, 1, 6, "#5a3a22");
+    blob(p, tx, G - top + 4, 3, "#1e4a2a", "#2e6a3a", "#4a8a4a");
+    blob(p, tx, G - 7, 3, "#1e4a2a", "#2e6a3a", "#4a8a4a");
+  }
+  p.rect(153, G - 14, 13, 15, stone);
+  p.rect(162, G - 14, 4, 15, shade);
+  p.rect(152, G - 15, 15, 2, gold);
+  p.rect(152, G - 1, 15, 2, shade);
+  p.rect(155, G - 18, 9, 3, "#b8862a");
+  p.rect(156, G - 18, 6, 1, gold);
+  p.rect(157, G - 21, 5, 3, gold);
+  p.rect(152, G - 25, 15, 4, "#d8a840");
+  p.rect(152, G - 25, 15, 1, "#fff0a0");
+  p.rect(148, G - 24, 4, 2, "#d8a840");
+  p.put(147, G - 24, "#d8a840");
+  p.rect(166, G - 24, 2, 3, "#b8862a");
+  flowers(p, 131, 151, ["#e05a6a", "#f2c14e", "#c84a8a", "#7a8af0"]);
+}
+
 const BUILDERS = [shed, cabin, cottage, longhouse, hall];
+const GROUNDS: ((p: Paint) => void)[] = [() => {}, () => {}, () => {}, longhouseGrounds, hallGrounds];
 
 export function houseSprite(level: number): Grid {
-  const p = painter(level * 977);
-  BUILDERS[Math.max(0, Math.min(BUILDERS.length - 1, level - 1))](p);
+  const lv = Math.max(1, Math.min(BUILDERS.length, level));
+  const p = painter(lv * 977);
+  GROUNDS[lv - 1](p);
+  p.dx = OX;
+  BUILDERS[lv - 1](p);
   return p.g;
+}
+
+export function houseIcon(level: number): Grid {
+  const g = houseSprite(level);
+  const used = g[0].map((_, x) => g.some((row) => row[x]));
+  const a = used.indexOf(true);
+  const b = used.lastIndexOf(true);
+  return g.map((row) => row.slice(a, b + 1));
 }

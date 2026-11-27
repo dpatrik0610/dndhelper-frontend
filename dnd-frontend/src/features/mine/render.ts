@@ -1,7 +1,7 @@
 import { dwarfParts, type GearSlot, item, SETS, sleeper } from "./art/gear";
 import { type Grid, hex, mix, tint } from "./art/pixel";
 import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
-import { HOUSE_H, HOUSE_LEVELS, HOUSE_W, houseSprite } from "./art/house";
+import { HOUSE_H, HOUSE_LEVELS, houseSprite } from "./art/house";
 import { COIN, MERCHANT } from "./art/materials";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
 import { chestSprite, cracks, enemySprite, oreTile, stoneTile, traderSprite } from "./art/world";
@@ -405,7 +405,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         ctx.fillRect(Math.round(hx0 + spots.smoke[0] + Math.sin(p * 5 + k) * 2 + p * 6), Math.round(gy - HOUSE_H + spots.smoke[1] - p * 20), 2, 2);
       }
     ctx.globalAlpha = 1;
-    label("Home", hx0 + HOUSE_W / 2, gy - HOUSE_H + spots.top - 6, near === "house");
+    label("Home", hx0 + spots.door, gy - HOUSE_H + spots.top - 6, near === "house");
   };
 
   return (g: Game) => {

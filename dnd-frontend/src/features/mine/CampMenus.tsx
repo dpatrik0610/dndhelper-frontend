@@ -17,7 +17,7 @@ import {
   upgradeHouse,
 } from "@services/miningService";
 import { FORGE_LEVELS, forgeSprite } from "./art/forge";
-import { HOUSE_LEVELS, houseSprite } from "./art/house";
+import { HOUSE_LEVELS, houseIcon } from "./art/house";
 import type { Grid } from "./art/pixel";
 import { COIN, MATERIALS, MERCHANT } from "./art/materials";
 import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
@@ -732,7 +732,7 @@ export function HouseMenu({ config, state, onState }: MenuProps) {
       <div className={styles.compare}>
         <div className={styles.gearCard}>
           <span className={styles.gearTag}>Now</span>
-          <Sprite grid={houseSprite(lv)} scale={2} label={now.name} />
+          <Sprite grid={houseIcon(lv)} scale={2} label={now.name} />
           <b className={styles.gearName}>{now.name}</b>
           <span className={styles.dim}>{now.perk}</span>
         </div>
@@ -741,7 +741,7 @@ export function HouseMenu({ config, state, onState }: MenuProps) {
             <IconArrowRight size={22} className={styles.compareArrow} aria-hidden />
             <div className={`${styles.gearCard} ${styles.gearNext}`}>
               <span className={styles.gearTag}>Next</span>
-              <Sprite grid={houseSprite(lv + 1)} scale={2} label={next.name} />
+              <Sprite grid={houseIcon(lv + 1)} scale={2} label={next.name} />
               <b className={styles.gearName}>{next.name}</b>
               <span className={styles.dim}>{next.perk}</span>
             </div>
