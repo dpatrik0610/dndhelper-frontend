@@ -117,6 +117,8 @@ export interface MiningState {
   nodesBroken: number;
   kills: number;
   trip: MiningTrip | null;
+  feats: Record<string, number>;
+  achievements: string[];
 }
 
 export interface Break {
@@ -132,6 +134,8 @@ export interface DigRequest {
   kills: number;
   mimics: number[];
   drank: number;
+  feats?: Record<string, number>;
+  unlocked?: string[];
 }
 
 export interface DigResult {
@@ -161,5 +165,6 @@ export const craftGear = (slot: SlotKey) => post<MiningState>(`/craft/${slot}`);
 export const upgradeForge = () => post<MiningState>("/forge");
 export const buyPet = (key: string) => post<MiningState>(`/pets/${key}`);
 export const trade = (item: string) => post<MiningState>(`/trade/${item}`);
+export const recordFeats = (req: { feats?: Record<string, number>; unlocked?: string[] }) => post<MiningState>("/feats", req);
 export const followPet = (key: string | null) => post<MiningState>(`/follow/${key ?? "none"}`);
 export const getMiningScoreboard = () => apiClient<MiningScore[]>("/mining/scoreboard");

@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Switch } from "@mantine/core";
-import { IconSettings } from "@tabler/icons-react";
+import { IconSettings, IconTrophy } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import {
   ascend,
   dig,
   faint,
   getMiningState,
+  recordFeats,
   trade,
   type MiningConfig,
   type MiningState,
@@ -41,19 +42,25 @@ import {
   step,
   T,
   takePending,
+  resetPending,
+  feat,
 } from "./engine";
+import { achievementsFor, mergeFeats, unlockedNow } from "./achievements";
 import { goalsFor, newlyAffordable } from "./goals";
 import { compact, tiersOf, total } from "./mine";
 import { createRenderer, oreIcon } from "./render";
 import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
 import { Hotbar } from "./Hotbar";
 import { Sprite } from "./Sprite";
+import { type AchToast, AchievementToasts, TrophyPanel } from "./Trophies";
 import { dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
 
 const SWITCH_CLASSES = { root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" };
 const GOAL_OPEN_KEY = "deepdelve-goal-open";
-type Panel = "pouch" | "controls" | "settings";
+type Panel = "pouch" | "controls" | "settings" | "trophies";
+const TOAST_MS = 5000;
+const MAX_TOASTS = 3;
 const LOW_HP = 0.3;
 const STEP_MS = 1000 / 60;
 const FLUSH_MS = 1000;
@@ -164,6 +171,45 @@ export function PlayView({
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  const achievements = useMemo(() => achievementsFor(config), [config]);
+  const [unlocked, setUnlocked] = useState<ReadonlySet<string>>(() => new Set(state.achievements));
+  const unlockedRef = useRef(unlocked);
+  const [toasts, setToasts] = useState<AchToast[]>([]);
+  const readAch = useCallback(
+    () => ({ config, state: stateRef.current, feats: mergeFeats(stateRef.current.feats, gameRef.current?.feats) }),
+    [config],
+  );
+
+  useEffect(() => {
+    const next = new Set([...unlockedRef.current, ...state.achievements]);
+    if (next.size === unlockedRef.current.size) return;
+    unlockedRef.current = next;
+    setUnlocked(next);
+  }, [state.achievements]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const g = gameRef.current;
+      if (!g || leaving.current) return;
+      const fresh = unlockedNow(achievements, readAch(), unlockedRef.current);
+      if (!fresh.length) return;
+      const ids = fresh.map((a) => a.id);
+      unlockedRef.current = new Set([...unlockedRef.current, ...ids]);
+      setUnlocked(unlockedRef.current);
+      if (g.camp) void recordFeats({ unlocked: ids }).catch(() => undefined);
+      else g.pending.unlocked.push(...ids);
+      play("achievement");
+      const now = Date.now();
+      const shown: AchToast[] = fresh.slice(0, MAX_TOASTS).map((a, k) => ({ key: now + k, icon: a.icon, name: a.name }));
+      if (fresh.length > MAX_TOASTS)
+        shown.push({ key: now + MAX_TOASTS, icon: "🏆", name: `and ${fresh.length - MAX_TOASTS} more` });
+      setToasts((cur) => [...cur, ...shown]);
+      const keys = new Set(shown.map((t) => t.key));
+      setTimeout(() => setToasts((cur) => cur.filter((t) => !keys.has(t.key))), TOAST_MS);
+    }, 700);
+    return () => clearInterval(id);
+  }, [achievements, readAch]);
+
   useEffect(() => {
     setSatchel(trip?.satchel ?? {});
     setDepth(trip?.depth ?? 0);
@@ -194,7 +240,7 @@ export function PlayView({
     const g = gameRef.current;
     if (s.trip && g && !g.camp) {
       loadTrip(g, s.trip, g.now);
-      g.pending = { breaks: [], ladders: [], torches: [], kills: 0, mimics: [], drank: 0 };
+      resetPending(g);
       setSatchel(s.trip.satchel);
       setDepth(s.trip.depth);
     } else onState(s);
@@ -228,7 +274,7 @@ export function PlayView({
         if (res.trip) {
           const broke = res.trip.depth !== g.depth;
           loadTrip(g, res.trip, g.now);
-          g.pending = { breaks: [], ladders: [], torches: [], kills: 0, mimics: [], drank: 0 };
+          resetPending(g);
           setDepth(res.trip.depth);
           if (broke)
             showNotification({
@@ -256,6 +302,11 @@ export function PlayView({
       setBusy(true);
       try {
         await inflight.current;
+        const g = gameRef.current;
+        if (g) {
+          feat(g, fainted ? "faint" : "trip");
+          if (new Date().getHours() < 5) feat(g, "nightShift");
+        }
         await flush();
         const before = stateRef.current;
         const s = await (fainted ? faint() : ascend());
@@ -269,6 +320,7 @@ export function PlayView({
           fresh: Object.keys(s.mined).filter((k) => !before.mined[k]),
           ready: newlyAffordable(goalsFor(config, s), before.ores, s.ores),
         });
+        if (g) g.feats = {};
         onState(s);
       } catch (e) {
         leaving.current = false;
@@ -575,6 +627,7 @@ export function PlayView({
           )}
         </div>
 
+        <AchievementToasts toasts={toasts} />
         <div className={styles.hudRight}>
           <div className={styles.btnRow}>
             {!trip && (
@@ -600,6 +653,15 @@ export function PlayView({
             </button>
             <button
               type="button"
+              className={`${panel === "trophies" ? "glass-btn-primary" : "glass-btn-secondary"} ${styles.gearBtn}`}
+              aria-label="Achievements"
+              aria-pressed={panel === "trophies"}
+              onClick={() => togglePanel("trophies")}
+            >
+              <IconTrophy size={18} />
+            </button>
+            <button
+              type="button"
               className={`${panel === "settings" ? "glass-btn-primary" : "glass-btn-secondary"} ${styles.gearBtn}`}
               aria-label="Settings"
               aria-pressed={panel === "settings"}
@@ -608,6 +670,10 @@ export function PlayView({
               <IconSettings size={18} />
             </button>
           </div>
+
+          {panel === "trophies" && (
+            <TrophyPanel list={achievements} read={readAch} unlocked={unlocked} onClose={() => setPanel(null)} />
+          )}
 
           {panel === "settings" && (
             <section className={styles.hudPanel} aria-label="Settings">

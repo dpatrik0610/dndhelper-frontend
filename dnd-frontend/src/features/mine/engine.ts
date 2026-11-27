@@ -22,6 +22,8 @@ export const isChest = (c: number) => c === MIMIC || CHESTS.includes(c);
 const MOTHERLODE_RADIUS = 4.5;
 const HUM_RADIUS = 12;
 export const MIMIC_KIND = 11;
+export const CUBE_KIND = 8;
+const CUBE_GENS = 2;
 export const BOLT_MS = 2500;
 
 const WALK_MS = 170;
@@ -76,6 +78,7 @@ export interface Player extends Tween {
   nextSweat: number;
   swingAt: number;
   heavyAt: number;
+  critStreak: number;
 }
 
 export interface Monster extends Tween {
@@ -102,6 +105,7 @@ export interface Monster extends Tween {
   windupUntil: number;
   ward: number;
   poise: number;
+  gen: number;
 }
 
 export interface PetActor {
@@ -146,6 +150,8 @@ export interface Pending {
   kills: number;
   mimics: number[];
   drank: number;
+  feats: Record<string, number>;
+  unlocked: string[];
 }
 
 export interface GameSetup {
@@ -209,6 +215,7 @@ export interface Game extends GameSetup {
   richFound: boolean;
   shakeUntil: number;
   shakeMag: number;
+  feats: Record<string, number>;
 }
 
 type Kind = { hp: number; dmg: number; move: number; windup: number; poise: number; ward?: number; tunnel?: boolean };
@@ -317,7 +324,8 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     texts: [],
     zs: [],
     nextZ: 0,
-    pending: { breaks: [], ladders: [], torches: [], kills: 0, mimics: [], drank: 0 },
+    pending: emptyPending(),
+    feats: {},
     bolts: [],
     nextBolt: 0,
     nextPotion: 0,
@@ -400,6 +408,7 @@ function place(g: Game, x: number) {
     nextSweat: 0,
     swingAt: -1e9,
     heavyAt: -1e9,
+    critStreak: 0,
   };
   g.petActor = g.pet
     ? { art: g.pet.art, key: g.pet.key, px: x - 1, py: g.liftY, face: 1, nextHit: 0, hopUntil: 0 }
@@ -442,12 +451,33 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   for (const i of g.torches) markSeen(g, i % g.W, Math.floor(i / g.W), 2.5);
 }
 
+export const emptyPending = (): Pending => ({
+  breaks: [],
+  ladders: [],
+  torches: [],
+  kills: 0,
+  mimics: [],
+  drank: 0,
+  feats: {},
+  unlocked: [],
+});
+
 export function takePending(g: Game): Pending | null {
   const p = g.pending;
-  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank)
+  const quiet = !Object.keys(p.feats).length && !p.unlocked.length;
+  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank && quiet)
     return null;
-  g.pending = { breaks: [], ladders: [], torches: [], kills: 0, mimics: [], drank: 0 };
+  g.pending = emptyPending();
   return p;
+}
+
+export function resetPending(g: Game) {
+  g.pending = { ...emptyPending(), feats: g.pending.feats, unlocked: g.pending.unlocked };
+}
+
+export function feat(g: Game, key: string, n = 1) {
+  g.feats[key] = (g.feats[key] ?? 0) + n;
+  g.pending.feats[key] = (g.pending.feats[key] ?? 0) + n;
 }
 
 export const lightRadius = (g: Game) => g.stats.light;
@@ -474,6 +504,8 @@ function addLadder(g: Game, x: number, y: number) {
   if (!isOpen(g, x, y) || g.ladders.has(i)) return;
   g.ladders.add(i);
   g.pending.ladders.push(i);
+  feat(g, "ladder");
+  if (g.feats.ladder === 40) feat(g, "stairway");
 }
 
 export function placeTorch(g: Game) {
@@ -484,6 +516,7 @@ export function placeTorch(g: Game) {
   g.torches.add(i);
   g.pending.torches.push(i);
   g.sfx.push("torch");
+  feat(g, "torch");
   markSeen(g, p.x, p.y - 1, 2.5);
 }
 
@@ -609,6 +642,8 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
   const cx = ((i % g.W) + 0.5) * T;
   const cy = (Math.floor(i / g.W) + 0.5) * T;
   const ore = oreOf(c);
+  const found = { [GEODE]: "geode", [GILDED_CHEST]: "gilded", [IRON_CHEST]: "iron", [CHEST]: "chest" }[c];
+  if (found) feat(g, found);
   g.sfx.push(
     c === SEAL
       ? "seal"
@@ -650,11 +685,15 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
     if (!g.richFound && inMotherlode(g, i)) {
       g.richFound = true;
       g.sfx.push("motherlode");
+      feat(g, "motherlode");
       say(g, cx, cy - 14, "MOTHERLODE!", g.oreColors[ore], 2400);
       burst(g, cx, cy, g.oreColors[ore], 50, 3.4);
     }
     if (g.carried >= g.stats.capacity) {
-      if (!g.warned.has("full")) g.sfx.push("full");
+      if (!g.warned.has("full")) {
+        g.sfx.push("full");
+        feat(g, "fullBag");
+      }
       sayOnce(g, "full", "Satchel full! Head back to the lift.", "#ff8a6a");
     }
     else {
@@ -672,9 +711,9 @@ const inMotherlode = (g: Game, i: number) =>
 export const nearMotherlode = (g: Game) =>
   !g.camp && !g.richFound && g.motherlode >= 0 && distTo(g, g.motherlode, g.player.x, g.player.y) <= HUM_RADIUS;
 
-function addMonster(g: Game, kind: number, x: number, y: number) {
+function addMonster(g: Game, kind: number, x: number, y: number, gen = 0) {
   const spec = KINDS[kind];
-  const hp = Math.round(g.info.monsterHp * spec.hp);
+  const hp = Math.max(1, Math.round(g.info.monsterHp * spec.hp * 0.5 ** gen));
   const m: Monster = {
     id: ++g.seq,
     def: ENEMIES[kind - 1],
@@ -687,8 +726,8 @@ function addMonster(g: Game, kind: number, x: number, y: number) {
     dur: 0,
     hp,
     maxHp: hp,
-    dmg: Math.round(g.info.monsterDamage * spec.dmg),
-    moveMs: spec.move,
+    dmg: gen >= CUBE_GENS ? 0 : Math.round(g.info.monsterDamage * spec.dmg * 0.5 ** gen),
+    moveMs: spec.move * 0.75 ** gen,
     nextMove: g.now + 600,
     nextHit: 0,
     lungeUntil: 0,
@@ -704,7 +743,8 @@ function addMonster(g: Game, kind: number, x: number, y: number) {
     nextBurn: 0,
     windupUntil: 0,
     ward: spec.ward ?? 0,
-    poise: spec.poise,
+    poise: gen ? 1 : spec.poise,
+    gen,
   };
   g.monsters.push(m);
   return m;
@@ -721,6 +761,7 @@ function wakeMimic(g: Game, x: number, y: number) {
   burst(g, cx, cy + 8, "#c9a04a", 18, 2.6);
   say(g, cx, cy - 10, "It's a MIMIC!", "#ff6a5a", 1800);
   g.sfx.push("mimic");
+  feat(g, "mimicWake");
   if (!g.firebolt) sayOnce(g, "nofire", "Your pick just bounces off. Only fire hurts it. Run!", "#ff8a6a");
 }
 
@@ -736,6 +777,7 @@ export function castBolt(g: Game, aim: Aim) {
   g.nextBolt = g.now + BOLT_MS;
   if (Math.abs(tx - ox) >= 0.3) p.face = tx < ox ? -1 : 1;
   g.sfx.push("bolt");
+  feat(g, "bolt");
   g.bolts.push({ x: ox, y: oy, vx: ((tx - ox) / len) * v, vy: ((ty - oy) / len) * v, life: 1400 });
   return true;
 }
@@ -749,6 +791,7 @@ export function drinkPotion(g: Game) {
   const heal = Math.round(g.stats.maxHp * 0.6);
   p.hp = Math.min(g.stats.maxHp, p.hp + heal);
   g.sfx.push("potion");
+  feat(g, "potion");
   say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, `+${heal}`, "#7ee08a", 900);
   burst(g, (p.x + 0.5) * T, p.y * T, "#ff6a8a", 10, 1.4);
   return true;
@@ -797,15 +840,49 @@ function killMonster(g: Game, m: Monster, by: string | null) {
   if (m.kind === MIMIC_KIND) {
     g.pending.mimics.push(m.cell);
     burst(g, (m.x + 0.5) * T, (m.y + 0.5) * T, "#ffd77a", 30, 3);
-  } else g.pending.kills++;
+  } else if (!m.gen) g.pending.kills++;
+  if (!m.gen) feat(g, `kill${m.kind}`);
+  if (m.gen >= CUBE_GENS) feat(g, "cubelet");
+  if (by) feat(g, "petKill");
+  if (g.player.hp <= g.stats.maxHp * 0.1) feat(g, "closeShave");
   const cx = (m.x + 0.5) * T;
   const cy = (m.y + 0.5) * T;
   burst(g, cx, cy, "#d6d0c4", 14, 2.2);
+  if (m.kind === CUBE_KIND && m.gen < CUBE_GENS) return splitCube(g, m);
   say(g, cx, cy - 10, by ? `${by} finished it!` : `${m.def.name} defeated`, "#ffd77a", 1300);
   if (m.kind === 5 && reaches(g.player, m)) {
+    feat(g, "blasted");
     burst(g, cx, cy, "#ff8a2a", 20, 2.6);
     hurt(g, Math.round(m.dmg * 0.5), "#ff8a2a");
   }
+}
+
+function splitCube(g: Game, m: Monster) {
+  const cx = (m.x + 0.5) * T;
+  const cy = (m.y + 0.5) * T;
+  say(g, cx, cy - 10, m.gen ? "It splits again!" : "It splits!", "#9be07a", 1100);
+  burst(g, cx, cy, "#9be07a", 18, 2.4);
+  g.sfx.push("squish");
+  for (const dir of [-1, 1]) {
+    const c = addMonster(g, CUBE_KIND, m.x, m.y, m.gen + 1);
+    c.nextMove = g.now + 500;
+    c.nextHit = g.now + 700;
+    c.stunUntil = g.now + 250;
+    const nx = m.x + dir;
+    const free = !g.monsters.some((o) => o !== c && o.x === nx && o.y === m.y) && !touches(g.player, nx, m.y);
+    if (isOpen(g, nx, m.y) && free) tweenTo(c, nx, m.y, 160);
+  }
+}
+
+function shove(g: Game, m: Monster) {
+  const p = g.player;
+  if (g.now < p.invulnUntil) return void say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, "Dodged!", "#9fe6ff", 600);
+  const dir = Math.sign(p.x - m.x) || -p.face;
+  say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, "Boing!", "#9be07a", 600);
+  g.sfx.push("squish");
+  feat(g, "bounced");
+  shake(g, 1, 80);
+  if (p.t >= p.dur && isOpen(g, p.x + dir, p.y) && isOpen(g, p.x + dir, p.y - 1)) tweenTo(p, p.x + dir, p.y, 120);
 }
 
 function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: string | null, fire = false) {
@@ -813,6 +890,7 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
   const cy = m.y * T;
   m.flashUntil = g.now + 120;
   if (m.kind === MIMIC_KIND && !fire) {
+    if (!byPet) feat(g, "clang");
     m.stunUntil = g.now + (byPet ? 200 : 450);
     say(g, cx, cy - 4, "Clang!", "#c8c0b0", 500);
     g.sfx.push("clang");
@@ -830,6 +908,7 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
       else {
         say(g, cx, cy - 6, "Ward shattered!", "#9fe6ff", 1300);
         g.sfx.push("shatter");
+        feat(g, "wardBreak");
         m.stunUntil = g.now + 700;
         m.windupUntil = 0;
       }
@@ -877,6 +956,8 @@ function attack(g: Game, m: Monster) {
   const p = g.player;
   if (g.now < p.nextSwing) return;
   const crit = swing(g);
+  p.critStreak = crit ? p.critStreak + 1 : 0;
+  if (p.critStreak === 3) feat(g, "hatTrick");
   const airborne = !supported(g, p.x, p.y);
   p.combo = g.now < p.comboUntil ? p.combo + 1 : 1;
   p.comboUntil = g.now + COMBO_MS;
@@ -892,6 +973,7 @@ function attack(g: Game, m: Monster) {
   const cy = m.y * T;
   if (airborne) {
     dmg *= 1.5;
+    feat(g, "jumpStrike");
     say(g, cx, cy - 16, "JUMP STRIKE!", "#9fe6ff", 900);
   }
   if (heavy) {
@@ -901,8 +983,11 @@ function attack(g: Game, m: Monster) {
     say(g, cx, cy - 22, "SMASH!", "#ffb347", 900);
     burst(g, cx, cy + 8, "#ffb347", 14, 2.6);
     g.sfx.push("smash");
+    feat(g, "smash");
   } else if (p.combo === 2) say(g, cx + 10, cy - 12, "x2", "#ffe066", 600);
   damageMonster(g, m, Math.round(dmg), crit, null);
+  if (m.hp <= 0 && heavy) feat(g, "smashKill");
+  if (m.hp <= 0 && airborne) feat(g, "jumpKill");
   if (crit || heavy || airborne) shake(g, heavy ? 3 : 2, heavy ? 180 : 120);
   if (m.hp <= 0 || m.kind === MIMIC_KIND || m.ward > 0) return;
   const poise = KINDS[m.kind].poise;
@@ -940,6 +1025,7 @@ function dash(g: Game, keys: Keys) {
   p.invulnUntil = g.now + IFRAME_MS;
   dust(g, p.x + 0.5, p.y + 1, 6);
   g.sfx.push("dash");
+  feat(g, "dash");
   tweenTo(p, to, p.y, DASH_MS);
   return true;
 }
@@ -948,6 +1034,8 @@ function hurt(g: Game, amount: number, color = "#ff5a4a") {
   const p = g.player;
   if (g.now < p.invulnUntil) {
     say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, "Dodged!", "#9fe6ff", 600);
+    feat(g, "dodge");
+    if (p.hp < g.stats.maxHp * LOW_HP) feat(g, "notToday");
     return;
   }
   const dmg = Math.max(1, Math.round(amount * (g.pet?.key === "owlbear" ? 0.7 : 1) * (1 - g.stats.armor)));
@@ -1284,12 +1372,16 @@ function stepMonsters(g: Game, dt: number) {
       m.windupUntil = 0;
       m.nextHit = g.now + 1100;
       m.lungeUntil = g.now + 180;
-      if (reaches(p, m)) {
+      if (reaches(p, m) && !m.dmg) shove(g, m);
+      else if (reaches(p, m)) {
         const before = p.hp;
         hurt(g, m.dmg);
         if (p.hp < before && m.kind === 3) p.slowUntil = g.now + 3000;
         if (p.hp < before && m.kind === 7) p.burnUntil = g.now + 3000;
-      } else say(g, (m.x + 0.5) * T, m.y * T, "miss", "#a59c8e", 500);
+      } else {
+        say(g, (m.x + 0.5) * T, m.y * T, "miss", "#a59c8e", 500);
+        feat(g, "sidestep");
+      }
       continue;
     }
     if (m.windupUntil) continue;
@@ -1405,6 +1497,7 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
   if (grounded && p.fell > 0) {
     p.landAt = g.now;
     dust(g, p.x + 0.5, p.y + 1, Math.min(12, 3 + p.fell * 2));
+    if (p.fell >= 8) feat(g, "bigFall");
     if (p.fell >= 3) {
       g.sfx.push("land");
       shake(g, 2, 120);

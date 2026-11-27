@@ -152,7 +152,7 @@ export const ENEMIES: Enemy[] = [
     name: "Gelatinous Cube",
     depth: 8,
     threat: "Engulfer",
-    does: "Slow, but it swallows you whole if it touches you. Whatever it ate on the way down spills out when it bursts.",
+    does: "Slow and heavy. Cut it down and it splits in two, then in two again. The tiny cubelets can't hurt you, but they love to shove you around.",
     pal: { Q: "#7fe6a0cc", q: "#4fc77a66", b: "#efe6d0", x: "#24402e", y: "#ffd23f" },
     rows: pad([
       ".QQQQQQQQQQQQQQ.",

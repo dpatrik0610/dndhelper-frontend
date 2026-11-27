@@ -560,3 +560,28 @@ run(wardHall, 20, { attack: true });
 assert.ok(raider.hp < raiderHp, "then steel bites");
 assert.equal(raider.x, 5, "a tough monster shrugs off one plain hit without staggering");
 console.log("ward ok");
+
+const goo = newGame(-1);
+goo.monsters = [];
+goo.player.x = goo.player.fromX = 4;
+goo.stats = { ...goo.stats, critZone: 0, swingMs: 100 };
+const cube = foe(goo, 8, 5, 2);
+Object.assign(cube, { gen: 0, hp: 1, stunUntil: 0, nextHit: 1e12, nextMove: 1e12, ward: 0, poise: 3 });
+run(goo, 20, { attack: true });
+const halves = goo.monsters.filter((m) => m.kind === 8);
+assert.equal(halves.length, 2, "a slain cube splits in two");
+assert.ok(halves.every((m) => m.gen === 1 && m.hp > 0 && m.dmg > 0), "into weaker halves that still bite");
+assert.equal(goo.pending.kills, 1, "only the parent cube pays out loot");
+assert.ok(!halves.some((m) => m.x === goo.player.x), "the halves never land on the dwarf");
+
+const boop = newGame(-1);
+boop.monsters = [];
+boop.player.x = boop.player.fromX = 4;
+const cubelet = foe(boop, 8, 5, 2);
+Object.assign(cubelet, { gen: 2, dmg: 0, stunUntil: 0, nextHit: 0, nextMove: 1e12, ward: 0, poise: 1 });
+const boopHp = boop.player.hp;
+run(boop, 700);
+assert.equal(boop.player.hp, boopHp, "a tiny cubelet deals no damage");
+assert.equal(boop.player.x, 3, "but boops the dwarf back a tile");
+assert.equal(boop.feats.bounced, 1, "which counts toward Bouncy Castle");
+console.log("cube ok");

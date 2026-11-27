@@ -37,6 +37,11 @@ const canvasCache = new WeakMap<Grid, HTMLCanvasElement>();
 const gridCache = new Map<string, Grid>();
 const partsCache = new Map<string, ReturnType<typeof dwarfParts>>();
 
+const shrink = (grid: Grid, k: number): Grid =>
+  Array.from({ length: Math.max(1, Math.round(grid.length * k)) }, (_, y) =>
+    Array.from({ length: Math.max(1, Math.round(grid[0].length * k)) }, (_, x) => grid[Math.floor(y / k)][Math.floor(x / k)]),
+  );
+
 const HAND_X = 14;
 const HAND_Y = 13;
 const GRIP_X = 3;
@@ -464,9 +469,10 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
 
     for (const m of g.monsters) {
       const mp = drawPos(m);
-      const sprite = cached(`e${m.kind}`, () => enemySprite(m.def));
+      const ek = `${m.kind}g${m.gen}`;
+      const sprite = cached(`e${ek}`, () => (m.gen ? shrink(enemySprite(m.def), 0.7 ** m.gen) : enemySprite(m.def)));
       const flash = g.now < m.flashUntil;
-      const body = flash ? cached(`ef${m.kind}`, () => tint(sprite, "#ffffff")) : sprite;
+      const body = flash ? cached(`ef${ek}`, () => tint(sprite, "#ffffff")) : sprite;
       const w = body[0].length;
       const h = body.length;
       const lunge = g.now < m.lungeUntil ? (p.x < m.x ? -3 : 3) : 0;
@@ -475,7 +481,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       const winding = m.windupUntil > g.now;
       const fade = m.leaving ? Math.max(0, 1 - (g.now - m.leaving) / 900) : 1;
       const coil = winding ? (p.x < m.x ? 2 : -2) : 0;
-      const shownBody = winding && Math.floor(g.now / 70) % 2 ? cached(`ew${m.kind}`, () => tint(sprite, "#ff8a6a")) : body;
+      const shownBody = winding && Math.floor(g.now / 70) % 2 ? cached(`ew${ek}`, () => tint(sprite, "#ff8a6a")) : body;
       draw(shownBody, mp.x * T + (T - w) / 2 + ox + lunge + coil, (mp.y + 1) * T - h + oy + bob, p.x > m.x, hidden * fade);
       if (m.ward > 0) {
         const cx = mp.x * T + T / 2 + ox;
