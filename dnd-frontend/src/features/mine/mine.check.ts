@@ -15,6 +15,7 @@ import {
   ORE0,
   OPEN,
   placeTorch,
+  showLoot,
   stationAt,
   STONE,
   step,
@@ -664,3 +665,16 @@ console.log("stat rows ok");
   assert.deepEqual(rows.map((r) => [r.name, r.total, r.index]), [["Iron", 15, 2], ["Copper", 10, 0]]);
 }
 console.log("renown breakdown ok");
+{
+  const g = newGame(-1);
+  g.oreNames = ["Copper", "Tin"];
+  g.oreColors = ["#c8743a", "#aaaaaa"];
+  g.texts = [];
+  showLoot(g, W + 2, [{ index: 1, n: 4 }, { index: 0, n: 12000 }]);
+  assert.deepEqual(g.texts.map((t) => t.text), ["+12K Copper", "+4 Tin"]);
+  assert.ok(g.texts[1].y < g.texts[0].y);
+  g.texts = [];
+  showLoot(g, W + 2, []);
+  assert.match(g.texts[0].text, /Satchel full/);
+}
+console.log("loot popups ok");

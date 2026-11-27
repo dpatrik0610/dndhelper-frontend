@@ -35,6 +35,7 @@ import {
   BOLT_MS,
   castBolt,
   createGame,
+  showLoot,
   drinkPotion,
   type Game,
   type Keys,
@@ -298,6 +299,15 @@ export function PlayView({
             autoClose: 5000,
           });
         }
+        if (!res.trip || res.trip.depth === g.depth)
+          for (const find of res.loot ?? [])
+            showLoot(
+              g,
+              find.i,
+              Object.entries(find.ores)
+                .map(([key, n]) => ({ index: config.ores.findIndex((o) => o.key === key), n }))
+                .filter((o) => o.index >= 0 && o.n > 0),
+            );
         if (res.deepestDepth !== stateRef.current.deepestDepth)
           onState({ ...stateRef.current, deepestDepth: res.deepestDepth });
         if (res.trip) {

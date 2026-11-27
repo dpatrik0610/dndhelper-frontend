@@ -2,7 +2,7 @@ import type { Break, DepthInfo, MiningStats, MiningTrip } from "@services/mining
 import { itemName, type Tiers } from "./art/gear";
 import { canSolo, type PetArt } from "./art/pets";
 import { ENEMIES, type Enemy } from "./art/world";
-import { critHit } from "./mine";
+import { compact, critHit } from "./mine";
 import type { Sfx } from "./sound";
 
 export const T = 16;
@@ -288,6 +288,18 @@ export const drawPos = (a: Tween) => {
 
 const say = (g: Game, x: number, y: number, text: string, color: string, life = 1100) =>
   g.texts.push({ x, y, text, color, life });
+
+export function showLoot(g: Game, i: number, ores: { index: number; n: number }[]) {
+  const cx = ((i % g.W) + 0.5) * T;
+  const cy = (Math.floor(i / g.W) + 0.5) * T;
+  if (!ores.length) {
+    say(g, cx, cy, "Satchel full! The loot is lost.", "#ff8a6a", 2200);
+    return;
+  }
+  const sorted = [...ores].sort((a, b) => a.index - b.index);
+  for (const [k, o] of sorted.entries())
+    say(g, cx, cy - k * 10, `+${compact(o.n)} ${g.oreNames[o.index]}`, g.oreColors[o.index], 2600 + k * 120);
+}
 
 export const sayOnce = (g: Game, key: string, text: string, color = "#ffb347", life = 1800) => {
   if (g.warned.has(key)) return;

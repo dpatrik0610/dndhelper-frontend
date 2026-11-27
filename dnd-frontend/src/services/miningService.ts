@@ -162,6 +162,7 @@ export interface DigResult {
   deepestDepth: number;
   trip: MiningTrip | null;
   cores?: number;
+  loot?: { i: number; ores: OreCounts }[];
 }
 
 export interface MiningScore {
