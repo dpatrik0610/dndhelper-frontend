@@ -358,10 +358,10 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           6,
         );
       }
-      if (g.target >= 0) {
-        const X = (g.target % g.W) * T + ox;
-        const Y = Math.floor(g.target / g.W) * T + oy;
-        ctx.fillStyle = Math.floor(g.now / 260) % 2 ? "rgba(255,232,160,0.95)" : "rgba(255,232,160,0.6)";
+      const brackets = (i: number, alpha: number) => {
+        const X = (i % g.W) * T + ox;
+        const Y = Math.floor(i / g.W) * T + oy;
+        ctx.fillStyle = `rgba(255,232,160,${(Math.floor(g.now / 260) % 2 ? 0.95 : 0.6) * alpha})`;
         for (const [a, b] of [
           [0, 0],
           [T - 3, 0],
@@ -376,7 +376,9 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           [T - 1, T - 3],
         ])
           ctx.fillRect(X + a, Y + b, 1, 3);
-      }
+      };
+      if (g.target >= 0) brackets(g.target, 1);
+      for (const i of g.splash) brackets(i, 0.45);
       for (const i of g.torches) draw(TORCH[flick ? 1 : 0], (i % g.W) * T + ox + 6, Math.floor(i / g.W) * T + oy + 5);
       if (g.trader >= 0) {
         const moss = cached("moss", traderSprite);

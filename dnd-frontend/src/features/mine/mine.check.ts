@@ -47,6 +47,8 @@ const stats: MiningStats = {
   yield: 1,
   capacity: 60,
   maxDepth: 1,
+  reach: 1,
+  wide: false,
 };
 const depth: DepthInfo = {
   number: 1,
@@ -318,4 +320,40 @@ assert.equal(stationAt(chest), "trader", "walk up to Moss to trade");
 
 assert.equal(dreamsFor(1).length, 3);
 assert.equal(dreamsFor(10).length, 12);
+const reachy = newGame(-1);
+reachy.monsters = [];
+reachy.nextSpawn = 1e12;
+reachy.stats = { ...stats, reach: 2 };
+run(reachy, 300, {}, null);
+reachy.hover = { x: 3.5, y: 4.5 };
+run(reachy, 20);
+assert.notEqual(reachy.target, 4 * W + 3, "reach never mines through solid rock");
+for (let t = 0; t < 1400 && reachy.map[3 * W + 5] !== OPEN; t += 1000 / 60)
+  run(reachy, 1000 / 60, {}, { x: 5.5, y: 3.5 });
+assert.equal(reachy.map[3 * W + 5], OPEN, "a tier 6+ pick mines a block two cells away");
+assert.equal(reachy.player.x, 3, "without walking to it");
+
+const wide = newGame(-1);
+wide.monsters = [];
+wide.nextSpawn = 1e12;
+wide.stats = { ...stats, reach: 2, wide: true };
+wide.player.x = wide.player.fromX = 6;
+const start = Uint8Array.from(wide.map);
+run(wide, 1400, {}, { x: 7.5, y: 2.5 });
+for (const [cx, cy] of [
+  [7, 2],
+  [8, 2],
+  [7, 1],
+  [8, 1],
+])
+  assert.equal(wide.map[cy * W + cx], OPEN, `a 2x2 pick clears ${cx},${cy} too`);
+const replay = Uint8Array.from(start);
+for (const b of wide.pending.breaks) {
+  const n = [b.i - 1, b.i + 1, b.i - W, b.i + W];
+  assert.ok(
+    n.some((k) => replay[k] === OPEN),
+    "every 2x2 break touches open space when the server replays it",
+  );
+  replay[b.i] = OPEN;
+}
 console.log("mine.check ok");

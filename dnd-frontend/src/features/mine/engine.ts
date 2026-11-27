@@ -130,6 +130,7 @@ export interface Game extends GameSetup {
   camp: boolean;
   hover: Aim;
   target: number;
+  splash: number[];
   aimPoint: { x: number; y: number };
   depth: number;
   info: DepthInfo;
@@ -262,6 +263,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     found: 0,
     hover: null,
     target: -1,
+    splash: [],
     aimPoint: { x: 0, y: 0 },
   } as unknown as Game;
   if (trip) loadTrip(g, trip, now);
@@ -417,22 +419,60 @@ function hitCell(g: Game, x: number, y: number) {
   const i = y * g.W + x;
   if (c === MIMIC) return wakeMimic(g, x, y);
   const crit = swing(g);
+  crack(g, i, crit, false);
+  for (const j of splashOf(g, i)) crack(g, j, crit, true);
+  settle(g);
+}
+
+const exposed = (g: Game, x: number, y: number) =>
+  isOpen(g, x - 1, y) || isOpen(g, x + 1, y) || isOpen(g, x, y - 1) || isOpen(g, x, y + 1);
+
+export function splashOf(g: Game, i: number) {
+  if (!g.stats.wide) return [];
+  const p = g.player;
+  const cx = i % g.W;
+  const cy = Math.floor(i / g.W);
+  const side = cy === p.y || cy === p.y - 1;
+  const fx = g.aimPoint.x - (cx + 0.5);
+  const sx = side ? Math.sign(cx - p.x) || p.face : Math.abs(fx) > 0.05 ? Math.sign(fx) : p.face;
+  const sy = side ? (cy === p.y ? -1 : 1) : cy > p.y ? 1 : -1;
+  return [i + sx, i + sy * g.W, i + sx + sy * g.W].filter((j) => {
+    const c = g.map[j];
+    return Math.abs((j % g.W) - cx) <= 1 && j >= 0 && j < g.map.length && (c === STONE || oreOf(c) >= 0);
+  });
+}
+
+function crack(g: Game, i: number, crit: boolean, splash: boolean) {
   const e = g.dmg.get(i) ?? { d: 0, s: 0, c: 0, t: 0 };
   e.t = g.now;
   e.d += crit ? critHit(g.stats) : g.stats.power;
   e.s++;
   if (crit) e.c++;
-  const cx = (x + 0.5) * T;
-  const cy = (y + 0.5) * T;
-  burst(g, cx, cy, crit ? "#ffe066" : "#d6d0c4", crit ? 8 : 3);
-  if (crit) say(g, cx, cy - 6, "CRIT", "#ffe066", 600);
-  if (e.d < hpOf(g, c)) {
-    g.dmg.set(i, e);
-    return;
+  g.dmg.set(i, e);
+  const cx = ((i % g.W) + 0.5) * T;
+  const cy = (Math.floor(i / g.W) + 0.5) * T;
+  burst(g, cx, cy, crit ? "#ffe066" : "#d6d0c4", splash ? 2 : crit ? 8 : 3);
+  if (crit && !splash) say(g, cx, cy - 6, "CRIT", "#ffe066", 600);
+}
+
+function settle(g: Game) {
+  for (let changed = true; changed; ) {
+    changed = false;
+    for (const [i, e] of g.dmg) {
+      const c = g.map[i];
+      if (e.d < hpOf(g, c) || !exposed(g, i % g.W, Math.floor(i / g.W))) continue;
+      breakCell(g, i, c, e);
+      changed = true;
+    }
   }
+}
+
+function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
   g.dmg.delete(i);
   g.map[i] = OPEN;
   g.pending.breaks.push({ i, s: e.s, c: e.c });
+  const cx = ((i % g.W) + 0.5) * T;
+  const cy = (Math.floor(i / g.W) + 0.5) * T;
   const ore = oreOf(c);
   if (c === SEAL) {
     say(g, cx, cy - 8, "The seal cracks open…", "#ffd77a", 1600);
@@ -675,6 +715,8 @@ function aimCell(g: Game, aim: { x: number; y: number }) {
   const adjacent =
     (Math.abs(cx - x) === 1 && (cy === y || cy === y - 1)) || (cx === x && (cy === y + 1 || cy === y - 2));
   if (adjacent && solid(cx, cy)) return cy * g.W + cx;
+  const far = Math.max(Math.abs(cx - x), cy < y - 1 ? y - 1 - cy : cy > y ? cy - y : 0);
+  if (far <= g.stats.reach && solid(cx, cy) && exposed(g, cx, cy) && clearLine(g, cx, cy)) return cy * g.W + cx;
   if (Math.abs(dx) >= Math.abs(dy)) {
     const nx = x + (dx < 0 ? -1 : 1);
     const row = (dy < 0 ? [y - 1, y] : [y, y - 1]).find((r) => !isOpen(g, nx, r));
@@ -682,6 +724,20 @@ function aimCell(g: Game, aim: { x: number; y: number }) {
   }
   const ry = dy > 0 ? y + 1 : y - 2;
   return solid(x, ry) ? ry * g.W + x : -1;
+}
+
+function clearLine(g: Game, cx: number, cy: number) {
+  const { x, y } = g.player;
+  const ax = x + 0.5;
+  const ay = y - 0.5;
+  const n = Math.ceil(Math.hypot(cx + 0.5 - ax, cy + 0.5 - ay) * 5);
+  for (let k = 1; k < n; k++) {
+    const px = Math.floor(ax + ((cx + 0.5 - ax) * k) / n);
+    const py = Math.floor(ay + ((cy + 0.5 - ay) * k) / n);
+    if ((px === cx && py === cy) || (px === x && (py === y || py === y - 1))) continue;
+    if (!isOpen(g, px, py)) return false;
+  }
+  return true;
 }
 
 function previewTarget(g: Game, keys: Keys) {
@@ -1026,6 +1082,7 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
   if (g.hover && !keys.left && !keys.right && p2.t >= p2.dur && Math.abs(g.hover.x - (p2.x + 0.5)) >= 0.3)
     p2.face = g.hover.x < p2.x + 0.5 ? -1 : 1;
   g.target = previewTarget(g, keys);
+  g.splash = g.target >= 0 ? splashOf(g, g.target) : [];
   g.aimPoint = g.hover
     ? g.hover
     : g.target >= 0

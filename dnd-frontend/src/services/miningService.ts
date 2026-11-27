@@ -15,6 +15,8 @@ export interface MiningStats {
   yield: number;
   capacity: number;
   maxDepth: number;
+  reach: number;
+  wide: boolean;
 }
 
 export interface Ore {
