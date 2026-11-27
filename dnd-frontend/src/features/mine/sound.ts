@@ -33,6 +33,7 @@ const VARIED = new Set<Sfx>(["dig", "crit", "break", "ore", "hit", "hurt", "clan
 const PITCH_SPREAD = 0.12;
 const MUSIC = "music.wav";
 const SFX_VOLUME = 0.6;
+const LEVELS: Partial<Record<Sfx, number>> = { break: 0.35 };
 const MUSIC_VOLUME = 0.3;
 const MIN_GAP_MS = 45;
 const PREFS_KEY = "deepdelve-sound";
@@ -86,7 +87,7 @@ export function play(name: Sfx) {
   if (now - (lastPlayed.get(name) ?? -Infinity) < MIN_GAP_MS) return;
   lastPlayed.set(name, now);
   const voice = sample(name).cloneNode() as HTMLAudioElement;
-  voice.volume = SFX_VOLUME;
+  voice.volume = SFX_VOLUME * (LEVELS[name] ?? 1);
   if (VARIED.has(name)) {
     voice.preservesPitch = false;
     voice.playbackRate = 1 + (Math.random() - 0.5) * PITCH_SPREAD;
