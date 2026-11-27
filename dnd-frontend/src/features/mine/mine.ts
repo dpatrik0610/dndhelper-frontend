@@ -36,7 +36,7 @@ export const statLine = (slot: SlotKey, s: MiningStats) => {
     case "pickaxe":
       return `${compact(s.power)} damage · breaks through to depth ${s.maxDepth}${s.reach > 1 ? ` · reaches ${s.reach} blocks` : ""}${s.wide ? " · digs 2×2" : ""}${s.vein ? " · cracks along whole veins" : ""}`;
     case "gauntlets":
-      return `${(1000 / s.swingMs).toFixed(2)} swings / sec`;
+      return `${(1000 / s.swingMs).toFixed(2)} swings / sec${s.armor ? ` · takes ${pct(s.armor)} less damage` : ""}`;
     case "helm":
       return `${s.light.toFixed(1)} blocks of light · ${compact(s.maxHp)} health${s.oreSight ? ` · senses ore ${s.oreSight} blocks past the light` : ""}`;
     case "charm":
@@ -64,7 +64,10 @@ const STAT_SPECS: Record<SlotKey, { stats: StatSpec[]; perks: Perk[] }> = {
     ],
   },
   gauntlets: {
-    stats: [{ label: "Swings / sec", value: (s) => 1000 / s.swingMs, show: (n) => n.toFixed(2) }],
+    stats: [
+      { label: "Swings / sec", value: (s) => 1000 / s.swingMs, show: (n) => n.toFixed(2) },
+      { label: "Armor", value: (s) => s.armor, show: (n) => `-${pct(n)} damage`, gain: (d) => `-${pct(d)}` },
+    ],
     perks: [],
   },
   helm: {
