@@ -35,6 +35,10 @@ const JUMP_MS = 140;
 const HANG_MS = 260;
 const AFK_MS = 60_000;
 const SPAWN_GRACE_MS = 12_000;
+const ENCUMBERED_SLOW = 2.5;
+
+export const hardCap = (g: Game) => Math.floor(g.stats.capacity * g.overload);
+export const encumbered = (g: Game) => !g.camp && g.carried > g.stats.capacity;
 const DASH_MS = 110;
 const DASH_COOLDOWN_MS = 1200;
 const IFRAME_MS = 380;
@@ -175,6 +179,7 @@ export interface GameSetup {
   firebolt: boolean;
   potions: number;
   maxTorches: number;
+  overload: number;
 }
 
 export interface Game extends GameSetup {
@@ -751,16 +756,21 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
       say(g, cx, cy - 14, "MOTHERLODE!", g.oreColors[ore], 2400);
       burst(g, cx, cy, g.oreColors[ore], 50, 3.4);
     }
-    if (g.carried >= g.stats.capacity) {
+    if (g.carried >= hardCap(g)) {
       if (!g.warned.has("full")) {
         g.sfx.push("full");
         feat(g, "fullBag");
       }
-      sayOnce(g, "full", "Satchel full! Head back to the lift.", "#ff8a6a");
-    }
-    else {
+      sayOnce(g, "full", "You can't carry another crumb. Head back to the lift.", "#ff8a6a");
+    } else {
       say(g, cx, cy - 6, `+ ${g.oreNames[ore]}`, g.oreColors[ore]);
+      const was = encumbered(g);
       g.carried += Math.floor(g.stats.yield) + (g.pet?.key === "ferret" ? 1 : 0);
+      if (!was && encumbered(g)) {
+        g.sfx.push("full");
+        say(g, (g.player.x + 0.5) * T, (g.player.y - 2) * T, "Encumbered!", "#ffb347", 1600);
+        sayOnce(g, "heavy", "Your satchel is overstuffed. You'll move slowly until you bank it.", "#ffb347", 3200);
+      }
     }
   }
 }
@@ -894,6 +904,21 @@ const reaches = (p: Player, m: Monster, dir?: number) => {
 };
 
 const liveMonsters = (g: Game) => g.monsters.filter((m) => !m.leaving && m.hp > 0);
+
+const strikeSpots = (m: Monster) => {
+  const d = drawPos(m);
+  return [
+    [m.x, m.y],
+    [Math.round(d.x), Math.round(d.y)],
+  ];
+};
+
+export const strikable = (p: Player, m: Monster, dir?: number) =>
+  strikeSpots(m).some(([x, y]) => {
+    const dx = x - p.x;
+    if (dir === undefined) return touches(p, x, y) || (Math.abs(dx) === 1 && y === p.y + 1);
+    return ((y === p.y || y === p.y - 1) && (dx === dir || dx === 0)) || (y === p.y + 1 && dx === dir);
+  });
 
 function killMonster(g: Game, m: Monster, by: string | null) {
   m.hp = 0;
@@ -1122,15 +1147,16 @@ function foeToward(g: Game, aim: { x: number; y: number }) {
   const { x, y } = p;
   const dx = aim.x - (x + 0.5);
   const dy = aim.y - y;
-  const cx = Math.floor(aim.x);
-  const cy = Math.floor(aim.y);
-  const live = liveMonsters(g);
-  return (
-    live.find((m) => m.x === cx && m.y === cy && reaches(p, m)) ??
-    (Math.abs(dx) >= Math.abs(dy)
-      ? live.find((m) => reaches(p, m, dx < 0 ? -1 : 1))
-      : live.find((m) => m.x === x && reaches(p, m) && (dy > 0 ? m.y > y : m.y < y - 1)))
-  );
+  const live = liveMonsters(g).filter((m) => strikable(p, m));
+  const off = (m: Monster) => {
+    const d = drawPos(m);
+    return Math.hypot(d.x + 0.5 - aim.x, d.y + 0.5 - aim.y);
+  };
+  const closest = live.reduce<Monster | undefined>((a, m) => (!a || off(m) < off(a) ? m : a), undefined);
+  if (closest && off(closest) <= 1.2) return closest;
+  return Math.abs(dx) >= Math.abs(dy)
+    ? live.find((m) => strikable(p, m, dx < 0 ? -1 : 1))
+    : live.find((m) => strikeSpots(m).some(([sx, sy]) => sx === x && (dy > 0 ? sy > y : sy < y - 1)));
 }
 
 function attackToward(g: Game, aim: { x: number; y: number }) {
@@ -1220,7 +1246,7 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
   if (keys.left || keys.right) {
     const d = keys.left ? -1 : 1;
     if (!aim) p.face = d;
-    const m = liveMonsters(g).find((mm) => reaches(p, mm, d));
+    const m = liveMonsters(g).find((mm) => strikable(p, mm, d));
     if (m) return ready && !aim ? attack(g, m) : undefined;
     const nx = x + d;
     if (isOpen(g, nx, y) && isOpen(g, nx, y - 1)) {
@@ -1383,7 +1409,7 @@ const unlit = (g: Game, x: number, y: number) => {
 
 function spawn(g: Game, alarm = false) {
   const p = g.player;
-  const cap = 1 + Math.floor(g.depth / 3) + (alarm ? 2 : 0);
+  const cap = 2 + Math.floor(g.depth / 3) + (alarm ? 2 : 0);
   const dark = inTorchlight(g, p.x, p.y - 1) ? 1 : 0.55;
   g.nextSpawn = g.now + Math.max(10_000, 26_000 - g.depth * 1500) * (0.7 + rand() * 0.6) * dark;
   if (liveMonsters(g).length >= cap) return;
@@ -1406,6 +1432,12 @@ function spawn(g: Game, alarm = false) {
   const at = cells[Math.floor(rand() * cells.length)];
   const x = at % g.W;
   addMonster(g, kind, x, Math.floor(at / g.W));
+  const pack = (rand() < 0.2 + g.depth * 0.04 ? 1 : 0) + (g.depth >= 5 && rand() < 0.15 ? 1 : 0);
+  const near = cells
+    .filter((i) => i !== at && Math.abs((i % g.W) - x) + Math.abs(Math.floor(i / g.W) - Math.floor(at / g.W)) <= 4)
+    .sort(() => rand() - 0.5);
+  for (const i of near.slice(0, Math.min(pack, cap - liveMonsters(g).length)))
+    addMonster(g, kind, i % g.W, Math.floor(i / g.W));
   const pet = g.petActor;
   if (pet?.key === "bat")
     say(g, (pet.px + 0.5) * T, (pet.py - 1) * T, x < p.x ? "← Squeak!" : "Squeak! →", "#d07a8c", 1600);
@@ -1557,7 +1589,7 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
     hurt(g, g.info.monsterDamage * 0.2, "#ff8a2a");
   }
   if (p.t < p.dur) {
-    p.t += dt;
+    p.t += p.fell || !encumbered(g) ? dt : dt / ENCUMBERED_SLOW;
     return;
   }
   const grounded = !isOpen(g, p.x, p.y + 1) || g.ladders.has(p.y * g.W + p.x);

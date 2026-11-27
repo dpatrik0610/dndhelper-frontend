@@ -7,6 +7,7 @@ import {
   dig,
   faint,
   getMiningState,
+  mossSell,
   recordFeats,
   trade,
   type MiningConfig,
@@ -428,6 +429,7 @@ export function PlayView({
         firebolt: s.firebolt,
         potions: s.potions,
         maxTorches: s.torchStock + (trip?.torches.length ?? 0),
+        overload: config.overload,
       },
       trip,
       performance.now(),
@@ -638,8 +640,21 @@ export function PlayView({
     showNotification({ title, message, color: "yellow" });
   };
 
+  const onMossSell = async (key: string, amount: number) => {
+    await inflight.current;
+    await flush();
+    const s = await mossSell(key, amount);
+    play("buy");
+    const left = s.trip?.satchel ?? {};
+    setSatchel(left);
+    const g = gameRef.current;
+    if (g) g.carried = total(left);
+    onState({ ...s, trip: stateRef.current.trip });
+  };
+
   const carried = total(satchel);
-  const full = carried >= state.stats.capacity;
+  const full = carried > state.stats.capacity;
+  const maxCarry = Math.floor(state.stats.capacity * config.overload);
   const props = { config, state, onState };
 
   return (
@@ -704,6 +719,11 @@ export function PlayView({
                   {compact(carried)} / {compact(state.stats.capacity)}
                 </span>
               </div>
+              {full && (
+                <span className={styles.encumbered}>
+                  Encumbered: moving slowly. {carried >= maxCarry ? "Can't carry more." : `Can carry up to ${compact(maxCarry)}.`}
+                </span>
+              )}
               <div className={styles.satchelList}>
                 {Object.entries(satchel)
                   .filter(([, n]) => n > 0)
@@ -863,7 +883,9 @@ export function PlayView({
                 <TraderMenu
                   config={config}
                   state={{ ...state, potions, trip: trip && { ...trip, wares: mossWares ?? trip.wares } }}
+                  satchel={satchel}
                   onTrade={onTrade}
+                  onSell={onMossSell}
                 />
               </>
             ) : trip ? (

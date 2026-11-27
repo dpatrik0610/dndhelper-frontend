@@ -819,19 +819,26 @@ export function HouseMenu({ config, state, onState }: MenuProps) {
 export function TraderMenu({
   config,
   state,
+  satchel,
   onTrade,
+  onSell,
 }: {
   config: MiningConfig;
   state: MiningState;
+  satchel: OreCounts;
   onTrade: (item: string) => Promise<void>;
+  onSell: (key: string, amount: number) => Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
   const [line] = useState(() => MOSS_LINES[Math.floor(Math.random() * MOSS_LINES.length)]);
   const wares = Object.entries(state.trip?.wares ?? {}).filter(([k]) => k !== "firebolt" || !state.firebolt);
-  const buy = async (item: string) => {
+  const carried = config.ores.filter((o) => (satchel[o.key] ?? 0) > 0);
+  const sell = (key: string, n: number) => attempt(() => onSell(key, n));
+  const buy = (item: string) => attempt(() => onTrade(item));
+  const attempt = async (work: () => Promise<void>) => {
     setBusy(true);
     try {
-      await onTrade(item);
+      await work();
     } catch (e) {
       showNotification({ title: "Moss shakes his head", message: (e as Error).message, color: "red" });
     } finally {
@@ -841,6 +848,52 @@ export function TraderMenu({
   return (
     <>
       <p className={styles.quote}>{line}</p>
+      <span className={styles.eyebrow}>Sell from your satchel</span>
+      <span className={styles.dim}>
+        Moss pays {Math.round(config.mossBuys * 100)}% of the camp price, and it lightens your load on the spot.
+      </span>
+      {carried.length ? (
+        <div className={styles.sellList}>
+          {carried.map((o) => {
+            const have = satchel[o.key] ?? 0;
+            const price = Math.max(1, Math.floor((state.prices[o.key] ?? 0) * config.mossBuys));
+            return (
+              <div key={o.key} className={styles.sellRow}>
+                <Sprite grid={resourceOf(config, o.key).grid} scale={1} />
+                <span className={styles.oreName}>{o.name}</span>
+                <span className={styles.dim}>
+                  {compact(have)} · {compact(price)}c each
+                </span>
+                <div className={styles.btnRow}>
+                  {SELL_STEPS.filter((n) => n < have).map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`glass-btn-secondary ${styles.actBtn}`}
+                      disabled={busy}
+                      onClick={() => void sell(o.key, n)}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={`glass-btn-primary ${styles.actBtn}`}
+                    disabled={busy}
+                    title={`Sell all for ${compact(have * price)} coins`}
+                    onClick={() => void sell(o.key, have)}
+                  >
+                    All · {compact(have * price)}c
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <span className={styles.dim}>Your satchel is empty.</span>
+      )}
+      <span className={styles.eyebrow}>Wares</span>
       <div className={styles.pets}>
         {wares.map(([key, price]) => {
           const full =

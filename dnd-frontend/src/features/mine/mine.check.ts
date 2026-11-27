@@ -18,6 +18,7 @@ import {
   lightRadius,
   placeTorch,
   placeTraps,
+  strikable,
   showLoot,
   TORCH_LIGHT,
   stationAt,
@@ -734,3 +735,14 @@ console.log("torch healing ok");
   assert.equal(p.hp, after, "and needs a moment to re-arm");
 }
 console.log("traps ok");
+{
+  const p = { x: 5, y: 5 } as Parameters<typeof strikable>[0];
+  const foe = (x: number, y: number, fromX = x, fromY = y, t = 1, dur = 1) =>
+    ({ x, y, fromX, fromY, t, dur }) as Parameters<typeof strikable>[1];
+  assert.ok(strikable(p, foe(6, 5)), "next to you");
+  assert.ok(!strikable(p, foe(7, 5)), "two tiles off is out of reach");
+  assert.ok(strikable(p, foe(7, 5, 6, 5, 10, 100)), "still hittable while it slides away");
+  assert.ok(strikable(p, foe(6, 6)), "diagonal below, in a dip");
+  assert.ok(strikable(p, foe(6, 6), 1) && !strikable(p, foe(6, 6), -1), "facing matters");
+}
+console.log("strikes ok");

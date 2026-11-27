@@ -97,6 +97,8 @@ export interface MiningConfig {
   torchPrice: number;
   potionPrice: number;
   fireboltPrice: number;
+  overload: number;
+  mossBuys: number;
 }
 
 export interface MiningTrip {
@@ -193,6 +195,7 @@ export const buyPet = (key: string) => post<MiningState>(`/pets/${key}`);
 export const trade = (item: string) => post<MiningState>(`/trade/${item}`);
 export const buyWare = (item: string, count: number) => post<MiningState>(`/buy/${item}/${count}`);
 export const sellOre = (key: string, amount: number) => post<MiningState>(`/sell/${key}/${amount}`);
+export const mossSell = (key: string, amount: number) => post<MiningState>(`/moss/sell/${key}/${amount}`);
 export const upgradeHouse = () => post<MiningState>("/house");
 export const recordFeats = (req: { feats?: Record<string, number>; unlocked?: string[] }) => post<MiningState>("/feats", req);
 export const followPet = (key: string | null) => post<MiningState>(`/follow/${key ?? "none"}`);

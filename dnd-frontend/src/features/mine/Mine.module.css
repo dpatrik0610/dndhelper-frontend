@@ -1403,3 +1403,9 @@
   padding: 2px 8px;
   min-height: 0;
 }
+
+.encumbered {
+  font-size: 0.75rem;
+  color: #ffb347;
+  font-weight: 600;
+}

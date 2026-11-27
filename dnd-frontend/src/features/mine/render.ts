@@ -562,9 +562,8 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
                       : cached(`s${d}-${v}`, () => stoneTile(d, v + 11));
           draw(grid, c * T + ox, r * T + oy);
           if (chest) {
-            const breath = cell === MIMIC && Math.floor((g.now + i * 377) / 300) % 12 === 0;
             const tier = Math.max(0, CHESTS.indexOf(cell));
-            const box = cached(`chest${cell}${breath}`, () => chestSprite(cell === MIMIC, breath, tier));
+            const box = cached(`chest${tier}`, () => chestSprite(tier));
             draw(box, c * T + ox, (r + 1) * T + oy - box.length);
           }
           if (cell !== OPEN && !chest) {
