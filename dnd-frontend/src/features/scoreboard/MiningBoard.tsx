@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Paper, Title, Tooltip } from "@mantine/core";
-import { IconPick } from "@tabler/icons-react";
+import { IconPick, IconTrophy } from "@tabler/icons-react";
 import { useSignalRConnection } from "@signalr/hooks/useSignalRConnection";
 import { ListSkeleton } from "@components/common/Skeletons";
 import { getMiningScoreboard, type MiningScore } from "@services/miningService";
@@ -137,6 +137,13 @@ export function MiningBoard() {
                         <dd>
                           <Sprite grid={DIAMOND_GRID} scale={1} />
                           {compact(s.diamonds ?? 0)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Achievements</dt>
+                        <dd>
+                          <IconTrophy size={14} aria-hidden />
+                          {s.achievements ?? 0}
                         </dd>
                       </div>
                     </dl>

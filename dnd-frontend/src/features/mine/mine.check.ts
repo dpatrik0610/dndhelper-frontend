@@ -26,7 +26,7 @@ import {
   step,
   takePending,
 } from "./engine";
-import { canAfford, characterSheet, discounted, hpColor, renownBreakdown, setProgress, statRows } from "./mine";
+import { canAfford, characterSheet, discounted, hpColor, renownBreakdown, statRows } from "./mine";
 import { pickSwing } from "./render";
 import { dreamsFor, engraving, PAGES, SEALS, wickLines } from "./story";
 
@@ -784,10 +784,6 @@ console.log("enemy traits ok");
 }
 console.log("encumbrance ok");
 {
-  const mixed = setProgress({ pickaxe: 3, gauntlets: 3, helm: 3, charm: 2, satchel: 0 });
-  assert.equal(mixed.length, 10, "one row per set");
-  assert.equal(mixed[2].have, 3, "three pieces of tier 3");
-  assert.equal(mixed[1].have, 1, "one piece of tier 2");
   const sheet = characterSheet(stats);
   assert.ok(sheet.find((r) => r.slot === "satchel")?.rows.some((r) => r.label === "Carries"), "sheet lists every slot's stats");
 }

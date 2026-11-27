@@ -147,13 +147,5 @@ export const SET_BONUSES: [string, string][] = [
   ["Fallen Star", "Half again as much ore from every block, and a full block more light."],
 ];
 
-export const setProgress = (tiers: Tiers) =>
-  SET_BONUSES.slice(1).map(([name, does], k) => ({
-    tier: k + 1,
-    name,
-    does,
-    have: GEAR_SLOTS.filter((slot) => tiers[slot] === k + 1).length,
-  }));
-
 export const tiersOf = (state: MiningState): Tiers =>
   Object.fromEntries(GEAR_SLOTS.map((s) => [s, state.gear[s] ?? 0])) as Tiers;

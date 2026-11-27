@@ -1453,15 +1453,6 @@
   text-align: right;
 }
 
-.setList {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .setRow {
   display: flex;
   align-items: center;
@@ -1490,20 +1481,4 @@
 
 .setDoes {
   font-size: 0.8125rem;
-}
-
-.setPips {
-  display: flex;
-  gap: 2px;
-}
-
-.setPips i {
-  width: 5px;
-  height: 10px;
-  border-radius: 1px;
-  background: #3a3346;
-}
-
-.setPips .pipOn {
-  background: var(--torch);
 }

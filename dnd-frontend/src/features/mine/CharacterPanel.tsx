@@ -1,7 +1,7 @@
 import type { MiningConfig, MiningState } from "@services/miningService";
 import { item, itemName, SETS } from "./art/gear";
 import { PanelHead } from "./CampMenus";
-import { characterSheet, compact, critHit, setProgress, tiersOf } from "./mine";
+import { characterSheet, compact, critHit, SET_BONUSES, tiersOf } from "./mine";
 import { Sprite } from "./Sprite";
 import styles from "./Mine.module.css";
 
@@ -16,6 +16,7 @@ export function CharacterPanel({
 }) {
   const s = state.stats;
   const tiers = tiersOf(state);
+  const set = s.setBonus;
   const fight = [
     ["Hit", compact(s.power)],
     ["Crit hit", compact(critHit(s))],
@@ -59,27 +60,21 @@ export function CharacterPanel({
         ))}
       </dl>
 
-      <span className={styles.eyebrow}>Armor sets</span>
-      <span className={styles.dim}>Wear all five pieces of one tier for its bonus.</span>
-      <ul className={styles.setList}>
-        {setProgress(tiers).map((row) => (
-          <li key={row.tier} className={`${styles.setRow} ${row.have === 5 ? styles.setActive : ""}`}>
-            <Sprite grid={item("helm", row.tier)} scale={2} label={SETS[row.tier].name} />
+      {set > 0 && (
+        <>
+          <span className={styles.eyebrow}>Armor set</span>
+          <div className={`${styles.setRow} ${styles.setActive}`}>
+            <Sprite grid={item("helm", set)} scale={2} label={SETS[set].name} />
             <div className={styles.setBody}>
-              <b>{row.name}</b>
+              <b>{SET_BONUSES[set][0]}</b>
               <span className={styles.dim}>
-                {SETS[row.tier].name} · tier {row.tier}
+                {SETS[set].name} · tier {set}
               </span>
-              <span className={styles.setDoes}>{row.does}</span>
+              <span className={styles.setDoes}>{SET_BONUSES[set][1]}</span>
             </div>
-            <span className={styles.setPips} role="img" aria-label={`${row.have} of 5 pieces`}>
-              {[0, 1, 2, 3, 4].map((k) => (
-                <i key={k} className={k < row.have ? styles.pipOn : undefined} />
-              ))}
-            </span>
-          </li>
-        ))}
-      </ul>
+          </div>
+        </>
+      )}
     </section>
   );
 }
