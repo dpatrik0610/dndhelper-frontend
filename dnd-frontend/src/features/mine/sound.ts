@@ -25,11 +25,14 @@ export const SFX = {
   potion: "potion.wav",
   lift: "lift.wav",
   buy: "buy.wav",
+  dash: "dash.wav",
+  land: "land.wav",
+  smash: "smash.wav",
 } as const;
 
 export type Sfx = keyof typeof SFX;
 
-const VARIED = new Set<Sfx>(["dig", "crit", "break", "ore", "hit", "hurt", "clang", "jump", "kill"]);
+const VARIED = new Set<Sfx>(["dig", "crit", "break", "ore", "hit", "hurt", "clang", "jump", "kill", "dash", "land", "smash"]);
 const PITCH_SPREAD = 0.12;
 const MUSIC = "music.wav";
 const SFX_VOLUME = 0.6;

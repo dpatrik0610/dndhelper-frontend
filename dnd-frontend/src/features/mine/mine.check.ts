@@ -396,6 +396,9 @@ tank.monsters = [];
 const brute = foe(tank, 1, 4, 2);
 brute.dmg = 10;
 run(tank, 100);
+assert.equal(tank.player.hp, hp0, "a monster winds up before it bites");
+assert.ok(brute.windupUntil > tank.now, "and shows it");
+run(tank, 400);
 assert.equal(hp0 - tank.player.hp <= 7 && hp0 - tank.player.hp > 0, true, "armor softens hits");
 
 const burner = newGame(-1);
@@ -482,3 +485,40 @@ for (const x of [2, 3, 5]) {
 }
 assert.equal(lamps.torches.size, 2, "torches stop at the trip's limit");
 assert.ok(lamps.warned.has("torches"), "and the dwarf says he's out");
+
+const duel = newGame(-1);
+duel.monsters = [];
+const dummy = foe(duel, 1, 5, 2);
+dummy.hp = dummy.maxHp = 999;
+dummy.stunUntil = 0;
+dummy.dmg = 0;
+dummy.moveMs = 1e9;
+dummy.nextMove = 1e12;
+duel.player.x = duel.player.fromX = 4;
+duel.stats = { ...duel.stats, critZone: 0, swingMs: 100 };
+run(duel, 20, { attack: true });
+assert.equal(dummy.x, 6, "a hit knocks the monster back a tile");
+assert.ok(dummy.stunUntil > duel.now, "and staggers it");
+dummy.x = dummy.fromX = 5;
+dummy.stunUntil = 0;
+const hp1 = dummy.hp;
+run(duel, 110, { attack: true });
+dummy.x = dummy.fromX = 5;
+run(duel, 110, { attack: true });
+assert.equal(hp1 - dummy.hp, 3 + Math.round(3 * 1.5), "every third hit in a row smashes for half again");
+
+const dodger = newGame(-1);
+dodger.monsters = [];
+const biter = foe(dodger, 1, 4, 2);
+biter.dmg = 5;
+biter.moveMs = 1e9;
+biter.nextMove = 1e12;
+const hp2 = dodger.player.hp;
+run(dodger, 100);
+assert.ok(biter.windupUntil > 0, "the bite is coming");
+run(dodger, 50, { left: true, dash: true });
+assert.ok(dodger.player.invulnUntil > dodger.now, "dashing grants a moment of safety");
+run(dodger, 600);
+assert.equal(dodger.player.hp, hp2, "dashing away dodges the bite");
+assert.ok(dodger.player.nextDash > dodger.now, "the dash has a cooldown");
+console.log("combat ok");

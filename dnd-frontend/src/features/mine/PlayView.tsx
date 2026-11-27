@@ -57,7 +57,7 @@ type Panel = "pouch" | "controls" | "settings";
 const LOW_HP = 0.3;
 const STEP_MS = 1000 / 60;
 const FLUSH_MS = 1000;
-const NO_KEYS: Keys = { left: false, right: false, up: false, down: false, jump: false, attack: false };
+const NO_KEYS: Keys = { left: false, right: false, up: false, down: false, jump: false, attack: false, dash: false };
 
 const KEYMAP: Record<string, keyof Keys> = {
   KeyA: "left",
@@ -71,6 +71,8 @@ const KEYMAP: Record<string, keyof Keys> = {
   Space: "jump",
   Enter: "attack",
   NumpadEnter: "attack",
+  ShiftLeft: "dash",
+  ShiftRight: "dash",
 };
 
 const ignoreKeys = (e: KeyboardEvent) => {
@@ -633,6 +635,10 @@ export function PlayView({
                   ? "Dig for ore and walk back to the lift to bank it. Break the gold-runed floor to go deeper."
                   : "Walk to the lift, the forge or Pip's stall."}
               </span>
+              <span className={styles.dim}>
+                Monsters flash a red ! before they bite: step back or dash away. Every third hit in a row smashes,
+                and hits from a jump land harder.
+              </span>
               <div className={styles.keys}>
                 <span>
                   <kbd>A</kbd>
@@ -649,6 +655,9 @@ export function PlayView({
                 </span>
                 <span>
                   <kbd>Click</kbd> or <kbd>Enter</kbd> attack and mine
+                </span>
+                <span>
+                  <kbd>Shift</kbd> dash, dodges hits
                 </span>
                 <span>
                   <kbd>T</kbd> torch

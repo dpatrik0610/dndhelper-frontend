@@ -1,4 +1,4 @@
-import { dwarfOnly, item, SETS, sleeper } from "./art/gear";
+import { dwarfParts, item, SETS, sleeper } from "./art/gear";
 import { type Grid, hex, mix, tint } from "./art/pixel";
 import { forgeSprite } from "./art/forge";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
@@ -14,6 +14,7 @@ import {
   isChest,
   nearMotherlode,
   drawPos,
+  dwarfPose,
   type Game,
   hpOf,
   LEDGER,
@@ -34,6 +35,7 @@ const CRACK = CRACK_ALL.map((_, n) => CRACK_ALL[(n % 4) * 7 + Math.floor(n / 4)]
 
 const canvasCache = new WeakMap<Grid, HTMLCanvasElement>();
 const gridCache = new Map<string, Grid>();
+const partsCache = new Map<string, ReturnType<typeof dwarfParts>>();
 
 const cached = (key: string, make: () => Grid) => {
   let g = gridCache.get(key);
@@ -280,8 +282,9 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     const pos = drawPos(p);
     const camX = (pos.x + 0.5) * T - VW / 2;
     const camY = pos.y * T - VH / 2;
-    const ox = -Math.round(camX);
-    const oy = -Math.round(camY);
+    const quake = g.now < g.shakeUntil ? g.shakeMag : 0;
+    const ox = -Math.round(camX) + Math.round((Math.random() - 0.5) * 2 * quake);
+    const oy = -Math.round(camY) + Math.round((Math.random() - 0.5) * 2 * quake);
     const c0 = Math.max(0, Math.floor(camX / T));
     const c1 = Math.min(g.W - 1, Math.ceil((camX + VW) / T));
     const r0 = Math.max(0, Math.floor(camY / T));
@@ -443,8 +446,12 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       const lunge = g.now < m.lungeUntil ? (p.x < m.x ? -3 : 3) : 0;
       const bob = m.kind === 5 ? -4 + Math.round(Math.sin(g.now / 160) * 2) : Math.floor(g.now / 200) % 2 ? 0 : -1;
       const hidden = m.kind === 6 && Math.abs(m.x - p.x) > 2 ? 0.14 : 1;
+      const winding = m.windupUntil > g.now;
       const fade = m.leaving ? Math.max(0, 1 - (g.now - m.leaving) / 900) : 1;
-      draw(body, mp.x * T + (T - w) / 2 + ox + lunge, (mp.y + 1) * T - h + oy + bob, p.x > m.x, hidden * fade);
+      const coil = winding ? (p.x < m.x ? 2 : -2) : 0;
+      const shownBody = winding && Math.floor(g.now / 70) % 2 ? cached(`ew${m.kind}`, () => tint(sprite, "#ff8a6a")) : body;
+      draw(shownBody, mp.x * T + (T - w) / 2 + ox + lunge + coil, (mp.y + 1) * T - h + oy + bob, p.x > m.x, hidden * fade);
+      if (winding) write("!", (mp.x + 0.5) * T + ox, (mp.y + 1) * T - h + oy - 6, "#ff5a4a", 1, 11);
       if (m.hp < m.maxHp && hidden === 1) {
         const bx = mp.x * T + ox;
         const by = (mp.y + 1) * T - h + oy - 4;
@@ -481,24 +488,39 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       );
     } else {
       const hurt = g.now < p.hurtUntil;
+      const pose = dwarfPose(g);
       const key = `d${JSON.stringify(tiers)}`;
-      const body = cached(key, () => dwarfOnly(tiers));
-      draw(
-        hurt ? cached(`${key}hurt`, () => tint(body, "#ff6a5a")) : body,
-        p.face < 0 ? px - 14 : px,
-        feet - 20,
-        p.face < 0,
-      );
+      let parts = partsCache.get(key);
+      if (!parts) {
+        parts = dwarfParts(tiers);
+        partsCache.set(key, parts);
+      }
+      const look = (grid: Grid, name: string) => (hurt ? cached(`${key}${name}hurt`, () => tint(grid, "#ff6a5a")) : grid);
+      const face = pose.glance ? -p.face : p.face;
+      const bx = (face < 0 ? px - 14 : px) + pose.lean * face;
+      const top = feet - 20;
+      const alpha = pose.flicker ? 0.45 : 1;
+      if (pose.dashing) {
+        const ghost = cached(`${key}ghost`, () => tint(parts.body, "#9fe6ff"));
+        for (const k of [0.66, 0.33]) {
+          const gx = (p.fromX + (pos.x - p.fromX) * k) * T + ox;
+          draw(ghost, face < 0 ? gx - 14 : gx, top, face < 0, 0.25 * k);
+        }
+      }
+      draw(look(parts.left, "l"), bx + pose.leftDx * face, top + pose.leftDy, face < 0, alpha);
+      draw(look(parts.right, "r"), bx + pose.rightDx * face, top + pose.rightDy, face < 0, alpha);
+      draw(look(pose.blink ? parts.blink : parts.body, pose.blink ? "k" : "b"), bx, top + pose.bodyDy, face < 0, alpha);
       const pick = cached(`pick${tiers.pickaxe}`, () => item("pickaxe", tiers.pickaxe));
-      const pivotX = p.face < 0 ? px + 2 : px + 14;
-      const pivotY = feet - 14;
+      const pivotX = (p.face < 0 ? px + 2 : px + 14) + pose.lean * p.face;
+      const pivotY = feet - 14 + pose.bodyDy;
       const dx = (g.aimPoint.x * T + ox - pivotX) * p.face;
       const dy = g.aimPoint.y * T + oy - pivotY;
       const left = p.strikeUntil - g.now;
-      const swingOff = left > 0 ? 0.35 - 1.3 * (left / 140) : -0.55;
+      const swingOff = left > 0 ? 0.35 - 1.3 * (left / 140) : -0.55 + (pose.bodyDy < 0 ? 0.06 : 0);
       const ang =
         Math.max(-Math.PI / 2, Math.min(Math.PI / 2, Math.atan2(dy, Math.max(0.1, dx)))) + Math.PI / 4 + swingOff;
       ctx.save();
+      ctx.globalAlpha = alpha;
       ctx.translate(Math.round(pivotX), Math.round(pivotY));
       ctx.scale(p.face, 1);
       ctx.rotate(ang);

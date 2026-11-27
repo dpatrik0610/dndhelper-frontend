@@ -31,8 +31,24 @@ const JUMP_MS = 140;
 const HANG_MS = 260;
 const AFK_MS = 60_000;
 const SPAWN_GRACE_MS = 12_000;
+const DASH_MS = 110;
+const DASH_COOLDOWN_MS = 1200;
+const IFRAME_MS = 380;
+const WINDUP_MS = 360;
+const COMBO_MS = 1100;
+const HITSTUN_MS = 260;
+const SWEAT_MS = 1100;
+const LOW_HP = 0.3;
 
-export type Keys = { left: boolean; right: boolean; up: boolean; down: boolean; jump: boolean; attack: boolean };
+export type Keys = {
+  left: boolean;
+  right: boolean;
+  up: boolean;
+  down: boolean;
+  jump: boolean;
+  attack: boolean;
+  dash?: boolean;
+};
 export type Aim = { x: number; y: number } | null;
 
 export const CAMP = { W: 44, H: 10, ground: 8, lift: 5, forge: 21, shop: 35 };
@@ -51,6 +67,14 @@ export interface Player extends Tween {
   lastHurt: number;
   hurtUntil: number;
   hangUntil: number;
+  fell: number;
+  landAt: number;
+  nextDash: number;
+  dashUntil: number;
+  invulnUntil: number;
+  combo: number;
+  comboUntil: number;
+  nextSweat: number;
 }
 
 export interface Monster extends Tween {
@@ -74,6 +98,7 @@ export interface Monster extends Tween {
   slowUntil: number;
   burnUntil: number;
   nextBurn: number;
+  windupUntil: number;
 }
 
 export interface PetActor {
@@ -179,6 +204,8 @@ export interface Game extends GameSetup {
   sfx: Sfx[];
   motherlode: number;
   richFound: boolean;
+  shakeUntil: number;
+  shakeMag: number;
 }
 
 const KINDS: Record<number, { hp: number; dmg: number; move: number; tunnel?: boolean }> = {
@@ -247,6 +274,23 @@ const sayOnce = (g: Game, key: string, text: string, color = "#ffb347") => {
   say(g, (p.x + 0.5) * T, (p.y - 2) * T, text, color, 1800);
 };
 
+const shake = (g: Game, mag: number, ms: number) => {
+  if (g.now >= g.shakeUntil || mag >= g.shakeMag) g.shakeMag = mag;
+  g.shakeUntil = Math.max(g.shakeUntil, g.now + ms);
+};
+
+const dust = (g: Game, x: number, y: number, n: number) => {
+  for (let i = 0; i < n; i++)
+    g.parts.push({
+      x: x * T + (Math.random() - 0.5) * 8,
+      y: y * T - 1,
+      vx: (Math.random() - 0.5) * 1.4,
+      vy: -Math.random() * 0.9,
+      life: 200 + Math.random() * 160,
+      color: Math.random() < 0.5 ? "#8a7f70" : "#b8ad9c",
+    });
+};
+
 const burst = (g: Game, x: number, y: number, color: string, n: number, spread = 1.6) => {
   for (let i = 0; i < n; i++)
     g.parts.push({
@@ -274,6 +318,8 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     nextPotion: 0,
     trader: -1,
     sfx: [],
+    shakeUntil: 0,
+    shakeMag: 0,
     asleep: false,
     lastInput: now,
     now,
@@ -339,6 +385,14 @@ function place(g: Game, x: number) {
     lastHurt: 0,
     hurtUntil: 0,
     hangUntil: 0,
+    fell: 0,
+    landAt: 0,
+    nextDash: 0,
+    dashUntil: 0,
+    invulnUntil: 0,
+    combo: 0,
+    comboUntil: 0,
+    nextSweat: 0,
   };
   g.petActor = g.pet
     ? { art: g.pet.art, key: g.pet.key, px: x - 1, py: g.liftY, face: 1, nextHit: 0, hopUntil: 0 }
@@ -640,6 +694,7 @@ function addMonster(g: Game, kind: number, x: number, y: number) {
     slowUntil: 0,
     burnUntil: 0,
     nextBurn: 0,
+    windupUntil: 0,
   };
   g.monsters.push(m);
   return m;
@@ -779,9 +834,25 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
   killMonster(g, m, byPet);
 }
 
+function knockback(g: Game, m: Monster, tiles: number) {
+  const dir = Math.sign(m.x - g.player.x) || g.player.face;
+  let to = m.x;
+  for (let k = 0; k < tiles; k++) {
+    const nx = to + dir;
+    if (!isOpen(g, nx, m.y) || g.monsters.some((o) => o !== m && o.x === nx && o.y === m.y)) break;
+    to = nx;
+  }
+  if (to !== m.x) tweenTo(m, to, m.y, 90);
+}
+
 function attack(g: Game, m: Monster) {
-  if (g.now < g.player.nextSwing) return;
+  const p = g.player;
+  if (g.now < p.nextSwing) return;
   const crit = swing(g);
+  const airborne = !supported(g, p.x, p.y);
+  p.combo = g.now < p.comboUntil ? p.combo + 1 : 1;
+  p.comboUntil = g.now + COMBO_MS;
+  const heavy = p.combo >= 3;
   let dmg = crit ? critHit(g.stats) : g.stats.power;
   const pet = g.petActor;
   if (crit && pet?.key === "blinkdog" && Math.abs(pet.px - m.x) < 2) dmg *= 1.5;
@@ -789,8 +860,26 @@ function attack(g: Game, m: Monster) {
     dmg *= 1.25;
     burst(g, (m.x + 0.5) * T, m.y * T, "#fff3b0", 10, 2);
   }
+  const cx = (m.x + 0.5) * T;
+  const cy = m.y * T;
+  if (airborne) {
+    dmg *= 1.5;
+    say(g, cx, cy - 16, "JUMP STRIKE!", "#9fe6ff", 900);
+  }
+  if (heavy) {
+    p.combo = 0;
+    dmg *= 1.5;
+    say(g, cx, cy - 22, "SMASH!", "#ffb347", 900);
+    burst(g, cx, cy + 8, "#ffb347", 14, 2.6);
+    g.sfx.push("smash");
+  } else if (p.combo === 2) say(g, cx + 10, cy - 12, "x2", "#ffe066", 600);
   damageMonster(g, m, Math.round(dmg), crit, null);
-  if (!crit || m.hp <= 0) return;
+  if (crit || heavy || airborne) shake(g, heavy ? 3 : 2, heavy ? 180 : 120);
+  if (m.hp <= 0 || m.kind === MIMIC_KIND) return;
+  m.windupUntil = 0;
+  m.stunUntil = Math.max(m.stunUntil, g.now + HITSTUN_MS * (heavy ? 2 : 1));
+  knockback(g, m, heavy || crit ? 2 : 1);
+  if (!crit) return;
   const set = g.stats.setBonus;
   if (set === 6) {
     m.slowUntil = g.now + 3000;
@@ -802,13 +891,38 @@ function attack(g: Game, m: Monster) {
   }
 }
 
+function dash(g: Game, keys: Keys) {
+  const p = g.player;
+  const d = keys.left ? -1 : keys.right ? 1 : p.face;
+  let to = p.x;
+  for (let k = 1; k <= 2; k++) {
+    const nx = p.x + d * k;
+    if (!isOpen(g, nx, p.y) || !isOpen(g, nx, p.y - 1)) break;
+    to = nx;
+  }
+  if (to === p.x) return false;
+  p.nextDash = g.now + DASH_COOLDOWN_MS;
+  p.dashUntil = g.now + DASH_MS;
+  p.invulnUntil = g.now + IFRAME_MS;
+  dust(g, p.x + 0.5, p.y + 1, 6);
+  g.sfx.push("dash");
+  tweenTo(p, to, p.y, DASH_MS);
+  return true;
+}
+
 function hurt(g: Game, amount: number, color = "#ff5a4a") {
   const p = g.player;
+  if (g.now < p.invulnUntil) {
+    say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, "Dodged!", "#9fe6ff", 600);
+    return;
+  }
   const dmg = Math.max(1, Math.round(amount * (g.pet?.key === "owlbear" ? 0.7 : 1) * (1 - g.stats.armor)));
   p.hp -= dmg;
   p.lastHurt = g.now;
   p.hurtUntil = g.now + 160;
   g.sfx.push("hurt");
+  shake(g, 2, 140);
+  burst(g, (p.x + 0.5) * T, (p.y - 0.5) * T, color, 6, 1.6);
   say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, `-${dmg}`, color, 800);
   if (p.hp <= 0) {
     p.hp = 0;
@@ -890,35 +1004,42 @@ function previewTarget(g: Game, keys: Keys) {
 function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
   const p = g.player;
   const { x, y } = p;
+  const ready = g.now >= p.nextSwing;
+  const moving = keys.left || keys.right || keys.up || keys.down || keys.jump;
+
+  if (keys.dash && grounded && g.now >= p.nextDash && dash(g, keys)) return;
 
   if (aim) {
     const dx = aim.x - (x + 0.5);
     if (Math.abs(dx) >= 0.3) p.face = dx < 0 ? -1 : 1;
-    const foe = foeToward(g, aim);
-    if (foe) return attack(g, foe);
-    const cell = aimCell(g, aim);
-    if (cell >= 0) return hitCell(g, cell % g.W, Math.floor(cell / g.W));
-    if (!keys.left && !keys.right && !keys.up && !keys.down && !keys.jump) {
-      if (g.now >= p.nextSwing) swing(g);
-      return;
-    }
+    if (ready) {
+      const foe = foeToward(g, aim);
+      if (foe) return attack(g, foe);
+      const cell = aimCell(g, aim);
+      if (cell >= 0) return hitCell(g, cell % g.W, Math.floor(cell / g.W));
+      if (!moving) return void swing(g);
+    } else if (!moving) return;
   }
-  if (keys.attack && g.now >= p.nextSwing) return attackToward(g, { x: x + 0.5 + p.face, y: y - 0.5 });
+  if (keys.attack && ready) return attackToward(g, { x: x + 0.5 + p.face, y: y - 0.5 });
 
   if (keys.jump && grounded && isOpen(g, x, y - 2)) {
     const high = g.stats.setBonus === 8 && isOpen(g, x, y - 3);
     p.hangUntil = g.now + JUMP_MS * (high ? 1.6 : 1) + HANG_MS;
     g.sfx.push("jump");
+    dust(g, x + 0.5, y + 1, 3);
     return tweenTo(p, x, y - (high ? 2 : 1), JUMP_MS * (high ? 1.6 : 1));
   }
 
   if (keys.left || keys.right) {
     const d = keys.left ? -1 : 1;
-    p.face = d;
+    if (!aim) p.face = d;
     const m = liveMonsters(g).find((mm) => reaches(p, mm, d));
-    if (m) return attack(g, m);
+    if (m) return ready && !aim ? attack(g, m) : undefined;
     const nx = x + d;
-    if (isOpen(g, nx, y) && isOpen(g, nx, y - 1)) return tweenTo(p, nx, y, WALK_MS);
+    if (isOpen(g, nx, y) && isOpen(g, nx, y - 1)) {
+      if (grounded) dust(g, x + 0.5 - d * 0.3, y + 1, 1);
+      return tweenTo(p, nx, y, WALK_MS);
+    }
     return hitCell(g, nx, isOpen(g, nx, y - 1) ? y : y - 1);
   }
 
@@ -935,6 +1056,48 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
     }
     return hitCell(g, x, y - 2);
   }
+}
+
+export interface DwarfPose {
+  bodyDy: number;
+  lean: number;
+  leftDy: number;
+  rightDy: number;
+  leftDx: number;
+  rightDx: number;
+  blink: boolean;
+  glance: boolean;
+  dashing: boolean;
+  flicker: boolean;
+}
+
+export function dwarfPose(g: Game): DwarfPose {
+  const p = g.player;
+  const now = g.now;
+  const k = p.dur > 0 ? Math.min(1, p.t / p.dur) : 1;
+  const tweening = k < 1;
+  const air = p.fell > 0 || !supported(g, p.x, p.y) || (tweening && p.y < p.fromY && !g.ladders.has(p.fromY * g.W + p.x));
+  const walking = tweening && p.fromY === p.y && p.fromX !== p.x && now >= p.dashUntil;
+  const climbing = tweening && p.fromX === p.x && !air;
+  const lead = p.x % 2 === 0;
+  const step = walking ? Math.round(Math.sin(k * Math.PI) * 2) : 0;
+  const climb = climbing ? (k < 0.5 ? 1 : 0) : 0;
+  const idle = !tweening && !air && now - p.landAt > 160;
+  const breathe = idle && Math.floor(now / 900) % 2 === 0 ? -1 : 0;
+  const squash = now - p.landAt < 140 ? 1 : 0;
+  const lean = (now < p.strikeUntil ? 1 : 0) + (now < p.dashUntil ? 1 : 0) - (now < p.hurtUntil ? 1 : 0);
+  return {
+    bodyDy: breathe + squash + (walking && step > 0 ? -1 : 0) + (air ? -1 : 0),
+    lean,
+    leftDy: air ? -1 : -(lead ? step : 0) - climb,
+    rightDy: air ? -1 : -(lead ? 0 : step) - (climbing ? 1 - climb : 0),
+    leftDx: walking ? (lead ? 1 : -1) * (step > 0 ? 1 : 0) : air ? 1 : 0,
+    rightDx: walking ? (lead ? -1 : 1) * (step > 0 ? 1 : 0) : air ? -1 : 0,
+    blink: now % 3600 < 130,
+    glance: idle && now - g.lastInput > 5000 && Math.floor(now / 2200) % 3 === 2,
+    dashing: now < p.dashUntil,
+    flicker: now < p.invulnUntil && Math.floor(now / 60) % 2 === 0,
+  };
 }
 
 const FLIERS = new Set([3, 5]);
@@ -1079,15 +1242,22 @@ function stepMonsters(g: Game, dt: number) {
       continue;
     }
     if (g.now < m.stunUntil) continue;
+    if (m.windupUntil && g.now >= m.windupUntil) {
+      m.windupUntil = 0;
+      m.nextHit = g.now + 1100;
+      m.lungeUntil = g.now + 180;
+      if (reaches(p, m)) {
+        const before = p.hp;
+        hurt(g, m.dmg);
+        if (p.hp < before && m.kind === 3) p.slowUntil = g.now + 3000;
+        if (p.hp < before && m.kind === 7) p.burnUntil = g.now + 3000;
+      } else say(g, (m.x + 0.5) * T, m.y * T, "miss", "#a59c8e", 500);
+      continue;
+    }
+    if (m.windupUntil) continue;
     if (reaches(p, m)) {
       m.lost = 0;
-      if (g.now >= m.nextHit) {
-        m.nextHit = g.now + 1100;
-        m.lungeUntil = g.now + 180;
-        hurt(g, m.dmg);
-        if (m.kind === 3) p.slowUntil = g.now + 3000;
-        if (m.kind === 7) p.burnUntil = g.now + 3000;
-      }
+      if (g.now >= m.nextHit) m.windupUntil = g.now + WINDUP_MS;
       continue;
     }
     if (g.now < m.nextMove) continue;
@@ -1190,7 +1360,30 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
     return;
   }
   const grounded = !isOpen(g, p.x, p.y + 1) || g.ladders.has(p.y * g.W + p.x);
-  if (!grounded && g.now >= p.hangUntil) return tweenTo(p, p.x, p.y + 1, FALL_MS);
+  if (!grounded && g.now >= p.hangUntil) {
+    p.fell++;
+    return tweenTo(p, p.x, p.y + 1, FALL_MS);
+  }
+  if (grounded && p.fell > 0) {
+    p.landAt = g.now;
+    dust(g, p.x + 0.5, p.y + 1, Math.min(12, 3 + p.fell * 2));
+    if (p.fell >= 3) {
+      g.sfx.push("land");
+      shake(g, 2, 120);
+    }
+    p.fell = 0;
+  }
+  if (p.hp < max * LOW_HP && g.now >= p.nextSweat && !g.asleep) {
+    p.nextSweat = g.now + SWEAT_MS;
+    g.parts.push({
+      x: (p.x + 0.5 + p.face * 0.25) * T,
+      y: (p.y - 1.4) * T,
+      vx: -p.face * 0.5,
+      vy: -1.1,
+      life: 500,
+      color: "#8fd3ff",
+    });
+  }
   if (!g.asleep) act(g, keys, aim, grounded);
 }
 

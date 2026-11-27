@@ -421,6 +421,23 @@ export const dwarfOnly = (tiers: Tiers) => {
   return out;
 };
 
+export const dwarfParts = (tiers: Tiers) => {
+  const full = dwarfOnly(tiers);
+  const base = raster(DWARF, BASE);
+  const body = full.map((r) => [...r]);
+  const left = blank(30, 20);
+  const right = blank(30, 20);
+  for (let y = 17; y < 20; y++)
+    for (let x = 0; x < 16; x++) {
+      if (!base[y][x] || full[y][x] !== base[y][x]) continue;
+      (x < 8 ? left : right)[y][x] = full[y][x];
+      body[y][x] = null;
+    }
+  const blink = body.map((r) => [...r]);
+  for (const x of [6, 9]) if (blink[6][x] === BASE.x) blink[6][x] = BASE.S;
+  return { body, blink, left, right };
+};
+
 export const sleeper = (tiers: Tiers): Grid => {
   const g = dwarfOnly(tiers).map((r) => [...r]);
   for (const x of [6, 9]) g[6][x] = BASE.S;
