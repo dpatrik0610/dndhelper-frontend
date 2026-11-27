@@ -1515,3 +1515,23 @@
   font-weight: 600;
   color: #ff6a4a;
 }
+
+.talkBtn {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  font-family: var(--pixel);
+  animation: menuIn 160ms ease-out;
+}
+
+.talkBtn kbd {
+  padding: 0 5px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  font-size: 0.75rem;
+}

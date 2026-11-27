@@ -116,6 +116,15 @@ const MENU_TITLES: Record<Station, [string, string]> = {
   trader: ["Moss, the wandering peddler", "He'll be gone by the next trip."],
 };
 
+const TALK: Record<Station, string> = {
+  lift: "Call the lift",
+  forge: "Use the forge",
+  market: "Talk to Hesk",
+  shop: "Visit Pip",
+  house: "Go inside",
+  trader: "Talk to Moss",
+};
+
 const petSetup = (config: MiningConfig, key: string | null) => {
   const i = key ? config.pets.findIndex((p) => p.key === key) : -1;
   return i >= 0 ? { art: PET_ART[i], key: config.pets[i].key } : null;
@@ -159,6 +168,7 @@ export function PlayView({
   }, []);
   const [depth, setDepth] = useState(trip?.depth ?? 0);
   const [near, setNear] = useState<Station | null>(null);
+  const [opened, setOpened] = useState<Station | null>(null);
   const [asleep, setAsleep] = useState(false);
   const [busy, setBusy] = useState(false);
   const [reading, setReading] = useState(0);
@@ -535,6 +545,7 @@ export function PlayView({
       if (n !== wasNear) {
         wasNear = n;
         setNear(n);
+        setOpened(null);
       }
       if (g.asleep !== wasAsleep) {
         wasAsleep = g.asleep;
@@ -593,11 +604,14 @@ export function PlayView({
         setReading(0);
         setReport(null);
         setPanel(null);
+        setOpened(null);
       }
       if (e.code === "KeyT" && !g.camp) placeTorch(g);
       if (e.code === "KeyF") castBolt(g, g.hover);
       if (e.code === "KeyQ") drinkPotion(g);
-      if (e.code === "KeyE" && !g.camp && stationAt(g) === "lift") void finishRef.current(false);
+      const station = e.code === "KeyE" ? stationAt(g) : null;
+      if (station && !g.camp && station === "lift") void finishRef.current(false);
+      else if (station) setOpened((cur) => (cur === station ? null : station));
     };
     const kd = onKey(true);
     const ku = onKey(false);
@@ -925,7 +939,7 @@ export function PlayView({
                   <kbd>Q</kbd> drink a potion
                 </span>
                 <span>
-                  <kbd>E</kbd> ride the lift up
+                  <kbd>E</kbd> talk, use, or ride the lift up
                 </span>
                 <span>
                   <kbd>Esc</kbd> close panels
@@ -946,13 +960,19 @@ export function PlayView({
           )}
         </div>
 
-        {near && !(report && !trip) && (
+        {near && !(report && !trip) && !(trip && near === "lift") && opened !== near && (
+          <button type="button" className={`glass-btn-primary ${styles.talkBtn}`} onClick={() => setOpened(near)}>
+            <kbd>E</kbd> {TALK[near]}
+          </button>
+        )}
+
+        {near && !(report && !trip) && ((trip && near === "lift") || opened === near) && (
           <section className={styles.menu} aria-label={MENU_TITLES[near][0]}>
             {trip && near === "trader" ? (
               <>
                 <div className={styles.menuHead}>
                   <h2 className={styles.h2}>{MENU_TITLES.trader[0]}</h2>
-                  <span className={styles.dim}>{MENU_TITLES.trader[1]} Walk away to close.</span>
+                  <span className={styles.dim}>{MENU_TITLES.trader[1]} Press E or walk away to close.</span>
                 </div>
                 <TraderMenu
                   config={config}
@@ -983,7 +1003,7 @@ export function PlayView({
               <>
                 <div className={styles.menuHead}>
                   <h2 className={styles.h2}>{MENU_TITLES[near][0]}</h2>
-                  <span className={styles.dim}>{MENU_TITLES[near][1]} Walk away to close.</span>
+                  <span className={styles.dim}>{MENU_TITLES[near][1]} Press E or walk away to close.</span>
                 </div>
                 {near === "lift" && <LiftMenu {...props} />}
                 {near === "forge" && <ForgeMenu {...props} />}
