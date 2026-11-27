@@ -40,6 +40,21 @@ const LEVELS: Partial<Record<Sfx, number>> = { break: 0.35 };
 const MUSIC_VOLUME = 0.3;
 const MIN_GAP_MS = 45;
 const PREFS_KEY = "deepdelve-sound";
+const MUSIC_ID = "deepdelve-music";
+
+const existingTrack = () =>
+  typeof document === "undefined" ? null : (document.getElementById(MUSIC_ID) as HTMLAudioElement | null);
+
+function musicTrack() {
+  const found = existingTrack();
+  if (found) return found;
+  const el = new Audio(DIR + MUSIC);
+  el.id = MUSIC_ID;
+  el.loop = true;
+  el.volume = MUSIC_VOLUME;
+  document.body.append(el);
+  return el;
+}
 
 export type SoundPrefs = { music: boolean; sfx: boolean };
 
@@ -54,14 +69,13 @@ export function loadPrefs(): SoundPrefs {
 let prefs = loadPrefs();
 const bank = new Map<Sfx, HTMLAudioElement>();
 const lastPlayed = new Map<Sfx, number>();
-let track: HTMLAudioElement | null = null;
 let wantMusic = false;
 
 export function setPrefs(next: SoundPrefs) {
   prefs = next;
   localStorage.setItem(PREFS_KEY, JSON.stringify(next));
   if (wantMusic && next.music) startMusic();
-  else track?.pause();
+  else existingTrack()?.pause();
 }
 
 function sample(name: Sfx) {
@@ -79,16 +93,13 @@ export function preloadSounds() {
 }
 
 const onVisibility = () => {
-  if (document.hidden) track?.pause();
+  if (document.hidden) existingTrack()?.pause();
   else if (wantMusic) startMusic();
 };
 
 if (typeof document !== "undefined") document.addEventListener("visibilitychange", onVisibility);
 
-import.meta.hot?.dispose(() => {
-  document.removeEventListener("visibilitychange", onVisibility);
-  track?.pause();
-});
+import.meta.hot?.dispose(() => document.removeEventListener("visibilitychange", onVisibility));
 
 export function play(name: Sfx) {
   if (!prefs.sfx) return;
@@ -107,15 +118,11 @@ export function play(name: Sfx) {
 export function startMusic() {
   wantMusic = true;
   if (!prefs.music) return;
-  if (!track) {
-    track = new Audio(DIR + MUSIC);
-    track.loop = true;
-    track.volume = MUSIC_VOLUME;
-  }
+  const track = musicTrack();
   if (track.paused) void track.play().catch(() => undefined);
 }
 
 export function stopMusic() {
   wantMusic = false;
-  track?.pause();
+  existingTrack()?.pause();
 }
