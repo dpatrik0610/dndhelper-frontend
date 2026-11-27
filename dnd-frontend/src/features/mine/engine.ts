@@ -2,7 +2,7 @@ import type { Break, DepthInfo, MiningStats, MiningTrip } from "@services/mining
 import { itemName, SETS, type Tiers } from "./art/gear";
 import { canSolo, type PetArt } from "./art/pets";
 import { ENEMIES, type Enemy } from "./art/world";
-import { compact, critHit } from "./mine";
+import { compact, critHit, dashHit } from "./mine";
 import type { Sfx } from "./sound";
 
 export const T = 16;
@@ -45,8 +45,7 @@ export const encumbered = (g: Game) => !g.camp && g.carried > g.stats.capacity;
 export const burden = (g: Game) =>
   encumbered(g) ? Math.min(1, (g.carried - g.stats.capacity) / Math.max(1, hardCap(g) - g.stats.capacity)) : 0;
 const DASH_MS = 110;
-export const DASH_COOLDOWN_MS = 1200;
-export const dashCooldown = (g: Game) => (g.stats.setBonus === 5 ? 800 : DASH_COOLDOWN_MS);
+export const dashCooldown = (g: Game) => g.stats.dashMs;
 export const dashColor = (set: number) => (set > 0 ? (SETS[set].gem ?? SETS[set].base) : "#9fe6ff");
 const IFRAME_MS = 380;
 const COMBO_MS = 1100;
@@ -1161,7 +1160,7 @@ function attack(g: Game, m: Monster) {
 function dashStrike(g: Game, m: Monster) {
   const set = g.stats.setBonus;
   const crit = set === 10;
-  const dmg = (crit ? critHit(g.stats) : g.stats.power) * (set === 9 ? 2 : 1);
+  const dmg = dashHit(g.stats);
   say(g, (m.x + 0.5) * T, m.y * T - 12, "Dash strike!", dashColor(set), 600);
   damageMonster(g, m, Math.round(dmg), crit, null, set === 7);
   if (m.hp <= 0) {
@@ -1182,7 +1181,7 @@ function dash(g: Game, keys: Keys) {
   const set = g.stats.setBonus;
   const d = keys.left ? -1 : keys.right ? 1 : p.face;
   let to = p.x;
-  for (let k = 1; k <= (set === 8 ? 3 : 2); k++) {
+  for (let k = 1; k <= g.stats.dashTiles; k++) {
     const nx = p.x + d * k;
     if (!isOpen(g, nx, p.y) || !isOpen(g, nx, p.y - 1)) break;
     to = nx;

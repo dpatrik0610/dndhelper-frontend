@@ -7,6 +7,8 @@ import {
   descend,
   dig,
   dropOre,
+  equipGear,
+  followPet,
   faint,
   getMiningState,
   mossSell,
@@ -762,6 +764,15 @@ export function PlayView({
     setPile(s.trip.pile ?? {});
   };
 
+  const swap = async (work: () => Promise<MiningState>) => {
+    try {
+      onState(await work());
+      play("buy");
+    } catch (e) {
+      showNotification({ title: "Can't swap that", message: (e as Error).message, color: "red" });
+    }
+  };
+
   const carried = total(satchel);
   const full = carried > state.stats.capacity;
   const maxCarry = Math.floor(state.stats.capacity * config.overload);
@@ -1109,6 +1120,8 @@ export function PlayView({
           torchesLeft={trip ? torchCap - torchesUsed : state.torchStock}
           inMine={!!trip}
           boltRef={boltRef}
+          onEquip={(slot, tier) => swap(() => equipGear(slot, tier))}
+          onPet={(key) => swap(() => followPet(key))}
           top={
             <div className={styles.hpDock}>
               <span className={styles.hudLabel}>Health</span>

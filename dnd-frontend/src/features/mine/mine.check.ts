@@ -69,6 +69,9 @@ const stats: MiningStats = {
   setBonus: 0,
   armor: 0,
   chainCrit: false,
+  dashMult: 1,
+  dashTiles: 2,
+  dashMs: 1200,
 };
 const depth: DepthInfo = {
   number: 1,
@@ -560,16 +563,25 @@ const hp3 = passed.hp;
 run(rusher, 50, { right: true, dash: true });
 assert.equal(rusher.player.x, 5, "the dash carries you through the monster");
 assert.equal(hp3 - passed.hp, stats.power, "and strikes it on the way");
+const kicker = newGame(-1);
+kicker.monsters = [];
+kicker.stats = { ...stats, dashMult: 2 };
+const kicked = foe(kicker, 1, 4, 2);
+kicked.moveMs = 1e9;
+kicked.nextMove = 1e12;
+const hp4 = kicked.hp;
+run(kicker, 50, { right: true, dash: true });
+assert.equal(hp4 - kicked.hp, stats.power * 2, "boots scale the dash strike");
 
 const feather = newGame(-1);
 feather.monsters = [];
-feather.stats = { ...stats, setBonus: 8 };
+feather.stats = { ...stats, setBonus: 8, dashTiles: 3 };
 run(feather, 50, { right: true, dash: true });
-assert.equal(feather.player.x, 6, "Mithral dashes three tiles");
+assert.equal(feather.player.x, 6, "a longer dash stat carries you further");
 const quick = newGame(-1);
-quick.stats = { ...stats, setBonus: 5 };
+quick.stats = { ...stats, dashMs: 800 };
 run(quick, 50, { right: true, dash: true });
-assert.ok(quick.player.nextDash - quick.now <= 800, "Darksteel recharges the dash faster");
+assert.ok(quick.player.nextDash - quick.now <= 800, "faster boots recharge the dash sooner");
 console.log("combat ok");
 
 assert.equal(pickSwing(1e9, false).active, false, "a resting pick isn't swinging");

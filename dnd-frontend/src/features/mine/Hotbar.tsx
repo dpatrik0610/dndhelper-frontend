@@ -1,11 +1,11 @@
-import type { CSSProperties, ReactNode, RefObject } from "react";
+import { type CSSProperties, type ReactNode, type RefObject, useState } from "react";
 import { Tooltip } from "@mantine/core";
-import type { MiningConfig, MiningState } from "@services/miningService";
-import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
+import type { MiningConfig, MiningState, SlotKey } from "@services/miningService";
+import { GEAR_SLOTS, type GearSlot, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { type Grid, tint } from "./art/pixel";
 import { potionSprite, scrollSprite } from "./art/world";
-import { SET_BONUSES, statLine, tiersOf } from "./mine";
+import { DASH_PERKS, forgedOf, SET_BONUSES, statLine, tiersOf } from "./mine";
 import { TORCH } from "./render";
 import { Sprite } from "./Sprite";
 import styles from "./Mine.module.css";
@@ -21,6 +21,8 @@ function Square({
   label,
   className,
   glow,
+  active,
+  onClick,
   children,
 }: {
   grid: Grid;
@@ -31,6 +33,8 @@ function Square({
   label: string;
   className?: string;
   glow?: string;
+  active?: boolean;
+  onClick?: () => void;
   children?: ReactNode;
 }) {
   return (
@@ -44,7 +48,10 @@ function Square({
           className={`${styles.hotSlot} ${empty ? styles.hotEmpty : ""} ${className ?? ""}`}
           aria-label={label}
           style={glow ? ({ "--glow": glow } as CSSProperties) : undefined}
+          data-on={active || undefined}
+          aria-pressed={onClick ? !!active : undefined}
           onMouseDown={(e) => e.preventDefault()}
+          onClick={onClick}
         >
           <Sprite grid={empty ? ghost(grid) : grid} scale={2} />
           {count && <span className={styles.hotCount}>{count}</span>}
@@ -63,6 +70,8 @@ export function Hotbar({
   inMine,
   boltRef,
   top,
+  onEquip,
+  onPet,
 }: {
   config: MiningConfig;
   state: MiningState;
@@ -71,13 +80,82 @@ export function Hotbar({
   inMine: boolean;
   boltRef: RefObject<HTMLDivElement | null>;
   top?: ReactNode;
+  onEquip: (slot: SlotKey, tier: number) => Promise<void>;
+  onPet: (key: string | null) => Promise<void>;
 }) {
   const tiers = tiersOf(state);
+  const forged = forgedOf(state);
   const set = state.stats.setBonus;
   const petIdx = state.pet ? config.pets.findIndex((p) => p.key === state.pet) : -1;
+  const [picking, setPicking] = useState<GearSlot | "pet" | null>(null);
+  const [busy, setBusy] = useState(false);
+  const pick = inMine ? null : picking;
+  const toggle = (p: GearSlot | "pet") => setPicking((cur) => (cur === p ? null : p));
+  const choose = async (work: () => Promise<void>) => {
+    setBusy(true);
+    try {
+      await work();
+      setPicking(null);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const swapTip = inMine ? "Swap gear at camp." : "Click to swap to another piece you've forged.";
+  const ownedPets = config.pets.map((p, i) => ({ ...p, i })).filter((p) => state.pets.includes(p.key));
+
   return (
     <div className={styles.hotbar}>
       {top}
+      {pick && pick !== "pet" && (
+        <div className={styles.hotPicker}>
+          <span className={styles.hotPickLabel}>Wear</span>
+          {(config.slots.find((x) => x.key === pick)?.tiers ?? []).slice(0, forged[pick] + 1).map(({ tier: t }) => (
+            <button
+              key={t}
+              type="button"
+              className={styles.hotSlot}
+              data-on={t === tiers[pick] || undefined}
+              aria-pressed={t === tiers[pick]}
+              title={`${itemName(pick, t)}, tier ${t}`}
+              disabled={busy}
+              onClick={() => void choose(() => onEquip(pick, t))}
+            >
+              <Sprite grid={item(pick, t)} scale={2} label={itemName(pick, t)} />
+              <span className={styles.hotCount}>{t}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {pick === "pet" && (
+        <div className={styles.hotPicker}>
+          <span className={styles.hotPickLabel}>Follow</span>
+          <button
+            type="button"
+            className={`${styles.hotSlot} ${styles.hotEmpty}`}
+            data-on={petIdx < 0 || undefined}
+            aria-pressed={petIdx < 0}
+            title="No pet"
+            disabled={busy}
+            onClick={() => void choose(() => onPet(null))}
+          >
+            <Sprite grid={ghost(petSprite(PET_ART[0]))} scale={2} label="No pet" />
+          </button>
+          {ownedPets.map((p) => (
+            <button
+              key={p.key}
+              type="button"
+              className={styles.hotSlot}
+              data-on={p.key === state.pet || undefined}
+              aria-pressed={p.key === state.pet}
+              title={p.name}
+              disabled={busy}
+              onClick={() => void choose(() => onPet(p.key))}
+            >
+              <Sprite grid={petSprite(PET_ART[p.i])} scale={2} label={p.name} />
+            </button>
+          ))}
+        </div>
+      )}
       <div className={styles.hotRow}>
         <div className={styles.hotGroup}>
           {GEAR_SLOTS.map((slot) => {
@@ -88,11 +166,14 @@ export function Hotbar({
                 key={slot}
                 grid={item(slot, t)}
                 label={`${itemName(slot, t)}, tier ${t}`}
-                className={set > 0 ? styles.hotSet : t >= 6 ? styles.hotGlow : ""}
+                className={set > 0 && slot !== "boots" ? styles.hotSet : t >= 6 ? styles.hotGlow : ""}
                 glow={t >= 6 ? (SETS[t].accent ?? SETS[t].base) : undefined}
+                active={pick === slot}
+                onClick={inMine ? undefined : () => toggle(slot)}
                 tip={
                   <>
                     <b>{itemName(slot, t)}</b> · tier {t} / 10
+                    {forged[slot] > t && ` (forged up to ${forged[slot]})`}
                     <br />
                     {info?.stat}
                     <br />
@@ -100,11 +181,13 @@ export function Hotbar({
                     <br />
                     {set > 0 ? (
                       <>
-                        Set bonus <b>{SET_BONUSES[set][0]}</b>: {SET_BONUSES[set][1]}
+                        Set bonus <b>{SET_BONUSES[set][0]}</b>: {SET_BONUSES[set][1]} {DASH_PERKS[set]}
                       </>
                     ) : (
-                      "Wear all five pieces of one metal for a set bonus."
+                      "Wear all five pieces of one metal (boots don't count) for a set bonus."
                     )}
+                    <br />
+                    {swapTip}
                   </>
                 }
               />
@@ -172,16 +255,26 @@ export function Hotbar({
             grid={petSprite(PET_ART[Math.max(0, petIdx)])}
             empty={petIdx < 0}
             label={petIdx >= 0 ? config.pets[petIdx].name : "No pet"}
+            active={pick === "pet"}
+            onClick={inMine || !state.pets.length ? undefined : () => toggle("pet")}
             tip={
-              petIdx >= 0 ? (
-                <>
-                  <b>{config.pets[petIdx].name}</b> · {PET_ART[petIdx].does}
-                </>
-              ) : (
-                <>
-                  <b>No pet yet</b> · Pip sells them at camp.
-                </>
-              )
+              <>
+                {petIdx >= 0 ? (
+                  <>
+                    <b>{config.pets[petIdx].name}</b> · {PET_ART[petIdx].does}
+                  </>
+                ) : (
+                  <>
+                    <b>No pet following</b> · Pip sells them at camp.
+                  </>
+                )}
+                {state.pets.length > 0 && (
+                  <>
+                    <br />
+                    {inMine ? "Swap pets at camp." : "Click to pick who follows you."}
+                  </>
+                )}
+              </>
             }
           />
         </div>

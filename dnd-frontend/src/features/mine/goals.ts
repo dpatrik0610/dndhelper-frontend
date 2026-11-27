@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import type { MiningConfig, MiningState, OreCounts } from "@services/miningService";
 import { itemName } from "./art/gear";
-import { canAfford, discounted } from "./mine";
+import { canAfford, discounted, forgedOf } from "./mine";
 
 export type GoalKind = "gear" | "forge" | "pet";
 export interface Goal {
@@ -16,7 +16,7 @@ export function goalsFor(config: MiningConfig, state: MiningState): Goal[] {
   const forge = config.forges[state.forgeLevel - 1];
   const out: Goal[] = [];
   for (const slot of config.slots) {
-    const next = slot.tiers[(state.gear[slot.key] ?? 0) + 1];
+    const next = slot.tiers[(forgedOf(state)[slot.key] ?? 0) + 1];
     if (next?.cost && next.tier <= forge.maxTier)
       out.push({
         id: `gear:${slot.key}`,

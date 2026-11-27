@@ -1,8 +1,9 @@
 import { blank, blit, type Grid, mix, raster, ramp, rotateCW } from "./pixel";
 
-export type GearSlot = "pickaxe" | "gauntlets" | "helm" | "charm" | "satchel";
+export type GearSlot = "pickaxe" | "gauntlets" | "helm" | "charm" | "satchel" | "boots";
 export type Tiers = Record<GearSlot, number>;
-export const GEAR_SLOTS: GearSlot[] = ["pickaxe", "gauntlets", "helm", "charm", "satchel"];
+export const GEAR_SLOTS: GearSlot[] = ["pickaxe", "gauntlets", "helm", "charm", "satchel", "boots"];
+export const SET_SLOTS: GearSlot[] = ["pickaxe", "gauntlets", "helm", "charm", "satchel"];
 
 type Detail = { from: number; shape: number; rows: Record<number, string> };
 type DollSlot = "helm" | "gauntlets" | "satchel" | "charm";
@@ -577,6 +578,62 @@ const G: Record<GearSlot, string[][]> = {
       "................",
     ],
   ],
+  boots: [
+    [
+      "................",
+      "................",
+      "....oooooo......",
+      "....ohllmo......",
+      "....ohlmmo......",
+      "....olmmdo......",
+      "....okKkko......",
+      "....olmmdo......",
+      "....olmmdo......",
+      "....olmmdoooo...",
+      "...oolmmmmmddo..",
+      "...ohllmmmmmddo.",
+      "...olmmmmmmmmdo.",
+      "...oddddddddddo.",
+      "...oooooooooooo.",
+      "................",
+    ],
+    [
+      "................",
+      "...a......a.....",
+      "...aoooooooa....",
+      "....ohllmmo.....",
+      "....ohlmmdo.....",
+      "....olmmdo......",
+      "....oAgGAo......",
+      "....olmmdo......",
+      "....olmmdo......",
+      "....olmmdoooo...",
+      "...oolmmmmmddo..",
+      "...ohllmmmmmddo.",
+      "...olmAmmmAmmdo.",
+      "...oddddddddddo.",
+      "...oaooaooaooao.",
+      "................",
+    ],
+    [
+      ".a..............",
+      ".aa.............",
+      "..aaoooooo......",
+      "...aohllmo......",
+      "..aaohlmmo......",
+      "...aolmmdo......",
+      "....oAgGAo......",
+      "....olmmdo......",
+      "....olmmdo......",
+      "....olmmdoooo...",
+      "...oolmmmmmddo..",
+      "...ohllmmGmmddo.",
+      "...olmAmmmAmmdo.",
+      "...oddddddddddo.",
+      "...oAooAooAooAo.",
+      "....A..A..A..A..",
+    ],
+  ],
 };
 
 const DETAILS: Record<GearSlot, Detail[]> = {
@@ -605,6 +662,10 @@ const DETAILS: Record<GearSlot, Detail[]> = {
     { from: 2, shape: 0, rows: { 9: "..h.........h", 12: "..l.........l" } },
     { from: 4, shape: 0, rows: { 9: ".......hd", 10: ".......hd", 11: ".......hd" } },
     { from: 5, shape: 0, rows: { 2: ".....uUUUu", 3: "....uUuuuUu" } },
+  ],
+  boots: [
+    { from: 2, shape: 0, rows: { 11: "...ohll..h..h" } },
+    { from: 4, shape: 0, rows: { 6: "....okgGko" } },
   ],
 };
 
@@ -697,7 +758,7 @@ export const SETS: {
     name: "Scrapper's Kit",
     base: "#8b4a2b",
     gem: null,
-    perSlot: { gauntlets: "#b5a58a", helm: "#8a5a36", charm: "#8f8c86", satchel: "#a88d5e" },
+    perSlot: { gauntlets: "#b5a58a", helm: "#8a5a36", charm: "#8f8c86", satchel: "#a88d5e", boots: "#6b4423" },
   },
   { tier: 1, name: "Copper", base: "#c8743a", gem: null },
   { tier: 2, name: "Iron", base: "#8a9099", gem: null },
@@ -717,14 +778,16 @@ const ITEM_NAMES: Record<GearSlot, [string, string]> = {
   helm: ["Candle Cap", "Lantern Helm"],
   charm: ["Lucky Pebble", "Strike Charm"],
   satchel: ["Torn Sack", "Satchel"],
+  boots: ["Worn Shoes", "Boots"],
 };
 
 const PICK_SHAPES = [0, 0, 0, 2, 2, 2, 1, 4, 5, 3, 6];
 export const pickShape = (tier: number) => PICK_SHAPES[tier];
 const shapeOf = (tier: number) => Math.max(0, tier - 5);
+const bootShape = (tier: number) => (tier >= 8 ? 2 : tier >= 6 ? 1 : 0);
 
 const detailed = (slot: GearSlot, tier: number) => {
-  const shape = slot === "pickaxe" ? pickShape(tier) : shapeOf(tier);
+  const shape = slot === "pickaxe" ? pickShape(tier) : slot === "boots" ? bootShape(tier) : shapeOf(tier);
   const g = G[slot][shape].map((r) => [...r]);
   for (const d of DETAILS[slot])
     if (d.shape === shape && tier >= d.from)
@@ -754,7 +817,7 @@ const overlay = (spec: (string | number)[], pal: Record<string, string>) =>
 
 export const fullSet = (tiers: Tiers) => {
   const t = tiers.pickaxe;
-  return t >= 6 && GEAR_SLOTS.every((s) => tiers[s] === t) ? t : 0;
+  return t >= 6 && SET_SLOTS.every((s) => tiers[s] === t) ? t : 0;
 };
 
 const tunicFor = (tiers: Tiers) => {
@@ -764,9 +827,22 @@ const tunicFor = (tiers: Tiers) => {
   return { ...BASE, u: r.d, U: r.m, k: mix(r.o, "#5a3a22", 0.4), K: r.d };
 };
 
+const dwarfBase = (tiers: Tiers) => {
+  const g = raster(DWARF, tunicFor(tiers));
+  const t = tiers.boots ?? 0;
+  if (!t) return g;
+  const pal = paletteFor("boots", t);
+  for (let y = 17; y < 20; y++)
+    DWARF[y].split("").forEach((ch, x) => {
+      if (ch === "k") g[y][x] = pal.m;
+      else if (ch === "K") g[y][x] = pal.a;
+    });
+  return g;
+};
+
 export const dwarfOnly = (tiers: Tiers) => {
   const out = blank(30, 20);
-  blit(out, raster(DWARF, tunicFor(tiers)), 0, 0);
+  blit(out, dwarfBase(tiers), 0, 0);
   for (const slot of ["gauntlets", "satchel", "charm", "helm"] as DollSlot[]) {
     const t = tiers[slot];
     const o = overlay(DOLL[slot][shapeOf(t)], paletteFor(slot, t));
@@ -777,7 +853,7 @@ export const dwarfOnly = (tiers: Tiers) => {
 
 export const dwarfParts = (tiers: Tiers) => {
   const full = dwarfOnly(tiers);
-  const base = raster(DWARF, tunicFor(tiers));
+  const base = dwarfBase(tiers);
   const body = full.map((r) => [...r]);
   const left = blank(30, 20);
   const right = blank(30, 20);

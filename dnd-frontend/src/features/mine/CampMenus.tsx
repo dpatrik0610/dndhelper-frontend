@@ -24,7 +24,7 @@ import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { chartSprite, ENEMIES, oilSprite, potionSprite, scrollSprite } from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
-import { canAfford, compact, discounted, statRows, tiersOf } from "./mine";
+import { canAfford, compact, discounted, forgedOf, statRows } from "./mine";
 import { oreIcon, TORCH } from "./render";
 import { play, type Sfx } from "./sound";
 import { Sprite } from "./Sprite";
@@ -361,7 +361,7 @@ export function LiftMenu({ config, state, onState }: MenuProps) {
 
 export function ForgeMenu({ config, state, onState }: MenuProps) {
   const { busy, run } = useRun(onState);
-  const tiers = tiersOf(state);
+  const tiers = forgedOf(state);
   const forge = config.forges[state.forgeLevel - 1];
   const nextForge = config.forges[state.forgeLevel];
   return (

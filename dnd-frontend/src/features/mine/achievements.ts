@@ -1,4 +1,5 @@
 import type { MiningConfig, MiningState } from "@services/miningService";
+import { forgedOf } from "./mine";
 
 export interface AchCtx {
   config: MiningConfig;
@@ -155,7 +156,7 @@ const FIXED: Achievement[] = [
   one("mimicwake-1", "Treasure", "😬", "It Has Teeth", "Wake a chest mimic.", feat("mimicWake")),
 
   one("firebolt", "Camp", "📕", "Spark of Genius", "Learn Firebolt from the trader.", (c) => +c.state.firebolt),
-  ...tiers("gear", "Camp", "⚒️", (c) => Math.max(0, ...Object.values(c.state.gear).map((t) => t ?? 0)), [
+  ...tiers("gear", "Camp", "⚒️", (c) => Math.max(0, ...Object.values(forgedOf(c.state))), [
     [3, "Apprentice Smith", "Forge any gear to tier 3."],
     [6, "Journeyman Smith", "Forge any gear to tier 6."],
   ]),
@@ -205,7 +206,7 @@ export function achievementsFor(config: MiningConfig): Achievement[] {
       "🏆",
       `Perfect ${s.noun}`,
       `Forge the finest ${s.noun.toLowerCase()} there is: ${s.tiers[s.tiers.length - 1].name}.`,
-      (c) => c.state.gear[s.key] ?? 0,
+      (c) => forgedOf(c.state)[s.key] ?? 0,
       s.tiers.length - 1,
     ),
   );

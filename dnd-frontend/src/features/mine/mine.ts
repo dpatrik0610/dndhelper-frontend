@@ -43,6 +43,8 @@ export const statLine = (slot: SlotKey, s: MiningStats) => {
       return `${Math.round(s.critZone * 100)}% crit chance · ×${s.critMult} crit · +${Math.round(s.luck * 100)}% luck${s.chainCrit ? " · crits spark into the next block" : ""}`;
     case "satchel":
       return `×${s.yield} ore per block · carries ${s.capacity}`;
+    case "boots":
+      return `dash hits ×${s.dashMult} · ${s.dashTiles} tiles · recharges in ${(s.dashMs / 1000).toFixed(1)} s`;
   }
 };
 
@@ -93,7 +95,18 @@ const STAT_SPECS: Record<SlotKey, { stats: StatSpec[]; perks: Perk[] }> = {
     ],
     perks: [],
   },
+  boots: {
+    stats: [
+      { label: "Dash hit", value: (s) => s.dashMult, show: (n) => `×${n}`, gain: (d) => `+${+d.toFixed(2)}×` },
+      { label: "Dash distance", value: (s) => s.dashTiles, show: (n) => `${n} tiles` },
+      { label: "Dash recharge", value: (s) => -s.dashMs, show: (n) => `${(-n / 1000).toFixed(1)} s`, gain: (d) => `-${(d / 1000).toFixed(2)} s` },
+    ],
+    perks: [],
+  },
 };
+
+export const dashHit = (s: MiningStats) =>
+  Math.round((s.setBonus === 10 ? critHit(s) : s.power * (s.setBonus === 9 ? 2 : 1)) * s.dashMult);
 
 export const characterSheet = (s: MiningStats) =>
   GEAR_SLOTS.map((slot) => ({
@@ -167,13 +180,16 @@ export const DASH_PERKS = [
   "Dash shoulder-checks monsters a tile back.",
   "Dash scatters gold glitter.",
   "Dash frosts monsters, slowing them for 2 s.",
-  "Dash recharges in 0.8 s instead of 1.2 s.",
+  "Dash recharges 0.4 s faster.",
   "Dash staggers monsters for half a second.",
   "Dash sets monsters burning, and its fire hurts mimics.",
-  "Dash carries you 3 tiles instead of 2.",
+  "Dash carries you 1 tile further.",
   "Dash hits twice as hard, staggers and knocks monsters 2 tiles back.",
   "Every dash hit is a crit, trailing stardust.",
 ];
 
 export const tiersOf = (state: MiningState): Tiers =>
   Object.fromEntries(GEAR_SLOTS.map((s) => [s, state.gear[s] ?? 0])) as Tiers;
+
+export const forgedOf = (state: MiningState): Tiers =>
+  Object.fromEntries(GEAR_SLOTS.map((s) => [s, Math.max(state.forged?.[s] ?? 0, state.gear[s] ?? 0)])) as Tiers;

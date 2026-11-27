@@ -22,6 +22,9 @@ export interface MiningStats {
   setBonus: number;
   armor: number;
   chainCrit: boolean;
+  dashMult: number;
+  dashTiles: number;
+  dashMs: number;
 }
 
 export interface Ore {
@@ -120,6 +123,7 @@ export interface MiningState {
   ores: OreCounts;
   mined: OreCounts;
   gear: Partial<Record<SlotKey, number>>;
+  forged?: Partial<Record<SlotKey, number>>;
   forgeLevel: number;
   pets: string[];
   pet: string | null;
@@ -208,5 +212,6 @@ export const dropOre = (key: string, amount: number) => post<MiningState>(`/drop
 export const mossSell = (key: string, amount: number) => post<MiningState>(`/moss/sell/${key}/${amount}`);
 export const upgradeHouse = () => post<MiningState>("/house");
 export const recordFeats = (req: { feats?: Record<string, number>; unlocked?: string[] }) => post<MiningState>("/feats", req);
+export const equipGear = (slot: SlotKey, tier: number) => post<MiningState>(`/equip/${slot}/${tier}`);
 export const followPet = (key: string | null) => post<MiningState>(`/follow/${key ?? "none"}`);
 export const getMiningScoreboard = () => apiClient<MiningScore[]>("/mining/scoreboard");
