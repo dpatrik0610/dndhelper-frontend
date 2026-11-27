@@ -20,7 +20,7 @@ import {
   step,
   takePending,
 } from "./engine";
-import { canAfford, discounted, hpColor, statRows } from "./mine";
+import { canAfford, discounted, hpColor, renownBreakdown, statRows } from "./mine";
 import { pickSwing } from "./render";
 import { dreamsFor, engraving, PAGES, SEALS, wickLines } from "./story";
 
@@ -654,3 +654,13 @@ console.log("forge ok");
   assert.equal(statRows("helm", base, base).rows.some((r) => r.label === "Ore sense"), false);
 }
 console.log("stat rows ok");
+{
+  const ores = [
+    { key: "copper", name: "Copper", value: 1 },
+    { key: "tin", name: "Tin", value: 2 },
+    { key: "iron", name: "Iron", value: 3 },
+  ] as never;
+  const rows = renownBreakdown(ores, { copper: 10, iron: 5 });
+  assert.deepEqual(rows.map((r) => [r.name, r.total, r.index]), [["Iron", 15, 2], ["Copper", 10, 0]]);
+}
+console.log("renown breakdown ok");

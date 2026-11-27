@@ -1,4 +1,4 @@
-import type { MiningState, MiningStats, OreCounts, SlotKey } from "@services/miningService";
+import type { MiningConfig, MiningState, MiningStats, OreCounts, SlotKey } from "@services/miningService";
 import { GEAR_SLOTS, type Tiers } from "./art/gear";
 
 export const critHit = (s: MiningStats) => Math.round(s.power * s.critMult);
@@ -13,6 +13,12 @@ export const total = (counts: OreCounts) => Object.values(counts).reduce((a, b) 
 
 const compactFmt = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
 export const compact = (n: number) => (n < 10_000 ? Math.round(n).toLocaleString("en") : compactFmt.format(n));
+
+export const renownBreakdown = (ores: MiningConfig["ores"], mined: OreCounts) =>
+  ores
+    .map((o, index) => ({ index, name: o.name, count: mined[o.key] ?? 0, value: o.value, total: (mined[o.key] ?? 0) * o.value }))
+    .filter((r) => r.count > 0)
+    .sort((a, b) => b.total - a.total);
 
 export const statLine = (slot: SlotKey, s: MiningStats) => {
   switch (slot) {
