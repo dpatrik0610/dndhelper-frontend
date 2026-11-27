@@ -21,6 +21,7 @@ import {
   MIMIC,
   lightRadius,
   OPEN,
+  ORE0,
   oreOf,
   PET_LIGHT,
   SEAL,
