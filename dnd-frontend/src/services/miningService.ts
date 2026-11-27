@@ -19,6 +19,8 @@ export interface MiningStats {
   wide: boolean;
   vein: boolean;
   oreSight: number;
+  setBonus: number;
+  armor: number;
 }
 
 export interface Ore {

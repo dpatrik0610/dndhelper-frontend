@@ -51,6 +51,8 @@ const stats: MiningStats = {
   wide: false,
   vein: false,
   oreSight: 0,
+  setBonus: 0,
+  armor: 0,
 };
 const depth: DepthInfo = {
   number: 1,
@@ -382,4 +384,55 @@ for (const b of seam.pending.breaks) {
   );
   seamReplay[b.i] = OPEN;
 }
+const tank = newGame(-1);
+tank.stats = { ...stats, armor: 0.3 };
+const hp0 = tank.player.hp;
+tank.monsters = [];
+const brute = foe(tank, 1, 4, 2);
+brute.dmg = 10;
+run(tank, 100);
+assert.equal(hp0 - tank.player.hp <= 7 && hp0 - tank.player.hp > 0, true, "armor softens hits");
+
+const burner = newGame(-1);
+burner.monsters = [];
+burner.stats = { ...stats, setBonus: 7, critZone: 1 };
+const torch = foe(burner, 1, 4, 2);
+torch.hp = torch.maxHp = 400;
+torch.dmg = 0;
+run(burner, 100, {}, { x: 4.5, y: 2.5 });
+const afterHit = torch.hp;
+assert.ok(torch.burnUntil > burner.now, "a Silver Flame crit sets it burning");
+run(burner, 1900);
+assert.ok(torch.hp < afterHit, "and the fire keeps biting after the swing");
+
+const slow = newGame(-1);
+slow.monsters = [];
+slow.stats = { ...stats, setBonus: 6, critZone: 1 };
+const snail = foe(slow, 1, 4, 2);
+snail.hp = snail.maxHp = 400;
+snail.dmg = 0;
+run(slow, 100, {}, { x: 4.5, y: 2.5 });
+assert.ok(snail.slowUntil > slow.now, "a Starbiter crit slows it");
+
+const hopper = newGame(
+  -1,
+  ["############", "#..........#", "#..........#", "#..........#", "#..........#", "#0000000000#", "############"],
+  4,
+);
+hopper.monsters = [];
+hopper.nextSpawn = 1e12;
+hopper.stats = { ...stats, setBonus: 8 };
+minY = 99;
+run(hopper, 400, { jump: true });
+assert.equal(minY, 2, "Featherlight jumps two blocks high");
+const plain = newGame(
+  -1,
+  ["############", "#..........#", "#..........#", "#..........#", "#..........#", "#0000000000#", "############"],
+  4,
+);
+plain.monsters = [];
+plain.nextSpawn = 1e12;
+minY = 99;
+run(plain, 400, { jump: true });
+assert.equal(minY, 3, "everyone else jumps one");
 console.log("mine.check ok");

@@ -32,7 +32,7 @@ import {
   T,
   takePending,
 } from "./engine";
-import { compact, statLine, tiersOf, total } from "./mine";
+import { compact, SET_BONUSES, statLine, tiersOf, total } from "./mine";
 import { createRenderer, oreIcon } from "./render";
 import { Sprite } from "./Sprite";
 import { dreamsFor, engraving } from "./story";
@@ -458,6 +458,13 @@ export function PlayView({
               );
             })}
           </div>
+          {state.stats.setBonus > 0 ? (
+            <span className={styles.setBonus}>
+              <b>{SET_BONUSES[state.stats.setBonus][0]}</b> · {SET_BONUSES[state.stats.setBonus][1]}
+            </span>
+          ) : (
+            <span className={styles.dim}>Wear all five pieces of one metal for a set bonus.</span>
+          )}
         </div>
 
         <div className={styles.block}>

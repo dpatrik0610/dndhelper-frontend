@@ -44,5 +44,19 @@ export const hpColor = (frac: number) => {
   return `rgb(${r},${g},${b})`;
 };
 
+export const SET_BONUSES: [string, string][] = [
+  ["", ""],
+  ["Warm Glow", "Half a block more light."],
+  ["Ironclad", "Monsters hit you 15% softer."],
+  ["Gilded", "10% more luck for rare ore."],
+  ["Fey-Bane", "5% more crit chance."],
+  ["Never-Rust", "Swings come a little faster."],
+  ["Starbiter", "Crits on monsters slow them down for 3 seconds."],
+  ["Silver Flame", "Crits on monsters set them burning. Fire hurts mimics too."],
+  ["Featherlight", "Jump two blocks high."],
+  ["Unbreaking", "Monsters hit you 30% softer."],
+  ["Fallen Star", "Half again as much ore from every block, and a full block more light."],
+];
+
 export const tiersOf = (state: MiningState): Tiers =>
   Object.fromEntries(GEAR_SLOTS.map((s) => [s, state.gear[s] ?? 0])) as Tiers;

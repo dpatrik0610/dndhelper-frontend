@@ -63,6 +63,9 @@ export interface Monster extends Tween {
   leaving: number;
   lost: number;
   cell: number;
+  slowUntil: number;
+  burnUntil: number;
+  nextBurn: number;
 }
 
 export interface PetActor {
@@ -542,6 +545,9 @@ function addMonster(g: Game, kind: number, x: number, y: number) {
     leaving: 0,
     lost: 0,
     cell: y * g.W + x,
+    slowUntil: 0,
+    burnUntil: 0,
+    nextBurn: 0,
   };
   g.monsters.push(m);
   return m;
@@ -686,11 +692,21 @@ function attack(g: Game, m: Monster) {
     burst(g, (m.x + 0.5) * T, m.y * T, "#fff3b0", 10, 2);
   }
   damageMonster(g, m, Math.round(dmg), crit, null);
+  if (!crit || m.hp <= 0) return;
+  const set = g.stats.setBonus;
+  if (set === 6) {
+    m.slowUntil = g.now + 3000;
+    burst(g, (m.x + 0.5) * T, m.y * T, "#f0a8ff", 8, 1.4);
+  }
+  if (set === 7) {
+    m.burnUntil = g.now + 3000;
+    m.nextBurn = g.now + 600;
+  }
 }
 
 function hurt(g: Game, amount: number, color = "#ff5a4a") {
   const p = g.player;
-  const dmg = Math.max(1, Math.round(amount * (g.pet?.key === "owlbear" ? 0.7 : 1)));
+  const dmg = Math.max(1, Math.round(amount * (g.pet?.key === "owlbear" ? 0.7 : 1) * (1 - g.stats.armor)));
   p.hp -= dmg;
   p.lastHurt = g.now;
   p.hurtUntil = g.now + 160;
@@ -796,8 +812,9 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
   if (keys.attack && g.now >= p.nextSwing) return attackToward(g, { x: x + 0.5 + p.face, y: y - 0.5 });
 
   if (keys.jump && grounded && isOpen(g, x, y - 2)) {
-    p.hangUntil = g.now + JUMP_MS + HANG_MS;
-    return tweenTo(p, x, y - 1, JUMP_MS);
+    const high = g.stats.setBonus === 8 && isOpen(g, x, y - 3);
+    p.hangUntil = g.now + JUMP_MS * (high ? 1.6 : 1) + HANG_MS;
+    return tweenTo(p, x, y - (high ? 2 : 1), JUMP_MS * (high ? 1.6 : 1));
   }
 
   if (keys.left || keys.right) {
@@ -949,6 +966,12 @@ function stepMonsters(g: Game, dt: number) {
   for (const m of g.monsters) {
     m.t += dt;
     if (m.leaving) continue;
+    if (g.now < m.burnUntil && g.now >= m.nextBurn && m.hp > 0) {
+      m.nextBurn = g.now + 600;
+      burst(g, (m.x + 0.5) * T, (m.y + 0.5) * T, "#ff8a2a", 5, 1.2);
+      damageMonster(g, m, Math.max(1, Math.round(g.stats.power * 0.4)), false, null, true);
+    }
+    if (m.hp <= 0) continue;
     if (g.asleep) {
       m.leaving = g.now;
       continue;
@@ -973,7 +996,7 @@ function stepMonsters(g: Game, dt: number) {
       continue;
     }
     if (g.now < m.nextMove) continue;
-    m.nextMove = g.now + m.moveMs;
+    m.nextMove = g.now + m.moveMs * (g.now < m.slowUntil ? 2 : 1);
     if (spec.tunnel) {
       const occupied = (x: number, y: number) => g.monsters.some((o) => o !== m && o.x === x && o.y === y);
       const dx = Math.sign(p.x - m.x);
