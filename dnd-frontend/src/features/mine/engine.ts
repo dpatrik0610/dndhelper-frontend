@@ -135,6 +135,7 @@ export interface GameSetup {
   forgeLevel: number;
   firebolt: boolean;
   potions: number;
+  maxTorches: number;
 }
 
 export interface Game extends GameSetup {
@@ -418,6 +419,7 @@ export function placeTorch(g: Game) {
   const p = g.player;
   const i = (p.y - 1) * g.W + p.x;
   if (g.torches.has(i) || !isOpen(g, p.x, p.y - 1)) return;
+  if (g.torches.size >= g.maxTorches) return sayOnce(g, "torches", "Out of torches for this trip.", "#ff8a6a");
   g.torches.add(i);
   g.pending.torches.push(i);
   g.sfx.push("torch");

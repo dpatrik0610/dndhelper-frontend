@@ -69,7 +69,7 @@ export function NextGoal({ config, state, satchel }: { config: MiningConfig; sta
   const ready = canAfford(goal.cost, ores);
   const banked = canAfford(goal.cost, state.ores);
   return (
-    <div className={styles.block}>
+    <div className={`${styles.block} ${styles.goalCard}`}>
       <div className={styles.barHead}>
         <span className={styles.eyebrow}>{goal.id === pinned ? "Tracking" : "Next goal"}</span>
         <span className={styles.barText}>{Math.floor(progress(goal.cost, ores) * 100)}%</span>

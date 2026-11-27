@@ -92,7 +92,7 @@ const torchGrid = (f: boolean): Grid => {
     [null, w, w, null],
   ];
 };
-const TORCH = [torchGrid(false), torchGrid(true)];
+export const TORCH = [torchGrid(false), torchGrid(true)];
 
 const sealTile = (depth: number): Grid => {
   const g = stoneTile(depth, 99).map((row) => row.map((c) => mix(c as string, "#000000", 0.35)));

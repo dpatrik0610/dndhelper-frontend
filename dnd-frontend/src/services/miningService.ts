@@ -84,6 +84,7 @@ export interface MiningConfig {
   liftX: number;
   liftY: number;
   foxNeeds: number;
+  maxTorches: number;
 }
 
 export interface MiningTrip {

@@ -11,6 +11,7 @@ import {
   type Keys,
   MIMIC_KIND,
   OPEN,
+  placeTorch,
   stationAt,
   step,
   takePending,
@@ -83,6 +84,7 @@ const newGame = (pet: number, map = rows, liftY = 2) =>
       forgeLevel: 1,
       firebolt: false,
       potions: 0,
+      maxTorches: 2,
       pet:
         pet >= 0
           ? {
@@ -472,3 +474,11 @@ lode.sfx.length = 0;
 run(lode, 4000, {}, { x: 7.5, y: 1.5 });
 assert.ok(lode.richFound && lode.sfx.includes("motherlode"), "the first ore broken in it calls out the motherlode");
 console.log("rewards ok");
+
+const lamps = newGame(-1, cave);
+for (const x of [2, 3, 5]) {
+  lamps.player.x = x;
+  placeTorch(lamps);
+}
+assert.equal(lamps.torches.size, 2, "torches stop at the trip's limit");
+assert.ok(lamps.warned.has("torches"), "and the dwarf says he's out");

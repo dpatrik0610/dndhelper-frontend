@@ -128,41 +128,6 @@
   flex: 1;
 }
 
-.gear {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 4px;
-}
-
-.gearSlot {
-  display: grid;
-  place-items: center;
-  aspect-ratio: 1;
-  border-radius: 4px;
-  border: 1px solid #3a3346;
-  background: #15121c;
-  padding: 2px;
-  cursor: help;
-}
-
-.gearSlot canvas {
-  max-width: 100%;
-  height: auto !important;
-}
-
-.gearSlot[data-tier="8"],
-.gearSlot[data-tier="9"],
-.gearSlot[data-tier="10"] {
-  border-color: var(--gold);
-  box-shadow: 0 0 10px -3px var(--gold);
-}
-
-.gearSlot:hover,
-.gearSlot:focus-visible {
-  border-color: var(--torch);
-  outline: none;
-}
-
 .barHead {
   display: flex;
   justify-content: space-between;
@@ -277,7 +242,7 @@
 .napNote {
   position: absolute;
   left: 50%;
-  bottom: 70px;
+  bottom: 110px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -295,19 +260,6 @@
 .textLayer {
   pointer-events: none;
   image-rendering: auto;
-}
-
-.petLine {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 8px;
-  align-items: start;
-}
-
-.petLine div {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
 }
 
 .keys {
@@ -714,7 +666,7 @@
 .sealNote {
   position: absolute;
   left: 50%;
-  bottom: 18px;
+  bottom: 96px;
   transform: translateX(-50%);
   max-width: min(560px, calc(100% - 20px));
   display: flex;
@@ -743,37 +695,6 @@
   font-style: italic;
   font-size: 0.9375rem;
   line-height: 1.4;
-}
-
-.beltItem {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.beltItem kbd {
-  padding: 0 5px;
-  border: 1px solid var(--theme-border-subtle);
-  border-bottom-width: 2px;
-  border-radius: 4px;
-  font-family: var(--pixel);
-  font-size: 0.75rem;
-}
-
-.boltFill {
-  height: 100%;
-  background: linear-gradient(#ffd23f, #ff6a2a);
-}
-
-.setBonus {
-  font-size: 0.8125rem;
-  color: #f1e6cf;
-}
-
-.setBonus b {
-  font-family: var(--pixel);
-  font-weight: 600;
-  color: var(--gold);
 }
 
 .btnRow {
@@ -809,4 +730,118 @@
 
 .freshOre {
   color: #ffe066;
+}
+
+.goalCard {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  background: linear-gradient(160deg, rgba(255, 215, 122, 0.1), rgba(255, 215, 122, 0.02));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.4);
+}
+
+.hotbar {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 6px 10px 8px;
+  border-radius: 8px;
+  border: 1px solid #3a3346;
+  background: var(--hud);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+}
+
+.hotGroup {
+  display: flex;
+  gap: 4px;
+}
+
+.hotCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.hotKey {
+  min-width: 18px;
+  padding: 0 4px;
+  border: 1px solid var(--theme-border-subtle);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font-family: var(--pixel);
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--torch);
+}
+
+.hotKey[data-empty] {
+  visibility: hidden;
+}
+
+.hotSlot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 2px;
+  overflow: hidden;
+  border-radius: 4px;
+  border: 1px solid #3a3346;
+  background: #15121c;
+  cursor: help;
+}
+
+.hotSlot canvas {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto !important;
+  height: auto !important;
+}
+
+.hotSlot:hover,
+.hotSlot:focus-visible {
+  border-color: var(--torch);
+  outline: none;
+}
+
+.hotEmpty canvas {
+  opacity: 0.35;
+}
+
+.hotGlow {
+  border-color: var(--gold);
+  box-shadow: 0 0 10px -3px var(--gold);
+}
+
+.hotSet {
+  border-color: var(--gold);
+  box-shadow: 0 0 12px -2px var(--gold);
+}
+
+.hotCount {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-family: var(--pixel);
+  font-size: 0.6875rem;
+  color: #f1e6cf;
+  text-shadow: 1px 1px 0 #000;
+  font-variant-numeric: tabular-nums;
+}
+
+.hotCooldown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+  background: rgba(3, 2, 6, 0.7);
+  pointer-events: none;
 }

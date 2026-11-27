@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Switch, Tooltip } from "@mantine/core";
+import { Switch } from "@mantine/core";
 import { showNotification } from "@components/Notification/Notification";
 import {
   ascend,
@@ -11,9 +11,7 @@ import {
   type MiningState,
   type OreCounts,
 } from "@services/miningService";
-import { GEAR_SLOTS, item, itemName } from "./art/gear";
-import { PET_ART, petSprite } from "./art/pets";
-import { potionSprite, scrollSprite } from "./art/world";
+import { PET_ART } from "./art/pets";
 import {
   ForgeMenu,
   LedgerPage,
@@ -43,9 +41,10 @@ import {
   takePending,
 } from "./engine";
 import { goalsFor, newlyAffordable } from "./goals";
-import { compact, SET_BONUSES, statLine, tiersOf, total } from "./mine";
+import { compact, tiersOf, total } from "./mine";
 import { createRenderer, oreIcon } from "./render";
 import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
+import { Hotbar } from "./Hotbar";
 import { Sprite } from "./Sprite";
 import { dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
@@ -120,6 +119,7 @@ export function PlayView({
   const [potions, setPotions] = useState(state.potions);
   const [dream, setDream] = useState("");
   const [report, setReport] = useState<TripReport | null>(null);
+  const [torchesUsed, setTorchesUsed] = useState(trip?.torches.length ?? 0);
   const boltRef = useRef<HTMLDivElement>(null);
   const [sound, setSound] = useState<SoundPrefs>(loadPrefs);
 
@@ -292,6 +292,7 @@ export function PlayView({
         forgeLevel: s.forgeLevel,
         firebolt: s.firebolt,
         potions: s.potions,
+        maxTorches: config.maxTorches,
       },
       trip,
       performance.now(),
@@ -325,6 +326,7 @@ export function PlayView({
     let fainted = false;
     let wasSeal = false;
     let wasPotions = g.potions;
+    let wasTorches = -1;
     const frame = (now: number) => {
       acc += Math.min(100, now - last);
       last = now;
@@ -357,7 +359,12 @@ export function PlayView({
         wasPotions = g.potions;
         setPotions(g.potions);
       }
-      if (boltRef.current) boltRef.current.style.width = `${Math.min(1, 1 - (g.nextBolt - g.now) / BOLT_MS) * 100}%`;
+      if (boltRef.current) boltRef.current.style.height = `${Math.max(0, (g.nextBolt - g.now) / BOLT_MS) * 100}%`;
+      const used = g.camp ? 0 : g.torches.size;
+      if (used !== wasTorches) {
+        wasTorches = used;
+        setTorchesUsed(used);
+      }
       const sn = !g.camp && g.player.y >= g.H - 4;
       if (sn !== wasSeal) {
         wasSeal = sn;
@@ -452,8 +459,6 @@ export function PlayView({
     });
   };
 
-  const tiers = tiersOf(state);
-  const petIdx = state.pet ? config.pets.findIndex((p) => p.key === state.pet) : -1;
   const carried = total(satchel);
   const full = carried >= state.stats.capacity;
   const props = { config, state, onState };
@@ -461,50 +466,6 @@ export function PlayView({
   return (
     <div className={styles.frame}>
       <aside className={styles.side}>
-        <div className={styles.block}>
-          <span className={styles.eyebrow}>Gear</span>
-          <div className={styles.gear}>
-            {GEAR_SLOTS.map((slot) => {
-              const info = config.slots.find((x) => x.key === slot);
-              const t = tiers[slot];
-              return (
-                <Tooltip
-                  key={slot}
-                  multiline
-                  w={240}
-                  withArrow
-                  position="right"
-                  label={
-                    <>
-                      <b>{itemName(slot, t)}</b> · tier {t} / 10
-                      <br />
-                      {info?.stat}
-                      <br />
-                      {info && statLine(slot, info.tiers[t].stats)}
-                    </>
-                  }
-                >
-                  <button
-                    type="button"
-                    className={styles.gearSlot}
-                    data-tier={t}
-                    aria-label={`${itemName(slot, t)}, tier ${t}`}
-                  >
-                    <Sprite grid={item(slot, t)} scale={2} />
-                  </button>
-                </Tooltip>
-              );
-            })}
-          </div>
-          {state.stats.setBonus > 0 ? (
-            <span className={styles.setBonus}>
-              <b>{SET_BONUSES[state.stats.setBonus][0]}</b> · {SET_BONUSES[state.stats.setBonus][1]}
-            </span>
-          ) : (
-            <span className={styles.dim}>Wear all five pieces of one metal for a set bonus.</span>
-          )}
-        </div>
-
         <div className={styles.block}>
           <div className={styles.barHead}>
             <span className={styles.eyebrow}>Health</span>
@@ -514,8 +475,6 @@ export function PlayView({
             <div ref={hpRef} className={styles.hpFill} />
           </div>
         </div>
-
-        <NextGoal config={config} state={state} satchel={trip ? satchel : {}} />
 
         {trip ? (
           <div className={styles.block}>
@@ -636,6 +595,15 @@ export function PlayView({
           </section>
         )}
 
+        <Hotbar
+          config={config}
+          state={state}
+          potions={potions}
+          torchesLeft={config.maxTorches - torchesUsed}
+          inMine={!!trip}
+          boltRef={boltRef}
+        />
+
         {report && !trip && (
           <TripSummary {...props} report={report} onClose={() => setReport(null)} />
         )}
@@ -669,40 +637,7 @@ export function PlayView({
           </span>
         </div>
 
-        {(potions > 0 || state.firebolt) && (
-          <div className={styles.block}>
-            <span className={styles.eyebrow}>Belt</span>
-            <div className={styles.beltItem}>
-              <Sprite grid={potionSprite()} scale={2} label="Healing draught" />
-              <span className={styles.pixel}>× {potions}</span>
-              <kbd>Q</kbd>
-            </div>
-            {state.firebolt && (
-              <div className={styles.beltItem}>
-                <Sprite grid={scrollSprite()} scale={2} label="Firebolt" />
-                <div className={`${styles.bar} ${styles.grow}`}>
-                  <div ref={boltRef} className={styles.boltFill} />
-                </div>
-                <kbd>F</kbd>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className={styles.block}>
-          <span className={styles.eyebrow}>Pet</span>
-          {petIdx >= 0 ? (
-            <div className={styles.petLine}>
-              <Sprite grid={petSprite(PET_ART[petIdx])} scale={2} />
-              <div>
-                <b className={styles.pixel}>{config.pets[petIdx].name}</b>
-                <span className={styles.dim}>{PET_ART[petIdx].does}</span>
-              </div>
-            </div>
-          ) : (
-            <span className={styles.dim}>No pet yet. Pip sells them at camp.</span>
-          )}
-        </div>
+        <NextGoal config={config} state={state} satchel={trip ? satchel : {}} />
 
         <div className={styles.block}>
           <span className={styles.eyebrow}>Sound</span>
