@@ -467,6 +467,26 @@ function settle(g: Game) {
   }
 }
 
+function echoVein(g: Game, from: number, c: number) {
+  const seen = new Set([from]);
+  const queue = [from];
+  const hits: number[] = [];
+  for (let head = 0; head < queue.length && hits.length < 3 && head < 40; head++) {
+    const i = queue[head];
+    for (const j of [i - 1, i + 1, i - g.W, i + g.W]) {
+      if (seen.has(j) || g.map[j] !== c || Math.abs((j % g.W) - (i % g.W)) > 1) continue;
+      seen.add(j);
+      queue.push(j);
+      if (hits.length < 3) hits.push(j);
+    }
+  }
+  const color = g.oreColors[oreOf(c)];
+  for (const j of hits) {
+    crack(g, j, false, true);
+    burst(g, ((j % g.W) + 0.5) * T, (Math.floor(j / g.W) + 0.5) * T, color, 6, 1.4);
+  }
+}
+
 function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
   g.dmg.delete(i);
   g.map[i] = OPEN;
@@ -486,6 +506,7 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
     g.found = g.depth;
   } else if (ore >= 0) {
     burst(g, cx, cy, g.oreColors[ore], 14, 2);
+    if (g.stats.vein) echoVein(g, i, c);
     if (g.carried >= g.stats.capacity) sayOnce(g, "full", "Satchel full! Head back to the lift.", "#ff8a6a");
     else {
       say(g, cx, cy - 6, `+ ${g.oreNames[ore]}`, g.oreColors[ore]);

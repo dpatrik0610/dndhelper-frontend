@@ -49,6 +49,7 @@ const stats: MiningStats = {
   maxDepth: 1,
   reach: 1,
   wide: false,
+  vein: false,
 };
 const depth: DepthInfo = {
   number: 1,
@@ -355,5 +356,29 @@ for (const b of wide.pending.breaks) {
     "every 2x2 break touches open space when the server replays it",
   );
   replay[b.i] = OPEN;
+}
+const seam = newGame(-1, [
+  "############",
+  "#..........#",
+  "#..........#",
+  "#00AAAAA000#",
+  "#0000000000#",
+  "############",
+]);
+seam.monsters = [];
+seam.nextSpawn = 1e12;
+seam.stats = { ...stats, power: 20, vein: true };
+seam.player.x = seam.player.fromX = 3;
+const seamStart = Uint8Array.from(seam.map);
+run(seam, 200, { down: true });
+for (let x = 3; x <= 7; x++) assert.equal(seam.map[3 * W + x], OPEN, `a starmetal pick cracks the whole vein (${x})`);
+assert.equal(seam.map[3 * W + 8], seamStart[3 * W + 8], "but not the stone around it");
+const seamReplay = Uint8Array.from(seamStart);
+for (const b of seam.pending.breaks) {
+  assert.ok(
+    [b.i - 1, b.i + 1, b.i - W, b.i + W].some((k) => seamReplay[k] === OPEN),
+    "vein breaks stay server-valid",
+  );
+  seamReplay[b.i] = OPEN;
 }
 console.log("mine.check ok");

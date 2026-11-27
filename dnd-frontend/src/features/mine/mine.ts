@@ -17,7 +17,7 @@ export const compact = (n: number) => (n < 10_000 ? Math.round(n).toLocaleString
 export const statLine = (slot: SlotKey, s: MiningStats) => {
   switch (slot) {
     case "pickaxe":
-      return `${compact(s.power)} damage · breaks through to depth ${s.maxDepth}${s.reach > 1 ? ` · reaches ${s.reach} blocks` : ""}${s.wide ? " · digs 2×2" : ""}`;
+      return `${compact(s.power)} damage · breaks through to depth ${s.maxDepth}${s.reach > 1 ? ` · reaches ${s.reach} blocks` : ""}${s.wide ? " · digs 2×2" : ""}${s.vein ? " · cracks along whole veins" : ""}`;
     case "gauntlets":
       return `${(1000 / s.swingMs).toFixed(2)} swings / sec`;
     case "helm":

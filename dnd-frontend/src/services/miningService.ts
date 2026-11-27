@@ -17,6 +17,7 @@ export interface MiningStats {
   maxDepth: number;
   reach: number;
   wide: boolean;
+  vein: boolean;
 }
 
 export interface Ore {
