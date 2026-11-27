@@ -1,6 +1,7 @@
 // Self-check: bunx esbuild src/features/mine/mine.check.ts --bundle --platform=node --tsconfig=tsconfig.app.json | node
 import assert from "node:assert/strict";
 import type { DepthInfo, MiningStats } from "@services/miningService";
+import { FORGE_H, FORGE_LEVELS, FORGE_W, forgeSprite } from "./art/forge";
 import { PET_ART } from "./art/pets";
 import { ENEMIES } from "./art/world";
 import {
@@ -630,3 +631,13 @@ cool.player.y = cool.player.fromY = 2;
 run(cool, 1100);
 assert.equal(cool.player.hp, cool.stats.maxHp, "ordinary ore is safe to stand on");
 console.log("hot ore ok");
+
+assert.equal(FORGE_LEVELS.length, 10, "one forge level per gear tier");
+for (const L of FORGE_LEVELS)
+  for (const flick of [false, true]) {
+    const s = forgeSprite(L.level, flick, 7);
+    assert.equal(s.length, FORGE_H, `forge ${L.level} height`);
+    assert.ok(s.every((r) => r.length === FORGE_W), `forge ${L.level} width`);
+    assert.ok(!s.flat().includes("#ff00ff"), `forge ${L.level} palette`);
+  }
+console.log("forge ok");

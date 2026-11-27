@@ -1,6 +1,6 @@
 import { dwarfParts, type GearSlot, item, SETS, sleeper } from "./art/gear";
 import { type Grid, hex, mix, tint } from "./art/pixel";
-import { forgeSprite } from "./art/forge";
+import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
 import { chestSprite, cracks, enemySprite, oreTile, stoneTile, traderSprite } from "./art/world";
 import {
@@ -285,6 +285,25 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
 
   const label = (text: string, x: number, y: number, on: boolean) => write(text, x, y, on ? "#ffb347" : "#a59c8e");
 
+  const forgeSmoke = (lv: number, cx: number, top: number, now: number) => {
+    const fire = FORGE_LEVELS[lv - 1].look.fire;
+    if (lv >= 3 && lv <= 7)
+      for (let k = 0; k < 4; k++) {
+        const p = (now / 2200 + k / 4) % 1;
+        ctx.globalAlpha = (1 - p) * 0.35;
+        ctx.fillStyle = "#968c96";
+        ctx.fillRect(Math.round(cx - 1 + Math.sin(p * 5 + k) * 2 + p * 8), Math.round(top + FORGE_SPOTS.chimney - 2 - p * 22), 2, 2);
+      }
+    for (let k = 0; k < Math.max(0, lv - 3); k++) {
+      const p = (now / (1100 + k * 173) + k * 0.37) % 1;
+      ctx.globalAlpha = 1 - p;
+      ctx.fillStyle = p < 0.5 ? fire[2] : fire[1];
+      const y = lv >= 3 ? top + FORGE_SPOTS.chimney - 2 : top + FORGE_SPOTS.mouth;
+      ctx.fillRect(Math.round(cx + Math.sin(p * 7 + k * 2) * 4), Math.round(y - p * 18), 1, 1);
+    }
+    ctx.globalAlpha = 1;
+  };
+
   const campBackdrop = (g: Game, ox: number, oy: number, VW: number, VH: number, flick: boolean) => {
     const gy = CAMP.ground * T + oy;
     const near = stationAt(g);
@@ -335,10 +354,14 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     draw(wick, hx - 16, gy - wick.length - (Math.floor(g.now / 900) % 5 === 0 ? 1 : 0));
     if (near === "lift") write("Old Wick", hx - 10, gy - wick.length - 4, "#ffb347", 1, 6);
 
-    const forge = cached(`forge${g.forgeLevel}${flick}`, () => forgeSprite(g.forgeLevel, flick));
-    const fx = CAMP.forge * T + 8 + ox - 16;
-    draw(forge, fx, gy - forge.length);
-    label("Forge", fx + 16, gy - forge.length - 4, near === "forge");
+    const lv = g.forgeLevel;
+    const ft = lv >= 7 ? Math.floor(g.now / 150) % 20 : 0;
+    const forge = cached(`forge${lv}${flick}${ft}`, () => forgeSprite(lv, flick, ft));
+    const fx = CAMP.forge * T + ox - FORGE_SPOTS.x + 1;
+    const fy = gy - FORGE_H;
+    draw(forge, fx, fy);
+    forgeSmoke(lv, fx + FORGE_SPOTS.x, fy, g.now);
+    label("Forge", fx + FORGE_SPOTS.x, fy + (lv >= 3 ? FORGE_SPOTS.chimney - 8 : FORGE_SPOTS.hood - 4), near === "forge");
 
     const sx = CAMP.shop * T + 8 + ox - 16;
     ctx.fillStyle = "#6b4423";
@@ -769,7 +792,16 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     ctx.globalCompositeOperation = "lighter";
     for (const i of g.torches)
       glow(ctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, 2.5 * T, [255, 150, 60], 0.18);
-    if (g.camp) glow(ctx, CAMP.forge * T + ox, CAMP.ground * T + oy - 10, 40, [255, 150, 60], flick ? 0.26 : 0.2);
+    if (g.camp) {
+      const lv = g.forgeLevel;
+      const fire = hex(FORGE_LEVELS[lv - 1].look.fire[1]);
+      const cx = CAMP.forge * T + ox + 1;
+      const top = CAMP.ground * T + oy - FORGE_H;
+      glow(ctx, cx, top + FORGE_SPOTS.mouth + 3, 36 + lv * 2, fire, flick ? 0.26 : 0.2);
+      if (lv >= 7) glow(ctx, cx, CAMP.ground * T + oy, 24, [255, 90, 30], 0.18);
+      if (lv >= 8) glow(ctx, cx, top + FORGE_SPOTS.chimney - 2, 16, fire, flick ? 0.3 : 0.22);
+      if (lv >= 10) glow(ctx, cx, top + 3, 20 + Math.sin(g.now / 300) * 3, [215, 225, 255], 0.4);
+    }
     else glow(ctx, lx + 23, ly - 20, 2.5 * T, [255, 150, 60], 0.16);
     glow(ctx, headX, headY - 4, 22, [255, 215, 130], 0.1);
     for (const b of g.bolts) glow(ctx, b.x * T + ox, b.y * T + oy, 14, [255, 140, 50], 0.45);

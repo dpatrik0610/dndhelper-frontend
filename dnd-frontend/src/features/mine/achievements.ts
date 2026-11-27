@@ -154,7 +154,7 @@ const FIXED: Achievement[] = [
     [6, "Journeyman Smith", "Forge any gear to tier 6."],
   ]),
   ...tiers("forge", "Camp", "🏭", (c) => c.state.forgeLevel, [
-    [5, "Starfall Smith", "Raise the forge to its final form."],
+    [10, "Starheart Smith", "Raise the forge to its final form."],
   ]),
   ...tiers("pets", "Camp", "🐕", (c) => c.state.pets.length, [
     [1, "Best Friend", "Adopt a pet."],
