@@ -530,3 +530,33 @@ assert.ok(pickSwing(100, false).trail, "the strike leaves a motion trail");
 assert.ok(pickSwing(105, true).off > pickSwing(105, false).off, "a smash swings further");
 assert.ok(pickSwing(105, true).spark && !pickSwing(105, false).spark, "and sparks");
 console.log("pick ok");
+
+const wardHall = newGame(-1);
+wardHall.monsters = [];
+wardHall.nextSpawn = 1e12;
+wardHall.player.x = wardHall.player.fromX = 4;
+wardHall.stats = { ...wardHall.stats, critZone: 0, swingMs: 100 };
+const raider = foe(wardHall, 6, 5, 2);
+raider.ward = 2;
+raider.poise = 2;
+raider.stunUntil = 0;
+raider.moveMs = 1e9;
+raider.nextMove = 1e12;
+raider.nextHit = 1e12;
+const raiderHp = raider.hp;
+run(wardHall, 250, { attack: true });
+assert.equal(raider.hp, raiderHp, "a warded duergar shrugs off the pickaxe");
+wardHall.firebolt = true;
+for (let k = 0; k < 2; k++) {
+  wardHall.nextBolt = 0;
+  castBolt(wardHall, { x: raider.x + 0.5, y: raider.y + 0.5 });
+  run(wardHall, 300);
+}
+assert.equal(raider.ward, 0, "two firebolts shatter the ward");
+assert.equal(raider.hp, raiderHp, "the bolts spent themselves on the ward");
+raider.stunUntil = 0;
+raider.x = raider.fromX = 5;
+run(wardHall, 20, { attack: true });
+assert.ok(raider.hp < raiderHp, "then steel bites");
+assert.equal(raider.x, 5, "a tough monster shrugs off one plain hit without staggering");
+console.log("ward ok");

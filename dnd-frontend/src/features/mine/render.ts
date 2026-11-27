@@ -477,6 +477,21 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       const coil = winding ? (p.x < m.x ? 2 : -2) : 0;
       const shownBody = winding && Math.floor(g.now / 70) % 2 ? cached(`ew${m.kind}`, () => tint(sprite, "#ff8a6a")) : body;
       draw(shownBody, mp.x * T + (T - w) / 2 + ox + lunge + coil, (mp.y + 1) * T - h + oy + bob, p.x > m.x, hidden * fade);
+      if (m.ward > 0) {
+        const cx = mp.x * T + T / 2 + ox;
+        const cy = (mp.y + 1) * T - h / 2 + oy + bob;
+        const r = Math.max(w, h) / 2 + 3 + Math.sin(g.now / 180);
+        ctx.globalAlpha = hidden * fade;
+        ctx.fillStyle = "rgba(120,210,255,0.12)";
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = m.ward > 1 ? "rgba(160,230,255,0.85)" : "rgba(160,230,255,0.45)";
+        ctx.setLineDash(m.ward > 1 ? [] : [3, 2]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.globalAlpha = 1;
+      }
       if (winding) write("!", (mp.x + 0.5) * T + ox, (mp.y + 1) * T - h + oy - 6, "#ff5a4a", 1, 11);
       if (m.hp < m.maxHp && hidden === 1) {
         const bx = mp.x * T + ox;

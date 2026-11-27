@@ -125,7 +125,7 @@ export const ENEMIES: Enemy[] = [
     name: "Duergar Raider",
     depth: 6,
     threat: "Bruiser",
-    does: "A grey dwarf who fades from sight, then steps out swinging hard. Watch for the shimmer.",
+    does: "A grey dwarf who fades from sight, then steps out swinging hard. A psionic ward turns steel until two firebolts shatter it.",
     duergar: true,
   },
   {

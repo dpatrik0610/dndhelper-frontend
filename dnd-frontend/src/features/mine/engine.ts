@@ -34,7 +34,6 @@ const SPAWN_GRACE_MS = 12_000;
 const DASH_MS = 110;
 const DASH_COOLDOWN_MS = 1200;
 const IFRAME_MS = 380;
-const WINDUP_MS = 360;
 const COMBO_MS = 1100;
 const HITSTUN_MS = 260;
 const SWEAT_MS = 1100;
@@ -101,6 +100,8 @@ export interface Monster extends Tween {
   burnUntil: number;
   nextBurn: number;
   windupUntil: number;
+  ward: number;
+  poise: number;
 }
 
 export interface PetActor {
@@ -210,18 +211,20 @@ export interface Game extends GameSetup {
   shakeMag: number;
 }
 
-const KINDS: Record<number, { hp: number; dmg: number; move: number; tunnel?: boolean }> = {
-  1: { hp: 0.8, dmg: 0.8, move: 380 },
-  2: { hp: 1, dmg: 0.9, move: 520, tunnel: true },
-  3: { hp: 0.9, dmg: 1, move: 340 },
-  4: { hp: 1, dmg: 1, move: 480 },
-  5: { hp: 0.8, dmg: 1, move: 300 },
-  6: { hp: 1.2, dmg: 1.3, move: 420 },
-  7: { hp: 1, dmg: 1, move: 400 },
-  8: { hp: 1.4, dmg: 1.6, move: 800 },
-  9: { hp: 1.2, dmg: 1.1, move: 560, tunnel: true },
-  10: { hp: 1.6, dmg: 1.5, move: 520 },
-  11: { hp: 5, dmg: 1.5, move: 430 },
+type Kind = { hp: number; dmg: number; move: number; windup: number; poise: number; ward?: number; tunnel?: boolean };
+
+export const KINDS: Record<number, Kind> = {
+  1: { hp: 0.8, dmg: 0.8, move: 380, windup: 420, poise: 1 },
+  2: { hp: 1, dmg: 0.9, move: 520, windup: 400, poise: 1, tunnel: true },
+  3: { hp: 0.9, dmg: 1, move: 340, windup: 380, poise: 1 },
+  4: { hp: 1.1, dmg: 1, move: 480, windup: 380, poise: 2 },
+  5: { hp: 0.8, dmg: 1, move: 300, windup: 340, poise: 1 },
+  6: { hp: 1.2, dmg: 1.3, move: 420, windup: 340, poise: 2, ward: 2 },
+  7: { hp: 1.1, dmg: 1.1, move: 400, windup: 300, poise: 2 },
+  8: { hp: 1.6, dmg: 1.6, move: 800, windup: 440, poise: 3 },
+  9: { hp: 1.3, dmg: 1.2, move: 560, windup: 300, poise: 2, tunnel: true },
+  10: { hp: 2, dmg: 1.6, move: 520, windup: 320, poise: 3 },
+  11: { hp: 5, dmg: 1.5, move: 430, windup: 360, poise: 99 },
 };
 
 export const PET_LIGHT: Record<string, number> = { moth: 2, wisp: 2.5, fox: 3 };
@@ -700,6 +703,8 @@ function addMonster(g: Game, kind: number, x: number, y: number) {
     burnUntil: 0,
     nextBurn: 0,
     windupUntil: 0,
+    ward: spec.ward ?? 0,
+    poise: spec.poise,
   };
   g.monsters.push(m);
   return m;
@@ -817,6 +822,24 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
     }
     return;
   }
+  if (m.ward > 0) {
+    if (fire) {
+      m.ward--;
+      burst(g, cx, cy + 8, "#9fe6ff", m.ward ? 12 : 30, m.ward ? 1.8 : 3);
+      if (m.ward) say(g, cx, cy - 4, "The ward cracks!", "#9fe6ff", 900);
+      else {
+        say(g, cx, cy - 6, "Ward shattered!", "#9fe6ff", 1300);
+        g.sfx.push("shatter");
+        m.stunUntil = g.now + 700;
+        m.windupUntil = 0;
+      }
+      return;
+    }
+    say(g, cx, cy - 4, "Warded!", "#9fe6ff", 500);
+    g.sfx.push("clang");
+    sayOnce(g, "ward", g.firebolt ? "Its ward turns steel. Break it with firebolt (F)!" : "Its ward turns steel. Only fire breaks it. Run!", "#9fe6ff");
+    return;
+  }
   if (byPet && !canSolo(g.pet?.art.tier ?? 0, g.depth) && m.hp - dmg <= 0) {
     if (m.hp > 1) m.hp = 1;
     else if (!m.petBlocked) {
@@ -881,10 +904,15 @@ function attack(g: Game, m: Monster) {
   } else if (p.combo === 2) say(g, cx + 10, cy - 12, "x2", "#ffe066", 600);
   damageMonster(g, m, Math.round(dmg), crit, null);
   if (crit || heavy || airborne) shake(g, heavy ? 3 : 2, heavy ? 180 : 120);
-  if (m.hp <= 0 || m.kind === MIMIC_KIND) return;
-  m.windupUntil = 0;
-  m.stunUntil = Math.max(m.stunUntil, g.now + HITSTUN_MS * (heavy ? 2 : 1));
-  knockback(g, m, heavy || crit ? 2 : 1);
+  if (m.hp <= 0 || m.kind === MIMIC_KIND || m.ward > 0) return;
+  const poise = KINDS[m.kind].poise;
+  m.poise = (m.poise || poise) - 1;
+  if (crit || heavy || m.poise <= 0) {
+    m.poise = poise;
+    m.windupUntil = 0;
+    m.stunUntil = Math.max(m.stunUntil, g.now + HITSTUN_MS * (heavy ? 2 : 1));
+    knockback(g, m, heavy || crit ? 2 : 1);
+  }
   if (!crit) return;
   const set = g.stats.setBonus;
   if (set === 6) {
@@ -1267,7 +1295,7 @@ function stepMonsters(g: Game, dt: number) {
     if (m.windupUntil) continue;
     if (reaches(p, m)) {
       m.lost = 0;
-      if (g.now >= m.nextHit) m.windupUntil = g.now + WINDUP_MS;
+      if (g.now >= m.nextHit) m.windupUntil = g.now + KINDS[m.kind].windup;
       continue;
     }
     if (g.now < m.nextMove) continue;

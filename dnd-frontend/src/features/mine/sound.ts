@@ -28,6 +28,7 @@ export const SFX = {
   dash: "dash.wav",
   land: "land.wav",
   smash: "smash.wav",
+  shatter: "shatter.wav",
 } as const;
 
 export type Sfx = keyof typeof SFX;
