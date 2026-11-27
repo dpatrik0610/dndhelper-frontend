@@ -848,11 +848,13 @@ export function TraderMenu({
   return (
     <>
       <p className={styles.quote}>{line}</p>
-      <Purse coins={state.coins} />
-      <span className={styles.eyebrow}>Sell from your satchel</span>
-      <span className={styles.dim}>
-        Moss pays {Math.round(config.mossBuys * 100)}% of the camp price, and it lightens your load on the spot.
-      </span>
+      <div className={styles.traderHead}>
+        <Purse coins={state.coins} />
+        <span className={styles.eyebrow}>Sell from your satchel</span>
+        <span className={styles.dim}>
+          Moss pays {Math.round(config.mossBuys * 100)}% of the camp price, and it lightens your load on the spot.
+        </span>
+      </div>
       {carried.length ? (
         <div className={styles.sellList}>
           {carried.map((o) => {

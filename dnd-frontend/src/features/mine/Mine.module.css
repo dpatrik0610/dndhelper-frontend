@@ -1380,6 +1380,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+.traderHead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
 .sellList {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
