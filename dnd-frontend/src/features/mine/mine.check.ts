@@ -14,8 +14,11 @@ import {
   minSwings,
   ORE0,
   OPEN,
+  inTorchlight,
+  lightRadius,
   placeTorch,
   showLoot,
+  TORCH_LIGHT,
   stationAt,
   STONE,
   step,
@@ -678,3 +681,28 @@ console.log("renown breakdown ok");
   assert.match(g.texts[0].text, /Satchel full/);
 }
 console.log("loot popups ok");
+{
+  const g = newGame(-1);
+  const base = lightRadius(g);
+  g.depth = 10;
+  assert.ok(Math.abs(lightRadius(g) - base * 0.6) < 1e-9, "the lantern shrinks to 60% at the bottom");
+  g.depth = 1;
+  assert.ok(!inTorchlight(g, g.liftX, g.liftY), "the lift is no place to heal");
+  const far = { x: g.W - 2, y: g.H - 2 };
+  assert.ok(!inTorchlight(g, far.x, far.y), "far tunnels are dark");
+  g.torches.add((far.y - TORCH_LIGHT) * g.W + far.x);
+  assert.ok(inTorchlight(g, far.x, far.y), "a torch lights its radius");
+}
+console.log("torchlight ok");
+{
+  const g = newGame(-1);
+  const p = g.player;
+  p.hp = 1;
+  p.lastHurt = -1e9;
+  step(g, 1000, none, null);
+  assert.equal(p.hp, 1, "no healing in the dark");
+  g.torches.add((p.y - 1) * g.W + p.x);
+  step(g, 1000, none, null);
+  assert.ok(p.hp > 1, "torchlight mends wounds");
+}
+console.log("torch healing ok");

@@ -23,6 +23,7 @@ import {
   LEDGER,
   MIMIC,
   lightRadius,
+  TORCH_LIGHT,
   OPEN,
   ORE0,
   oreOf,
@@ -776,7 +777,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       dctx.fillStyle = "rgb(3,2,6)";
       dctx.fillRect(0, 0, VW, VH);
       dctx.globalCompositeOperation = "destination-out";
-      dctx.fillStyle = "rgba(0,0,0,0.22)";
+      dctx.fillStyle = "rgba(0,0,0,0.13)";
       for (let r = r0; r <= r1; r++)
         for (let c = c0; c <= c1; c++) {
           const i = r * g.W + c;
@@ -786,7 +787,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       glow(dctx, headX, headY, (lightRadius(g) + (g.asleep ? -0.8 : 0)) * T + fl, black, 1);
       glow(dctx, lx + 23, ly - 20, 3 * T + fl, black, 0.9);
       for (const i of g.torches)
-        glow(dctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, 2.5 * T + fl, black, 0.92);
+        glow(dctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, TORCH_LIGHT * T + fl, black, 0.95);
       for (const b of g.bolts) glow(dctx, b.x * T + ox, b.y * T + oy, 1.8 * T, black, 0.95);
       if (g.trader >= 0) {
         const tx = (g.trader % g.W) * T + ox + 15;
@@ -834,7 +835,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
 
     ctx.globalCompositeOperation = "lighter";
     for (const i of g.torches)
-      glow(ctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, 2.5 * T, [255, 150, 60], 0.18);
+      glow(ctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, TORCH_LIGHT * T, [255, 150, 60], 0.2);
     if (g.camp) {
       const lv = g.forgeLevel;
       const fire = hex(FORGE_LEVELS[lv - 1].look.fire[1]);

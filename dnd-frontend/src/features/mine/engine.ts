@@ -475,7 +475,7 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.nextSpawn = now + SPAWN_GRACE_MS;
   g.warned.clear();
   place(g, g.liftX);
-  for (const i of g.torches) markSeen(g, i % g.W, Math.floor(i / g.W), 2.5);
+  for (const i of g.torches) markSeen(g, i % g.W, Math.floor(i / g.W), TORCH_LIGHT);
 }
 
 export const emptyPending = (): Pending => ({
@@ -508,7 +508,15 @@ export function feat(g: Game, key: string, n = 1) {
   g.pending.feats[key] = (g.pending.feats[key] ?? 0) + n;
 }
 
-export const lightRadius = (g: Game) => g.stats.light;
+export const TORCH_LIGHT = 4;
+const REST_MS = 3000;
+
+export const lightRadius = (g: Game) => (g.camp ? g.stats.light : g.stats.light * Math.max(0.6, 1 - 0.045 * (g.depth - 1)));
+
+export const inTorchlight = (g: Game, x: number, y: number) => {
+  for (const t of g.torches) if (((t % g.W) - x) ** 2 + (Math.floor(t / g.W) - y) ** 2 <= TORCH_LIGHT * TORCH_LIGHT) return true;
+  return false;
+};
 
 export const atLift = (g: Game) => g.player.y === g.liftY && Math.abs(g.player.x - g.liftX) <= 1;
 
@@ -545,7 +553,7 @@ export function placeTorch(g: Game) {
   g.pending.torches.push(i);
   g.sfx.push("torch");
   feat(g, "torch");
-  markSeen(g, p.x, p.y - 1, 2.5);
+  markSeen(g, p.x, p.y - 1, TORCH_LIGHT);
 }
 
 function swing(g: Game) {
@@ -1347,14 +1355,15 @@ const unlit = (g: Game, x: number, y: number) => {
   const lit = lightRadius(g) + 1.5;
   if ((x - p.x) ** 2 + (y - p.y) ** 2 <= lit * lit) return false;
   if (Math.abs(x - g.liftX) <= 5 && Math.abs(y - g.liftY) <= 4) return false;
-  for (const t of g.torches) if (((t % g.W) - x) ** 2 + (Math.floor(t / g.W) - y) ** 2 < 30) return false;
+  for (const t of g.torches) if (((t % g.W) - x) ** 2 + (Math.floor(t / g.W) - y) ** 2 < (TORCH_LIGHT + 1.5) ** 2) return false;
   return true;
 };
 
 function spawn(g: Game) {
   const p = g.player;
   const cap = 1 + Math.floor(g.depth / 3);
-  g.nextSpawn = g.now + Math.max(10_000, 26_000 - g.depth * 1500) * (0.7 + rand() * 0.6);
+  const dark = inTorchlight(g, p.x, p.y - 1) ? 1 : 0.55;
+  g.nextSpawn = g.now + Math.max(10_000, 26_000 - g.depth * 1500) * (0.7 + rand() * 0.6) * dark;
   if (liveMonsters(g).length >= cap) return;
   const kind = g.depth > 1 && rand() < 0.3 ? g.depth - 1 : g.depth;
   const spec = KINDS[kind];
@@ -1514,7 +1523,8 @@ function stepEffects(g: Game, dt: number) {
 function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
   const p = g.player;
   const max = g.stats.maxHp;
-  const regen = (g.pet?.key === "wisp" ? 0.03 : 0) + (g.now - p.lastHurt > 5000 ? 0.02 : 0);
+  const resting = g.now - p.lastHurt > REST_MS && inTorchlight(g, p.x, p.y - 1);
+  const regen = (g.pet?.key === "wisp" ? 0.03 : 0) + (resting ? 0.03 : 0);
   p.hp = Math.min(max, p.hp + max * regen * (dt / 1000));
   if (g.now < p.burnUntil && g.now >= p.nextBurn) {
     p.nextBurn = g.now + 1000;
@@ -1595,6 +1605,8 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
   if (g.petActor && PET_LIGHT[g.petActor.key])
     markSeen(g, Math.round(g.petActor.px), Math.round(g.petActor.py), PET_LIGHT[g.petActor.key]);
   if (!g.camp && !g.asleep && g.now >= g.nextSpawn && g.now - g.startedAt > SPAWN_GRACE_MS) spawn(g);
+  if (!g.camp && g.now - g.startedAt > 4000 && !inTorchlight(g, p.x, p.y - 1))
+    sayOnce(g, "dark", "Dark out here. Wounds only mend in torchlight, and monsters stir faster (T plants a torch).", "#ffc98a", 4200);
   stepBolts(g, dt);
   stepMonsters(g, dt);
   stepPet(g, dt);

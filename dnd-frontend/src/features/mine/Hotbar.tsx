@@ -124,7 +124,7 @@ export function Hotbar({
                 <b>Torches</b>
                 {torchesLeft !== null && ` · ${torchesLeft} left`}
                 <br />
-                {inMine ? "T plants one above your head. Lit tunnels stay lit." : `Hesk sells them at camp, ${config.torchPrice} coins each.`}
+                {inMine ? "T plants one above your head. Wounds only mend in torchlight, and monsters never spawn near one." : `Hesk sells them at camp, ${config.torchPrice} coins each.`}
               </>
             }
           />
