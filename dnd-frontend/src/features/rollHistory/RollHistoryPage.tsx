@@ -121,39 +121,41 @@ export default function RollHistoryPage() {
 
   return (
     <div className={classes.page}>
-      <header className={classes.header}>
-        <span className={classes.headerIcon}>
-          <IconDice5 size={22} stroke={1.75} />
-        </span>
-        <div className={classes.headerText}>
-          <h1 className={`${classes.title} narrative-title`} data-themed>
-            Roll Log
-          </h1>
-          <p className={classes.subtitle}>{subtitle}</p>
-        </div>
-        <button
-          type="button"
-          className={classes.iconButton}
-          onClick={() => void load(1)}
-          disabled={loading}
-          aria-label="Refresh"
-          title="Refresh"
-        >
-          <IconRefresh size={18} className={loading ? classes.spin : undefined} />
-        </button>
-      </header>
+      <div className={`${classes.panel} ${classes.top}`}>
+        <header className={classes.header}>
+          <span className={classes.headerIcon}>
+            <IconDice5 size={22} stroke={1.75} />
+          </span>
+          <div className={classes.headerText}>
+            <h1 className={`${classes.title} narrative-title`} data-themed>
+              Roll Log
+            </h1>
+            <p className={classes.subtitle}>{subtitle}</p>
+          </div>
+          <button
+            type="button"
+            className={classes.iconButton}
+            onClick={() => void load(1)}
+            disabled={loading}
+            aria-label="Refresh"
+            title="Refresh"
+          >
+            <IconRefresh size={18} className={loading ? classes.spin : undefined} />
+          </button>
+        </header>
 
-      <SegmentedControl
-        value={filter}
-        onChange={(v) => setFilter(v as Filter)}
-        data={[
-          { label: "All", value: "all" },
-          { label: "Public", value: "public" },
-          { label: "Subtle", value: "subtle" },
-        ]}
-        size="xs"
-        classNames={{ root: `glassy-segmented ${classes.filter}`, control: "glassy-segmented__control", label: "glassy-segmented__label" }}
-      />
+        <SegmentedControl
+          value={filter}
+          onChange={(v) => setFilter(v as Filter)}
+          data={[
+            { label: "All", value: "all" },
+            { label: "Public", value: "public" },
+            { label: "Subtle", value: "subtle" },
+          ]}
+          size="xs"
+          classNames={{ root: `glassy-segmented ${classes.filter}`, control: "glassy-segmented__control", label: "glassy-segmented__label" }}
+        />
+      </div>
 
       <div className={classes.panel}>
         {loading && entries.length === 0 ? (

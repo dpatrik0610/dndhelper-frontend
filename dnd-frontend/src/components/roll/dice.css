@@ -20,11 +20,11 @@
 }
 
 /* Shapes. clip-path drops borders, so dice read through fill colour + drop-shadow. */
-.die--d4 { clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 28%; }
+.die--d4 { clip-path: polygon(50% 0, 100% 100%, 0 100%); padding-top: 0.75em; }
 .die--d6 { border-radius: 22%; }
 .die--d8 { clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
 .die--d10, .die--d100 { clip-path: polygon(50% 0, 100% 58%, 50% 100%, 0 58%); }
-.die--d12 { clip-path: polygon(50% 0, 100% 38%, 81% 100%, 19% 100%, 0 38%); padding-top: 10%; }
+.die--d12 { clip-path: polygon(50% 0, 100% 38%, 81% 100%, 19% 100%, 0 38%); padding-top: 0.25em; }
 .die--d20 { clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
 .die--dx { border-radius: 50%; }
 
