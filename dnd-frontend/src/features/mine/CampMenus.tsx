@@ -18,6 +18,7 @@ import { PET_ART, petSprite } from "./art/pets";
 import { ENEMIES, potionSprite, scrollSprite } from "./art/world";
 import { canAfford, compact, discounted, statLine, tiersOf } from "./mine";
 import { oreIcon } from "./render";
+import { play, type Sfx } from "./sound";
 import { Sprite } from "./Sprite";
 import { FOREMAN, MOSS_LINES, PAGES, WARES, wickLines, wickSprite } from "./story";
 import styles from "./Mine.module.css";
@@ -43,10 +44,12 @@ function Cost({ cost, ores, config }: { cost: OreCounts; ores: OreCounts; config
 
 function useRun(onState: (s: MiningState) => void) {
   const [busy, setBusy] = useState(false);
-  const run = async (action: () => Promise<MiningState>, done?: (s: MiningState) => string) => {
+  const run = async (action: () => Promise<MiningState>, done?: (s: MiningState) => string, sfx?: Sfx) => {
     setBusy(true);
     try {
       const s = await action();
+      const cue = sfx ?? (done ? "buy" : null);
+      if (cue) play(cue);
       onState(s);
       if (done) showNotification({ title: done(s), message: "", color: "yellow" });
     } catch (e) {
@@ -126,7 +129,7 @@ export function LiftMenu({ config, state, onState }: MenuProps) {
               type="button"
               className={`${styles.depthCard} ${locked ? styles.locked : ""}`}
               disabled={locked || busy}
-              onClick={() => void run(() => descend(d.number))}
+              onClick={() => void run(() => descend(d.number), undefined, "lift")}
             >
               <span className={styles.depthNum}>{locked ? <IconLock size={14} /> : d.number}</span>
               <span className={styles.depthInfo}>

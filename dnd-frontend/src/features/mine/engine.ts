@@ -3,6 +3,7 @@ import { itemName, type Tiers } from "./art/gear";
 import { canSolo, type PetArt } from "./art/pets";
 import { ENEMIES, type Enemy } from "./art/world";
 import { critHit } from "./mine";
+import type { Sfx } from "./sound";
 
 export const T = 16;
 export const OPEN = 46;
@@ -167,6 +168,7 @@ export interface Game extends GameSetup {
   nextBolt: number;
   nextPotion: number;
   trader: number;
+  sfx: Sfx[];
 }
 
 const KINDS: Record<number, { hp: number; dmg: number; move: number; tunnel?: boolean }> = {
@@ -255,6 +257,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     nextBolt: 0,
     nextPotion: 0,
     trader: -1,
+    sfx: [],
     asleep: false,
     lastInput: now,
     now,
@@ -399,6 +402,7 @@ export function placeTorch(g: Game) {
   if (g.torches.has(i) || !isOpen(g, p.x, p.y - 1)) return;
   g.torches.add(i);
   g.pending.torches.push(i);
+  g.sfx.push("torch");
   markSeen(g, p.x, p.y - 1, 2.5);
 }
 
@@ -480,6 +484,7 @@ function crack(g: Game, i: number, crit: boolean, splash: boolean) {
   const cx = ((i % g.W) + 0.5) * T;
   const cy = (Math.floor(i / g.W) + 0.5) * T;
   burst(g, cx, cy, crit ? "#ffe066" : "#d6d0c4", splash ? 2 : crit ? 8 : 3);
+  if (!splash) g.sfx.push(crit ? "crit" : "dig");
   if (crit && !splash) say(g, cx, cy - 6, "CRIT", "#ffe066", 600);
 }
 
@@ -522,6 +527,7 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
   const cx = ((i % g.W) + 0.5) * T;
   const cy = (Math.floor(i / g.W) + 0.5) * T;
   const ore = oreOf(c);
+  g.sfx.push(c === SEAL ? "seal" : c === CHEST ? "chest" : c === LEDGER ? "ledger" : ore >= 0 ? "ore" : "break");
   if (c === SEAL) {
     say(g, cx, cy - 8, "The seal cracks open…", "#ffd77a", 1600);
     burst(g, cx, cy, "#ffd77a", 24, 2.4);
@@ -535,7 +541,10 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
   } else if (ore >= 0) {
     burst(g, cx, cy, g.oreColors[ore], 14, 2);
     if (g.stats.vein) echoVein(g, i, c);
-    if (g.carried >= g.stats.capacity) sayOnce(g, "full", "Satchel full! Head back to the lift.", "#ff8a6a");
+    if (g.carried >= g.stats.capacity) {
+      if (!g.warned.has("full")) g.sfx.push("full");
+      sayOnce(g, "full", "Satchel full! Head back to the lift.", "#ff8a6a");
+    }
     else {
       say(g, cx, cy - 6, `+ ${g.oreNames[ore]}`, g.oreColors[ore]);
       g.carried += Math.floor(g.stats.yield) + (g.pet?.key === "ferret" ? 1 : 0);
@@ -588,6 +597,7 @@ function wakeMimic(g: Game, x: number, y: number) {
   const cy = y * T;
   burst(g, cx, cy + 8, "#c9a04a", 18, 2.6);
   say(g, cx, cy - 10, "It's a MIMIC!", "#ff6a5a", 1800);
+  g.sfx.push("mimic");
   if (!g.firebolt) sayOnce(g, "nofire", "Your pick just bounces off. Only fire hurts it. Run!", "#ff8a6a");
 }
 
@@ -602,6 +612,7 @@ export function castBolt(g: Game, aim: Aim) {
   const v = 0.012;
   g.nextBolt = g.now + BOLT_MS;
   if (Math.abs(tx - ox) >= 0.3) p.face = tx < ox ? -1 : 1;
+  g.sfx.push("bolt");
   g.bolts.push({ x: ox, y: oy, vx: ((tx - ox) / len) * v, vy: ((ty - oy) / len) * v, life: 1400 });
   return true;
 }
@@ -614,6 +625,7 @@ export function drinkPotion(g: Game) {
   g.nextPotion = g.now + 1000;
   const heal = Math.round(g.stats.maxHp * 0.6);
   p.hp = Math.min(g.stats.maxHp, p.hp + heal);
+  g.sfx.push("potion");
   say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, `+${heal}`, "#7ee08a", 900);
   burst(g, (p.x + 0.5) * T, p.y * T, "#ff6a8a", 10, 1.4);
   return true;
@@ -658,6 +670,7 @@ const liveMonsters = (g: Game) => g.monsters.filter((m) => !m.leaving && m.hp > 
 function killMonster(g: Game, m: Monster, by: string | null) {
   m.hp = 0;
   g.monsters = g.monsters.filter((x) => x !== m);
+  g.sfx.push("kill");
   if (m.kind === MIMIC_KIND) {
     g.pending.mimics.push(m.cell);
     burst(g, (m.x + 0.5) * T, (m.y + 0.5) * T, "#ffd77a", 30, 3);
@@ -679,6 +692,7 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
   if (m.kind === MIMIC_KIND && !fire) {
     m.stunUntil = g.now + (byPet ? 200 : 450);
     say(g, cx, cy - 4, "Clang!", "#c8c0b0", 500);
+    g.sfx.push("clang");
     if (!m.petBlocked) {
       m.petBlocked = true;
       say(g, cx, cy - 14, g.firebolt ? "Only fire hurts it! (F)" : "Only fire hurts it!", "#ffb347", 1600);
@@ -694,6 +708,7 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
     return;
   }
   m.hp -= dmg;
+  g.sfx.push(crit ? "crit" : "hit");
   say(g, cx, cy, String(Math.round(dmg)), crit ? "#ffe066" : "#ffffff", 600);
   burst(g, cx, cy + 8, "#ffffff", crit ? 6 : 3);
   if (m.hp > 0) return;
@@ -735,6 +750,7 @@ function hurt(g: Game, amount: number, color = "#ff5a4a") {
   p.hp -= dmg;
   p.lastHurt = g.now;
   p.hurtUntil = g.now + 160;
+  g.sfx.push("hurt");
   say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, `-${dmg}`, color, 800);
   if (p.hp <= 0) {
     p.hp = 0;
@@ -839,6 +855,7 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
   if (keys.jump && grounded && isOpen(g, x, y - 2)) {
     const high = g.stats.setBonus === 8 && isOpen(g, x, y - 3);
     p.hangUntil = g.now + JUMP_MS * (high ? 1.6 : 1) + HANG_MS;
+    g.sfx.push("jump");
     return tweenTo(p, x, y - (high ? 2 : 1), JUMP_MS * (high ? 1.6 : 1));
   }
 

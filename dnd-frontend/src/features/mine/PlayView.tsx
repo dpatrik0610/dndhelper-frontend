@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Tooltip } from "@mantine/core";
+import { Switch, Tooltip } from "@mantine/core";
 import { showNotification } from "@components/Notification/Notification";
 import {
   ascend,
@@ -34,10 +34,12 @@ import {
 } from "./engine";
 import { compact, SET_BONUSES, statLine, tiersOf, total } from "./mine";
 import { createRenderer, oreIcon } from "./render";
+import { loadPrefs, play, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
 import { Sprite } from "./Sprite";
 import { dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
 
+const SWITCH_CLASSES = { root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" };
 const STEP_MS = 1000 / 60;
 const FLUSH_MS = 1000;
 const NO_KEYS: Keys = { left: false, right: false, up: false, down: false, jump: false, attack: false };
@@ -107,6 +109,13 @@ export function PlayView({
   const [potions, setPotions] = useState(state.potions);
   const [dream, setDream] = useState("");
   const boltRef = useRef<HTMLDivElement>(null);
+  const [sound, setSound] = useState<SoundPrefs>(loadPrefs);
+
+  const toggleSound = (key: keyof SoundPrefs, on: boolean) => {
+    const next = { ...sound, [key]: on };
+    setSound(next);
+    setPrefs(next);
+  };
 
   useEffect(() => {
     if (!asleep) return;
@@ -116,6 +125,11 @@ export function PlayView({
     const id = setInterval(pick, 15_000);
     return () => clearInterval(id);
   }, [asleep, state.deepestDepth]);
+
+  useEffect(() => {
+    startMusic();
+    return stopMusic;
+  }, []);
 
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -168,6 +182,7 @@ export function PlayView({
         for (const key of Object.keys(res.drops)) {
           if (seenOres.current.has(key)) continue;
           seenOres.current.add(key);
+          play("discover");
           const ore = config.ores.find((o) => o.key === key);
           if (ore)
             showNotification({
@@ -213,6 +228,7 @@ export function PlayView({
         await flush();
         const banked = total(satchel);
         const s = await (fainted ? faint() : ascend());
+        play(fainted ? "faint" : "lift");
         showNotification(
           fainted
             ? {
@@ -306,6 +322,8 @@ export function PlayView({
         step(g, STEP_MS, keys.current, aim.current);
         acc -= STEP_MS;
       }
+      for (const name of g.sfx) play(name);
+      g.sfx.length = 0;
       cam.current = draw(g);
       if (hpRef.current) hpRef.current.style.width = `${Math.max(0, g.player.hp / g.stats.maxHp) * 100}%`;
       if (hpText.current) hpText.current.textContent = `${compact(Math.ceil(g.player.hp))} / ${compact(g.stats.maxHp)}`;
@@ -344,7 +362,10 @@ export function PlayView({
     raf = requestAnimationFrame(frame);
 
     const onKey = (down: boolean) => (e: KeyboardEvent) => {
-      if (down) noteInput(g);
+      if (down) {
+        noteInput(g);
+        startMusic();
+      }
       if (ignoreKeys(e)) return;
       const k = KEYMAP[e.code];
       if (k) {
@@ -360,7 +381,10 @@ export function PlayView({
     };
     const kd = onKey(true);
     const ku = onKey(false);
-    const wake = () => noteInput(g);
+    const wake = () => {
+      noteInput(g);
+      startMusic();
+    };
     const release = () => {
       keys.current = { ...NO_KEYS };
       aim.current = null;
@@ -400,6 +424,7 @@ export function PlayView({
     await inflight.current;
     await flush();
     const s = await trade(item);
+    play("buy");
     const g = gameRef.current;
     if (g) {
       g.firebolt = s.firebolt;
@@ -658,6 +683,22 @@ export function PlayView({
           ) : (
             <span className={styles.dim}>No pet yet. Pip sells them at camp.</span>
           )}
+        </div>
+
+        <div className={styles.block}>
+          <span className={styles.eyebrow}>Sound</span>
+          <Switch
+            classNames={SWITCH_CLASSES}
+            label="Music"
+            checked={sound.music}
+            onChange={(e) => toggleSound("music", e.currentTarget.checked)}
+          />
+          <Switch
+            classNames={SWITCH_CLASSES}
+            label="Effects"
+            checked={sound.sfx}
+            onChange={(e) => toggleSound("sfx", e.currentTarget.checked)}
+          />
         </div>
 
         <div className={styles.block}>
