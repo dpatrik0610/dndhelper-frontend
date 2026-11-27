@@ -14,7 +14,17 @@ import {
 import { GEAR_SLOTS, item, itemName } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { potionSprite, scrollSprite } from "./art/world";
-import { ForgeMenu, LedgerPage, LiftMenu, OrePouch, PetMenu, TraderMenu } from "./CampMenus";
+import {
+  ForgeMenu,
+  LedgerPage,
+  LiftMenu,
+  NextGoal,
+  OrePouch,
+  PetMenu,
+  TraderMenu,
+  type TripReport,
+  TripSummary,
+} from "./CampMenus";
 import {
   type Aim,
   BOLT_MS,
@@ -32,6 +42,7 @@ import {
   T,
   takePending,
 } from "./engine";
+import { goalsFor, newlyAffordable } from "./goals";
 import { compact, SET_BONUSES, statLine, tiersOf, total } from "./mine";
 import { createRenderer, oreIcon } from "./render";
 import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
@@ -108,6 +119,7 @@ export function PlayView({
   const [sealNear, setSealNear] = useState(false);
   const [potions, setPotions] = useState(state.potions);
   const [dream, setDream] = useState("");
+  const [report, setReport] = useState<TripReport | null>(null);
   const boltRef = useRef<HTMLDivElement>(null);
   const [sound, setSound] = useState<SoundPrefs>(loadPrefs);
 
@@ -138,6 +150,7 @@ export function PlayView({
   useEffect(() => {
     setSatchel(trip?.satchel ?? {});
     setDepth(trip?.depth ?? 0);
+    if (trip) setReport(null);
     leaving.current = false;
   }, [trip]);
 
@@ -227,22 +240,18 @@ export function PlayView({
       try {
         await inflight.current;
         await flush();
-        const banked = total(satchel);
+        const before = stateRef.current;
         const s = await (fainted ? faint() : ascend());
         play(fainted ? "faint" : "lift");
-        showNotification(
-          fainted
-            ? {
-                title: "You fainted",
-                message: "You wake up at camp, sore and lighter. Half your satchel is gone.",
-                color: "red",
-              }
-            : {
-                title: "Back at camp",
-                message: banked ? `You banked ${compact(banked)} ore.` : "Empty-handed, but alive.",
-                color: "yellow",
-              },
+        const haul = Object.fromEntries(
+          Object.entries(s.ores).map(([k, n]) => [k, n - (before.ores[k] ?? 0)] as const),
         );
+        setReport({
+          fainted,
+          haul,
+          fresh: Object.keys(s.mined).filter((k) => !before.mined[k]),
+          ready: newlyAffordable(goalsFor(config, s), before.ores, s.ores),
+        });
         onState(s);
       } catch (e) {
         leaving.current = false;
@@ -251,7 +260,7 @@ export function PlayView({
         setBusy(false);
       }
     },
-    [flush, onState, satchel],
+    [config, flush, onState],
   );
 
   const finishRef = useRef(finish);
@@ -374,7 +383,10 @@ export function PlayView({
         keys.current[k] = down;
       }
       if (!down || e.repeat) return;
-      if (e.code === "Escape") setReading(0);
+      if (e.code === "Escape") {
+        setReading(0);
+        setReport(null);
+      }
       if (e.code === "KeyT" && !g.camp) placeTorch(g);
       if (e.code === "KeyF") castBolt(g, g.hover);
       if (e.code === "KeyQ") drinkPotion(g);
@@ -503,6 +515,8 @@ export function PlayView({
           </div>
         </div>
 
+        <NextGoal config={config} state={state} satchel={trip ? satchel : {}} />
+
         {trip ? (
           <div className={styles.block}>
             <div className={styles.barHead}>
@@ -572,7 +586,7 @@ export function PlayView({
 
         <canvas ref={textRef} className={`${styles.canvas} ${styles.textLayer}`} aria-hidden />
 
-        {near && (
+        {near && !(report && !trip) && (
           <section className={styles.menu} aria-label={MENU_TITLES[near][0]}>
             {trip && near === "trader" ? (
               <>
@@ -620,6 +634,10 @@ export function PlayView({
               Tuck it in your satchel (Esc)
             </button>
           </section>
+        )}
+
+        {report && !trip && (
+          <TripSummary {...props} report={report} onClose={() => setReport(null)} />
         )}
 
         {sealNear && trip && (

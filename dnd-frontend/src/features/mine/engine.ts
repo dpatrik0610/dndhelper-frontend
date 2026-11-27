@@ -14,6 +14,13 @@ export const ORE0 = 65;
 export const LEDGER = 42;
 export const CHEST = 36;
 export const MIMIC = 38;
+export const IRON_CHEST = 43;
+export const GILDED_CHEST = 94;
+export const GEODE = 37;
+export const CHESTS = [CHEST, IRON_CHEST, GILDED_CHEST];
+export const isChest = (c: number) => c === MIMIC || CHESTS.includes(c);
+const MOTHERLODE_RADIUS = 4.5;
+const HUM_RADIUS = 12;
 export const MIMIC_KIND = 11;
 export const BOLT_MS = 2500;
 
@@ -169,6 +176,8 @@ export interface Game extends GameSetup {
   nextPotion: number;
   trader: number;
   sfx: Sfx[];
+  motherlode: number;
+  richFound: boolean;
 }
 
 const KINDS: Record<number, { hp: number; dmg: number; move: number; tunnel?: boolean }> = {
@@ -203,7 +212,13 @@ export const hpOf = (g: Game, c: number) =>
         ? g.info.stoneHp * 6
         : c === CHEST || c === MIMIC
           ? g.info.stoneHp * 3
-          : oreOf(c) >= 0
+          : c === IRON_CHEST
+            ? g.info.stoneHp * 4
+            : c === GILDED_CHEST
+              ? g.info.stoneHp * 6
+              : c === GEODE
+                ? g.info.stoneHp * 5
+                : oreOf(c) >= 0
             ? g.oreHp[oreOf(c)]
             : Number.POSITIVE_INFINITY;
 
@@ -299,6 +314,7 @@ function loadCamp(g: Game, now: number) {
   g.monsters = [];
   g.bolts = [];
   g.trader = -1;
+  g.motherlode = -1;
   g.startedAt = now;
   g.nextSpawn = Number.POSITIVE_INFINITY;
   place(g, g.liftX + 1);
@@ -355,6 +371,8 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.monsters = [];
   g.bolts = [];
   g.trader = trip.trader ?? -1;
+  g.motherlode = trip.motherlode ?? -1;
+  g.richFound = false;
   g.startedAt = now;
   g.nextSpawn = now + SPAWN_GRACE_MS;
   g.warned.clear();
@@ -527,13 +545,37 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
   const cx = ((i % g.W) + 0.5) * T;
   const cy = (Math.floor(i / g.W) + 0.5) * T;
   const ore = oreOf(c);
-  g.sfx.push(c === SEAL ? "seal" : c === CHEST ? "chest" : c === LEDGER ? "ledger" : ore >= 0 ? "ore" : "break");
+  g.sfx.push(
+    c === SEAL
+      ? "seal"
+      : c === GILDED_CHEST
+        ? "jackpot"
+        : isChest(c)
+          ? "chest"
+          : c === GEODE
+            ? "geode"
+            : c === LEDGER
+              ? "ledger"
+              : ore >= 0
+                ? "ore"
+                : "break",
+  );
   if (c === SEAL) {
     say(g, cx, cy - 8, "The seal cracks open…", "#ffd77a", 1600);
     burst(g, cx, cy, "#ffd77a", 24, 2.4);
+  } else if (c === GILDED_CHEST) {
+    say(g, cx, cy - 10, "A GILDED CHEST!", "#fff0a0", 2000);
+    burst(g, cx, cy, "#fff0a0", 40, 3.2);
+    burst(g, cx, cy, "#ffd77a", 30, 2.4);
+  } else if (c === IRON_CHEST) {
+    say(g, cx, cy - 8, "An iron-bound chest!", "#dfe3ea", 1600);
+    burst(g, cx, cy, "#dfe3ea", 28, 2.6);
   } else if (c === CHEST) {
     say(g, cx, cy - 8, "Treasure!", "#ffd77a", 1400);
     burst(g, cx, cy, "#ffd77a", 22, 2.4);
+  } else if (c === GEODE) {
+    say(g, cx, cy - 8, "The geode shatters!", "#c9a6ff", 1800);
+    for (const color of ["#c9a6ff", "#7fe3ff", "#ff9ad5", "#ffffff"]) burst(g, cx, cy, color, 12, 2.8);
   } else if (c === LEDGER) {
     say(g, cx, cy - 8, "A ledger page!", "#f4e2b8", 1600);
     burst(g, cx, cy, "#f4e2b8", 18, 2.2);
@@ -541,6 +583,12 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
   } else if (ore >= 0) {
     burst(g, cx, cy, g.oreColors[ore], 14, 2);
     if (g.stats.vein) echoVein(g, i, c);
+    if (!g.richFound && inMotherlode(g, i)) {
+      g.richFound = true;
+      g.sfx.push("motherlode");
+      say(g, cx, cy - 14, "MOTHERLODE!", g.oreColors[ore], 2400);
+      burst(g, cx, cy, g.oreColors[ore], 50, 3.4);
+    }
     if (g.carried >= g.stats.capacity) {
       if (!g.warned.has("full")) g.sfx.push("full");
       sayOnce(g, "full", "Satchel full! Head back to the lift.", "#ff8a6a");
@@ -551,6 +599,14 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
     }
   }
 }
+
+const distTo = (g: Game, i: number, x: number, y: number) => Math.hypot((i % g.W) - x, Math.floor(i / g.W) - y);
+
+const inMotherlode = (g: Game, i: number) =>
+  g.motherlode >= 0 && distTo(g, i, g.motherlode % g.W, Math.floor(g.motherlode / g.W)) <= MOTHERLODE_RADIUS;
+
+export const nearMotherlode = (g: Game) =>
+  !g.camp && !g.richFound && g.motherlode >= 0 && distTo(g, g.motherlode, g.player.x, g.player.y) <= HUM_RADIUS;
 
 function addMonster(g: Game, kind: number, x: number, y: number) {
   const spec = KINDS[kind];
@@ -1178,6 +1234,7 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
   stepMonsters(g, dt);
   stepPet(g, dt);
   stepBeetle(g);
+  if (nearMotherlode(g)) sayOnce(g, "hum", "The rock hums here. Something rich is close…", "#ffe9a8");
   if (g.asleep && g.now >= g.nextZ) {
     g.nextZ = g.now + 700;
     const pos = drawPos(p);

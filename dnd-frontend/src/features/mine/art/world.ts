@@ -266,14 +266,20 @@ const CHEST_BOX = [
   "xxxxxxxxxxxxxxxx",
 ];
 
-export const chestSprite = (mimic: boolean, breath: boolean): Grid =>
+const CHEST_TIERS = [
+  CHEST_PAL,
+  { ...CHEST_PAL, W: "#9aa1ab", w: "#5d636d", g: "#2e3238", d: "#23262b" },
+  { ...CHEST_PAL, W: "#ffe27a", w: "#d9a536", g: "#fff6c8", y: "#ffffff", d: "#8a5a14" },
+];
+
+export const chestSprite = (mimic: boolean, breath: boolean, tier = 0): Grid =>
   raster(
     mimic && breath
       ? [...CHEST_LID, "xtxxtxxxxxxtxxtx", ...CHEST_BOX]
       : mimic
         ? [...CHEST_LID, CHEST_BOX[0], "xwwtwwwyywwwwtwx", ...CHEST_BOX.slice(2)]
         : [...CHEST_LID, ...CHEST_BOX],
-    CHEST_PAL,
+    CHEST_TIERS[tier],
   );
 
 const PACK = [

@@ -7,6 +7,12 @@ import {
   BEDROCK,
   CAMP,
   CHEST,
+  CHESTS,
+  GEODE,
+  GILDED_CHEST,
+  IRON_CHEST,
+  isChest,
+  nearMotherlode,
   drawPos,
   type Game,
   hpOf,
@@ -117,6 +123,26 @@ const ledgerTile = (depth: number): Grid => {
     for (let x = 4; x < 12; x++) g[y][x] = x === 4 || y === 4 || x === 11 || y === 11 ? k : (x + y) % 5 ? P : p;
   for (const y of [6, 8, 10]) for (let x = 6; x < 10; x++) g[y][x] = "#8a6a4a";
   g[3][7] = "#ffe9a8";
+  return g;
+};
+
+const geodeTile = (depth: number): Grid => {
+  const g = stoneTile(depth, 91);
+  const rim = "#3a2f48";
+  const shell = "#6b5a80";
+  const gems = ["#c9a6ff", "#7fe3ff", "#ff9ad5"];
+  for (let y = 2; y < 14; y++)
+    for (let x = 2; x < 14; x++) {
+      const d = Math.hypot(x - 7.5, y - 7.5);
+      if (d > 5.8) continue;
+      g[y][x] = d > 4.8 ? rim : d > 3.6 ? shell : gems[(x * 3 + y * 5) % 3];
+    }
+  for (const [x, y] of [
+    [6, 6],
+    [9, 8],
+    [7, 9],
+  ])
+    g[y][x] = "#ffffff";
   return g;
 };
 
@@ -265,16 +291,16 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     const lx = g.liftX * T + ox;
     const ly = (g.liftY + 1) * T + oy;
 
-    let ledgerAt = -1;
+    const glints: number[] = [];
     if (g.camp) campBackdrop(g, ox, oy, VW, VH, flick);
     else {
       for (let r = r0; r <= r1; r++)
         for (let c = c0; c <= c1; c++) {
           const i = r * g.W + c;
           const cell = g.map[i];
-          if (cell === LEDGER) ledgerAt = i;
+          if (cell === LEDGER || cell === GILDED_CHEST) glints.push(i);
           const v = (c * 7 + r * 13) % 4;
-          const chest = cell === CHEST || cell === MIMIC;
+          const chest = isChest(cell);
           const grid =
             cell === OPEN || chest
               ? cached(`w${d}-${v}`, () =>
@@ -288,13 +314,16 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
                   ? cached(`seal${d}`, () => sealTile(d))
                   : cell === LEDGER
                     ? cached(`ledger${d}`, () => ledgerTile(d))
-                    : oreOf(cell) >= 0
+                    : cell === GEODE
+                      ? cached(`geode${d}`, () => geodeTile(d))
+                      : oreOf(cell) >= 0
                       ? cached(`o${d}-${oreOf(cell)}`, () => oreTile(oreOf(cell), d))
                       : cached(`s${d}-${v}`, () => stoneTile(d, v + 11));
           draw(grid, c * T + ox, r * T + oy);
           if (chest) {
             const breath = cell === MIMIC && Math.floor((g.now + i * 377) / 300) % 12 === 0;
-            const box = cached(`chest${cell}${breath}`, () => chestSprite(cell === MIMIC, breath));
+            const tier = Math.max(0, CHESTS.indexOf(cell));
+            const box = cached(`chest${cell}${breath}`, () => chestSprite(cell === MIMIC, breath, tier));
             draw(box, c * T + ox, (r + 1) * T + oy - box.length);
           }
           if (cell !== OPEN && !chest) {
@@ -343,9 +372,15 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
             ? "Rune seal"
             : cell === LEDGER
               ? "Ledger page"
-              : cell === CHEST || cell === MIMIC
-                ? "Chest"
-                : o >= 0
+              : cell === GILDED_CHEST
+                ? "Gilded chest"
+                : cell === IRON_CHEST
+                  ? "Iron chest"
+                  : cell === CHEST || cell === MIMIC
+                    ? "Chest"
+                    : cell === GEODE
+                      ? "Geode"
+                      : o >= 0
                   ? g.oreNames[o]
                   : "Stone";
         bar(g.target);
@@ -353,7 +388,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           `${name} · hardness ${compact(hpOf(g, cell))}`,
           (g.target % g.W) * T + ox + T / 2,
           Math.floor(g.target / g.W) * T + oy - 3,
-          o >= 0 || cell === LEDGER || cell === CHEST || cell === MIMIC ? "#ffd77a" : "#d6d0c4",
+          o >= 0 || cell === LEDGER || cell === GEODE || isChest(cell) ? "#ffd77a" : "#d6d0c4",
           1,
           6,
         );
@@ -506,7 +541,8 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
 
     const headX = px + 8;
     const headY = feet - 24;
-    const fl = Math.floor(g.now / 130) % 2 ? 2 : 0;
+    const hum = nearMotherlode(g);
+    const fl = hum ? Math.round(Math.sin(g.now / 47) * 3 + Math.sin(g.now / 13) * 2) : Math.floor(g.now / 130) % 2 ? 2 : 0;
     if (!g.camp) {
       dctx.globalCompositeOperation = "source-over";
       dctx.clearRect(0, 0, VW, VH);
@@ -557,12 +593,13 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           }
         ctx.globalAlpha = 1;
       }
-      const lc = ledgerAt % g.W;
-      const lr = Math.floor(ledgerAt / g.W);
-      if (ledgerAt >= 0 && (lc - p.x) ** 2 + (lr - p.y) ** 2 <= 100 && Math.floor(g.now / 220) % 7 < 2) {
+      for (const at of glints) {
+        const lc = at % g.W;
+        const lr = Math.floor(at / g.W);
+        if ((lc - p.x) ** 2 + (lr - p.y) ** 2 > 100 || Math.floor((g.now + at * 97) / 220) % 7 >= 2) continue;
         const X = lc * T + ox + 7;
         const Y = lr * T + oy + 7;
-        ctx.fillStyle = "#fff3c8";
+        ctx.fillStyle = g.map[at] === GILDED_CHEST ? "#fff0a0" : "#fff3c8";
         ctx.fillRect(X, Y - 2, 1, 5);
         ctx.fillRect(X - 2, Y, 5, 1);
       }

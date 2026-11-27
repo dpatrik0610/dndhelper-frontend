@@ -93,6 +93,7 @@ export interface MiningTrip {
   torches: number[];
   satchel: OreCounts;
   trader: number | null;
+  motherlode: number | null;
   wares: Record<string, OreCounts> | null;
 }
 

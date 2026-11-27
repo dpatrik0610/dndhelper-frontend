@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tooltip } from "@mantine/core";
-import { IconLock } from "@tabler/icons-react";
+import { IconLock, IconPin, IconPinFilled } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import {
   buyPet,
@@ -10,12 +10,14 @@ import {
   type MiningConfig,
   type MiningState,
   type OreCounts,
+  type SlotKey,
   upgradeForge,
 } from "@services/miningService";
 import { FORGE_LEVELS, forgeSprite } from "./art/forge";
 import { GEAR_SLOTS, item, itemName } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { ENEMIES, potionSprite, scrollSprite } from "./art/world";
+import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
 import { canAfford, compact, discounted, statLine, tiersOf } from "./mine";
 import { oreIcon } from "./render";
 import { play, type Sfx } from "./sound";
@@ -39,6 +41,128 @@ function Cost({ cost, ores, config }: { cost: OreCounts; ores: OreCounts; config
         );
       })}
     </div>
+  );
+}
+
+function PinButton({ id }: { id: string }) {
+  const pinned = usePinnedGoal();
+  const on = pinned === id;
+  return (
+    <button
+      type="button"
+      className={`${on ? "glass-btn-primary" : "glass-btn-secondary"} ${styles.actBtn}`}
+      aria-pressed={on}
+      onClick={() => setPinnedGoal(on ? null : id)}
+    >
+      {on ? <IconPinFilled size={14} /> : <IconPin size={14} />} {on ? "Tracking" : "Track"}
+    </button>
+  );
+}
+
+const GOAL_PLACE: Record<Goal["kind"], string> = { gear: "the forge", forge: "the forge", pet: "Pip's stall" };
+
+export function NextGoal({ config, state, satchel }: { config: MiningConfig; state: MiningState; satchel: OreCounts }) {
+  const pinned = usePinnedGoal();
+  const ores = withSatchel(state.ores, satchel);
+  const goal = pickGoal(goalsFor(config, state), ores, pinned);
+  if (!goal) return null;
+  const ready = canAfford(goal.cost, ores);
+  const banked = canAfford(goal.cost, state.ores);
+  return (
+    <div className={styles.block}>
+      <div className={styles.barHead}>
+        <span className={styles.eyebrow}>{goal.id === pinned ? "Tracking" : "Next goal"}</span>
+        <span className={styles.barText}>{Math.floor(progress(goal.cost, ores) * 100)}%</span>
+      </div>
+      <b className={styles.pixel}>{goal.name}</b>
+      <div className={styles.bar}>
+        <div
+          className={`${styles.satchelFill} ${ready ? styles.goalReady : ""}`}
+          style={{ width: `${progress(goal.cost, ores) * 100}%` }}
+        />
+      </div>
+      <Cost cost={goal.cost} ores={ores} config={config} />
+      {ready && (
+        <span className={styles.goalNote}>
+          {banked ? `Ready! Visit ${GOAL_PLACE[goal.kind]}.` : `Ready! Bank your satchel, then visit ${GOAL_PLACE[goal.kind]}.`}
+        </span>
+      )}
+      {goal.id === pinned && (
+        <button type="button" className={`glass-btn-secondary ${styles.actBtn}`} onClick={() => setPinnedGoal(null)}>
+          Stop tracking
+        </button>
+      )}
+    </div>
+  );
+}
+
+export interface TripReport {
+  fainted: boolean;
+  haul: OreCounts;
+  fresh: string[];
+  ready: Goal[];
+}
+
+const GOAL_ACTIONS: Record<Goal["kind"], [string, (key: string) => Promise<MiningState>]> = {
+  gear: ["Forge it", (key) => craftGear(key as SlotKey)],
+  forge: ["Rebuild", () => upgradeForge()],
+  pet: ["Adopt", (key) => buyPet(key)],
+};
+
+export function TripSummary({ config, state, onState, report, onClose }: MenuProps & { report: TripReport; onClose: () => void }) {
+  const { busy, run } = useRun(onState);
+  const live = new Map(goalsFor(config, state).map((g) => [g.id, g]));
+  const ready = report.ready.filter((g) => live.get(g.id)?.name === g.name);
+  const haul = Object.entries(report.haul).filter(([, n]) => n > 0);
+  return (
+    <section className={styles.found} aria-label="Trip summary">
+      <div className={styles.summary}>
+        <span className={styles.eyebrow}>{report.fainted ? "You fainted" : "Back at camp"}</span>
+        <h2 className={styles.h2}>
+          {haul.length ? `Banked ${compact(haul.reduce((a, [, n]) => a + n, 0))} ore` : "Empty-handed, but alive"}
+        </h2>
+        {report.fainted && <span className={styles.dim}>You woke up sore and lighter. Half the satchel is gone.</span>}
+        {haul.length > 0 && (
+          <div className={styles.satchelList}>
+            {haul.map(([key, n]) => {
+              const i = config.ores.findIndex((o) => o.key === key);
+              const fresh = report.fresh.includes(key);
+              return (
+                <span key={key} className={`${styles.satchelItem} ${fresh ? styles.freshOre : ""}`} title={config.ores[i]?.name}>
+                  <Sprite grid={oreIcon(i)} scale={2} />
+                  {compact(n)} {config.ores[i]?.name}
+                  {fresh && " · NEW"}
+                </span>
+              );
+            })}
+          </div>
+        )}
+        {ready.length > 0 && (
+          <>
+            <span className={styles.eyebrow}>Now affordable</span>
+            {ready.map((g) => {
+              const [label, act] = GOAL_ACTIONS[g.kind];
+              return (
+                <div key={g.id} className={styles.readyRow}>
+                  <span className={styles.pixel}>{g.name}</span>
+                  <button
+                    type="button"
+                    className={`glass-btn-primary ${styles.actBtn}`}
+                    disabled={busy || !canAfford(g.cost, state.ores)}
+                    onClick={() => void run(() => act(g.key), () => `${g.name} is yours`)}
+                  >
+                    {label}
+                  </button>
+                </div>
+              );
+            })}
+          </>
+        )}
+      </div>
+      <button type="button" className={`glass-btn-secondary ${styles.actBtn}`} onClick={onClose}>
+        Back to camp (Esc)
+      </button>
+    </section>
   );
 }
 
@@ -172,14 +296,17 @@ export function ForgeMenu({ config, state, onState }: MenuProps) {
                 Next: {nextForge.name}. {FORGE_LEVELS[state.forgeLevel].perk}
               </span>
               <Cost cost={nextForge.cost ?? {}} ores={state.ores} config={config} />
-              <button
-                type="button"
-                className={`glass-btn-primary ${styles.actBtn}`}
-                disabled={busy || !canAfford(nextForge.cost, state.ores)}
-                onClick={() => void run(upgradeForge, (s) => `The ${config.forges[s.forgeLevel - 1].name} is lit`)}
-              >
-                Rebuild the forge
-              </button>
+              <div className={styles.btnRow}>
+                <button
+                  type="button"
+                  className={`glass-btn-primary ${styles.actBtn}`}
+                  disabled={busy || !canAfford(nextForge.cost, state.ores)}
+                  onClick={() => void run(upgradeForge, (s) => `The ${config.forges[s.forgeLevel - 1].name} is lit`)}
+                >
+                  Rebuild the forge
+                </button>
+                <PinButton id="forge" />
+              </div>
             </>
           ) : (
             <span className={styles.dim}>The hottest fire there is.</span>
@@ -214,19 +341,22 @@ export function ForgeMenu({ config, state, onState }: MenuProps) {
                     ) : (
                       <>
                         <Cost cost={cost} ores={state.ores} config={config} />
-                        <button
-                          type="button"
-                          className={`glass-btn-primary ${styles.actBtn}`}
-                          disabled={busy || !canAfford(cost, state.ores)}
-                          onClick={() =>
-                            void run(
-                              () => craftGear(key),
-                              () => `Forged: ${itemName(key, tier + 1)}`,
-                            )
-                          }
-                        >
-                          Forge
-                        </button>
+                        <div className={styles.btnRow}>
+                          <button
+                            type="button"
+                            className={`glass-btn-primary ${styles.actBtn}`}
+                            disabled={busy || !canAfford(cost, state.ores)}
+                            onClick={() =>
+                              void run(
+                                () => craftGear(key),
+                                () => `Forged: ${itemName(key, tier + 1)}`,
+                              )
+                            }
+                          >
+                            Forge
+                          </button>
+                          <PinButton id={`gear:${key}`} />
+                        </div>
                       </>
                     )}
                   </>
@@ -294,19 +424,22 @@ export function PetMenu({ config, state, onState }: MenuProps) {
                 ) : (
                   <>
                     <Cost cost={p.cost} ores={state.ores} config={config} />
-                    <button
-                      type="button"
-                      className={`glass-btn-primary ${styles.actBtn}`}
-                      disabled={busy || !canAfford(p.cost, state.ores)}
-                      onClick={() =>
-                        void run(
-                          () => buyPet(p.key),
-                          () => `${p.name} joins you`,
-                        )
-                      }
-                    >
-                      Adopt
-                    </button>
+                    <div className={styles.btnRow}>
+                      <button
+                        type="button"
+                        className={`glass-btn-primary ${styles.actBtn}`}
+                        disabled={busy || !canAfford(p.cost, state.ores)}
+                        onClick={() =>
+                          void run(
+                            () => buyPet(p.key),
+                            () => `${p.name} joins you`,
+                          )
+                        }
+                      >
+                        Adopt
+                      </button>
+                      <PinButton id={`pet:${p.key}`} />
+                    </div>
                   </>
                 )}
               </div>

@@ -775,3 +775,38 @@
   font-weight: 600;
   color: var(--gold);
 }
+
+.btnRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.goalReady {
+  background: linear-gradient(#9fe09a, #4a9a3a);
+}
+
+.goalNote {
+  font-family: var(--pixel);
+  font-size: 0.8125rem;
+  color: #9fe09a;
+}
+
+.summary {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.readyRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.freshOre {
+  color: #ffe066;
+}

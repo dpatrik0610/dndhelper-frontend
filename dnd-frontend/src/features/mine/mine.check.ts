@@ -451,3 +451,24 @@ dull.stats = { ...stats, critZone: 1 };
 run(dull, 100, { down: true });
 assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
 console.log("mine.check ok");
+
+const cave = ["############", "#...%..A...#", "#..........#", "#0000000000#", "############"];
+const rich = newGame(-1, cave);
+rich.monsters = [];
+rich.nextSpawn = 1e12;
+run(rich, 8000, {}, { x: 4.5, y: 1.5 });
+assert.equal(rich.map[W + 4], OPEN, "a geode shatters");
+assert.ok(rich.pending.breaks.some((b) => b.i === W + 4), "and is reported for its loot");
+assert.equal(rich.richFound, false, "no motherlode on this map");
+
+const lode = newGame(-1, cave);
+lode.monsters = [];
+lode.nextSpawn = 1e12;
+lode.motherlode = W + 8;
+lode.player.x = lode.player.fromX = 6;
+run(lode, 50);
+assert.ok(lode.warned.has("hum"), "the rock hums when a motherlode is near");
+lode.sfx.length = 0;
+run(lode, 4000, {}, { x: 7.5, y: 1.5 });
+assert.ok(lode.richFound && lode.sfx.includes("motherlode"), "the first ore broken in it calls out the motherlode");
+console.log("rewards ok");
