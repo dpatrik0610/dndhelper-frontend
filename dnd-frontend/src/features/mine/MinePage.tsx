@@ -110,10 +110,10 @@ function RenownStat({ config, state }: { config: MiningConfig; state: MiningStat
   );
   return (
     <Tooltip label={tip} withArrow multiline w={320} events={{ hover: true, focus: true, touch: true }}>
-      <div className={`${styles.stat} ${styles.statHelp}`} tabIndex={0}>
+      <button type="button" className={`${styles.stat} ${styles.statHelp}`}>
         <span className={styles.eyebrow}>Renown</span>
         <span className={styles.statValue}>{compact(state.renown)}</span>
-      </div>
+      </button>
     </Tooltip>
   );
 }

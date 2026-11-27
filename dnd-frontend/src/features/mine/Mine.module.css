@@ -81,6 +81,9 @@
 
 .statHelp {
   cursor: help;
+  font: inherit;
+  color: inherit;
+  text-align: left;
 }
 
 .statHelp:focus-visible {
