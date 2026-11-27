@@ -10,9 +10,12 @@ import {
   type Game,
   type Keys,
   MIMIC_KIND,
+  minSwings,
+  ORE0,
   OPEN,
   placeTorch,
   stationAt,
+  STONE,
   step,
   takePending,
 } from "./engine";
@@ -376,10 +379,10 @@ const seam = newGame(-1, [
 ]);
 seam.monsters = [];
 seam.nextSpawn = 1e12;
-seam.stats = { ...stats, power: 20, vein: true };
+seam.stats = { ...stats, power: 20, vein: true, swingMs: 100 };
 seam.player.x = seam.player.fromX = 3;
 const seamStart = Uint8Array.from(seam.map);
-run(seam, 200, { down: true });
+run(seam, 380, { down: true });
 for (let x = 3; x <= 7; x++) assert.equal(seam.map[3 * W + x], OPEN, `a starmetal pick cracks the whole vein (${x})`);
 assert.equal(seam.map[3 * W + 8], seamStart[3 * W + 8], "but not the stone around it");
 const seamReplay = Uint8Array.from(seamStart);
@@ -585,3 +588,17 @@ assert.equal(boop.player.hp, boopHp, "a tiny cubelet deals no damage");
 assert.equal(boop.player.x, 3, "but boops the dwarf back a tile");
 assert.equal(boop.feats.bounced, 1, "which counts toward Bouncy Castle");
 console.log("cube ok");
+
+const tough = newGame(-1);
+tough.monsters = [];
+tough.nextSpawn = 1e12;
+tough.stats = { ...stats, power: 1e6, critZone: 0, swingMs: 100 };
+tough.player.x = tough.player.fromX = 6;
+const below = (tough.player.y + 1) * W + 6;
+const wasCell = tough.map[below];
+run(tough, 20, { down: true });
+assert.equal(tough.map[below], wasCell, "even a legendary pick can't one-shot stone");
+run(tough, 120, { down: true });
+assert.notEqual(tough.map[below], wasCell, "but it's through on the second swing");
+assert.ok(minSwings(STONE) === 2 && minSwings(ORE0) === 3, "ore takes longer than stone");
+console.log("tough ok");
