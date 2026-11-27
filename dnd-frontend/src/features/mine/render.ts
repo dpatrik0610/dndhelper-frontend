@@ -37,6 +37,32 @@ const canvasCache = new WeakMap<Grid, HTMLCanvasElement>();
 const gridCache = new Map<string, Grid>();
 const partsCache = new Map<string, ReturnType<typeof dwarfParts>>();
 
+const HAND_X = 14;
+const HAND_Y = 13;
+const GRIP_X = 3;
+const GRIP_Y = 12;
+const HEAD_DX = 6;
+const HEAD_DY = -9;
+const PICK_REST = -0.55;
+const RAISE_MS = 40;
+const STRIKE_MS = 70;
+const SETTLE_MS = 150;
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * Math.max(0, Math.min(1, t));
+
+export function pickSwing(e: number, heavy: boolean) {
+  const raised = heavy ? -1.6 : -1.25;
+  const hit = heavy ? 1.1 : 0.6;
+  if (e < 0 || e >= RAISE_MS + STRIKE_MS + SETTLE_MS) return { active: false, off: PICK_REST, trail: false, spark: false };
+  if (e < RAISE_MS) return { active: true, off: lerp(PICK_REST, raised, e / RAISE_MS), trail: false, spark: false };
+  if (e < RAISE_MS + STRIKE_MS) {
+    const t = (e - RAISE_MS) / STRIKE_MS;
+    return { active: true, off: lerp(raised, hit, t * t), trail: true, spark: heavy && t > 0.7 };
+  }
+  const t = (e - RAISE_MS - STRIKE_MS) / SETTLE_MS;
+  return { active: true, off: lerp(hit, PICK_REST, 1 - (1 - t) ** 3), trail: false, spark: heavy && t < 0.3 };
+}
+
 const cached = (key: string, make: () => Grid) => {
   let g = gridCache.get(key);
   if (!g) {
@@ -511,21 +537,49 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       draw(look(parts.right, "r"), bx + pose.rightDx * face, top + pose.rightDy, face < 0, alpha);
       draw(look(pose.blink ? parts.blink : parts.body, pose.blink ? "k" : "b"), bx, top + pose.bodyDy, face < 0, alpha);
       const pick = cached(`pick${tiers.pickaxe}`, () => item("pickaxe", tiers.pickaxe));
-      const pivotX = (p.face < 0 ? px + 2 : px + 14) + pose.lean * p.face;
-      const pivotY = feet - 14 + pose.bodyDy;
-      const dx = (g.aimPoint.x * T + ox - pivotX) * p.face;
+      const pivotX = (face < 0 ? bx + 29 - HAND_X : bx + HAND_X) + 0.5;
+      const pivotY = top + HAND_Y + pose.bodyDy;
+      const dx = (g.aimPoint.x * T + ox - pivotX) * face;
       const dy = g.aimPoint.y * T + oy - pivotY;
-      const left = p.strikeUntil - g.now;
-      const swingOff = left > 0 ? 0.35 - 1.3 * (left / 140) : -0.55 + (pose.bodyDy < 0 ? 0.06 : 0);
-      const ang =
-        Math.max(-Math.PI / 2, Math.min(Math.PI / 2, Math.atan2(dy, Math.max(0.1, dx)))) + Math.PI / 4 + swingOff;
+      const aimAng = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, Math.atan2(dy, Math.max(0.1, dx))));
+      const swing = pickSwing(g.now - p.swingAt, g.now - p.heavyAt < 320);
+      const carry =
+        PICK_REST +
+        pose.stride * 0.22 +
+        pose.bodyDy * 0.06 +
+        Math.sin(g.now / 520) * 0.04 +
+        (pose.air ? -0.5 : 0) +
+        (pose.dashing ? -0.9 : 0) +
+        (hurt ? 0.3 : 0);
+      const ang = aimAng + Math.PI / 4 + (swing.active ? swing.off : carry);
+      const pickImg = hurt ? cached(`pick${tiers.pickaxe}hurt`, () => tint(pick, "#ff6a5a")) : pick;
       ctx.save();
-      ctx.globalAlpha = alpha;
       ctx.translate(Math.round(pivotX), Math.round(pivotY));
-      ctx.scale(p.face, 1);
+      ctx.scale(face, 1);
+      if (swing.trail) {
+        const blur = cached(`pick${tiers.pickaxe}blur`, () => tint(pick, "#fff3d0"));
+        for (const [back, a] of [
+          [0.28, 0.35],
+          [0.56, 0.16],
+        ]) {
+          ctx.save();
+          ctx.globalAlpha = a * alpha;
+          ctx.rotate(aimAng + Math.PI / 4 + swing.off - back);
+          ctx.drawImage(toCanvas(blur), -GRIP_X, -GRIP_Y);
+          ctx.restore();
+        }
+      }
+      ctx.globalAlpha = alpha;
       ctx.rotate(ang);
-      ctx.drawImage(toCanvas(hurt ? cached(`pick${tiers.pickaxe}hurt`, () => tint(pick, "#ff6a5a")) : pick), -3, -12);
+      ctx.drawImage(toCanvas(pickImg), -GRIP_X, -GRIP_Y);
       ctx.restore();
+      if (swing.spark) {
+        const hx = pivotX + face * (Math.cos(ang) * HEAD_DX - Math.sin(ang) * HEAD_DY);
+        const hy = pivotY + Math.sin(ang) * HEAD_DX + Math.cos(ang) * HEAD_DY;
+        ctx.fillStyle = Math.floor(g.now / 40) % 2 ? "#fff3a0" : "#ffffff";
+        ctx.fillRect(Math.round(hx) - 3, Math.round(hy), 7, 1);
+        ctx.fillRect(Math.round(hx), Math.round(hy) - 3, 1, 7);
+      }
     }
 
     const pet = g.petActor;

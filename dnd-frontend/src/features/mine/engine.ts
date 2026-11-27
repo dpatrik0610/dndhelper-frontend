@@ -75,6 +75,8 @@ export interface Player extends Tween {
   combo: number;
   comboUntil: number;
   nextSweat: number;
+  swingAt: number;
+  heavyAt: number;
 }
 
 export interface Monster extends Tween {
@@ -393,6 +395,8 @@ function place(g: Game, x: number) {
     combo: 0,
     comboUntil: 0,
     nextSweat: 0,
+    swingAt: -1e9,
+    heavyAt: -1e9,
   };
   g.petActor = g.pet
     ? { art: g.pet.art, key: g.pet.key, px: x - 1, py: g.liftY, face: 1, nextHit: 0, hopUntil: 0 }
@@ -485,6 +489,7 @@ function swing(g: Game) {
   const slow = g.now < p.slowUntil ? 1.5 : 1;
   p.nextSwing = g.now + g.stats.swingMs * slow;
   p.strikeUntil = g.now + 140;
+  p.swingAt = g.now;
   return rand() < g.stats.critZone;
 }
 
@@ -868,6 +873,7 @@ function attack(g: Game, m: Monster) {
   }
   if (heavy) {
     p.combo = 0;
+    p.heavyAt = g.now;
     dmg *= 1.5;
     say(g, cx, cy - 22, "SMASH!", "#ffb347", 900);
     burst(g, cx, cy + 8, "#ffb347", 14, 2.6);
@@ -1069,6 +1075,8 @@ export interface DwarfPose {
   glance: boolean;
   dashing: boolean;
   flicker: boolean;
+  air: boolean;
+  stride: number;
 }
 
 export function dwarfPose(g: Game): DwarfPose {
@@ -1097,6 +1105,8 @@ export function dwarfPose(g: Game): DwarfPose {
     glance: idle && now - g.lastInput > 5000 && Math.floor(now / 2200) % 3 === 2,
     dashing: now < p.dashUntil,
     flicker: now < p.invulnUntil && Math.floor(now / 60) % 2 === 0,
+    air,
+    stride: walking ? Math.sin(k * Math.PI) * (lead ? 1 : -1) : 0,
   };
 }
 

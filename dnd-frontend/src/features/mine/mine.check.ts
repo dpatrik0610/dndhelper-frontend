@@ -17,6 +17,7 @@ import {
   takePending,
 } from "./engine";
 import { canAfford, discounted, hpColor } from "./mine";
+import { pickSwing } from "./render";
 import { dreamsFor, engraving, PAGES, SEALS, wickLines } from "./story";
 
 assert.equal(hpColor(1), "rgb(90,200,80)");
@@ -522,3 +523,10 @@ run(dodger, 600);
 assert.equal(dodger.player.hp, hp2, "dashing away dodges the bite");
 assert.ok(dodger.player.nextDash > dodger.now, "the dash has a cooldown");
 console.log("combat ok");
+
+assert.equal(pickSwing(1e9, false).active, false, "a resting pick isn't swinging");
+assert.ok(pickSwing(20, false).off < pickSwing(0, false).off, "the swing winds up first");
+assert.ok(pickSwing(100, false).trail, "the strike leaves a motion trail");
+assert.ok(pickSwing(105, true).off > pickSwing(105, false).off, "a smash swings further");
+assert.ok(pickSwing(105, true).spark && !pickSwing(105, false).spark, "and sparks");
+console.log("pick ok");
