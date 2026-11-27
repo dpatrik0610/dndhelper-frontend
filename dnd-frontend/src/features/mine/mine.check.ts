@@ -765,3 +765,21 @@ console.log("strikes ok");
   assert.notEqual(q.x, startX, "free again, you can walk");
 }
 console.log("enemy traits ok");
+{
+  const g = newGame(
+    -1,
+    ["############", "#..........#", "#..........#", "#..........#", "#..........#", "#0000000000#", "############"],
+    4,
+  );
+  const p = g.player;
+  g.monsters = [];
+  g.nextSpawn = 1e12;
+  g.carried = g.stats.capacity + 1;
+  const y = p.y;
+  step(g, 16, { ...none, jump: true }, null);
+  assert.equal(p.y, y, "too heavy to jump");
+  g.carried = 0;
+  step(g, 16, { ...none, jump: true }, null);
+  assert.notEqual(p.y, y, "light again, you can jump");
+}
+console.log("encumbrance ok");

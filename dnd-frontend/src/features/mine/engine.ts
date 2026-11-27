@@ -35,7 +35,8 @@ const JUMP_MS = 140;
 const HANG_MS = 260;
 const AFK_MS = 60_000;
 const SPAWN_GRACE_MS = 12_000;
-const ENCUMBERED_SLOW = 2.5;
+const ENCUMBERED_SLOW = 4;
+const ENCUMBERED_SWING = 1.6;
 
 export const hardCap = (g: Game) => Math.floor(g.stats.capacity * g.overload);
 export const encumbered = (g: Game) => !g.camp && g.carried > g.stats.capacity;
@@ -601,7 +602,7 @@ export function placeTorch(g: Game) {
 
 function swing(g: Game) {
   const p = g.player;
-  const slow = g.now < p.slowUntil ? 1.5 : 1;
+  const slow = (g.now < p.slowUntil ? 1.5 : 1) * (encumbered(g) ? ENCUMBERED_SWING : 1);
   p.nextSwing = g.now + g.stats.swingMs * slow;
   p.strikeUntil = g.now + 140;
   p.swingAt = g.now;
@@ -1245,7 +1246,10 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
   const ready = g.now >= p.nextSwing;
   const moving = keys.left || keys.right || keys.up || keys.down || keys.jump;
 
-  if (keys.dash && grounded && g.now >= p.nextDash && dash(g, keys)) return;
+  const heavy = encumbered(g);
+  if ((keys.jump || keys.dash) && heavy && grounded)
+    sayOnce(g, "nojump", "Too heavy to jump or dash. Bank the ore, or sell some to Moss.", "#ffb347");
+  if (keys.dash && grounded && !heavy && g.now >= p.nextDash && dash(g, keys)) return;
 
   if (aim) {
     const dx = aim.x - (x + 0.5);
@@ -1262,7 +1266,7 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
 
   if (g.now < p.rootUntil && (keys.jump || keys.left || keys.right || keys.up || keys.down)) return;
 
-  if (keys.jump && grounded && isOpen(g, x, y - 2)) {
+  if (keys.jump && grounded && !heavy && isOpen(g, x, y - 2)) {
     const high = g.stats.setBonus === 8 && isOpen(g, x, y - 3);
     p.hangUntil = g.now + JUMP_MS * (high ? 1.6 : 1) + HANG_MS;
     g.sfx.push("jump");
@@ -1690,7 +1694,7 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
     p.burnUntil = Math.max(p.burnUntil, g.now + 400);
     sayOnce(g, "hotOre", "Flametouched Iron scorches your boots! Don't stand on it.", "#ff8a33");
   }
-  if (p.hp < max * LOW_HP && g.now >= p.nextSweat && !g.asleep) {
+  if ((p.hp < max * LOW_HP || encumbered(g)) && g.now >= p.nextSweat && !g.asleep) {
     p.nextSweat = g.now + SWEAT_MS;
     g.parts.push({
       x: (p.x + 0.5 + p.face * 0.25) * T,

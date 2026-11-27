@@ -26,6 +26,7 @@ import {
   CHARTED,
   TORCH_LIGHT,
   trapCycle,
+  encumbered,
   GOLEM_KIND,
   SLAM_RANGE,
   SLAM_WINDUP_MS,
@@ -781,6 +782,8 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       const bx = (face < 0 ? px - 14 : px) + pose.lean * face;
       const top = feet - 20;
       const alpha = pose.flicker ? 0.45 : 1;
+      if (encumbered(g))
+        write("ENCUMBERED", px + 7, top - 6, "#ffb347", 0.75 + 0.25 * Math.sin(g.now / 160), 7);
       if (pose.dashing) {
         const ghost = cached(`${key}ghost`, () => tint(parts.body, "#9fe6ff"));
         for (const k of [0.66, 0.33]) {

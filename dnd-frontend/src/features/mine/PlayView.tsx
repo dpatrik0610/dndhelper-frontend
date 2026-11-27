@@ -721,7 +721,7 @@ export function PlayView({
               </div>
               {full && (
                 <span className={styles.encumbered}>
-                  Encumbered: moving slowly. {carried >= maxCarry ? "Can't carry more." : `Can carry up to ${compact(maxCarry)}.`}
+                  Encumbered: crawling, no jumping or dashing, slower swings. {carried >= maxCarry ? "Can't carry more." : `Can carry up to ${compact(maxCarry)}.`}
                 </span>
               )}
               <div className={styles.satchelList}>
