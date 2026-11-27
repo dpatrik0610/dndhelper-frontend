@@ -106,7 +106,7 @@ const STAT_SPECS: Record<SlotKey, { stats: StatSpec[]; perks: Perk[] }> = {
 };
 
 export const dashHit = (s: MiningStats) =>
-  Math.round((s.setBonus === 10 ? critHit(s) : s.power * (s.setBonus === 9 ? 2 : 1)) * s.dashMult);
+  Math.round((s.setBonus === 10 ? critHit(s) : s.power * (s.setBonus === 9 ? 2 : 1)) * (s.dashMult ?? 1));
 
 export const characterSheet = (s: MiningStats) =>
   GEAR_SLOTS.map((slot) => ({

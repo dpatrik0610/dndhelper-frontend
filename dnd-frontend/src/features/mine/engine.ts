@@ -45,7 +45,7 @@ export const encumbered = (g: Game) => !g.camp && g.carried > g.stats.capacity;
 export const burden = (g: Game) =>
   encumbered(g) ? Math.min(1, (g.carried - g.stats.capacity) / Math.max(1, hardCap(g) - g.stats.capacity)) : 0;
 const DASH_MS = 110;
-export const dashCooldown = (g: Game) => g.stats.dashMs;
+export const dashCooldown = (g: Game) => g.stats.dashMs ?? 1200;
 export const dashColor = (set: number) => (set > 0 ? (SETS[set].gem ?? SETS[set].base) : "#9fe6ff");
 const IFRAME_MS = 380;
 const COMBO_MS = 1100;
@@ -1181,7 +1181,7 @@ function dash(g: Game, keys: Keys) {
   const set = g.stats.setBonus;
   const d = keys.left ? -1 : keys.right ? 1 : p.face;
   let to = p.x;
-  for (let k = 1; k <= g.stats.dashTiles; k++) {
+  for (let k = 1; k <= (g.stats.dashTiles ?? 2); k++) {
     const nx = p.x + d * k;
     if (!isOpen(g, nx, p.y) || !isOpen(g, nx, p.y - 1)) break;
     to = nx;
