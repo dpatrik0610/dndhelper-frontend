@@ -209,22 +209,28 @@ export default function QuestsPage() {
     }
   };
 
-  const handleDeleteQuest = async (id: string, title: string) => {
-    if (window.confirm(`Are you sure you want to delete the quest: "${title}"?`)) {
-      try {
-        await remove(id);
-        showNotification({
-          title: "Quest Deleted",
-          message: `Successfully deleted quest: ${title}`,
-          color: SectionColor.Green,
-        });
-      } catch (err) {
-        showNotification({
-          title: "Error Deleting Quest",
-          message: err instanceof Error ? err.message : "An unexpected error occurred.",
-          color: SectionColor.Red,
-        });
-      }
+  const [pendingDelete, setPendingDelete] = useState<
+    { kind: "quest"; id: string; label: string } | { kind: "objective"; questId: string; id: string; label: string } | null
+  >(null);
+  const [deletingBusy, setDeletingBusy] = useState(false);
+
+  const handleDeleteQuest = (id: string, title: string) => setPendingDelete({ kind: "quest", id, label: title });
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeletingBusy(true);
+    try {
+      if (pendingDelete.kind === "quest") await remove(pendingDelete.id);
+      else await deleteObjective(pendingDelete.questId, pendingDelete.id);
+      setPendingDelete(null);
+    } catch (err) {
+      showNotification({
+        title: pendingDelete.kind === "quest" ? "Couldn't delete the quest" : "Couldn't delete the objective",
+        message: err instanceof Error ? err.message : "Check your connection and try again.",
+        color: SectionColor.Red,
+      });
+    } finally {
+      setDeletingBusy(false);
     }
   };
 
@@ -245,8 +251,9 @@ export default function QuestsPage() {
     await updateObjective(questId, obj);
   };
 
-  const handleDeleteObjectiveInline = async (questId: string, objectiveId: string) => {
-    await deleteObjective(questId, objectiveId);
+  const handleDeleteObjectiveInline = (questId: string, objectiveId: string) => {
+    const description = quests.find((q) => q.id === questId)?.objectives?.find((o) => o.id === objectiveId)?.description;
+    setPendingDelete({ kind: "objective", questId, id: objectiveId, label: description || "this objective" });
   };
 
   const handleToggleObjectiveComplete = async (questId: string, obj: QuestObjective) => {
@@ -486,6 +493,20 @@ export default function QuestsPage() {
         onAdjustProgress={handleAdjustProgress}
         onViewEquipment={handleInspectEquipment}
       />
+
+      <BaseModal
+        opened={pendingDelete != null}
+        onClose={() => !deletingBusy && setPendingDelete(null)}
+        title={pendingDelete?.kind === "objective" ? "Delete objective" : "Delete quest"}
+        size="sm"
+        loading={deletingBusy}
+        onSave={() => void confirmDelete()}
+        saveLabel="Delete"
+      >
+        <Text size="sm">
+          Delete <strong>{pendingDelete?.label}</strong>? This can't be undone.
+        </Text>
+      </BaseModal>
 
       <EquipmentModal
         opened={equipmentModalOpened}

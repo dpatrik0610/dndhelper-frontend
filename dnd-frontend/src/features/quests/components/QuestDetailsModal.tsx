@@ -18,7 +18,7 @@ interface QuestDetailsModalProps {
   isPersonal: boolean;
   onAddObjective: (questId: string, description: string, threshold: number, progress: number) => Promise<void>;
   onEditObjective: (questId: string, obj: QuestObjective) => Promise<void>;
-  onDeleteObjective: (questId: string, objectiveId: string) => Promise<void>;
+  onDeleteObjective: (questId: string, objectiveId: string) => void;
   onToggleObjective: (questId: string, obj: QuestObjective) => Promise<void>;
   onAdjustProgress: (questId: string, obj: QuestObjective, amount: number) => Promise<void>;
   onViewEquipment: (equipmentId: string) => void;

@@ -51,7 +51,8 @@ export function QuestObjectiveItem({
                 variant="subtle"
                 color={obj.isCompleted ? "#10b981" : "rgba(255, 255, 255, 0.4)"}
                 onClick={() => onToggle?.(questId, obj)}
-                style={{ cursor: "pointer" }}
+                aria-label={obj.isCompleted ? "Mark objective not done" : "Mark objective done"}
+                aria-pressed={obj.isCompleted}
               >
                 {obj.isCompleted ? <IconCircleCheck size={18} /> : <IconCircle size={18} />}
               </ActionIcon>
@@ -93,6 +94,7 @@ export function QuestObjectiveItem({
                     variant="subtle"
                     disabled={obj.currentProgress === 0}
                     onClick={() => onAdjustProgress?.(questId, obj, -1)}
+                    aria-label="Decrease progress"
                     styles={{ root: { color: "var(--theme-color-text-secondary)" } }}
                   >
                     <IconMinus size={12} />
@@ -102,6 +104,7 @@ export function QuestObjectiveItem({
                     variant="subtle"
                     disabled={obj.isCompleted}
                     onClick={() => onAdjustProgress?.(questId, obj, 1)}
+                    aria-label="Increase progress"
                     styles={{ root: { color: "var(--theme-color-accent-primary)" } }}
                   >
                     <IconPlus size={12} />
@@ -113,6 +116,7 @@ export function QuestObjectiveItem({
                 variant="subtle"
                 color="var(--theme-color-accent-primary, #f59e0b)"
                 onClick={() => onEdit?.(questId, obj)}
+                aria-label="Edit objective"
               >
                 <IconEdit size={12} />
               </ActionIcon>
@@ -121,6 +125,7 @@ export function QuestObjectiveItem({
                 variant="subtle"
                 color="red"
                 onClick={() => onDelete?.(questId, obj.id)}
+                aria-label="Delete objective"
               >
                 <IconTrash size={12} />
               </ActionIcon>
