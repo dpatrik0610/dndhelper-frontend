@@ -45,7 +45,7 @@ export const encumbered = (g: Game) => !g.camp && g.carried > g.stats.capacity;
 export const burden = (g: Game) =>
   encumbered(g) ? Math.min(1, (g.carried - g.stats.capacity) / Math.max(1, hardCap(g) - g.stats.capacity)) : 0;
 const DASH_MS = 110;
-const DASH_COOLDOWN_MS = 1200;
+export const DASH_COOLDOWN_MS = 1200;
 const IFRAME_MS = 380;
 const COMBO_MS = 1100;
 const HITSTUN_MS = 260;

@@ -26,6 +26,7 @@ import {
   CHARTED,
   TORCH_LIGHT,
   trapCycle,
+  DASH_COOLDOWN_MS,
   encumbered,
   burden,
   OVERLOADED,
@@ -787,6 +788,18 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       if (encumbered(g)) {
         const over = burden(g) >= OVERLOADED;
         write(over ? "OVERLOADED" : "ENCUMBERED", px + 7, top - 6, over ? "#ff6a4a" : "#ffb347", 0.75 + 0.25 * Math.sin(g.now / 160), 7);
+      }
+      const recharge = (p.nextDash - g.now) / DASH_COOLDOWN_MS;
+      const sinceReady = g.now - p.nextDash;
+      if (recharge > 0 || (p.nextDash > 0 && sinceReady < 300)) {
+        const bx0 = Math.round(px + 1);
+        const by0 = top - 4;
+        ctx.globalAlpha = recharge > 0 ? 0.9 : 1 - sinceReady / 300;
+        ctx.fillStyle = "#1c1410";
+        ctx.fillRect(bx0 - 1, by0 - 1, 14, 4);
+        ctx.fillStyle = recharge > 0 ? "#4a7f96" : "#e8fbff";
+        ctx.fillRect(bx0, by0, Math.round(12 * (1 - Math.max(0, recharge))), 2);
+        ctx.globalAlpha = 1;
       }
       if (pose.dashing) {
         const ghost = cached(`${key}ghost`, () => tint(parts.body, "#9fe6ff"));
