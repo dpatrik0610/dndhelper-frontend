@@ -18,6 +18,7 @@ import {
   lightRadius,
   placeTorch,
   placeTraps,
+  addMonster,
   burden,
   strikable,
   showLoot,
@@ -824,3 +825,31 @@ console.log("loot pile ok");
   assert.equal(p.hp, hp, "once you pull the lift lever, nothing down there can hurt you");
 }
 console.log("lift ok");
+{
+  const open = ["############", "#..........#", "#..........#", "#..........#", "#..........#", "#0000000000#", "############"];
+  const fresh = () => {
+    const g = newGame(-1, open, 4);
+    g.monsters = [];
+    g.nextSpawn = 1e12;
+    g.player.x = 5;
+    return g;
+  };
+  const walkRight = (g: Game) => {
+    g.player.nextSwing = g.now + 99999;
+    step(g, 16, { ...none, right: true }, null);
+    return g.player.x;
+  };
+
+  const g1 = fresh();
+  addMonster(g1, 1, 5, 4);
+  assert.equal(walkRight(g1), 6, "a monster on your own tile doesn't pin you");
+
+  const g2 = fresh();
+  addMonster(g2, 1, 6, 4);
+  assert.equal(walkRight(g2), 5, "a monster in the way blocks you while your swing recovers");
+
+  const g3 = fresh();
+  addMonster(g3, 1, 6, 4).stunUntil = g3.now + 1000;
+  assert.equal(walkRight(g3), 6, "you can slip past a staggered monster");
+}
+console.log("movement ok");

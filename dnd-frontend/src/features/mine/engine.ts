@@ -261,6 +261,7 @@ export const SKITTER_KIND = 1;
 export const KOBOLD_KIND = 2;
 export const SALAMANDER_TRAIL_MS = 3000;
 export const ENGULF_MS = 1000;
+const ENGULF_GRACE_MS = 2000;
 export const XORN_KIND = 9;
 export const GOLEM_KIND = 10;
 export const SLAM_RANGE = 3;
@@ -806,7 +807,7 @@ const inMotherlode = (g: Game, i: number) =>
 export const nearMotherlode = (g: Game) =>
   !g.camp && !g.richFound && g.motherlode >= 0 && distTo(g, g.motherlode, g.player.x, g.player.y) <= HUM_RADIUS;
 
-function addMonster(g: Game, kind: number, x: number, y: number, gen = 0) {
+export function addMonster(g: Game, kind: number, x: number, y: number, gen = 0) {
   const spec = KINDS[kind];
   const hp = Math.max(1, Math.round(g.info.monsterHp * spec.hp * 0.5 ** gen));
   const m: Monster = {
@@ -1283,9 +1284,13 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
   if (keys.left || keys.right) {
     const d = keys.left ? -1 : 1;
     if (!aim) p.face = d;
-    const m = liveMonsters(g).find((mm) => strikable(p, mm, d));
-    if (m) return ready && !aim ? attack(g, m) : undefined;
+    const foe = liveMonsters(g).find((mm) => strikable(p, mm, d));
+    if (foe && ready && !aim) return attack(g, foe);
     const nx = x + d;
+    const blocked = liveMonsters(g).some(
+      (mm) => mm.x === nx && (mm.y === y || mm.y === y - 1) && g.now >= mm.stunUntil && mm.dmg > 0,
+    );
+    if (blocked) return;
     if (isOpen(g, nx, y) && isOpen(g, nx, y - 1)) {
       if (grounded) dust(g, x + 0.5 - d * 0.3, y + 1, 1);
       return tweenTo(p, nx, y, WALK_MS);
@@ -1558,7 +1563,7 @@ function stepMonsters(g: Game, dt: number) {
         hurt(g, m.dmg);
         if (p.hp < before && m.kind === 3) p.slowUntil = g.now + 3000;
         if (p.hp < before && m.kind === 7) p.burnUntil = g.now + 3000;
-        if (p.hp < before && m.kind === CUBE_KIND) {
+        if (p.hp < before && m.kind === CUBE_KIND && g.now > p.rootUntil + ENGULF_GRACE_MS) {
           p.rootUntil = g.now + ENGULF_MS;
           say(g, (p.x + 0.5) * T, (p.y - 2) * T, "Engulfed!", "#9be07a", ENGULF_MS);
         }
