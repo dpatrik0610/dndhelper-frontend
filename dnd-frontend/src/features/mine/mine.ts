@@ -29,6 +29,82 @@ export const statLine = (slot: SlotKey, s: MiningStats) => {
   }
 };
 
+type StatSpec = { label: string; value: (s: MiningStats) => number; show: (n: number) => string; gain?: (d: number) => string };
+type Perk = { label: string; on: (s: MiningStats) => boolean };
+
+const pct = (n: number) => `${Math.round(n * 100)}%`;
+
+const STAT_SPECS: Record<SlotKey, { stats: StatSpec[]; perks: Perk[] }> = {
+  pickaxe: {
+    stats: [
+      { label: "Damage", value: (s) => s.power, show: compact },
+      { label: "Breaks to depth", value: (s) => s.maxDepth, show: String },
+      { label: "Reach", value: (s) => s.reach, show: (n) => `${n} block${n === 1 ? "" : "s"}` },
+    ],
+    perks: [
+      { label: "Digs 2×2", on: (s) => s.wide },
+      { label: "Cracks along whole veins", on: (s) => s.vein },
+    ],
+  },
+  gauntlets: {
+    stats: [{ label: "Swings / sec", value: (s) => 1000 / s.swingMs, show: (n) => n.toFixed(2) }],
+    perks: [],
+  },
+  helm: {
+    stats: [
+      { label: "Light", value: (s) => s.light, show: (n) => `${n.toFixed(1)} blocks`, gain: (d) => `+${d.toFixed(1)}` },
+      { label: "Health", value: (s) => s.maxHp, show: compact },
+      { label: "Ore sense", value: (s) => s.oreSight, show: (n) => (n ? `${n} blocks` : "none") },
+    ],
+    perks: [],
+  },
+  charm: {
+    stats: [
+      { label: "Crit chance", value: (s) => s.critZone, show: pct, gain: (d) => `+${pct(d)}` },
+      { label: "Crit power", value: (s) => s.critMult, show: (n) => `×${n}`, gain: (d) => `+${+d.toFixed(2)}×` },
+      { label: "Luck", value: (s) => s.luck, show: (n) => `+${pct(n)}`, gain: (d) => `+${pct(d)}` },
+    ],
+    perks: [{ label: "Crits spark into the next block", on: (s) => s.chainCrit }],
+  },
+  satchel: {
+    stats: [
+      { label: "Ore per block", value: (s) => s.yield, show: (n) => `×${n}`, gain: (d) => `+${+d.toFixed(2)}×` },
+      { label: "Carries", value: (s) => s.capacity, show: compact },
+    ],
+    perks: [],
+  },
+};
+
+export interface StatRow {
+  label: string;
+  now: string;
+  next: string;
+  gain: string | null;
+}
+
+export const statRows = (slot: SlotKey, now: MiningStats, next: MiningStats) => {
+  const spec = STAT_SPECS[slot];
+  const rows: StatRow[] = spec.stats
+    .map((st) => {
+      const a = st.value(now);
+      const b = st.value(next);
+      if (a === 0 && b === 0) return null;
+      const diff = b - a;
+      const gain =
+        diff <= 1e-9
+          ? null
+          : st.gain
+            ? st.gain(diff)
+            : Number.isInteger(diff)
+              ? `+${compact(diff)}`
+              : `+${a ? Math.round((diff / a) * 100) : 100}%`;
+      return { label: st.label, now: st.show(a), next: st.show(b), gain };
+    })
+    .filter((r): r is StatRow => !!r);
+  const perks = spec.perks.filter((p) => p.on(next)).map((p) => ({ label: p.label, fresh: !p.on(now) }));
+  return { rows, perks };
+};
+
 const HP_STOPS = [
   [224, 64, 48],
   [240, 140, 40],

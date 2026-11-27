@@ -1,5 +1,5 @@
 import type { Icon } from "@tabler/icons-react";
-import { IconBook, IconBook2, IconDashboard, IconShieldLock, IconDice5, IconHome, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconCompass, IconChartBar, IconMusic } from "@tabler/icons-react";
+import { IconBook, IconBook2, IconDashboard, IconShieldLock, IconDice5, IconHome, IconNotes, IconSparkles, IconSwords, IconUsers, IconBuildingStore, IconCompass, IconChartBar, IconMusic, IconPick, IconTrophy } from "@tabler/icons-react";
 
 export interface NavItemData {
   link: string;
@@ -38,6 +38,13 @@ export const navSections: NavSectionData[] = [
       { link: "/polls", label: "Polls", icon: IconChartBar },
       { link: "/chronicle", label: "Chronicle", icon: IconBook },
       { link: "/rules", label: "Rules", icon: IconBook2 },
+    ],
+  },
+  {
+    label: "Games",
+    items: [
+      { link: "/mine", label: "Deepdelve", icon: IconPick },
+      { link: "/scoreboard", label: "Scoreboard", icon: IconTrophy },
     ],
   },
   {

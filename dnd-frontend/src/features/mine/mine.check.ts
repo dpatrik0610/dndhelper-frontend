@@ -20,7 +20,7 @@ import {
   step,
   takePending,
 } from "./engine";
-import { canAfford, discounted, hpColor } from "./mine";
+import { canAfford, discounted, hpColor, statRows } from "./mine";
 import { pickSwing } from "./render";
 import { dreamsFor, engraving, PAGES, SEALS, wickLines } from "./story";
 
@@ -641,3 +641,15 @@ for (const L of FORGE_LEVELS)
     assert.ok(!s.flat().includes("#ff00ff"), `forge ${L.level} palette`);
   }
 console.log("forge ok");
+
+{
+  const base = { power: 10, swingMs: 500, light: 3, maxHp: 50, critZone: 0.2, critMult: 2, luck: 0.1, yield: 1, capacity: 100, maxDepth: 3, reach: 1, wide: false, vein: false, oreSight: 0, chainCrit: false } as unknown as MiningStats;
+  const pick = statRows("pickaxe", base, { ...base, power: 20, wide: true });
+  assert.equal(pick.rows.find((r) => r.label === "Damage")?.gain, "+10");
+  assert.equal(pick.rows.find((r) => r.label === "Reach")?.gain, null);
+  assert.deepEqual(pick.perks, [{ label: "Digs 2×2", fresh: true }]);
+  const charm = statRows("charm", base, { ...base, critZone: 0.25 });
+  assert.equal(charm.rows.find((r) => r.label === "Crit chance")?.gain, "+5%");
+  assert.equal(statRows("helm", base, base).rows.some((r) => r.label === "Ore sense"), false);
+}
+console.log("stat rows ok");

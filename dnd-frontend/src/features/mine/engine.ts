@@ -23,6 +23,7 @@ const MOTHERLODE_RADIUS = 4.5;
 const HUM_RADIUS = 12;
 export const MIMIC_KIND = 11;
 export const CUBE_KIND = 8;
+export const SALAMANDER_KIND = 7;
 const CUBE_GENS = 2;
 export const BOLT_MS = 2500;
 
@@ -148,6 +149,7 @@ export interface Pending {
   ladders: number[];
   torches: number[];
   kills: number;
+  salamanders: number;
   mimics: number[];
   drank: number;
   feats: Record<string, number>;
@@ -463,6 +465,7 @@ export const emptyPending = (): Pending => ({
   ladders: [],
   torches: [],
   kills: 0,
+  salamanders: 0,
   mimics: [],
   drank: 0,
   feats: {},
@@ -848,7 +851,10 @@ function killMonster(g: Game, m: Monster, by: string | null) {
   if (m.kind === MIMIC_KIND) {
     g.pending.mimics.push(m.cell);
     burst(g, (m.x + 0.5) * T, (m.y + 0.5) * T, "#ffd77a", 30, 3);
-  } else if (!m.gen) g.pending.kills++;
+  } else if (!m.gen) {
+    g.pending.kills++;
+    if (m.kind === SALAMANDER_KIND) g.pending.salamanders++;
+  }
   if (!m.gen) feat(g, `kill${m.kind}`);
   if (m.gen >= CUBE_GENS) feat(g, "cubelet");
   if (by) feat(g, "petKill");

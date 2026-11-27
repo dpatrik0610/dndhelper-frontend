@@ -72,7 +72,6 @@ const SuperAdminConsole = lazy(adminPages.superAdmin);
 const Login = lazy(() => import("@features/auth/login/Login"));
 const Register = lazy(() => import("@features/auth/register/Register"));
 const NotFound = lazy(() => import("@features/notFound/NotFound"));
-// Hidden: no nav link and not prefetched, only reachable by typing /scoreboard.
 const ScoreboardPage = lazy(() => import("@features/scoreboard/ScoreboardPage"));
 const MinePage = lazy(() => import("@features/mine/MinePage"));
 

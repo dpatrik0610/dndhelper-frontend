@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { type CSSProperties, useState } from "react";
 import { Tooltip } from "@mantine/core";
-import { IconLock, IconPin, IconPinFilled, IconX } from "@tabler/icons-react";
+import { IconArrowRight, IconLock, IconPin, IconPinFilled, IconX } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import {
   buyPet,
@@ -14,11 +14,12 @@ import {
   upgradeForge,
 } from "@services/miningService";
 import { FORGE_LEVELS, forgeSprite } from "./art/forge";
-import { GEAR_SLOTS, item, itemName } from "./art/gear";
+import { MATERIALS } from "./art/materials";
+import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { ENEMIES, potionSprite, scrollSprite } from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
-import { canAfford, compact, discounted, statLine, tiersOf } from "./mine";
+import { canAfford, compact, discounted, statRows, tiersOf } from "./mine";
 import { oreIcon } from "./render";
 import { play, type Sfx } from "./sound";
 import { Sprite } from "./Sprite";
@@ -27,16 +28,26 @@ import styles from "./Mine.module.css";
 
 type MenuProps = { config: MiningConfig; state: MiningState; onState: (s: MiningState) => void };
 
+export const resourceOf = (config: MiningConfig, key: string) => {
+  const i = config.ores.findIndex((o) => o.key === key);
+  if (i >= 0) return { name: config.ores[i].name, grid: oreIcon(i), special: false };
+  const m = MATERIALS[key];
+  return { name: m?.name ?? key, grid: m?.grid ?? oreIcon(0), special: true };
+};
+
 function Cost({ cost, ores, config }: { cost: OreCounts; ores: OreCounts; config: MiningConfig }) {
   return (
     <div className={styles.costs}>
       {Object.entries(cost).map(([key, need]) => {
-        const i = config.ores.findIndex((o) => o.key === key);
+        const r = resourceOf(config, key);
         const have = ores[key] ?? 0;
         return (
-          <span key={key} className={`${styles.cost} ${have >= need ? styles.costOk : ""}`}>
-            <Sprite grid={oreIcon(i)} scale={1} />
-            {compact(Math.min(have, need))} / {compact(need)} {config.ores[i]?.name}
+          <span
+            key={key}
+            className={`${styles.cost} ${have >= need ? styles.costOk : ""} ${r.special ? styles.costSpecial : ""}`}
+          >
+            <Sprite grid={r.grid} scale={1} />
+            {compact(Math.min(have, need))} / {compact(need)} {r.name}
           </span>
         );
       })}
@@ -151,12 +162,12 @@ export function TripSummary({ config, state, onState, report, onClose }: MenuPro
         {haul.length > 0 && (
           <div className={styles.satchelList}>
             {haul.map(([key, n]) => {
-              const i = config.ores.findIndex((o) => o.key === key);
+              const r = resourceOf(config, key);
               const fresh = report.fresh.includes(key);
               return (
-                <span key={key} className={`${styles.satchelItem} ${fresh ? styles.freshOre : ""}`} title={config.ores[i]?.name}>
-                  <Sprite grid={oreIcon(i)} scale={2} />
-                  {compact(n)} {config.ores[i]?.name}
+                <span key={key} className={`${styles.satchelItem} ${fresh ? styles.freshOre : ""}`} title={r.name}>
+                  <Sprite grid={r.grid} scale={2} />
+                  {compact(n)} {r.name}
                   {fresh && " · NEW"}
                 </span>
               );
@@ -347,49 +358,86 @@ export function ForgeMenu({ config, state, onState }: MenuProps) {
           const next = slot.tiers[tier + 1];
           const cost = next?.cost ? discounted(next.cost, forge.discount) : null;
           const capped = !!next && next.tier > forge.maxTier;
+          const change = next ? statRows(key, slot.tiers[tier].stats, next.stats) : null;
+          const glow = next ? (SETS[next.tier].accent ?? SETS[next.tier].gem ?? SETS[next.tier].base) : undefined;
           return (
             <div key={key} className={styles.slot}>
-              <Sprite grid={item(key, tier)} scale={3} label={itemName(key, tier)} />
-              <div className={styles.slotBody}>
-                <div className={styles.slotName}>
-                  {itemName(key, tier)}
-                  <span className={styles.tier}>{tier} / 10</span>
+              <span className={styles.eyebrow}>{slot.noun}</span>
+              <div className={styles.compare}>
+                <div className={styles.gearCard}>
+                  <span className={styles.gearTag}>Now</span>
+                  <Sprite grid={item(key, tier)} scale={3} label={itemName(key, tier)} />
+                  <b className={styles.gearName}>{itemName(key, tier)}</b>
+                  <span className={styles.tier}>Tier {tier}</span>
                 </div>
-                <div className={styles.slotStat}>{statLine(key, slot.tiers[tier].stats)}</div>
-                {next && cost ? (
+                {next ? (
                   <>
-                    <div className={styles.slotNext}>
-                      <Sprite grid={item(key, tier + 1)} scale={1} /> {itemName(key, tier + 1)} →{" "}
-                      {statLine(key, next.stats)}
+                    <IconArrowRight size={22} className={styles.compareArrow} aria-hidden />
+                    <div
+                      className={`${styles.gearCard} ${styles.gearNext}`}
+                      style={{ "--glow": glow } as CSSProperties}
+                    >
+                      <span className={styles.gearTag}>Next</span>
+                      <Sprite grid={item(key, tier + 1)} scale={3} label={itemName(key, tier + 1)} />
+                      <b className={styles.gearName}>{itemName(key, tier + 1)}</b>
+                      <span className={styles.tier}>Tier {tier + 1}</span>
                     </div>
-                    {capped ? (
-                      <div className={styles.dim}>Needs a hotter forge (level {Math.ceil(next.tier / 2)}).</div>
-                    ) : (
-                      <>
-                        <Cost cost={cost} ores={state.ores} config={config} />
-                        <div className={styles.btnRow}>
-                          <button
-                            type="button"
-                            className={`glass-btn-primary ${styles.actBtn}`}
-                            disabled={busy || !canAfford(cost, state.ores)}
-                            onClick={() =>
-                              void run(
-                                () => craftGear(key),
-                                () => `Forged: ${itemName(key, tier + 1)}`,
-                              )
-                            }
-                          >
-                            Forge
-                          </button>
-                          <PinButton id={`gear:${key}`} />
-                        </div>
-                      </>
-                    )}
                   </>
                 ) : (
-                  <div className={styles.dim}>Masterwork. Nothing left to forge.</div>
+                  <span className={styles.dim}>Masterwork. Nothing left to forge.</span>
                 )}
               </div>
+              {change && (
+                <table className={styles.deltaTable}>
+                  <tbody>
+                    {change.rows.map((r) => (
+                      <tr key={r.label} className={r.gain ? styles.deltaUp : ""}>
+                        <th scope="row">{r.label}</th>
+                        <td>{r.now}</td>
+                        <td aria-hidden>→</td>
+                        <td className={styles.deltaNext}>{r.next}</td>
+                        <td className={styles.deltaGain}>{r.gain ?? "same"}</td>
+                      </tr>
+                    ))}
+                    {change.perks.map((p) => (
+                      <tr key={p.label} className={p.fresh ? styles.deltaPerk : ""}>
+                        <th scope="row" colSpan={4}>
+                          {p.label}
+                        </th>
+                        <td className={styles.deltaGain}>{p.fresh ? "NEW" : "kept"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+              {next && cost && (
+                capped ? (
+                  <div className={styles.dim}>
+                    <IconLock size={12} /> Needs a hotter forge:{" "}
+                    {config.forges.find((f) => f.maxTier >= next.tier)?.name ?? "a better one"}.
+                  </div>
+                ) : (
+                  <>
+                    <Cost cost={cost} ores={state.ores} config={config} />
+                    <div className={styles.btnRow}>
+                      <button
+                        type="button"
+                        className={`glass-btn-primary ${styles.actBtn}`}
+                        disabled={busy || !canAfford(cost, state.ores)}
+                        onClick={() =>
+                          void run(
+                            () => craftGear(key),
+                            () => `Forged: ${itemName(key, tier + 1)}`,
+                          )
+                        }
+                      >
+                        Forge {itemName(key, tier + 1)}
+                      </button>
+                      <PinButton id={`gear:${key}`} />
+                    </div>
+                  </>
+                )
+              )}
             </div>
           );
         })}
@@ -502,6 +550,17 @@ export function OrePouch({ config, state }: { config: MiningConfig; state: Minin
           </Tooltip>
         );
       })}
+      {Object.entries(MATERIALS).map(([key, m]) =>
+        state.ores[key] ? (
+          <Tooltip key={key} multiline w={240} withArrow label={m.lore}>
+            <div className={`${styles.oreCell} ${styles.oreSpecial}`}>
+              <Sprite grid={m.grid} scale={1} />
+              <span className={styles.oreName}>{m.name}</span>
+              <span className={styles.oreCount}>{compact(state.ores[key] ?? 0)}</span>
+            </div>
+          </Tooltip>
+        ) : null,
+      )}
     </div>
   );
 }

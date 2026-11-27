@@ -132,7 +132,7 @@ export const ENEMIES: Enemy[] = [
     name: "Salamander",
     depth: 7,
     threat: "Scorcher",
-    does: "Leaves burning ground behind it. Standing in the flames chips away at you.",
+    does: "Leaves burning ground behind it. Standing in the flames chips away at you. Half of them drop a Magma Core, which Flametouched gear needs.",
     pal: { x: "#1a0806", d: "#7a1c10", m: "#c8381c", l: "#f26b2a", h: "#ffb347", f: "#ffd23f", y: "#fff3a0" },
     rows: pad([
       "..xxx...........",

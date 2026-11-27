@@ -134,6 +134,7 @@ export interface DigRequest {
   kills: number;
   mimics: number[];
   drank: number;
+  salamanders?: number;
   feats?: Record<string, number>;
   unlocked?: string[];
 }
@@ -143,6 +144,7 @@ export interface DigResult {
   drops: OreCounts;
   deepestDepth: number;
   trip: MiningTrip | null;
+  cores?: number;
 }
 
 export interface MiningScore {

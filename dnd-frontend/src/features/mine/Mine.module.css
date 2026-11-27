@@ -3,8 +3,10 @@
   --gold: #f5c542;
   --pixel: "Pixelify Sans", "Courier New", monospace;
   --hud: rgba(12, 10, 18, 0.9);
+  --zoom: 1.2;
+  zoom: var(--zoom);
   width: 100%;
-  height: 100dvh;
+  height: calc(100dvh / var(--zoom));
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -165,6 +167,66 @@
   min-height: 0;
   overflow: hidden;
   background: #030206;
+}
+
+.startScreen {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  padding: 24px;
+  cursor: pointer;
+  color: var(--theme-color-text-primary, #ece5d8);
+  background: radial-gradient(ellipse at 50% 45%, rgba(10, 8, 20, 0.35), rgba(3, 2, 6, 0.82) 75%);
+  font: inherit;
+}
+
+.startScreen:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -6px;
+}
+
+.startTitle {
+  font-family: var(--pixel);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  line-height: 1;
+  color: #ffe7b0;
+  text-shadow:
+    0 3px 0 #3a1a06,
+    0 0 24px rgba(255, 170, 70, 0.55);
+}
+
+.startHint {
+  margin-top: 14px;
+  padding: 8px 18px;
+  border: 1px solid color-mix(in srgb, var(--torch) 70%, transparent);
+  border-radius: 4px;
+  background: rgba(255, 179, 71, 0.12);
+  box-shadow: 0 0 18px -6px var(--torch);
+  font-family: var(--pixel);
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--torch);
+  animation: startPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes startPulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startHint {
+    animation: none;
+  }
 }
 
 .canvas {
@@ -365,34 +427,85 @@
 
 .slots {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 10px;
 }
 
 .slot {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr);
-  gap: 10px;
-  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px;
   border-radius: 6px;
   border: 1px solid #3a3346;
   background: rgba(255, 255, 255, 0.04);
-}
-
-.slotBody {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
   min-width: 0;
 }
 
-.slotName {
-  display: flex;
-  align-items: center;
+.compare {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
   gap: 8px;
+}
+
+.compare > .dim {
+  grid-column: 2 / 4;
+  align-self: center;
+}
+
+.compareArrow {
+  align-self: center;
+  color: var(--torch);
+}
+
+.gearCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #3a3346;
+  background: rgba(0, 0, 0, 0.25);
+  text-align: center;
+  min-width: 0;
+  opacity: 0.75;
+}
+
+.gearNext {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--glow, var(--gold)) 70%, transparent);
+  background:
+    radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--glow, var(--gold)) 22%, transparent), transparent 70%),
+    rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 14px -4px var(--glow, var(--gold));
+}
+
+.gearTag {
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  font-family: var(--pixel);
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.gearNext .gearTag {
+  color: var(--glow, var(--gold));
+  opacity: 1;
+}
+
+.gearName {
   font-family: var(--pixel);
   font-weight: 600;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .tier {
@@ -400,16 +513,54 @@
   color: var(--torch);
 }
 
-.slotStat {
+.deltaTable {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
 }
 
-.slotNext {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  opacity: 0.85;
+.deltaTable th,
+.deltaTable td {
+  padding: 3px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.deltaTable th {
+  opacity: 0.75;
+}
+
+.deltaTable td:nth-child(3) {
+  opacity: 0.4;
+}
+
+.deltaUp th,
+.deltaUp td,
+.deltaPerk th,
+.deltaPerk td {
+  opacity: 1;
+}
+
+.deltaNext {
+  font-weight: 600;
+}
+
+.deltaGain {
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.deltaUp .deltaGain,
+.deltaPerk .deltaGain {
+  color: #9fe09a;
+  font-family: var(--pixel);
+}
+
+.deltaPerk th {
+  color: #ffd77a;
 }
 
 .costs {
@@ -430,6 +581,18 @@
 .costOk {
   opacity: 1;
   color: #9fe09a;
+}
+
+.costSpecial {
+  color: #ffb070;
+}
+
+.costSpecial.costOk {
+  color: #9fe09a;
+}
+
+.oreSpecial .oreName {
+  color: #ffb070;
 }
 
 .actBtn {

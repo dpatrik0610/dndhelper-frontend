@@ -13,6 +13,7 @@ import {
   type MiningState,
   type OreCounts,
 } from "@services/miningService";
+import { MAGMA_CORE, MATERIALS } from "./art/materials";
 import { PET_ART } from "./art/pets";
 import {
   ForgeMenu,
@@ -138,6 +139,15 @@ export function PlayView({
   const [dream, setDream] = useState("");
   const [report, setReport] = useState<TripReport | null>(null);
   const [panel, setPanel] = useState<Panel | null>(null);
+  const [started, setStarted] = useState(false);
+  const startedRef = useRef(false);
+  const begin = useRef(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    setStarted(true);
+    startMusic();
+    play("lift");
+  }).current;
   const [goalOpen, setGoalOpen] = useState(() => localStorage.getItem(GOAL_OPEN_KEY) !== "0");
   const togglePanel = (p: Panel) => setPanel((cur) => (cur === p ? null : p));
   const showGoal = (open: boolean) => {
@@ -165,7 +175,6 @@ export function PlayView({
 
   useEffect(() => {
     preloadSounds();
-    startMusic();
     return stopMusic;
   }, []);
 
@@ -269,6 +278,17 @@ export function PlayView({
               color: "yellow",
               autoClose: 6000,
             });
+        }
+        if (res.cores) {
+          const now = stateRef.current;
+          onState({ ...now, ores: { ...now.ores, [MAGMA_CORE]: (now.ores[MAGMA_CORE] ?? 0) + res.cores } });
+          play("jackpot");
+          showNotification({
+            title: res.cores > 1 ? `${res.cores} Magma Cores` : "Magma Core",
+            message: MATERIALS[MAGMA_CORE].lore,
+            color: "orange",
+            autoClose: 5000,
+          });
         }
         if (res.deepestDepth !== stateRef.current.deepestDepth)
           onState({ ...stateRef.current, deepestDepth: res.deepestDepth });
@@ -380,7 +400,7 @@ export function PlayView({
       canvas.height = Math.ceil(h / scale);
       canvas.style.width = `${canvas.width * scale}px`;
       canvas.style.height = `${canvas.height * scale}px`;
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = (window.devicePixelRatio || 1) * ((stage as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom ?? 1);
       text.width = Math.round(canvas.width * scale * dpr);
       text.height = Math.round(canvas.height * scale * dpr);
       text.style.width = canvas.style.width;
@@ -406,7 +426,11 @@ export function PlayView({
       acc += Math.min(100, now - last);
       last = now;
       while (acc >= STEP_MS) {
-        step(g, STEP_MS, keys.current, aim.current);
+        if (startedRef.current) step(g, STEP_MS, keys.current, aim.current);
+        else {
+          g.now += STEP_MS;
+          g.lastInput = g.now;
+        }
         acc -= STEP_MS;
       }
       for (const name of g.sfx) play(name);
@@ -475,6 +499,13 @@ export function PlayView({
     raf = requestAnimationFrame(frame);
 
     const onKey = (down: boolean) => (e: KeyboardEvent) => {
+      if (!startedRef.current) {
+        if (down && !ignoreKeys(e) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          e.preventDefault();
+          begin();
+        }
+        return;
+      }
       if (down) {
         noteInput(g);
         startMusic();
@@ -499,6 +530,7 @@ export function PlayView({
     const kd = onKey(true);
     const ku = onKey(false);
     const wake = () => {
+      if (!startedRef.current) return;
       noteInput(g);
       startMusic();
     };
@@ -593,6 +625,14 @@ export function PlayView({
         />
 
         <canvas ref={textRef} className={`${styles.canvas} ${styles.textLayer}`} aria-hidden />
+        {!started && (
+          <button type="button" className={styles.startScreen} onClick={begin}>
+            <span className={styles.eyebrow}>Saltbell Isle · beneath the Anvil</span>
+            <span className={styles.startTitle}>The Deepdelve</span>
+            <span className={styles.startHint}>Click to start</span>
+            <span className={styles.dim}>or press any key</span>
+          </button>
+        )}
         <div ref={flashRef} className={styles.hurtFlash} aria-hidden />
 
         <div className={styles.hudLeft}>
