@@ -5,6 +5,7 @@ export interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   body?: unknown
   token?: string
+  keepalive?: boolean
 }
 
 const API_BASE = import.meta.env.VITE_API_BASE
@@ -12,7 +13,7 @@ export async function apiClient<T>(
   endpoint: string, 
   options: ApiOptions = {}
 ): Promise<T> {
-  const { method = 'GET', body, token: explicitToken } = options
+  const { method = 'GET', body, token: explicitToken, keepalive } = options
   const token = explicitToken ?? getAuthTokenSafe();
   const headers: Record<string, string> = {};
 
@@ -31,6 +32,7 @@ export async function apiClient<T>(
     headers,
     body: isForm ? body : body ? JSON.stringify(body) : undefined,
     cache: 'no-store',
+    keepalive,
   })
 
   if (!res.ok) {

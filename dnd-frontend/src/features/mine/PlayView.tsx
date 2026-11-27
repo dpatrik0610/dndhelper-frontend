@@ -4,6 +4,7 @@ import { IconSettings, IconTrophy, IconUserShield } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import {
   ascend,
+  descend,
   dig,
   faint,
   getMiningState,
@@ -108,7 +109,7 @@ const ignoreKeys = (e: KeyboardEvent) => {
 };
 
 const MENU_TITLES: Record<Station, [string, string]> = {
-  lift: ["The lift", "Old Wick works the bell. Pick a depth; every trip down is a fresh shaft."],
+  lift: ["The lift", "Old Wick works the bell. Pick a depth, or press its number key; every trip down is a fresh shaft."],
   forge: ["The forge", "Turn ore into better gear, or rebuild the forge to work harder metals."],
   market: ["Hesk Saltpenny's Market", "Ore for coin, coin for torches and tonics. Hesk weighs everything twice."],
   shop: ["Pip Tinkerwhistle's Menagerie", "One friend follows you down at a time."],
@@ -389,7 +390,7 @@ export function PlayView({
   }, [config, onState, resync]);
 
   const finish = useCallback(
-    async (fainted: boolean) => {
+    async (fainted: boolean, next = 0) => {
       if (leaving.current) return;
       leaving.current = true;
       setBusy(true);
@@ -419,6 +420,7 @@ export function PlayView({
         });
         if (g) g.feats = {};
         onState(s);
+        if (next) onState(await descend(next));
       } catch (e) {
         leaving.current = false;
         if (g) g.riding = false;
@@ -432,6 +434,30 @@ export function PlayView({
 
   const finishRef = useRef(finish);
   finishRef.current = finish;
+
+  const rideTo = async (n: number) => {
+    const g = gameRef.current;
+    if (!g || leaving.current || n > config.depths.length) return;
+    if (n > stateRef.current.deepestDepth) {
+      showNotification({ title: `Depth ${n} is sealed`, message: "Break the seal above it first.", color: "red" });
+      return;
+    }
+    if (!g.camp) return finish(false, n);
+    leaving.current = true;
+    setBusy(true);
+    try {
+      const s = await descend(n);
+      play("lift");
+      onState(s);
+    } catch (e) {
+      leaving.current = false;
+      showNotification({ title: "The lift is stuck", message: (e as Error).message, color: "red" });
+    } finally {
+      setBusy(false);
+    }
+  };
+  const rideRef = useRef(rideTo);
+  rideRef.current = rideTo;
   const flushRef = useRef(flush);
   flushRef.current = flush;
   const onStateRef = useRef(onState);
@@ -609,6 +635,8 @@ export function PlayView({
       if (e.code === "KeyT" && !g.camp) placeTorch(g);
       if (e.code === "KeyF") castBolt(g, g.hover);
       if (e.code === "KeyQ") drinkPotion(g);
+      const floor = /^Digit\d$/.test(e.code) ? Number(e.code.slice(5)) || 10 : 0;
+      if (floor && stationAt(g) === "lift") void rideRef.current(floor);
       const station = e.code === "KeyE" ? stationAt(g) : null;
       if (station && !g.camp && station === "lift") void finishRef.current(false);
       else if (station) setOpened((cur) => (cur === station ? null : station));
@@ -620,6 +648,10 @@ export function PlayView({
       noteInput(g);
       startMusic();
     };
+    const bye = () => {
+      const rest = g.camp || leaving.current ? null : takePending(g);
+      if (rest) void dig(rest, true).catch(() => undefined);
+    };
     const release = () => {
       keys.current = { ...NO_KEYS };
       aim.current = null;
@@ -629,6 +661,7 @@ export function PlayView({
     window.addEventListener("pointerdown", wake);
     window.addEventListener("wheel", wake, { passive: true });
     window.addEventListener("blur", release);
+    window.addEventListener("pagehide", bye);
     const id = setInterval(() => void flushRef.current(), FLUSH_MS);
 
     return () => {
@@ -640,6 +673,7 @@ export function PlayView({
       window.removeEventListener("pointerdown", wake);
       window.removeEventListener("wheel", wake);
       window.removeEventListener("blur", release);
+      window.removeEventListener("pagehide", bye);
       const rest = g.camp ? null : takePending(g);
       if (rest && !leaving.current) void dig(rest).catch(() => undefined);
       gameRef.current = null;
@@ -942,6 +976,9 @@ export function PlayView({
                   <kbd>E</kbd> talk, use, or ride the lift up
                 </span>
                 <span>
+                  <kbd>1</kbd>–<kbd>0</kbd> at the lift: ride to that depth
+                </span>
+                <span>
                   <kbd>Esc</kbd> close panels
                 </span>
               </div>
@@ -987,7 +1024,8 @@ export function PlayView({
                 <div>
                   <h2 className={styles.h2}>The lift</h2>
                   <p className={styles.dim}>
-                    {carried ? `Ride up and bank ${compact(carried)} ore.` : "Ride up to camp. Your satchel is empty."}
+                    {carried ? `Ride up and bank ${compact(carried)} ore.` : "Ride up to camp. Your satchel is empty."} Or
+                    press a depth's number key to bank and ride straight down there.
                   </p>
                 </div>
                 <button

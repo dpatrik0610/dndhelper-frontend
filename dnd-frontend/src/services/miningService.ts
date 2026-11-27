@@ -112,6 +112,8 @@ export interface MiningTrip {
   wares: Record<string, number> | null;
   boons?: string[];
   pile?: OreCounts;
+  hp?: number | null;
+  pos?: number | null;
 }
 
 export interface MiningState {
@@ -158,6 +160,8 @@ export interface DigRequest {
   salamanders?: number;
   feats?: Record<string, number>;
   unlocked?: string[];
+  hp?: number;
+  pos?: number;
 }
 
 export interface DigResult {
@@ -184,12 +188,13 @@ export interface MiningScore {
   achievements?: number;
 }
 
-const post = <T>(path: string, body?: unknown) => apiClient<T>(`/mining/me${path}`, { method: "POST", body });
+const post = <T>(path: string, body?: unknown, keepalive?: boolean) =>
+  apiClient<T>(`/mining/me${path}`, { method: "POST", body, keepalive });
 
 export const getMiningConfig = () => apiClient<MiningConfig>("/mining/config");
 export const getMiningState = () => apiClient<MiningState>("/mining/me");
 export const descend = (depth: number) => post<MiningState>(`/descend/${depth}`);
-export const dig = (req: DigRequest) => post<DigResult>("/dig", req);
+export const dig = (req: DigRequest, keepalive?: boolean) => post<DigResult>("/dig", req, keepalive);
 export const ascend = () => post<MiningState>("/ascend");
 export const faint = () => post<MiningState>("/faint");
 export const craftGear = (slot: SlotKey) => post<MiningState>(`/craft/${slot}`);

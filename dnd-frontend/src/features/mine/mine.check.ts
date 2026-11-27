@@ -27,6 +27,7 @@ import {
   STONE,
   step,
   takePending,
+  loadTrip,
 } from "./engine";
 import { canAfford, characterSheet, discounted, fillUpTo, hpColor, renownBreakdown, statRows } from "./mine";
 import { pickSwing } from "./render";
@@ -139,6 +140,18 @@ for (const b of p.breaks) {
   const hp = rows.join("")[b.i] === "A" ? 10 : 5;
   assert.ok((b.s - b.c) * 3 + b.c * 6 >= hp && b.c <= b.s, "every break carries enough swings for the server");
 }
+
+const reload = newGame(-1);
+const saved = { depth: 1, map: rows.join(""), ladders: [], torches: [], satchel: {} };
+loadTrip(reload, { ...saved, hp: 7, pos: at(5, 2) }, 0);
+assert.deepEqual([reload.player.x, reload.player.y, reload.player.hp], [5, 2, 7], "a reload puts you back where you were, as hurt as you were");
+assert.equal(takePending(reload), null, "nothing to save right after a restore");
+reload.player.hp = 5;
+assert.deepEqual([takePending(reload)?.hp, takePending(reload)], [5, null], "a hit is saved once");
+loadTrip(reload, { ...saved, hp: 99, pos: at(0, 0) }, 0);
+assert.deepEqual([reload.player.x, reload.player.y, reload.player.hp], [3, 2, 20], "a saved spot inside rock falls back to the lift, hp caps at max");
+loadTrip(reload, { ...saved, hp: 0 }, 0);
+assert.ok(reload.fainted, "a reload at zero hp still faints");
 
 g = newGame(-1);
 run(g, 3000, { down: true });

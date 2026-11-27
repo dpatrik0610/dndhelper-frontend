@@ -167,6 +167,8 @@ export interface Pending {
   drank: number;
   feats: Record<string, number>;
   unlocked: string[];
+  hp?: number;
+  pos?: number;
 }
 
 export interface GameSetup {
@@ -220,6 +222,7 @@ export interface Game extends GameSetup {
   carried: number;
   fainted: boolean;
   riding: boolean;
+  sent: { hp: number; pos: number };
   beetle: number;
   nextBeetle: number;
   warned: Set<string>;
@@ -397,6 +400,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     now,
     fainted: false,
     riding: false,
+    sent: { hp: -1, pos: -1 },
     beetle: -1,
     nextBeetle: 0,
     warned: new Set(),
@@ -518,6 +522,14 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.nextSpawn = now + SPAWN_GRACE_MS;
   g.warned.clear();
   place(g, g.liftX);
+  const p = g.player;
+  if (trip.pos != null && g.map[trip.pos] === OPEN) {
+    p.x = p.fromX = trip.pos % g.W;
+    p.y = p.fromY = Math.floor(trip.pos / g.W);
+  }
+  if (trip.hp != null) p.hp = Math.min(g.stats.maxHp, trip.hp);
+  if (p.hp <= 0) g.fainted = true;
+  g.sent = vitals(g);
   for (const i of g.torches) markSeen(g, i % g.W, Math.floor(i / g.W), TORCH_LIGHT);
 }
 
@@ -533,13 +545,18 @@ export const emptyPending = (): Pending => ({
   unlocked: [],
 });
 
+const vitals = (g: Game) => ({ hp: Math.round(g.player.hp * 10) / 10, pos: g.player.y * g.W + g.player.x });
+
 export function takePending(g: Game): Pending | null {
   const p = g.pending;
+  const now = vitals(g);
+  const still = now.hp === g.sent.hp && now.pos === g.sent.pos;
   const quiet = !Object.keys(p.feats).length && !p.unlocked.length;
-  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank && quiet)
+  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank && quiet && still)
     return null;
   g.pending = emptyPending();
-  return p;
+  g.sent = now;
+  return { ...p, ...now };
 }
 
 export function resetPending(g: Game) {
