@@ -17,6 +17,7 @@ export const MIMIC = 38;
 export const IRON_CHEST = 43;
 export const GILDED_CHEST = 94;
 export const GEODE = 37;
+export const DIAMOND_CELL = 64;
 export const CHESTS = [CHEST, IRON_CHEST, GILDED_CHEST];
 export const isChest = (c: number) => c === MIMIC || CHESTS.includes(c);
 const MOTHERLODE_RADIUS = 4.5;
@@ -250,7 +251,7 @@ export const oreOf = (c: number) => (c >= ORE0 && c < ORE0 + 20 ? c - ORE0 : -1)
 export const OUTCLASS_TIERS = 3;
 
 export const minSwings = (c: number, pickTier: number, depth: number) =>
-  (c === STONE ? 2 : c === CHEST || c === IRON_CHEST || c === LEDGER ? 4 : c === GILDED_CHEST || c === GEODE || c === SEAL ? 5 : 3) -
+  (c === STONE ? 2 : c === CHEST || c === IRON_CHEST || c === LEDGER ? 4 : c === GILDED_CHEST || c === GEODE || c === SEAL || c === DIAMOND_CELL ? 5 : 3) -
   (pickTier - (depth - 1) >= OUTCLASS_TIERS ? 1 : 0);
 
 export const hpOf = (g: Game, c: number) =>
@@ -268,7 +269,9 @@ export const hpOf = (g: Game, c: number) =>
               ? g.info.stoneHp * 6
               : c === GEODE
                 ? g.info.stoneHp * 5
-                : oreOf(c) >= 0
+                : c === DIAMOND_CELL
+                  ? g.info.stoneHp * 8
+                  : oreOf(c) >= 0
             ? g.oreHp[oreOf(c)]
             : Number.POSITIVE_INFINITY;
 
@@ -673,7 +676,7 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
   g.sfx.push(
     c === SEAL
       ? "seal"
-      : c === GILDED_CHEST
+      : c === GILDED_CHEST || c === DIAMOND_CELL
         ? "jackpot"
         : isChest(c)
           ? "chest"
@@ -701,6 +704,9 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
   } else if (c === GEODE) {
     say(g, cx, cy - 8, "The geode shatters!", "#c9a6ff", 1800);
     for (const color of ["#c9a6ff", "#7fe3ff", "#ff9ad5", "#ffffff"]) burst(g, cx, cy, color, 12, 2.8);
+  } else if (c === DIAMOND_CELL) {
+    say(g, cx, cy - 10, "A DIAMOND!", "#c4f4ff", 2400);
+    for (const color of ["#ffffff", "#c4f4ff", "#6cc6ea"]) burst(g, cx, cy, color, 20, 3);
   } else if (c === LEDGER) {
     say(g, cx, cy - 8, "A ledger page!", "#f4e2b8", 1600);
     burst(g, cx, cy, "#f4e2b8", 18, 2.2);

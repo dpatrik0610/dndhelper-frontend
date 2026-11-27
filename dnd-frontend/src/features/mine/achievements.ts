@@ -146,6 +146,12 @@ const FIXED: Achievement[] = [
     [1, "Crack the Egg", "Shatter a geode."],
     [25, "Crystal Clear", "Shatter 25 geodes."],
   ]),
+  ...tiers("diamond", "Treasure", "💠", (c) => c.state.mined.diamond ?? 0, [
+    [1, "Diamond in the Rough", "Find a diamond."],
+    [10, "Glittering Hoard", "Find 10 diamonds."],
+    [25, "Heart of the Mountain", "Find 25 diamonds."],
+  ]),
+  ...tiers("diamondkept", "Treasure", "💍", (c) => c.state.ores.diamond ?? 0, [[5, "Not for Sale", "Keep 5 diamonds at once."]]),
   one("mimicwake-1", "Treasure", "😬", "It Has Teeth", "Wake a chest mimic.", feat("mimicWake")),
 
   one("firebolt", "Camp", "📕", "Spark of Genius", "Learn Firebolt from the trader.", (c) => +c.state.firebolt),

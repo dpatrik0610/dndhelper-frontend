@@ -13,7 +13,7 @@ import {
   type MiningState,
   type OreCounts,
 } from "@services/miningService";
-import { MAGMA_CORE, MATERIALS } from "./art/materials";
+import { DIAMOND, MAGMA_CORE, MATERIALS } from "./art/materials";
 import { PET_ART } from "./art/pets";
 import {
   ForgeMenu,
@@ -297,6 +297,21 @@ export function PlayView({
             message: MATERIALS[MAGMA_CORE].lore,
             color: "orange",
             autoClose: 5000,
+          });
+        }
+        if (res.diamonds) {
+          const now = stateRef.current;
+          const n = res.diamonds;
+          onState({
+            ...now,
+            ores: { ...now.ores, [DIAMOND]: (now.ores[DIAMOND] ?? 0) + n },
+            mined: { ...now.mined, [DIAMOND]: (now.mined[DIAMOND] ?? 0) + n },
+          });
+          showNotification({
+            title: n > 1 ? `${n} diamonds!` : "A diamond!",
+            message: `It's safe in your stores already. Hesk pays ${compact(now.prices[DIAMOND] ?? 0)} coins apiece, or keep it for your collection.`,
+            color: "cyan",
+            autoClose: 6000,
           });
         }
         if (!res.trip || res.trip.depth === g.depth)

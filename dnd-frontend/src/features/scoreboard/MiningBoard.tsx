@@ -10,7 +10,7 @@ import { compact } from "@features/mine/mine";
 import { GEAR_SLOTS, item, itemName } from "@features/mine/art/gear";
 import { FORGE_LEVELS, forgeSprite } from "@features/mine/art/forge";
 import { HOUSE_LEVELS, houseIcon } from "@features/mine/art/house";
-import { COIN } from "@features/mine/art/materials";
+import { COIN, DIAMOND_GRID } from "@features/mine/art/materials";
 import type { Grid } from "@features/mine/art/pixel";
 import { Sprite } from "@features/mine/Sprite";
 import styles from "./Scoreboard.module.css";
@@ -130,6 +130,13 @@ export function MiningBoard() {
                         <dd>
                           <Sprite grid={COIN} scale={1} />
                           {compact(s.coins ?? 0)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Diamonds found</dt>
+                        <dd>
+                          <Sprite grid={DIAMOND_GRID} scale={1} />
+                          {compact(s.diamonds ?? 0)}
                         </dd>
                       </div>
                     </dl>

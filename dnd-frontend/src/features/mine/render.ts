@@ -2,7 +2,7 @@ import { dwarfParts, type GearSlot, item, SETS, sleeper } from "./art/gear";
 import { type Grid, hex, mix, tint } from "./art/pixel";
 import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
 import { HOUSE_H, HOUSE_LEVELS, houseSprite } from "./art/house";
-import { COIN, MERCHANT } from "./art/materials";
+import { COIN, DIAMOND_GRID, MERCHANT } from "./art/materials";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
 import { chestSprite, cracks, enemySprite, oreTile, stoneTile, traderSprite } from "./art/world";
 import {
@@ -11,6 +11,7 @@ import {
   CHEST,
   CHESTS,
   GEODE,
+  DIAMOND_CELL,
   GILDED_CHEST,
   IRON_CHEST,
   isChest,
@@ -238,6 +239,13 @@ const geodeTile = (depth: number): Grid => {
   return g;
 };
 
+const diamondTile = (depth: number): Grid => {
+  const g = stoneTile(depth, 93);
+  for (const [y, row] of DIAMOND_GRID.entries())
+    for (const [x, c] of row.entries()) if (c) g[y][x] = c;
+  return g;
+};
+
 const glow = (ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rgb: number[], a: number) => {
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
   g.addColorStop(0, `rgba(${rgb.join(",")},${a})`);
@@ -442,7 +450,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         for (let c = c0; c <= c1; c++) {
           const i = r * g.W + c;
           const cell = g.map[i];
-          if (cell === LEDGER || cell === GILDED_CHEST) glints.push(i);
+          if (cell === LEDGER || cell === GILDED_CHEST || cell === DIAMOND_CELL) glints.push(i);
           const v = (c * 7 + r * 13) % 4;
           const chest = isChest(cell);
           const grid =
@@ -460,6 +468,8 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
                     ? cached(`ledger${d}`, () => ledgerTile(d))
                     : cell === GEODE
                       ? cached(`geode${d}`, () => geodeTile(d))
+                      : cell === DIAMOND_CELL
+                        ? cached(`diamond${d}`, () => diamondTile(d))
                       : oreOf(cell) >= 0
                       ? cached(`o${d}-${oreOf(cell)}`, () => oreTile(oreOf(cell), d))
                       : cached(`s${d}-${v}`, () => stoneTile(d, v + 11));
@@ -524,6 +534,8 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
                     ? "Chest"
                     : cell === GEODE
                       ? "Geode"
+                      : cell === DIAMOND_CELL
+                        ? "Diamond"
                       : o >= 0
                   ? g.oreNames[o]
                   : "Stone";
@@ -532,7 +544,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           `${name} · hardness ${compact(hpOf(g, cell))}`,
           (g.target % g.W) * T + ox + T / 2,
           Math.floor(g.target / g.W) * T + oy - 3,
-          o >= 0 || cell === LEDGER || cell === GEODE || isChest(cell) ? "#ffd77a" : "#d6d0c4",
+          o >= 0 || cell === LEDGER || cell === GEODE || cell === DIAMOND_CELL || isChest(cell) ? "#ffd77a" : "#d6d0c4",
           1,
           6,
         );

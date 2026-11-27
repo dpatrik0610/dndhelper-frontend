@@ -163,6 +163,7 @@ export interface DigResult {
   trip: MiningTrip | null;
   cores?: number;
   loot?: { i: number; ores: OreCounts }[];
+  diamonds?: number;
 }
 
 export interface MiningScore {
@@ -174,6 +175,7 @@ export interface MiningScore {
   forgeLevel: number;
   houseLevel: number;
   coins: number;
+  diamonds: number;
 }
 
 const post = <T>(path: string, body?: unknown) => apiClient<T>(`/mining/me${path}`, { method: "POST", body });

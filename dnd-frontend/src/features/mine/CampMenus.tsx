@@ -19,7 +19,7 @@ import {
 import { FORGE_LEVELS, forgeSprite } from "./art/forge";
 import { HOUSE_LEVELS, houseIcon } from "./art/house";
 import type { Grid } from "./art/pixel";
-import { COIN, MATERIALS, MERCHANT } from "./art/materials";
+import { COIN, DIAMOND, MATERIALS, MERCHANT } from "./art/materials";
 import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { ENEMIES, potionSprite, scrollSprite } from "./art/world";
@@ -626,7 +626,7 @@ const SELL_STEPS = [1, 10, 100];
 
 export function MarketMenu({ config, state, onState }: MenuProps) {
   const { busy, run } = useRun(onState);
-  const owned = config.ores.filter((o) => (state.ores[o.key] ?? 0) > 0);
+  const owned = [...config.ores, { key: DIAMOND, name: MATERIALS[DIAMOND].name }].filter((o) => (state.ores[o.key] ?? 0) > 0);
   const wares = [
     {
       key: "torch",

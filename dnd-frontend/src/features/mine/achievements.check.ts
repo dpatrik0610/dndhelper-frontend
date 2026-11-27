@@ -21,7 +21,8 @@ assert.ok(list.every((a) => /^[a-zA-Z0-9_-]{1,40}$/.test(a.id)), "ids pass the s
 
 const state = {
   nodesBroken: 12,
-  mined: { ore3: 2 },
+  mined: { ore3: 2, diamond: 1 },
+  ores: {},
   crits: 0,
   kills: 0,
   pages: [],
@@ -39,5 +40,6 @@ assert.ok(ids.includes("depth-2") && ids.includes("depth-3") && !ids.includes("d
 assert.ok(ids.includes("find-ore3") && !ids.includes("find-ore4"), "first finds per ore");
 assert.ok(ids.includes("smash-1") && ids.includes("geode-1"), "server and local feats both count");
 assert.ok(!ids.includes("dig-10"), "already unlocked ones don't fire again");
+assert.ok(ids.includes("diamond-1") && !ids.includes("diamondkept-5"), "diamonds found vs kept");
 assert.deepEqual(mergeFeats({ a: 1 }, { a: 2, b: 1 }), { a: 3, b: 1 });
 console.log(`achievements ok (${list.length})`);
