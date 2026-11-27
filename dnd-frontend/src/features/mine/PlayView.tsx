@@ -383,9 +383,13 @@ export function PlayView({
       if (leaving.current) return;
       leaving.current = true;
       setBusy(true);
+      const g = gameRef.current;
+      if (g && !fainted) {
+        g.riding = true;
+        play("lift");
+      }
       try {
         await inflight.current;
-        const g = gameRef.current;
         if (g) {
           feat(g, fainted ? "faint" : "trip");
           if (new Date().getHours() < 5) feat(g, "nightShift");
@@ -393,7 +397,7 @@ export function PlayView({
         await flush();
         const before = stateRef.current;
         const s = await (fainted ? faint() : ascend());
-        play(fainted ? "faint" : "lift");
+        if (fainted) play("faint");
         const haul = Object.fromEntries(
           Object.entries(s.ores).map(([k, n]) => [k, n - (before.ores[k] ?? 0)] as const),
         );
@@ -407,6 +411,7 @@ export function PlayView({
         onState(s);
       } catch (e) {
         leaving.current = false;
+        if (g) g.riding = false;
         showNotification({ title: "The lift is stuck", message: (e as Error).message, color: "red" });
       } finally {
         setBusy(false);

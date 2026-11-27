@@ -219,6 +219,7 @@ export interface Game extends GameSetup {
   lastInput: number;
   carried: number;
   fainted: boolean;
+  riding: boolean;
   beetle: number;
   nextBeetle: number;
   warned: Set<string>;
@@ -394,6 +395,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     lastInput: now,
     now,
     fainted: false,
+    riding: false,
     beetle: -1,
     nextBeetle: 0,
     warned: new Set(),
@@ -1917,7 +1919,7 @@ function stepTraps(g: Game) {
 
 export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
   g.now += dt;
-  if (g.fainted) return stepEffects(g, dt);
+  if (g.fainted || g.riding) return stepEffects(g, dt);
   if (!g.asleep && g.now - g.lastInput > AFK_MS) g.asleep = true;
   distanceField(g);
   stepPlayer(g, dt, keys, aim);

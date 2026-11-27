@@ -814,3 +814,13 @@ console.log("character ok");
   assert.equal(burden(g), 1, "burden tops out at the hard cap");
 }
 console.log("loot pile ok");
+{
+  const g = newGame(-1);
+  const p = g.player;
+  g.riding = true;
+  const hp = p.hp;
+  g.traps = [{ i: p.y * g.W + p.x, key: "spikes", phase: 0, armedAt: 0, sprung: false, fireAt: 0, firedAt: -1e9, hitCycle: -1, target: -1 }];
+  step(g, 16, none, null);
+  assert.equal(p.hp, hp, "once you pull the lift lever, nothing down there can hurt you");
+}
+console.log("lift ok");
