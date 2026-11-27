@@ -26,6 +26,8 @@ export const SFX = {
 
 export type Sfx = keyof typeof SFX;
 
+const VARIED = new Set<Sfx>(["dig", "crit", "break", "ore", "hit", "hurt", "clang", "jump", "kill"]);
+const PITCH_SPREAD = 0.12;
 const MUSIC = "music.wav";
 const SFX_VOLUME = 0.6;
 const MUSIC_VOLUME = 0.3;
@@ -55,19 +57,37 @@ export function setPrefs(next: SoundPrefs) {
   else track?.pause();
 }
 
-export function play(name: Sfx) {
-  if (!prefs.sfx) return;
-  const now = performance.now();
-  if (now - (lastPlayed.get(name) ?? -Infinity) < MIN_GAP_MS) return;
-  lastPlayed.set(name, now);
+function sample(name: Sfx) {
   let base = bank.get(name);
   if (!base) {
     base = new Audio(DIR + SFX[name]);
     base.preload = "auto";
     bank.set(name, base);
   }
-  const voice = base.cloneNode() as HTMLAudioElement;
+  return base;
+}
+
+export function preloadSounds() {
+  for (const name of Object.keys(SFX) as Sfx[]) sample(name);
+}
+
+if (typeof document !== "undefined")
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) track?.pause();
+    else if (wantMusic) startMusic();
+  });
+
+export function play(name: Sfx) {
+  if (!prefs.sfx) return;
+  const now = performance.now();
+  if (now - (lastPlayed.get(name) ?? -Infinity) < MIN_GAP_MS) return;
+  lastPlayed.set(name, now);
+  const voice = sample(name).cloneNode() as HTMLAudioElement;
   voice.volume = SFX_VOLUME;
+  if (VARIED.has(name)) {
+    voice.preservesPitch = false;
+    voice.playbackRate = 1 + (Math.random() - 0.5) * PITCH_SPREAD;
+  }
   void voice.play().catch(() => undefined);
 }
 

@@ -34,7 +34,7 @@ import {
 } from "./engine";
 import { compact, SET_BONUSES, statLine, tiersOf, total } from "./mine";
 import { createRenderer, oreIcon } from "./render";
-import { loadPrefs, play, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
+import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
 import { Sprite } from "./Sprite";
 import { dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
@@ -127,6 +127,7 @@ export function PlayView({
   }, [asleep, state.deepestDepth]);
 
   useEffect(() => {
+    preloadSounds();
     startMusic();
     return stopMusic;
   }, []);
