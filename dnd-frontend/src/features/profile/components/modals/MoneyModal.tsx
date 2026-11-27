@@ -169,7 +169,7 @@ export function MoneyModal({ opened, onClose }: MoneyModalProps) {
               textTransform: "uppercase",
               transition: "color 0.2s ease",
               "&[data-active]": {
-                color: "#121214 !important",
+                color: "var(--theme-color-text-on-accent, #121214) !important",
                 fontWeight: 700,
               }
             }

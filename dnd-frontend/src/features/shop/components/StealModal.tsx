@@ -81,20 +81,7 @@ export function StealModal({
                         input: { backgroundColor: "rgba(0,0,0,0.25)", color: "white", border: "1px solid rgba(239, 68, 68, 0.1)" }
                     }}
                 />
-                <Button 
-                    color="red" 
-                    onClick={executeSteal} 
-                    loading={actionLoading} 
-                    mt="sm" 
-                    styles={{ 
-                        root: { 
-                            backgroundColor: "#ef4444", 
-                            color: "white", 
-                            fontWeight: 700, 
-                            "&:hover": { backgroundColor: "#dc2626" } 
-                        } 
-                    }}
-                >
+                <Button className="glass-btn-danger" onClick={executeSteal} loading={actionLoading} mt="sm">
                     Attempt Steal
                 </Button>
             </Stack>

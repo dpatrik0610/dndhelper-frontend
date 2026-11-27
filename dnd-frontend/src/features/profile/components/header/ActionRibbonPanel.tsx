@@ -65,7 +65,7 @@ function CountBadge({ count, style }: { count: number; style?: CSSProperties }) 
         borderRadius: "50%",
         background: "var(--theme-color-accent-primary, #f59e0b)",
         border: "1.5px solid #fff",
-        color: "#121214",
+        color: "var(--theme-color-text-on-accent, #121214)",
         fontSize: "10px",
         fontWeight: 800,
         display: "flex",

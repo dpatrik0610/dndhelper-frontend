@@ -85,7 +85,7 @@ export function EffectModal({ opened, initial, onClose, onSave, onDelete }: Effe
 
         {draft.equipmentId && (
           <Group>
-            <Button size="xs" variant="subtle" leftSection={<IconEye size={14} />} onClick={() => setViewingItem(true)}>
+            <Button className="glass-btn-secondary" size="xs" leftSection={<IconEye size={14} />} onClick={() => setViewingItem(true)}>
               View item
             </Button>
           </Group>
@@ -168,7 +168,7 @@ export function EffectModal({ opened, initial, onClose, onSave, onDelete }: Effe
           </Group>
         ))}
         <Group>
-          <Button size="xs" variant="light" leftSection={<IconPlus size={14} />} onClick={() => setMods([...draft.modifiers, { target: "", type: "bonus", value: 1 }])}>
+          <Button className="glass-btn-secondary" size="xs" leftSection={<IconPlus size={14} />} onClick={() => setMods([...draft.modifiers, { target: "", type: "bonus", value: 1 }])}>
             Add change
           </Button>
         </Group>
@@ -183,8 +183,8 @@ export function EffectModal({ opened, initial, onClose, onSave, onDelete }: Effe
         />
         <Group>
           <Button
+            className="glass-btn-secondary"
             size="xs"
-            variant="light"
             leftSection={<IconWand size={14} />}
             disabled={!pasted.trim()}
             onClick={() => setMods([...draft.modifiers, ...detectModifiers({ description: [pasted] })])}
@@ -197,7 +197,7 @@ export function EffectModal({ opened, initial, onClose, onSave, onDelete }: Effe
 
         {onDelete && (
           <Group justify="flex-end">
-            <Button color="red" variant="subtle" leftSection={<IconTrash size={14} />} onClick={onDelete}>
+            <Button className="glass-btn-danger" leftSection={<IconTrash size={14} />} onClick={onDelete}>
               Remove effect
             </Button>
           </Group>

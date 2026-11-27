@@ -188,7 +188,7 @@ export function EffectsPanel() {
         </Text>
         {(showQuiet ? list : changing).map(row)}
         {quiet > 0 && (
-          <Button variant="subtle" color="gray" size="compact-xs" mt={6} style={{ alignSelf: "flex-start" }} onClick={() => setShowQuiet(!showQuiet)}>
+          <Button className="glass-btn-secondary" size="compact-xs" mt={6} style={{ alignSelf: "flex-start" }} onClick={() => setShowQuiet(!showQuiet)}>
             {showQuiet ? "Hide items with no stat changes" : `Show ${quiet} item${quiet === 1 ? "" : "s"} with no stat changes`}
           </Button>
         )}
@@ -208,8 +208,8 @@ export function EffectsPanel() {
         style={PANEL_STYLE}
         rightSection={
           <Button
+            className="glass-btn-secondary"
             size="xs"
-            variant="light"
             leftSection={<IconPlus size={14} />}
             onClick={(e) => {
               e.stopPropagation();

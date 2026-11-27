@@ -175,7 +175,7 @@ export function CharacterSelectModal({
                        border: "2px solid var(--theme-color-accent-primary)",
                        background: char.imageUrl ? "transparent" : "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
                        boxShadow: "var(--theme-glow-shadow-primary)",
-                       color: "#121214",
+                       color: "var(--theme-color-text-on-accent, #121214)",
                        fontWeight: 900,
                        fontSize: "1.2rem",
                      }}
@@ -211,7 +211,7 @@ export function CharacterSelectModal({
                           style={{
                             background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
                             border: "none",
-                            color: "#121214",
+                            color: "var(--theme-color-text-on-accent, #121214)",
                             fontWeight: 800,
                             boxShadow: "var(--theme-glow-shadow-primary)",
                           }}
@@ -267,31 +267,13 @@ export function CharacterSelectModal({
         style={{ borderTop: "1px solid var(--theme-border-subtle, rgba(255,255,255,0.05))" }}
       >
         <Button
+          className="glass-btn-primary"
           leftSection={<IconUserCog size={16} />}
           onClick={() => {
             onClose();
             navigate("/settings/characters");
           }}
           size="md"
-          radius="md"
-          style={{
-            background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
-            border: "none",
-            color: "#121214",
-            boxShadow: "var(--theme-glow-shadow-primary)",
-            fontWeight: 700,
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.filter = "brightness(1.15)";
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary), 0 4px 12px rgba(0,0,0,0.2)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.filter = "none";
-            e.currentTarget.style.transform = "none";
-            e.currentTarget.style.boxShadow = "var(--theme-glow-shadow-primary)";
-          }}
         >
           Manage Characters
         </Button>

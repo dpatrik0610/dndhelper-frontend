@@ -191,7 +191,7 @@ export function InterfaceSettings() {
       </SettingsSection>
 
       <Group justify="flex-end">
-        <Button size="xs" variant="subtle" color="gray" leftSection={<IconRestore size={14} />} onClick={resetPrefs}>
+        <Button className="glass-btn-secondary" size="xs" leftSection={<IconRestore size={14} />} onClick={resetPrefs}>
           Reset to defaults
         </Button>
       </Group>

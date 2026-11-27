@@ -53,8 +53,8 @@ export function UnassignedCharacters({ opened }: { opened: boolean }) {
             <Text span size="sm" c="dimmed"> · Lvl {c.level} {classSummary(c)}</Text>
           </Text>
           <Button
+            className="glass-btn-secondary"
             size="compact-sm"
-            variant="light"
             leftSection={<IconDoorEnter size={14} />}
             disabled={!campaign}
             loading={busy === c.id}

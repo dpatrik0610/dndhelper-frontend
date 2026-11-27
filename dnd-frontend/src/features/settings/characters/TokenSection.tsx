@@ -121,33 +121,27 @@ export function TokenSection({ character }: { character: Character }) {
           <FileButton onChange={handleUpload} accept="image/png,image/jpeg,image/webp,image/gif">
             {(props) => (
               <Button
+                className="glass-btn-secondary"
                 {...props}
                 size="xs"
-                variant="default"
                 loading={uploading}
                 leftSection={<IconUpload size={14} />}
-                style={{ height: "36px", borderRadius: "8px", flexShrink: 0 }}
+                h={36}
+                style={{ flexShrink: 0 }}
               >
                 Upload
               </Button>
             )}
           </FileButton>
           <Button
+            className="glass-btn-primary"
             size="xs"
             onClick={handleSave}
             loading={saving}
             disabled={!isDirty}
             leftSection={<IconDeviceFloppy size={14} />}
-            style={{
-              height: "36px",
-              borderRadius: "8px",
-              background: isDirty ? "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))" : undefined,
-              border: "none",
-              color: isDirty ? "#fff" : undefined,
-              boxShadow: isDirty ? "var(--theme-glow-shadow-primary)" : "none",
-              fontWeight: 600,
-              flexShrink: 0,
-            }}
+            h={36}
+            style={{ flexShrink: 0 }}
           >
             Save
           </Button>

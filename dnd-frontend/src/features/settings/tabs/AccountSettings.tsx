@@ -31,7 +31,7 @@ function ProfileSection() {
         <Avatar
           size={64}
           radius="md"
-          style={{ background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))", color: "#121214", fontWeight: 800 }}
+          style={{ background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))", color: "var(--theme-color-text-on-accent, #121214)", fontWeight: 800 }}
         >
           {name.charAt(0).toUpperCase()}
         </Avatar>
@@ -122,10 +122,10 @@ function PasswordSection() {
           />
           <Group justify="flex-end" mt="xs">
             <Button
+              className="glass-btn-primary"
               type="submit"
               loading={saving}
               disabled={!canSubmit}
-              style={canSubmit ? { background: "var(--theme-gradient-primary)", color: "#121214", border: "none", fontWeight: 700 } : undefined}
             >
               Change password
             </Button>

@@ -187,11 +187,10 @@ export default function SpellPage() {
         spellName ? (
           <Stack gap="sm">
             <Button
-              variant="subtle"
+              className="glass-btn-secondary"
               leftSection={<IconArrowLeft size={16} />}
               onClick={() => navigate("/spells")}
               w="fit-content"
-              px={4}
             >
               All spells
             </Button>

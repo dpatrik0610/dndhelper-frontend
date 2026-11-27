@@ -86,8 +86,8 @@ function ShopSelectorDropdown({
         <Box style={{ minWidth: "160px", maxWidth: "240px" }}>
             <Menu shadow="md" width={240} position="bottom-end" styles={{
                 dropdown: {
-                    backgroundColor: "#1c1917",
-                    border: "1px solid rgba(245, 158, 11, 0.2)",
+                    backgroundColor: "var(--theme-bg-panel-opaque, #1c1917)",
+                    border: "1px solid var(--theme-border-subtle, rgba(245, 158, 11, 0.2))",
                     padding: "4px",
                     borderRadius: "8px",
                     boxShadow: "0 8px 24px rgba(0,0,0,0.5)"
@@ -111,7 +111,7 @@ function ShopSelectorDropdown({
                                     {activeShop ? activeShop.name : "Choose Stall..."}
                                 </Text>
                             </div>
-                            <IconChevronDown size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
+                            <IconChevronDown size={14} color="var(--theme-color-accent-primary, #f59e0b)" style={{ flexShrink: 0 }} />
                         </Group>
                     </UnstyledButton>
                 </Menu.Target>

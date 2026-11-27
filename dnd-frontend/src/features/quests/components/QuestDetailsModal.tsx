@@ -154,15 +154,10 @@ export function QuestDetailsModal({
             </Text>
             {isPersonal && !showForm && (
               <Button
+                className="glass-btn-secondary"
                 size="xs"
-                variant="subtle"
                 leftSection={<IconPlus size={12} />}
                 onClick={handleOpenNewForm}
-                styles={{
-                  root: {
-                    color: "var(--theme-color-accent-primary, #f59e0b)",
-                  },
-                }}
               >
                 Add Objective
               </Button>
@@ -257,12 +252,11 @@ export function QuestDetailsModal({
 
                 <Group justify="flex-end" gap="sm" mt="xs">
                   <Button
+                    className="glass-btn-secondary"
                     size="xs"
-                    variant="subtle"
                     onClick={() => setShowForm(false)}
                     disabled={loadingInline}
                     leftSection={<IconX size={12} />}
-                    styles={{ root: { color: "var(--theme-color-text-secondary)" } }}
                   >
                     Cancel
                   </Button>

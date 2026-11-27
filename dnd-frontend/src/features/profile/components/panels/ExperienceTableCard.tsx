@@ -56,10 +56,10 @@ export function ExperienceTableCard() {
             }}
           >
             <Stack gap={0} align="center" justify="center" h="100%">
-              <Text size="xs" fw={850} style={{ fontSize: "9px", opacity: 0.95, lineHeight: 1, marginTop: 4, color: "#121214" }}>
+              <Text size="xs" fw={850} style={{ fontSize: "9px", opacity: 0.95, lineHeight: 1, marginTop: 4, color: "var(--theme-color-text-on-accent, #121214)" }}>
                 LEVEL
               </Text>
-              <Text fw={900} style={{ fontSize: isMobile ? "24px" : "28px", lineHeight: 1.1, textShadow: "0 2px 4px rgba(0,0,0,0.15)", color: "#121214" }}>
+              <Text fw={900} style={{ fontSize: isMobile ? "24px" : "28px", lineHeight: 1.1, textShadow: "0 2px 4px rgba(0,0,0,0.15)", color: "var(--theme-color-text-on-accent, #121214)" }}>
                 {expProgress.current.level}
               </Text>
             </Stack>
@@ -219,7 +219,7 @@ export function ExperienceTableCard() {
                               style={{
                                 boxShadow: "var(--theme-glow-shadow-primary)",
                                 fontWeight: 800,
-                                color: "#121214",
+                                color: "var(--theme-color-text-on-accent, #121214)",
                                 border: "none",
                               }}
                             >

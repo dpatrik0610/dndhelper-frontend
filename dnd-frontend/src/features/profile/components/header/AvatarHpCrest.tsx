@@ -293,7 +293,7 @@ export function AvatarHpCrest({ character, isMobile }: AvatarHpCrestProps) {
                   background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
                   border: "none",
                   boxShadow: "none",
-                  color: "#121214",
+                  color: "var(--theme-color-text-on-accent, #121214)",
                 }}
               >
                 <IconAward size={isMobile ? 32 : 44} />

@@ -186,11 +186,11 @@ export default function InventoryBox({ inventory, inventories, details, searchTe
           Its effects stop applying to your character.
         </Text>
         <Group justify="flex-end">
-          <Button variant="light" onClick={() => setUnequipTarget(null)}>
+          <Button className="glass-btn-secondary" onClick={() => setUnequipTarget(null)}>
             Cancel
           </Button>
           <Button
-            color="red"
+            className="glass-btn-danger"
             onClick={() => {
               saveEffect({ ...unequipTarget!, active: false });
               setUnequipTarget(null);

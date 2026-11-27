@@ -76,16 +76,15 @@ export function EquipmentFormModal({
 
       <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.2)" }}>
         <Group justify="flex-end">
-          <Button variant="subtle" color="gray" onClick={onClose}>
+          <Button className="glass-btn-secondary" onClick={onClose}>
             {cancelLabel}
           </Button>
           <Button
+            className="glass-btn-primary"
             leftSection={<IconDeviceFloppy size={16} />}
             onClick={() => void handleSubmit()}
             loading={saving}
             disabled={!draft.name.trim()}
-            variant="gradient"
-            gradient={{ from: "violet", to: "cyan", deg: 90 }}
           >
             {submitLabel}
           </Button>

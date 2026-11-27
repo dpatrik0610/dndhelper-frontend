@@ -115,7 +115,7 @@ export function SellModal({
                     />
                 </SimpleGrid>
 
-                <Button color="orange" onClick={executeSell} loading={actionLoading} mt="sm" styles={{ root: { backgroundColor: "#ea580c", color: "white", fontWeight: 700, "&:hover": { backgroundColor: "#c2410c" } } }}>
+                <Button className="glass-btn-primary" onClick={executeSell} loading={actionLoading} mt="sm">
                     Submit Offer
                 </Button>
             </Stack>

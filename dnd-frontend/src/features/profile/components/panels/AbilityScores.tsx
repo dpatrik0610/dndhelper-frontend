@@ -271,7 +271,7 @@ export function AbilityScores() {
                         {isProf ? (
                           <span
                             style={{
-                              color: "#121214",
+                              color: "var(--theme-color-text-on-accent, #121214)",
                               filter: "drop-shadow(0 0 2px rgba(0, 0, 0, 0.2))",
                               fontSize: "14px",
                               cursor: "default",
@@ -308,7 +308,7 @@ export function AbilityScores() {
                             ...(isProf ? {
                               background: "rgba(18, 18, 20, 0.15)",
                               border: "1px solid rgba(18, 18, 20, 0.18)",
-                              color: "#121214",
+                              color: "var(--theme-color-text-on-accent, #121214)",
                               textShadow: "none",
                               boxShadow: "none",
                             } : undefined),

@@ -41,16 +41,9 @@ export function CharacterSettings() {
 
   const newCharacterButton = (
     <Button
+      className="glass-btn-primary"
       leftSection={<IconPlus size={16} />}
       onClick={() => navigate("/newCharacter")}
-      style={{
-        flexShrink: 0,
-        background: "var(--theme-gradient-primary, linear-gradient(135deg, #f59e0b, #10b981))",
-        border: "none",
-        color: "#121214",
-        boxShadow: "var(--theme-glow-shadow-primary)",
-        fontWeight: 700,
-      }}
     >
       New character
     </Button>

@@ -388,7 +388,7 @@ function EditorBody({ initial, onClose, onSaved, onDeleted, isMobile }: EditorBo
             {spell.school.name ? spellSubtitle(spell.level, spell.school.name, spell.ritual) : "Choose a level and school"}
           </div>
         </div>
-        <Button variant="subtle" color="gray" onClick={close} disabled={saving}>
+        <Button className="glass-btn-secondary" onClick={close} disabled={saving}>
           Close
         </Button>
       </header>
@@ -406,7 +406,7 @@ function EditorBody({ initial, onClose, onSaved, onDeleted, isMobile }: EditorBo
 
       <footer className={classes.edFooter}>
         {editing && (
-          <Button variant="subtle" color="red" onClick={remove} disabled={saving}>
+          <Button className="glass-btn-danger" onClick={remove} disabled={saving}>
             Delete spell
           </Button>
         )}

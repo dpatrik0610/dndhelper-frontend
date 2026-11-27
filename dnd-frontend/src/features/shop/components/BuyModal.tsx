@@ -59,7 +59,7 @@ export function BuyModal({
                          input: { backgroundColor: "rgba(0,0,0,0.25)", color: "white", border: "1px solid rgba(245, 158, 11, 0.1)" }
                      }}
                  />
-                 <Button color="yellow" onClick={executeBuy} loading={actionLoading} styles={{ root: { backgroundColor: "#fbbf24", color: "#1e1b18", fontWeight: 700, "&:hover": { backgroundColor: "#f59e0b" } } }}>
+                 <Button className="glass-btn-primary" onClick={executeBuy} loading={actionLoading}>
                      Confirm Purchase
                  </Button>
              </Stack>

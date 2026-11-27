@@ -35,9 +35,8 @@ export function CustomDateInput({ label = "Scheduled For", value, onChange, disa
         <Popover opened={opened} onChange={setOpened} position="bottom-start" shadow="xl" withArrow>
           <Popover.Target>
             <Button
+              className="glass-btn-secondary"
               size="xs"
-              variant="light"
-              color="cyan"
               leftSection={<IconCalendar size={14} />}
               onClick={() => !disabled && setOpened((o) => !o)}
               disabled={disabled}

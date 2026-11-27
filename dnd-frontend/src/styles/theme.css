@@ -755,6 +755,33 @@
   border-color: var(--theme-border-glow) !important;
 }
 
+.glass-btn-danger {
+  background: color-mix(in srgb, var(--mantine-color-red-6) 12%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--mantine-color-red-6) 45%, transparent) !important;
+  color: var(--mantine-color-red-3) !important;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: 0.2s ease;
+  transition-property: background-color, border-color, box-shadow, color, opacity, transform, filter;
+}
+
+.glass-btn-danger:hover {
+  background: color-mix(in srgb, var(--mantine-color-red-6) 22%, transparent) !important;
+  border-color: var(--mantine-color-red-5) !important;
+}
+
+.glass-btn-primary:disabled,
+.glass-btn-secondary:disabled,
+.glass-btn-danger:disabled,
+.glass-btn-primary[data-disabled],
+.glass-btn-secondary[data-disabled],
+.glass-btn-danger[data-disabled] {
+  opacity: 0.5;
+  box-shadow: none;
+  transform: none;
+  filter: none;
+}
+
 /* Glassmorphic progress tracker */
 .glass-progress {
   height: 8px;
@@ -813,6 +840,7 @@
 .magic-rune-button:focus-visible,
 .glass-btn-primary:focus-visible,
 .glass-btn-secondary:focus-visible,
+.glass-btn-danger:focus-visible,
 .glass-card--interactive:focus-visible {
   outline: 2px solid var(--theme-color-accent-primary, #f59e0b);
   outline-offset: 2px;

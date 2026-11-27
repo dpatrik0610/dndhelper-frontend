@@ -50,7 +50,7 @@ export function QuestRewards({
       <Stack gap="xs">
         {hasCurrency ? (
           <Group gap="xs" align="center" wrap="nowrap">
-            <IconCoins size={14} color="#f59e0b" style={{ flexShrink: 0 }} />
+            <IconCoins size={14} color="var(--theme-color-accent-primary, #f59e0b)" style={{ flexShrink: 0 }} />
             <Text size="xs" c="var(--theme-color-text-secondary)" truncate="end">
               Coins: {formatCurrencies(rewardCurrencies)}
             </Text>

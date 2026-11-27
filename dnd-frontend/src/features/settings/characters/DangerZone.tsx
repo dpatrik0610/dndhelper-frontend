@@ -64,7 +64,7 @@ export function DangerZone({ character }: { character: Character }) {
             styles={{ input: { backgroundColor: "rgba(255,255,255,0.05)" } }}
           />
           <Button
-            color="red"
+            className="glass-btn-danger"
             leftSection={<IconTrash size={16} />}
             onClick={handleDelete}
             loading={loading}
