@@ -59,6 +59,7 @@ export function Hotbar({
   torchesLeft,
   inMine,
   boltRef,
+  top,
 }: {
   config: MiningConfig;
   state: MiningState;
@@ -66,116 +67,120 @@ export function Hotbar({
   torchesLeft: number | null;
   inMine: boolean;
   boltRef: RefObject<HTMLDivElement | null>;
+  top?: ReactNode;
 }) {
   const tiers = tiersOf(state);
   const set = state.stats.setBonus;
   const petIdx = state.pet ? config.pets.findIndex((p) => p.key === state.pet) : -1;
   return (
     <div className={styles.hotbar}>
-      <div className={styles.hotGroup}>
-        {GEAR_SLOTS.map((slot) => {
-          const info = config.slots.find((x) => x.key === slot);
-          const t = tiers[slot];
-          return (
-            <Square
-              key={slot}
-              grid={item(slot, t)}
-              label={`${itemName(slot, t)}, tier ${t}`}
-              className={set > 0 ? styles.hotSet : t >= 8 ? styles.hotGlow : ""}
-              tip={
+      {top}
+      <div className={styles.hotRow}>
+        <div className={styles.hotGroup}>
+          {GEAR_SLOTS.map((slot) => {
+            const info = config.slots.find((x) => x.key === slot);
+            const t = tiers[slot];
+            return (
+              <Square
+                key={slot}
+                grid={item(slot, t)}
+                label={`${itemName(slot, t)}, tier ${t}`}
+                className={set > 0 ? styles.hotSet : t >= 8 ? styles.hotGlow : ""}
+                tip={
+                  <>
+                    <b>{itemName(slot, t)}</b> · tier {t} / 10
+                    <br />
+                    {info?.stat}
+                    <br />
+                    {info && statLine(slot, info.tiers[t].stats)}
+                    <br />
+                    {set > 0 ? (
+                      <>
+                        Set bonus <b>{SET_BONUSES[set][0]}</b>: {SET_BONUSES[set][1]}
+                      </>
+                    ) : (
+                      "Wear all five pieces of one metal for a set bonus."
+                    )}
+                  </>
+                }
+              />
+            );
+          })}
+        </div>
+
+        <div className={styles.hotGroup}>
+          <Square
+            grid={TORCH[1]}
+            hotkey="T"
+            empty={torchesLeft !== null && torchesLeft <= 0}
+            count={torchesLeft === null ? undefined : `${torchesLeft}/${config.maxTorches}`}
+            label={torchesLeft === null ? "Torches" : `Torches, ${torchesLeft} left`}
+            tip={
+              <>
+                <b>Torches</b>
+                {torchesLeft !== null && ` · ${torchesLeft} of ${config.maxTorches} left`}
+                <br />
+                {inMine ? "T plants one above your head. Lit tunnels stay lit." : "You get a fresh bundle every trip."}
+              </>
+            }
+          />
+          <Square
+            grid={scrollSprite()}
+            hotkey="F"
+            empty={!state.firebolt}
+            label={state.firebolt ? "Firebolt" : "Firebolt, not learned"}
+            tip={
+              state.firebolt ? (
                 <>
-                  <b>{itemName(slot, t)}</b> · tier {t} / 10
-                  <br />
-                  {info?.stat}
-                  <br />
-                  {info && statLine(slot, info.tiers[t].stats)}
-                  <br />
-                  {set > 0 ? (
-                    <>
-                      Set bonus <b>{SET_BONUSES[set][0]}</b>: {SET_BONUSES[set][1]}
-                    </>
-                  ) : (
-                    "Wear all five pieces of one metal for a set bonus."
-                  )}
+                  <b>Firebolt</b> · F or right-click to throw it at the cursor. The only thing that hurts a mimic.
                 </>
-              }
-            />
-          );
-        })}
-      </div>
+              ) : (
+                <>
+                  <b>Firebolt</b> · not learned yet. Moss the peddler teaches it down in the mine.
+                </>
+              )
+            }
+          >
+            {state.firebolt && <div ref={boltRef} className={styles.hotCooldown} />}
+          </Square>
+          <Square
+            grid={potionSprite()}
+            hotkey="Q"
+            empty={potions <= 0}
+            count={potions > 0 ? `×${potions}` : undefined}
+            label={`Healing draughts, ${potions}`}
+            tip={
+              potions > 0 ? (
+                <>
+                  <b>Healing draught</b> × {potions} · Q heals 60% of your health.
+                </>
+              ) : (
+                <>
+                  <b>Healing draught</b> · none on your belt. Moss sells them down in the mine.
+                </>
+              )
+            }
+          />
+        </div>
 
-      <div className={styles.hotGroup}>
-        <Square
-          grid={TORCH[1]}
-          hotkey="T"
-          empty={torchesLeft !== null && torchesLeft <= 0}
-          count={torchesLeft === null ? undefined : `${torchesLeft}/${config.maxTorches}`}
-          label={torchesLeft === null ? "Torches" : `Torches, ${torchesLeft} left`}
-          tip={
-            <>
-              <b>Torches</b>
-              {torchesLeft !== null && ` · ${torchesLeft} of ${config.maxTorches} left`}
-              <br />
-              {inMine ? "T plants one above your head. Lit tunnels stay lit." : "You get a fresh bundle every trip."}
-            </>
-          }
-        />
-        <Square
-          grid={scrollSprite()}
-          hotkey="F"
-          empty={!state.firebolt}
-          label={state.firebolt ? "Firebolt" : "Firebolt, not learned"}
-          tip={
-            state.firebolt ? (
-              <>
-                <b>Firebolt</b> · F or right-click to throw it at the cursor. The only thing that hurts a mimic.
-              </>
-            ) : (
-              <>
-                <b>Firebolt</b> · not learned yet. Moss the peddler teaches it down in the mine.
-              </>
-            )
-          }
-        >
-          {state.firebolt && <div ref={boltRef} className={styles.hotCooldown} />}
-        </Square>
-        <Square
-          grid={potionSprite()}
-          hotkey="Q"
-          empty={potions <= 0}
-          count={potions > 0 ? `×${potions}` : undefined}
-          label={`Healing draughts, ${potions}`}
-          tip={
-            potions > 0 ? (
-              <>
-                <b>Healing draught</b> × {potions} · Q heals 60% of your health.
-              </>
-            ) : (
-              <>
-                <b>Healing draught</b> · none on your belt. Moss sells them down in the mine.
-              </>
-            )
-          }
-        />
-      </div>
-
-      <div className={styles.hotGroup}>
-        <Square
-          grid={petSprite(PET_ART[Math.max(0, petIdx)])}
-          empty={petIdx < 0}
-          label={petIdx >= 0 ? config.pets[petIdx].name : "No pet"}
-          tip={
-            petIdx >= 0 ? (
-              <>
-                <b>{config.pets[petIdx].name}</b> · {PET_ART[petIdx].does}
-              </>
-            ) : (
-              <>
-                <b>No pet yet</b> · Pip sells them at camp.
-              </>
-            )
-          }
-        />
+        <div className={styles.hotGroup}>
+          <Square
+            grid={petSprite(PET_ART[Math.max(0, petIdx)])}
+            empty={petIdx < 0}
+            label={petIdx >= 0 ? config.pets[petIdx].name : "No pet"}
+            tip={
+              petIdx >= 0 ? (
+                <>
+                  <b>{config.pets[petIdx].name}</b> · {PET_ART[petIdx].does}
+                </>
+              ) : (
+                <>
+                  <b>No pet yet</b> · Pip sells them at camp.
+                </>
+              )
+            }
+          />
+        </div>
       </div>
     </div>
   );

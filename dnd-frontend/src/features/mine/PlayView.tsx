@@ -54,6 +54,7 @@ import styles from "./Mine.module.css";
 const SWITCH_CLASSES = { root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" };
 const GOAL_OPEN_KEY = "deepdelve-goal-open";
 type Panel = "pouch" | "controls" | "settings";
+const LOW_HP = 0.3;
 const STEP_MS = 1000 / 60;
 const FLUSH_MS = 1000;
 const NO_KEYS: Keys = { left: false, right: false, up: false, down: false, jump: false, attack: false };
@@ -105,6 +106,9 @@ export function PlayView({
   const textRef = useRef<HTMLCanvasElement>(null);
   const hpRef = useRef<HTMLDivElement>(null);
   const hpText = useRef<HTMLSpanElement>(null);
+  const hpLag = useRef<HTMLDivElement>(null);
+  const hpBar = useRef<HTMLDivElement>(null);
+  const flashRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Game | null>(null);
   const keys = useRef<Keys>({ ...NO_KEYS });
   const aim = useRef<Aim>(null);
@@ -338,6 +342,9 @@ export function PlayView({
     let wasSeal = false;
     let wasPotions = g.potions;
     let wasTorches = -1;
+    let seenHurt = g.player.lastHurt;
+    let wasLow = false;
+    const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const frame = (now: number) => {
       acc += Math.min(100, now - last);
       last = now;
@@ -348,7 +355,28 @@ export function PlayView({
       for (const name of g.sfx) play(name);
       g.sfx.length = 0;
       cam.current = draw(g);
-      if (hpRef.current) hpRef.current.style.width = `${Math.max(0, g.player.hp / g.stats.maxHp) * 100}%`;
+      const frac = Math.max(0, g.player.hp / g.stats.maxHp);
+      if (hpRef.current) hpRef.current.style.width = `${frac * 100}%`;
+      if (hpLag.current) hpLag.current.style.width = `${frac * 100}%`;
+      if (g.player.lastHurt !== seenHurt) {
+        seenHurt = g.player.lastHurt;
+        flashRef.current?.animate([{ opacity: 0.9 }, { opacity: 0 }], { duration: 450, easing: "ease-out" });
+        if (!calm)
+          hpBar.current?.animate(
+            [
+              { transform: "translateX(-4px)" },
+              { transform: "translateX(4px)" },
+              { transform: "translateX(-2px)" },
+              { transform: "none" },
+            ],
+            { duration: 260 },
+          );
+      }
+      const low = frac > 0 && frac < LOW_HP;
+      if (low !== wasLow) {
+        wasLow = low;
+        hpBar.current?.toggleAttribute("data-low", low);
+      }
       if (hpText.current) hpText.current.textContent = `${compact(Math.ceil(g.player.hp))} / ${compact(g.stats.maxHp)}`;
       const n = stationAt(g);
       if (n !== wasNear) {
@@ -508,18 +536,12 @@ export function PlayView({
         />
 
         <canvas ref={textRef} className={`${styles.canvas} ${styles.textLayer}`} aria-hidden />
+        <div ref={flashRef} className={styles.hurtFlash} aria-hidden />
 
         <div className={styles.hudLeft}>
           <span className={styles.hudTitle}>
             {trip ? `Depth ${depth} · ${config.depths[depth - 1]?.name ?? ""}` : "Camp · The mine entrance"}
           </span>
-          <div className={styles.hudRow}>
-            <span className={styles.hudLabel}>Health</span>
-            <div className={`${styles.bar} ${styles.grow}`}>
-              <div ref={hpRef} className={styles.hpFill} />
-            </div>
-            <span ref={hpText} className={styles.barText} />
-          </div>
           {trip && (
             <>
               <div className={styles.hudRow}>
@@ -718,6 +740,16 @@ export function PlayView({
           torchesLeft={config.maxTorches ? config.maxTorches - torchesUsed : null}
           inMine={!!trip}
           boltRef={boltRef}
+          top={
+            <div className={styles.hpDock}>
+              <span className={styles.hudLabel}>Health</span>
+              <div ref={hpBar} className={`${styles.bar} ${styles.hpBar}`}>
+                <div ref={hpLag} className={styles.hpLag} />
+                <div ref={hpRef} className={styles.hpFill} />
+              </div>
+              <span ref={hpText} className={styles.barText} />
+            </div>
+          }
         />
 
         {report && !trip && (
