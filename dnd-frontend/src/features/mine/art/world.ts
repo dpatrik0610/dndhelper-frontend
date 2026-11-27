@@ -219,7 +219,7 @@ export const ENEMIES: Enemy[] = [
   },
   {
     name: "Chest Mimic",
-    depth: 2,
+    depth: 4,
     threat: "Mini-boss",
     does: "Waits as a treasure chest. Steel bounces off its hide; only fire hurts it. Spills a fortune when it dies.",
     pal: {
