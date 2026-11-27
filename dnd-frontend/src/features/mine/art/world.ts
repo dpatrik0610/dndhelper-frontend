@@ -35,7 +35,7 @@ export const ENEMIES: Enemy[] = [
     name: "Kobold Digger",
     depth: 2,
     threat: "Thief",
-    does: "Tunnels toward you through the rock and snatches a few ore from your satchel if it reaches you.",
+    does: "Tunnels toward you through the rock. Hit and run: after it lands a blow it hops back out of reach, so step in after it.",
     pal: { x: "#1c1410", R: "#b5482e", c: "#e8d8b0", y: "#ffd23f", m: "#9aa0a8", w: "#7a5030" },
     rows: pad([
       "..........xxxx..",
@@ -132,7 +132,7 @@ export const ENEMIES: Enemy[] = [
     name: "Salamander",
     depth: 7,
     threat: "Scorcher",
-    does: "Leaves burning ground behind it. Standing in the flames chips away at you. Half of them drop a Magma Core, which Flametouched gear needs.",
+    does: "Leaves a trail of embers wherever it crawls, and stepping on one sets you burning. Its bite burns too. Half of them drop a Magma Core, which Flametouched gear needs.",
     pal: { x: "#1a0806", d: "#7a1c10", m: "#c8381c", l: "#f26b2a", h: "#ffb347", f: "#ffd23f", y: "#fff3a0" },
     rows: pad([
       "..xxx...........",
@@ -152,7 +152,7 @@ export const ENEMIES: Enemy[] = [
     name: "Gelatinous Cube",
     depth: 8,
     threat: "Engulfer",
-    does: "Slow and heavy. Cut it down and it splits in two, then in two again. The tiny cubelets can't hurt you, but they love to shove you around.",
+    does: "Slow and heavy. Its hit engulfs you, holding you in place for a second. Cut it down and it splits in two, then in two again. The tiny cubelets can't hurt you, but they love to shove you around.",
     pal: { Q: "#7fe6a0cc", q: "#4fc77a66", b: "#efe6d0", x: "#24402e", y: "#ffd23f" },
     rows: pad([
       ".QQQQQQQQQQQQQQ.",
@@ -174,7 +174,7 @@ export const ENEMIES: Enemy[] = [
     name: "Xorn",
     depth: 9,
     threat: "Ore-eater",
-    does: "Swims through solid stone and eats the ore around you. Kill it fast or lose the vein.",
+    does: "Swims through solid stone to reach you. Its stone hide turns half of every plain blow; crits and Firebolt bite in full.",
     pal: { x: "#14100c", s: "#6b5a4a", S: "#8f7a63", d: "#3f342b", e: "#ffd23f", t: "#e8e0cc", m: "#2a1010" },
     rows: pad([
       ".....xxxxxx.....",
@@ -197,7 +197,7 @@ export const ENEMIES: Enemy[] = [
     name: "Star Golem",
     depth: 10,
     threat: "Guardian",
-    does: "Grown from the fallen star itself. It hits like a landslide, and its heart is pure starmetal.",
+    does: "Grown from the fallen star itself. Every few seconds it raises its fists and slams the floor, hitting everything within three tiles. Jump over the shockwave, or stagger it to break the slam.",
     pal: { x: "#0c1030", c: "#3d5bd6", C: "#7f9cff", h: "#d8e4ff", y: "#fff7d0" },
     rows: pad([
       "......xxxx......",

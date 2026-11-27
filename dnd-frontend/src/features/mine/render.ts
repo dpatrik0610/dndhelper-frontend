@@ -26,6 +26,9 @@ import {
   CHARTED,
   TORCH_LIGHT,
   trapCycle,
+  GOLEM_KIND,
+  SLAM_RANGE,
+  SLAM_WINDUP_MS,
   OPEN,
   ORE0,
   oreOf,
@@ -339,6 +342,26 @@ function drawTraps(ctx: CanvasRenderingContext2D, g: Game, ox: number, oy: numbe
         ctx.fillRect(X + 9, floor - 7, 1, 2);
       }
     }
+  }
+}
+
+function drawHazards(ctx: CanvasRenderingContext2D, g: Game, ox: number, oy: number) {
+  for (const [i, until] of g.embers) {
+    const X = (i % g.W) * T + ox;
+    const floor = (Math.floor(i / g.W) + 1) * T + oy;
+    const fade = Math.min(1, (until - g.now) / 800);
+    for (let k = 0; k < 4; k++) {
+      const lit = Math.floor(g.now / 90 + k * 3 + i) % 3;
+      ctx.fillStyle = lit ? `rgba(255,138,42,${0.8 * fade})` : `rgba(255,214,90,${fade})`;
+      ctx.fillRect(X + 2 + k * 4, floor - 2 - (lit ? 0 : 1), 2, lit ? 2 : 3);
+    }
+  }
+  for (const m of g.monsters) {
+    if (m.kind !== GOLEM_KIND || !m.slamAt || m.hp <= 0) continue;
+    const left = Math.max(0, (m.slamAt - g.now) / SLAM_WINDUP_MS);
+    const floor = (m.y + 1) * T + oy;
+    ctx.fillStyle = `rgba(157,182,255,${0.35 + 0.45 * (1 - left) * (Math.floor(g.now / 80) % 2 ? 1 : 0.6)})`;
+    ctx.fillRect((m.x - SLAM_RANGE) * T + ox, floor - 2, (SLAM_RANGE * 2 + 1) * T, 2);
   }
 }
 
@@ -658,6 +681,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       for (const i of g.splash) brackets(i, 0.45);
       for (const i of g.torches) draw(TORCH[flick ? 1 : 0], (i % g.W) * T + ox + 6, Math.floor(i / g.W) * T + oy + 5);
       drawTraps(ctx, g, ox, oy);
+      drawHazards(ctx, g, ox, oy);
       if (g.trader >= 0) {
         const moss = cached("moss", traderSprite);
         const X = (g.trader % g.W) * T + ox + 8 - Math.floor(moss[0].length / 2);

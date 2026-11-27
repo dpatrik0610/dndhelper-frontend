@@ -746,3 +746,22 @@ console.log("traps ok");
   assert.ok(strikable(p, foe(6, 6), 1) && !strikable(p, foe(6, 6), -1), "facing matters");
 }
 console.log("strikes ok");
+{
+  const g = newGame(-1);
+  const p = g.player;
+  g.embers.set(p.y * g.W + p.x, g.now + 3000);
+  step(g, 16, none, null);
+  assert.ok(p.burnUntil > g.now, "salamander embers set you burning");
+
+  const h = newGame(-1);
+  const q = h.player;
+  const startX = q.x;
+  q.rootUntil = h.now + 1000;
+  step(h, 16, { ...none, right: true }, null);
+  assert.equal(q.x, startX, "engulfed: you can't walk away");
+  q.rootUntil = 0;
+  step(h, 16, { ...none, right: true }, null);
+  step(h, 16, { ...none, left: true }, null);
+  assert.notEqual(q.x, startX, "free again, you can walk");
+}
+console.log("enemy traits ok");

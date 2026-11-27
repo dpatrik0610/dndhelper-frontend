@@ -85,6 +85,7 @@ export interface Player extends Tween {
   swingAt: number;
   heavyAt: number;
   critStreak: number;
+  rootUntil: number;
 }
 
 export interface Monster extends Tween {
@@ -112,6 +113,8 @@ export interface Monster extends Tween {
   ward: number;
   poise: number;
   gen: number;
+  slamAt: number;
+  nextSlam: number;
 }
 
 export interface PetActor {
@@ -226,6 +229,7 @@ export interface Game extends GameSetup {
   richFound: boolean;
   traps: Trap[];
   dimUntil: number;
+  embers: Map<number, number>;
   shakeUntil: number;
   shakeMag: number;
   feats: Record<string, number>;
@@ -248,6 +252,14 @@ export const KINDS: Record<number, Kind> = {
 };
 
 export const SKITTER_KIND = 1;
+export const KOBOLD_KIND = 2;
+export const SALAMANDER_TRAIL_MS = 3000;
+export const ENGULF_MS = 1000;
+export const XORN_KIND = 9;
+export const GOLEM_KIND = 10;
+export const SLAM_RANGE = 3;
+export const SLAM_WINDUP_MS = 900;
+const SLAM_EVERY_MS = 5000;
 const SKITTER_CHANCE = 0.35;
 
 export const PET_LIGHT: Record<string, number> = { moth: 2, wisp: 2.5, fox: 3 };
@@ -369,6 +381,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     boons: new Set(),
     traps: [],
     dimUntil: 0,
+    embers: new Map(),
     sfx: [],
     shakeUntil: 0,
     shakeMag: 0,
@@ -415,6 +428,7 @@ function loadCamp(g: Game, now: number, home: boolean) {
   g.trader = -1;
   g.boons = new Set();
   g.traps = [];
+  g.embers = new Map();
   g.motherlode = -1;
   g.startedAt = now;
   g.nextSpawn = Number.POSITIVE_INFINITY;
@@ -450,6 +464,7 @@ function place(g: Game, x: number) {
     swingAt: -1e9,
     heavyAt: -1e9,
     critStreak: 0,
+    rootUntil: 0,
   };
   g.petActor = g.pet
     ? { art: g.pet.art, key: g.pet.key, px: x - 1, py: g.liftY, face: 1, nextHit: 0, hopUntil: 0 }
@@ -488,6 +503,7 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.boons = new Set(trip.boons ?? []);
   g.traps = placeTraps(g, trip.map);
   g.dimUntil = 0;
+  g.embers = new Map();
   g.motherlode = trip.motherlode ?? -1;
   g.richFound = false;
   g.startedAt = now;
@@ -817,6 +833,8 @@ function addMonster(g: Game, kind: number, x: number, y: number, gen = 0) {
     ward: spec.ward ?? 0,
     poise: gen ? 1 : spec.poise,
     gen,
+    slamAt: 0,
+    nextSlam: g.now + 2000,
   };
   g.monsters.push(m);
   return m;
@@ -1017,9 +1035,12 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
     }
     return;
   }
-  m.hp -= dmg;
-  g.sfx.push(crit ? "crit" : "hit");
-  say(g, cx, cy, String(Math.round(dmg)), crit ? "#ffe066" : "#ffffff", 600);
+  const hide = m.kind === XORN_KIND && !crit && !fire;
+  const dealt = hide ? Math.max(1, Math.round(dmg / 2)) : dmg;
+  if (hide && !byPet) sayOnce(g, "stonehide", "Its stone hide turns half the blow. Crits and fire bite in full.", "#c9b8a0");
+  m.hp -= dealt;
+  g.sfx.push(crit ? "crit" : hide ? "clang" : "hit");
+  say(g, cx, cy, String(Math.round(dealt)), crit ? "#ffe066" : hide ? "#a59c8e" : "#ffffff", 600);
   burst(g, cx, cy + 8, "#ffffff", crit ? 6 : 3);
   if (m.hp > 0) return;
   if (m.kind === 4 && !crit && !m.revived && !byPet) {
@@ -1085,6 +1106,10 @@ function attack(g: Game, m: Monster) {
   if (crit || heavy || m.poise <= 0) {
     m.poise = poise;
     m.windupUntil = 0;
+    if (m.slamAt) {
+      m.slamAt = 0;
+      say(g, (m.x + 0.5) * T, m.y * T - 6, "Slam broken!", "#9db6ff", 900);
+    }
     m.stunUntil = Math.max(m.stunUntil, g.now + HITSTUN_MS * (heavy ? 2 : 1));
     knockback(g, m, heavy || crit ? 2 : 1);
   }
@@ -1234,6 +1259,8 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
     } else if (!moving) return;
   }
   if (keys.attack && ready) return attackToward(g, { x: x + 0.5 + p.face, y: y - 0.5 });
+
+  if (g.now < p.rootUntil && (keys.jump || keys.left || keys.right || keys.up || keys.down)) return;
 
   if (keys.jump && grounded && isOpen(g, x, y - 2)) {
     const high = g.stats.setBonus === 8 && isOpen(g, x, y - 3);
@@ -1443,6 +1470,51 @@ function spawn(g: Game, alarm = false) {
     say(g, (pet.px + 0.5) * T, (pet.py - 1) * T, x < p.x ? "← Squeak!" : "Squeak! →", "#d07a8c", 1600);
 }
 
+function hopBack(g: Game, m: Monster) {
+  const dir = Math.sign(m.x - g.player.x) || 1;
+  if (!isOpen(g, m.x + dir, m.y) || !supported(g, m.x + dir, m.y)) return;
+  tweenTo(m, m.x + dir, m.y, 160);
+  m.nextMove = g.now + 700;
+  say(g, (m.x + 0.5) * T, m.y * T - 4, "hehe!", "#e0a060", 600);
+}
+
+export const inSlam = (g: Game, m: Monster) => {
+  const p = g.player;
+  return Math.abs(p.x - m.x) <= SLAM_RANGE && Math.abs(p.y - m.y) <= 1 && supported(g, p.x, p.y);
+};
+
+function golemSlam(g: Game, m: Monster) {
+  const p = g.player;
+  if (m.slamAt && g.now >= m.slamAt) {
+    m.slamAt = 0;
+    m.nextSlam = g.now + SLAM_EVERY_MS;
+    m.nextHit = g.now + 900;
+    shake(g, 4, 320);
+    g.sfx.push("break");
+    for (let dx = -SLAM_RANGE; dx <= SLAM_RANGE; dx++) burst(g, (m.x + dx + 0.5) * T, (m.y + 1) * T, "#9db6ff", 5, 1.8);
+    if (inSlam(g, m)) hurt(g, m.dmg * 0.8, "#9db6ff");
+    else if (Math.abs(p.x - m.x) <= SLAM_RANGE) feat(g, "sidestep");
+    return true;
+  }
+  if (m.slamAt) return true;
+  if (g.now < m.nextSlam || !supported(g, m.x, m.y)) return false;
+  if (Math.abs(p.x - m.x) > SLAM_RANGE || Math.abs(p.y - m.y) > 1) return false;
+  m.slamAt = g.now + SLAM_WINDUP_MS;
+  say(g, (m.x + 0.5) * T, m.y * T - 6, "RUMBLE", "#9db6ff", SLAM_WINDUP_MS);
+  sayOnce(g, "slam", "The golem raises its fists. Jump, or stagger it!", "#9db6ff");
+  return true;
+}
+
+function stepEmbers(g: Game) {
+  if (!g.embers.size) return;
+  const p = g.player;
+  for (const [i, until] of g.embers) if (g.now >= until) g.embers.delete(i);
+  if (g.embers.has(p.y * g.W + p.x) && supported(g, p.x, p.y)) {
+    p.burnUntil = Math.max(p.burnUntil, g.now + 1500);
+    sayOnce(g, "embers", "Salamanders leave burning embers where they crawl.", "#ff8a2a");
+  }
+}
+
 function stepMonsters(g: Game, dt: number) {
   const p = g.player;
   for (const m of g.monsters) {
@@ -1476,6 +1548,11 @@ function stepMonsters(g: Game, dt: number) {
         hurt(g, m.dmg);
         if (p.hp < before && m.kind === 3) p.slowUntil = g.now + 3000;
         if (p.hp < before && m.kind === 7) p.burnUntil = g.now + 3000;
+        if (p.hp < before && m.kind === CUBE_KIND) {
+          p.rootUntil = g.now + ENGULF_MS;
+          say(g, (p.x + 0.5) * T, (p.y - 2) * T, "Engulfed!", "#9be07a", ENGULF_MS);
+        }
+        if (m.kind === KOBOLD_KIND) hopBack(g, m);
       } else {
         say(g, (m.x + 0.5) * T, m.y * T, "miss", "#a59c8e", 500);
         feat(g, "sidestep");
@@ -1483,6 +1560,7 @@ function stepMonsters(g: Game, dt: number) {
       continue;
     }
     if (m.windupUntil) continue;
+    if (m.kind === GOLEM_KIND && golemSlam(g, m)) continue;
     if (reaches(p, m)) {
       m.lost = 0;
       if (g.now >= m.nextHit) m.windupUntil = g.now + KINDS[m.kind].windup;
@@ -1505,6 +1583,7 @@ function stepMonsters(g: Game, dt: number) {
     }
     if (next >= 0) {
       m.lost = 0;
+      if (m.kind === SALAMANDER_KIND) g.embers.set(m.y * g.W + m.x, g.now + SALAMANDER_TRAIL_MS);
       const nx = next % g.W;
       const ny = Math.floor(next / g.W);
       tweenTo(m, nx, ny, ny > m.y && !fly && !g.ladders.has(m.y * g.W + m.x) ? FALL_MS : m.moveMs * 0.9);
@@ -1853,6 +1932,7 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
     sayOnce(g, "dark", "Dark out here. Wounds only mend in torchlight, and monsters stir faster (T plants a torch).", "#ffc98a", 4200);
   stepBolts(g, dt);
   stepMonsters(g, dt);
+  stepEmbers(g);
   stepTraps(g);
   stepPet(g, dt);
   stepBeetle(g);
