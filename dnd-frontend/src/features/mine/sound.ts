@@ -75,11 +75,17 @@ export function preloadSounds() {
   for (const name of Object.keys(SFX) as Sfx[]) sample(name);
 }
 
-if (typeof document !== "undefined")
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) track?.pause();
-    else if (wantMusic) startMusic();
-  });
+const onVisibility = () => {
+  if (document.hidden) track?.pause();
+  else if (wantMusic) startMusic();
+};
+
+if (typeof document !== "undefined") document.addEventListener("visibilitychange", onVisibility);
+
+import.meta.hot?.dispose(() => {
+  document.removeEventListener("visibilitychange", onVisibility);
+  track?.pause();
+});
 
 export function play(name: Sfx) {
   if (!prefs.sfx) return;
