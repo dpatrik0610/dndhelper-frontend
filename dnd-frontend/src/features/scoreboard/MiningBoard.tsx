@@ -10,6 +10,7 @@ import { compact } from "@features/mine/mine";
 import { GEAR_SLOTS, item, itemName } from "@features/mine/art/gear";
 import { FORGE_LEVELS, forgeSprite } from "@features/mine/art/forge";
 import { HOUSE_LEVELS, houseIcon } from "@features/mine/art/house";
+import { COIN } from "@features/mine/art/materials";
 import type { Grid } from "@features/mine/art/pixel";
 import { Sprite } from "@features/mine/Sprite";
 import styles from "./Scoreboard.module.css";
@@ -22,14 +23,34 @@ const cached = (key: string, make: () => Grid) => {
   return sprites.get(key)!;
 };
 
-function Holding({ grid, name, tag, height }: { grid: Grid; name: string; tag: string; height: number }) {
+const clampLevel = (n: number, max: number) => Math.max(1, Math.min(max, n || 1));
+
+function Estate({ house, forge }: { house: number; forge: number }) {
+  const h = clampLevel(house, HOUSE_LEVELS.length);
+  const f = clampLevel(forge, FORGE_LEVELS.length);
+  const houseName = HOUSE_LEVELS[h - 1].name;
+  const forgeName = FORGE_LEVELS[f - 1].name;
   return (
-    <Tooltip label={tag} withArrow>
-      <span className={styles.holding}>
-        <Sprite grid={grid} scale={height / grid.length} label={name} />
-        {name}
-      </span>
-    </Tooltip>
+    <figure className={styles.estate}>
+      <div className={styles.plot}>
+        <Sprite grid={cached(`h${h}`, () => houseIcon(h))} scale={1} label={houseName} />
+        <Sprite grid={cached(`f${f}`, () => forgeSprite(f))} scale={1} label={forgeName} />
+      </div>
+      <figcaption className={styles.estateCaption}>
+        <span>
+          {houseName}
+          <small>
+            Home {h} of {HOUSE_LEVELS.length}
+          </small>
+        </span>
+        <span>
+          {forgeName}
+          <small>
+            Forge {f} of {FORGE_LEVELS.length}
+          </small>
+        </span>
+      </figcaption>
+    </figure>
   );
 }
 
@@ -82,55 +103,51 @@ export function MiningBoard() {
             <div className={styles.state}>Nobody has swung a pickaxe yet.</div>
           ) : (
             <>
-              <div className={styles.listHead}>
-                <span className={styles.eyebrow}>#</span>
-                <span className={styles.eyebrow}>Delver</span>
-                <span className={styles.eyebrow}>Renown</span>
-              </div>
               {scores!.map((s, i) => (
-                <div key={s.username} className={`${styles.row} ${s.username === me ? styles.rowMe : ""}`}>
+                <div key={s.username} className={`${styles.delver} ${s.username === me ? styles.rowMe : ""}`}>
                   <div className={styles.rank} data-place={i + 1}>
                     {i + 1}
                   </div>
-                  <div className={styles.who}>
+                  <div className={styles.delverInfo}>
                     <div className={styles.name}>
                       <span className={styles.nameText}>{s.username}</span>
                       {s.username === me && <span className={styles.you}>You</span>}
                     </div>
-                    <div className={styles.holdings}>
-                      <Holding
-                        grid={cached(`h${s.houseLevel}`, () => houseIcon(s.houseLevel))}
-                        name={HOUSE_LEVELS[Math.max(1, Math.min(HOUSE_LEVELS.length, s.houseLevel)) - 1].name}
-                        tag={`Home ${s.houseLevel} / ${HOUSE_LEVELS.length}`}
-                        height={34}
-                      />
-                      <Holding
-                        grid={cached(`f${s.forgeLevel}`, () => forgeSprite(s.forgeLevel))}
-                        name={FORGE_LEVELS[Math.max(1, Math.min(FORGE_LEVELS.length, s.forgeLevel)) - 1].name}
-                        tag={`Forge ${s.forgeLevel} / ${FORGE_LEVELS.length}`}
-                        height={24}
-                      />
+                    <div className={styles.renown}>
+                      <b>{compact(s.renown)}</b> renown
+                    </div>
+                    <dl className={styles.stats}>
+                      <div>
+                        <dt>Deepest</dt>
+                        <dd>Depth {s.deepestDepth}</dd>
+                      </div>
+                      <div>
+                        <dt>Ore blocks</dt>
+                        <dd>{compact(s.nodesBroken)}</dd>
+                      </div>
+                      <div>
+                        <dt>Coins</dt>
+                        <dd>
+                          <Sprite grid={COIN} scale={1} />
+                          {compact(s.coins ?? 0)}
+                        </dd>
+                      </div>
+                    </dl>
+                    <div className={styles.gearRow}>
+                      {GEAR_SLOTS.map((slot) => {
+                        const tier = s.gear[slot] ?? 0;
+                        return (
+                          <Tooltip key={slot} label={`${itemName(slot, tier)} · tier ${tier} / 10`} withArrow>
+                            <div className={`${styles.catch} ${tier === 10 ? styles.catchGolden : ""}`}>
+                              <Sprite grid={item(slot, tier)} scale={1} />
+                              <span className={styles.count}>{tier}</span>
+                            </div>
+                          </Tooltip>
+                        );
+                      })}
                     </div>
                   </div>
-                  <div className={styles.total}>
-                    {compact(s.renown)}
-                    <span className={styles.species}>
-                      Depth {s.deepestDepth} · {compact(s.nodesBroken)} ore blocks
-                    </span>
-                  </div>
-                  <div className={styles.catches}>
-                    {GEAR_SLOTS.map((slot) => {
-                      const tier = s.gear[slot] ?? 0;
-                      return (
-                        <Tooltip key={slot} label={`${itemName(slot, tier)} · tier ${tier} / 10`} withArrow>
-                          <div className={`${styles.catch} ${tier === 10 ? styles.catchGolden : ""}`}>
-                            <Sprite grid={item(slot, tier)} scale={1} />
-                            <span className={styles.count}>{tier}</span>
-                          </div>
-                        </Tooltip>
-                      );
-                    })}
-                  </div>
+                  <Estate house={s.houseLevel} forge={s.forgeLevel} />
                 </div>
               ))}
             </>

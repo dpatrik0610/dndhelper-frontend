@@ -172,6 +172,7 @@ export interface MiningScore {
   nodesBroken: number;
   forgeLevel: number;
   houseLevel: number;
+  coins: number;
 }
 
 const post = <T>(path: string, body?: unknown) => apiClient<T>(`/mining/me${path}`, { method: "POST", body });

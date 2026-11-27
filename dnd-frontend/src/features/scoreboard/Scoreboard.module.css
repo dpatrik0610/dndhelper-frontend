@@ -245,20 +245,127 @@
   color: var(--theme-color-text-primary);
 }
 
-.holdings {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-  margin-top: 6px;
+.delver {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  column-gap: 16px;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--theme-border-subtle);
 }
 
-.holding {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 6px;
-  font-size: 0.75rem;
+.delver:last-child {
+  border-bottom: 0;
+}
+
+.delverInfo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.renown {
+  font-size: 0.8125rem;
+  color: var(--theme-color-text-secondary);
+}
+
+.renown b {
+  margin-right: 4px;
+  font-family: "Pixelify Sans", var(--theme-font-body, sans-serif);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
   color: var(--theme-color-text-primary);
-  opacity: 0.75;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 22px;
+  margin: 0;
+}
+
+.stats dt {
+  font-size: 0.6875rem;
+  color: var(--theme-color-text-secondary);
+}
+
+.stats dd {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-family: "Pixelify Sans", var(--theme-font-body, sans-serif);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-color-text-primary);
+}
+
+.gearRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gearRow .catch {
+  min-width: 52px;
+}
+
+.estate {
+  margin: 0;
+  width: 360px;
+}
+
+.plot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+  height: 136px;
+  padding: 0 10px;
+  border-radius: 8px 8px 0 0;
+  background:
+    radial-gradient(1px 1px at 18% 22%, #fff8 99%, transparent),
+    radial-gradient(1px 1px at 46% 12%, #fff6 99%, transparent),
+    radial-gradient(1px 1px at 71% 28%, #fff7 99%, transparent),
+    radial-gradient(1px 1px at 88% 9%, #fff5 99%, transparent),
+    radial-gradient(60% 50% at 50% 100%, rgba(255, 190, 110, 0.16), transparent 70%),
+    linear-gradient(#111632, #2a2447);
+  box-shadow: inset 0 -6px 0 #3b2a1f, inset 0 -8px 0 #4f8a3a;
+  padding-bottom: 8px;
+}
+
+.plot canvas {
+  zoom: 1.5;
+}
+
+.estateCaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 2px 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--theme-color-text-primary);
+}
+
+.estateCaption span {
+  display: flex;
+  flex-direction: column;
+}
+
+.estateCaption span:last-child {
+  text-align: right;
+}
+
+.estateCaption small {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--theme-color-text-secondary);
 }
 
 .mineHead {
@@ -306,6 +413,25 @@
 
   .mineHead {
     flex-direction: column;
+  }
+
+  .delver {
+    grid-template-columns: 32px minmax(0, 1fr);
+    row-gap: 14px;
+    padding: 14px 12px;
+  }
+
+  .estate {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .plot {
+    height: 104px;
+  }
+
+  .plot canvas {
+    zoom: 1;
   }
 
   .catches {
