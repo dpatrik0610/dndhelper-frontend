@@ -272,7 +272,7 @@
 
 .renown b {
   margin-right: 4px;
-  font-family: "Pixelify Sans", var(--theme-font-body, sans-serif);
+  font-family: "Pixelify Delve", "Pixelify Sans", var(--theme-font-body, sans-serif);
   font-size: 1.75rem;
   font-weight: 600;
   line-height: 1;
@@ -297,7 +297,7 @@
   align-items: center;
   gap: 5px;
   margin: 0;
-  font-family: "Pixelify Sans", var(--theme-font-body, sans-serif);
+  font-family: "Pixelify Delve", "Pixelify Sans", var(--theme-font-body, sans-serif);
   font-size: 0.9375rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;

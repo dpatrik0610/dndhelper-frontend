@@ -185,7 +185,7 @@ html.theme-wizards-library {
 
 /* Pixel headings with a hard, pixel-art drop shadow */
 .theme-wizards-library .narrative-title {
-  font-family: "Pixelify Sans", "Plus Jakarta Sans", sans-serif !important;
+  font-family: "Pixelify Delve", "Pixelify Sans", "Plus Jakarta Sans", sans-serif !important;
   font-weight: 600 !important;
   letter-spacing: 1px !important;
   color: #f0d9a0 !important;

@@ -383,7 +383,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     if (octx && overlay) octx.clearRect(0, 0, overlay.width, overlay.height);
     out.textAlign = "center";
     for (const w of words) {
-      out.font = `600 ${w.size * k}px "Pixelify Sans", monospace`;
+      out.font = `600 ${w.size * k}px "Pixelify Delve", "Pixelify Sans", monospace`;
       out.globalAlpha = w.alpha;
       out.fillStyle = "#000";
       out.fillText(w.text, (w.x + 1) * k, (w.y + 1) * k);

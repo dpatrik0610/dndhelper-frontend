@@ -1,3 +1,24 @@
+@font-face {
+  font-family: "Pixelify Delve";
+  src: url("/fonts/pixelify-delve-500.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pixelify Delve";
+  src: url("/fonts/pixelify-delve-600.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Pixelify Delve";
+  src: url("/fonts/pixelify-delve-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
   /* Font families */
   --font-sans: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;

@@ -1,7 +1,7 @@
 .page {
   --torch: #ffb347;
   --gold: #f5c542;
-  --pixel: "Pixelify Sans", "Courier New", monospace;
+  --pixel: "Pixelify Delve", "Pixelify Sans", "Courier New", monospace;
   --hud: rgba(12, 10, 18, 0.9);
   --zoom: 1.2;
   zoom: var(--zoom);
