@@ -9,6 +9,7 @@ import {
   getMiningState,
   mossSell,
   recordFeats,
+  takePile,
   trade,
   type MiningConfig,
   type MiningState,
@@ -41,6 +42,7 @@ import {
   type Game,
   type Keys,
   loadTrip,
+  OVERLOADED,
   noteInput,
   placeTorch,
   type Station,
@@ -59,6 +61,7 @@ import { createRenderer, oreIcon } from "./render";
 import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
 import { CharacterPanel } from "./CharacterPanel";
 import { Hotbar } from "./Hotbar";
+import { LootPile } from "./LootPile";
 import { Sprite } from "./Sprite";
 import { type AchToast, AchievementToasts, TrophyPanel } from "./Trophies";
 import { ARRIVAL, dreamsFor, engraving } from "./story";
@@ -145,6 +148,15 @@ export function PlayView({
   const seenOres = useRef(new Set(Object.keys(state.mined)));
 
   const [satchel, setSatchel] = useState<OreCounts>(trip?.satchel ?? {});
+  const [pile, setPile] = useState<OreCounts>(trip?.pile ?? {});
+  const [pileOpen, setPileOpen] = useState(false);
+  const pileSize = useRef(total(trip?.pile ?? {}));
+  const notePile = useCallback((next: OreCounts) => {
+    const n = total(next);
+    if (n > pileSize.current) setPileOpen(true);
+    pileSize.current = n;
+    setPile(next);
+  }, []);
   const [depth, setDepth] = useState(trip?.depth ?? 0);
   const [near, setNear] = useState<Station | null>(null);
   const [asleep, setAsleep] = useState(false);
@@ -241,6 +253,9 @@ export function PlayView({
 
   useEffect(() => {
     setSatchel(trip?.satchel ?? {});
+    setPile(trip?.pile ?? {});
+    pileSize.current = total(trip?.pile ?? {});
+    setPileOpen(false);
     setDepth(trip?.depth ?? 0);
     setMossWares(null);
     if (trip) setReport(null);
@@ -273,9 +288,10 @@ export function PlayView({
       loadTrip(g, s.trip, g.now);
       resetPending(g);
       setSatchel(s.trip.satchel);
+      notePile(s.trip.pile ?? {});
       setDepth(s.trip.depth);
     } else onState(s);
-  }, [onState]);
+  }, [onState, notePile]);
 
   const flush = useCallback(async () => {
     if (inflight.current) return inflight.current;
@@ -287,6 +303,7 @@ export function PlayView({
         const res = await dig(req);
         setSatchel(res.satchel);
         g.carried = total(res.satchel);
+        if (res.pile) notePile(res.pile);
         for (const key of Object.keys(res.drops)) {
           if (seenOres.current.has(key)) continue;
           seenOres.current.add(key);
@@ -641,6 +658,24 @@ export function PlayView({
     showNotification({ title, message, color: "yellow" });
   };
 
+  const onTakePile = async (take: OreCounts) => {
+    await inflight.current;
+    await flush();
+    try {
+      const s = await takePile(take);
+      play("buy");
+      const now = s.trip?.satchel ?? {};
+      setSatchel(now);
+      const g = gameRef.current;
+      if (g) g.carried = total(now);
+      pileSize.current = total(s.trip?.pile ?? {});
+      setPile(s.trip?.pile ?? {});
+      setPileOpen(false);
+    } catch (e) {
+      showNotification({ title: "Can't take that", message: (e as Error).message, color: "red" });
+    }
+  };
+
   const onMossSell = async (key: string, amount: number) => {
     await inflight.current;
     await flush();
@@ -722,7 +757,11 @@ export function PlayView({
               </div>
               {full && (
                 <span className={styles.encumbered}>
-                  Encumbered: crawling, no jumping or dashing, slower swings. {carried >= maxCarry ? "Can't carry more." : `Can carry up to ${compact(maxCarry)}.`}
+                  Encumbered: the more you carry, the slower you go.{" "}
+                  {carried - state.stats.capacity >= (maxCarry - state.stats.capacity) * OVERLOADED
+                    ? "Overloaded: no jumping or dashing."
+                    : `Past ${compact(Math.ceil(state.stats.capacity + (maxCarry - state.stats.capacity) * OVERLOADED))} you can't jump.`}{" "}
+                  {carried >= maxCarry ? "Can't carry more." : `Max ${compact(maxCarry)}.`}
                 </span>
               )}
               <div className={styles.satchelList}>
@@ -745,6 +784,11 @@ export function PlayView({
         <AchievementToasts toasts={toasts} />
         <div className={styles.hudRight}>
           <div className={styles.btnRow}>
+            {trip && total(pile) > 0 && !pileOpen && (
+              <button type="button" className={`glass-btn-primary ${styles.hudBtn}`} onClick={() => setPileOpen(true)}>
+                Loot pile · {compact(total(pile))}
+              </button>
+            )}
             {!trip && (
               <button
                 type="button"
@@ -794,6 +838,19 @@ export function PlayView({
               <IconSettings size={18} />
             </button>
           </div>
+
+          {trip && pileOpen && total(pile) > 0 && (
+            <LootPile
+              key={JSON.stringify(pile)}
+              config={config}
+              pile={pile}
+              carried={carried}
+              capacity={state.stats.capacity}
+              maxCarry={maxCarry}
+              onTake={onTakePile}
+              onClose={() => setPileOpen(false)}
+            />
+          )}
 
           {panel === "character" && <CharacterPanel config={config} state={state} onClose={() => setPanel(null)} />}
 

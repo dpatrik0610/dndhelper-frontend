@@ -18,6 +18,7 @@ import {
   lightRadius,
   placeTorch,
   placeTraps,
+  burden,
   strikable,
   showLoot,
   TORCH_LIGHT,
@@ -26,7 +27,7 @@ import {
   step,
   takePending,
 } from "./engine";
-import { canAfford, characterSheet, discounted, hpColor, renownBreakdown, statRows } from "./mine";
+import { canAfford, characterSheet, discounted, fillUpTo, hpColor, renownBreakdown, statRows } from "./mine";
 import { pickSwing } from "./render";
 import { dreamsFor, engraving, PAGES, SEALS, wickLines } from "./story";
 
@@ -98,6 +99,7 @@ const newGame = (pet: number, map = rows, liftY = 2) =>
       firebolt: false,
       potions: 0,
       maxTorches: 2,
+      overload: 1.5,
       pet:
         pet >= 0
           ? {
@@ -777,7 +779,16 @@ console.log("enemy traits ok");
   g.carried = g.stats.capacity + 1;
   const y = p.y;
   step(g, 16, { ...none, jump: true }, null);
-  assert.equal(p.y, y, "too heavy to jump");
+  assert.notEqual(p.y, y, "a little over capacity, you can still jump");
+  p.y = y;
+  p.x = 5;
+  p.t = p.dur = 0;
+  p.hangUntil = 0;
+  for (let k = 0; k < 120; k++) step(g, 16, none, null);
+  g.carried = Math.floor(g.stats.capacity * 1.5);
+  const y2 = p.y;
+  step(g, 16, { ...none, jump: true }, null);
+  assert.equal(p.y, y2, "overloaded: too heavy to jump");
   g.carried = 0;
   step(g, 16, { ...none, jump: true }, null);
   assert.notEqual(p.y, y, "light again, you can jump");
@@ -788,3 +799,18 @@ console.log("encumbrance ok");
   assert.ok(sheet.find((r) => r.slot === "satchel")?.rows.some((r) => r.label === "Carries"), "sheet lists every slot's stats");
 }
 console.log("character ok");
+{
+  const pile = { copper: 30, gold: 8, mithral: 5 };
+  assert.deepEqual(fillUpTo(pile, ["mithral", "gold", "copper"], 10), { mithral: 5, gold: 5 }, "rarest first, up to the room");
+  assert.deepEqual(fillUpTo(pile, ["mithral", "gold", "copper"], 0), {}, "no room, take nothing");
+  assert.deepEqual(fillUpTo(pile, ["mithral", "gold", "copper"], 999), pile, "plenty of room, take it all");
+
+  const g = newGame(-1);
+  g.carried = g.stats.capacity;
+  assert.equal(burden(g), 0, "full but not over: no burden");
+  g.carried = g.stats.capacity + Math.round((g.stats.capacity * (g.overload - 1)) / 2);
+  assert.ok(Math.abs(burden(g) - 0.5) < 0.05, "halfway into the overload");
+  g.carried = g.stats.capacity * 10;
+  assert.equal(burden(g), 1, "burden tops out at the hard cap");
+}
+console.log("loot pile ok");

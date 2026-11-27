@@ -1482,3 +1482,36 @@
 .setDoes {
   font-size: 0.8125rem;
 }
+
+.pileRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 2px;
+  font-size: 0.8125rem;
+}
+
+.pileName {
+  font-family: var(--pixel);
+}
+
+.pileRange {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  width: 100%;
+  accent-color: var(--torch);
+}
+
+.pileCount {
+  grid-column: 3;
+  grid-row: 1;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
+.pileOver {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ff6a4a;
+}

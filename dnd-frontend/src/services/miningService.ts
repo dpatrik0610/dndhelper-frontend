@@ -111,6 +111,7 @@ export interface MiningTrip {
   motherlode: number | null;
   wares: Record<string, number> | null;
   boons?: string[];
+  pile?: OreCounts;
 }
 
 export interface MiningState {
@@ -167,6 +168,7 @@ export interface DigResult {
   cores?: number;
   loot?: { i: number; ores: OreCounts }[];
   diamonds?: number;
+  pile?: OreCounts;
 }
 
 export interface MiningScore {
@@ -196,6 +198,7 @@ export const buyPet = (key: string) => post<MiningState>(`/pets/${key}`);
 export const trade = (item: string) => post<MiningState>(`/trade/${item}`);
 export const buyWare = (item: string, count: number) => post<MiningState>(`/buy/${item}/${count}`);
 export const sellOre = (key: string, amount: number) => post<MiningState>(`/sell/${key}/${amount}`);
+export const takePile = (take: OreCounts) => post<MiningState>("/pile/take", take);
 export const mossSell = (key: string, amount: number) => post<MiningState>(`/moss/sell/${key}/${amount}`);
 export const upgradeHouse = () => post<MiningState>("/house");
 export const recordFeats = (req: { feats?: Record<string, number>; unlocked?: string[] }) => post<MiningState>("/feats", req);

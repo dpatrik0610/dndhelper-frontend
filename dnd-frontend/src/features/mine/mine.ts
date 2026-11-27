@@ -11,6 +11,17 @@ export const canAfford = (cost: OreCounts | null, ores: OreCounts) =>
 
 export const total = (counts: OreCounts) => Object.values(counts).reduce((a, b) => a + b, 0);
 
+export const fillUpTo = (pile: OreCounts, order: string[], room: number): OreCounts => {
+  const out: OreCounts = {};
+  let left = Math.max(0, room);
+  for (const key of order) {
+    const n = Math.min(pile[key] ?? 0, left);
+    if (n > 0) out[key] = n;
+    left -= n;
+  }
+  return out;
+};
+
 const compactFmt = new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 });
 export const compact = (n: number) => (n < 10_000 ? Math.round(n).toLocaleString("en") : compactFmt.format(n));
 

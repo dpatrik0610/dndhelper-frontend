@@ -35,11 +35,15 @@ const JUMP_MS = 140;
 const HANG_MS = 260;
 const AFK_MS = 60_000;
 const SPAWN_GRACE_MS = 12_000;
-const ENCUMBERED_SLOW = 4;
-const ENCUMBERED_SWING = 1.6;
+const ENCUMBERED_SLOW: [number, number] = [1.5, 4];
+const ENCUMBERED_SWING: [number, number] = [1.15, 1.6];
+export const OVERLOADED = 0.5;
+const scaled = ([lo, hi]: [number, number], b: number) => lo + (hi - lo) * b;
 
 export const hardCap = (g: Game) => Math.floor(g.stats.capacity * g.overload);
 export const encumbered = (g: Game) => !g.camp && g.carried > g.stats.capacity;
+export const burden = (g: Game) =>
+  encumbered(g) ? Math.min(1, (g.carried - g.stats.capacity) / Math.max(1, hardCap(g) - g.stats.capacity)) : 0;
 const DASH_MS = 110;
 const DASH_COOLDOWN_MS = 1200;
 const IFRAME_MS = 380;
@@ -602,7 +606,7 @@ export function placeTorch(g: Game) {
 
 function swing(g: Game) {
   const p = g.player;
-  const slow = (g.now < p.slowUntil ? 1.5 : 1) * (encumbered(g) ? ENCUMBERED_SWING : 1);
+  const slow = (g.now < p.slowUntil ? 1.5 : 1) * (encumbered(g) ? scaled(ENCUMBERED_SWING, burden(g)) : 1);
   p.nextSwing = g.now + g.stats.swingMs * slow;
   p.strikeUntil = g.now + 140;
   p.swingAt = g.now;
@@ -1246,9 +1250,9 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
   const ready = g.now >= p.nextSwing;
   const moving = keys.left || keys.right || keys.up || keys.down || keys.jump;
 
-  const heavy = encumbered(g);
+  const heavy = encumbered(g) && burden(g) >= OVERLOADED;
   if ((keys.jump || keys.dash) && heavy && grounded)
-    sayOnce(g, "nojump", "Too heavy to jump or dash. Bank the ore, or sell some to Moss.", "#ffb347");
+    sayOnce(g, "nojump", "Overloaded: too heavy to jump or dash. Bank the ore, or sell some to Moss.", "#ffb347");
   if (keys.dash && grounded && !heavy && g.now >= p.nextDash && dash(g, keys)) return;
 
   if (aim) {
@@ -1672,7 +1676,7 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
     hurt(g, g.info.monsterDamage * 0.2, "#ff8a2a");
   }
   if (p.t < p.dur) {
-    p.t += p.fell || !encumbered(g) ? dt : dt / ENCUMBERED_SLOW;
+    p.t += p.fell || !encumbered(g) ? dt : dt / scaled(ENCUMBERED_SLOW, burden(g));
     return;
   }
   const grounded = !isOpen(g, p.x, p.y + 1) || g.ladders.has(p.y * g.W + p.x);
