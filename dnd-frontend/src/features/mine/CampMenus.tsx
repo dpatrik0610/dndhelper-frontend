@@ -147,14 +147,15 @@ export interface TripReport {
   ready: Goal[];
 }
 
-const GOAL_ACTIONS: Record<Goal["kind"], [string, (key: string) => Promise<MiningState>]> = {
-  gear: ["Forge it", (key) => craftGear(key as SlotKey)],
-  forge: ["Rebuild", () => upgradeForge()],
-  pet: ["Adopt", (key) => buyPet(key)],
+const GOAL_ACTIONS: Record<Goal["kind"], [string, (name: string) => string, (key: string) => Promise<MiningState>]> = {
+  gear: ["Forge it", (name) => `Forge the ${name}?`, (key) => craftGear(key as SlotKey)],
+  forge: ["Rebuild", (name) => `Rebuild into the ${name}?`, () => upgradeForge()],
+  pet: ["Adopt", (name) => `Adopt the ${name}?`, (key) => buyPet(key)],
 };
 
 export function TripSummary({ config, state, onState, report, onClose }: MenuProps & { report: TripReport; onClose: () => void }) {
   const { busy, run } = useRun(onState);
+  const [confirming, setConfirming] = useState<string | null>(null);
   const live = new Map(goalsFor(config, state).map((g) => [g.id, g]));
   const ready = report.ready.filter((g) => live.get(g.id)?.name === g.name);
   const haul = Object.entries(report.haul).filter(([, n]) => n > 0);
@@ -183,19 +184,49 @@ export function TripSummary({ config, state, onState, report, onClose }: MenuPro
         )}
         {ready.length > 0 && (
           <>
-            <span className={styles.eyebrow}>Now affordable</span>
+            <span className={styles.eyebrow}>Suggestions</span>
+            <span className={styles.dim}>
+              Just ideas for what your stores can pay for now. Nothing is bought until you confirm, and you can always spend your ore at the
+              forge or the pet shop instead.
+            </span>
             {ready.map((g) => {
-              const [label, act] = GOAL_ACTIONS[g.kind];
+              const [label, ask, act] = GOAL_ACTIONS[g.kind];
+              const affordable = canAfford(g.cost, state.ores);
+              if (confirming === g.id && affordable)
+                return (
+                  <div key={g.id} className={`${styles.readyRow} ${styles.readyConfirm}`}>
+                    <div className={styles.readyAsk}>
+                      <span className={styles.pixel}>{ask(g.name)}</span>
+                      <Cost cost={g.cost} ores={state.ores} config={config} />
+                    </div>
+                    <div className={styles.btnRow}>
+                      <button type="button" className={`glass-btn-secondary ${styles.actBtn}`} onClick={() => setConfirming(null)}>
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        className={`glass-btn-primary ${styles.actBtn}`}
+                        disabled={busy}
+                        onClick={() => {
+                          setConfirming(null);
+                          void run(() => act(g.key), () => `${g.name} is yours`);
+                        }}
+                      >
+                        Confirm
+                      </button>
+                    </div>
+                  </div>
+                );
               return (
                 <div key={g.id} className={styles.readyRow}>
                   <span className={styles.pixel}>{g.name}</span>
                   <button
                     type="button"
-                    className={`glass-btn-primary ${styles.actBtn}`}
-                    disabled={busy || !canAfford(g.cost, state.ores)}
-                    onClick={() => void run(() => act(g.key), () => `${g.name} is yours`)}
+                    className={`glass-btn-secondary ${styles.actBtn}`}
+                    disabled={busy || !affordable}
+                    onClick={() => setConfirming(g.id)}
                   >
-                    {label}
+                    {label}…
                   </button>
                 </div>
               );

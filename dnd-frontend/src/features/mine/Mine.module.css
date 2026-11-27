@@ -931,6 +931,21 @@
   gap: 10px;
 }
 
+.readyConfirm {
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--theme-border-glow, var(--theme-border-subtle));
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.readyAsk {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
 .freshOre {
   color: #ffe066;
 }
