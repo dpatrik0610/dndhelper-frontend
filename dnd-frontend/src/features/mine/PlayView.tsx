@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Switch } from "@mantine/core";
-import { IconSettings, IconTrophy } from "@tabler/icons-react";
+import { IconSettings, IconTrophy, IconUserShield } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import {
   ascend,
@@ -57,6 +57,7 @@ import { goalsFor, newlyAffordable } from "./goals";
 import { compact, tiersOf, total } from "./mine";
 import { createRenderer, oreIcon } from "./render";
 import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
+import { CharacterPanel } from "./CharacterPanel";
 import { Hotbar } from "./Hotbar";
 import { Sprite } from "./Sprite";
 import { type AchToast, AchievementToasts, TrophyPanel } from "./Trophies";
@@ -65,7 +66,7 @@ import styles from "./Mine.module.css";
 
 const SWITCH_CLASSES = { root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" };
 const GOAL_OPEN_KEY = "deepdelve-goal-open";
-type Panel = "pouch" | "controls" | "settings" | "trophies";
+type Panel = "pouch" | "controls" | "settings" | "trophies" | "character";
 const TOAST_MS = 5000;
 const MAX_TOASTS = 3;
 const LOW_HP = 0.3;
@@ -767,6 +768,15 @@ export function PlayView({
             </button>
             <button
               type="button"
+              className={`${panel === "character" ? "glass-btn-primary" : "glass-btn-secondary"} ${styles.gearBtn}`}
+              aria-label="Character"
+              aria-pressed={panel === "character"}
+              onClick={() => togglePanel("character")}
+            >
+              <IconUserShield size={18} />
+            </button>
+            <button
+              type="button"
               className={`${panel === "trophies" ? "glass-btn-primary" : "glass-btn-secondary"} ${styles.gearBtn}`}
               aria-label="Achievements"
               aria-pressed={panel === "trophies"}
@@ -784,6 +794,8 @@ export function PlayView({
               <IconSettings size={18} />
             </button>
           </div>
+
+          {panel === "character" && <CharacterPanel config={config} state={state} onClose={() => setPanel(null)} />}
 
           {panel === "trophies" && (
             <TrophyPanel list={achievements} read={readAch} unlocked={unlocked} onClose={() => setPanel(null)} />
