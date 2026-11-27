@@ -227,7 +227,7 @@ type Kind = { hp: number; dmg: number; move: number; windup: number; poise: numb
 
 export const KINDS: Record<number, Kind> = {
   1: { hp: 0.8, dmg: 0.8, move: 380, windup: 420, poise: 1 },
-  2: { hp: 1, dmg: 0.9, move: 520, windup: 400, poise: 1, tunnel: true },
+  2: { hp: 1, dmg: 1.15, move: 520, windup: 400, poise: 1, tunnel: true },
   3: { hp: 0.9, dmg: 1, move: 340, windup: 380, poise: 1 },
   4: { hp: 1.1, dmg: 1, move: 480, windup: 380, poise: 2 },
   5: { hp: 0.8, dmg: 1, move: 300, windup: 340, poise: 1 },
