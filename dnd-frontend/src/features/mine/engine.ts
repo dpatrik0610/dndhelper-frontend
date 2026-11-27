@@ -835,20 +835,15 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
 
   if (aim) {
     const dx = aim.x - (x + 0.5);
-    const dy = aim.y - y;
     if (Math.abs(dx) >= 0.3) p.face = dx < 0 ? -1 : 1;
     const foe = foeToward(g, aim);
     if (foe) return attack(g, foe);
     const cell = aimCell(g, aim);
     if (cell >= 0) return hitCell(g, cell % g.W, Math.floor(cell / g.W));
-    const sideways = Math.abs(dx) >= Math.abs(dy);
-    keys = {
-      ...keys,
-      left: keys.left || (sideways && dx < -0.6),
-      right: keys.right || (sideways && dx > 0.6),
-      down: keys.down || (!sideways && dy > 1),
-      up: keys.up || (!sideways && dy < -1.5),
-    };
+    if (!keys.left && !keys.right && !keys.up && !keys.down && !keys.jump) {
+      if (g.now >= p.nextSwing) swing(g);
+      return;
+    }
   }
   if (keys.attack && g.now >= p.nextSwing) return attackToward(g, { x: x + 0.5 + p.face, y: y - 0.5 });
 

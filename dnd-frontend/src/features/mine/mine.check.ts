@@ -108,11 +108,13 @@ run(g, 4000, { right: true });
 assert.equal(g.player.x, 7, "walked to the wall, then tunnelled into it");
 
 const walker = newGame(-1);
+const startX = walker.player.x;
 run(walker, 1200, {}, { x: 6.5, y: 2.5 });
-assert.equal(walker.player.x, 6, "holding the mouse to the right walks there and stops under the cursor");
+assert.equal(walker.player.x, startX, "holding the mouse only swings, it never walks");
+assert.equal(walker.player.face, 1);
 run(walker, 300, {}, { x: 2.5, y: 2.5 });
 assert.equal(walker.player.face, -1, "the dwarf turns toward the cursor");
-assert.equal(takePending(walker), null, "walking by cursor breaks nothing");
+assert.equal(takePending(walker), null, "swinging at thin air breaks nothing");
 const p = takePending(g);
 assert.ok(p && p.breaks.length >= 2, "both blocks of the tunnel face were dug");
 for (const b of p.breaks) {
