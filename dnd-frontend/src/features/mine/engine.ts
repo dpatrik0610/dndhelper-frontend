@@ -272,7 +272,7 @@ export const SLAM_WINDUP_MS = 900;
 const SLAM_EVERY_MS = 5000;
 const SKITTER_CHANCE = 0.35;
 
-export const PET_LIGHT: Record<string, number> = { moth: 2, wisp: 2.5, fox: 3 };
+export const PET_LIGHT: Record<string, number> = { moth: 3.5, wisp: 5, fox: 10 };
 
 const rand = Math.random;
 
