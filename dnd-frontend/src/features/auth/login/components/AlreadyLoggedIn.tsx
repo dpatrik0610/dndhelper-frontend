@@ -12,7 +12,7 @@ export default function AlreadyLoggedIn() {
       </Title>
       
       <Text className="portal-header-subtitle" style={{ marginBottom: "8px" }}>
-        You Are Already Logged In
+        You're already logged in
       </Text>
 
       <Stack gap="md" style={{ width: '100%', marginTop: '12px' }}>
@@ -21,9 +21,8 @@ export default function AlreadyLoggedIn() {
           onClick={() => navigate('/')}
           className="glass-btn-primary"
           h={50}
-          style={{ textTransform: "uppercase", letterSpacing: "1.5px", fontSize: "15px" }}
         >
-          Enter Campaign
+          Continue
         </Button>
 
         <Button
@@ -31,9 +30,8 @@ export default function AlreadyLoggedIn() {
           onClick={() => handleLogout()}
           className="glass-btn-secondary"
           h={50}
-          style={{ textTransform: "uppercase", letterSpacing: "1.5px", fontSize: "15px" }}
         >
-          Logout
+          Log out
         </Button>
       </Stack>
     </Stack>

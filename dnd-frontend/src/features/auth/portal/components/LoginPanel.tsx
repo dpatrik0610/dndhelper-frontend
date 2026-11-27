@@ -1,4 +1,5 @@
-import { TextInput, PasswordInput, Button, Group, Text, Stack, Title } from "@mantine/core";
+import { TextInput, PasswordInput, Button, Text, Stack, Title } from "@mantine/core";
+import { Link } from "react-router";
 
 interface LoginPanelProps {
   loginUserVal: string;
@@ -6,7 +7,8 @@ interface LoginPanelProps {
   loginPassVal: string;
   setLoginPasswordVal: (val: string) => void;
   onSubmit: () => void;
-  onSwitchToRegister: () => void;
+  busy: boolean;
+  error: string | null;
 }
 
 export function LoginPanel({
@@ -15,66 +17,58 @@ export function LoginPanel({
   loginPassVal,
   setLoginPasswordVal,
   onSubmit,
-  onSwitchToRegister,
+  busy,
+  error,
 }: LoginPanelProps) {
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
       <Title order={1} className="portal-header-title">
         D&D Reforged
       </Title>
-      <Text className="portal-header-subtitle">Login</Text>
+      <Text className="portal-header-subtitle">Log in</Text>
 
       <Stack gap="lg">
         <TextInput
           label="Username"
-          placeholder="Enter your username..."
+          name="username"
+          autoComplete="username"
+          spellCheck={false}
+          autoCapitalize="none"
           value={loginUserVal}
           onChange={(e) => setLoginUserVal(e.currentTarget.value)}
           required
           classNames={{ input: "glassy-input", label: "glassy-label" }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") void onSubmit();
-          }}
         />
 
         <PasswordInput
           label="Password"
-          placeholder="Enter your password..."
+          name="password"
+          autoComplete="current-password"
           value={loginPassVal}
           onChange={(e) => setLoginPasswordVal(e.currentTarget.value)}
           required
           classNames={{ input: "glassy-input", label: "glassy-label" }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") void onSubmit();
-          }}
         />
 
-        <Button
-          fullWidth
-          onClick={onSubmit}
-          className="glass-btn-primary"
-          mt={24}
-          h={50}
-          style={{ textTransform: "uppercase", letterSpacing: "1.5px", fontSize: "15px" }}
-        >
-          Login
+        {error && (
+          <p className="portal-error" role="alert">
+            {error}
+          </p>
+        )}
+
+        <Button type="submit" fullWidth loading={busy} className="glass-btn-primary" mt={24} h={50}>
+          Log in
         </Button>
 
-        <Group justify="center" mt="md">
-          <Text size="sm" c="var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))" style={{ fontFamily: "var(--font-sans)" }}>
-            Don't have an account?{" "}
-            <Text
-              component="span"
-              fw={700}
-              c="var(--theme-color-accent-primary, #f59e0b)"
-              style={{ cursor: "pointer", textDecoration: "underline" }}
-              onClick={onSwitchToRegister}
-            >
-              Register
-            </Text>
-          </Text>
-        </Group>
+        <p className="portal-switch">
+          Don't have an account? <Link to="/register">Create one</Link>
+        </p>
       </Stack>
-    </>
+    </form>
   );
 }

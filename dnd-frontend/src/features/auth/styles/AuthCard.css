@@ -143,3 +143,31 @@
     padding: 24px 20px !important;
   }
 }
+
+.portal-error {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--mantine-color-red-4);
+}
+
+.portal-switch {
+  margin: 16px 0 0;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.portal-switch a {
+  font-weight: 700;
+  color: var(--theme-color-accent-primary, #f59e0b);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.portal-switch a:focus-visible {
+  outline: 2px solid var(--theme-color-accent-primary, #f59e0b);
+  outline-offset: 2px;
+  border-radius: 2px;
+}

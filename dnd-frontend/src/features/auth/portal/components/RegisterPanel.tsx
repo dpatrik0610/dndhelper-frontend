@@ -1,4 +1,5 @@
-import { TextInput, Button, Group, Text, Stack, Title } from "@mantine/core";
+import { TextInput, Button, Text, Stack, Title } from "@mantine/core";
+import { Link } from "react-router";
 import { PasswordStrength } from "@features/auth/register/PasswordRequirement";
 
 interface RegisterPanelProps {
@@ -8,7 +9,8 @@ interface RegisterPanelProps {
   setRegPassVal: (val: string) => void;
   errors: { username?: string; password?: string };
   onSubmit: () => void;
-  onSwitchToLogin: () => void;
+  busy: boolean;
+  error: string | null;
 }
 
 export function RegisterPanel({
@@ -18,19 +20,28 @@ export function RegisterPanel({
   setRegPassVal,
   errors,
   onSubmit,
-  onSwitchToLogin,
+  busy,
+  error,
 }: RegisterPanelProps) {
   return (
-    <>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
+    >
       <Title order={1} className="portal-header-title">
         Register
       </Title>
-      <Text className="portal-header-subtitle">Create an Account</Text>
+      <Text className="portal-header-subtitle">Create an account</Text>
 
       <Stack gap="md">
         <TextInput
           label="Username"
-          placeholder="Choose a username..."
+          name="username"
+          autoComplete="username"
+          spellCheck={false}
+          autoCapitalize="none"
           value={regUserVal}
           onChange={(e) => setRegUserVal(e.currentTarget.value)}
           required
@@ -40,38 +51,20 @@ export function RegisterPanel({
 
         <PasswordStrength value={regPassVal} onChange={setRegPassVal} />
 
-        {errors.password && (
-          <Text c="red" size="sm" mt={4} style={{ fontFamily: "var(--font-sans)" }}>
-            {errors.password}
-          </Text>
+        {(errors.password || error) && (
+          <p className="portal-error" role="alert">
+            {errors.password ?? error}
+          </p>
         )}
 
-        <Button
-          fullWidth
-          onClick={onSubmit}
-          className="glass-btn-primary"
-          mt={28}
-          h={50}
-          style={{ textTransform: "uppercase", letterSpacing: "1.5px", fontSize: "15px" }}
-        >
-          Register
+        <Button type="submit" fullWidth loading={busy} className="glass-btn-primary" mt={28} h={50}>
+          Create account
         </Button>
 
-        <Group justify="center" mt="md">
-          <Text size="sm" c="var(--theme-color-text-secondary, rgba(255, 255, 255, 0.7))" style={{ fontFamily: "var(--font-sans)" }}>
-            Already have an account?{" "}
-            <Text
-              component="span"
-              fw={700}
-              c="var(--theme-color-accent-primary, #f59e0b)"
-              style={{ cursor: "pointer", textDecoration: "underline" }}
-              onClick={onSwitchToLogin}
-            >
-              Login
-            </Text>
-          </Text>
-        </Group>
+        <p className="portal-switch">
+          Already have an account? <Link to="/login">Log in</Link>
+        </p>
       </Stack>
-    </>
+    </form>
   );
 }

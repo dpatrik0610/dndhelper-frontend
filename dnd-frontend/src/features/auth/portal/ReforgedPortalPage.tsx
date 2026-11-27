@@ -1,17 +1,15 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { Box } from "@mantine/core";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { useUiStore } from "@store/ui/uiStore";
 import { getActiveThemeClass } from "@appTypes/ThemeTypes";
 
 import { loginUser, registerUser } from "@services/authService";
 import { processToken } from "@utils/processToken";
-import { useLoadingNotification } from "@components/Notification/LoadingNotification";
 import { useToken } from "@store/auth/authSelectors";
 import AlreadyLoggedIn from "@features/auth/login/components/AlreadyLoggedIn";
 import { validateRegisterForm } from "@validations/registerValidation";
-import { showNotification } from "@components/Notification/Notification";
 
 import { LoginPanel } from "./components/LoginPanel";
 import { RegisterPanel } from "./components/RegisterPanel";
@@ -28,14 +26,9 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
 
   const { sidebarTheme } = useUiStore();
 
-  const [activePanel, setActivePanel] = useState<"login" | "register">(mode);
-
-  // Prevents brief "already logged in" page flash before redirect navigates
   const [isRedirecting, setIsRedirecting] = useState(false);
-
-  useEffect(() => {
-    setActivePanel(mode);
-  }, [mode]);
+  const [busy, setBusy] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [loginUserVal, setLoginUserVal] = useState("");
   const [loginPassVal, setLoginPasswordVal] = useState("");
@@ -44,86 +37,47 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
   const [regPassVal, setRegPassVal] = useState("");
   const [errors, setErrors] = useState<{ username?: string; password?: string }>({});
 
-  const toggleLoginNotification = useLoadingNotification({
-    title: "Logging in...",
-    message: "Please wait while we establish your session",
-    successTitle: "Login Successful",
-    successMessage: `Welcome back, ${loginUserVal}!`,
-    errorTitle: "Login Failed",
-    errorMessage: "Check your username and password",
-    autoClose: 2000,
-  });
-
-  const toggleRegNotification = useLoadingNotification({
-    id: "portal-registration",
-    title: "Creating account...",
-    message: "Registering credentials on server registry",
-    successTitle: "Registration Successful",
-    successMessage: `Account created successfully! Welcome, ${regUserVal}!`,
-    errorTitle: "Registration Failed",
-    errorMessage: "Check your details or select another username",
-    autoClose: 2000,
-  });
-
   const handleLoginSubmit = async () => {
-    if (!loginUserVal.trim() || !loginPassVal.trim()) {
-      showNotification({
-        title: "Validation Error",
-        message: "Please enter both username and password.",
-        color: "red",
-      });
+    if (busy) return;
+    const username = loginUserVal.trim();
+    if (!username || !loginPassVal) {
+      setFormError("Enter your username and password.");
       return;
     }
 
-    toggleLoginNotification(true);
+    setFormError(null);
+    setBusy(true);
     try {
-      const response = await loginUser({
-        username: loginUserVal.trim(),
-        password: loginPassVal.trim(),
-      });
-      await new Promise((res) => setTimeout(res, 800));
-
+      const response = await loginUser({ username, password: loginPassVal });
       localStorage.setItem("authToken", response.token);
-      localStorage.setItem("username", loginUserVal.trim());
+      localStorage.setItem("username", username);
       setIsRedirecting(true);
       processToken(response.token);
-
       await useUiStore.getState().fetchSettings();
-
-      toggleLoginNotification(false, true);
       navigate("/");
     } catch {
-      toggleLoginNotification(false, false);
+      setFormError("Wrong username or password. Check both and try again.");
+      setBusy(false);
     }
   };
 
   const handleRegisterSubmit = async () => {
+    if (busy) return;
     const { valid, errors: validationErrors } = validateRegisterForm(regUserVal, regPassVal);
     setErrors(validationErrors);
+    setFormError(null);
+    if (!valid) return;
 
-    if (!valid) {
-      showNotification({
-        title: "Validation Error",
-        message: Object.values(validationErrors).join(" | "),
-        color: "red",
-      });
-      return;
-    }
-
-    toggleRegNotification(true);
+    setBusy(true);
     try {
-      const response = await registerUser({
-        username: regUserVal.trim(),
-        password: regPassVal.trim(),
-      });
-      if (!response?.token) throw new Error("No token returned");
-
+      const response = await registerUser({ username: regUserVal.trim(), password: regPassVal });
+      if (!response?.token) throw new Error("The server didn't return a session. Try logging in.");
       setIsRedirecting(true);
       processToken(response.token);
-      toggleRegNotification(false, true);
       navigate("/");
-    } catch (err: any) {
-      toggleRegNotification(false, false, err.message || "Failed to register account");
+    } catch (err) {
+      setFormError(err instanceof Error && err.message ? err.message : "Couldn't create the account. Try another username.");
+      setBusy(false);
     }
   };
 
@@ -145,44 +99,34 @@ export function ReforgedPortalPage({ mode }: ReforgedPortalPageProps) {
     <Box className={`portal-container ${activeThemeClass} style-variant-glass`}>
       <Box className="portal-content-layer">
         <Box className="reforged-portal-card">
-          <AnimatePresence mode="wait">
-            {activePanel === "login" ? (
-              <motion.div
-                key="login-panel"
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 30 }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-              >
-                <LoginPanel
-                  loginUserVal={loginUserVal}
-                  setLoginUserVal={setLoginUserVal}
-                  loginPassVal={loginPassVal}
-                  setLoginPasswordVal={setLoginPasswordVal}
-                  onSubmit={handleLoginSubmit}
-                  onSwitchToRegister={() => setActivePanel("register")}
-                />
-              </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: mode === "login" ? -30 : 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+          >
+            {mode === "login" ? (
+              <LoginPanel
+                loginUserVal={loginUserVal}
+                setLoginUserVal={setLoginUserVal}
+                loginPassVal={loginPassVal}
+                setLoginPasswordVal={setLoginPasswordVal}
+                onSubmit={handleLoginSubmit}
+                busy={busy}
+                error={formError}
+              />
             ) : (
-              <motion.div
-                key="register-panel"
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-              >
-                <RegisterPanel
-                  regUserVal={regUserVal}
-                  setRegUserVal={setRegUserVal}
-                  regPassVal={regPassVal}
-                  setRegPassVal={setRegPassVal}
-                  errors={errors}
-                  onSubmit={handleRegisterSubmit}
-                  onSwitchToLogin={() => setActivePanel("login")}
-                />
-              </motion.div>
+              <RegisterPanel
+                regUserVal={regUserVal}
+                setRegUserVal={setRegUserVal}
+                regPassVal={regPassVal}
+                setRegPassVal={setRegPassVal}
+                errors={errors}
+                onSubmit={handleRegisterSubmit}
+                busy={busy}
+                error={formError}
+              />
             )}
-          </AnimatePresence>
+          </motion.div>
         </Box>
       </Box>
     </Box>

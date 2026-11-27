@@ -57,8 +57,9 @@ export function PasswordStrength({ value, onChange }: PasswordStrengthProps) {
       <PasswordInput
         value={value}
         onChange={(e) => onChange(e.currentTarget.value)}
-        placeholder="Your password"
         label="Password"
+        name="password"
+        autoComplete="new-password"
         required
         classNames={{ input: 'glassy-input', label: 'glassy-label' }}
       />
