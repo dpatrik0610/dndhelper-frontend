@@ -84,7 +84,7 @@ export function MiningBoard() {
               The Deepdelve
             </Title>
             <p className={styles.lede}>
-              Twenty ores, five pieces of gear, ten depths. Every ore you haul up earns renown, and the rarer it is the more it counts.
+              Twenty ores, six pieces of gear, ten depths. Every ore you haul up earns renown, and the rarer it is the more it counts.
             </p>
           </div>
           <Link to="/mine" className={`glass-btn-primary ${styles.mineBtn}`}>

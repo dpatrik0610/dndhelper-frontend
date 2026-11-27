@@ -166,7 +166,7 @@ export function Hotbar({
                 key={slot}
                 grid={item(slot, t)}
                 label={`${itemName(slot, t)}, tier ${t}`}
-                className={set > 0 && slot !== "boots" ? styles.hotSet : t >= 6 ? styles.hotGlow : ""}
+                className={set > 0 ? styles.hotSet : t >= 6 ? styles.hotGlow : ""}
                 glow={t >= 6 ? (SETS[t].accent ?? SETS[t].base) : undefined}
                 active={pick === slot}
                 onClick={inMine ? undefined : () => toggle(slot)}
@@ -184,7 +184,7 @@ export function Hotbar({
                         Set bonus <b>{SET_BONUSES[set][0]}</b>: {SET_BONUSES[set][1]} {DASH_PERKS[set]}
                       </>
                     ) : (
-                      "Wear all five pieces of one metal (boots don't count) for a set bonus."
+                      "Wear all six pieces of one metal, boots included, for a set bonus."
                     )}
                     <br />
                     {swapTip}

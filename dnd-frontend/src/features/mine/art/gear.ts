@@ -3,7 +3,6 @@ import { blank, blit, type Grid, mix, raster, ramp, rotateCW } from "./pixel";
 export type GearSlot = "pickaxe" | "gauntlets" | "helm" | "charm" | "satchel" | "boots";
 export type Tiers = Record<GearSlot, number>;
 export const GEAR_SLOTS: GearSlot[] = ["pickaxe", "gauntlets", "helm", "charm", "satchel", "boots"];
-export const SET_SLOTS: GearSlot[] = ["pickaxe", "gauntlets", "helm", "charm", "satchel"];
 
 type Detail = { from: number; shape: number; rows: Record<number, string> };
 type DollSlot = "helm" | "gauntlets" | "satchel" | "charm";
@@ -817,7 +816,7 @@ const overlay = (spec: (string | number)[], pal: Record<string, string>) =>
 
 export const fullSet = (tiers: Tiers) => {
   const t = tiers.pickaxe;
-  return t >= 6 && SET_SLOTS.every((s) => tiers[s] === t) ? t : 0;
+  return t >= 6 && GEAR_SLOTS.every((s) => tiers[s] === t) ? t : 0;
 };
 
 const tunicFor = (tiers: Tiers) => {
