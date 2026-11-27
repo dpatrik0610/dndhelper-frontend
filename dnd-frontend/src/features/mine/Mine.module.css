@@ -32,10 +32,14 @@
 
 .eyebrow {
   font-family: var(--pixel);
-  font-size: 0.6875rem;
-  letter-spacing: 0.12em;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--torch);
+}
+
+.stat .eyebrow {
+  font-size: 0.75rem;
 }
 
 .h1 {
@@ -547,8 +551,8 @@
   top: 4px;
   left: 6px;
   font-family: var(--pixel);
-  font-size: 0.625rem;
-  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   opacity: 0.7;
 }
@@ -690,7 +694,7 @@
 
 .petMeta {
   font-family: var(--pixel);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   color: var(--torch);
 }
