@@ -254,7 +254,7 @@ function AppRoutes() {
       )}
 
       <AppShell.Main>
-        {!isTableRoute && !isDashboardRoute && <AppBackground />}
+        {!isTableRoute && !isDashboardRoute && section !== "mine" && <AppBackground />}
         <SubtleRollDetailsModal />
         <div
           style={{

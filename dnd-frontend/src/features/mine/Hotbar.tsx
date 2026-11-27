@@ -63,7 +63,7 @@ export function Hotbar({
   config: MiningConfig;
   state: MiningState;
   potions: number;
-  torchesLeft: number;
+  torchesLeft: number | null;
   inMine: boolean;
   boltRef: RefObject<HTMLDivElement | null>;
 }) {
@@ -108,12 +108,13 @@ export function Hotbar({
         <Square
           grid={TORCH[1]}
           hotkey="T"
-          empty={torchesLeft <= 0}
-          count={`${torchesLeft}/${config.maxTorches}`}
-          label={`Torches, ${torchesLeft} left`}
+          empty={torchesLeft !== null && torchesLeft <= 0}
+          count={torchesLeft === null ? undefined : `${torchesLeft}/${config.maxTorches}`}
+          label={torchesLeft === null ? "Torches" : `Torches, ${torchesLeft} left`}
           tip={
             <>
-              <b>Torches</b> · {torchesLeft} of {config.maxTorches} left
+              <b>Torches</b>
+              {torchesLeft !== null && ` · ${torchesLeft} of ${config.maxTorches} left`}
               <br />
               {inMine ? "T plants one above your head. Lit tunnels stay lit." : "You get a fresh bundle every trip."}
             </>

@@ -97,25 +97,7 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 240px;
-}
-
-.side {
-  min-height: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 12px;
-  background: color-mix(in srgb, var(--theme-bg-panel-opaque, var(--theme-bg-panel)) 92%, transparent);
-}
-
-.side:first-child {
-  border-right: 1px solid var(--theme-border-subtle);
-}
-
-.side:last-child {
-  border-left: 1px solid var(--theme-border-subtle);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .block {
@@ -200,7 +182,7 @@
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(900px, calc(100% - 20px));
+  width: clamp(420px, calc(100% - 640px), 900px);
   max-height: calc(50% - 48px);
   overflow-y: auto;
   padding: 14px 16px;
@@ -844,4 +826,96 @@
   height: 0;
   background: rgba(3, 2, 6, 0.7);
   pointer-events: none;
+}
+
+.hudLeft {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #f1e6cf;
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+}
+
+.hudTitle {
+  font-family: var(--pixel);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--torch);
+}
+
+.hudRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hudLabel {
+  width: 52px;
+  font-family: var(--pixel);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hudRight {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 290px;
+  max-height: calc(100% - 110px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.hudRight > * {
+  pointer-events: auto;
+}
+
+.hudRight > .btnRow {
+  justify-content: flex-end;
+}
+
+.hudBtn {
+  padding: 4px 10px;
+  font-family: var(--pixel);
+  font-size: 0.75rem;
+}
+
+.hudRight .gearBtn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.closeBtn {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+}
+
+.hudPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #3a3346;
+  background: var(--hud);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+  animation: fadeIn 120ms ease-out;
 }

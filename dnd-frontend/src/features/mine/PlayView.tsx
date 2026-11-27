@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Switch } from "@mantine/core";
+import { IconSettings } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import {
   ascend,
@@ -18,6 +19,7 @@ import {
   LiftMenu,
   NextGoal,
   OrePouch,
+  PanelHead,
   PetMenu,
   TraderMenu,
   type TripReport,
@@ -50,6 +52,8 @@ import { dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
 
 const SWITCH_CLASSES = { root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" };
+const GOAL_OPEN_KEY = "deepdelve-goal-open";
+type Panel = "pouch" | "controls" | "settings";
 const STEP_MS = 1000 / 60;
 const FLUSH_MS = 1000;
 const NO_KEYS: Keys = { left: false, right: false, up: false, down: false, jump: false, attack: false };
@@ -119,6 +123,13 @@ export function PlayView({
   const [potions, setPotions] = useState(state.potions);
   const [dream, setDream] = useState("");
   const [report, setReport] = useState<TripReport | null>(null);
+  const [panel, setPanel] = useState<Panel | null>(null);
+  const [goalOpen, setGoalOpen] = useState(() => localStorage.getItem(GOAL_OPEN_KEY) !== "0");
+  const togglePanel = (p: Panel) => setPanel((cur) => (cur === p ? null : p));
+  const showGoal = (open: boolean) => {
+    setGoalOpen(open);
+    localStorage.setItem(GOAL_OPEN_KEY, open ? "1" : "0");
+  };
   const [torchesUsed, setTorchesUsed] = useState(trip?.torches.length ?? 0);
   const boltRef = useRef<HTMLDivElement>(null);
   const [sound, setSound] = useState<SoundPrefs>(loadPrefs);
@@ -393,6 +404,7 @@ export function PlayView({
       if (e.code === "Escape") {
         setReading(0);
         setReport(null);
+        setPanel(null);
       }
       if (e.code === "KeyT" && !g.camp) placeTorch(g);
       if (e.code === "KeyF") castBolt(g, g.hover);
@@ -465,54 +477,6 @@ export function PlayView({
 
   return (
     <div className={styles.frame}>
-      <aside className={styles.side}>
-        <div className={styles.block}>
-          <div className={styles.barHead}>
-            <span className={styles.eyebrow}>Health</span>
-            <span ref={hpText} className={styles.barText} />
-          </div>
-          <div className={styles.bar}>
-            <div ref={hpRef} className={styles.hpFill} />
-          </div>
-        </div>
-
-        {trip ? (
-          <div className={styles.block}>
-            <div className={styles.barHead}>
-              <span className={styles.eyebrow}>Satchel</span>
-              <span className={styles.barText}>
-                {compact(carried)} / {compact(state.stats.capacity)}
-              </span>
-            </div>
-            <div className={styles.bar}>
-              <div
-                className={`${styles.satchelFill} ${full ? styles.satchelFull : ""}`}
-                style={{ width: `${Math.min(1, carried / state.stats.capacity) * 100}%` }}
-              />
-            </div>
-            <div className={styles.satchelList}>
-              {Object.entries(satchel)
-                .filter(([, n]) => n > 0)
-                .map(([key, n]) => {
-                  const i = config.ores.findIndex((o) => o.key === key);
-                  return (
-                    <span key={key} className={styles.satchelItem} title={config.ores[i]?.name}>
-                      <Sprite grid={oreIcon(i)} scale={1} />
-                      {compact(n)}
-                    </span>
-                  );
-                })}
-              {!carried && <span className={styles.dim}>Empty. Find some ore.</span>}
-            </div>
-          </div>
-        ) : (
-          <div className={`${styles.block} ${styles.grow}`}>
-            <span className={styles.eyebrow}>Ore pouch</span>
-            <OrePouch config={config} state={state} />
-          </div>
-        )}
-      </aside>
-
       <div ref={stageRef} className={styles.stage}>
         <canvas
           ref={canvasRef}
@@ -544,6 +508,158 @@ export function PlayView({
         />
 
         <canvas ref={textRef} className={`${styles.canvas} ${styles.textLayer}`} aria-hidden />
+
+        <div className={styles.hudLeft}>
+          <span className={styles.hudTitle}>
+            {trip ? `Depth ${depth} · ${config.depths[depth - 1]?.name ?? ""}` : "Camp · The mine entrance"}
+          </span>
+          <div className={styles.hudRow}>
+            <span className={styles.hudLabel}>Health</span>
+            <div className={`${styles.bar} ${styles.grow}`}>
+              <div ref={hpRef} className={styles.hpFill} />
+            </div>
+            <span ref={hpText} className={styles.barText} />
+          </div>
+          {trip && (
+            <>
+              <div className={styles.hudRow}>
+                <span className={styles.hudLabel}>Satchel</span>
+                <div className={`${styles.bar} ${styles.grow}`}>
+                  <div
+                    className={`${styles.satchelFill} ${full ? styles.satchelFull : ""}`}
+                    style={{ width: `${Math.min(1, carried / state.stats.capacity) * 100}%` }}
+                  />
+                </div>
+                <span className={styles.barText}>
+                  {compact(carried)} / {compact(state.stats.capacity)}
+                </span>
+              </div>
+              <div className={styles.satchelList}>
+                {Object.entries(satchel)
+                  .filter(([, n]) => n > 0)
+                  .map(([key, n]) => {
+                    const i = config.ores.findIndex((o) => o.key === key);
+                    return (
+                      <span key={key} className={styles.satchelItem} title={config.ores[i]?.name}>
+                        <Sprite grid={oreIcon(i)} scale={1} />
+                        {compact(n)}
+                      </span>
+                    );
+                  })}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className={styles.hudRight}>
+          <div className={styles.btnRow}>
+            {!trip && (
+              <button
+                type="button"
+                className={`glass-btn-secondary ${styles.hudBtn}`}
+                onClick={() => togglePanel("pouch")}
+              >
+                {panel === "pouch" ? "Hide ore pouch" : "Ore pouch"}
+              </button>
+            )}
+            {!goalOpen && (
+              <button type="button" className={`glass-btn-secondary ${styles.hudBtn}`} onClick={() => showGoal(true)}>
+                Show goal
+              </button>
+            )}
+            <button
+              type="button"
+              className={`glass-btn-secondary ${styles.hudBtn}`}
+              onClick={() => togglePanel("controls")}
+            >
+              {panel === "controls" ? "Hide controls" : "Show controls"}
+            </button>
+            <button
+              type="button"
+              className={`${panel === "settings" ? "glass-btn-primary" : "glass-btn-secondary"} ${styles.gearBtn}`}
+              aria-label="Settings"
+              aria-pressed={panel === "settings"}
+              onClick={() => togglePanel("settings")}
+            >
+              <IconSettings size={18} />
+            </button>
+          </div>
+
+          {panel === "settings" && (
+            <section className={styles.hudPanel} aria-label="Settings">
+              <PanelHead title="Settings" onClose={() => setPanel(null)} />
+              <Switch
+                classNames={SWITCH_CLASSES}
+                label="Music"
+                checked={sound.music}
+                onChange={(e) => toggleSound("music", e.currentTarget.checked)}
+              />
+              <Switch
+                classNames={SWITCH_CLASSES}
+                label="Effects"
+                checked={sound.sfx}
+                onChange={(e) => toggleSound("sfx", e.currentTarget.checked)}
+              />
+            </section>
+          )}
+
+          {panel === "controls" && (
+            <section className={styles.hudPanel} aria-label="Controls">
+              <PanelHead title="Controls" onClose={() => setPanel(null)} />
+              <span className={styles.dim}>
+                {trip
+                  ? "Dig for ore and walk back to the lift to bank it. Break the gold-runed floor to go deeper."
+                  : "Walk to the lift, the forge or Pip's stall."}
+              </span>
+              <div className={styles.keys}>
+                <span>
+                  <kbd>A</kbd>
+                  <kbd>D</kbd> walk / dig sideways
+                </span>
+                <span>
+                  <kbd>Space</kbd> jump
+                </span>
+                <span>
+                  <kbd>S</kbd> dig down
+                </span>
+                <span>
+                  <kbd>W</kbd> climb, places a ladder
+                </span>
+                <span>
+                  <kbd>Click</kbd> or <kbd>Enter</kbd> attack and mine
+                </span>
+                <span>
+                  <kbd>T</kbd> torch
+                </span>
+                {state.firebolt && (
+                  <span>
+                    <kbd>F</kbd> or <kbd>Right-click</kbd> firebolt
+                  </span>
+                )}
+                <span>
+                  <kbd>Q</kbd> drink a potion
+                </span>
+                <span>
+                  <kbd>E</kbd> ride the lift up
+                </span>
+                <span>
+                  <kbd>Esc</kbd> close panels
+                </span>
+              </div>
+            </section>
+          )}
+
+          {panel === "pouch" && !trip && (
+            <section className={styles.hudPanel} aria-label="Ore pouch">
+              <PanelHead title="Ore pouch" onClose={() => setPanel(null)} />
+              <OrePouch config={config} state={state} />
+            </section>
+          )}
+
+          {goalOpen && (
+            <NextGoal config={config} state={state} satchel={trip ? satchel : {}} onClose={() => showGoal(false)} />
+          )}
+        </div>
 
         {near && !(report && !trip) && (
           <section className={styles.menu} aria-label={MENU_TITLES[near][0]}>
@@ -599,7 +715,7 @@ export function PlayView({
           config={config}
           state={state}
           potions={potions}
-          torchesLeft={config.maxTorches - torchesUsed}
+          torchesLeft={config.maxTorches ? config.maxTorches - torchesUsed : null}
           inMine={!!trip}
           boltRef={boltRef}
         />
@@ -625,72 +741,6 @@ export function PlayView({
           </div>
         )}
       </div>
-
-      <aside className={styles.side}>
-        <div className={styles.block}>
-          <span className={styles.eyebrow}>{trip ? `Depth ${depth}` : "Camp"}</span>
-          <b className={styles.pixel}>{trip ? config.depths[depth - 1]?.name : "The mine entrance"}</b>
-          <span className={styles.dim}>
-            {trip
-              ? "Dig for ore and walk back to the lift to bank it. Break the gold-runed floor to go deeper."
-              : "Walk to the lift, the forge or Pip's stall."}
-          </span>
-        </div>
-
-        <NextGoal config={config} state={state} satchel={trip ? satchel : {}} />
-
-        <div className={styles.block}>
-          <span className={styles.eyebrow}>Sound</span>
-          <Switch
-            classNames={SWITCH_CLASSES}
-            label="Music"
-            checked={sound.music}
-            onChange={(e) => toggleSound("music", e.currentTarget.checked)}
-          />
-          <Switch
-            classNames={SWITCH_CLASSES}
-            label="Effects"
-            checked={sound.sfx}
-            onChange={(e) => toggleSound("sfx", e.currentTarget.checked)}
-          />
-        </div>
-
-        <div className={styles.block}>
-          <span className={styles.eyebrow}>Controls</span>
-          <div className={styles.keys}>
-            <span>
-              <kbd>A</kbd>
-              <kbd>D</kbd> walk / dig sideways
-            </span>
-            <span>
-              <kbd>Space</kbd> jump
-            </span>
-            <span>
-              <kbd>S</kbd> dig down
-            </span>
-            <span>
-              <kbd>W</kbd> climb, places a ladder
-            </span>
-            <span>
-              <kbd>Click</kbd> or <kbd>Enter</kbd> attack
-            </span>
-            <span>
-              <kbd>T</kbd> torch
-            </span>
-            {state.firebolt && (
-              <span>
-                <kbd>F</kbd> or <kbd>Right-click</kbd> firebolt
-              </span>
-            )}
-            <span>
-              <kbd>Q</kbd> drink a potion
-            </span>
-            <span>
-              <kbd>E</kbd> ride the lift up
-            </span>
-          </div>
-        </div>
-      </aside>
     </div>
   );
 }

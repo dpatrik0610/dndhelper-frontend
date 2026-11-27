@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tooltip } from "@mantine/core";
-import { IconLock, IconPin, IconPinFilled } from "@tabler/icons-react";
+import { IconLock, IconPin, IconPinFilled, IconX } from "@tabler/icons-react";
 import { showNotification } from "@components/Notification/Notification";
 import {
   buyPet,
@@ -61,7 +61,33 @@ function PinButton({ id }: { id: string }) {
 
 const GOAL_PLACE: Record<Goal["kind"], string> = { gear: "the forge", forge: "the forge", pet: "Pip's stall" };
 
-export function NextGoal({ config, state, satchel }: { config: MiningConfig; state: MiningState; satchel: OreCounts }) {
+export function PanelHead({ title, onClose }: { title: string; onClose: () => void }) {
+  return (
+    <div className={styles.barHead}>
+      <span className={styles.eyebrow}>{title}</span>
+      <button
+        type="button"
+        className={`glass-btn-secondary ${styles.closeBtn}`}
+        aria-label={`Close ${title}`}
+        onClick={onClose}
+      >
+        <IconX size={14} />
+      </button>
+    </div>
+  );
+}
+
+export function NextGoal({
+  config,
+  state,
+  satchel,
+  onClose,
+}: {
+  config: MiningConfig;
+  state: MiningState;
+  satchel: OreCounts;
+  onClose: () => void;
+}) {
   const pinned = usePinnedGoal();
   const ores = withSatchel(state.ores, satchel);
   const goal = pickGoal(goalsFor(config, state), ores, pinned);
@@ -69,12 +95,12 @@ export function NextGoal({ config, state, satchel }: { config: MiningConfig; sta
   const ready = canAfford(goal.cost, ores);
   const banked = canAfford(goal.cost, state.ores);
   return (
-    <div className={`${styles.block} ${styles.goalCard}`}>
+    <div className={`${styles.block} ${styles.hudPanel} ${styles.goalCard}`}>
+      <PanelHead title={goal.id === pinned ? "Tracking" : "Next goal"} onClose={onClose} />
       <div className={styles.barHead}>
-        <span className={styles.eyebrow}>{goal.id === pinned ? "Tracking" : "Next goal"}</span>
+        <b className={styles.pixel}>{goal.name}</b>
         <span className={styles.barText}>{Math.floor(progress(goal.cost, ores) * 100)}%</span>
       </div>
-      <b className={styles.pixel}>{goal.name}</b>
       <div className={styles.bar}>
         <div
           className={`${styles.satchelFill} ${ready ? styles.goalReady : ""}`}
