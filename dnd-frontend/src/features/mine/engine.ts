@@ -286,11 +286,11 @@ export const drawPos = (a: Tween) => {
 const say = (g: Game, x: number, y: number, text: string, color: string, life = 1100) =>
   g.texts.push({ x, y, text, color, life });
 
-const sayOnce = (g: Game, key: string, text: string, color = "#ffb347") => {
+export const sayOnce = (g: Game, key: string, text: string, color = "#ffb347", life = 1800) => {
   if (g.warned.has(key)) return;
   g.warned.add(key);
   const p = g.player;
-  say(g, (p.x + 0.5) * T, (p.y - 2) * T, text, color, 1800);
+  say(g, (p.x + 0.5) * T, (p.y - 2) * T, text, color, life);
 };
 
 const shake = (g: Game, mag: number, ms: number) => {

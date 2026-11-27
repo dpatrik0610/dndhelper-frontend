@@ -333,8 +333,8 @@ assert.ok(chest.pending.breaks.some((b) => b.i === 2 * W + 10));
 chest.trader = chest.player.y * W + chest.player.x - 2;
 assert.equal(stationAt(chest), "trader", "walk up to Moss to trade");
 
-assert.equal(dreamsFor(1).length, 3);
-assert.equal(dreamsFor(10).length, 12);
+assert.equal(dreamsFor(1).length, 4);
+assert.equal(dreamsFor(10).length, 14);
 const reachy = newGame(-1);
 reachy.monsters = [];
 reachy.nextSpawn = 1e12;

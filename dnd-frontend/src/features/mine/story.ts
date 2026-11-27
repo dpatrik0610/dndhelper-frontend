@@ -3,6 +3,8 @@ import { type Grid, raster } from "./art/pixel";
 
 export const FOREMAN = "Foreman Ottilie Brasshand";
 
+export const ARRIVAL = "Fresh off the Gullrock ferry. Dig the Anvil, earn your name back.";
+
 export const PAGES: string[] = [
   "Day one of the deep cut. Forty-one of us, one lift, and a hum in the rock the old hands swear is water. It isn't water. I've left the boy Wick up top with the bell and the last good candle. Someone has to ring us home.",
   "The Old Road runs further than any map of it. Found a boot print pressed in stone so old it's gone to glass. The toe points down. Morale is fine. Morale is always fine on day four.",
@@ -37,10 +39,14 @@ const BY_DEPTH: string[][] = [
     "Lift still works. Hasn't stopped working in three hundred years. I oil it. Nobody asked me to.",
     "Bell rang again last night. On its own. It does that.",
     "You've got the look of someone who'll go down anyway. Fine. Bring me anything with writing on it.",
+    "Gullrock ferry drops one of you every season. Rusty pick, work pardon, and a look like the world owes you a second go. It might.",
+    "The reeve wants ore, not apologies. Dig enough and they'll scrub your name off the Gullrock wall.",
+    "Forty-one went down this lift. You'd make forty-two. Try to come back up, eh?",
   ],
   [
     "The Old Road. The foreman used to sing on it. Badly.",
     "Kobolds are harmless. They'll just rob you blind.",
+    "Heard the Bent Nail let you drink there last night. Nobody's done that for a Gullrock face in years.",
     "Mind the seals. They weren't put there to keep things in.",
   ],
   [
@@ -50,6 +56,7 @@ const BY_DEPTH: string[][] = [
   [
     "Darkfall. Ring the bell twice when you pass it. Don't ask, just do it.",
     "You carry a lot of light for someone going that deep. Good. Keep it.",
+    "Reeve came by asking after you. Your name got said in the tavern without anyone spitting. That's progress.",
   ],
   [
     "Bonewhite. They all face down, don't they? Don't you face down.",
@@ -59,6 +66,7 @@ const BY_DEPTH: string[][] = [
     "So it wasn't there. Of course it wasn't. She never could leave a song alone.",
     "It's still falling. Some nights the bell rings so soft I think it's her, very far away.",
     "Go on, then. Somebody has to keep up with her.",
+    "Nobody on Saltbell thinks of Gullrock when they look at you now. They think of the Anvil.",
   ],
 ];
 
@@ -116,6 +124,8 @@ const DREAMS: [number, string][] = [
   [1, "You dream of a bell ringing under a lake. Every ring, the water gets warmer."],
   [1, "You dream you're a candle, and someone old is cupping a hand around you against the wind."],
   [1, "You dream of nothing at all and wake up rested. Wick would call that a miracle."],
+  [1, "You dream of your old cell at Gullrock. The door's been open for weeks. You still knock before you walk out."],
+  [3, "You dream the whole Bent Nail raises a mug when you walk in. Nobody spits. You wake up grinning."],
   [2, "A kobold in your dream counts your ore twice, gets two different numbers, and weeps."],
   [3, "You dream of forty-one lanterns going down a stair, and one staying at the top."],
   [4, "The rock in your dream sings three slow notes and one quick one. You already know the next verse."],

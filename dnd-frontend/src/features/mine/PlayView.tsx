@@ -39,6 +39,7 @@ import {
   placeTorch,
   type Station,
   stationAt,
+  sayOnce,
   step,
   T,
   takePending,
@@ -53,7 +54,7 @@ import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, 
 import { Hotbar } from "./Hotbar";
 import { Sprite } from "./Sprite";
 import { type AchToast, AchievementToasts, TrophyPanel } from "./Trophies";
-import { dreamsFor, engraving } from "./story";
+import { ARRIVAL, dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
 
 const SWITCH_CLASSES = { root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" };
@@ -367,6 +368,7 @@ export function PlayView({
       trip,
       performance.now(),
     );
+    if (!trip && s.nodesBroken === 0) sayOnce(g, "arrival", ARRIVAL, "#e8dcc0", 3000);
     gameRef.current = g;
     const draw = createRenderer(canvas, text);
 

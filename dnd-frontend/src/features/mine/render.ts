@@ -29,6 +29,7 @@ import {
   T,
 } from "./engine";
 import { compact, hpColor } from "./mine";
+import { islandBack, islandLights, islandNear, LANDMARKS } from "./scenery";
 import { wickSprite } from "./story";
 
 const CRACK_ALL = cracks(4);
@@ -321,17 +322,16 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         1,
       );
     }
-    ctx.fillStyle = "#1a1428";
-    for (let x = 0; x < VW; x += 2) {
-      const h = Math.round(Math.sin((x - ox * 0.3) / 23) * 5 + Math.sin((x - ox * 0.3) / 7) * 2);
-      ctx.fillRect(x, gy - 18 - h, 2, 20 + h);
-    }
+    islandBack(ctx, g.now, ox, gy, VW);
     ctx.fillStyle = "#3a2a20";
     ctx.fillRect(0, gy, VW, VH - gy);
     ctx.fillStyle = "#2f4a2a";
     ctx.fillRect(0, gy, VW, 2);
     ctx.fillStyle = "#4a3426";
     for (let x = 3; x < g.W * T; x += 11) ctx.fillRect(x + ox, gy + 6 + ((x * 7) % 13), 2, 1);
+    islandNear(ctx, g.now, ox, gy, VW);
+    const px = (g.player.x + 0.5) * T;
+    for (const l of LANDMARKS) if (Math.abs(px - l.x) < 26) label(l.name, l.x + ox, gy - l.y, false);
 
     const hx = CAMP.lift * T + 8 + ox - 15;
     ctx.fillStyle = "#050308";
@@ -801,6 +801,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       if (lv >= 7) glow(ctx, cx, CAMP.ground * T + oy, 24, [255, 90, 30], 0.18);
       if (lv >= 8) glow(ctx, cx, top + FORGE_SPOTS.chimney - 2, 16, fire, flick ? 0.3 : 0.22);
       if (lv >= 10) glow(ctx, cx, top + 3, 20 + Math.sin(g.now / 300) * 3, [215, 225, 255], 0.4);
+      islandLights(ctx, glow, g.now, ox, CAMP.ground * T + oy, VW);
     }
     else glow(ctx, lx + 23, ly - 20, 2.5 * T, [255, 150, 60], 0.16);
     glow(ctx, headX, headY - 4, 22, [255, 215, 130], 0.1);
