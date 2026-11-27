@@ -25,6 +25,7 @@ import {
   lightRadius,
   CHARTED,
   TORCH_LIGHT,
+  LIFT_LIGHT,
   trapCycle,
   DASH_COOLDOWN_MS,
   encumbered,
@@ -915,7 +916,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         }
       const black = [0, 0, 0];
       glow(dctx, headX, headY, (lightRadius(g) + (g.asleep ? -0.8 : 0)) * T + fl, black, 1);
-      glow(dctx, lx + 23, ly - 20, 3 * T + fl, black, 0.9);
+      glow(dctx, lx + 23, ly - 20, LIFT_LIGHT * T + fl, black, 1);
       for (const i of g.torches)
         glow(dctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, TORCH_LIGHT * T + fl, black, 0.95);
       for (const b of g.bolts) glow(dctx, b.x * T + ox, b.y * T + oy, 1.8 * T, black, 0.95);
@@ -1008,7 +1009,10 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       for (const [x, y, r] of spots.lights) glow(ctx, hx0 + x, hy0 + y, r, [255, 200, 110], flick ? 0.2 : 0.16);
       glow(ctx, CAMP.market * T + ox + 8, CAMP.ground * T + oy - 20, 20, [255, 200, 110], 0.1);
     }
-    else glow(ctx, lx + 23, ly - 20, 2.5 * T, [255, 150, 60], 0.16);
+    else {
+      glow(ctx, lx + 23, ly - 20, (LIFT_LIGHT - 1) * T, [255, 160, 70], flick ? 0.28 : 0.24);
+      glow(ctx, lx + 23, ly - 24, 18, [255, 220, 140], 0.3);
+    }
     glow(ctx, headX, headY - 4, 22, [255, 215, 130], 0.1);
     for (const b of g.bolts) glow(ctx, b.x * T + ox, b.y * T + oy, 14, [255, 140, 50], 0.45);
     if (pet?.art.light) glow(ctx, pet.px * T + ox + 8, (pet.py + 0.5) * T + oy, 14, hex(pet.art.light), 0.3);

@@ -531,6 +531,7 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   if (p.hp <= 0) g.fainted = true;
   g.sent = vitals(g);
   for (const i of g.torches) markSeen(g, i % g.W, Math.floor(i / g.W), TORCH_LIGHT);
+  markSeen(g, g.liftX + 1, g.liftY - 1, LIFT_LIGHT);
 }
 
 export const emptyPending = (): Pending => ({
@@ -581,7 +582,12 @@ export const lightRadius = (g: Game) =>
 
 export const CHARTED = [CHEST, IRON_CHEST, GILDED_CHEST, MIMIC, GEODE, DIAMOND_CELL, LEDGER];
 
+export const LIFT_LIGHT = 5;
+export const byLiftTorch = (g: Game, x: number, y: number) =>
+  !g.camp && (x - g.liftX - 1) ** 2 + (y - g.liftY + 1) ** 2 <= LIFT_LIGHT * LIFT_LIGHT;
+
 export const inTorchlight = (g: Game, x: number, y: number) => {
+  if (byLiftTorch(g, x, y)) return true;
   for (const t of g.torches) if (((t % g.W) - x) ** 2 + (Math.floor(t / g.W) - y) ** 2 <= TORCH_LIGHT * TORCH_LIGHT) return true;
   return false;
 };
@@ -1693,7 +1699,8 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
   const p = g.player;
   const max = g.stats.maxHp;
   const resting = g.now - p.lastHurt > REST_MS && inTorchlight(g, p.x, p.y - 1);
-  const regen = (g.pet?.key === "wisp" ? 0.03 : 0) + (resting ? 0.03 : 0);
+  const rest = resting ? (byLiftTorch(g, p.x, p.y - 1) ? 0.06 : 0.03) : 0;
+  const regen = (g.pet?.key === "wisp" ? 0.03 : 0) + rest;
   p.hp = Math.min(max, p.hp + max * regen * (dt / 1000));
   if (g.now < p.burnUntil && g.now >= p.nextBurn) {
     p.nextBurn = g.now + 1000;
