@@ -18,7 +18,7 @@ export const ENEMIES: Enemy[] = [
     name: "Giant Rat",
     depth: 1,
     threat: "Pest",
-    does: "Scurries in from the dark and nibbles. One or two good hits.",
+    does: "Darts in from the dark far faster than you, zig-zagging so it is hard to pin down. Weak, though: one or two good hits.",
     pal: { x: "#1c1410", b: "#6e5e50", B: "#93806c", p: "#d98c9a", e: "#ff3b3b" },
     rows: pad([
       "....xx..........",

@@ -227,7 +227,7 @@ export interface Game extends GameSetup {
 type Kind = { hp: number; dmg: number; move: number; windup: number; poise: number; ward?: number; tunnel?: boolean };
 
 export const KINDS: Record<number, Kind> = {
-  1: { hp: 0.8, dmg: 0.8, move: 380, windup: 420, poise: 1 },
+  1: { hp: 0.8, dmg: 0.8, move: 150, windup: 420, poise: 1 },
   2: { hp: 1, dmg: 1.15, move: 520, windup: 400, poise: 1, tunnel: true },
   3: { hp: 0.9, dmg: 1, move: 340, windup: 380, poise: 1 },
   4: { hp: 1.1, dmg: 1, move: 480, windup: 380, poise: 2 },
@@ -239,6 +239,9 @@ export const KINDS: Record<number, Kind> = {
   10: { hp: 2, dmg: 1.6, move: 520, windup: 320, poise: 3 },
   11: { hp: 5, dmg: 1.5, move: 430, windup: 360, poise: 99 },
 };
+
+export const SKITTER_KIND = 1;
+const SKITTER_CHANCE = 0.35;
 
 export const PET_LIGHT: Record<string, number> = { moth: 2, wisp: 2.5, fox: 3 };
 
@@ -1451,7 +1454,11 @@ function stepMonsters(g: Game, dt: number) {
       if (cellAt(g, nx, ny) !== BEDROCK && !occupied(nx, ny)) tweenTo(m, nx, ny, m.moveMs * 0.9);
       continue;
     }
-    const next = route(g, m, fly);
+    let next = route(g, m, fly);
+    if (next >= 0 && m.kind === SKITTER_KIND && rand() < SKITTER_CHANCE) {
+      const dir = (next % g.W) - m.x || (rand() < 0.5 ? -1 : 1);
+      if (isOpen(g, m.x - dir, m.y)) next = m.y * g.W + m.x - dir;
+    }
     if (next >= 0) {
       m.lost = 0;
       const nx = next % g.W;
