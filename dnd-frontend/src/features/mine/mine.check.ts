@@ -53,6 +53,7 @@ const stats: MiningStats = {
   oreSight: 0,
   setBonus: 0,
   armor: 0,
+  chainCrit: false,
 };
 const depth: DepthInfo = {
   number: 1,
@@ -435,4 +436,16 @@ plain.nextSpawn = 1e12;
 minY = 99;
 run(plain, 400, { jump: true });
 assert.equal(minY, 3, "everyone else jumps one");
+const sparky = newGame(-1);
+sparky.monsters = [];
+sparky.nextSpawn = 1e12;
+sparky.stats = { ...stats, critZone: 1, chainCrit: true };
+run(sparky, 100, { down: true });
+assert.equal(sparky.dmg.size, 2, "a crit with a tier 8 charm sparks a free hit into a neighbouring block");
+const dull = newGame(-1);
+dull.monsters = [];
+dull.nextSpawn = 1e12;
+dull.stats = { ...stats, critZone: 1 };
+run(dull, 100, { down: true });
+assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
 console.log("mine.check ok");

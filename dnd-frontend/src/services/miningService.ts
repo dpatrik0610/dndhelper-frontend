@@ -21,6 +21,7 @@ export interface MiningStats {
   oreSight: number;
   setBonus: number;
   armor: number;
+  chainCrit: boolean;
 }
 
 export interface Ore {

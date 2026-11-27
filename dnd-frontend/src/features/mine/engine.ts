@@ -423,7 +423,9 @@ function hitCell(g: Game, x: number, y: number) {
   if (c === MIMIC) return wakeMimic(g, x, y);
   const crit = swing(g);
   crack(g, i, crit, false);
-  for (const j of splashOf(g, i)) crack(g, j, crit, true);
+  const splash = splashOf(g, i);
+  for (const j of splash) crack(g, j, crit, true);
+  if (crit && g.stats.chainCrit) chainSpark(g, i, splash);
   settle(g);
 }
 
@@ -443,6 +445,29 @@ export function splashOf(g: Game, i: number) {
     const c = g.map[j];
     return Math.abs((j % g.W) - cx) <= 1 && j >= 0 && j < g.map.length && (c === STONE || oreOf(c) >= 0);
   });
+}
+
+function chainSpark(g: Game, i: number, splash: number[]) {
+  const near = [i - 1, i + 1, i - g.W, i + g.W].filter((j) => {
+    const c = g.map[j];
+    return Math.abs((j % g.W) - (i % g.W)) <= 1 && !splash.includes(j) && (c === STONE || oreOf(c) >= 0);
+  });
+  if (!near.length) return;
+  const j = near[Math.floor(rand() * near.length)];
+  crack(g, j, true, true);
+  const ax = ((i % g.W) + 0.5) * T;
+  const ay = (Math.floor(i / g.W) + 0.5) * T;
+  const bx = ((j % g.W) + 0.5) * T;
+  const by = (Math.floor(j / g.W) + 0.5) * T;
+  for (let k = 0; k <= 6; k++)
+    g.parts.push({
+      x: ax + ((bx - ax) * k) / 6,
+      y: ay + ((by - ay) * k) / 6,
+      vx: 0,
+      vy: 0,
+      life: 160 + k * 20,
+      color: "#ffe066",
+    });
 }
 
 function crack(g: Game, i: number, crit: boolean, splash: boolean) {
