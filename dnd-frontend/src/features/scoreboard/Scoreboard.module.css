@@ -245,6 +245,22 @@
   color: var(--theme-color-text-primary);
 }
 
+.holdings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 6px;
+}
+
+.holding {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--theme-color-text-primary);
+  opacity: 0.75;
+}
+
 .mineHead {
   display: flex;
   justify-content: space-between;

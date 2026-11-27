@@ -159,10 +159,11 @@ const FIXED: Achievement[] = [
   ...tiers("home", "Camp", "🏠", (c) => c.state.houseLevel ?? 1, [
     [2, "Four Walls", "Trade the shed for a timber cabin."],
     [3, "Hearth and Thatch", "Move into the stone cottage."],
+    [4, "Under the Long Roof", "Build the dwarven longhouse, walled garden and all."],
     [5, "Thane of Saltbell", "Raise Anvilhold Hall."],
   ]),
   ...tiers("coins", "Camp", "🪙", (c) => c.state.coins ?? 0, [
-    [1000, "Pocket Money", "Hold 1,000 coins at once."],
+    [1000, "A Jingling Purse", "Hold 1,000 coins at once."],
     [1_000_000, "Saltbell Magnate", "Hold a million coins at once."],
   ]),
   ...tiers("pets", "Camp", "🐕", (c) => c.state.pets.length, [

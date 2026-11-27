@@ -170,6 +170,8 @@ export interface MiningScore {
   gear: Partial<Record<SlotKey, number>>;
   deepestDepth: number;
   nodesBroken: number;
+  forgeLevel: number;
+  houseLevel: number;
 }
 
 const post = <T>(path: string, body?: unknown) => apiClient<T>(`/mining/me${path}`, { method: "POST", body });

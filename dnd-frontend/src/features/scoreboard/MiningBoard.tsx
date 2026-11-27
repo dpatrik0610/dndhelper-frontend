@@ -8,10 +8,30 @@ import { getMiningScoreboard, type MiningScore } from "@services/miningService";
 import { useUsername } from "@store/auth/authSelectors";
 import { compact } from "@features/mine/mine";
 import { GEAR_SLOTS, item, itemName } from "@features/mine/art/gear";
+import { FORGE_LEVELS, forgeSprite } from "@features/mine/art/forge";
+import { HOUSE_LEVELS, houseIcon } from "@features/mine/art/house";
+import type { Grid } from "@features/mine/art/pixel";
 import { Sprite } from "@features/mine/Sprite";
 import styles from "./Scoreboard.module.css";
 
 const byRenown = (a: MiningScore, b: MiningScore) => b.renown - a.renown;
+
+const sprites = new Map<string, Grid>();
+const cached = (key: string, make: () => Grid) => {
+  if (!sprites.has(key)) sprites.set(key, make());
+  return sprites.get(key)!;
+};
+
+function Holding({ grid, name, tag, height }: { grid: Grid; name: string; tag: string; height: number }) {
+  return (
+    <Tooltip label={tag} withArrow>
+      <span className={styles.holding}>
+        <Sprite grid={grid} scale={height / grid.length} label={name} />
+        {name}
+      </span>
+    </Tooltip>
+  );
+}
 
 /** The Deepdelve section of /scoreboard: renown from mined ore, with each player's gear. */
 export function MiningBoard() {
@@ -76,6 +96,20 @@ export function MiningBoard() {
                     <div className={styles.name}>
                       <span className={styles.nameText}>{s.username}</span>
                       {s.username === me && <span className={styles.you}>You</span>}
+                    </div>
+                    <div className={styles.holdings}>
+                      <Holding
+                        grid={cached(`h${s.houseLevel}`, () => houseIcon(s.houseLevel))}
+                        name={HOUSE_LEVELS[Math.max(1, Math.min(HOUSE_LEVELS.length, s.houseLevel)) - 1].name}
+                        tag={`Home ${s.houseLevel} / ${HOUSE_LEVELS.length}`}
+                        height={34}
+                      />
+                      <Holding
+                        grid={cached(`f${s.forgeLevel}`, () => forgeSprite(s.forgeLevel))}
+                        name={FORGE_LEVELS[Math.max(1, Math.min(FORGE_LEVELS.length, s.forgeLevel)) - 1].name}
+                        tag={`Forge ${s.forgeLevel} / ${FORGE_LEVELS.length}`}
+                        height={24}
+                      />
                     </div>
                   </div>
                   <div className={styles.total}>
