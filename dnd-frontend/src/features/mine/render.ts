@@ -538,6 +538,25 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           glow(dctx, (mp.x + 0.5) * T + ox, (mp.y + 0.5) * T + oy, T * 1.2, black, 0.6);
         }
       ctx.drawImage(dark, 0, 0);
+      const sight = g.stats.oreSight;
+      if (sight > 0) {
+        const lit = lightRadius(g);
+        const pulse = 0.35 + 0.25 * Math.sin(g.now / 300);
+        for (let r = r0; r <= r1; r++)
+          for (let c = c0; c <= c1; c++) {
+            const o = oreOf(g.map[r * g.W + c]);
+            const d = Math.hypot(c - p.x, r - (p.y - 1));
+            if (o < 0 || d <= lit - 0.5 || d > lit + sight) continue;
+            const fade = 1 - (d - lit) / (sight + 1);
+            ctx.globalAlpha = 0.3 * fade;
+            ctx.strokeStyle = g.oreColors[o];
+            ctx.strokeRect(c * T + ox + 0.5, r * T + oy + 0.5, T - 1, T - 1);
+            ctx.globalAlpha = pulse * fade;
+            ctx.fillStyle = g.oreColors[o];
+            ctx.fillRect(c * T + ox + 7, r * T + oy + 7, 2, 2);
+          }
+        ctx.globalAlpha = 1;
+      }
       const lc = ledgerAt % g.W;
       const lr = Math.floor(ledgerAt / g.W);
       if (ledgerAt >= 0 && (lc - p.x) ** 2 + (lr - p.y) ** 2 <= 100 && Math.floor(g.now / 220) % 7 < 2) {

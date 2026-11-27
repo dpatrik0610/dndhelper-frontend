@@ -21,7 +21,7 @@ export const statLine = (slot: SlotKey, s: MiningStats) => {
     case "gauntlets":
       return `${(1000 / s.swingMs).toFixed(2)} swings / sec`;
     case "helm":
-      return `${s.light.toFixed(1)} blocks of light · ${compact(s.maxHp)} health`;
+      return `${s.light.toFixed(1)} blocks of light · ${compact(s.maxHp)} health${s.oreSight ? ` · senses ore ${s.oreSight} blocks past the light` : ""}`;
     case "charm":
       return `${Math.round(s.critZone * 100)}% crit chance · ×${s.critMult} crit · +${Math.round(s.luck * 100)}% luck`;
     case "satchel":

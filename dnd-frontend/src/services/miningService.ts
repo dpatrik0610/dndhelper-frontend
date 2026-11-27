@@ -18,6 +18,7 @@ export interface MiningStats {
   reach: number;
   wide: boolean;
   vein: boolean;
+  oreSight: number;
 }
 
 export interface Ore {

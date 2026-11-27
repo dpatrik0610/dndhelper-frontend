@@ -50,6 +50,7 @@ const stats: MiningStats = {
   reach: 1,
   wide: false,
   vein: false,
+  oreSight: 0,
 };
 const depth: DepthInfo = {
   number: 1,
