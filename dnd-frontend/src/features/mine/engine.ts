@@ -243,8 +243,11 @@ export const cellAt = (g: Game, x: number, y: number) =>
 export const isOpen = (g: Game, x: number, y: number) => cellAt(g, x, y) === OPEN;
 export const oreOf = (c: number) => (c >= ORE0 && c < ORE0 + 20 ? c - ORE0 : -1);
 
-export const minSwings = (c: number) =>
-  c === STONE ? 2 : c === CHEST || c === IRON_CHEST || c === LEDGER ? 4 : c === GILDED_CHEST || c === GEODE || c === SEAL ? 5 : 3;
+export const OUTCLASS_TIERS = 3;
+
+export const minSwings = (c: number, pickTier: number, depth: number) =>
+  (c === STONE ? 2 : c === CHEST || c === IRON_CHEST || c === LEDGER ? 4 : c === GILDED_CHEST || c === GEODE || c === SEAL ? 5 : 3) -
+  (pickTier - (depth - 1) >= OUTCLASS_TIERS ? 1 : 0);
 
 export const hpOf = (g: Game, c: number) =>
   c === STONE
@@ -595,7 +598,7 @@ function chainSpark(g: Game, i: number, splash: number[]) {
 function crack(g: Game, i: number, crit: boolean, splash: boolean) {
   const e = g.dmg.get(i) ?? { d: 0, s: 0, c: 0, t: 0 };
   e.t = g.now;
-  const cap = Math.ceil(hpOf(g, g.map[i]) / minSwings(g.map[i]));
+  const cap = Math.ceil(hpOf(g, g.map[i]) / minSwings(g.map[i], g.tiers.pickaxe, g.depth));
   e.d += crit ? Math.min(critHit(g.stats), cap * 2) : Math.min(g.stats.power, cap);
   e.s++;
   if (crit) e.c++;
@@ -634,7 +637,7 @@ function echoVein(g: Game, from: number, c: number) {
   }
   const color = g.oreColors[oreOf(c)];
   for (const j of hits) {
-    for (let k = 0; k < minSwings(c); k++) crack(g, j, false, true);
+    for (let k = 0; k < minSwings(c, g.tiers.pickaxe, g.depth); k++) crack(g, j, false, true);
     burst(g, ((j % g.W) + 0.5) * T, (Math.floor(j / g.W) + 0.5) * T, color, 6, 1.4);
   }
 }
