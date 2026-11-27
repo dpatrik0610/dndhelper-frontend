@@ -46,6 +46,228 @@ const inArch = (wx: number, y: number, gy: number) => {
   return ((gy - ARCH.rise - y) / ry) ** 2 + (dx / ARCH.half) ** 2 <= 1;
 };
 
+const GW = 256;
+const GH = 200;
+const LIP = 7;
+
+const hash = (x: number, y = 0) => {
+  let h = Math.imul(x | 0, 374761393) ^ Math.imul(y | 0, 668265263);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+};
+
+const soil = (y: number) => {
+  const d = y - LIP;
+  if (d < 34) return ["#3a2a20", "#35261d", "#423024"];
+  if (d < 84) return ["#30231b", "#2b1f18", "#372820"];
+  if (d < 130) return ["#271d17", "#221913", "#2d221b"];
+  return ["#1d1612", "#19130f", "#221a15"];
+};
+
+let groundTex: HTMLCanvasElement | null = null;
+
+const buildGround = () => {
+  const c = document.createElement("canvas");
+  c.width = GW;
+  c.height = GH;
+  const g = c.getContext("2d") as Ctx;
+  const px = (x: number, y: number, col: string) => {
+    g.fillStyle = col;
+    g.fillRect(((x % GW) + GW) % GW, y, 1, 1);
+  };
+  for (let y = LIP; y < GH; y++)
+    for (let x = 0; x < GW; x++) {
+      const tone = soil(y);
+      const n = hash(x, y);
+      const band = Math.sin(x / 19 + y / 5) + Math.sin(x / 7 - y / 11) * 0.5;
+      px(x, y, n < 0.12 ? tone[1] : n > 0.9 ? tone[2] : band > 1.1 ? tone[1] : tone[0]);
+    }
+  for (let x = 0; x < GW; x++) {
+    for (const [dy, d] of [
+      [44, 0],
+      [92, 1],
+      [138, 2],
+    ]) {
+      const y = LIP + dy + Math.round(Math.sin(x / 23 + d) * 3 + Math.sin(x / 9 + d * 2) * 1.2);
+      px(x, y, "#1c1410");
+      if (hash(x, d + 9) < 0.5) px(x, y + 1, "#241a14");
+    }
+  }
+  for (let k = 0; k < 70; k++) {
+    const x = Math.floor(hash(k, 1) * GW);
+    const y = LIP + 6 + Math.floor(hash(k, 2) * 26);
+    px(x, y, "#5a4a3e");
+    px(x + 1, y, "#4a3c32");
+    if (hash(k, 3) < 0.5) px(x, y - 1, "#6e5e50");
+  }
+  for (let k = 0; k < 26; k++) {
+    let x = Math.floor(hash(k, 4) * GW);
+    const len = 6 + Math.floor(hash(k, 5) * 16);
+    for (let j = 0; j < len; j++) {
+      px(x, LIP + 3 + j, j < 3 ? "#2a3a22" : "#24190f");
+      if (hash(k, j + 40) < 0.35) x += hash(k, j + 80) < 0.5 ? -1 : 1;
+    }
+  }
+  const rock = (x: number, y: number, w: number, h: number, base: string, lit: string, dark: string) => {
+    for (let j = 0; j < h; j++)
+      for (let i = 0; i < w; i++) {
+        if ((j === 0 || j === h - 1) && (i === 0 || i === w - 1)) continue;
+        px(x + i, y + j, j === 0 || (i === 0 && j < h - 1) ? lit : j === h - 1 || i === w - 1 ? dark : base);
+      }
+  };
+  for (let k = 0; k < 22; k++) {
+    const w = 3 + Math.floor(hash(k, 6) * 4);
+    const h = 2 + Math.floor(hash(k, 7) * 2);
+    rock(Math.floor(hash(k, 8) * GW), LIP + 36 + Math.floor(hash(k, 9) * 50), w, h, "#4a4048", "#5e5460", "#2e2830");
+  }
+  for (let k = 0; k < 14; k++) {
+    const w = 5 + Math.floor(hash(k, 10) * 6);
+    const h = 3 + Math.floor(hash(k, 11) * 3);
+    rock(Math.floor(hash(k, 12) * GW), LIP + 90 + Math.floor(hash(k, 13) * 95), w, h, "#3a3440", "#4a4252", "#221e28");
+  }
+  for (let k = 0; k < 9; k++) {
+    const x = Math.floor(hash(k, 14) * GW);
+    const y = LIP + 50 + Math.floor(hash(k, 15) * 130);
+    const ore = ["#c8743a", "#a9b0b5", "#b08a74"][k % 3];
+    px(x, y, ore);
+    px(x + 1, y + 1, ore);
+    px(x + 1, y, "#e8d8c8");
+  }
+  for (const [bx, by] of [
+    [40, 150],
+    [180, 118],
+  ]) {
+    for (let i = 0; i < 5; i++) px(bx + i, LIP + by, "#cfc6a8");
+    px(bx - 1, LIP + by - 1, "#cfc6a8");
+    px(bx - 1, LIP + by + 1, "#cfc6a8");
+    px(bx + 5, LIP + by - 1, "#cfc6a8");
+    px(bx + 5, LIP + by + 1, "#cfc6a8");
+  }
+  for (let x = 0; x < GW; x++) {
+    px(x, LIP, "#4a6e3a");
+    px(x, LIP + 1, hash(x, 20) < 0.3 ? "#3e5e32" : "#2f4a2a");
+    px(x, LIP + 2, hash(x, 21) < 0.5 ? "#2f4a2a" : "#263e22");
+    if (hash(x, 22) < 0.45) px(x, LIP + 3, "#263e22");
+    const h = Math.floor(hash(x, 23) * 4) + (hash(x, 24) < 0.12 ? 3 : 0);
+    for (let j = 1; j <= h; j++) px(x, LIP - j, j === h ? "#5a8a44" : hash(x, 25) < 0.5 ? "#3e5e32" : "#4a6e3a");
+    if (h >= 4 && hash(x, 26) < 0.25) px(x, LIP - h - 1, ["#e8dcc0", "#d98c9a", "#ffd23f", "#9fb8ff"][Math.floor(hash(x, 27) * 4)]);
+  }
+  return c;
+};
+
+export function islandGround(ctx: Ctx, now: number, ox: number, gy: number, VW: number, VH: number) {
+  if (!groundTex) groundTex = buildGround();
+  const top = gy - LIP;
+  ctx.fillStyle = "#1d1612";
+  ctx.fillRect(0, top + GH, VW, Math.max(0, VH - top - GH));
+  for (let x = (ox % GW) - GW; x < VW; x += GW) ctx.drawImage(groundTex, x, top);
+  const first = Math.floor(-ox / 23) - 1;
+  for (let k = first; k * 23 + ox < VW + 4; k++) {
+    if (hash(k, 30) < 0.4) continue;
+    const wx = k * 23 + Math.floor(hash(k, 31) * 12);
+    const x = wx + ox;
+    for (let b = 0; b < 3; b++) {
+      const h = 4 + Math.floor(hash(k, 32 + b) * 4);
+      const sway = Math.sin(now / 650 + wx * 0.3 + b) * 1.2;
+      for (let j = 0; j < h; j++) {
+        ctx.fillStyle = j > h - 2 ? "#6a9a4e" : "#3e5e32";
+        ctx.fillRect(Math.round(x + b * 2 - 2 + (sway * j) / h), gy - j - 1, 1, 1);
+      }
+    }
+  }
+}
+
+const CLOUDS = Array.from({ length: 6 }, (_, k) => ({
+  w: 36 + Math.floor(hash(k, 50) * 50),
+  y: 0.1 + hash(k, 51) * 0.42,
+  at: hash(k, 52),
+  speed: 0.6 + hash(k, 53) * 0.8,
+  depth: 0.06 + hash(k, 54) * 0.12,
+}));
+const cloudTex: HTMLCanvasElement[] = [];
+
+const buildCloud = (k: number) => {
+  const { w } = CLOUDS[k];
+  const h = 20;
+  const n = 3 + Math.floor(w / 18);
+  const blobs = Array.from({ length: n }, (_, i) => ({
+    x: 6 + ((w - 12) * i) / (n - 1) + (hash(k, 60 + i) - 0.5) * 6,
+    y: 12 - hash(k, 70 + i) * 5,
+    r: 4 + hash(k, 80 + i) * 5 + (i > 0 && i < n - 1 ? 2 : 0),
+  }));
+  const inside = (x: number, y: number) =>
+    y < h - 3 && y >= 0 && blobs.some((b) => (x - b.x) ** 2 + ((y - b.y) * 1.35) ** 2 <= b.r * b.r);
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const g = c.getContext("2d") as Ctx;
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      if (!inside(x, y)) continue;
+      g.fillStyle = !inside(x, y - 1)
+        ? "#9a96b0"
+        : !inside(x, y - 2)
+          ? "#7a7690"
+          : !inside(x, y + 1)
+            ? "#34314a"
+            : y < 11
+              ? "#5e5a74"
+              : "#4a4660";
+      g.fillRect(x, y, 1, 1);
+    }
+  return c;
+};
+
+export function islandSky(ctx: Ctx, now: number, ox: number, gy: number, VW: number) {
+  const sky = ctx.createLinearGradient(0, 0, 0, gy);
+  sky.addColorStop(0, "#04031a");
+  sky.addColorStop(0.45, "#110f38");
+  sky.addColorStop(0.8, "#251d4c");
+  sky.addColorStop(1, "#3a2a58");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, VW, gy);
+  const drift = Math.round(ox * 0.02);
+  ctx.fillStyle = "#2a2658";
+  for (let k = 0; k < 220; k++) {
+    const t = hash(k, 90);
+    const x = Math.round(t * (VW + 60) - 30 + (hash(k, 91) - 0.5) * 40 + drift);
+    const y = Math.round(t * gy * 0.7 + (hash(k, 92) - 0.5) * 26);
+    ctx.globalAlpha = 0.35 + hash(k, 93) * 0.4;
+    ctx.fillRect(x, y, 1 + (k % 3 === 0 ? 1 : 0), 1);
+  }
+  ctx.globalAlpha = 1;
+  for (let k = 0; k < 130; k++) {
+    const x = Math.floor((((hash(k, 94) * (VW + 40) + drift) % (VW + 40)) + VW + 40) % (VW + 40)) - 20;
+    const y = Math.floor(hash(k, 95) * gy * 0.85);
+    const kind = hash(k, 96);
+    const tw = Math.sin(now / (500 + hash(k, 97) * 900) + k) > 0.6;
+    if (kind > 0.95) {
+      ctx.fillStyle = tw ? "#ffffff" : "#d8d4f0";
+      ctx.fillRect(x, y, 1, 1);
+      ctx.fillStyle = "#8a86c0";
+      ctx.fillRect(x - 1, y, 1, 1);
+      ctx.fillRect(x + 1, y, 1, 1);
+      ctx.fillRect(x, y - 1, 1, 1);
+      ctx.fillRect(x, y + 1, 1, 1);
+    } else {
+      ctx.fillStyle = kind > 0.6 ? (tw ? "#ffffff" : "#d8d4f0") : kind > 0.25 ? "#8a86b0" : "#5a5688";
+      ctx.fillRect(x, y, 1, 1);
+    }
+  }
+}
+
+const drawClouds = (ctx: Ctx, now: number, ox: number, gy: number, VW: number) => {
+  const span = VW + 220;
+  CLOUDS.forEach((c, k) => {
+    if (!cloudTex[k]) cloudTex[k] = buildCloud(k);
+    const raw = c.at * span + (now / 1000) * c.speed + ox * c.depth;
+    const x = Math.round((((raw % span) + span) % span) - 110);
+    ctx.globalAlpha = 0.82;
+    ctx.drawImage(cloudTex[k], x, Math.round(gy * c.y));
+  });
+  ctx.globalAlpha = 1;
+};
+
 export const LANDMARKS = [
   { x: WARDEN + 20, y: 34, name: "Reeve's Post" },
   { x: TAVERN + 29, y: 50, name: "The Bent Nail" },
@@ -64,6 +286,7 @@ export function islandBack(ctx: Ctx, now: number, ox: number, gy: number, VW: nu
     [3, -4, 1],
   ])
     ctx.fillRect(m.x + dx, m.y + dy, w, w > 1 ? 2 : 1);
+  drawClouds(ctx, now, ox, gy, VW);
 
   const hy = gy - 30;
   const sea = ctx.createLinearGradient(0, hy, 0, gy);

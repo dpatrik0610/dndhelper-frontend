@@ -29,7 +29,7 @@ import {
   T,
 } from "./engine";
 import { compact, hpColor } from "./mine";
-import { islandBack, islandLights, islandNear, LANDMARKS } from "./scenery";
+import { islandBack, islandGround, islandLights, islandNear, islandSky, LANDMARKS } from "./scenery";
 import { wickSprite } from "./story";
 
 const CRACK_ALL = cracks(4);
@@ -308,27 +308,9 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
   const campBackdrop = (g: Game, ox: number, oy: number, VW: number, VH: number, flick: boolean) => {
     const gy = CAMP.ground * T + oy;
     const near = stationAt(g);
-    const sky = ctx.createLinearGradient(0, 0, 0, gy);
-    sky.addColorStop(0, "#07061a");
-    sky.addColorStop(1, "#2a1f44");
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, VW, gy);
-    for (let k = 0; k < 90; k++) {
-      ctx.fillStyle = (Math.floor(g.now / 400) + k) % 11 === 0 ? "#8a86b0" : "#d8d4f0";
-      ctx.fillRect(
-        Math.floor((((k * 97 + 13) % 701) / 701) * VW),
-        Math.floor((((k * 53 + 7) % 409) / 409) * gy * 0.8),
-        1,
-        1,
-      );
-    }
+    islandSky(ctx, g.now, ox, gy, VW);
     islandBack(ctx, g.now, ox, gy, VW);
-    ctx.fillStyle = "#3a2a20";
-    ctx.fillRect(0, gy, VW, VH - gy);
-    ctx.fillStyle = "#2f4a2a";
-    ctx.fillRect(0, gy, VW, 2);
-    ctx.fillStyle = "#4a3426";
-    for (let x = 3; x < g.W * T; x += 11) ctx.fillRect(x + ox, gy + 6 + ((x * 7) % 13), 2, 1);
+    islandGround(ctx, g.now, ox, gy, VW, VH);
     islandNear(ctx, g.now, ox, gy, VW);
     const px = (g.player.x + 0.5) * T;
     for (const l of LANDMARKS) if (Math.abs(px - l.x) < 26) label(l.name, l.x + ox, gy - l.y, false);
