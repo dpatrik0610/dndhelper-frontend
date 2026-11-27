@@ -17,6 +17,7 @@ import {
   inTorchlight,
   lightRadius,
   placeTorch,
+  placeTraps,
   showLoot,
   TORCH_LIGHT,
   stationAt,
@@ -709,3 +710,27 @@ console.log("torchlight ok");
   assert.ok(p.hp > 1, "torchlight mends wounds");
 }
 console.log("torch healing ok");
+{
+  const TW = 40;
+  const map = new Uint8Array(TW * 10).fill(STONE);
+  for (let y = 2; y <= 7; y += 5) for (let x = 1; x < TW - 1; x++) map[y * TW + x] = OPEN;
+  const fake = (depth: number) => ({ W: TW, map, liftX: 3, trader: -1, depth }) as unknown as Game;
+  assert.equal(placeTraps(fake(1), "seed").length, 0, "no traps at depth 1");
+  const two = placeTraps(fake(2), "seed");
+  assert.ok(two.length > 0 && two.every((t) => t.key === "spikes"), "depth 2 brings spike plates");
+  assert.deepEqual(placeTraps(fake(2), "seed"), two, "same map, same traps");
+  assert.ok(two.every((t) => t.i % TW > 11 && map[t.i + TW] !== OPEN), "on a floor, away from the lift");
+  const deep = placeTraps(fake(10), "seed");
+  assert.ok(new Set(deep.map((t) => t.key)).size >= 3, "the deep mixes old traps with new");
+
+  const g = newGame(-1);
+  const p = g.player;
+  g.traps = [{ i: p.y * g.W + p.x, key: "spikes", phase: 0, armedAt: 0, sprung: false, fireAt: 0, firedAt: -1e9, hitCycle: -1, target: -1 }];
+  const before = p.hp;
+  step(g, 16, none, null);
+  assert.ok(p.hp < before, "a spike plate jabs");
+  const after = p.hp;
+  step(g, 16, none, null);
+  assert.equal(p.hp, after, "and needs a moment to re-arm");
+}
+console.log("traps ok");

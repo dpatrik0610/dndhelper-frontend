@@ -219,6 +219,8 @@ export interface Game extends GameSetup {
   sfx: Sfx[];
   motherlode: number;
   richFound: boolean;
+  traps: Trap[];
+  dimUntil: number;
   shakeUntil: number;
   shakeMag: number;
   feats: Record<string, number>;
@@ -360,6 +362,8 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     nextPotion: 0,
     trader: -1,
     boons: new Set(),
+    traps: [],
+    dimUntil: 0,
     sfx: [],
     shakeUntil: 0,
     shakeMag: 0,
@@ -405,6 +409,7 @@ function loadCamp(g: Game, now: number, home: boolean) {
   g.bolts = [];
   g.trader = -1;
   g.boons = new Set();
+  g.traps = [];
   g.motherlode = -1;
   g.startedAt = now;
   g.nextSpawn = Number.POSITIVE_INFINITY;
@@ -476,6 +481,8 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.bolts = [];
   g.trader = trip.trader ?? -1;
   g.boons = new Set(trip.boons ?? []);
+  g.traps = placeTraps(g, trip.map);
+  g.dimUntil = 0;
   g.motherlode = trip.motherlode ?? -1;
   g.richFound = false;
   g.startedAt = now;
@@ -519,7 +526,12 @@ export const TORCH_LIGHT = 4;
 const REST_MS = 3000;
 
 export const lightRadius = (g: Game) =>
-  g.camp ? g.stats.light : g.stats.light * Math.max(0.6, 1 - 0.045 * (g.depth - 1)) * (g.boons.has("oil") ? 1.5 : 1);
+  g.camp
+    ? g.stats.light
+    : g.stats.light *
+      Math.max(0.6, 1 - 0.045 * (g.depth - 1)) *
+      (g.boons.has("oil") ? 1.5 : 1) *
+      (g.now < g.dimUntil ? 0.5 : 1);
 
 export const CHARTED = [CHEST, IRON_CHEST, GILDED_CHEST, MIMIC, GEODE, DIAMOND_CELL, LEDGER];
 
@@ -1369,9 +1381,9 @@ const unlit = (g: Game, x: number, y: number) => {
   return true;
 };
 
-function spawn(g: Game) {
+function spawn(g: Game, alarm = false) {
   const p = g.player;
-  const cap = 1 + Math.floor(g.depth / 3);
+  const cap = 1 + Math.floor(g.depth / 3) + (alarm ? 2 : 0);
   const dark = inTorchlight(g, p.x, p.y - 1) ? 1 : 0.55;
   g.nextSpawn = g.now + Math.max(10_000, 26_000 - g.depth * 1500) * (0.7 + rand() * 0.6) * dark;
   if (liveMonsters(g).length >= cap) return;
@@ -1598,6 +1610,192 @@ function stepBeetle(g: Game) {
   g.beetle = best;
 }
 
+export type TrapKey = "spikes" | "tripwire" | "frost" | "geyser" | "draft" | "magma" | "bones" | "rune" | "shards";
+
+export interface Trap {
+  i: number;
+  key: TrapKey;
+  phase: number;
+  armedAt: number;
+  sprung: boolean;
+  fireAt: number;
+  firedAt: number;
+  hitCycle: number;
+  target: number;
+}
+
+export const TRAPS: { key: TrapKey; depth: number; name: string; does: string }[] = [
+  { key: "spikes", depth: 2, name: "Spike plate", does: "A pressure plate hidden in the floor. Step on it and spikes jab up, then it re-arms." },
+  { key: "tripwire", depth: 3, name: "Rockfall tripwire", does: "A wire across the tunnel. Snap it and rocks come down a moment later on the three tiles around it." },
+  { key: "frost", depth: 4, name: "Frost vent", does: "Breathes freezing mist up the tunnel on a rhythm. Caught in it, you're slowed and chilled." },
+  { key: "geyser", depth: 5, name: "Fire geyser", does: "Hisses, then erupts in a column of fire that leaves you burning." },
+  { key: "draft", depth: 6, name: "Guttering draft", does: "A cold gust from a crack in the floor. It does no harm, but your lantern gutters to half for a few seconds." },
+  { key: "magma", depth: 7, name: "Magma crust", does: "A thin skin over molten rock. It burns for as long as you stand on it." },
+  { key: "bones", depth: 8, name: "Bone rattle", does: "A string of old bones across the way. Brush it and the clatter calls monsters to you." },
+  { key: "rune", depth: 9, name: "Rune mine", does: "A faint glyph on the floor. It flares a second after you step on it, then blows." },
+  { key: "shards", depth: 10, name: "Star-shard field", does: "Bits of the fallen star rain down here. Watch for the glowing marks and step off them." },
+];
+
+const TRAP_CYCLE: Partial<Record<TrapKey, number>> = { frost: 4200, geyser: 3600, draft: 6000 };
+const TRAP_ACTIVE_MS = 900;
+const TRAP_WARN_MS = 700;
+const DIM_MS = 4000;
+
+const seeded = (text: string) => {
+  let h = 2166136261;
+  for (let k = 0; k < text.length; k++) h = Math.imul(h ^ text.charCodeAt(k), 16777619);
+  return () => {
+    h = (h + 0x6d2b79f5) | 0;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+};
+
+export function placeTraps(g: Game, seed: string): Trap[] {
+  const pool = TRAPS.filter((t) => t.depth <= g.depth);
+  if (!pool.length) return [];
+  const newest = pool[pool.length - 1];
+  const r = seeded(`${g.depth}:${seed}`);
+  const spots: number[] = [];
+  for (let i = g.W; i < g.map.length - g.W; i++) {
+    if (i % g.W <= g.liftX + 8 || g.map[i] !== OPEN || g.map[i + g.W] === OPEN || i === g.trader) continue;
+    spots.push(i);
+  }
+  const out: Trap[] = [];
+  const want = 3 + g.depth;
+  for (let tries = 0; out.length < want && tries < want * 20 && spots.length; tries++) {
+    const i = spots[Math.floor(r() * spots.length)];
+    const close = out.some(
+      (t) => Math.abs((t.i % g.W) - (i % g.W)) + Math.abs(Math.floor(t.i / g.W) - Math.floor(i / g.W)) < 5,
+    );
+    if (close) continue;
+    const key = r() < 0.4 ? newest.key : pool[Math.floor(r() * pool.length)].key;
+    out.push({ i, key, phase: Math.floor(r() * 6000), armedAt: 0, sprung: false, fireAt: 0, firedAt: -1e9, hitCycle: -1, target: -1 });
+  }
+  return out;
+}
+
+export const trapCycle = (g: Game, t: Trap) => {
+  const period = TRAP_CYCLE[t.key];
+  if (!period) return null;
+  const at = (g.now + t.phase) % period;
+  return {
+    n: Math.floor((g.now + t.phase) / period),
+    active: at >= period - TRAP_ACTIVE_MS,
+    warn: at >= period - TRAP_ACTIVE_MS - TRAP_WARN_MS,
+  };
+};
+
+const trapName = (key: TrapKey) => TRAPS.find((t) => t.key === key)?.name ?? key;
+
+function springLater(g: Game, t: Trap, tx: number, ty: number) {
+  const p = g.player;
+  const hit = g.info.monsterDamage;
+  t.fireAt = 0;
+  t.firedAt = g.now;
+  shake(g, 3, 220);
+  if (t.key === "tripwire") {
+    for (let dx = -1; dx <= 1; dx++) burst(g, (tx + dx + 0.5) * T, (ty - 1) * T, "#8a7f72", 8, 2);
+    if (Math.abs(p.x - tx) <= 1 && Math.abs(p.y - ty) <= 1) hurt(g, hit * 0.9);
+  } else {
+    burst(g, (tx + 0.5) * T, (ty + 0.5) * T, "#ff6a3a", 30, 3);
+    burst(g, (tx + 0.5) * T, (ty + 0.5) * T, "#ffd23f", 16, 2.4);
+    if (Math.abs(p.x - tx) <= 2 && Math.abs(p.y - ty) <= 2) hurt(g, hit * 1.2);
+  }
+}
+
+function stepShards(g: Game, t: Trap, tx: number, ty: number) {
+  const p = g.player;
+  if (Math.abs(p.x - tx) > 8 || Math.abs(p.y - ty) > 5 || g.now < t.armedAt) return;
+  if (t.target < 0) {
+    const inField = Math.abs(p.x - tx) <= 3 && Math.abs(p.y - ty) <= 2;
+    const x = inField && rand() < 0.6 ? p.x : tx + Math.floor(rand() * 7) - 3;
+    let y = inField ? p.y : ty;
+    while (y < g.H - 1 && isOpen(g, x, y + 1)) y++;
+    if (!isOpen(g, x, y)) return;
+    t.target = y * g.W + x;
+    t.armedAt = g.now + 700;
+    return;
+  }
+  const sx = t.target % g.W;
+  const sy = Math.floor(t.target / g.W);
+  burst(g, (sx + 0.5) * T, (sy + 0.5) * T, "#c9d6ff", 14, 2.2);
+  if (p.x === sx && Math.abs(p.y - sy) <= 1) {
+    hurt(g, g.info.monsterDamage * 0.6, "#9db6ff");
+    sayOnce(g, "trap-shards", "Star-shard field!", "#ff8a6a");
+  }
+  t.target = -1;
+  t.armedAt = g.now + 700;
+}
+
+function stepTraps(g: Game) {
+  if (g.camp || g.asleep || !g.traps.length) return;
+  const p = g.player;
+  const hit = g.info.monsterDamage;
+  for (const t of g.traps) {
+    const tx = t.i % g.W;
+    const ty = Math.floor(t.i / g.W);
+    const cx = (tx + 0.5) * T;
+    const cy = (ty + 0.5) * T;
+    const on = p.x === tx && p.y === ty;
+    const warn = () => sayOnce(g, `trap-${t.key}`, `${trapName(t.key)}!`, "#ff8a6a");
+    if (t.key === "shards") {
+      stepShards(g, t, tx, ty);
+      continue;
+    }
+    if (t.fireAt && g.now >= t.fireAt) {
+      springLater(g, t, tx, ty);
+      warn();
+      continue;
+    }
+    if (t.key === "spikes" && on && g.now >= t.armedAt) {
+      t.armedAt = g.now + 2500;
+      t.firedAt = g.now;
+      burst(g, cx, cy + 6, "#d6d0c4", 8, 1.4);
+      hurt(g, hit * 0.5);
+      warn();
+    } else if ((t.key === "tripwire" || t.key === "rune") && on && !t.sprung) {
+      t.sprung = true;
+      t.fireAt = g.now + (t.key === "rune" ? 900 : 700);
+      say(g, cx, cy - 10, t.key === "rune" ? "The glyph flares!" : "*snap*", "#ffb347", 900);
+      g.sfx.push("break");
+    } else if (t.key === "bones" && Math.abs(p.x - tx) <= 1 && Math.abs(p.y - ty) <= 1 && !t.sprung) {
+      t.sprung = true;
+      t.firedAt = g.now;
+      say(g, cx, cy - 10, "The bones rattle. Something heard that.", "#e8dcc0", 2200);
+      g.sfx.push("clang");
+      spawn(g, true);
+      spawn(g, true);
+    } else if (t.key === "magma" && on && g.now >= t.armedAt) {
+      t.armedAt = g.now + 600;
+      hurt(g, hit * 0.2, "#ff8a2a");
+      p.burnUntil = Math.max(p.burnUntil, g.now + 1500);
+      sayOnce(g, "trap-magma", "The crust is burning through your boots!", "#ff8a2a");
+    } else {
+      const cyc = trapCycle(g, t);
+      if (!cyc?.active || cyc.n === t.hitCycle) continue;
+      const caught =
+        t.key === "draft"
+          ? Math.abs(p.x - tx) <= 3 && Math.abs(p.y - ty) <= 2
+          : p.x === tx && p.y <= ty && p.y >= ty - 2;
+      if (!caught) continue;
+      t.hitCycle = cyc.n;
+      if (t.key === "frost") {
+        p.slowUntil = g.now + 2500;
+        hurt(g, hit * 0.25, "#9fe6ff");
+      } else if (t.key === "geyser") {
+        p.burnUntil = g.now + 3000;
+        hurt(g, hit * 0.5, "#ff8a2a");
+      } else {
+        g.dimUntil = g.now + DIM_MS;
+        say(g, (p.x + 0.5) * T, (p.y - 2) * T, "Your lantern gutters!", "#c9b8ff", 1400);
+      }
+      warn();
+    }
+  }
+}
+
 export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
   g.now += dt;
   if (g.fainted) return stepEffects(g, dt);
@@ -1623,6 +1821,7 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
     sayOnce(g, "dark", "Dark out here. Wounds only mend in torchlight, and monsters stir faster (T plants a torch).", "#ffc98a", 4200);
   stepBolts(g, dt);
   stepMonsters(g, dt);
+  stepTraps(g);
   stepPet(g, dt);
   stepBeetle(g);
   if (nearMotherlode(g)) sayOnce(g, "hum", "The rock hums here. Something rich is close…", "#ffe9a8");

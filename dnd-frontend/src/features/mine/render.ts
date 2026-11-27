@@ -25,6 +25,7 @@ import {
   lightRadius,
   CHARTED,
   TORCH_LIGHT,
+  trapCycle,
   OPEN,
   ORE0,
   oreOf,
@@ -256,6 +257,90 @@ const glow = (ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rg
   ctx.fillStyle = g;
   ctx.fillRect(x - r, y - r, r * 2, r * 2);
 };
+
+const GRATE: Record<string, string> = { frost: "#6f90ab", geyser: "#a0402a", draft: "#4a4060" };
+const PLUME: Record<string, string> = { frost: "200,240,255", geyser: "255,120,40", draft: "40,30,70" };
+
+function drawTraps(ctx: CanvasRenderingContext2D, g: Game, ox: number, oy: number) {
+  for (const t of g.traps) {
+    if (!g.seen[t.i]) continue;
+    const X = (t.i % g.W) * T + ox;
+    const Y = Math.floor(t.i / g.W) * T + oy;
+    const floor = Y + T;
+    const since = g.now - t.firedAt;
+    const blink = Math.floor(g.now / 120) % 2 === 0;
+    if (t.key === "spikes") {
+      ctx.fillStyle = "rgba(120,110,100,0.55)";
+      ctx.fillRect(X + 2, floor - 2, 12, 2);
+      if (since < 500) {
+        ctx.fillStyle = "#e8e2d6";
+        for (let k = 0; k < 4; k++) {
+          ctx.fillRect(X + 3 + k * 3, floor - 8, 1, 6);
+          ctx.fillRect(X + 3 + k * 3, floor - 9, 1, 1);
+        }
+      }
+    } else if (t.key === "tripwire" && !t.sprung) {
+      ctx.fillStyle = "rgba(201,176,122,0.7)";
+      ctx.fillRect(X, floor - 5, T, 1);
+      ctx.fillRect(X, floor - 7, 1, 7);
+      ctx.fillRect(X + T - 1, floor - 7, 1, 7);
+    } else if (t.key === "bones" && !t.sprung) {
+      ctx.fillStyle = "#e8dcc0";
+      for (let k = 0; k < 5; k++) ctx.fillRect(X + 1 + k * 3, floor - 6 + (k % 2), 2, 1);
+      ctx.fillRect(X + 7, floor - 4, 3, 3);
+      ctx.fillStyle = "#1c1410";
+      ctx.fillRect(X + 7, floor - 3, 1, 1);
+      ctx.fillRect(X + 9, floor - 3, 1, 1);
+    } else if (t.key === "magma") {
+      ctx.fillStyle = Math.floor(g.now / 400 + t.i) % 2 ? "#ff6a2a" : "#ff8a3a";
+      ctx.fillRect(X + 1, floor - 3, 14, 3);
+      ctx.fillStyle = "#3a1a12";
+      for (const k of [3, 7, 12]) ctx.fillRect(X + k, floor - 3, 1, 2);
+    } else if (t.key === "rune") {
+      const armed = t.fireAt > 0;
+      if (t.sprung && !armed) continue;
+      ctx.fillStyle = armed ? (blink ? "#ff4a3a" : "#ffd23f") : "rgba(180,138,255,0.35)";
+      for (let k = 0; k < 16; k++) {
+        const a = (k / 16) * Math.PI * 2;
+        ctx.fillRect(Math.round(X + 7.5 + Math.cos(a) * 6), Math.round(floor - 3 + Math.sin(a) * 2), 1, 1);
+      }
+      ctx.fillRect(X + 7, floor - 4, 2, 2);
+    } else if (t.key === "shards") {
+      ctx.fillStyle = "rgba(201,214,255,0.6)";
+      ctx.fillRect(X + 7, floor - 6, 2, 2);
+      if (t.target >= 0) {
+        const tx = (t.target % g.W) * T + ox;
+        const ty = Math.floor(t.target / g.W) * T + oy + T;
+        const left = Math.max(0, Math.min(1, (t.armedAt - g.now) / 700));
+        ctx.fillStyle = `rgba(157,182,255,${blink ? 0.9 : 0.5})`;
+        ctx.fillRect(tx + 2, ty - 1, 12, 1);
+        ctx.fillRect(tx + 7, ty - 3, 2, 3);
+        ctx.fillStyle = "#e8eeff";
+        ctx.fillRect(tx + 7, ty - 4 - left * 3 * T, 2, 5);
+      }
+    } else if (GRATE[t.key]) {
+      ctx.fillStyle = GRATE[t.key];
+      ctx.fillRect(X + 3, floor - 2, 10, 2);
+      ctx.fillStyle = "#1c1410";
+      for (const k of [5, 8, 11]) ctx.fillRect(X + k, floor - 2, 1, 2);
+      const cyc = trapCycle(g, t);
+      if (cyc?.active) {
+        const flick = 0.45 + 0.15 * Math.sin(g.now / 40 + t.i);
+        ctx.fillStyle = `rgba(${PLUME[t.key]},${flick})`;
+        if (t.key === "draft") {
+          for (let k = 0; k < 10; k++) {
+            const a = g.now / 150 + k * 0.63;
+            ctx.fillRect(Math.round(X + 8 + Math.cos(a) * (6 + k * 3)), Math.round(floor - 8 - Math.sin(a) * (4 + k)), 2, 2);
+          }
+        } else ctx.fillRect(X + 4, floor - 3 * T, 8, 3 * T - 2);
+      } else if (cyc?.warn && blink) {
+        ctx.fillStyle = `rgba(${PLUME[t.key]},0.5)`;
+        ctx.fillRect(X + 6, floor - 5, 1, 2);
+        ctx.fillRect(X + 9, floor - 7, 1, 2);
+      }
+    }
+  }
+}
 
 export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasElement) {
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -573,6 +658,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       if (g.target >= 0) brackets(g.target, 1);
       for (const i of g.splash) brackets(i, 0.45);
       for (const i of g.torches) draw(TORCH[flick ? 1 : 0], (i % g.W) * T + ox + 6, Math.floor(i / g.W) * T + oy + 5);
+      drawTraps(ctx, g, ox, oy);
       if (g.trader >= 0) {
         const moss = cached("moss", traderSprite);
         const X = (g.trader % g.W) * T + ox + 8 - Math.floor(moss[0].length / 2);
@@ -859,6 +945,9 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     ctx.globalCompositeOperation = "lighter";
     for (const i of g.torches)
       glow(ctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, TORCH_LIGHT * T, [255, 150, 60], 0.2);
+    for (const t of g.traps)
+      if (g.seen[t.i] && (t.key === "magma" || (t.key === "geyser" && trapCycle(g, t)?.active)))
+        glow(ctx, (t.i % g.W) * T + ox + 8, Math.floor(t.i / g.W) * T + oy + 12, 1.4 * T, [255, 110, 40], 0.22);
     if (g.camp) {
       const lv = g.forgeLevel;
       const fire = hex(FORGE_LEVELS[lv - 1].look.fire[1]);
