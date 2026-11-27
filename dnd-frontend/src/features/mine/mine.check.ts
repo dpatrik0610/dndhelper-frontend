@@ -3,8 +3,20 @@ import assert from "node:assert/strict";
 import type { DepthInfo, MiningStats } from "@services/miningService";
 import { PET_ART } from "./art/pets";
 import { ENEMIES } from "./art/world";
-import { createGame, type Game, type Keys, OPEN, step, takePending } from "./engine";
+import {
+  castBolt,
+  createGame,
+  drinkPotion,
+  type Game,
+  type Keys,
+  MIMIC_KIND,
+  OPEN,
+  stationAt,
+  step,
+  takePending,
+} from "./engine";
 import { canAfford, discounted, hpColor } from "./mine";
+import { dreamsFor, engraving, PAGES, SEALS, wickLines } from "./story";
 
 assert.equal(hpColor(1), "rgb(90,200,80)");
 assert.equal(hpColor(0), "rgb(224,64,48)");
@@ -62,6 +74,8 @@ const newGame = (pet: number, map = rows, liftY = 2) =>
       stats,
       tiers,
       forgeLevel: 1,
+      firebolt: false,
+      potions: 0,
       pet:
         pet >= 0
           ? {
@@ -189,14 +203,26 @@ g.nextSpawn = 1e12;
 run(g, 61_000);
 assert.ok(g.asleep, "a minute without input and he naps");
 
-
 const foe = (gm: Game, kind: number, x: number, y: number) => {
   gm.monsters.push({
     ...structuredClone({ ...g.monsters[0], def: undefined }),
     def: ENEMIES[kind - 1],
     id: kind * 100 + x,
-    kind, x, y, fromX: x, fromY: y, t: 0, dur: 0, hp: 50, maxHp: 50, dmg: 1,
-    moveMs: 200, nextMove: 0, nextHit: 0, leaving: 0, lost: 0,
+    kind,
+    x,
+    y,
+    fromX: x,
+    fromY: y,
+    t: 0,
+    dur: 0,
+    hp: 50,
+    maxHp: 50,
+    dmg: 1,
+    moveMs: 200,
+    nextMove: 0,
+    nextHit: 0,
+    leaving: 0,
+    lost: 0,
   });
   gm.nextSpawn = 1e12;
   return gm.monsters[gm.monsters.length - 1];
@@ -233,4 +259,63 @@ gm.monsters = [];
 const mephit = foe(gm, 5, 10, 5);
 run(gm, 4000);
 assert.ok(reachedYou(gm, mephit), "a flier comes up the shaft");
+const vault = newGame(-1, ["############", "#...*......#", "#..........#", "#0000000000#", "############"]);
+vault.monsters = [];
+run(vault, 8000, {}, { x: 4.5, y: 1.5 });
+assert.equal(vault.found, 1, "breaking a ledger block hands you that depth's page");
+assert.equal(vault.map[W + 4], OPEN);
+assert.equal(PAGES.length, 10);
+assert.equal(SEALS.length, 9);
+assert.equal(engraving(10), engraving(11), "below the last seal the floor just hums");
+const camp = { deepestDepth: 1, pages: [] as number[], foxRevealed: false };
+assert.ok(wickLines(camp as never).length >= 3);
+assert.ok(
+  wickLines({ ...camp, deepestDepth: 10, pages: PAGES.map((_, i) => i + 1) } as never).some((l) => l.includes("bell")),
+);
+const den = ["############", "#..........#", "#...&.....$#", "#0000000000#", "############"];
+const lair = newGame(-1, den);
+lair.monsters = [];
+lair.nextSpawn = 1e12;
+run(lair, 700, {}, { x: 4.5, y: 2.5 });
+const mimic = lair.monsters.find((m) => m.kind === MIMIC_KIND);
+assert.ok(mimic && lair.map[2 * W + 4] === OPEN, "hitting a mimic chest wakes it up");
+run(lair, 3000, {}, { x: 4.5, y: 2.5 });
+assert.equal(mimic.hp, mimic.maxHp, "a pickaxe only staggers a mimic");
+assert.equal(castBolt(lair, { x: 4.5, y: 2.5 }), false, "no firebolt until you learn it");
+lair.firebolt = true;
+assert.ok(castBolt(lair, { x: 4.5, y: 2.5 }));
+run(lair, 300);
+assert.equal(mimic.hp, mimic.maxHp - stats.power * 3, "fire burns it for 3x pick damage");
+assert.equal(castBolt(lair, { x: 4.5, y: 2.5 }), false, "the bolt has a cooldown");
+mimic.hp = 1;
+lair.nextBolt = 0;
+castBolt(lair, { x: mimic.x + 0.5, y: mimic.y + 0.5 });
+run(lair, 300);
+assert.deepEqual(lair.pending.mimics, [2 * W + 4], "a slain mimic is reported for its loot");
+assert.equal(lair.pending.kills, 0);
+
+const bolt = newGame(-1);
+bolt.firebolt = true;
+const before = bolt.map.join();
+castBolt(bolt, { x: 3.5, y: 6 });
+run(bolt, 600);
+assert.ok(!bolt.bolts.length && bolt.map.join() === before, "firebolt fizzles on rock without breaking it");
+
+const sip = newGame(-1);
+sip.player.hp = 2;
+assert.equal(drinkPotion(sip), false, "no potion, no sip");
+sip.potions = 1;
+assert.ok(drinkPotion(sip) && sip.player.hp === 14 && sip.potions === 0 && sip.pending.drank === 1);
+
+const chest = newGame(-1, den);
+chest.monsters = [];
+chest.player.x = chest.player.fromX = 9;
+run(chest, 3000, {}, { x: 10.5, y: 2.5 });
+assert.equal(chest.map[2 * W + 10], OPEN, "a chest breaks open");
+assert.ok(chest.pending.breaks.some((b) => b.i === 2 * W + 10));
+chest.trader = chest.player.y * W + chest.player.x - 2;
+assert.equal(stationAt(chest), "trader", "walk up to Moss to trade");
+
+assert.equal(dreamsFor(1).length, 3);
+assert.equal(dreamsFor(10).length, 12);
 console.log("mine.check ok");

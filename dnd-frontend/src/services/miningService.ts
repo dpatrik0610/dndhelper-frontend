@@ -85,6 +85,8 @@ export interface MiningTrip {
   ladders: number[];
   torches: number[];
   satchel: OreCounts;
+  trader: number | null;
+  wares: Record<string, OreCounts> | null;
 }
 
 export interface MiningState {
@@ -94,6 +96,9 @@ export interface MiningState {
   forgeLevel: number;
   pets: string[];
   pet: string | null;
+  pages: number[];
+  firebolt: boolean;
+  potions: number;
   foxRevealed: boolean;
   deepestDepth: number;
   stats: MiningStats;
@@ -116,6 +121,8 @@ export interface DigRequest {
   ladders: number[];
   torches: number[];
   kills: number;
+  mimics: number[];
+  drank: number;
 }
 
 export interface DigResult {
@@ -144,5 +151,6 @@ export const faint = () => post<MiningState>("/faint");
 export const craftGear = (slot: SlotKey) => post<MiningState>(`/craft/${slot}`);
 export const upgradeForge = () => post<MiningState>("/forge");
 export const buyPet = (key: string) => post<MiningState>(`/pets/${key}`);
+export const trade = (item: string) => post<MiningState>(`/trade/${item}`);
 export const followPet = (key: string | null) => post<MiningState>(`/follow/${key ?? "none"}`);
 export const getMiningScoreboard = () => apiClient<MiningScore[]>("/mining/scoreboard");

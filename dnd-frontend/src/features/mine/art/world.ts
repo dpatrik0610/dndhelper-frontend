@@ -217,7 +217,156 @@ export const ENEMIES: Enemy[] = [
       "....xxxx.xxxx...",
     ]),
   },
+  {
+    name: "Chest Mimic",
+    depth: 2,
+    threat: "Mini-boss",
+    does: "Waits as a treasure chest. Steel bounces off its hide; only fire hurts it. Spills a fortune when it dies.",
+    pal: {
+      x: "#1c1410",
+      W: "#a8784a",
+      w: "#7d5433",
+      g: "#c9a04a",
+      y: "#ffd77a",
+      d: "#4a3020",
+      t: "#efeadf",
+      E: "#ffe066",
+      r: "#5a0f1a",
+      R: "#d0405a",
+    },
+    rows: pad([
+      "..xxxxxxxxxxxx..",
+      ".xWWWWWWWWWWWWx.",
+      "xWwwEwwwwwwEwwWx",
+      "xggggggggggggggx",
+      "xtxtxtxtxtxtxtxx",
+      "xrrrrrrrrrrrrrrx",
+      "xrrrrrRRRRrrrrrx",
+      "xrrrrRRRRRRrrrrx",
+      "xtxtxtxtxtxtxtxx",
+      "xggggggyyggggggx",
+      "xwwwwwwwwwwwwwwx",
+      "xddddddddddddddx",
+      "xxxxxxxxxxxxxxxx",
+      ".xdx.......xdx..",
+      ".xx.........xx..",
+    ]),
+  },
 ];
+
+const CHEST_PAL = { x: "#1c1410", W: "#a8784a", w: "#7d5433", g: "#c9a04a", y: "#ffd77a", d: "#4a3020", t: "#efeadf" };
+const CHEST_LID = ["..xxxxxxxxxxxx..", ".xWWWWWWWWWWWWx.", "xWwwwwwwwwwwwwWx", "xwwwwwwwwwwwwwwx"];
+const CHEST_BOX = [
+  "xggggggyyggggggx",
+  "xwwwwwwyywwwwwwx",
+  "xwwwwwwwwwwwwwwx",
+  "xgwwwwwwwwwwwwgx",
+  "xgwwwwwwwwwwwwgx",
+  "xddddddddddddddx",
+  "xxxxxxxxxxxxxxxx",
+];
+
+export const chestSprite = (mimic: boolean, breath: boolean): Grid =>
+  raster(
+    mimic && breath
+      ? [...CHEST_LID, "xtxxtxxxxxxtxxtx", ...CHEST_BOX]
+      : mimic
+        ? [...CHEST_LID, CHEST_BOX[0], "xwwtwwwyywwwwtwx", ...CHEST_BOX.slice(2)]
+        : [...CHEST_LID, ...CHEST_BOX],
+    CHEST_PAL,
+  );
+
+const PACK = [
+  "....",
+  "....",
+  "....",
+  ".xx.",
+  "xbbx",
+  "xbBx",
+  "xbbx",
+  "xbBx",
+  "xbbx",
+  "xbbx",
+  "xBbx",
+  "xbbx",
+  ".xx.",
+  "....",
+  "....",
+  "....",
+];
+const LAMP = [
+  "...",
+  "...",
+  "...",
+  "...",
+  "...",
+  "...",
+  "...",
+  "...",
+  "...",
+  ".x.",
+  "xyx",
+  "xYx",
+  "xyx",
+  ".x.",
+  "...",
+  "...",
+];
+const MOSS = [
+  ".....xx.....",
+  "....xhhx....",
+  "....xhHx....",
+  "...xhhHHx...",
+  "..xhhhhHhx..",
+  "..xhssssxx..",
+  "..xsxssxsx..",
+  "..xsssSssx..",
+  ".xwwwwwwwwx.",
+  ".xwWwwwwWwx.",
+  "xcxwwwwwwxcx",
+  "xcccwwwwcccx",
+  ".xccccccccx.",
+  ".xccccccccx.",
+  "..xkkxxkkx..",
+  "..xxx..xxx..",
+];
+
+export const traderSprite = (): Grid =>
+  raster(
+    MOSS.map((row, i) => PACK[i] + row + LAMP[i]),
+    {
+      x: "#1c1410",
+      h: "#5a4a32",
+      H: "#7a6a48",
+      s: "#e2aa7c",
+      S: "#b97a52",
+      w: "#c8c0b0",
+      W: "#a8a090",
+      c: "#3a5a4a",
+      k: "#3a2a1a",
+      b: "#7a5a3a",
+      B: "#5a3a22",
+      y: "#ffd23f",
+      Y: "#fff3a0",
+    },
+  );
+
+export const potionSprite = (): Grid =>
+  raster(["..xxxx..", "...xx...", "..xccx..", ".xrrrrx.", "xrRrrrrx", "xrrrrrrx", ".xrrrrx.", "..xxxx.."], {
+    x: "#1c1410",
+    c: "#b98a52",
+    r: "#c0303a",
+    R: "#ff8a8a",
+  });
+
+export const scrollSprite = (): Grid =>
+  raster([".xxxxxx.", "xPppppPx", ".xpoopx.", ".xpOopx.", ".xpoopx.", ".xppppx.", "xPppppPx", ".xxxxxx."], {
+    x: "#1c1410",
+    p: "#f4e2b8",
+    P: "#c9b07a",
+    o: "#ff8a2a",
+    O: "#ffe066",
+  });
 
 const DUERGAR = [
   "................",

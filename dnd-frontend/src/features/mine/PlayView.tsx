@@ -6,16 +6,21 @@ import {
   dig,
   faint,
   getMiningState,
+  trade,
   type MiningConfig,
   type MiningState,
   type OreCounts,
 } from "@services/miningService";
 import { GEAR_SLOTS, item, itemName } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
-import { ForgeMenu, LiftMenu, OrePouch, PetMenu } from "./CampMenus";
+import { potionSprite, scrollSprite } from "./art/world";
+import { ForgeMenu, LedgerPage, LiftMenu, OrePouch, PetMenu, TraderMenu } from "./CampMenus";
 import {
   type Aim,
+  BOLT_MS,
+  castBolt,
   createGame,
+  drinkPotion,
   type Game,
   type Keys,
   loadTrip,
@@ -30,6 +35,7 @@ import {
 import { compact, statLine, tiersOf, total } from "./mine";
 import { createRenderer, oreIcon } from "./render";
 import { Sprite } from "./Sprite";
+import { dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
 
 const STEP_MS = 1000 / 60;
@@ -57,9 +63,10 @@ const ignoreKeys = (e: KeyboardEvent) => {
 };
 
 const MENU_TITLES: Record<Station, [string, string]> = {
-  lift: ["The lift", "Pick a depth. Every trip down is a fresh shaft."],
+  lift: ["The lift", "Old Wick works the bell. Pick a depth; every trip down is a fresh shaft."],
   forge: ["The forge", "Turn ore into better gear, or rebuild the forge to work harder metals."],
   shop: ["Pip Tinkerwhistle's Menagerie", "One friend follows you down at a time."],
+  trader: ["Moss, the wandering peddler", "He'll be gone by the next trip."],
 };
 
 const petSetup = (config: MiningConfig, key: string | null) => {
@@ -95,6 +102,20 @@ export function PlayView({
   const [near, setNear] = useState<Station | null>(null);
   const [asleep, setAsleep] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [reading, setReading] = useState(0);
+  const [sealNear, setSealNear] = useState(false);
+  const [potions, setPotions] = useState(state.potions);
+  const [dream, setDream] = useState("");
+  const boltRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!asleep) return;
+    const dreams = dreamsFor(state.deepestDepth);
+    const pick = () => setDream(dreams[Math.floor(Math.random() * dreams.length)]);
+    pick();
+    const id = setInterval(pick, 15_000);
+    return () => clearInterval(id);
+  }, [asleep, state.deepestDepth]);
 
   const stateRef = useRef(state);
   stateRef.current = state;
@@ -111,6 +132,8 @@ export function PlayView({
     g.tiers = tiersOf(state);
     g.stats = state.stats;
     g.forgeLevel = state.forgeLevel;
+    g.firebolt = state.firebolt;
+    g.potions = state.potions;
     g.player.hp = state.stats.maxHp;
     if ((g.pet?.key ?? null) !== state.pet) {
       g.pet = petSetup(config, state.pet);
@@ -126,7 +149,7 @@ export function PlayView({
     const g = gameRef.current;
     if (s.trip && g && !g.camp) {
       loadTrip(g, s.trip, g.now);
-      g.pending = { breaks: [], ladders: [], torches: [], kills: 0 };
+      g.pending = { breaks: [], ladders: [], torches: [], kills: 0, mimics: [], drank: 0 };
       setSatchel(s.trip.satchel);
       setDepth(s.trip.depth);
     } else onState(s);
@@ -159,7 +182,7 @@ export function PlayView({
         if (res.trip) {
           const broke = res.trip.depth !== g.depth;
           loadTrip(g, res.trip, g.now);
-          g.pending = { breaks: [], ladders: [], torches: [], kills: 0 };
+          g.pending = { breaks: [], ladders: [], torches: [], kills: 0, mimics: [], drank: 0 };
           setDepth(res.trip.depth);
           if (broke)
             showNotification({
@@ -218,6 +241,8 @@ export function PlayView({
   finishRef.current = finish;
   const flushRef = useRef(flush);
   flushRef.current = flush;
+  const onStateRef = useRef(onState);
+  onStateRef.current = onState;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -239,6 +264,8 @@ export function PlayView({
         tiers: tiersOf(s),
         pet: petSetup(config, s.pet),
         forgeLevel: s.forgeLevel,
+        firebolt: s.firebolt,
+        potions: s.potions,
       },
       trip,
       performance.now(),
@@ -270,6 +297,8 @@ export function PlayView({
     let wasNear: Station | null = null;
     let wasAsleep = false;
     let fainted = false;
+    let wasSeal = false;
+    let wasPotions = g.potions;
     const frame = (now: number) => {
       acc += Math.min(100, now - last);
       last = now;
@@ -289,6 +318,23 @@ export function PlayView({
         wasAsleep = g.asleep;
         setAsleep(g.asleep);
       }
+      if (g.found) {
+        const n = g.found;
+        g.found = 0;
+        setReading(n);
+        const s = stateRef.current;
+        if (!s.pages.includes(n)) onStateRef.current({ ...s, pages: [...s.pages, n] });
+      }
+      if (g.potions !== wasPotions) {
+        wasPotions = g.potions;
+        setPotions(g.potions);
+      }
+      if (boltRef.current) boltRef.current.style.width = `${Math.min(1, 1 - (g.nextBolt - g.now) / BOLT_MS) * 100}%`;
+      const sn = !g.camp && g.player.y >= g.H - 4;
+      if (sn !== wasSeal) {
+        wasSeal = sn;
+        setSealNear(sn);
+      }
       if (g.fainted && !fainted) {
         fainted = true;
         void finishRef.current(true);
@@ -306,7 +352,10 @@ export function PlayView({
         keys.current[k] = down;
       }
       if (!down || e.repeat) return;
+      if (e.code === "Escape") setReading(0);
       if (e.code === "KeyT" && !g.camp) placeTorch(g);
+      if (e.code === "KeyF") castBolt(g, g.hover);
+      if (e.code === "KeyQ") drinkPotion(g);
       if (e.code === "KeyE" && !g.camp && stationAt(g) === "lift") void finishRef.current(false);
     };
     const kd = onKey(true);
@@ -345,6 +394,24 @@ export function PlayView({
       x: (((e.clientX - r.left) / r.width) * c.width + cam.current.camX) / T,
       y: (((e.clientY - r.top) / r.height) * c.height + cam.current.camY) / T,
     };
+  };
+
+  const onTrade = async (item: string) => {
+    await inflight.current;
+    await flush();
+    const s = await trade(item);
+    const g = gameRef.current;
+    if (g) {
+      g.firebolt = s.firebolt;
+      g.potions = s.potions;
+    }
+    setPotions(s.potions);
+    onState({ ...s, trip: stateRef.current.trip });
+    showNotification({
+      title: item === "firebolt" ? "You learned Firebolt" : "A healing draught, corked and warm",
+      message: item === "firebolt" ? "F or right-click to cast it at the cursor." : "Q to drink it.",
+      color: "yellow",
+    });
   };
 
   const tiers = tiersOf(state);
@@ -446,9 +513,14 @@ export function PlayView({
           className={styles.canvas}
           aria-label="The game. A and D walk and dig, Space jumps, S digs down, W climbs, click or Enter attacks."
           onPointerDown={(e) => {
+            if (e.button === 2) {
+              if (gameRef.current) castBolt(gameRef.current, aimAt(e));
+              return;
+            }
             e.currentTarget.setPointerCapture(e.pointerId);
             aim.current = aimAt(e);
           }}
+          onContextMenu={(e) => e.preventDefault()}
           onPointerMove={(e) => {
             const a = aimAt(e);
             if (aim.current) aim.current = a;
@@ -468,8 +540,16 @@ export function PlayView({
         <canvas ref={textRef} className={`${styles.canvas} ${styles.textLayer}`} aria-hidden />
 
         {near && (
-          <section className={styles.menu} aria-label={trip ? "The lift" : MENU_TITLES[near][0]}>
-            {trip ? (
+          <section className={styles.menu} aria-label={MENU_TITLES[near][0]}>
+            {trip && near === "trader" ? (
+              <>
+                <div className={styles.menuHead}>
+                  <h2 className={styles.h2}>{MENU_TITLES.trader[0]}</h2>
+                  <span className={styles.dim}>{MENU_TITLES.trader[1]} Walk away to close.</span>
+                </div>
+                <TraderMenu config={config} state={{ ...state, potions }} onTrade={onTrade} />
+              </>
+            ) : trip ? (
               <div className={styles.liftUp}>
                 <div>
                   <h2 className={styles.h2}>The lift</h2>
@@ -500,7 +580,31 @@ export function PlayView({
           </section>
         )}
 
-        {asleep && <div className={styles.napNote}>Zzz… your dwarf dozed off. Press any key to wake him.</div>}
+        {reading > 0 && trip && (
+          <section className={styles.found} aria-label="A ledger page">
+            <LedgerPage n={reading} />
+            <button type="button" className={`glass-btn-secondary ${styles.actBtn}`} onClick={() => setReading(0)}>
+              Tuck it in your satchel (Esc)
+            </button>
+          </section>
+        )}
+
+        {sealNear && trip && (
+          <div className={styles.sealNote}>
+            <span className={styles.eyebrow}>
+              {depth < 10 ? "Carved into the seal below" : "The bottom of the world"}
+            </span>
+            <span>{engraving(depth)}</span>
+          </div>
+        )}
+
+        {asleep && (
+          <div className={styles.napNote}>
+            <span className={styles.eyebrow}>Zzz… dreaming</span>
+            <span className={styles.dream}>{dream}</span>
+            <span className={styles.dim}>Press any key to wake up.</span>
+          </div>
+        )}
       </div>
 
       <aside className={styles.side}>
@@ -513,6 +617,26 @@ export function PlayView({
               : "Walk to the lift, the forge or Pip's stall."}
           </span>
         </div>
+
+        {(potions > 0 || state.firebolt) && (
+          <div className={styles.block}>
+            <span className={styles.eyebrow}>Belt</span>
+            <div className={styles.beltItem}>
+              <Sprite grid={potionSprite()} scale={2} label="Healing draught" />
+              <span className={styles.pixel}>× {potions}</span>
+              <kbd>Q</kbd>
+            </div>
+            {state.firebolt && (
+              <div className={styles.beltItem}>
+                <Sprite grid={scrollSprite()} scale={2} label="Firebolt" />
+                <div className={`${styles.bar} ${styles.grow}`}>
+                  <div ref={boltRef} className={styles.boltFill} />
+                </div>
+                <kbd>F</kbd>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className={styles.block}>
           <span className={styles.eyebrow}>Pet</span>
@@ -550,6 +674,14 @@ export function PlayView({
             </span>
             <span>
               <kbd>T</kbd> torch
+            </span>
+            {state.firebolt && (
+              <span>
+                <kbd>F</kbd> or <kbd>Right-click</kbd> firebolt
+              </span>
+            )}
+            <span>
+              <kbd>Q</kbd> drink a potion
             </span>
             <span>
               <kbd>E</kbd> ride the lift up

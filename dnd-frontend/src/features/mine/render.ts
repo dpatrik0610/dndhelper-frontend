@@ -2,13 +2,16 @@ import { dwarfOnly, item, SETS, sleeper } from "./art/gear";
 import { type Grid, hex, mix, tint } from "./art/pixel";
 import { forgeSprite } from "./art/forge";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
-import { cracks, enemySprite, oreTile, stoneTile } from "./art/world";
+import { chestSprite, cracks, enemySprite, oreTile, stoneTile, traderSprite } from "./art/world";
 import {
   BEDROCK,
   CAMP,
+  CHEST,
   drawPos,
   type Game,
   hpOf,
+  LEDGER,
+  MIMIC,
   lightRadius,
   OPEN,
   oreOf,
@@ -18,6 +21,7 @@ import {
   T,
 } from "./engine";
 import { compact, hpColor } from "./mine";
+import { wickSprite } from "./story";
 
 const CRACK_ALL = cracks(4);
 const CRACK = CRACK_ALL.map((_, n) => CRACK_ALL[(n % 4) * 7 + Math.floor(n / 4)]);
@@ -101,6 +105,18 @@ const sealTile = (depth: number): Grid => {
   ])
     g[y][x] = "#ffd77a";
   for (let x = 0; x < 16; x++) if (x % 4 !== 1) g[12][x] = "#c9a04a";
+  return g;
+};
+
+const ledgerTile = (depth: number): Grid => {
+  const g = stoneTile(depth, 77);
+  const P = "#f4e2b8";
+  const p = "#c9b07a";
+  const k = "#6b4423";
+  for (let y = 4; y < 12; y++)
+    for (let x = 4; x < 12; x++) g[y][x] = x === 4 || y === 4 || x === 11 || y === 11 ? k : (x + y) % 5 ? P : p;
+  for (const y of [6, 8, 10]) for (let x = 6; x < 10; x++) g[y][x] = "#8a6a4a";
+  g[3][7] = "#ffe9a8";
   return g;
 };
 
@@ -200,6 +216,9 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     ctx.fillStyle = "#a8784a";
     ctx.fillRect(hx + 3, gy - 1, 24, 2);
     label("Lift", hx + 15, gy - 66, near === "lift");
+    const wick = cached("wick", wickSprite);
+    draw(wick, hx - 16, gy - wick.length - (Math.floor(g.now / 900) % 5 === 0 ? 1 : 0));
+    if (near === "lift") write("Old Wick", hx - 10, gy - wick.length - 4, "#ffb347", 1, 6);
 
     const forge = cached(`forge${g.forgeLevel}${flick}`, () => forgeSprite(g.forgeLevel, flick));
     const fx = CAMP.forge * T + 8 + ox - 16;
@@ -246,15 +265,18 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     const lx = g.liftX * T + ox;
     const ly = (g.liftY + 1) * T + oy;
 
+    let ledgerAt = -1;
     if (g.camp) campBackdrop(g, ox, oy, VW, VH, flick);
     else {
       for (let r = r0; r <= r1; r++)
         for (let c = c0; c <= c1; c++) {
           const i = r * g.W + c;
           const cell = g.map[i];
+          if (cell === LEDGER) ledgerAt = i;
           const v = (c * 7 + r * 13) % 4;
+          const chest = cell === CHEST || cell === MIMIC;
           const grid =
-            cell === OPEN
+            cell === OPEN || chest
               ? cached(`w${d}-${v}`, () =>
                   stoneTile(d, v).map((row) => row.map((x) => mix(x as string, "#07060a", 0.74))),
                 )
@@ -264,11 +286,18 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
                   )
                 : cell === SEAL
                   ? cached(`seal${d}`, () => sealTile(d))
-                  : oreOf(cell) >= 0
-                    ? cached(`o${d}-${oreOf(cell)}`, () => oreTile(oreOf(cell), d))
-                    : cached(`s${d}-${v}`, () => stoneTile(d, v + 11));
+                  : cell === LEDGER
+                    ? cached(`ledger${d}`, () => ledgerTile(d))
+                    : oreOf(cell) >= 0
+                      ? cached(`o${d}-${oreOf(cell)}`, () => oreTile(oreOf(cell), d))
+                      : cached(`s${d}-${v}`, () => stoneTile(d, v + 11));
           draw(grid, c * T + ox, r * T + oy);
-          if (cell !== OPEN) {
+          if (chest) {
+            const breath = cell === MIMIC && Math.floor((g.now + i * 377) / 300) % 12 === 0;
+            const box = cached(`chest${cell}${breath}`, () => chestSprite(cell === MIMIC, breath));
+            draw(box, c * T + ox, (r + 1) * T + oy - box.length);
+          }
+          if (cell !== OPEN && !chest) {
             const X = c * T + ox;
             const Y = r * T + oy;
             ctx.fillStyle = "rgba(0,0,0,0.55)";
@@ -309,13 +338,22 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       if (g.target >= 0) {
         const cell = g.map[g.target];
         const o = oreOf(cell);
-        const name = cell === SEAL ? "Rune seal" : o >= 0 ? g.oreNames[o] : "Stone";
+        const name =
+          cell === SEAL
+            ? "Rune seal"
+            : cell === LEDGER
+              ? "Ledger page"
+              : cell === CHEST || cell === MIMIC
+                ? "Chest"
+                : o >= 0
+                  ? g.oreNames[o]
+                  : "Stone";
         bar(g.target);
         write(
           `${name} · hardness ${compact(hpOf(g, cell))}`,
           (g.target % g.W) * T + ox + T / 2,
           Math.floor(g.target / g.W) * T + oy - 3,
-          o >= 0 ? "#ffd77a" : "#d6d0c4",
+          o >= 0 || cell === LEDGER || cell === CHEST || cell === MIMIC ? "#ffd77a" : "#d6d0c4",
           1,
           6,
         );
@@ -340,6 +378,13 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           ctx.fillRect(X + a, Y + b, 1, 3);
       }
       for (const i of g.torches) draw(TORCH[flick ? 1 : 0], (i % g.W) * T + ox + 6, Math.floor(i / g.W) * T + oy + 5);
+      if (g.trader >= 0) {
+        const moss = cached("moss", traderSprite);
+        const X = (g.trader % g.W) * T + ox + 8 - Math.floor(moss[0].length / 2);
+        const Y = (Math.floor(g.trader / g.W) + 1) * T + oy - moss.length;
+        draw(moss, X, Y - (Math.floor(g.now / 700) % 4 === 0 ? 1 : 0));
+        if (stationAt(g) === "trader") write("Moss", X + moss[0].length / 2, Y - 4, "#ffb347", 1, 6);
+      }
 
       ctx.fillStyle = "#4a3020";
       ctx.fillRect(lx - 6, oy, 1, ly - oy - 3);
@@ -371,6 +416,16 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         ctx.fillStyle = "#e0503a";
         ctx.fillRect(bx, by, Math.max(1, Math.round((16 * m.hp) / m.maxHp)), 2);
       }
+    }
+
+    for (const b of g.bolts) {
+      const bx = Math.round(b.x * T + ox);
+      const by = Math.round(b.y * T + oy);
+      ctx.fillStyle = "#ff8a2a";
+      ctx.fillRect(bx - 2, by - 1, 5, 3);
+      ctx.fillRect(bx - 1, by - 2, 3, 5);
+      ctx.fillStyle = "#fff3a0";
+      ctx.fillRect(bx - 1, by - 1, 3, 3);
     }
 
     const tiers = g.tiers;
@@ -467,6 +522,12 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       glow(dctx, lx + 23, ly - 20, 3 * T + fl, black, 0.9);
       for (const i of g.torches)
         glow(dctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, 2.5 * T + fl, black, 0.92);
+      for (const b of g.bolts) glow(dctx, b.x * T + ox, b.y * T + oy, 1.8 * T, black, 0.95);
+      if (g.trader >= 0) {
+        const tx = (g.trader % g.W) * T + ox + 15;
+        const ty = Math.floor(g.trader / g.W) * T + oy + 12;
+        glow(dctx, tx, ty, 2.6 * T + fl, black, 0.9);
+      }
       const petLight = pet && PET_LIGHT[pet.key];
       if (pet && petLight) glow(dctx, pet.px * T + ox + 8, (pet.py + 0.5) * T + oy, petLight * T, black, 0.9);
       for (const m of g.monsters)
@@ -475,6 +536,15 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           glow(dctx, (mp.x + 0.5) * T + ox, (mp.y + 0.5) * T + oy, T * 1.2, black, 0.6);
         }
       ctx.drawImage(dark, 0, 0);
+      const lc = ledgerAt % g.W;
+      const lr = Math.floor(ledgerAt / g.W);
+      if (ledgerAt >= 0 && (lc - p.x) ** 2 + (lr - p.y) ** 2 <= 100 && Math.floor(g.now / 220) % 7 < 2) {
+        const X = lc * T + ox + 7;
+        const Y = lr * T + oy + 7;
+        ctx.fillStyle = "#fff3c8";
+        ctx.fillRect(X, Y - 2, 1, 5);
+        ctx.fillRect(X - 2, Y, 5, 1);
+      }
     }
 
     ctx.globalCompositeOperation = "lighter";
@@ -483,6 +553,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     if (g.camp) glow(ctx, CAMP.forge * T + ox, CAMP.ground * T + oy - 10, 40, [255, 150, 60], flick ? 0.26 : 0.2);
     else glow(ctx, lx + 23, ly - 20, 2.5 * T, [255, 150, 60], 0.16);
     glow(ctx, headX, headY - 4, 22, [255, 215, 130], 0.1);
+    for (const b of g.bolts) glow(ctx, b.x * T + ox, b.y * T + oy, 14, [255, 140, 50], 0.45);
     if (pet?.art.light) glow(ctx, pet.px * T + ox + 8, (pet.py + 0.5) * T + oy, 14, hex(pet.art.light), 0.3);
     if (pet?.key === "dragon") glow(ctx, pet.px * T + ox + 9, (pet.py + 0.5) * T + oy, 12, [255, 120, 40], 0.18);
     const set = SETS[tiers.helm];

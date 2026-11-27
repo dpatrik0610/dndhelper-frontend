@@ -15,10 +15,11 @@ import {
 import { FORGE_LEVELS, forgeSprite } from "./art/forge";
 import { GEAR_SLOTS, item, itemName } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
-import { ENEMIES } from "./art/world";
+import { ENEMIES, potionSprite, scrollSprite } from "./art/world";
 import { canAfford, compact, discounted, statLine, tiersOf } from "./mine";
 import { oreIcon } from "./render";
 import { Sprite } from "./Sprite";
+import { FOREMAN, MOSS_LINES, PAGES, WARES, wickLines, wickSprite } from "./story";
 import styles from "./Mine.module.css";
 
 type MenuProps = { config: MiningConfig; state: MiningState; onState: (s: MiningState) => void };
@@ -57,38 +58,94 @@ function useRun(onState: (s: MiningState) => void) {
   return { busy, run };
 }
 
+function Wick({ state }: { state: MiningState }) {
+  const [line] = useState(() => {
+    const lines = wickLines(state);
+    return lines[Math.floor(Math.random() * lines.length)];
+  });
+  const [page, setPage] = useState<number | null>(null);
+  const found = new Set(state.pages);
+  return (
+    <div className={styles.wick}>
+      <Sprite grid={wickSprite()} scale={3} label="Old Wick" />
+      <div className={styles.wickBody}>
+        <p className={styles.wickLine}>
+          <b className={styles.pixel}>Old Wick:</b> "{line}"
+        </p>
+        <div className={styles.ledgerRow}>
+          <span className={styles.petMeta}>
+            The foreman's ledger · {found.size} / {PAGES.length}
+          </span>
+          {PAGES.map((_, i) => {
+            const n = i + 1;
+            const has = found.has(n);
+            return (
+              <Tooltip key={n} label={has ? `Page ${n}` : `Lost somewhere in depth ${n}`} withArrow>
+                <button
+                  type="button"
+                  className={`${styles.pageBtn} ${page === n ? styles.pageOpen : ""}`}
+                  disabled={!has}
+                  aria-label={has ? `Read page ${n}` : `Page ${n}, not found yet`}
+                  onClick={() => setPage(page === n ? null : n)}
+                >
+                  {has ? n : "?"}
+                </button>
+              </Tooltip>
+            );
+          })}
+        </div>
+        {page && <LedgerPage n={page} />}
+      </div>
+    </div>
+  );
+}
+
+export function LedgerPage({ n }: { n: number }) {
+  return (
+    <blockquote className={styles.ledgerPage}>
+      <span className={styles.petMeta}>
+        {FOREMAN} · page {n}
+      </span>
+      <p>{PAGES[n - 1]}</p>
+    </blockquote>
+  );
+}
+
 export function LiftMenu({ config, state, onState }: MenuProps) {
   const { busy, run } = useRun(onState);
   return (
-    <div className={styles.depths}>
-      {config.depths.map((d) => {
-        const locked = d.number > state.deepestDepth;
-        const foe = ENEMIES[d.number - 1];
-        return (
-          <button
-            key={d.number}
-            type="button"
-            className={`${styles.depthCard} ${locked ? styles.locked : ""}`}
-            disabled={locked || busy}
-            onClick={() => void run(() => descend(d.number))}
-          >
-            <span className={styles.depthNum}>{locked ? <IconLock size={14} /> : d.number}</span>
-            <span className={styles.depthInfo}>
-              <b>{d.name}</b>
-              <span>
-                {locked
-                  ? `Break the seal at depth ${d.number - 1} with a ${itemName("pickaxe", d.number - 1)}`
-                  : `${foe.name} · ${config.ores[2 * d.number - 2].name}, ${config.ores[2 * d.number - 1].name}`}
+    <>
+      <Wick state={state} />
+      <div className={styles.depths}>
+        {config.depths.map((d) => {
+          const locked = d.number > state.deepestDepth;
+          const foe = ENEMIES[d.number - 1];
+          return (
+            <button
+              key={d.number}
+              type="button"
+              className={`${styles.depthCard} ${locked ? styles.locked : ""}`}
+              disabled={locked || busy}
+              onClick={() => void run(() => descend(d.number))}
+            >
+              <span className={styles.depthNum}>{locked ? <IconLock size={14} /> : d.number}</span>
+              <span className={styles.depthInfo}>
+                <b>{d.name}</b>
+                <span>
+                  {locked
+                    ? `Break the seal at depth ${d.number - 1} with a ${itemName("pickaxe", d.number - 1)}`
+                    : `${foe.name} · ${config.ores[2 * d.number - 2].name}, ${config.ores[2 * d.number - 1].name}`}
+                </span>
               </span>
-            </span>
-            <span className={styles.depthOres}>
-              <Sprite grid={oreIcon(2 * d.number - 2)} scale={1} />
-              <Sprite grid={oreIcon(2 * d.number - 1)} scale={1} />
-            </span>
-          </button>
-        );
-      })}
-    </div>
+              <span className={styles.depthOres}>
+                <Sprite grid={oreIcon(2 * d.number - 2)} scale={1} />
+                <Sprite grid={oreIcon(2 * d.number - 1)} scale={1} />
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -284,5 +341,58 @@ export function OrePouch({ config, state }: { config: MiningConfig; state: Minin
         );
       })}
     </div>
+  );
+}
+
+export function TraderMenu({
+  config,
+  state,
+  onTrade,
+}: {
+  config: MiningConfig;
+  state: MiningState;
+  onTrade: (item: string) => Promise<void>;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [line] = useState(() => MOSS_LINES[Math.floor(Math.random() * MOSS_LINES.length)]);
+  const wares = Object.entries(state.trip?.wares ?? {}).filter(([k]) => k !== "firebolt" || !state.firebolt);
+  const buy = async (item: string) => {
+    setBusy(true);
+    try {
+      await onTrade(item);
+    } catch (e) {
+      showNotification({ title: "Moss shakes his head", message: (e as Error).message, color: "red" });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <>
+      <p className={styles.quote}>{line}</p>
+      <div className={styles.pets}>
+        {wares.map(([key, cost]) => {
+          const full = key === "potion" && state.potions >= 5;
+          return (
+            <div key={key} className={`${styles.pet} ${key === "firebolt" ? styles.petActive : ""}`}>
+              <Sprite grid={key === "firebolt" ? scrollSprite() : potionSprite()} scale={6} label={WARES[key]?.name} />
+              <div className={styles.petBody}>
+                <b className={styles.pixel}>{WARES[key]?.name ?? key}</b>
+                <span className={styles.dim}>{WARES[key]?.blurb}</span>
+                {key === "potion" && <span className={styles.petMeta}>ON YOUR BELT · {state.potions} / 5</span>}
+                <Cost cost={cost} ores={state.ores} config={config} />
+                <button
+                  type="button"
+                  className={`glass-btn-primary ${styles.actBtn}`}
+                  disabled={busy || full || !canAfford(cost, state.ores)}
+                  onClick={() => void buy(key)}
+                >
+                  {key === "firebolt" ? "Learn it" : full ? "Belt full" : "Buy one"}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }

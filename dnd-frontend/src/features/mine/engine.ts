@@ -10,6 +10,11 @@ export const BEDROCK = 35;
 export const SEAL = 61;
 export const STONE = 48;
 export const ORE0 = 65;
+export const LEDGER = 42;
+export const CHEST = 36;
+export const MIMIC = 38;
+export const MIMIC_KIND = 11;
+export const BOLT_MS = 2500;
 
 const WALK_MS = 170;
 const CLIMB_MS = 200;
@@ -23,7 +28,7 @@ export type Keys = { left: boolean; right: boolean; up: boolean; down: boolean; 
 export type Aim = { x: number; y: number } | null;
 
 export const CAMP = { W: 44, H: 10, ground: 8, lift: 5, forge: 21, shop: 35 };
-export type Station = "lift" | "forge" | "shop";
+export type Station = "lift" | "forge" | "shop" | "trader";
 
 type Tween = { x: number; y: number; fromX: number; fromY: number; t: number; dur: number };
 
@@ -57,6 +62,7 @@ export interface Monster extends Tween {
   petBlocked: boolean;
   leaving: number;
   lost: number;
+  cell: number;
 }
 
 export interface PetActor {
@@ -78,6 +84,14 @@ export interface Particle {
   color: string;
 }
 
+export interface Bolt {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+}
+
 export interface FloatText {
   x: number;
   y: number;
@@ -91,6 +105,8 @@ export interface Pending {
   ladders: number[];
   torches: number[];
   kills: number;
+  mimics: number[];
+  drank: number;
 }
 
 export interface GameSetup {
@@ -106,6 +122,8 @@ export interface GameSetup {
   tiers: Tiers;
   pet: { art: PetArt; key: string } | null;
   forgeLevel: number;
+  firebolt: boolean;
+  potions: number;
 }
 
 export interface Game extends GameSetup {
@@ -140,6 +158,11 @@ export interface Game extends GameSetup {
   nextBeetle: number;
   warned: Set<string>;
   seq: number;
+  found: number;
+  bolts: Bolt[];
+  nextBolt: number;
+  nextPotion: number;
+  trader: number;
 }
 
 const KINDS: Record<number, { hp: number; dmg: number; move: number; tunnel?: boolean }> = {
@@ -153,6 +176,7 @@ const KINDS: Record<number, { hp: number; dmg: number; move: number; tunnel?: bo
   8: { hp: 1.4, dmg: 1.6, move: 800 },
   9: { hp: 1.2, dmg: 1.1, move: 560, tunnel: true },
   10: { hp: 1.6, dmg: 1.5, move: 520 },
+  11: { hp: 5, dmg: 1.5, move: 430 },
 };
 
 export const PET_LIGHT: Record<string, number> = { moth: 2, wisp: 2.5, fox: 3 };
@@ -169,9 +193,13 @@ export const hpOf = (g: Game, c: number) =>
     ? g.info.stoneHp
     : c === SEAL
       ? g.info.sealHp
-      : oreOf(c) >= 0
-        ? g.oreHp[oreOf(c)]
-        : Number.POSITIVE_INFINITY;
+      : c === LEDGER
+        ? g.info.stoneHp * 6
+        : c === CHEST || c === MIMIC
+          ? g.info.stoneHp * 3
+          : oreOf(c) >= 0
+            ? g.oreHp[oreOf(c)]
+            : Number.POSITIVE_INFINITY;
 
 const tweenTo = (a: Tween, x: number, y: number, dur: number) => {
   a.fromX = a.x;
@@ -218,7 +246,11 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     texts: [],
     zs: [],
     nextZ: 0,
-    pending: { breaks: [], ladders: [], torches: [], kills: 0 },
+    pending: { breaks: [], ladders: [], torches: [], kills: 0, mimics: [], drank: 0 },
+    bolts: [],
+    nextBolt: 0,
+    nextPotion: 0,
+    trader: -1,
     asleep: false,
     lastInput: now,
     now,
@@ -227,6 +259,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     nextBeetle: 0,
     warned: new Set(),
     seq: 0,
+    found: 0,
     hover: null,
     target: -1,
     aimPoint: { x: 0, y: 0 },
@@ -256,6 +289,8 @@ function loadCamp(g: Game, now: number) {
   g.dist = new Int16Array(CAMP.W * CAMP.H);
   g.carried = 0;
   g.monsters = [];
+  g.bolts = [];
+  g.trader = -1;
   g.startedAt = now;
   g.nextSpawn = Number.POSITIVE_INFINITY;
   place(g, g.liftX + 1);
@@ -287,7 +322,11 @@ function place(g: Game, x: number) {
 
 export const stationAt = (g: Game): Station | null => {
   const x = g.player.x;
-  if (!g.camp) return atLift(g) ? "lift" : null;
+  if (!g.camp) {
+    if (atLift(g)) return "lift";
+    const t = g.trader;
+    return t >= 0 && Math.abs((t % g.W) - x) <= 2 && Math.abs(Math.floor(t / g.W) - g.player.y) <= 1 ? "trader" : null;
+  }
   if (Math.abs(x - CAMP.lift) <= 2) return "lift";
   if (Math.abs(x - CAMP.forge) <= 2) return "forge";
   if (Math.abs(x - CAMP.shop) <= 2) return "shop";
@@ -306,6 +345,8 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.dmg.clear();
   g.carried = Object.values(trip.satchel).reduce((a, b) => a + b, 0);
   g.monsters = [];
+  g.bolts = [];
+  g.trader = trip.trader ?? -1;
   g.startedAt = now;
   g.nextSpawn = now + SPAWN_GRACE_MS;
   g.warned.clear();
@@ -315,8 +356,9 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
 
 export function takePending(g: Game): Pending | null {
   const p = g.pending;
-  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills) return null;
-  g.pending = { breaks: [], ladders: [], torches: [], kills: 0 };
+  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank)
+    return null;
+  g.pending = { breaks: [], ladders: [], torches: [], kills: 0, mimics: [], drank: 0 };
   return p;
 }
 
@@ -372,8 +414,9 @@ function hitCell(g: Game, x: number, y: number) {
   if (c === SEAL && pick < g.depth)
     return sayOnce(g, "seal", `Breaking the seal needs a ${itemName("pickaxe", g.depth)}`);
   if (g.now < p.nextSwing) return;
-  const crit = swing(g);
   const i = y * g.W + x;
+  if (c === MIMIC) return wakeMimic(g, x, y);
+  const crit = swing(g);
   const e = g.dmg.get(i) ?? { d: 0, s: 0, c: 0, t: 0 };
   e.t = g.now;
   e.d += crit ? critHit(g.stats) : g.stats.power;
@@ -394,6 +437,13 @@ function hitCell(g: Game, x: number, y: number) {
   if (c === SEAL) {
     say(g, cx, cy - 8, "The seal cracks open…", "#ffd77a", 1600);
     burst(g, cx, cy, "#ffd77a", 24, 2.4);
+  } else if (c === CHEST) {
+    say(g, cx, cy - 8, "Treasure!", "#ffd77a", 1400);
+    burst(g, cx, cy, "#ffd77a", 22, 2.4);
+  } else if (c === LEDGER) {
+    say(g, cx, cy - 8, "A ledger page!", "#f4e2b8", 1600);
+    burst(g, cx, cy, "#f4e2b8", 18, 2.2);
+    g.found = g.depth;
   } else if (ore >= 0) {
     burst(g, cx, cy, g.oreColors[ore], 14, 2);
     if (g.carried >= g.stats.capacity) sayOnce(g, "full", "Satchel full! Head back to the lift.", "#ff8a6a");
@@ -402,6 +452,104 @@ function hitCell(g: Game, x: number, y: number) {
       g.carried += Math.floor(g.stats.yield) + (g.pet?.key === "ferret" ? 1 : 0);
     }
   }
+}
+
+function addMonster(g: Game, kind: number, x: number, y: number) {
+  const spec = KINDS[kind];
+  const hp = Math.round(g.info.monsterHp * spec.hp);
+  const m: Monster = {
+    id: ++g.seq,
+    def: ENEMIES[kind - 1],
+    kind,
+    x,
+    y,
+    fromX: x,
+    fromY: y,
+    t: 0,
+    dur: 0,
+    hp,
+    maxHp: hp,
+    dmg: Math.round(g.info.monsterDamage * spec.dmg),
+    moveMs: spec.move,
+    nextMove: g.now + 600,
+    nextHit: 0,
+    lungeUntil: 0,
+    flashUntil: 0,
+    stunUntil: 0,
+    revived: false,
+    petBlocked: false,
+    leaving: 0,
+    lost: 0,
+    cell: y * g.W + x,
+  };
+  g.monsters.push(m);
+  return m;
+}
+
+function wakeMimic(g: Game, x: number, y: number) {
+  swing(g);
+  g.map[y * g.W + x] = OPEN;
+  const m = addMonster(g, MIMIC_KIND, x, y);
+  m.nextMove = g.now + 900;
+  m.nextHit = g.now + 900;
+  const cx = (x + 0.5) * T;
+  const cy = y * T;
+  burst(g, cx, cy + 8, "#c9a04a", 18, 2.6);
+  say(g, cx, cy - 10, "It's a MIMIC!", "#ff6a5a", 1800);
+  if (!g.firebolt) sayOnce(g, "nofire", "Your pick just bounces off. Only fire hurts it. Run!", "#ff8a6a");
+}
+
+export function castBolt(g: Game, aim: Aim) {
+  const p = g.player;
+  if (!g.firebolt || g.camp || g.asleep || g.now < g.nextBolt) return false;
+  const ox = p.x + 0.5;
+  const oy = p.y - 0.4;
+  const tx = aim ? aim.x : ox + p.face;
+  const ty = aim ? aim.y : oy;
+  const len = Math.hypot(tx - ox, ty - oy) || 1;
+  const v = 0.012;
+  g.nextBolt = g.now + BOLT_MS;
+  if (Math.abs(tx - ox) >= 0.3) p.face = tx < ox ? -1 : 1;
+  g.bolts.push({ x: ox, y: oy, vx: ((tx - ox) / len) * v, vy: ((ty - oy) / len) * v, life: 1400 });
+  return true;
+}
+
+export function drinkPotion(g: Game) {
+  const p = g.player;
+  if (g.camp || g.potions <= 0 || g.now < g.nextPotion || p.hp >= g.stats.maxHp) return false;
+  g.potions--;
+  g.pending.drank++;
+  g.nextPotion = g.now + 1000;
+  const heal = Math.round(g.stats.maxHp * 0.6);
+  p.hp = Math.min(g.stats.maxHp, p.hp + heal);
+  say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, `+${heal}`, "#7ee08a", 900);
+  burst(g, (p.x + 0.5) * T, p.y * T, "#ff6a8a", 10, 1.4);
+  return true;
+}
+
+function stepBolts(g: Game, dt: number) {
+  for (const b of g.bolts) {
+    b.life -= dt;
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+    const cx = Math.floor(b.x);
+    const cy = Math.floor(b.y);
+    if (rand() < 0.5) g.parts.push({ x: b.x * T, y: b.y * T, vx: 0, vy: -0.2, life: 220, color: "#ff8a2a" });
+    markSeen(g, cx, cy, 1.6);
+    const foe = liveMonsters(g).find((m) => {
+      const mp = drawPos(m);
+      return Math.abs(mp.x + 0.5 - b.x) < 0.7 && Math.abs(mp.y + 0.5 - b.y) < 0.8;
+    });
+    if (foe) {
+      b.life = 0;
+      burst(g, b.x * T, b.y * T, "#ffb347", 16, 2.2);
+      damageMonster(g, foe, Math.round(g.stats.power * 3), false, null, true);
+    } else if (!isOpen(g, cx, cy)) {
+      b.life = 0;
+      burst(g, b.x * T, b.y * T, "#ff8a2a", 10, 1.6);
+    }
+  }
+  g.bolts = g.bolts.filter((b) => b.life > 0);
 }
 
 const touches = (p: Player, x: number, y: number) =>
@@ -418,7 +566,10 @@ const liveMonsters = (g: Game) => g.monsters.filter((m) => !m.leaving && m.hp > 
 function killMonster(g: Game, m: Monster, by: string | null) {
   m.hp = 0;
   g.monsters = g.monsters.filter((x) => x !== m);
-  g.pending.kills++;
+  if (m.kind === MIMIC_KIND) {
+    g.pending.mimics.push(m.cell);
+    burst(g, (m.x + 0.5) * T, (m.y + 0.5) * T, "#ffd77a", 30, 3);
+  } else g.pending.kills++;
   const cx = (m.x + 0.5) * T;
   const cy = (m.y + 0.5) * T;
   burst(g, cx, cy, "#d6d0c4", 14, 2.2);
@@ -429,10 +580,19 @@ function killMonster(g: Game, m: Monster, by: string | null) {
   }
 }
 
-function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: string | null) {
+function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: string | null, fire = false) {
   const cx = (m.x + 0.5) * T;
   const cy = m.y * T;
   m.flashUntil = g.now + 120;
+  if (m.kind === MIMIC_KIND && !fire) {
+    m.stunUntil = g.now + (byPet ? 200 : 450);
+    say(g, cx, cy - 4, "Clang!", "#c8c0b0", 500);
+    if (!m.petBlocked) {
+      m.petBlocked = true;
+      say(g, cx, cy - 14, g.firebolt ? "Only fire hurts it! (F)" : "Only fire hurts it!", "#ffb347", 1600);
+    }
+    return;
+  }
   if (byPet && !canSolo(g.pet?.art.tier ?? 0, g.depth) && m.hp - dmg <= 0) {
     if (m.hp > 1) m.hp = 1;
     else if (!m.petBlocked) {
@@ -701,32 +861,7 @@ function spawn(g: Game) {
   if (!cells.length) return;
   const at = cells[Math.floor(rand() * cells.length)];
   const x = at % g.W;
-  const y = Math.floor(at / g.W);
-  const hp = Math.round(g.info.monsterHp * spec.hp);
-  g.monsters.push({
-    id: ++g.seq,
-    def: ENEMIES[kind - 1],
-    kind,
-    x,
-    y,
-    fromX: x,
-    fromY: y,
-    t: 0,
-    dur: 0,
-    hp,
-    maxHp: hp,
-    dmg: Math.round(g.info.monsterDamage * spec.dmg),
-    moveMs: spec.move,
-    nextMove: g.now + 600,
-    nextHit: 0,
-    lungeUntil: 0,
-    flashUntil: 0,
-    stunUntil: 0,
-    revived: false,
-    petBlocked: false,
-    leaving: 0,
-    lost: 0,
-  });
+  addMonster(g, kind, x, Math.floor(at / g.W));
   const pet = g.petActor;
   if (pet?.key === "bat")
     say(g, (pet.px + 0.5) * T, (pet.py - 1) * T, x < p.x ? "← Squeak!" : "Squeak! →", "#d07a8c", 1600);
@@ -781,7 +916,13 @@ function stepMonsters(g: Game, dt: number) {
     if (!m.lost) m.lost = g.now;
     else if (g.now - m.lost > 10_000 && unlit(g, m.x, m.y)) m.leaving = g.now;
   }
-  g.monsters = g.monsters.filter((m) => !m.leaving || g.now - m.leaving < 900);
+  g.monsters = g.monsters.filter((m) => {
+    if (!m.leaving || g.now - m.leaving < 900) return true;
+    const home = m.cell;
+    if (m.kind === MIMIC_KIND && g.map[home] === OPEN && !touches(p, home % g.W, Math.floor(home / g.W)))
+      g.map[home] = MIMIC;
+    return false;
+  });
 }
 
 function stepPet(g: Game, dt: number) {
@@ -895,6 +1036,7 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
   if (g.petActor && PET_LIGHT[g.petActor.key])
     markSeen(g, Math.round(g.petActor.px), Math.round(g.petActor.py), PET_LIGHT[g.petActor.key]);
   if (!g.camp && !g.asleep && g.now >= g.nextSpawn && g.now - g.startedAt > SPAWN_GRACE_MS) spawn(g);
+  stepBolts(g, dt);
   stepMonsters(g, dt);
   stepPet(g, dt);
   stepBeetle(g);
