@@ -374,6 +374,23 @@ export const scrollSprite = (): Grid =>
     O: "#ffe066",
   });
 
+export const chartSprite = (): Grid =>
+  raster(["xxxxxxx.", "xpPppPpx", "xpppxppx", "xpPpppPx", "xppxpppx", "xPppprPx", "xppppppx", ".xxxxxxx"], {
+    x: "#3a2a1a",
+    p: "#e8d3a0",
+    P: "#b8945a",
+    r: "#d2451e",
+  });
+
+export const oilSprite = (): Grid =>
+  raster(["...kk...", "...xx...", "..xyyx..", ".xyYyyx.", "xyyyyyyx", "xyyooyyx", ".xyyyyx.", "..xxxx.."], {
+    k: "#6b4423",
+    x: "#2a1c10",
+    y: "#e0a030",
+    Y: "#fff0a0",
+    o: "#b8701a",
+  });
+
 const DUERGAR = [
   "................",
   "......h....h....",

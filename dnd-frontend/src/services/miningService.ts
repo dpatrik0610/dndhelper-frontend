@@ -108,6 +108,7 @@ export interface MiningTrip {
   trader: number | null;
   motherlode: number | null;
   wares: Record<string, number> | null;
+  boons?: string[];
 }
 
 export interface MiningState {

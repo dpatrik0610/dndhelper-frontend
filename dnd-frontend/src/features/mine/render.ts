@@ -23,6 +23,7 @@ import {
   LEDGER,
   MIMIC,
   lightRadius,
+  CHARTED,
   TORCH_LIGHT,
   OPEN,
   ORE0,
@@ -820,6 +821,28 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
             ctx.fillRect(c * T + ox + 7, r * T + oy + 7, 2, 2);
           }
         ctx.globalAlpha = 1;
+      }
+      if (g.boons.has("chart")) {
+        const blink = 0.55 + 0.35 * Math.sin(g.now / 260);
+        ctx.fillStyle = `rgba(255,215,122,${blink})`;
+        for (let r = r0; r <= r1; r++)
+          for (let c = c0; c <= c1; c++) {
+            const cell = g.map[r * g.W + c];
+            if (!CHARTED.includes(cell)) continue;
+            const X = c * T + ox;
+            const Y = r * T + oy;
+            for (let k = 0; k < 6; k++) {
+              ctx.fillRect(X + 4 + k, Y + 4 + k, 2, 2);
+              ctx.fillRect(X + 10 - k, Y + 4 + k, 2, 2);
+            }
+          }
+        if (g.motherlode >= 0 && !g.richFound) {
+          const X = (g.motherlode % g.W) * T + ox + 8;
+          const Y = Math.floor(g.motherlode / g.W) * T + oy + 8;
+          ctx.strokeStyle = `rgba(255,215,122,${blink})`;
+          ctx.strokeRect(X - 4.5 * T, Y - 3 * T, 9 * T, 6 * T);
+          write("Motherlode", X, Y - 3 * T - 3, "#ffd77a", blink, 7);
+        }
       }
       for (const at of glints) {
         const lc = at % g.W;

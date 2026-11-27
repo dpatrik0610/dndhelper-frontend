@@ -215,6 +215,7 @@ export interface Game extends GameSetup {
   nextBolt: number;
   nextPotion: number;
   trader: number;
+  boons: Set<string>;
   sfx: Sfx[];
   motherlode: number;
   richFound: boolean;
@@ -355,6 +356,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     nextBolt: 0,
     nextPotion: 0,
     trader: -1,
+    boons: new Set(),
     sfx: [],
     shakeUntil: 0,
     shakeMag: 0,
@@ -399,6 +401,7 @@ function loadCamp(g: Game, now: number, home: boolean) {
   g.monsters = [];
   g.bolts = [];
   g.trader = -1;
+  g.boons = new Set();
   g.motherlode = -1;
   g.startedAt = now;
   g.nextSpawn = Number.POSITIVE_INFINITY;
@@ -469,6 +472,7 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.monsters = [];
   g.bolts = [];
   g.trader = trip.trader ?? -1;
+  g.boons = new Set(trip.boons ?? []);
   g.motherlode = trip.motherlode ?? -1;
   g.richFound = false;
   g.startedAt = now;
@@ -511,7 +515,10 @@ export function feat(g: Game, key: string, n = 1) {
 export const TORCH_LIGHT = 4;
 const REST_MS = 3000;
 
-export const lightRadius = (g: Game) => (g.camp ? g.stats.light : g.stats.light * Math.max(0.6, 1 - 0.045 * (g.depth - 1)));
+export const lightRadius = (g: Game) =>
+  g.camp ? g.stats.light : g.stats.light * Math.max(0.6, 1 - 0.045 * (g.depth - 1)) * (g.boons.has("oil") ? 1.5 : 1);
+
+export const CHARTED = [CHEST, IRON_CHEST, GILDED_CHEST, MIMIC, GEODE, DIAMOND_CELL, LEDGER];
 
 export const inTorchlight = (g: Game, x: number, y: number) => {
   for (const t of g.torches) if (((t % g.W) - x) ** 2 + (Math.floor(t / g.W) - y) ** 2 <= TORCH_LIGHT * TORCH_LIGHT) return true;

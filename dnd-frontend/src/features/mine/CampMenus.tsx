@@ -19,10 +19,10 @@ import {
 import { FORGE_LEVELS, forgeSprite } from "./art/forge";
 import { HOUSE_LEVELS, houseIcon } from "./art/house";
 import type { Grid } from "./art/pixel";
-import { COIN, DIAMOND, MATERIALS, MERCHANT } from "./art/materials";
+import { COIN, DIAMOND, MAGMA_CORE, MATERIALS, MERCHANT } from "./art/materials";
 import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
-import { ENEMIES, potionSprite, scrollSprite } from "./art/world";
+import { chartSprite, ENEMIES, oilSprite, potionSprite, scrollSprite } from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
 import { canAfford, compact, discounted, statRows, tiersOf } from "./mine";
 import { oreIcon, TORCH } from "./render";
@@ -75,7 +75,15 @@ function PinButton({ id }: { id: string }) {
   );
 }
 
-const WARE_ART: Record<string, () => Grid> = { firebolt: scrollSprite, potion: potionSprite, torch: () => TORCH[1] };
+const WARE_ART: Record<string, () => Grid> = {
+  firebolt: scrollSprite,
+  potion: potionSprite,
+  torch: () => TORCH[1],
+  chart: chartSprite,
+  oil: oilSprite,
+  [MAGMA_CORE]: () => MATERIALS[MAGMA_CORE].grid,
+};
+const MOSS_ONLY = new Set(["chart", "oil", MAGMA_CORE]);
 
 const GOAL_PLACE: Record<Goal["kind"], string> = { gear: "the forge", forge: "the forge", pet: "Pip's stall" };
 
@@ -839,8 +847,8 @@ export function TraderMenu({
             (key === "potion" && state.potions >= state.belt) || (key === "torch" && state.torchStock >= config.maxTorchStock);
           const ware = WARES[key];
           return (
-            <div key={key} className={`${styles.pet} ${key === "firebolt" ? styles.petActive : ""}`}>
-              <Sprite grid={WARE_ART[key]?.() ?? potionSprite()} scale={key === "torch" ? 4 : 6} label={ware?.name ?? key} />
+            <div key={key} className={`${styles.pet} ${key === "firebolt" || MOSS_ONLY.has(key) ? styles.petActive : ""}`}>
+              <Sprite grid={WARE_ART[key]?.() ?? potionSprite()} scale={key === "torch" || key === MAGMA_CORE ? 4 : 6} label={ware?.name ?? key} />
               <div className={styles.petBody}>
                 <b className={styles.pixel}>{ware?.name ?? key}</b>
                 <span className={styles.dim}>{ware?.blurb}</span>
@@ -849,6 +857,7 @@ export function TraderMenu({
                     ON YOUR BELT · {state.potions} / {state.belt}
                   </span>
                 )}
+                {MOSS_ONLY.has(key) && <span className={styles.petMeta}>ONLY FROM MOSS · ONE PER VISIT</span>}
                 <Coins n={price} have={state.coins} />
                 <button
                   type="button"

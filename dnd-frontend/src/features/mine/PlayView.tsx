@@ -70,6 +70,14 @@ const MAX_TOASTS = 3;
 const LOW_HP = 0.3;
 const STEP_MS = 1000 / 60;
 const FLUSH_MS = 1000;
+const TRADE_NOTES: Record<string, [string, string]> = {
+  firebolt: ["You learned Firebolt", "F or right-click to cast it at the cursor."],
+  torch: ["A torch, a little damp", "T to plant it."],
+  potion: ["A healing draught, corked and warm", "Q to drink it."],
+  chart: ["Prospector's Chart", "Every treasure on this level is marked with an X."],
+  oil: ["Lamp Oil", "Your lantern burns half again as far until you leave this level."],
+  magmaCore: ["Magma Core", "Still warm. It's safe in your stores."],
+};
 const NO_KEYS: Keys = { left: false, right: false, up: false, down: false, jump: false, attack: false, dash: false };
 
 const KEYMAP: Record<string, keyof Keys> = {
@@ -142,6 +150,7 @@ export function PlayView({
   const [reading, setReading] = useState(0);
   const [sealNear, setSealNear] = useState(false);
   const [potions, setPotions] = useState(state.potions);
+  const [mossWares, setMossWares] = useState<Record<string, number> | null>(null);
   const [dream, setDream] = useState("");
   const [report, setReport] = useState<TripReport | null>(null);
   const [panel, setPanel] = useState<Panel | null>(null);
@@ -231,6 +240,7 @@ export function PlayView({
   useEffect(() => {
     setSatchel(trip?.satchel ?? {});
     setDepth(trip?.depth ?? 0);
+    setMossWares(null);
     if (trip) setReport(null);
     leaving.current = false;
   }, [trip]);
@@ -615,18 +625,17 @@ export function PlayView({
     if (g) {
       g.firebolt = s.firebolt;
       g.potions = s.potions;
+      g.boons = new Set(s.trip?.boons ?? []);
       if (item === "torch") {
         g.maxTorches++;
         setTorchCap(g.maxTorches);
       }
     }
     setPotions(s.potions);
+    setMossWares(s.trip?.wares ?? null);
     onState({ ...s, trip: stateRef.current.trip });
-    showNotification({
-      title: item === "firebolt" ? "You learned Firebolt" : item === "torch" ? "A torch, a little damp" : "A healing draught, corked and warm",
-      message: item === "firebolt" ? "F or right-click to cast it at the cursor." : item === "torch" ? "T to plant it." : "Q to drink it.",
-      color: "yellow",
-    });
+    const [title, message] = TRADE_NOTES[item] ?? TRADE_NOTES.potion;
+    showNotification({ title, message, color: "yellow" });
   };
 
   const carried = total(satchel);
@@ -851,7 +860,11 @@ export function PlayView({
                   <h2 className={styles.h2}>{MENU_TITLES.trader[0]}</h2>
                   <span className={styles.dim}>{MENU_TITLES.trader[1]} Walk away to close.</span>
                 </div>
-                <TraderMenu config={config} state={{ ...state, potions }} onTrade={onTrade} />
+                <TraderMenu
+                  config={config}
+                  state={{ ...state, potions, trip: trip && { ...trip, wares: mossWares ?? trip.wares } }}
+                  onTrade={onTrade}
+                />
               </>
             ) : trip ? (
               <div className={styles.liftUp}>

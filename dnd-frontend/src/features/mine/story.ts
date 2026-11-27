@@ -159,6 +159,18 @@ export const WARES: Record<string, { name: string; blurb: string }> = {
     name: "Healing draught",
     blurb: "Q drinks one and heals 60% of your health. A grander home makes room for more on your belt.",
   },
+  chart: {
+    name: "Prospector's Chart",
+    blurb: "Moss's own survey of this level. Every chest, geode, diamond and ledger page gets an X, even in the dark, and so does the motherlode if there is one.",
+  },
+  oil: {
+    name: "Lamp Oil",
+    blurb: "Thick, smoky and strong. Your lantern reaches half again as far until you leave this level.",
+  },
+  magmaCore: {
+    name: "Magma Core",
+    blurb: "One he pried out of a salamander himself, and he only ever has the one.",
+  },
   torch: {
     name: "Torch",
     blurb: "Twice Hesk's price, but Hesk isn't down here.",
