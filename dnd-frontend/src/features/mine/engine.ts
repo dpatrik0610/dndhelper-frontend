@@ -161,6 +161,7 @@ export interface GameSetup {
   liftY: number;
   oreHp: number[];
   oreNames: string[];
+  hotOre: number;
   oreColors: string[];
   depths: DepthInfo[];
   stats: MiningStats;
@@ -1510,6 +1511,10 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
       shake(g, 2, 120);
     }
     p.fell = 0;
+  }
+  if (grounded && g.hotOre >= 0 && cellAt(g, p.x, p.y + 1) === ORE0 + g.hotOre && !g.asleep) {
+    p.burnUntil = Math.max(p.burnUntil, g.now + 400);
+    sayOnce(g, "hotOre", "Flametouched Iron scorches your boots! Don't stand on it.", "#ff8a33");
   }
   if (p.hp < max * LOW_HP && g.now >= p.nextSweat && !g.asleep) {
     p.nextSweat = g.now + SWEAT_MS;

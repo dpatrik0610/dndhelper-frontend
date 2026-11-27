@@ -799,8 +799,10 @@
 }
 
 .hotGlow {
-  border-color: var(--gold);
-  box-shadow: 0 0 10px -3px var(--gold);
+  border-color: var(--glow, var(--gold));
+  box-shadow:
+    0 0 12px -3px var(--glow, var(--gold)),
+    inset 0 0 10px -4px var(--glow, var(--gold));
 }
 
 .hotSet {

@@ -81,6 +81,7 @@ const newGame = (pet: number, map = rows, liftY = 2) =>
       liftY,
       oreHp: [10],
       oreNames: ["Copper"],
+      hotOre: -1,
       oreColors: ["#c8743a"],
       depths: [depth],
       stats,
@@ -605,3 +606,27 @@ assert.ok(minSwings(STONE, 2, 1) === 2 && minSwings(STONE, 4, 3) === 2, "two tie
 assert.ok(minSwings(STONE, 3, 1) === 1 && minSwings(ORE0, 5, 1) === 2, "a far stronger pick shaves a swing off");
 assert.ok(minSwings(ORE0, 9, 1) === 2, "but ore never drops to one");
 console.log("tough ok");
+
+const forge = newGame(-1, [
+  "############",
+  "#..........#",
+  "#..........#",
+  "#AAAAAAAAAA#",
+  "############",
+]);
+forge.monsters = [];
+forge.nextSpawn = 1e12;
+forge.hotOre = 0;
+forge.player.x = forge.player.fromX = 4;
+forge.player.y = forge.player.fromY = 2;
+const forgeHp = forge.player.hp;
+run(forge, 1100);
+assert.ok(forge.player.hp < forgeHp, "standing on flametouched iron burns");
+const cool = newGame(-1, ["############", "#..........#", "#..........#", "#AAAAAAAAAA#", "############"]);
+cool.monsters = [];
+cool.nextSpawn = 1e12;
+cool.player.x = cool.player.fromX = 4;
+cool.player.y = cool.player.fromY = 2;
+run(cool, 1100);
+assert.equal(cool.player.hp, cool.stats.maxHp, "ordinary ore is safe to stand on");
+console.log("hot ore ok");

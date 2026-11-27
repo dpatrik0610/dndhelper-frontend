@@ -1,4 +1,4 @@
-import { dwarfParts, item, SETS, sleeper } from "./art/gear";
+import { dwarfParts, type GearSlot, item, SETS, sleeper } from "./art/gear";
 import { type Grid, hex, mix, tint } from "./art/pixel";
 import { forgeSprite } from "./art/forge";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
@@ -52,6 +52,61 @@ const PICK_REST = -0.55;
 const RAISE_MS = 40;
 const STRIKE_MS = 70;
 const SETTLE_MS = 150;
+
+const GEAR_ANCHORS: [GearSlot, number, number][] = [
+  ["helm", 8, 2],
+  ["charm", 8, 12],
+  ["gauntlets", 1, 14],
+  ["gauntlets", 14, 14],
+  ["satchel", 11, 16],
+];
+
+const AURA: Record<number, { rgb: number[]; color: string; alt: string }> = {
+  6: { rgb: [200, 140, 255], color: "#d9b8ff", alt: "#f0a8ff" },
+  7: { rgb: [255, 150, 50], color: "#ffd23f", alt: "#ff7a2a" },
+  8: { rgb: [200, 230, 255], color: "#ffffff", alt: "#bfe6ff" },
+  9: { rgb: [255, 60, 50], color: "#ffcf5a", alt: "#ff5a4a" },
+  10: { rgb: [170, 190, 255], color: "#ffffff", alt: "#cfe0ff" },
+};
+
+const wave = (now: number, seed: number, period: number) => (((now + seed * 7919) % period) + period) % period / period;
+
+function gearAura(ctx: CanvasRenderingContext2D, x: number, y: number, tier: number, now: number, seed: number) {
+  const a = AURA[tier];
+  const flick = tier === 7 ? 0.75 + 0.25 * Math.sin(now / 70 + seed) * Math.sin(now / 23 + seed) : 1;
+  const pulse = tier === 9 ? 0.55 + 0.45 * Math.sin(now / 260 + seed) : 1;
+  glow(ctx, x, y, tier === 7 ? 11 : 9, a.rgb, (tier === 7 ? 0.2 : 0.13) * flick * pulse);
+}
+
+function gearSparks(ctx: CanvasRenderingContext2D, x: number, y: number, tier: number, now: number, seed: number) {
+  const a = AURA[tier];
+  if (tier === 6 || tier === 7) {
+    for (let k = 0; k < (tier === 7 ? 3 : 1); k++) {
+      const t = wave(now, seed * 3 + k, tier === 7 ? 900 + k * 130 : 2400);
+      ctx.globalAlpha = 1 - t;
+      ctx.fillStyle = t < 0.4 ? a.color : a.alt;
+      ctx.fillRect(Math.round(x + Math.sin(t * 7 + k * 2 + seed) * 3), Math.round(y - t * (tier === 7 ? 14 : 10)), 1, 1);
+    }
+  } else if (tier === 8) {
+    const t = wave(now, seed, 1700);
+    if (t < 0.12) {
+      ctx.globalAlpha = 1 - t / 0.12;
+      ctx.fillStyle = a.color;
+      ctx.fillRect(Math.round(x) - 2, Math.round(y), 5, 1);
+      ctx.fillRect(Math.round(x), Math.round(y) - 2, 1, 5);
+    }
+  } else if (tier === 10) {
+    for (let k = 0; k < 2; k++) {
+      const t = wave(now, seed * 5 + k * 3, 1300 + k * 400);
+      if (t > 0.35) continue;
+      ctx.globalAlpha = Math.sin((t / 0.35) * Math.PI);
+      ctx.fillStyle = k ? a.alt : a.color;
+      const ang = seed * 2.4 + k * 2.1 + Math.floor(now / (1300 + k * 400));
+      ctx.fillRect(Math.round(x + Math.cos(ang) * 6), Math.round(y + Math.sin(ang) * 5), 1, 1);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * Math.max(0, Math.min(1, t));
 
@@ -520,6 +575,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     }
 
     const tiers = g.tiers;
+    const auras: { x: number; y: number; tier: number; seed: number }[] = [];
     const px = pos.x * T + ox;
     const feet = (pos.y + 1) * T + oy;
     if (g.asleep) {
@@ -594,9 +650,16 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       ctx.rotate(ang);
       ctx.drawImage(toCanvas(pickImg), -GRIP_X, -GRIP_Y);
       ctx.restore();
+      const hx = pivotX + face * (Math.cos(ang) * HEAD_DX - Math.sin(ang) * HEAD_DY);
+      const hy = pivotY + Math.sin(ang) * HEAD_DX + Math.cos(ang) * HEAD_DY;
+      if (!pose.flicker) {
+        if (tiers.pickaxe >= 6) auras.push({ x: hx, y: hy, tier: tiers.pickaxe, seed: 9 });
+        GEAR_ANCHORS.forEach(([slot, ax, ay], k) => {
+          if (tiers[slot] >= 6)
+            auras.push({ x: face < 0 ? bx + 29 - ax : bx + ax, y: top + ay + pose.bodyDy, tier: tiers[slot], seed: k });
+        });
+      }
       if (swing.spark) {
-        const hx = pivotX + face * (Math.cos(ang) * HEAD_DX - Math.sin(ang) * HEAD_DY);
-        const hy = pivotY + Math.sin(ang) * HEAD_DX + Math.cos(ang) * HEAD_DY;
         ctx.fillStyle = Math.floor(g.now / 40) % 2 ? "#fff3a0" : "#ffffff";
         ctx.fillRect(Math.round(hx) - 3, Math.round(hy), 7, 1);
         ctx.fillRect(Math.round(hx), Math.round(hy) - 3, 1, 7);
@@ -711,10 +774,20 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     for (const b of g.bolts) glow(ctx, b.x * T + ox, b.y * T + oy, 14, [255, 140, 50], 0.45);
     if (pet?.art.light) glow(ctx, pet.px * T + ox + 8, (pet.py + 0.5) * T + oy, 14, hex(pet.art.light), 0.3);
     if (pet?.key === "dragon") glow(ctx, pet.px * T + ox + 9, (pet.py + 0.5) * T + oy, 12, [255, 120, 40], 0.18);
+    for (const a of auras) gearAura(ctx, a.x, a.y, a.tier, g.now, a.seed);
+    if (!g.camp && g.hotOre >= 0)
+      for (let r = r0; r <= r1; r++)
+        for (let c = c0; c <= c1; c++) {
+          const i = r * g.W + c;
+          if (g.map[i] !== ORE0 + g.hotOre || !g.seen[i] || g.map[i - g.W] !== OPEN) continue;
+          auras.push({ x: c * T + ox + 8, y: r * T + oy, tier: 7, seed: i });
+          glow(ctx, c * T + ox + 8, r * T + oy + 2, 10, [255, 140, 50], 0.1);
+        }
     const set = SETS[tiers.helm];
     if (tiers.helm >= 8 && set.gem) glow(ctx, headX, headY + 4, 20, hex(set.gem), 0.26);
     ctx.globalCompositeOperation = "source-over";
 
+    for (const a of auras) gearSparks(ctx, a.x, a.y, a.tier, g.now, a.seed);
     if (tiers.helm === 10 && !g.asleep)
       for (let k = 0; k < 4; k++) {
         const a = (g.now / 50) * 0.35 * 0.3 + k * 1.6;

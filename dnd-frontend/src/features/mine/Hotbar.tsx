@@ -1,7 +1,7 @@
-import type { ReactNode, RefObject } from "react";
+import type { CSSProperties, ReactNode, RefObject } from "react";
 import { Tooltip } from "@mantine/core";
 import type { MiningConfig, MiningState } from "@services/miningService";
-import { GEAR_SLOTS, item, itemName } from "./art/gear";
+import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { type Grid, tint } from "./art/pixel";
 import { potionSprite, scrollSprite } from "./art/world";
@@ -20,6 +20,7 @@ function Square({
   tip,
   label,
   className,
+  glow,
   children,
 }: {
   grid: Grid;
@@ -29,6 +30,7 @@ function Square({
   tip: ReactNode;
   label: string;
   className?: string;
+  glow?: string;
   children?: ReactNode;
 }) {
   return (
@@ -41,6 +43,7 @@ function Square({
           type="button"
           className={`${styles.hotSlot} ${empty ? styles.hotEmpty : ""} ${className ?? ""}`}
           aria-label={label}
+          style={glow ? ({ "--glow": glow } as CSSProperties) : undefined}
           onMouseDown={(e) => e.preventDefault()}
         >
           <Sprite grid={empty ? ghost(grid) : grid} scale={2} />
@@ -85,7 +88,8 @@ export function Hotbar({
                 key={slot}
                 grid={item(slot, t)}
                 label={`${itemName(slot, t)}, tier ${t}`}
-                className={set > 0 ? styles.hotSet : t >= 8 ? styles.hotGlow : ""}
+                className={set > 0 ? styles.hotSet : t >= 6 ? styles.hotGlow : ""}
+                glow={t >= 6 ? (SETS[t].accent ?? SETS[t].base) : undefined}
                 tip={
                   <>
                     <b>{itemName(slot, t)}</b> · tier {t} / 10

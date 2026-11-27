@@ -353,6 +353,7 @@ export function PlayView({
         liftY: config.liftY,
         oreHp: config.ores.map((o) => o.hardness),
         oreNames: config.ores.map((o) => o.name),
+        hotOre: config.ores.findIndex((o) => o.key === "flametouchedIron"),
         oreColors: config.ores.map((o) => o.color),
         depths: config.depths,
         stats: s.stats,
