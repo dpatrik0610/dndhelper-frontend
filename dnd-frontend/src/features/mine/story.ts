@@ -157,6 +157,10 @@ export const WARES: Record<string, { name: string; blurb: string }> = {
   },
   potion: {
     name: "Healing draught",
-    blurb: "Q drinks one and heals 60% of your health. Your belt holds five.",
+    blurb: "Q drinks one and heals 60% of your health. A grander home makes room for more on your belt.",
+  },
+  torch: {
+    name: "Torch",
+    blurb: "Twice Hesk's price, but Hesk isn't down here.",
   },
 };

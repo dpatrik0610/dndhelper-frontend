@@ -88,6 +88,7 @@ const newGame = (pet: number, map = rows, liftY = 2) =>
       stats,
       tiers,
       forgeLevel: 1,
+      houseLevel: 1,
       firebolt: false,
       potions: 0,
       maxTorches: 2,

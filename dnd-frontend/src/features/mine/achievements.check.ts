@@ -14,7 +14,7 @@ const config = {
 } as unknown as MiningConfig;
 
 const list = achievementsFor(config);
-assert.ok(list.length >= 50 && list.length <= 100, `a healthy number of achievements (${list.length})`);
+assert.ok(list.length >= 50 && list.length <= 120, `a healthy number of achievements (${list.length})`);
 assert.equal(new Set(list.map((a) => a.id)).size, list.length, "ids are unique");
 assert.equal(list.filter((a) => a.hidden).length, 10, "ten hidden ones");
 assert.ok(list.every((a) => /^[a-zA-Z0-9_-]{1,40}$/.test(a.id)), "ids pass the server's key filter");

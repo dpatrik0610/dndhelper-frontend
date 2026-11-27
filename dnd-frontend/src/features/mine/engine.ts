@@ -53,8 +53,8 @@ export type Keys = {
 };
 export type Aim = { x: number; y: number } | null;
 
-export const CAMP = { W: 44, H: 10, ground: 8, lift: 5, forge: 21, shop: 35 };
-export type Station = "lift" | "forge" | "shop" | "trader";
+export const CAMP = { W: 64, H: 10, ground: 8, lift: 5, forge: 19, market: 31, shop: 42, house: 54 };
+export type Station = "lift" | "forge" | "market" | "shop" | "house" | "trader";
 
 type Tween = { x: number; y: number; fromX: number; fromY: number; t: number; dur: number };
 
@@ -170,6 +170,7 @@ export interface GameSetup {
   tiers: Tiers;
   pet: { art: PetArt; key: string } | null;
   forgeLevel: number;
+  houseLevel: number;
   firebolt: boolean;
   potions: number;
   maxTorches: number;
@@ -324,7 +325,7 @@ const burst = (g: Game, x: number, y: number, color: string, n: number, spread =
     });
 };
 
-export function createGame(setup: GameSetup, trip: MiningTrip | null, now: number): Game {
+export function createGame(setup: GameSetup, trip: MiningTrip | null, now: number, home = false): Game {
   const g = {
     ...setup,
     dmg: new Map(),
@@ -357,11 +358,11 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     aimPoint: { x: 0, y: 0 },
   } as unknown as Game;
   if (trip) loadTrip(g, trip, now);
-  else loadCamp(g, now);
+  else loadCamp(g, now, home);
   return g;
 }
 
-function loadCamp(g: Game, now: number) {
+function loadCamp(g: Game, now: number, home: boolean) {
   Object.assign(g, {
     camp: true,
     W: CAMP.W,
@@ -386,7 +387,7 @@ function loadCamp(g: Game, now: number) {
   g.motherlode = -1;
   g.startedAt = now;
   g.nextSpawn = Number.POSITIVE_INFINITY;
-  place(g, g.liftX + 1);
+  place(g, home ? CAMP.house : g.liftX + 1);
 }
 
 function place(g: Game, x: number) {
@@ -433,7 +434,9 @@ export const stationAt = (g: Game): Station | null => {
   }
   if (Math.abs(x - CAMP.lift) <= 2) return "lift";
   if (Math.abs(x - CAMP.forge) <= 2) return "forge";
+  if (Math.abs(x - CAMP.market) <= 2) return "market";
   if (Math.abs(x - CAMP.shop) <= 2) return "shop";
+  if (Math.abs(x - CAMP.house) <= 3) return "house";
   return null;
 };
 
@@ -522,7 +525,7 @@ export function placeTorch(g: Game) {
   const p = g.player;
   const i = (p.y - 1) * g.W + p.x;
   if (g.torches.has(i) || !isOpen(g, p.x, p.y - 1)) return;
-  if (g.torches.size >= g.maxTorches) return sayOnce(g, "torches", "Out of torches for this trip.", "#ff8a6a");
+  if (g.torches.size >= g.maxTorches) return sayOnce(g, "torches", "Out of torches. Hesk sells them up at camp.", "#ff8a6a");
   g.torches.add(i);
   g.pending.torches.push(i);
   g.sfx.push("torch");

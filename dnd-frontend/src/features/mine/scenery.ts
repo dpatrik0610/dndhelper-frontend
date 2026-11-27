@@ -8,8 +8,7 @@ const LIFT_X = CAMP.lift * T + 8;
 const ARCH = { half: 25, rise: 50, top: 76 };
 const WARDEN = 196;
 const TAVERN = 398;
-const COTTAGE = 476;
-const LIGHTHOUSE = 648;
+const LIGHTHOUSE = 990;
 const ANVIL_PEAK = 128;
 
 const ridge = (x: number, seed: number) =>
@@ -477,14 +476,6 @@ export function islandNear(ctx: Ctx, now: number, ox: number, gy: number, VW: nu
     ctx.fillRect(tv + 63 + swing, gy - 23, 3, 2);
   }
 
-  const ct = COTTAGE + ox;
-  if (ct > -40 && ct < VW + 10) {
-    house(ctx, ct, gy, 26, 14, "#3a3040", "#2a1e2a", 6);
-    windowAt(ctx, ct + 15, gy - 10, true);
-    ctx.fillStyle = "#16121e";
-    ctx.fillRect(ct + 4, gy - 9, 5, 9);
-  }
-
   const lh = LIGHTHOUSE + ox;
   if (lh > -40 && lh < VW + 40) {
     ctx.fillStyle = "#241c2e";
@@ -517,7 +508,6 @@ export function islandLights(ctx: Ctx, glow: Glow, now: number, ox: number, gy: 
     [WARDEN + 22, -14],
     [TAVERN + 20, -13],
     [TAVERN + 26, -29],
-    [COTTAGE + 17, -8],
   ])
     glow(ctx, x + ox, gy + y, 12, [255, 190, 100], 0.12);
   const lx = LIGHTHOUSE + ox + 1;

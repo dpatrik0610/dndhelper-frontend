@@ -63,6 +63,14 @@ export interface PetInfo {
   cost: OreCounts;
 }
 
+export interface HouseInfo {
+  level: number;
+  name: string;
+  cost: number;
+  sellBonus: number;
+  belt: number;
+}
+
 export interface DepthInfo {
   number: number;
   name: string;
@@ -84,7 +92,11 @@ export interface MiningConfig {
   liftX: number;
   liftY: number;
   foxNeeds: number;
-  maxTorches: number;
+  houses: HouseInfo[];
+  maxTorchStock: number;
+  torchPrice: number;
+  potionPrice: number;
+  fireboltPrice: number;
 }
 
 export interface MiningTrip {
@@ -95,7 +107,7 @@ export interface MiningTrip {
   satchel: OreCounts;
   trader: number | null;
   motherlode: number | null;
-  wares: Record<string, OreCounts> | null;
+  wares: Record<string, number> | null;
 }
 
 export interface MiningState {
@@ -119,6 +131,11 @@ export interface MiningState {
   trip: MiningTrip | null;
   feats: Record<string, number>;
   achievements: string[];
+  coins: number;
+  houseLevel: number;
+  torchStock: number;
+  belt: number;
+  prices: OreCounts;
 }
 
 export interface Break {
@@ -167,6 +184,9 @@ export const craftGear = (slot: SlotKey) => post<MiningState>(`/craft/${slot}`);
 export const upgradeForge = () => post<MiningState>("/forge");
 export const buyPet = (key: string) => post<MiningState>(`/pets/${key}`);
 export const trade = (item: string) => post<MiningState>(`/trade/${item}`);
+export const buyWare = (item: string, count: number) => post<MiningState>(`/buy/${item}/${count}`);
+export const sellOre = (key: string, amount: number) => post<MiningState>(`/sell/${key}/${amount}`);
+export const upgradeHouse = () => post<MiningState>("/house");
 export const recordFeats = (req: { feats?: Record<string, number>; unlocked?: string[] }) => post<MiningState>("/feats", req);
 export const followPet = (key: string | null) => post<MiningState>(`/follow/${key ?? "none"}`);
 export const getMiningScoreboard = () => apiClient<MiningScore[]>("/mining/scoreboard");

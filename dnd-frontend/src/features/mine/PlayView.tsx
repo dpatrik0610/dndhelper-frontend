@@ -22,7 +22,10 @@ import {
   NextGoal,
   OrePouch,
   PanelHead,
+  HouseMenu,
+  MarketMenu,
   PetMenu,
+  Purse,
   TraderMenu,
   type TripReport,
   TripSummary,
@@ -93,7 +96,9 @@ const ignoreKeys = (e: KeyboardEvent) => {
 const MENU_TITLES: Record<Station, [string, string]> = {
   lift: ["The lift", "Old Wick works the bell. Pick a depth; every trip down is a fresh shaft."],
   forge: ["The forge", "Turn ore into better gear, or rebuild the forge to work harder metals."],
+  market: ["Hesk Saltpenny's Market", "Ore for coin, coin for torches and tonics. Hesk weighs everything twice."],
   shop: ["Pip Tinkerwhistle's Menagerie", "One friend follows you down at a time."],
+  house: ["Home", "Your own four walls on Saltbell Isle. Coin makes them grander."],
   trader: ["Moss, the wandering peddler", "He'll be gone by the next trip."],
 };
 
@@ -140,6 +145,7 @@ export function PlayView({
   const [report, setReport] = useState<TripReport | null>(null);
   const [panel, setPanel] = useState<Panel | null>(null);
   const [started, setStarted] = useState(false);
+  const firstLoad = useRef(true);
   const startedRef = useRef(false);
   const begin = useRef(() => {
     if (startedRef.current) return;
@@ -155,6 +161,7 @@ export function PlayView({
     localStorage.setItem(GOAL_OPEN_KEY, open ? "1" : "0");
   };
   const [torchesUsed, setTorchesUsed] = useState(trip?.torches.length ?? 0);
+  const [torchCap, setTorchCap] = useState(state.torchStock + (trip?.torches.length ?? 0));
   const boltRef = useRef<HTMLDivElement>(null);
   const [sound, setSound] = useState<SoundPrefs>(loadPrefs);
 
@@ -233,6 +240,7 @@ export function PlayView({
     g.tiers = tiersOf(state);
     g.stats = state.stats;
     g.forgeLevel = state.forgeLevel;
+    g.houseLevel = state.houseLevel;
     g.firebolt = state.firebolt;
     g.potions = state.potions;
     g.player.hp = state.stats.maxHp;
@@ -381,14 +389,18 @@ export function PlayView({
         tiers: tiersOf(s),
         pet: petSetup(config, s.pet),
         forgeLevel: s.forgeLevel,
+        houseLevel: s.houseLevel,
         firebolt: s.firebolt,
         potions: s.potions,
-        maxTorches: config.maxTorches,
+        maxTorches: s.torchStock + (trip?.torches.length ?? 0),
       },
       trip,
       performance.now(),
+      !trip && firstLoad.current,
     );
+    firstLoad.current = false;
     if (!trip && s.nodesBroken === 0) sayOnce(g, "arrival", ARRIVAL, "#e8dcc0", 3000);
+    setTorchCap(g.maxTorches);
     gameRef.current = g;
     const draw = createRenderer(canvas, text);
 
@@ -558,7 +570,7 @@ export function PlayView({
       if (rest && !leaving.current) void dig(rest).catch(() => undefined);
       gameRef.current = null;
     };
-  }, [config, trip]);
+  }, [config, trip, begin]);
 
   const aimAt = (e: React.PointerEvent<HTMLCanvasElement>): Aim => {
     const c = e.currentTarget;
@@ -578,12 +590,16 @@ export function PlayView({
     if (g) {
       g.firebolt = s.firebolt;
       g.potions = s.potions;
+      if (item === "torch") {
+        g.maxTorches++;
+        setTorchCap(g.maxTorches);
+      }
     }
     setPotions(s.potions);
     onState({ ...s, trip: stateRef.current.trip });
     showNotification({
-      title: item === "firebolt" ? "You learned Firebolt" : "A healing draught, corked and warm",
-      message: item === "firebolt" ? "F or right-click to cast it at the cursor." : "Q to drink it.",
+      title: item === "firebolt" ? "You learned Firebolt" : item === "torch" ? "A torch, a little damp" : "A healing draught, corked and warm",
+      message: item === "firebolt" ? "F or right-click to cast it at the cursor." : item === "torch" ? "T to plant it." : "Q to drink it.",
       color: "yellow",
     });
   };
@@ -637,8 +653,9 @@ export function PlayView({
 
         <div className={styles.hudLeft}>
           <span className={styles.hudTitle}>
-            {trip ? `Depth ${depth} · ${config.depths[depth - 1]?.name ?? ""}` : "Camp · The mine entrance"}
+            {trip ? `Depth ${depth} · ${config.depths[depth - 1]?.name ?? ""}` : "Camp · Saltbell Isle"}
           </span>
+          {!trip && <Purse coins={state.coins} />}
           {trip && (
             <>
               <div className={styles.hudRow}>
@@ -836,7 +853,9 @@ export function PlayView({
                 </div>
                 {near === "lift" && <LiftMenu {...props} />}
                 {near === "forge" && <ForgeMenu {...props} />}
+                {near === "market" && <MarketMenu {...props} />}
                 {near === "shop" && <PetMenu {...props} />}
+                {near === "house" && <HouseMenu {...props} />}
               </>
             )}
           </section>
@@ -855,7 +874,7 @@ export function PlayView({
           config={config}
           state={state}
           potions={potions}
-          torchesLeft={config.maxTorches ? config.maxTorches - torchesUsed : null}
+          torchesLeft={trip ? torchCap - torchesUsed : state.torchStock}
           inMine={!!trip}
           boltRef={boltRef}
           top={

@@ -1274,3 +1274,55 @@
 .trophy .dim {
   font-size: 12px;
 }
+
+.marketHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.marketHead .quote {
+  flex: 1;
+  margin: 0;
+}
+
+.purse {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  background: rgba(242, 193, 78, 0.08);
+  white-space: nowrap;
+}
+
+.purse b {
+  color: #ffe08a;
+  font-variant-numeric: tabular-nums;
+}
+
+.sellList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 4px 12px;
+  margin: 6px 0 10px;
+}
+
+.sellRow {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.8125rem;
+}
+
+.sellRow .actBtn {
+  margin-top: 0;
+  padding: 2px 8px;
+  min-height: 0;
+}

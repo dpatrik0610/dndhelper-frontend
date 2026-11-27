@@ -4,23 +4,28 @@ import { IconArrowRight, IconLock, IconPin, IconPinFilled, IconX } from "@tabler
 import { showNotification } from "@components/Notification/Notification";
 import {
   buyPet,
+  buyWare,
   craftGear,
   descend,
   followPet,
   type MiningConfig,
   type MiningState,
   type OreCounts,
+  sellOre,
   type SlotKey,
   upgradeForge,
+  upgradeHouse,
 } from "@services/miningService";
 import { FORGE_LEVELS, forgeSprite } from "./art/forge";
-import { MATERIALS } from "./art/materials";
+import { HOUSE_LEVELS, houseSprite } from "./art/house";
+import type { Grid } from "./art/pixel";
+import { COIN, MATERIALS, MERCHANT } from "./art/materials";
 import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { ENEMIES, potionSprite, scrollSprite } from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
 import { canAfford, compact, discounted, statRows, tiersOf } from "./mine";
-import { oreIcon } from "./render";
+import { oreIcon, TORCH } from "./render";
 import { play, type Sfx } from "./sound";
 import { Sprite } from "./Sprite";
 import { FOREMAN, MOSS_LINES, PAGES, WARES, wickLines, wickSprite } from "./story";
@@ -28,7 +33,7 @@ import styles from "./Mine.module.css";
 
 type MenuProps = { config: MiningConfig; state: MiningState; onState: (s: MiningState) => void };
 
-export const resourceOf = (config: MiningConfig, key: string) => {
+const resourceOf = (config: MiningConfig, key: string) => {
   const i = config.ores.findIndex((o) => o.key === key);
   if (i >= 0) return { name: config.ores[i].name, grid: oreIcon(i), special: false };
   const m = MATERIALS[key];
@@ -69,6 +74,8 @@ function PinButton({ id }: { id: string }) {
     </button>
   );
 }
+
+const WARE_ART: Record<string, () => Grid> = { firebolt: scrollSprite, potion: potionSprite, torch: () => TORCH[1] };
 
 const GOAL_PLACE: Record<Goal["kind"], string> = { gear: "the forge", forge: "the forge", pet: "Pip's stall" };
 
@@ -565,6 +572,211 @@ export function OrePouch({ config, state }: { config: MiningConfig; state: Minin
   );
 }
 
+function Coins({ n, have }: { n: number; have?: number }) {
+  return (
+    <span className={`${styles.cost} ${have === undefined || have >= n ? styles.costOk : ""}`}>
+      <Sprite grid={COIN} scale={1} />
+      {compact(n)} coins
+    </span>
+  );
+}
+
+export function Purse({ coins }: { coins: number }) {
+  return (
+    <span className={styles.purse}>
+      <Sprite grid={COIN} scale={2} label="Coin pouch" />
+      <b className={styles.pixel}>{coins.toLocaleString("en")}</b>
+      <span className={styles.dim}>coins</span>
+    </span>
+  );
+}
+
+const SELL_STEPS = [1, 10, 100];
+
+export function MarketMenu({ config, state, onState }: MenuProps) {
+  const { busy, run } = useRun(onState);
+  const owned = config.ores.filter((o) => (state.ores[o.key] ?? 0) > 0);
+  const wares = [
+    {
+      key: "torch",
+      name: "Torch",
+      blurb: `Pitch and rag on a stick. Your bundle holds ${config.maxTorchStock}.`,
+      grid: TORCH[1],
+      price: config.torchPrice,
+      have: `IN YOUR BUNDLE · ${state.torchStock} / ${config.maxTorchStock}`,
+      room: config.maxTorchStock - state.torchStock,
+      counts: [1, 10],
+    },
+    {
+      key: "potion",
+      name: WARES.potion.name,
+      blurb: WARES.potion.blurb,
+      grid: potionSprite(),
+      price: config.potionPrice,
+      have: `ON YOUR BELT · ${state.potions} / ${state.belt}`,
+      room: state.belt - state.potions,
+      counts: [1],
+    },
+    ...(state.firebolt
+      ? []
+      : [
+          {
+            key: "firebolt",
+            name: WARES.firebolt.name,
+            blurb: WARES.firebolt.blurb,
+            grid: scrollSprite(),
+            price: config.fireboltPrice,
+            have: "ONE SCROLL, LEARNED FOR GOOD",
+            room: 1,
+            counts: [1],
+          },
+        ]),
+  ];
+  return (
+    <>
+      <div className={styles.marketHead}>
+        <Sprite grid={MERCHANT} scale={3} label="Hesk Saltpenny" />
+        <p className={styles.quote}>"Copper's copper and starmetal's a fortune. I pay fair either way. Fair-ish."</p>
+        <Purse coins={state.coins} />
+      </div>
+      <span className={styles.eyebrow}>Sell ore</span>
+      {owned.length ? (
+        <div className={styles.sellList}>
+          {owned.map((o) => {
+            const have = state.ores[o.key] ?? 0;
+            const price = state.prices[o.key] ?? 0;
+            return (
+              <div key={o.key} className={styles.sellRow}>
+                <Sprite grid={resourceOf(config, o.key).grid} scale={1} />
+                <span className={styles.oreName}>{o.name}</span>
+                <span className={styles.dim}>
+                  {compact(have)} · {compact(price)}c each
+                </span>
+                <div className={styles.btnRow}>
+                  {SELL_STEPS.filter((n) => n < have).map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`glass-btn-secondary ${styles.actBtn}`}
+                      disabled={busy}
+                      onClick={() => void run(() => sellOre(o.key, n), undefined, "buy")}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={`glass-btn-primary ${styles.actBtn}`}
+                    disabled={busy}
+                    title={`Sell all for ${compact(have * price)} coins`}
+                    onClick={() => void run(() => sellOre(o.key, have), undefined, "buy")}
+                  >
+                    All · {compact(have * price)}c
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <span className={styles.dim}>Nothing in your stores to sell. Bank some ore first.</span>
+      )}
+      <span className={styles.eyebrow}>Wares</span>
+      <div className={styles.pets}>
+        {wares.map((w) => (
+          <div key={w.key} className={styles.pet}>
+            <Sprite grid={w.grid} scale={w.key === "torch" ? 4 : 6} label={w.name} />
+            <div className={styles.petBody}>
+              <b className={styles.pixel}>{w.name}</b>
+              <span className={styles.dim}>{w.blurb}</span>
+              <span className={styles.petMeta}>{w.have}</span>
+              <Coins n={w.price} have={state.coins} />
+              <div className={styles.btnRow}>
+                {w.counts.map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className={`${n === 1 ? "glass-btn-primary" : "glass-btn-secondary"} ${styles.actBtn}`}
+                    disabled={busy || w.room < n || state.coins < w.price * n}
+                    onClick={() =>
+                      void run(
+                        () => buyWare(w.key, n),
+                        () => (w.key === "firebolt" ? "You learned Firebolt" : `Bought ${n} × ${w.name}`),
+                      )
+                    }
+                  >
+                    {w.room < 1 ? "Full" : w.key === "firebolt" ? "Learn it" : `Buy ${n}`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+export function HouseMenu({ config, state, onState }: MenuProps) {
+  const { busy, run } = useRun(onState);
+  const lv = Math.max(1, Math.min(HOUSE_LEVELS.length, state.houseLevel));
+  const now = HOUSE_LEVELS[lv - 1];
+  const next = HOUSE_LEVELS[lv];
+  const cost = config.houses[lv]?.cost ?? 0;
+  return (
+    <>
+      <div className={styles.marketHead}>
+        <p className={styles.quote}>{now.blurb}</p>
+        <Purse coins={state.coins} />
+      </div>
+      <div className={styles.compare}>
+        <div className={styles.gearCard}>
+          <span className={styles.gearTag}>Now</span>
+          <Sprite grid={houseSprite(lv)} scale={2} label={now.name} />
+          <b className={styles.gearName}>{now.name}</b>
+          <span className={styles.dim}>{now.perk}</span>
+        </div>
+        {next ? (
+          <>
+            <IconArrowRight size={22} className={styles.compareArrow} aria-hidden />
+            <div className={`${styles.gearCard} ${styles.gearNext}`}>
+              <span className={styles.gearTag}>Next</span>
+              <Sprite grid={houseSprite(lv + 1)} scale={2} label={next.name} />
+              <b className={styles.gearName}>{next.name}</b>
+              <span className={styles.dim}>{next.perk}</span>
+            </div>
+          </>
+        ) : (
+          <span className={styles.dim}>The grandest hall on Saltbell Isle. Nothing left to build.</span>
+        )}
+      </div>
+      {next && (
+        <>
+          <div className={styles.barHead}>
+            <span className={styles.eyebrow}>
+              Home {lv} / {HOUSE_LEVELS.length}
+            </span>
+            <span className={styles.barText}>
+              {compact(Math.min(state.coins, cost))} / {compact(cost)} coins
+            </span>
+          </div>
+          <div className={styles.bar}>
+            <div className={styles.satchelFill} style={{ width: `${Math.min(1, state.coins / cost) * 100}%` }} />
+          </div>
+          <button
+            type="button"
+            className={`glass-btn-primary ${styles.actBtn}`}
+            disabled={busy || state.coins < cost}
+            onClick={() => void run(upgradeHouse, () => `Moved into the ${next.name}`)}
+          >
+            Build the {next.name}
+          </button>
+        </>
+      )}
+    </>
+  );
+}
+
 export function TraderMenu({
   config,
   state,
@@ -591,20 +803,26 @@ export function TraderMenu({
     <>
       <p className={styles.quote}>{line}</p>
       <div className={styles.pets}>
-        {wares.map(([key, cost]) => {
-          const full = key === "potion" && state.potions >= 5;
+        {wares.map(([key, price]) => {
+          const full =
+            (key === "potion" && state.potions >= state.belt) || (key === "torch" && state.torchStock >= config.maxTorchStock);
+          const ware = WARES[key];
           return (
             <div key={key} className={`${styles.pet} ${key === "firebolt" ? styles.petActive : ""}`}>
-              <Sprite grid={key === "firebolt" ? scrollSprite() : potionSprite()} scale={6} label={WARES[key]?.name} />
+              <Sprite grid={WARE_ART[key]?.() ?? potionSprite()} scale={key === "torch" ? 4 : 6} label={ware?.name ?? key} />
               <div className={styles.petBody}>
-                <b className={styles.pixel}>{WARES[key]?.name ?? key}</b>
-                <span className={styles.dim}>{WARES[key]?.blurb}</span>
-                {key === "potion" && <span className={styles.petMeta}>ON YOUR BELT · {state.potions} / 5</span>}
-                <Cost cost={cost} ores={state.ores} config={config} />
+                <b className={styles.pixel}>{ware?.name ?? key}</b>
+                <span className={styles.dim}>{ware?.blurb}</span>
+                {key === "potion" && (
+                  <span className={styles.petMeta}>
+                    ON YOUR BELT · {state.potions} / {state.belt}
+                  </span>
+                )}
+                <Coins n={price} have={state.coins} />
                 <button
                   type="button"
                   className={`glass-btn-primary ${styles.actBtn}`}
-                  disabled={busy || full || !canAfford(cost, state.ores)}
+                  disabled={busy || full || state.coins < price}
                   onClick={() => void buy(key)}
                 >
                   {key === "firebolt" ? "Learn it" : full ? "Belt full" : "Buy one"}

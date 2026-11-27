@@ -117,14 +117,14 @@ export function Hotbar({
             grid={TORCH[1]}
             hotkey="T"
             empty={torchesLeft !== null && torchesLeft <= 0}
-            count={torchesLeft === null ? undefined : `${torchesLeft}/${config.maxTorches}`}
+            count={torchesLeft === null ? undefined : String(torchesLeft)}
             label={torchesLeft === null ? "Torches" : `Torches, ${torchesLeft} left`}
             tip={
               <>
                 <b>Torches</b>
-                {torchesLeft !== null && ` · ${torchesLeft} of ${config.maxTorches} left`}
+                {torchesLeft !== null && ` · ${torchesLeft} left`}
                 <br />
-                {inMine ? "T plants one above your head. Lit tunnels stay lit." : "You get a fresh bundle every trip."}
+                {inMine ? "T plants one above your head. Lit tunnels stay lit." : `Hesk sells them at camp, ${config.torchPrice} coins each.`}
               </>
             }
           />

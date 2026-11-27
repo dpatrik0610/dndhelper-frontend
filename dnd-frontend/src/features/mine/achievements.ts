@@ -156,6 +156,15 @@ const FIXED: Achievement[] = [
   ...tiers("forge", "Camp", "🏭", (c) => c.state.forgeLevel, [
     [10, "Starheart Smith", "Raise the forge to its final form."],
   ]),
+  ...tiers("home", "Camp", "🏠", (c) => c.state.houseLevel ?? 1, [
+    [2, "Four Walls", "Trade the shed for a timber cabin."],
+    [3, "Hearth and Thatch", "Move into the stone cottage."],
+    [5, "Thane of Saltbell", "Raise Anvilhold Hall."],
+  ]),
+  ...tiers("coins", "Camp", "🪙", (c) => c.state.coins ?? 0, [
+    [1000, "Pocket Money", "Hold 1,000 coins at once."],
+    [1_000_000, "Saltbell Magnate", "Hold a million coins at once."],
+  ]),
   ...tiers("pets", "Camp", "🐕", (c) => c.state.pets.length, [
     [1, "Best Friend", "Adopt a pet."],
     [10, "Zookeeper", "Adopt 10 pets."],

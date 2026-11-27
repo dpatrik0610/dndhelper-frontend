@@ -1,6 +1,8 @@
 import { dwarfParts, type GearSlot, item, SETS, sleeper } from "./art/gear";
 import { type Grid, hex, mix, tint } from "./art/pixel";
 import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
+import { HOUSE_H, HOUSE_LEVELS, HOUSE_W, houseSprite } from "./art/house";
+import { COIN, MERCHANT } from "./art/materials";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
 import { chestSprite, cracks, enemySprite, oreTile, stoneTile, traderSprite } from "./art/world";
 import {
@@ -357,6 +359,53 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     ctx.fillRect(sx, gy - 10, 32, 3);
     draw(cached("gnome", gnomeSprite), sx + 10, gy - 16 - (Math.floor(g.now / 160) % 6 === 0 ? 1 : 0));
     label("Pip's Menagerie", sx + 16, gy - 38, near === "shop");
+
+    const mx = CAMP.market * T + 8 + ox - 20;
+    ctx.fillStyle = "#4a3020";
+    ctx.fillRect(mx, gy - 34, 2, 34);
+    ctx.fillRect(mx + 38, gy - 34, 2, 34);
+    for (let k = 0; k < 8; k++) {
+      ctx.fillStyle = k % 2 ? "#e8dcc0" : "#8a2a2a";
+      ctx.fillRect(mx - 3 + k * 6, gy - 38, 6, 5);
+      ctx.fillRect(mx - 3 + k * 6 + 1, gy - 33, 4, 1 + (k % 2));
+    }
+    draw(cached("merchant", () => MERCHANT), mx + 13, gy - 26 - (Math.floor(g.now / 1300) % 5 === 0 ? 1 : 0));
+    ctx.fillStyle = "#6b4423";
+    ctx.fillRect(mx, gy - 12, 40, 3);
+    ctx.fillStyle = "#4a3020";
+    ctx.fillRect(mx + 2, gy - 9, 36, 9);
+    for (const [cx, col] of [
+      [mx + 4, "#c8743a"],
+      [mx + 10, "#a9b0b5"],
+      [mx + 28, "#f2c14e"],
+    ] as const) {
+      ctx.fillStyle = col;
+      ctx.fillRect(cx, gy - 15, 5, 3);
+      ctx.fillRect(cx + 1, gy - 16, 3, 1);
+    }
+    ctx.fillStyle = "#8a8e96";
+    ctx.fillRect(mx + 34, gy - 22, 1, 10);
+    ctx.fillRect(mx + 31, gy - 22, 7, 1);
+    ctx.fillRect(mx + 30, gy - 19, 3, 1);
+    ctx.fillRect(mx + 36, gy - 18, 3, 1);
+    ctx.fillStyle = "#4a3020";
+    ctx.fillRect(mx + 40, gy - 31, 6, 1);
+    draw(cached("coin", () => COIN), mx + 38, gy - 34);
+    label("Hesk's Market", mx + 20, gy - 42, near === "market");
+
+    const hl = Math.max(1, Math.min(HOUSE_LEVELS.length, g.houseLevel));
+    const spots = HOUSE_LEVELS[hl - 1].spots;
+    const hx0 = CAMP.house * T + 8 + ox - spots.door;
+    draw(cached(`house${hl}`, () => houseSprite(hl)), hx0, gy - HOUSE_H);
+    if (spots.smoke)
+      for (let k = 0; k < 4; k++) {
+        const p = (g.now / 2600 + k / 4) % 1;
+        ctx.globalAlpha = (1 - p) * 0.3;
+        ctx.fillStyle = "#968c96";
+        ctx.fillRect(Math.round(hx0 + spots.smoke[0] + Math.sin(p * 5 + k) * 2 + p * 6), Math.round(gy - HOUSE_H + spots.smoke[1] - p * 20), 2, 2);
+      }
+    ctx.globalAlpha = 1;
+    label("Home", hx0 + HOUSE_W / 2, gy - HOUSE_H + spots.top - 6, near === "house");
   };
 
   return (g: Game) => {
@@ -784,6 +833,12 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       if (lv >= 8) glow(ctx, cx, top + FORGE_SPOTS.chimney - 2, 16, fire, flick ? 0.3 : 0.22);
       if (lv >= 10) glow(ctx, cx, top + 3, 20 + Math.sin(g.now / 300) * 3, [215, 225, 255], 0.4);
       islandLights(ctx, glow, g.now, ox, CAMP.ground * T + oy, VW);
+      const hl = Math.max(1, Math.min(HOUSE_LEVELS.length, g.houseLevel));
+      const spots = HOUSE_LEVELS[hl - 1].spots;
+      const hx0 = CAMP.house * T + 8 + ox - spots.door;
+      const hy0 = CAMP.ground * T + oy - HOUSE_H;
+      for (const [x, y, r] of spots.lights) glow(ctx, hx0 + x, hy0 + y, r, [255, 200, 110], flick ? 0.2 : 0.16);
+      glow(ctx, CAMP.market * T + ox + 8, CAMP.ground * T + oy - 20, 20, [255, 200, 110], 0.1);
     }
     else glow(ctx, lx + 23, ly - 20, 2.5 * T, [255, 150, 60], 0.16);
     glow(ctx, headX, headY - 4, 22, [255, 215, 130], 0.1);
