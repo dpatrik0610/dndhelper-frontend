@@ -48,7 +48,7 @@ function useNow() {
 const needText = (config: MiningConfig, q: MiningQuest, n: QuestNeed) => {
   if (n.kind === "kill") return `Slay monsters on depth ${q.depth}`;
   const name = resourceOf(config, n.key).name;
-  return n.kind === "alloy" ? `Smelt ${name} bars` : `Gather ${name} on depth ${q.depth}`;
+  return n.kind === "alloy" ? `Smelt ${name} bars` : `Mine ${name} on depth ${q.depth}`;
 };
 
 function NeedIcon({ config, need }: { config: MiningConfig; need: QuestNeed }) {
@@ -257,8 +257,8 @@ export function ShipMenu({ config, state, onState }: { config: MiningConfig; sta
         </span>
       </div>
       <span className={styles.dim}>
-        Ore and kills count on the job's depth after you take it. Bars count when you smelt them. Morg takes the ore
-        and bars at hand-in. {state.questsDone ? `Jobs finished so far: ${state.questsDone}.` : ""}
+        Mining and kills count on the job's depth after you take it. Ore progress comes from veins, and bar progress
+        comes from smelting. Morg takes the ore and bars at hand-in. {state.questsDone ? `Jobs finished so far: ${state.questsDone}.` : ""}
       </span>
       <div className={styles.contracts}>
         {quests.map((q) => (
