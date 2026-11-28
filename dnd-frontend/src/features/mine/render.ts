@@ -4,7 +4,7 @@ import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
 import { HOUSE_H, HOUSE_LEVELS, houseSprite } from "./art/house";
 import { COIN, DIAMOND_GRID, MERCHANT } from "./art/materials";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
-import { chestSprite, cracks, enemySprite, oreTile, priestSprite, stoneTile, traderSprite } from "./art/world";
+import { bombSprite, chestSprite, cracks, enemySprite, oreTile, priestSprite, stoneTile, traderSprite } from "./art/world";
 import {
   BEDROCK,
   BOLT_MS,
@@ -13,6 +13,8 @@ import {
   CHESTS,
   GRAB_MS,
   GRAB_NEED,
+  bombCell,
+  BOMB_RADIUS,
   playerPos,
   stretch,
   isZombie,
@@ -814,6 +816,37 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       }
     }
 
+    const ring = (i: number, color: string, alpha: number) => {
+      ctx.beginPath();
+      ctx.arc((i % g.W) * T + 8 + ox, Math.floor(i / g.W) * T + 8 + oy, (BOMB_RADIUS + 0.5) * T, 0, Math.PI * 2);
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    };
+    for (const f of g.fuses) {
+      const left = f.at - g.now;
+      const blink = Math.floor(g.now / (left < 700 ? 70 : 180)) % 2 === 0;
+      ring(f.i, "#ff5a3a", blink ? 0.7 : 0.3);
+      const fx = (f.i % g.W) * T + ox + 4;
+      const fy = Math.floor(f.i / g.W) * T + oy + 8;
+      draw(cached("bomb", bombSprite), fx, fy);
+      if (blink) {
+        ctx.fillStyle = "#fff3a0";
+        ctx.fillRect(fx + 6, fy - 1, 2, 2);
+      }
+    }
+    if (g.bombArmed && !g.camp) {
+      const at = bombCell(g);
+      const h = g.hover;
+      const hi = h ? Math.floor(h.y) * g.W + Math.floor(h.x) : -1;
+      if (hi >= 0) {
+        ring(hi, at >= 0 ? "#ffb347" : "#8a8494", 0.5 + 0.25 * Math.sin(g.now / 120));
+        draw(cached("bomb", bombSprite), (hi % g.W) * T + ox + 4, Math.floor(hi / g.W) * T + oy + 8, false, at >= 0 ? 0.8 : 0.35);
+      }
+    }
+
     for (const b of g.bolts) {
       const bx = Math.round(b.x * T + ox);
       const by = Math.round(b.y * T + oy);
@@ -1060,6 +1093,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       for (const i of g.torches)
         glow(dctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, TORCH_LIGHT * T + fl, black, 0.95);
       for (const b of g.bolts) glow(dctx, b.x * T + ox, b.y * T + oy, (b.big ? 2.6 : 1.8) * T, black, 0.95);
+      for (const f of g.fuses) glow(dctx, (f.i % g.W) * T + ox + 8, Math.floor(f.i / g.W) * T + oy + 8, 1.6 * T, black, 0.8);
       if (g.trader >= 0) {
         const tx = (g.trader % g.W) * T + ox + 15;
         const ty = Math.floor(g.trader / g.W) * T + oy + 12;

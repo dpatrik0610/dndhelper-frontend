@@ -369,6 +369,15 @@ const paper = (p: string, P: string, o: string, O: string): Grid =>
 export const scrollSprite = (big = false): Grid =>
   big ? paper("#f0c8a0", "#b8402a", "#e0301a", "#ff8a2a") : paper("#f4e2b8", "#c9b07a", "#ff8a2a", "#ffe066");
 
+export const bombSprite = (): Grid =>
+  raster(["......y.", ".....o..", "....x...", "..xxxx..", ".xkKkkx.", ".xKkkkx.", ".xkkkkx.", "..xxxx.."], {
+    y: "#fff3a0",
+    o: "#ff8a2a",
+    x: "#1c1410",
+    k: "#3a3a48",
+    K: "#8a8aa0",
+  });
+
 export const reviveScroll = (): Grid => paper("#fbf4dc", "#c9a04a", "#ffe066", "#ffffff");
 
 export const recallScroll = (): Grid => paper("#dfe8f4", "#5a7ab0", "#4aa8ff", "#c8f0ff");

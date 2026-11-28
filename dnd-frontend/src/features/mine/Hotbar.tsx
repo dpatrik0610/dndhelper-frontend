@@ -4,7 +4,7 @@ import type { MiningConfig, MiningState, SlotKey } from "@services/miningService
 import { GEAR_SLOTS, type GearSlot, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { type Grid, tint } from "./art/pixel";
-import { potionSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
+import { bombSprite, potionSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
 import { DASH_PERKS, forgedOf, SET_BONUSES, statLine, tiersOf } from "./mine";
 import { TORCH } from "./render";
 import { Sprite } from "./Sprite";
@@ -66,6 +66,7 @@ export function Hotbar({
   config,
   state,
   potions,
+  bombs,
   torchesLeft,
   inMine,
   boltRef,
@@ -77,6 +78,7 @@ export function Hotbar({
   config: MiningConfig;
   state: MiningState;
   potions: number;
+  bombs: number;
   torchesLeft: number | null;
   inMine: boolean;
   boltRef: RefObject<HTMLDivElement | null>;
@@ -257,6 +259,19 @@ export function Hotbar({
         </div>
 
         <div className={styles.hotGroup}>
+          <Square
+            grid={bombSprite()}
+            hotkey="B"
+            empty={bombs <= 0}
+            count={bombs > 0 ? `×${bombs}` : undefined}
+            label={`Bombs, ${bombs} of ${state.bombCap ?? 3}`}
+            tip={
+              <>
+                <b>Blasting Bomb</b> × {bombs} / {state.bombCap ?? 3} · B readies one, B again lights it at the cursor. It levels everything within 7 tiles
+                and hits you for 200 (less armor) if you're inside the ring.{bombs <= 0 && " Moss sells them down in the mine."}
+              </>
+            }
+          />
           <Square
             grid={recallScroll()}
             hotkey="R"

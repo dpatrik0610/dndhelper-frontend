@@ -72,6 +72,10 @@ export const CAMP = { W: 78, H: 10, ground: 8, lift: 5, forge: 19, market: 31, s
 export type Station = "lift" | "forge" | "market" | "shop" | "house" | "church" | "trader";
 export type Blessing = "shield" | "regen" | "glow";
 export const SHIELD_CUT = 0.3;
+export const BOMB_RADIUS = 7;
+export const BOMB_FUSE_MS = 2000;
+export const BOMB_SELF_DMG = 200;
+const BOMB_HIT = 8;
 export const BLESSED_REGEN = 0.02;
 export const GLOW_BOOST = 1.5;
 
@@ -192,6 +196,7 @@ export interface Pending {
   salamanders: number;
   mimics: number[];
   drank: number;
+  bombs: { i: number; after: number }[];
   feats: Record<string, number>;
   unlocked: string[];
   hp?: number;
@@ -216,6 +221,7 @@ export interface GameSetup {
   firebolt: boolean;
   fireball?: boolean;
   blessings?: Partial<Record<Blessing, number>>;
+  bombs?: number;
   potions: number;
   maxTorches: number;
   overload: number;
@@ -268,6 +274,8 @@ export interface Game extends GameSetup {
   traps: Trap[];
   dimUntil: number;
   embers: Map<number, number>;
+  bombArmed: boolean;
+  fuses: { i: number; at: number }[];
   grab: Grab | null;
   shakeUntil: number;
   shakeMag: number;
@@ -474,6 +482,8 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     traps: [],
     dimUntil: 0,
     embers: new Map(),
+    bombArmed: false,
+    fuses: [],
     grab: null,
     sfx: [],
     shakeUntil: 0,
@@ -524,6 +534,8 @@ function loadCamp(g: Game, now: number, home: boolean) {
   g.boons = new Set();
   g.traps = [];
   g.embers = new Map();
+  g.fuses = [];
+  g.bombArmed = false;
   g.grab = null;
   g.motherlode = -1;
   g.startedAt = now;
@@ -606,6 +618,8 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.traps = placeTraps(g, trip.map);
   g.dimUntil = 0;
   g.embers = new Map();
+  g.fuses = [];
+  g.bombArmed = false;
   g.grab = null;
   g.motherlode = trip.motherlode ?? -1;
   g.richFound = false;
@@ -633,6 +647,7 @@ export const emptyPending = (): Pending => ({
   salamanders: 0,
   mimics: [],
   drank: 0,
+  bombs: [],
   feats: {},
   unlocked: [],
 });
@@ -644,7 +659,7 @@ export function takePending(g: Game): Pending | null {
   const now = vitals(g);
   const still = now.hp === g.sent.hp && now.pos === g.sent.pos;
   const quiet = !Object.keys(p.feats).length && !p.unlocked.length;
-  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank && quiet && still)
+  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank && !p.bombs.length && quiet && still)
     return null;
   g.pending = emptyPending();
   g.sent = now;
@@ -844,16 +859,17 @@ function echoVein(g: Game, from: number, c: number) {
   }
 }
 
-function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
+function breakCell(g: Game, i: number, c: number, e: { s: number; c: number } | null) {
   g.dmg.delete(i);
   g.map[i] = OPEN;
-  g.pending.breaks.push({ i, s: e.s, c: e.c });
+  if (e) g.pending.breaks.push({ i, s: e.s, c: e.c });
   const cx = ((i % g.W) + 0.5) * T;
   const cy = (Math.floor(i / g.W) + 0.5) * T;
   const ore = oreOf(c);
   const found = { [GEODE]: "geode", [GILDED_CHEST]: "gilded", [IRON_CHEST]: "iron", [CHEST]: "chest" }[c];
   if (found) feat(g, found);
-  g.sfx.push(
+  if (e || (c !== STONE && ore < 0))
+    g.sfx.push(
     c === SEAL
       ? "seal"
       : c === GILDED_CHEST || c === DIAMOND_CELL
@@ -893,7 +909,7 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
     g.found = g.depth;
   } else if (ore >= 0) {
     burst(g, cx, cy, g.oreColors[ore], 14, 2);
-    if (g.stats.vein) echoVein(g, i, c);
+    if (g.stats.vein && e) echoVein(g, i, c);
     if (!g.richFound && inMotherlode(g, i)) {
       g.richFound = true;
       g.sfx.push("motherlode");
@@ -908,7 +924,7 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number }) {
       }
       sayOnce(g, "full", "You can't carry another crumb. Head back to the lift.", "#ff8a6a");
     } else {
-      say(g, cx, cy - 6, `+ ${g.oreNames[ore]}`, g.oreColors[ore]);
+      if (e) say(g, cx, cy - 6, `+ ${g.oreNames[ore]}`, g.oreColors[ore]);
       const was = encumbered(g);
       g.carried += Math.floor(g.stats.yield) + (g.pet?.key === "ferret" ? 1 : 0);
       if (!was && encumbered(g)) {
@@ -984,6 +1000,74 @@ function wakeMimic(g: Game, x: number, y: number) {
   g.sfx.push("mimic");
   feat(g, "mimicWake");
   if (!g.firebolt) sayOnce(g, "nofire", "Your pick just bounces off. Only fire hurts it. Run!", "#ff8a6a");
+}
+
+export const bombCell = (g: Game) => {
+  const h = g.hover;
+  if (!h || g.camp) return -1;
+  const x = Math.floor(h.x);
+  const y = Math.floor(h.y);
+  const i = y * g.W + x;
+  return isOpen(g, x, y) && g.seen[i] && !g.fuses.some((f) => f.i === i) ? i : -1;
+};
+
+export function bombKey(g: Game) {
+  if (g.camp || g.fainted || g.asleep) return;
+  if (!g.bombArmed) {
+    if ((g.bombs ?? 0) <= 0) return sayOnce(g, "nobomb", "No bombs left. Moss sells them down here.", "#ff8a6a");
+    g.bombArmed = true;
+    sayOnce(g, "bombAim", "Point at an open spot and press B again to light it. Esc puts it away.", "#ffb347", 3200);
+    return;
+  }
+  const i = bombCell(g);
+  const p = g.player;
+  if (i < 0) return void say(g, (p.x + 0.5) * T, (p.y - 2) * T, "Can't set it there", "#ff8a6a", 700);
+  g.bombArmed = false;
+  g.bombs = (g.bombs ?? 1) - 1;
+  g.fuses.push({ i, at: g.now + BOMB_FUSE_MS });
+  g.sfx.push("torch");
+  feat(g, "bomb");
+}
+
+const inBlast = (dx: number, dy: number) => dx * dx + dy * dy <= BOMB_RADIUS * BOMB_RADIUS;
+
+function explode(g: Game, at: number) {
+  const cx = at % g.W;
+  const cy = Math.floor(at / g.W);
+  g.pending.bombs.push({ i: at, after: g.pending.breaks.length });
+  for (let y = Math.max(0, cy - BOMB_RADIUS); y <= Math.min(g.H - 1, cy + BOMB_RADIUS); y++)
+    for (let x = Math.max(0, cx - BOMB_RADIUS); x <= Math.min(g.W - 1, cx + BOMB_RADIUS); x++) {
+      if (!inBlast(x - cx, y - cy)) continue;
+      const i = y * g.W + x;
+      const c = g.map[i];
+      if (c === OPEN || c === BEDROCK || c === SEAL || c === MIMIC) continue;
+      breakCell(g, i, c, null);
+    }
+  markSeen(g, cx, cy, BOMB_RADIUS + 1);
+  for (const m of liveMonsters(g))
+    if (inBlast(m.x - cx, m.y - cy)) damageMonster(g, m, Math.round(g.stats.power * BOMB_HIT), false, null, true);
+  const p = g.player;
+  if (inBlast(p.x - cx, p.y - cy) || inBlast(p.x - cx, p.y - 1 - cy)) hurt(g, BOMB_SELF_DMG, "#ff8a2a");
+  const px = (cx + 0.5) * T;
+  const py = (cy + 0.5) * T;
+  for (let k = 0; k < 64; k++) {
+    const a = (k / 64) * Math.PI * 2;
+    const v = (BOMB_RADIUS * T) / 420;
+    g.parts.push({ x: px, y: py, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 420, color: k % 3 ? "#ff8a2a" : "#fff3a0" });
+  }
+  for (const color of ["#fff3a0", "#ff8a2a", "#c22a1a", "#5a5060"]) burst(g, px, py, color, 30, 3.2);
+  say(g, px, py - 12, "BOOM!", "#ffb347", 1200);
+  shake(g, 7, 450);
+  g.sfx.push("smash", "seal");
+  feat(g, "bombBlast");
+}
+
+function stepFuses(g: Game) {
+  if (!g.fuses.length) return;
+  const due = g.fuses.filter((f) => g.now >= f.at);
+  if (!due.length) return;
+  g.fuses = g.fuses.filter((f) => g.now < f.at);
+  for (const f of due) explode(g, f.i);
 }
 
 export function castBolt(g: Game, aim: Aim) {
@@ -2253,6 +2337,7 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
   if (!g.camp && g.now - g.startedAt > 4000 && !inTorchlight(g, p.x, p.y - 1))
     sayOnce(g, "dark", "Dark out here. Wounds only mend in torchlight, and monsters stir faster (T plants a torch).", "#ffc98a", 4200);
   stepBolts(g, dt);
+  stepFuses(g);
   stepMonsters(g, dt);
   stepEmbers(g);
   stepTraps(g);

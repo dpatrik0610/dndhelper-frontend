@@ -165,6 +165,10 @@ export const BLESSINGS: Record<"shield" | "regen" | "glow", { name: string; blur
 };
 
 export const WARES: Record<string, { name: string; blurb: string }> = {
+  bomb: {
+    name: "Blasting Bomb",
+    blurb: "B readies one, aim at an open spot and press B again to light it. Two seconds later it levels everything within 7 tiles, ore and treasure included. Stand clear: it hits you for 200, less your armor. You carry 3, or 5 with a tier 7 satchel.",
+  },
   revive: {
     name: "Scroll of Second Breath",
     blurb: "When you fall in the mine, read it instead of fainting: you're back on your feet at full health, right where you dropped, satchel and all.",

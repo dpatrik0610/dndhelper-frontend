@@ -13,6 +13,8 @@ import {
   GRAB_MS,
   playerPos,
   effects,
+  bombKey,
+  BOMB_SELF_DMG,
   revive,
   setBlessings,
   SHIELD_CUT,
@@ -653,6 +655,39 @@ assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
   fallen.fainted = true;
   revive(fallen);
   assert.ok(!fallen.fainted && fallen.player.hp === fallen.stats.maxHp, "a revive scroll stands you back up at full health");
+}
+{
+  const field = ["############", "#......0000#", "#......0000#", ...Array.from({ length: 15 }, (_, y) => (y === 6 ? "#.000000000#" : "#0000000000#")), "############"];
+  const boom = newGame(-1, field);
+  boom.monsters = [];
+  boom.nextSpawn = 1e12;
+  boom.seen.fill(1);
+  boom.bombs = 1;
+  const hp = boom.player.hp;
+  boom.hover = { x: 1.5, y: 9.5 };
+  bombKey(boom);
+  assert.equal(boom.fuses.length, 0, "the first B only readies the bomb");
+  bombKey(boom);
+  assert.equal(boom.fuses.length, 1, "the second B lights it at the cursor");
+  assert.equal(boom.bombs, 0, "lighting one spends it");
+  run(boom, 2100);
+  const at = (x: number, y: number) => boom.map[y * W + x];
+  assert.ok(at(8, 9) === OPEN && at(1, 16) === OPEN && at(5, 14) === OPEN, "the blast clears everything 7 tiles out");
+  assert.ok(at(6, 14) !== OPEN && at(2, 16) !== OPEN, "the blast is round, not square");
+  assert.deepEqual(boom.pending.bombs, [{ i: 9 * W + 1, after: 0 }], "the blast is queued for the server in order");
+  assert.equal(boom.player.hp, hp, "standing outside the ring keeps you safe");
+  const close = newGame(-1, field);
+  close.monsters = [];
+  close.nextSpawn = 1e12;
+  close.seen.fill(1);
+  close.bombs = 1;
+  close.stats = { ...close.stats, maxHp: 1000, armor: 0.25 };
+  close.player.hp = 1000;
+  close.hover = { x: 6.5, y: 2.5 };
+  bombKey(close);
+  bombKey(close);
+  run(close, 2100);
+  assert.equal(1000 - close.player.hp, BOMB_SELF_DMG * 0.75, "your own bomb hits you for 200, less armor");
 }
 console.log("mine.check ok");
 

@@ -23,7 +23,7 @@ import type { Grid } from "./art/pixel";
 import { COIN, DIAMOND, MAGMA_CORE, MATERIALS, MERCHANT } from "./art/materials";
 import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
-import { chartSprite, ENEMIES, oilSprite, potionSprite, priestSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
+import { bombSprite, chartSprite, ENEMIES, oilSprite, potionSprite, priestSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
 import { canAfford, compact, discounted, forgedOf, statRows } from "./mine";
 import { oreIcon, TORCH } from "./render";
@@ -81,6 +81,7 @@ const WARE_ART: Record<string, () => Grid> = {
   firebolt: () => scrollSprite(),
   fireball: () => scrollSprite(true),
   potion: potionSprite,
+  bomb: bombSprite,
   torch: () => TORCH[1],
   chart: chartSprite,
   oil: oilSprite,

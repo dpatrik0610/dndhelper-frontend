@@ -51,6 +51,7 @@ import {
   loadTrip,
   OVERLOADED,
   noteInput,
+  bombKey,
   placeTorch,
   revive,
   setBlessings,
@@ -90,6 +91,7 @@ const TRADE_NOTES: Record<string, [string, string]> = {
   fireball: ["Your Firebolt is a Fireball now", "5× damage, and it bursts on every monster within 2 tiles."],
   torch: ["A torch, a little damp", "T to plant it."],
   potion: ["A healing draught, corked and warm", "Q to drink it."],
+  bomb: ["A blasting bomb", "B readies it, B again lights it at the cursor. Stand clear of the ring."],
   chart: ["Prospector's Chart", "Every treasure on this level is marked with an X."],
   oil: ["Lamp Oil", "Your lantern burns half again as far until you leave this level."],
   magmaCore: ["Magma Core", "Still warm. It's safe in your stores."],
@@ -191,6 +193,7 @@ export function PlayView({
   const [sealNear, setSealNear] = useState(false);
   const [potions, setPotions] = useState(state.potions);
   const [downed, setDowned] = useState(false);
+  const [bombs, setBombs] = useState(state.bombs ?? 0);
   const downedRef = useRef(false);
   const [mossWares, setMossWares] = useState<Record<string, number> | null>(null);
   const [dream, setDream] = useState("");
@@ -307,6 +310,7 @@ export function PlayView({
     g.firebolt = state.firebolt;
     g.fireball = !!state.fireball;
     g.potions = state.potions;
+    g.bombs = state.bombs ?? 0;
     g.player.hp = state.stats.maxHp;
     if ((g.pet?.key ?? null) !== state.pet) {
       g.pet = petSetup(config, state.pet);
@@ -323,6 +327,7 @@ export function PlayView({
     if (s.trip && g && !g.camp) {
       loadTrip(g, s.trip, g.now);
       resetPending(g);
+      g.bombs = s.bombs ?? 0;
       setSatchel(s.trip.satchel);
       notePile(s.trip.pile ?? {});
       setDepth(s.trip.depth);
@@ -533,6 +538,7 @@ export function PlayView({
         firebolt: s.firebolt,
         fireball: !!s.fireball,
         potions: s.potions,
+        bombs: s.bombs ?? 0,
         maxTorches: s.torchStock + (trip?.torches.length ?? 0),
         overload: config.overload,
       },
@@ -574,6 +580,7 @@ export function PlayView({
     let fainted = false;
     let wasSeal = false;
     let wasPotions = g.potions;
+    let wasBombs = -1;
     let wasTorches = -1;
     let seenHurt = g.player.lastHurt;
     let wasLow = false;
@@ -636,6 +643,10 @@ export function PlayView({
         wasPotions = g.potions;
         setPotions(g.potions);
       }
+      if ((g.bombs ?? 0) !== wasBombs) {
+        wasBombs = g.bombs ?? 0;
+        setBombs(wasBombs);
+      }
       if (boltRef.current) boltRef.current.style.height = `${Math.max(0, (g.nextBolt - g.now) / BOLT_MS) * 100}%`;
       const used = g.camp ? 0 : g.torches.size;
       if (used !== wasTorches) {
@@ -687,10 +698,12 @@ export function PlayView({
         setReport(null);
         setPanel(null);
         setOpened(null);
+        g.bombArmed = false;
       }
       if (e.code === "KeyT" && !g.camp) placeTorch(g);
       if (e.code === "KeyF") castBolt(g, g.hover);
       if (e.code === "KeyQ") drinkPotion(g);
+      if (e.code === "KeyB") bombKey(g);
       if (e.code === "KeyR" && !g.camp && !g.fainted && (stateRef.current.recalls ?? 0) > 0) void finishRef.current(false, 0, true);
       const floor = /^Digit\d$/.test(e.code) ? Number(e.code.slice(5)) || 10 : 0;
       if (floor && stationAt(g) === "lift") void rideRef.current(floor);
@@ -756,6 +769,7 @@ export function PlayView({
       g.firebolt = s.firebolt;
       g.fireball = !!s.fireball;
       g.potions = s.potions;
+      g.bombs = s.bombs ?? 0;
       g.boons = new Set(s.trip?.boons ?? []);
       if (item === "torch") {
         g.maxTorches++;
@@ -1191,6 +1205,7 @@ export function PlayView({
           config={config}
           state={state}
           potions={potions}
+          bombs={bombs}
           torchesLeft={trip ? torchCap - torchesUsed : state.torchStock}
           inMine={!!trip}
           boltRef={boltRef}
