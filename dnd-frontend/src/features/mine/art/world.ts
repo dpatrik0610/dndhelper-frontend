@@ -529,6 +529,28 @@ export const priestSprite = (): Grid =>
     { x: "#1c1410", h: "#e8e4f0", H: "#b8b4c8", s: "#e2aa7c", S: "#b97a52", r: "#3a4a7a", g: "#e8c060", k: "#2a2030" },
   );
 
+export const smithSprite = (): Grid =>
+  raster(
+    [
+      "....xxxx....",
+      "...xRRRRx...",
+      "..xRRRRRRx..",
+      "..xRssssRx..",
+      "..xRsxsxRx..",
+      "..xRssssRx..",
+      "..xRsSSsRx..",
+      ".xRRxccxRRx.",
+      "xsRxaaaaxRsx",
+      "xsxaaaaaaxsx",
+      "xsxaaAAaaxsx",
+      ".xSaaaaaaSx.",
+      "..xaaaaaax..",
+      "..xaaaaaax..",
+      "..xkkxxkkx..",
+    ],
+    { x: "#1c1410", R: "#b8502a", s: "#e2aa7c", S: "#b97a52", c: "#5a4a3a", a: "#6e4428", A: "#a86a3a", k: "#2a2030" },
+  );
+
 export const chartSprite = (): Grid =>
   raster(["xxxxxxx.", "xpPppPpx", "xpppxppx", "xpPpppPx", "xppxpppx", "xPppprPx", "xppppppx", ".xxxxxxx"], {
     x: "#3a2a1a",

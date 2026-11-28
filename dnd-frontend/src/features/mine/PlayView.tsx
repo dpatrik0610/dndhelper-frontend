@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Switch } from "@mantine/core";
 import { IconSettings, IconTrophy, IconUserShield } from "@tabler/icons-react";
-import { showNotification } from "@components/Notification/Notification";
 import {
   ascend,
   descend,
@@ -26,6 +25,7 @@ import { PET_ART } from "./art/pets";
 import {
   ChurchMenu,
   ForgeMenu,
+  SmithMenu,
   LedgerPage,
   LiftMenu,
   NextGoal,
@@ -75,14 +75,15 @@ import { Effects } from "./Effects";
 import { Hotbar } from "./Hotbar";
 import { DropOre, LootPile } from "./LootPile";
 import { Sprite } from "./Sprite";
-import { type AchToast, AchievementToasts, TrophyPanel } from "./Trophies";
+import { NoteLog } from "./NoteLog";
+import { pushNote } from "./notes";
+import { TrophyPanel } from "./Trophies";
 import { ARRIVAL, dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
 
 const SWITCH_CLASSES = { root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" };
 const GOAL_OPEN_KEY = "deepdelve-goal-open";
 type Panel = "pouch" | "controls" | "settings" | "trophies" | "character" | "drop";
-const TOAST_MS = 5000;
 const MAX_TOASTS = 3;
 const LOW_HP = 0.3;
 const STEP_MS = 1000 / 60;
@@ -127,7 +128,8 @@ const MENU_TITLES: Record<Station, [string, string]> = {
     "The lift",
     "Old Wick works the bell. Pick a depth, or press its number key; every trip down is a fresh shaft.",
   ],
-  forge: ["The forge", "Turn ore into better gear, or rebuild the forge to work harder metals."],
+  forge: ["The forge", "Smelt ore into alloy bars, or rebuild the forge to burn hot enough for harder metals."],
+  smith: ["Thora's Smithy", "Thora Anvilsong turns your ore and alloy bars into better gear."],
   market: ["Hesk Saltpenny's Market", "Ore for coin, coin for torches and tonics. Hesk weighs everything twice."],
   shop: ["Pip Tinkerwhistle's Menagerie", "One friend follows you down at a time."],
   house: ["Home", "Your own four walls on Saltbell Isle. Coin makes them grander."],
@@ -138,6 +140,7 @@ const MENU_TITLES: Record<Station, [string, string]> = {
 const TALK: Record<Station, string> = {
   lift: "Call the lift",
   forge: "Use the forge",
+  smith: "Talk to Thora",
   market: "Talk to Hesk",
   shop: "Visit Pip",
   house: "Go inside",
@@ -260,7 +263,6 @@ export function PlayView({
   const achievements = useMemo(() => achievementsFor(config), [config]);
   const [unlocked, setUnlocked] = useState<ReadonlySet<string>>(() => new Set(state.achievements));
   const unlockedRef = useRef(unlocked);
-  const [toasts, setToasts] = useState<AchToast[]>([]);
   const readAch = useCallback(
     () => ({ config, state: stateRef.current, feats: mergeFeats(stateRef.current.feats, gameRef.current?.feats) }),
     [config],
@@ -285,15 +287,10 @@ export function PlayView({
       if (g.camp) void recordFeats({ unlocked: ids }).catch(() => undefined);
       else g.pending.unlocked.push(...ids);
       play("achievement");
-      const now = Date.now();
-      const shown: AchToast[] = fresh
-        .slice(0, MAX_TOASTS)
-        .map((a, k) => ({ key: now + k, icon: a.icon, name: a.name }));
+      for (const a of fresh.slice(0, MAX_TOASTS))
+        pushNote({ icon: a.icon, title: a.name, text: "Achievement unlocked", color: "#f5c542" });
       if (fresh.length > MAX_TOASTS)
-        shown.push({ key: now + MAX_TOASTS, icon: "🏆", name: `and ${fresh.length - MAX_TOASTS} more` });
-      setToasts((cur) => [...cur, ...shown]);
-      const keys = new Set(shown.map((t) => t.key));
-      setTimeout(() => setToasts((cur) => cur.filter((t) => !keys.has(t.key))), TOAST_MS);
+        pushNote({ icon: "🏆", title: `and ${fresh.length - MAX_TOASTS} more`, text: "Achievements unlocked", color: "#f5c542" });
     }, 700);
     return () => clearInterval(id);
   }, [achievements, readAch]);
@@ -367,22 +364,20 @@ export function PlayView({
           play("discover");
           const ore = config.ores.find((o) => o.key === key);
           if (ore)
-            showNotification({
+            pushNote({
               title: "New ore discovered",
-              message: `${ore.name}: ${ore.lore}`,
-              color: "yellow",
-              autoClose: 6000,
+              text: `${ore.name}: ${ore.lore}`,
+              color: "#ffd77a",
             });
         }
         if (res.cores) {
           const now = stateRef.current;
           onState({ ...now, ores: { ...now.ores, [MAGMA_CORE]: (now.ores[MAGMA_CORE] ?? 0) + res.cores } });
           play("jackpot");
-          showNotification({
+          pushNote({
             title: res.cores > 1 ? `${res.cores} Magma Cores` : "Magma Core",
-            message: MATERIALS[MAGMA_CORE].lore,
-            color: "orange",
-            autoClose: 5000,
+            text: MATERIALS[MAGMA_CORE].lore,
+            color: "#ffb347",
           });
         }
         if (res.diamonds) {
@@ -393,11 +388,10 @@ export function PlayView({
             ores: { ...now.ores, [DIAMOND]: (now.ores[DIAMOND] ?? 0) + n },
             mined: { ...now.mined, [DIAMOND]: (now.mined[DIAMOND] ?? 0) + n },
           });
-          showNotification({
+          pushNote({
             title: n > 1 ? `${n} diamonds!` : "A diamond!",
-            message: `It's safe in your stores already. Hesk pays ${compact(now.prices[DIAMOND] ?? 0)} coins apiece, or keep it for your collection.`,
-            color: "cyan",
-            autoClose: 6000,
+            text: `It's safe in your stores already. Hesk pays ${compact(now.prices[DIAMOND] ?? 0)} coins apiece, or keep it for your collection.`,
+            color: "#c4f4ff",
           });
         }
         if (res.wyrmCoins) {
@@ -408,11 +402,10 @@ export function PlayView({
             ores: res.bag ? { ...now.ores, bagOfHolding: 1 } : now.ores,
           });
           play("jackpot");
-          showNotification({
+          pushNote({
             title: "The Ashen Wyrm is slain!",
-            message: `Its hoard is yours: ${compact(res.wyrmCoins)} coins, banked already.${res.bag ? ` You found a Bag of Holding too. ${MATERIALS.bagOfHolding.lore}` : ""}`,
-            color: "orange",
-            autoClose: 10000,
+            text: `Its hoard is yours: ${compact(res.wyrmCoins)} coins, banked already.${res.bag ? ` You found a Bag of Holding too. ${MATERIALS.bagOfHolding.lore}` : ""}`,
+            color: "#ffb347",
           });
         }
         if (!res.trip || res.trip.depth === g.depth)
@@ -432,15 +425,15 @@ export function PlayView({
           resetPending(g);
           setDepth(res.trip.depth);
           if (broke)
-            showNotification({
+            pushNote({
               title: `You broke through to depth ${res.trip.depth}`,
-              message: `${config.depths[res.trip.depth - 1].name}. The lift reaches down here now.`,
-              color: "yellow",
+              text: `${config.depths[res.trip.depth - 1].name}. The lift reaches down here now.`,
+              color: "#ffd77a",
             });
         }
       } catch (e) {
         if ((e as { status?: number }).status !== 409)
-          showNotification({ title: "The mine rumbles", message: "Couldn't save your last swings.", color: "red" });
+          pushNote({ title: "The mine rumbles", text: "Couldn't save your last swings.", color: "#ff8a6a" });
         await resync();
       } finally {
         inflight.current = null;
@@ -485,7 +478,7 @@ export function PlayView({
       } catch (e) {
         leaving.current = false;
         if (g) g.riding = false;
-        showNotification({ title: "The lift is stuck", message: (e as Error).message, color: "red" });
+        pushNote({ title: "The lift is stuck", text: (e as Error).message, color: "#ff8a6a" });
       } finally {
         setBusy(false);
       }
@@ -509,7 +502,7 @@ export function PlayView({
       revive(g);
       onState({ ...s, trip: stateRef.current.trip });
     } catch (e) {
-      showNotification({ title: "The scroll crumbles", message: (e as Error).message, color: "red" });
+      pushNote({ title: "The scroll crumbles", text: (e as Error).message, color: "#ff8a6a" });
       void finish(true);
     }
   };
@@ -520,7 +513,7 @@ export function PlayView({
     const g = gameRef.current;
     if (!g || leaving.current || n > config.depths.length) return;
     if (n > stateRef.current.deepestDepth) {
-      showNotification({ title: `Depth ${n} is sealed`, message: "Break the seal above it first.", color: "red" });
+      pushNote({ title: `Depth ${n} is sealed`, text: "Break the seal above it first.", color: "#ff8a6a" });
       return;
     }
     if (!g.camp) return finish(false, n);
@@ -532,7 +525,7 @@ export function PlayView({
       onState(s);
     } catch (e) {
       leaving.current = false;
-      showNotification({ title: "The lift is stuck", message: (e as Error).message, color: "red" });
+      pushNote({ title: "The lift is stuck", text: (e as Error).message, color: "#ff8a6a" });
     } finally {
       setBusy(false);
     }
@@ -559,6 +552,8 @@ export function PlayView({
         oreHp: config.ores.map((o) => o.hardness),
         oreNames: config.ores.map((o) => o.name),
         hotOre: config.ores.findIndex((o) => o.key === "flametouchedIron"),
+        shockOre: config.ores.findIndex((o) => o.key === "hizagkuur"),
+        glowOre: config.ores.findIndex((o) => o.key === "byeshk"),
         oreColors: config.ores.map((o) => o.color),
         depths: config.depths,
         stats: s.stats,
@@ -581,7 +576,7 @@ export function PlayView({
     );
     firstLoad.current = false;
     setBlessings(g, s.blessings);
-    if (!trip && s.nodesBroken === 0) sayOnce(g, "arrival", ARRIVAL, "#e8dcc0", 3000);
+    if (!trip && s.nodesBroken === 0) sayOnce(g, "arrival", ARRIVAL, "#e8dcc0");
     setTorchCap(g.maxTorches);
     gameRef.current = g;
     const draw = createRenderer(canvas, text);
@@ -634,6 +629,8 @@ export function PlayView({
       }
       for (const name of g.sfx) play(name);
       g.sfx.length = 0;
+      for (const n of g.notes) pushNote(n);
+      g.notes.length = 0;
       cam.current = draw(g);
       const frac = Math.max(0, g.player.hp / g.stats.maxHp);
       if (hpRef.current) hpRef.current.style.width = `${frac * 100}%`;
@@ -822,7 +819,7 @@ export function PlayView({
     setMossWares(s.trip?.wares ?? null);
     onState({ ...s, trip: stateRef.current.trip });
     const [title, message] = TRADE_NOTES[item] ?? TRADE_NOTES.potion;
-    showNotification({ title, message, color: "yellow" });
+    pushNote({ title, text: message, color: "#ffd77a" });
   };
 
   const onTakePile = async (take: OreCounts) => {
@@ -839,7 +836,7 @@ export function PlayView({
       setPile(s.trip?.pile ?? {});
       setPileOpen(false);
     } catch (e) {
-      showNotification({ title: "Can't take that", message: (e as Error).message, color: "red" });
+      pushNote({ title: "Can't take that", text: (e as Error).message, color: "#ff8a6a" });
     }
   };
 
@@ -862,7 +859,7 @@ export function PlayView({
     try {
       for (const [key, n] of Object.entries(drop)) if (n > 0) s = await dropOre(key, n);
     } catch (e) {
-      showNotification({ title: "Can't drop that", message: (e as Error).message, color: "red" });
+      pushNote({ title: "Can't drop that", text: (e as Error).message, color: "#ff8a6a" });
       s = await getMiningState().catch(() => null);
     }
     if (!s?.trip) return;
@@ -880,7 +877,7 @@ export function PlayView({
       onState(await work());
       play("buy");
     } catch (e) {
-      showNotification({ title: "Can't swap that", message: (e as Error).message, color: "red" });
+      pushNote({ title: "Can't swap that", text: (e as Error).message, color: "#ff8a6a" });
     }
   };
 
@@ -998,7 +995,7 @@ export function PlayView({
           )}
         </div>
 
-        <AchievementToasts toasts={toasts} />
+        <NoteLog />
         <div className={styles.hudRight}>
           <div className={styles.btnRow}>
             {trip && total(pile) > 0 && !pileOpen && (
@@ -1099,7 +1096,7 @@ export function PlayView({
               <span className={styles.dim}>
                 {trip
                   ? "Dig for ore and walk back to the lift to bank it. Break the gold-runed floor to go deeper."
-                  : "Walk to the lift, the forge or Pip's stall."}
+                  : "Walk to the lift, the forge, Thora's smithy or Pip's stall."}
               </span>
               <span className={styles.dim}>
                 Monsters flash a red ! before they bite: step back or dash away. Every third hit in a row smashes, and
@@ -1209,6 +1206,7 @@ export function PlayView({
                 </div>
                 {near === "lift" && <LiftMenu {...props} />}
                 {near === "forge" && <ForgeMenu {...props} />}
+                {near === "smith" && <SmithMenu {...props} />}
                 {near === "market" && <MarketMenu {...props} />}
                 {near === "shop" && <PetMenu {...props} />}
                 {near === "house" && <HouseMenu {...props} />}

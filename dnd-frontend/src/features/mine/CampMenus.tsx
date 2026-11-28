@@ -1,7 +1,7 @@
 import { type CSSProperties, useState } from "react";
 import { Tooltip } from "@mantine/core";
 import { IconArrowRight, IconLock, IconPin, IconPinFilled, IconX } from "@tabler/icons-react";
-import { showNotification } from "@components/Notification/Notification";
+import { pushNote } from "./notes";
 import {
   buyPet,
   buyWare,
@@ -14,13 +14,14 @@ import {
   type OreCounts,
   sellOre,
   type SlotKey,
+  smeltAlloy,
   upgradeForge,
   upgradeHouse,
 } from "@services/miningService";
 import { FORGE_LEVELS, forgeSprite } from "./art/forge";
 import { HOUSE_LEVELS, houseIcon } from "./art/house";
 import type { Grid } from "./art/pixel";
-import { COIN, DIAMOND, MAGMA_CORE, MATERIALS, MERCHANT } from "./art/materials";
+import { alloyIcon, COIN, DIAMOND, MAGMA_CORE, MATERIALS, MERCHANT } from "./art/materials";
 import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import {
@@ -34,6 +35,7 @@ import {
   recallScroll,
   reviveScroll,
   scrollSprite,
+  smithSprite,
 } from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
 import { canAfford, compact, discounted, forgedOf, HOLDING_TIER, ownsHolding, statRows } from "./mine";
@@ -49,6 +51,8 @@ type MenuProps = { config: MiningConfig; state: MiningState; onState: (s: Mining
 const resourceOf = (config: MiningConfig, key: string) => {
   const i = config.ores.findIndex((o) => o.key === key);
   if (i >= 0) return { name: config.ores[i].name, grid: oreIcon(i), special: false };
+  const a = config.alloys?.find((x) => x.key === key);
+  if (a) return { name: a.name, grid: alloyIcon(a.tier, a.color), special: true };
   const m = MATERIALS[key];
   return { name: m?.name ?? key, grid: m?.grid ?? oreIcon(0), special: true };
 };
@@ -101,7 +105,7 @@ const WARE_ART: Record<string, () => Grid> = {
 const MOSS_ONLY = new Set(["chart", "oil", MAGMA_CORE]);
 const SPELLS = new Set(["firebolt", "fireball"]);
 
-const GOAL_PLACE: Record<Goal["kind"], string> = { gear: "the forge", forge: "the forge", pet: "Pip's stall" };
+const GOAL_PLACE: Record<Goal["kind"], string> = { gear: "Thora's smithy", forge: "the forge", pet: "Pip's stall" };
 
 export function PanelHead({ title, onClose }: { title: string; onClose: () => void }) {
   return (
@@ -211,7 +215,7 @@ export function TripSummary({ config, state, onState, report, onClose }: MenuPro
             <span className={styles.eyebrow}>Suggestions</span>
             <span className={styles.dim}>
               Just ideas for what your stores can pay for now. Nothing is bought until you confirm, and you can always spend your ore at the
-              forge or the pet shop instead.
+              smithy, the forge or the pet shop instead.
             </span>
             {ready.map((g) => {
               const [label, ask, act] = GOAL_ACTIONS[g.kind];
@@ -274,9 +278,9 @@ function useRun(onState: (s: MiningState) => void) {
       const cue = sfx ?? (done ? "buy" : null);
       if (cue) play(cue);
       onState(s);
-      if (done) showNotification({ title: done(s), message: "", color: "yellow" });
+      if (done) pushNote({ text: done(s), color: "#ffd77a" });
     } catch (e) {
-      showNotification({ title: "Not now", message: (e as Error).message, color: "red" });
+      pushNote({ title: "Not now", text: (e as Error).message, color: "#ff8a6a" });
     } finally {
       setBusy(false);
     }
@@ -377,9 +381,14 @@ export function LiftMenu({ config, state, onState }: MenuProps) {
 
 export function ForgeMenu({ config, state, onState }: MenuProps) {
   const { busy, run } = useRun(onState);
-  const tiers = forgedOf(state);
   const forge = config.forges[state.forgeLevel - 1];
   const nextForge = config.forges[state.forgeLevel];
+  const tiers = forgedOf(state);
+  const wanted = (key: string) =>
+    config.slots.reduce((n, slot) => {
+      const next = slot.tiers[(tiers[slot.key] ?? 0) + 1];
+      return n + (next?.cost?.[key] ? discounted(next.cost, forge.discount)[key] : 0);
+    }, 0);
   return (
     <>
       <div className={styles.forgeHead}>
@@ -410,6 +419,106 @@ export function ForgeMenu({ config, state, onState }: MenuProps) {
           ) : (
             <span className={styles.dim}>The hottest fire there is.</span>
           )}
+        </div>
+      </div>
+      <span className={styles.eyebrow}>Alloys</span>
+      <span className={styles.dim}>
+        From tier 4 on, Thora won't work raw ore alone: every piece also needs bars of its tier's alloy, and from tier 5 most
+        want a share of an older alloy too. Each alloy marries a deep metal to an old one from the shallows, so plan a shallow
+        trip now and then.
+      </span>
+      <div className={styles.slots}>
+        {(config.alloys ?? []).map((a) => {
+          const have = state.ores[a.key] ?? 0;
+          const most = Math.min(1000, ...Object.entries(a.recipe).map(([k, n]) => Math.floor((state.ores[k] ?? 0) / n)));
+          const need = wanted(a.key);
+          const short = Math.max(0, need - have);
+          const locked = a.tier > forge.maxTier;
+          const smelt = (n: number) => void run(() => smeltAlloy(a.key, n), () => `Smelted ${compact(n)} ${a.name}`);
+          return (
+            <div key={a.key} className={styles.slot}>
+              <span className={styles.eyebrow}>Tier {a.tier}</span>
+              <div className={styles.forgeHead}>
+                <span className={styles.alloyGlow} style={{ "--glow": a.color } as CSSProperties}>
+                  <Sprite grid={alloyIcon(a.tier, a.color)} scale={3} label={a.name} />
+                </span>
+                <div className={styles.forgeInfo}>
+                  <b className={styles.pixel}>
+                    {a.name} · {compact(have)} bars
+                  </b>
+                  <span className={styles.dim}>{a.lore}</span>
+                  {need > 0 && (
+                    <span className={styles.dim}>
+                      Your next tier {a.tier} gear needs {compact(need)}
+                      {short > 0 ? `, ${compact(short)} short.` : ". You have enough."}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {locked ? (
+                <div className={styles.dim}>
+                  <IconLock size={12} /> Needs a hotter forge:{" "}
+                  {config.forges.find((f) => f.maxTier >= a.tier)?.name ?? "a better one"}.
+                </div>
+              ) : (
+                <>
+                  <span className={styles.dim}>One bar takes:</span>
+                  <Cost cost={a.recipe} ores={state.ores} config={config} />
+                  <div className={styles.btnRow}>
+                    {[1, 10].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        className={`glass-btn-secondary ${styles.actBtn}`}
+                        disabled={busy || most < n}
+                        onClick={() => smelt(n)}
+                      >
+                        Smelt {n}
+                      </button>
+                    ))}
+                    {short > 0 && (
+                      <button
+                        type="button"
+                        className={`glass-btn-primary ${styles.actBtn}`}
+                        disabled={busy || most < short}
+                        onClick={() => smelt(short)}
+                      >
+                        Smelt what's needed ({compact(short)})
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className={`glass-btn-secondary ${styles.actBtn}`}
+                      disabled={busy || most < 1}
+                      onClick={() => smelt(most)}
+                    >
+                      Smelt all ({compact(most)})
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+export function SmithMenu({ config, state, onState }: MenuProps) {
+  const { busy, run } = useRun(onState);
+  const tiers = forgedOf(state);
+  const forge = config.forges[state.forgeLevel - 1];
+  return (
+    <>
+      <div className={styles.forgeHead}>
+        <Sprite grid={smithSprite()} scale={3} label="Thora Anvilsong" />
+        <div className={styles.forgeInfo}>
+          <b className={styles.pixel}>Thora Anvilsong</b>
+          <span className={styles.dim}>
+            "Bring me ore and I'll bring you steel. Past tier 3 I want proper alloy bars from the forge, not rubble from your sack.
+            And I only work metal as hot as your forge burns."
+          </span>
         </div>
       </div>
       <div className={styles.slots}>
@@ -506,7 +615,7 @@ export function ForgeMenu({ config, state, onState }: MenuProps) {
               {next && cost && (
                 capped ? (
                   <div className={styles.dim}>
-                    <IconLock size={12} /> Needs a hotter forge:{" "}
+                    <IconLock size={12} /> Thora needs a hotter forge first:{" "}
                     {config.forges.find((f) => f.maxTier >= next.tier)?.name ?? "a better one"}.
                   </div>
                 ) : (
@@ -643,6 +752,17 @@ export function OrePouch({ config, state }: { config: MiningConfig; state: Minin
           </Tooltip>
         );
       })}
+      {(config.alloys ?? []).map((a) =>
+        state.ores[a.key] ? (
+          <Tooltip key={a.key} multiline w={240} withArrow label={`${a.lore} Smelted at the forge for tier ${a.tier} gear.`}>
+            <div className={`${styles.oreCell} ${styles.oreSpecial}`}>
+              <Sprite grid={alloyIcon(a.tier, a.color)} scale={1} />
+              <span className={styles.oreName}>{a.name}</span>
+              <span className={styles.oreCount}>{compact(state.ores[a.key] ?? 0)}</span>
+            </div>
+          </Tooltip>
+        ) : null,
+      )}
       {Object.entries(MATERIALS).map(([key, m]) =>
         state.ores[key] ? (
           <Tooltip key={key} multiline w={240} withArrow label={m.lore}>
@@ -997,7 +1117,7 @@ export function TraderMenu({
     try {
       await work();
     } catch (e) {
-      showNotification({ title: "Moss shakes his head", message: (e as Error).message, color: "red" });
+      pushNote({ title: "Moss shakes his head", text: (e as Error).message, color: "#ff8a6a" });
     } finally {
       setBusy(false);
     }

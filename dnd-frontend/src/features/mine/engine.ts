@@ -68,8 +68,8 @@ export type Keys = {
 };
 export type Aim = { x: number; y: number } | null;
 
-export const CAMP = { W: 78, H: 10, ground: 8, lift: 5, forge: 19, market: 31, shop: 42, house: 54, church: 67 };
-export type Station = "lift" | "forge" | "market" | "shop" | "house" | "church" | "trader";
+export const CAMP = { W: 78, H: 10, ground: 8, lift: 5, forge: 19, smith: 25, market: 31, shop: 42, house: 54, church: 67 };
+export type Station = "lift" | "forge" | "smith" | "market" | "shop" | "house" | "church" | "trader";
 export type Drink = "potion" | "greater";
 export const GREATER_HEAL = 1;
 export type Blessing = "shield" | "regen" | "glow";
@@ -78,6 +78,17 @@ export const BOMB_RADIUS = 7;
 export const BOMB_FUSE_MS = 2000;
 export const BOMB_SELF_DMG = 200;
 const BOMB_HIT = 8;
+export const SHOCK_FUSE_MS = 700;
+export const SHOCK_RADIUS = 2.5;
+export const SHOCK_DMG = 2;
+export const RAD_RADIUS = 2.5;
+export const RAD_DMG = 0.05;
+export const RAD_MAX = 5;
+const RAD_TICK_MS = 1000;
+export const WARD_SET = 6;
+export const WARD_RADIUS = 2.5;
+export const WARD_DMG = 0.6;
+export const WARD_TICK_MS = 1000;
 export const BLESSED_REGEN = 0.02;
 export const GLOW_BOOST = 1.5;
 
@@ -205,6 +216,13 @@ export interface Bolt {
   big: boolean;
 }
 
+export interface Note {
+  text: string;
+  color: string;
+  title?: string;
+  icon?: string;
+}
+
 export interface FloatText {
   x: number;
   y: number;
@@ -238,6 +256,8 @@ export interface GameSetup {
   oreHp: number[];
   oreNames: string[];
   hotOre: number;
+  shockOre?: number;
+  glowOre?: number;
   oreColors: string[];
   depths: DepthInfo[];
   stats: MiningStats;
@@ -278,6 +298,7 @@ export interface Game extends GameSetup {
   now: number;
   parts: Particle[];
   texts: FloatText[];
+  notes: Note[];
   zs: { x: number; y: number; big: boolean; life: number }[];
   nextZ: number;
   pending: Pending;
@@ -305,6 +326,10 @@ export interface Game extends GameSetup {
   embers: Map<number, number>;
   bombArmed: boolean;
   fuses: { i: number; at: number }[];
+  charges: { i: number; at: number }[];
+  nextRad: number;
+  nextWard: number;
+  wardPulse: number;
   spits: Spit[];
   lobs: Lob[];
   grab: Grab | null;
@@ -514,14 +539,18 @@ export function stretch(g: Game): [number, number] {
   return [1, 1];
 }
 
-const say = (g: Game, x: number, y: number, text: string, color: string, life = 1100) =>
+const say = (g: Game, x: number, y: number, text: string, color: string, life = 1100) => {
+  while (g.texts.some((t) => Math.abs(t.x - x) < 28 && Math.abs(t.y - y) < 9)) y -= 9;
   g.texts.push({ x, y, text, color, life });
+};
+
+export const tell = (g: Game, text: string, color = "#ffb347") => g.notes.push({ text, color });
 
 export function showLoot(g: Game, i: number, ores: { index: number; n: number }[]) {
   const cx = ((i % g.W) + 0.5) * T;
   const cy = (Math.floor(i / g.W) + 0.5) * T;
   if (!ores.length) {
-    say(g, cx, cy, "Satchel full! The loot is lost.", "#ff8a6a", 2200);
+    tell(g, "Satchel full! The loot is lost.", "#ff8a6a");
     return;
   }
   const sorted = [...ores].sort((a, b) => a.index - b.index);
@@ -529,11 +558,10 @@ export function showLoot(g: Game, i: number, ores: { index: number; n: number }[
     say(g, cx, cy - k * 10, `+${compact(o.n)} ${g.oreNames[o.index]}`, g.oreColors[o.index], 2600 + k * 120);
 }
 
-export const sayOnce = (g: Game, key: string, text: string, color = "#ffb347", life = 1800) => {
+export const sayOnce = (g: Game, key: string, text: string, color = "#ffb347") => {
   if (g.warned.has(key)) return;
   g.warned.add(key);
-  const p = g.player;
-  say(g, (p.x + 0.5) * T, (p.y - 2) * T, text, color, life);
+  tell(g, text, color);
 };
 
 const shake = (g: Game, mag: number, ms: number) => {
@@ -572,6 +600,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     monsters: [],
     parts: [],
     texts: [],
+    notes: [],
     zs: [],
     nextZ: 0,
     pending: emptyPending(),
@@ -586,6 +615,10 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     embers: new Map(),
     bombArmed: false,
     fuses: [],
+    charges: [],
+    nextRad: 0,
+    nextWard: 0,
+    wardPulse: -1e9,
     spits: [],
     lobs: [],
     grab: null,
@@ -639,6 +672,7 @@ function loadCamp(g: Game, now: number, home: boolean) {
   g.traps = [];
   g.embers = new Map();
   g.fuses = [];
+  g.charges = [];
   g.bombArmed = false;
   g.spits = [];
   g.lobs = [];
@@ -699,6 +733,7 @@ export const stationAt = (g: Game): Station | null => {
   }
   if (Math.abs(x - CAMP.lift) <= 2) return "lift";
   if (Math.abs(x - CAMP.forge) <= 2) return "forge";
+  if (Math.abs(x - CAMP.smith) <= 2) return "smith";
   if (Math.abs(x - CAMP.market) <= 2) return "market";
   if (Math.abs(x - CAMP.shop) <= 2) return "shop";
   if (Math.abs(x - CAMP.house) <= 3) return "house";
@@ -727,6 +762,7 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.dimUntil = 0;
   g.embers = new Map();
   g.fuses = [];
+  g.charges = [];
   g.bombArmed = false;
   g.spits = [];
   g.lobs = [];
@@ -1002,36 +1038,41 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number } | 
                 : "break",
   );
   if (c === SEAL) {
-    say(g, cx, cy - 8, "The seal cracks open…", "#ffd77a", 1600);
+    tell(g, "The seal cracks open…", "#ffd77a");
     burst(g, cx, cy, "#ffd77a", 24, 2.4);
   } else if (c === GILDED_CHEST) {
-    say(g, cx, cy - 10, "A GILDED CHEST!", "#fff0a0", 2000);
+    tell(g, "A gilded chest!", "#fff0a0");
     burst(g, cx, cy, "#fff0a0", 40, 3.2);
     burst(g, cx, cy, "#ffd77a", 30, 2.4);
   } else if (c === IRON_CHEST) {
-    say(g, cx, cy - 8, "An iron-bound chest!", "#dfe3ea", 1600);
+    tell(g, "An iron-bound chest!", "#dfe3ea");
     burst(g, cx, cy, "#dfe3ea", 28, 2.6);
   } else if (c === CHEST) {
-    say(g, cx, cy - 8, "Treasure!", "#ffd77a", 1400);
+    tell(g, "Treasure!", "#ffd77a");
     burst(g, cx, cy, "#ffd77a", 22, 2.4);
   } else if (c === GEODE) {
-    say(g, cx, cy - 8, "The geode shatters!", "#c9a6ff", 1800);
+    tell(g, "The geode shatters!", "#c9a6ff");
     for (const color of ["#c9a6ff", "#7fe3ff", "#ff9ad5", "#ffffff"]) burst(g, cx, cy, color, 12, 2.8);
   } else if (c === DIAMOND_CELL) {
-    say(g, cx, cy - 10, "A DIAMOND!", "#c4f4ff", 2400);
     for (const color of ["#ffffff", "#c4f4ff", "#6cc6ea"]) burst(g, cx, cy, color, 20, 3);
   } else if (c === LEDGER) {
-    say(g, cx, cy - 8, "A ledger page!", "#f4e2b8", 1600);
+    tell(g, "A ledger page!", "#f4e2b8");
     burst(g, cx, cy, "#f4e2b8", 18, 2.2);
     g.found = g.depth;
   } else if (ore >= 0) {
     burst(g, cx, cy, g.oreColors[ore], 14, 2);
+    if (e && ore === g.shockOre) {
+      g.charges.push({ i, at: g.now + SHOCK_FUSE_MS });
+      burst(g, cx, cy, "#bfe6ff", 10, 2.6);
+      tell(g, "It's crackling! Get clear!", "#bfe6ff");
+      g.sfx.push("crit");
+    }
     if (g.stats.vein && e) echoVein(g, i, c);
     if (!g.richFound && inMotherlode(g, i)) {
       g.richFound = true;
       g.sfx.push("motherlode");
       feat(g, "motherlode");
-      say(g, cx, cy - 14, "MOTHERLODE!", g.oreColors[ore], 2400);
+      tell(g, "Motherlode!", g.oreColors[ore]);
       burst(g, cx, cy, g.oreColors[ore], 50, 3.4);
     }
     if (g.carried >= hardCap(g)) {
@@ -1046,8 +1087,7 @@ function breakCell(g: Game, i: number, c: number, e: { s: number; c: number } | 
       g.carried += Math.floor(g.stats.yield) + (g.pet?.key === "ferret" ? 1 : 0);
       if (!was && encumbered(g)) {
         g.sfx.push("full");
-        say(g, (g.player.x + 0.5) * T, (g.player.y - 2) * T, "Encumbered!", "#ffb347", 1600);
-        sayOnce(g, "heavy", "Your satchel is overstuffed. You'll move slowly until you bank it.", "#ffb347", 3200);
+        sayOnce(g, "heavy", "Your satchel is overstuffed. You'll move slowly until you bank it.", "#ffb347");
       }
     }
   }
@@ -1118,7 +1158,7 @@ function wakeMimic(g: Game, x: number, y: number) {
   const cx = (x + 0.5) * T;
   const cy = y * T;
   burst(g, cx, cy + 8, "#c9a04a", 18, 2.6);
-  say(g, cx, cy - 10, "It's a MIMIC!", "#ff6a5a", 1800);
+  tell(g, "It's a mimic!", "#ff6a5a");
   g.sfx.push("mimic");
   feat(g, "mimicWake");
   if (!g.firebolt) sayOnce(g, "nofire", "Your pick just bounces off. Only fire hurts it. Run!", "#ff8a6a");
@@ -1138,12 +1178,11 @@ export function bombKey(g: Game) {
   if (!g.bombArmed) {
     if ((g.bombs ?? 0) <= 0) return sayOnce(g, "nobomb", "No bombs left. Moss sells them down here.", "#ff8a6a");
     g.bombArmed = true;
-    sayOnce(g, "bombAim", "Point at an open spot and press B again to light it. Esc puts it away.", "#ffb347", 3200);
+    sayOnce(g, "bombAim", "Point at an open spot and press B again to light it. Esc puts it away.", "#ffb347");
     return;
   }
   const i = bombCell(g);
-  const p = g.player;
-  if (i < 0) return void say(g, (p.x + 0.5) * T, (p.y - 2) * T, "Can't set it there", "#ff8a6a", 700);
+  if (i < 0) return void tell(g, "Can't set it there.", "#ff8a6a");
   g.bombArmed = false;
   g.bombs = (g.bombs ?? 1) - 1;
   g.fuses.push({ i, at: g.now + BOMB_FUSE_MS });
@@ -1183,6 +1222,85 @@ function explode(g: Game, at: number) {
   shake(g, 7, 450);
   g.sfx.push("smash", "seal");
   feat(g, "bombBlast");
+}
+
+function discharge(g: Game, at: number) {
+  const cx = at % g.W;
+  const cy = Math.floor(at / g.W);
+  const near = (x: number, y: number) => Math.hypot(x - cx, y - cy) <= SHOCK_RADIUS;
+  for (const m of liveMonsters(g))
+    if (cellsOf(m).some(([x, y]) => near(x, y))) damageMonster(g, m, Math.round(g.stats.power * 3), false, null);
+  const p = g.player;
+  if (near(p.x, p.y) || near(p.x, p.y - 1)) {
+    hurt(g, g.info.monsterDamage * SHOCK_DMG, "#bfe6ff");
+    sayOnce(g, "shock", "Hizagkuur stores lightning and lets it all go when it breaks. Back off, or bomb it from afar.", "#bfe6ff");
+    feat(g, "shocked");
+  }
+  const px = (cx + 0.5) * T;
+  const py = (cy + 0.5) * T;
+  for (let k = 0; k < 24; k++) {
+    const a = (k / 24) * Math.PI * 2;
+    const v = (SHOCK_RADIUS * T) / 260;
+    g.parts.push({ x: px, y: py, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 260, color: k % 2 ? "#bfe6ff" : "#ffffff" });
+  }
+  for (const color of ["#ffffff", "#bfe6ff", "#c07a3a"]) burst(g, px, py, color, 16, 2.6);
+  say(g, px, py - 10, "CRACK!", "#bfe6ff", 900);
+  shake(g, 4, 260);
+  g.sfx.push("smash");
+}
+
+function stepCharges(g: Game) {
+  if (!g.charges.length) return;
+  for (const c of g.charges)
+    if (rand() < 0.5)
+      g.parts.push({
+        x: ((c.i % g.W) + rand()) * T,
+        y: (Math.floor(c.i / g.W) + rand()) * T,
+        vx: (rand() - 0.5) * 1.6,
+        vy: (rand() - 0.5) * 1.6,
+        life: 140,
+        color: rand() < 0.5 ? "#ffffff" : "#bfe6ff",
+      });
+  const due = g.charges.filter((c) => g.now >= c.at);
+  if (!due.length) return;
+  g.charges = g.charges.filter((c) => g.now < c.at);
+  for (const c of due) discharge(g, c.i);
+}
+
+export function radiationAt(g: Game, x: number, y: number) {
+  if (g.camp || g.glowOre === undefined || g.glowOre < 0) return 0;
+  const r = Math.ceil(RAD_RADIUS);
+  const cy = y - 0.5;
+  let n = 0;
+  for (let yy = Math.max(0, Math.floor(cy) - r); yy <= Math.min(g.H - 1, Math.ceil(cy) + r); yy++)
+    for (let xx = Math.max(0, x - r); xx <= Math.min(g.W - 1, x + r); xx++)
+      if (g.map[yy * g.W + xx] === ORE0 + g.glowOre && Math.hypot(xx - x, yy - cy) <= RAD_RADIUS) n++;
+  return Math.min(n, RAD_MAX);
+}
+
+export const warded = (g: Game) => !g.camp && g.stats.setBonus === WARD_SET;
+
+function stepWard(g: Game) {
+  if (!warded(g) || g.asleep || g.now < g.nextWard) return;
+  const p = g.player;
+  const near = liveMonsters(g).filter((m) => cellsOf(m).some(([x, y]) => Math.hypot(x - p.x, y - (p.y - 0.5)) <= WARD_RADIUS));
+  if (!near.length) return;
+  g.nextWard = g.now + WARD_TICK_MS;
+  g.wardPulse = g.now;
+  for (const m of near) {
+    burst(g, (m.x + 0.5) * T, m.y * T, "#c27aff", 6, 1.2);
+    damageMonster(g, m, Math.round(g.stats.power * WARD_DMG), false, null);
+  }
+}
+
+function stepRadiation(g: Game) {
+  if (g.asleep || g.now < g.nextRad || warded(g)) return;
+  const p = g.player;
+  const n = radiationAt(g, p.x, p.y);
+  if (!n) return;
+  g.nextRad = g.now + RAD_TICK_MS;
+  hurt(g, g.info.monsterDamage * RAD_DMG * n, "#c27aff");
+  sayOnce(g, "rad", "Byeshk radiates! It hurts to stand near. A bomb works it from a safe distance.", "#c27aff");
 }
 
 function stepFuses(g: Game) {
@@ -1324,7 +1442,7 @@ function killMonster(g: Game, m: Monster, by: string | null) {
     const cx = (m.x + WYRM_W / 2) * T;
     const cy = (m.y - 1) * T;
     for (const color of ["#ffe066", "#ff8a2a", "#c22a1a", "#fff3a0"]) burst(g, cx, cy, color, 40, 3.6);
-    say(g, cx, cy - 30, "THE ASHEN WYRM FALLS!", "#ffd77a", 3200);
+    tell(g, "The Ashen Wyrm falls!", "#ffd77a");
     shake(g, 8, 700);
     g.sfx.push("jackpot");
     feat(g, "wyrmSlain");
@@ -1399,7 +1517,7 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
     g.sfx.push("clang");
     if (!m.petBlocked) {
       m.petBlocked = true;
-      say(g, cx, cy - 14, g.firebolt ? "Only fire hurts it! (F)" : "Only fire hurts it!", "#ffb347", 1600);
+      tell(g, g.firebolt ? "Only fire hurts it! (F)" : "Only fire hurts it!", "#ffb347");
     }
     return;
   }
@@ -1426,7 +1544,7 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
     if (m.hp > 1) m.hp = 1;
     else if (!m.petBlocked) {
       m.petBlocked = true;
-      say(g, cx, cy - 8, "Needs your pickaxe!", "#ffb347");
+      tell(g, "Needs your pickaxe!", "#ffb347");
     }
     return;
   }
@@ -1441,7 +1559,7 @@ function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: s
   if (m.kind === 4 && !crit && !m.revived && !byPet) {
     m.revived = true;
     m.hp = Math.ceil(m.maxHp / 2);
-    say(g, cx, cy - 8, "It pulls itself back together!", "#e8e0cc", 1400);
+    tell(g, "It pulls itself back together!", "#e8e0cc");
     return;
   }
   killMonster(g, m, byPet);
@@ -2210,8 +2328,8 @@ function stepWyrm(g: Game, m: Monster) {
     m.awake = true;
     m.nextSlam = g.now + 1600;
     m.nextHit = g.now + 1200;
-    say(g, cx * T, (m.y - 4) * T, "The Ashen Wyrm wakes!", "#ff6a3a", 2400);
-    sayOnce(g, "wyrm", "A dragon! It bites hard, spits fire and shrugs off fire. Only steel and bombs hurt it.", "#ff8a6a", 5000);
+    tell(g, "The Ashen Wyrm wakes!", "#ff6a3a");
+    sayOnce(g, "wyrm", "A dragon! It bites hard, spits fire and shrugs off fire. Only steel and bombs hurt it.", "#ff8a6a");
     shake(g, 6, 600);
     g.sfx.push("seal");
     feat(g, "wyrmWake");
@@ -2429,7 +2547,7 @@ function startGrab(g: Game, m: Monster) {
   m.windupUntil = 0;
   const p = g.player;
   say(g, (p.x + 0.5) * T, (p.y - 3) * T, "GRABBED!", "#ff6a5a", 1200);
-  sayOnce(g, "grab", "The mimic has you! Press A, D, A, D... as fast as you can to break free.", "#ff6a5a", 5000);
+  sayOnce(g, "grab", "The mimic has you! Press A, D, A, D... as fast as you can to break free.", "#ff6a5a");
   shake(g, 3, 200);
   g.sfx.push("mimic");
 }
@@ -2657,7 +2775,7 @@ function stepTraps(g: Game) {
     } else if (t.key === "bones" && Math.abs(p.x - tx) <= 1 && Math.abs(p.y - ty) <= 1 && !t.sprung) {
       t.sprung = true;
       t.firedAt = g.now;
-      say(g, cx, cy - 10, "The bones rattle. Something heard that.", "#e8dcc0", 2200);
+      tell(g, "The bones rattle. Something heard that.", "#e8dcc0");
       g.sfx.push("clang");
       spawn(g, true);
       spawn(g, true);
@@ -2683,7 +2801,7 @@ function stepTraps(g: Game) {
         hurt(g, hit * 0.5, "#ff8a2a");
       } else {
         g.dimUntil = g.now + DIM_MS;
-        say(g, (p.x + 0.5) * T, (p.y - 2) * T, "Your lantern gutters!", "#c9b8ff", 1400);
+        tell(g, "Your lantern gutters!", "#c9b8ff");
       }
       warn();
     }
@@ -2712,11 +2830,14 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
     markSeen(g, Math.round(g.petActor.px), Math.round(g.petActor.py), PET_LIGHT[g.petActor.key]);
   if (!g.camp && !g.asleep && g.now >= g.nextSpawn && g.now - g.startedAt > SPAWN_GRACE_MS) spawn(g);
   if (!g.camp && g.now - g.startedAt > 4000 && !inTorchlight(g, p.x, p.y - 1))
-    sayOnce(g, "dark", "Dark out here. Wounds only mend in torchlight, and monsters stir faster (T plants a torch).", "#ffc98a", 4200);
+    sayOnce(g, "dark", "Dark out here. Wounds only mend in torchlight, and monsters stir faster (T plants a torch).", "#ffc98a");
   stepBolts(g, dt);
   stepSpits(g, dt);
   stepLobs(g, dt);
   stepFuses(g);
+  stepCharges(g);
+  if (!g.camp) stepRadiation(g);
+  stepWard(g);
   stepMonsters(g, dt);
   stepEmbers(g);
   stepTraps(g);

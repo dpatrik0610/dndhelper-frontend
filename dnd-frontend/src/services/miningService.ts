@@ -58,6 +58,15 @@ export interface ForgeInfo {
   cost: OreCounts | null;
 }
 
+export interface AlloyInfo {
+  key: string;
+  name: string;
+  color: string;
+  lore: string;
+  tier: number;
+  recipe: OreCounts;
+}
+
 export interface PetInfo {
   key: string;
   name: string;
@@ -106,6 +115,7 @@ export interface MiningConfig {
   maxRevives?: number;
   maxRecalls?: number;
   maxBlessingMinutes?: number;
+  alloys?: AlloyInfo[];
 }
 
 export interface MiningTrip {
@@ -221,6 +231,7 @@ export const ascend = () => post<MiningState>("/ascend");
 export const faint = () => post<MiningState>("/faint");
 export const craftGear = (slot: SlotKey) => post<MiningState>(`/craft/${slot}`);
 export const upgradeForge = () => post<MiningState>("/forge");
+export const smeltAlloy = (key: string, count: number) => post<MiningState>(`/smelt/${key}/${count}`);
 export const buyPet = (key: string) => post<MiningState>(`/pets/${key}`);
 export const trade = (item: string) => post<MiningState>(`/trade/${item}`);
 export const buyWare = (item: string, count: number) => post<MiningState>(`/buy/${item}/${count}`);

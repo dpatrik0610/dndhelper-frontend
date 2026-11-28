@@ -3,29 +3,6 @@ import type { AchCtx, Achievement } from "./achievements";
 import { PanelHead } from "./CampMenus";
 import styles from "./Mine.module.css";
 
-export interface AchToast {
-  key: number;
-  icon: string;
-  name: string;
-}
-
-export function AchievementToasts({ toasts }: { toasts: AchToast[] }) {
-  if (!toasts.length) return null;
-  return (
-    <div className={styles.achToasts} aria-live="polite">
-      {toasts.map((t) => (
-        <div key={t.key} className={styles.achToast}>
-          <span className={styles.achIcon}>{t.icon}</span>
-          <div>
-            <span className={styles.eyebrow}>Achievement unlocked</span>
-            <strong>{t.name}</strong>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function TrophyPanel({
   list,
   read,

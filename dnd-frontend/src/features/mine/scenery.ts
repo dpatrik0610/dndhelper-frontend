@@ -7,7 +7,7 @@ const T = 16;
 const LIFT_X = CAMP.lift * T + 8;
 const ARCH = { half: 25, rise: 50, top: 76 };
 const WARDEN = 196;
-const TAVERN = 398;
+const TAVERN = 560;
 const LIGHTHOUSE = 1214;
 const ANVIL_PEAK = 128;
 

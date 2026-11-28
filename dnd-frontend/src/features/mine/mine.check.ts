@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import type { DepthInfo, MiningStats } from "@services/miningService";
 import { FORGE_H, FORGE_LEVELS, FORGE_W, forgeSprite } from "./art/forge";
+import { alloyIcon } from "./art/materials";
 import { PET_ART } from "./art/pets";
 import { ENEMIES } from "./art/world";
 import {
@@ -22,6 +23,8 @@ import {
   revive,
   setBlessings,
   SHIELD_CUT,
+  SHOCK_FUSE_MS,
+  WARD_SET,
   GLOW_BOOST,
   isZombie,
   rarify,
@@ -704,6 +707,60 @@ assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
   assert.equal(1000 - close.player.hp, BOMB_SELF_DMG * 0.75, "your own bomb hits you for 200, less armor");
 }
 {
+  const quiet = (gm: Game) => {
+    gm.monsters = [];
+    gm.nextSpawn = 1e12;
+    return gm;
+  };
+  const shock = quiet(newGame(-1, rows.map((r, y) => (y === 2 ? "#......A000#" : r))));
+  shock.shockOre = 0;
+  run(shock, 4000, { right: true });
+  run(shock, SHOCK_FUSE_MS + 50);
+  assert.ok(shock.map[at(7, 2)] === OPEN && shock.charges.length === 0, "hizagkuur broken by the pick goes off");
+  assert.ok(shock.player.hp < 20, "standing next to it when it goes off hurts");
+
+  const glowing = quiet(newGame(-1, rows.map((r, y) => (y === 3 ? "#000A000000#" : r))));
+  glowing.glowOre = 0;
+  run(glowing, 1100);
+  assert.ok(glowing.player.hp < 20, "byeshk next to you radiates through the rock");
+  const far = quiet(newGame(-1));
+  far.glowOre = 0;
+  run(far, 1100);
+  assert.equal(far.player.hp, 20, "byeshk four tiles off is harmless");
+
+  const field = ["############", "#......0000#", "#......0000#", ...Array.from({ length: 15 }, (_, y) => (y === 6 ? "#.000000000#" : "#0000A00000#")), "############"];
+  const safe = quiet(newGame(-1, field));
+  safe.shockOre = 0;
+  safe.seen.fill(1);
+  safe.bombs = 1;
+  safe.hover = { x: 1.5, y: 9.5 };
+  bombKey(safe);
+  bombKey(safe);
+  run(safe, 2100);
+  assert.ok(safe.map[12 * W + 5] === OPEN && safe.charges.length === 0, "bombed hizagkuur never sparks");
+  assert.equal(safe.player.hp, 20, "bombing it from afar is safe");
+}
+{
+  const wardRows = ["############", "#..........#", "#..........#", "############"];
+  const ward = newGame(-1, wardRows);
+  ward.nextSpawn = 1e12;
+  ward.stats = { ...ward.stats, setBonus: WARD_SET, power: 10 };
+  const near = addMonster(ward, 1, 5, 2);
+  const far = addMonster(ward, 1, 9, 2);
+  ward.monsters = [near, far];
+  const [nearHp, farHp] = [near.hp, far.hp];
+  run(ward, 50);
+  assert.ok(near.hp < nearHp, "the Byeshk ward bites a monster two blocks away");
+  assert.equal(far.hp, farHp, "monsters outside the ward are untouched");
+  const shielded = newGame(-1, rows.map((r, y) => (y === 3 ? "#000A000000#" : r)));
+  shielded.monsters = [];
+  shielded.nextSpawn = 1e12;
+  shielded.glowOre = 0;
+  shielded.stats = { ...shielded.stats, setBonus: WARD_SET };
+  run(shielded, 1100);
+  assert.equal(shielded.player.hp, 20, "the ward keeps Byeshk radiation out");
+}
+{
   const lair = newGame(-1, ["############", ...Array.from({ length: 5 }, () => "#..........#"), "############"]);
   lair.monsters = [];
   lair.nextSpawn = 1e12;
@@ -984,6 +1041,11 @@ for (const L of FORGE_LEVELS)
     assert.ok(!s.flat().includes("#ff00ff"), `forge ${L.level} palette`);
   }
 console.log("forge ok");
+for (let t = 4; t <= 10; t++) {
+  const a = alloyIcon(t, "#8fb8cc");
+  assert.ok(a.length === 16 && a.every((r) => r.length === 16), `alloy ${t} is 16x16`);
+  assert.ok(!a.flat().includes("#ff00ff"), `alloy ${t} palette`);
+}
 
 {
   const base = { power: 10, swingMs: 500, light: 3, maxHp: 50, critZone: 0.2, critMult: 2, luck: 0.1, yield: 1, capacity: 100, maxDepth: 3, reach: 1, wide: false, vein: false, oreSight: 0, chainCrit: false } as unknown as MiningStats;
@@ -1014,9 +1076,8 @@ console.log("renown breakdown ok");
   showLoot(g, W + 2, [{ index: 1, n: 4 }, { index: 0, n: 12000 }]);
   assert.deepEqual(g.texts.map((t) => t.text), ["+12K Copper", "+4 Tin"]);
   assert.ok(g.texts[1].y < g.texts[0].y);
-  g.texts = [];
   showLoot(g, W + 2, []);
-  assert.match(g.texts[0].text, /Satchel full/);
+  assert.match(g.notes[0].text, /Satchel full/);
 }
 console.log("loot popups ok");
 {

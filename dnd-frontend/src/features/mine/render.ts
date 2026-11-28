@@ -4,7 +4,7 @@ import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
 import { HOUSE_H, HOUSE_LEVELS, houseSprite } from "./art/house";
 import { COIN, DIAMOND_GRID, MERCHANT } from "./art/materials";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
-import { bombSprite, chestSprite, cracks, enemySprite, oreTile, priestSprite, stoneTile, traderSprite, wyrmSprite } from "./art/world";
+import { bombSprite, chestSprite, cracks, enemySprite, oreTile, priestSprite, smithSprite, stoneTile, traderSprite, wyrmSprite } from "./art/world";
 import {
   BEDROCK,
   BOLT_MS,
@@ -26,6 +26,8 @@ import {
   WYRM_H,
   WYRM_SPIT_WINDUP,
   playerPos,
+  warded,
+  WARD_RADIUS,
   stretch,
   isZombie,
   KINDS,
@@ -453,6 +455,111 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     ctx.globalAlpha = 1;
   };
 
+  const smithy = (cx: number, gy: number, now: number, on: boolean) => {
+    ctx.fillStyle = "#3e3a40";
+    ctx.fillRect(cx - 28, gy - 30, 48, 30);
+    ctx.fillStyle = "#2e2a30";
+    for (let r = 5; r < 30; r += 5) ctx.fillRect(cx - 28, gy - 30 + r, 48, 1);
+    for (let r = 0; r < 6; r++)
+      for (let k = (r % 2) * 5; k < 48; k += 10) ctx.fillRect(cx - 28 + k, gy - 30 + r * 5, 1, 5);
+    for (let k = 0; k < 60; k++) {
+      const top = gy - 41 + Math.floor(k / 6);
+      ctx.fillStyle = Math.floor(k / 4) % 2 ? "#4a3a2e" : "#3a2c22";
+      ctx.fillRect(cx - 33 + k, top, 1, 4);
+      ctx.fillStyle = "#1e1612";
+      ctx.fillRect(cx - 33 + k, top + 4, 1, 1);
+    }
+    ctx.fillStyle = "#6b4423";
+    ctx.fillRect(cx - 31, gy - 37, 3, 37);
+    ctx.fillRect(cx + 22, gy - 32, 3, 32);
+    ctx.fillRect(cx + 22, gy - 30, 9, 1);
+    ctx.fillStyle = "#4a3020";
+    ctx.fillRect(cx + 25, gy - 29, 1, 2);
+    ctx.fillRect(cx + 30, gy - 29, 1, 2);
+    const sway = Math.round(Math.sin(now / 800) * 0.6);
+    ctx.fillStyle = "#6b4423";
+    ctx.fillRect(cx + 24 + sway, gy - 27, 9, 7);
+    ctx.fillStyle = "#c8ccd4";
+    ctx.fillRect(cx + 26 + sway, gy - 26, 5, 2);
+    ctx.fillRect(cx + 28 + sway, gy - 24, 1, 3);
+
+    ctx.fillStyle = "#5a3a22";
+    ctx.fillRect(cx - 25, gy - 25, 18, 1);
+    ctx.fillStyle = "#8a8e96";
+    ctx.fillRect(cx - 23, gy - 24, 5, 2);
+    ctx.fillStyle = "#6b4423";
+    ctx.fillRect(cx - 21, gy - 22, 1, 7);
+    ctx.fillStyle = "#c8ccd4";
+    ctx.fillRect(cx - 15, gy - 24, 1, 9);
+    ctx.fillStyle = "#c9a04a";
+    ctx.fillRect(cx - 17, gy - 22, 5, 1);
+    ctx.fillStyle = "#8a8e96";
+    ctx.fillRect(cx - 11, gy - 24, 3, 4);
+    ctx.fillStyle = "#6b4423";
+    ctx.fillRect(cx - 10, gy - 20, 1, 5);
+
+    ctx.fillStyle = "#4a3020";
+    ctx.fillRect(cx - 25, gy - 6, 1, 6);
+    ctx.fillRect(cx - 16, gy - 6, 1, 6);
+    ctx.fillRect(cx - 25, gy - 6, 10, 1);
+    ctx.fillStyle = "#8a8478";
+    for (let dy = -4; dy <= 4; dy++) {
+      const w = Math.round(Math.sqrt(16 - Math.min(16, dy * dy)));
+      ctx.fillRect(cx - 20 - w, gy - 10 + dy, 2 * w + 1, 1);
+    }
+    ctx.fillStyle = "#5a564e";
+    const spin = (now / 400) % (Math.PI * 2);
+    ctx.fillRect(Math.round(cx - 20 + Math.cos(spin) * 3), Math.round(gy - 10 + Math.sin(spin) * 3), 1, 1);
+    ctx.fillRect(cx - 20, gy - 10, 1, 1);
+
+    ctx.fillStyle = "#5a3a22";
+    ctx.fillRect(cx + 12, gy - 9, 8, 9);
+    ctx.fillStyle = "#3a3a40";
+    ctx.fillRect(cx + 12, gy - 7, 8, 1);
+    ctx.fillRect(cx + 12, gy - 3, 8, 1);
+    ctx.fillStyle = "#3a6a8a";
+    ctx.fillRect(cx + 13, gy - 9, 6, 1);
+
+    const ax = cx + 1;
+    const ay = gy - 9;
+    ctx.fillStyle = "#5a3a22";
+    ctx.fillRect(ax + 2, ay + 7, 7, 2);
+    ctx.fillStyle = "#4a4c56";
+    ctx.fillRect(ax + 1, ay + 5, 9, 2);
+    ctx.fillRect(ax + 3, ay + 2, 5, 3);
+    ctx.fillStyle = "#6a6c76";
+    ctx.fillRect(ax, ay, 11, 2);
+    ctx.fillRect(ax + 11, ay, 2, 1);
+    ctx.fillStyle = "#a8aab4";
+    ctx.fillRect(ax, ay, 11, 1);
+    const p = (now % 1300) / 1300;
+    const struck = p < 0.12;
+    ctx.fillStyle = struck || Math.floor(now / 200) % 3 ? "#ff8a2a" : "#ffd23f";
+    ctx.fillRect(ax + 4, ay - 1, 4, 1);
+
+    draw(cached("smith", smithSprite), cx - 11, gy - 15);
+    const hx = cx - 2;
+    ctx.fillStyle = "#6b4423";
+    if (struck) {
+      for (let k = 0; k < 6; k++) ctx.fillRect(hx + k, gy - 5 - k, 1, 1);
+      ctx.fillStyle = "#5a5c66";
+      ctx.fillRect(hx + 5, gy - 13, 3, 3);
+    } else {
+      ctx.fillRect(hx, gy - 13, 1, 8);
+      ctx.fillStyle = "#5a5c66";
+      ctx.fillRect(hx - 2, gy - 16, 5, 3);
+    }
+    if (p < 0.25)
+      for (let k = 0; k < 5; k++) {
+        const t = p / 0.25;
+        ctx.globalAlpha = 1 - t;
+        ctx.fillStyle = k % 2 ? "#ffd23f" : "#ff8a2a";
+        ctx.fillRect(Math.round(ax + 6 + (k - 2) * 3 * t), Math.round(ay - 2 - (4 + k) * t + 6 * t * t), 1, 1);
+      }
+    ctx.globalAlpha = 1;
+    label("Thora's Smithy", cx - 4, gy - 48, on);
+  };
+
   const campBackdrop = (g: Game, ox: number, oy: number, VW: number, VH: number, flick: boolean) => {
     const gy = CAMP.ground * T + oy;
     const near = stationAt(g);
@@ -492,6 +599,8 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     draw(forge, fx, fy);
     forgeSmoke(lv, fx + FORGE_SPOTS.x, fy, g.now);
     label("Forge", fx + FORGE_SPOTS.x, fy + (lv >= 3 ? FORGE_SPOTS.chimney - 8 : FORGE_SPOTS.hood - 4), near === "forge");
+
+    smithy(CAMP.smith * T + 8 + ox, gy, g.now, near === "smith");
 
     const sx = CAMP.shop * T + 8 + ox - 16;
     ctx.fillStyle = "#6b4423";
@@ -1326,6 +1435,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       const hy0 = CAMP.ground * T + oy - HOUSE_H;
       for (const [x, y, r] of spots.lights) glow(ctx, hx0 + x, hy0 + y, r, [255, 200, 110], flick ? 0.2 : 0.16);
       glow(ctx, CAMP.market * T + ox + 8, CAMP.ground * T + oy - 20, 20, [255, 200, 110], 0.1);
+      glow(ctx, CAMP.smith * T + ox + 14, CAMP.ground * T + oy - 10, 14, [255, 140, 50], g.now % 1300 < 160 ? 0.28 : 0.14);
       glow(ctx, CAMP.church * T + ox + 12, CAMP.ground * T + oy - 21, 16, [255, 210, 150], flick ? 0.2 : 0.16);
     }
     else {
@@ -1345,6 +1455,15 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           auras.push({ x: c * T + ox + 8, y: r * T + oy, tier: 7, seed: i });
           glow(ctx, c * T + ox + 8, r * T + oy + 2, 10, [255, 140, 50], 0.1);
         }
+    if (!g.camp && g.glowOre !== undefined && g.glowOre >= 0) {
+      const pulse = 0.09 + Math.sin(g.now / 420) * 0.03;
+      for (let r = r0; r <= r1; r++)
+        for (let c = c0; c <= c1; c++)
+          if (g.map[r * g.W + c] === ORE0 + g.glowOre && Math.hypot(c - p.x, r - p.y) <= 9)
+            glow(ctx, c * T + ox + 8, r * T + oy + 8, 14, [194, 122, 255], pulse);
+    }
+    for (const ch of g.charges)
+      glow(ctx, (ch.i % g.W) * T + ox + 8, Math.floor(ch.i / g.W) * T + oy + 8, 18, [191, 230, 255], Math.floor(g.now / 60) % 2 ? 0.5 : 0.25);
     const set = SETS[tiers.helm];
     if (tiers.helm >= 8 && set.gem) glow(ctx, headX, headY + 4, 20, hex(set.gem), 0.26);
     ctx.globalCompositeOperation = "source-over";
@@ -1357,6 +1476,41 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         ctx.fillRect(Math.round(headX + Math.cos(a) * 13), Math.round(headY + 2 + Math.sin(a) * 10), 1, 1);
       }
 
+    if (warded(g)) {
+      const pos2 = playerPos(g);
+      const cx = (pos2.x + 0.5) * T + ox;
+      const cy = (pos2.y + 0.4) * T + oy;
+      const since = g.now - g.wardPulse;
+      const flash = since < 260 ? 1 - since / 260 : 0;
+      const R = WARD_RADIUS * T;
+      ctx.globalCompositeOperation = "lighter";
+      glow(ctx, cx, cy, R, [150, 80, 230], 0.08 + 0.12 * flash);
+      ctx.globalCompositeOperation = "source-over";
+      const n = Math.round(2 * Math.PI * R);
+      for (let k = 0; k < n; k++) {
+        const a = (k / n) * Math.PI * 2;
+        const wave = Math.sin(a * 6 + g.now / 300);
+        ctx.globalAlpha = (0.18 + 0.14 * wave + 0.5 * flash) * (k % 3 === 0 ? 1.4 : 1);
+        ctx.fillStyle = wave > 0.7 ? "#f0d8ff" : "#c27aff";
+        ctx.fillRect(Math.round(cx + Math.cos(a) * R), Math.round(cy + Math.sin(a) * R * 0.92), 1, 1);
+      }
+      if (flash) {
+        const r2 = R * (1 - flash * 0.6);
+        ctx.globalAlpha = flash * 0.6;
+        ctx.fillStyle = "#e8c8ff";
+        for (let k = 0; k < 48; k++) {
+          const a = (k / 48) * Math.PI * 2;
+          ctx.fillRect(Math.round(cx + Math.cos(a) * r2), Math.round(cy + Math.sin(a) * r2 * 0.92), 1, 1);
+        }
+      }
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = "#f0d8ff";
+      for (let k = 0; k < 3; k++) {
+        const a = g.now / 900 + (k * Math.PI * 2) / 3;
+        ctx.fillRect(Math.round(cx + Math.cos(a) * (R - 3)), Math.round(cy + Math.sin(a) * (R - 3) * 0.92), 1, 1);
+      }
+      ctx.globalAlpha = 1;
+    }
     for (const t of g.texts) write(t.text, t.x + ox, t.y + oy, t.color, Math.min(1, t.life / 300));
     flushWords();
     return { camX: Math.round(camX), camY: Math.round(camY) };

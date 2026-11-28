@@ -170,7 +170,7 @@ export const SET_BONUSES: [string, string][] = [
   ["Gilded", "10% more luck for rare ore."],
   ["Fey-Bane", "5% more crit chance."],
   ["Never-Rust", "Swings come a little faster."],
-  ["Starbiter", "Crits on monsters slow them down for 3 seconds."],
+  ["Starbiter", "Crits slow monsters for 3 seconds, and a Byeshk ward hums around you: every second it bites monsters within 2.5 blocks for 60% of your pickaxe damage. Byeshk radiation can't get through it."],
   ["Silver Flame", "Crits on monsters set them burning. Fire hurts mimics too."],
   ["Featherlight", "Jump two blocks high."],
   ["Unbreaking", "Monsters hit you 30% softer."],
