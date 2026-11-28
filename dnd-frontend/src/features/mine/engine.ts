@@ -86,6 +86,9 @@ export interface Player extends Tween {
   lastHurt: number;
   hurtUntil: number;
   hangUntil: number;
+  jumpAt: number;
+  jumpH: number;
+  jumpTop: number;
   fell: number;
   landAt: number;
   nextDash: number;
@@ -349,6 +352,31 @@ export const drawPos = (a: Tween) => {
   return { x: a.fromX + (a.x - a.fromX) * k, y: a.fromY + (a.y - a.fromY) * k };
 };
 
+export function playerPos(g: Game) {
+  const p = g.player;
+  const pos = drawPos(p);
+  const rise = JUMP_MS * (p.jumpH > 1 ? 1.6 : 1) + HANG_MS * 0.85;
+  const since = g.now - p.jumpAt;
+  if (p.jumpH && !p.fell && since < rise && p.y === p.jumpTop) {
+    const k = 1 - (1 - since / rise) ** 2;
+    return { x: pos.x, y: p.jumpTop + p.jumpH * (1 - k) };
+  }
+  if (p.fell === 1 && p.t < p.dur) {
+    const k = p.t / p.dur;
+    return { x: pos.x, y: p.fromY + (p.y - p.fromY) * k * k };
+  }
+  return pos;
+}
+
+export function stretch(g: Game): [number, number] {
+  const p = g.player;
+  const land = (g.now - p.landAt) / 140;
+  if (p.landAt && land < 1) return [1 + 0.12 * (1 - land), 1 - 0.12 * (1 - land)];
+  if (p.jumpH && g.now - p.jumpAt < 140) return [0.92, 1.1];
+  if (p.fell > 1) return [0.94, 1.08];
+  return [1, 1];
+}
+
 const say = (g: Game, x: number, y: number, text: string, color: string, life = 1100) =>
   g.texts.push({ x, y, text, color, life });
 
@@ -496,6 +524,9 @@ function place(g: Game, x: number) {
     lastHurt: 0,
     hurtUntil: 0,
     hangUntil: 0,
+    jumpAt: 0,
+    jumpH: 0,
+    jumpTop: 0,
     fell: 0,
     landAt: 0,
     nextDash: 0,
@@ -1378,6 +1409,9 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
   if (keys.jump && grounded && !heavy && isOpen(g, x, y - 2)) {
     const high = g.stats.setBonus === 8 && isOpen(g, x, y - 3);
     p.hangUntil = g.now + JUMP_MS * (high ? 1.6 : 1) + HANG_MS;
+    p.jumpAt = g.now;
+    p.jumpH = high ? 2 : 1;
+    p.jumpTop = y - p.jumpH;
     g.sfx.push("jump");
     dust(g, x + 0.5, y + 1, 3);
     return tweenTo(p, x, y - (high ? 2 : 1), JUMP_MS * (high ? 1.6 : 1));
@@ -1827,7 +1861,7 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
   const grounded = !isOpen(g, p.x, p.y + 1) || g.ladders.has(p.y * g.W + p.x);
   if (!grounded && g.now >= p.hangUntil) {
     p.fell++;
-    return tweenTo(p, p.x, p.y + 1, FALL_MS);
+    return tweenTo(p, p.x, p.y + 1, p.fell === 1 ? FALL_MS * 2 : FALL_MS);
   }
   if (grounded && p.fell > 0) {
     p.landAt = g.now;

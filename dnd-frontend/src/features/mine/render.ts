@@ -13,6 +13,8 @@ import {
   CHESTS,
   GRAB_MS,
   GRAB_NEED,
+  playerPos,
+  stretch,
   isZombie,
   KINDS,
   ROT_RANGE,
@@ -552,7 +554,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     ctx.fillRect(0, 0, VW, VH);
 
     const p = g.player;
-    const pos = drawPos(p);
+    const pos = playerPos(g);
     const camX = (pos.x + 0.5) * T - VW / 2;
     const camY = pos.y * T - VH / 2;
     const quake = g.now < g.shakeUntil ? g.shakeMag : 0;
@@ -894,6 +896,11 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           draw(ghost, face < 0 ? gx - 14 : gx, top, face < 0, 0.25 * k);
         }
       }
+      const [sx, sy] = stretch(g);
+      ctx.save();
+      ctx.translate(px + 7, feet);
+      ctx.scale(sx, sy);
+      ctx.translate(-(px + 7), -feet);
       draw(look(parts.left, "l"), bx + pose.leftDx * face, top + pose.leftDy, face < 0, alpha);
       draw(look(parts.right, "r"), bx + pose.rightDx * face, top + pose.rightDy, face < 0, alpha);
       draw(look(pose.blink ? parts.blink : parts.body, pose.blink ? "k" : "b"), bx, top + pose.bodyDy, face < 0, alpha);
@@ -933,6 +940,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       ctx.globalAlpha = alpha;
       ctx.rotate(ang);
       ctx.drawImage(toCanvas(pickImg), -GRIP_X, -GRIP_Y);
+      ctx.restore();
       ctx.restore();
       const hx = pivotX + face * (Math.cos(ang) * HEAD_DX - Math.sin(ang) * HEAD_DY);
       const hy = pivotY + Math.sin(ang) * HEAD_DX + Math.cos(ang) * HEAD_DY;

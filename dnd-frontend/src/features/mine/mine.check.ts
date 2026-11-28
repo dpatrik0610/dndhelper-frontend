@@ -11,6 +11,7 @@ import {
   type Game,
   type Keys,
   GRAB_MS,
+  playerPos,
   isZombie,
   rarify,
   ROT_RANGE,
@@ -556,6 +557,19 @@ plain.nextSpawn = 1e12;
 minY = 99;
 run(plain, 400, { jump: true });
 assert.equal(minY, 3, "everyone else jumps one");
+{
+  const arc = newGame(-1, ["############", "#..........#", "#..........#", "#..........#", "############"], 3);
+  const ys: number[] = [];
+  step(arc, 1000 / 60, { ...none, jump: true }, null);
+  for (let t = 0; t < 900; t += 1000 / 60) {
+    step(arc, 1000 / 60, none, null);
+    ys.push(playerPos(arc).y);
+  }
+  const top = ys.indexOf(Math.min(...ys));
+  const jumps = ys.slice(1).map((y, i) => Math.abs(y - ys[i]));
+  assert.ok(Math.max(...jumps) < 0.2, `the jump arc moves smoothly frame to frame (${Math.max(...jumps).toFixed(2)})`);
+  assert.ok(ys.slice(0, top).every((y, i) => i === 0 || y <= ys[i - 1]) && ys.slice(top).every((y, i, a) => i === 0 || y >= a[i - 1]), "it rises, then falls, without wobbling");
+}
 const sparky = newGame(-1);
 sparky.monsters = [];
 sparky.nextSpawn = 1e12;
