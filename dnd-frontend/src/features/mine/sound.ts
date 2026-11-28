@@ -38,9 +38,7 @@ export type Sfx = keyof typeof SFX;
 const VARIED = new Set<Sfx>(["dig", "crit", "break", "ore", "hit", "hurt", "clang", "jump", "kill", "dash", "land", "smash"]);
 const PITCH_SPREAD = 0.12;
 const MUSIC = "music.wav";
-const SFX_VOLUME = 0.6;
 const LEVELS: Partial<Record<Sfx, number>> = { break: 0.35 };
-const MUSIC_VOLUME = 0.3;
 const MIN_GAP_MS = 45;
 const PREFS_KEY = "deepdelve-sound";
 const MUSIC_ID = "deepdelve-music";
@@ -54,18 +52,30 @@ function musicTrack() {
   const el = new Audio(DIR + MUSIC);
   el.id = MUSIC_ID;
   el.loop = true;
-  el.volume = MUSIC_VOLUME;
+  el.volume = prefs.musicVolume;
   document.body.append(el);
   return el;
 }
 
-export type SoundPrefs = { music: boolean; sfx: boolean };
+export type SoundPrefs = { music: boolean; sfx: boolean; musicVolume: number; sfxVolume: number };
+
+const DEFAULT_PREFS: SoundPrefs = { music: true, sfx: true, musicVolume: 0.3, sfxVolume: 0.6 };
+
+function savedVolume(value: unknown, fallback: number) {
+  return typeof value === "number" && value >= 0 && value <= 1 ? value : fallback;
+}
 
 export function loadPrefs(): SoundPrefs {
   try {
-    return { music: true, sfx: true, ...JSON.parse(localStorage.getItem(PREFS_KEY) ?? "{}") };
+    const saved = JSON.parse(localStorage.getItem(PREFS_KEY) ?? "null") as Partial<SoundPrefs> | null;
+    return {
+      music: typeof saved?.music === "boolean" ? saved.music : DEFAULT_PREFS.music,
+      sfx: typeof saved?.sfx === "boolean" ? saved.sfx : DEFAULT_PREFS.sfx,
+      musicVolume: savedVolume(saved?.musicVolume, DEFAULT_PREFS.musicVolume),
+      sfxVolume: savedVolume(saved?.sfxVolume, DEFAULT_PREFS.sfxVolume),
+    };
   } catch {
-    return { music: true, sfx: true };
+    return { ...DEFAULT_PREFS };
   }
 }
 
@@ -74,11 +84,22 @@ const bank = new Map<Sfx, HTMLAudioElement>();
 const lastPlayed = new Map<Sfx, number>();
 let wantMusic = false;
 
+export function getPrefs() {
+  return prefs;
+}
+
 export function setPrefs(next: SoundPrefs) {
   prefs = next;
-  localStorage.setItem(PREFS_KEY, JSON.stringify(next));
+  const track = existingTrack();
+  if (track) track.volume = next.musicVolume;
   if (wantMusic && next.music) startMusic();
-  else existingTrack()?.pause();
+  else track?.pause();
+
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(next));
+  } catch {
+    // Playback settings still apply when browser storage is unavailable.
+  }
 }
 
 function sample(name: Sfx) {
@@ -105,12 +126,12 @@ if (typeof document !== "undefined") document.addEventListener("visibilitychange
 import.meta.hot?.dispose(() => document.removeEventListener("visibilitychange", onVisibility));
 
 export function play(name: Sfx) {
-  if (!prefs.sfx) return;
+  if (!prefs.sfx || prefs.sfxVolume === 0) return;
   const now = performance.now();
   if (now - (lastPlayed.get(name) ?? -Infinity) < MIN_GAP_MS) return;
   lastPlayed.set(name, now);
   const voice = sample(name).cloneNode() as HTMLAudioElement;
-  voice.volume = SFX_VOLUME * (LEVELS[name] ?? 1);
+  voice.volume = prefs.sfxVolume * (LEVELS[name] ?? 1);
   if (VARIED.has(name)) {
     voice.preservesPitch = false;
     voice.playbackRate = 1 + (Math.random() - 0.5) * PITCH_SPREAD;

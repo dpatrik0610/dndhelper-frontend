@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Switch } from "@mantine/core";
 import { IconSettings, IconTrophy, IconUserShield } from "@tabler/icons-react";
+import { play, preloadSounds, startMusic, stopMusic } from "@features/mine/sound";
+import { SoundSettings } from "@features/mine/SoundSettings";
 import {
   ascend,
   descend,
@@ -69,7 +70,6 @@ import { achievementsFor, mergeFeats, unlockedNow } from "./achievements";
 import { goalsFor, newlyAffordable } from "./goals";
 import { compact, tiersOf, total, viewOf } from "./mine";
 import { createRenderer, oreIcon } from "./render";
-import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
 import { CharacterPanel } from "./CharacterPanel";
 import { Effects } from "./Effects";
 import { Hotbar } from "./Hotbar";
@@ -81,7 +81,6 @@ import { TrophyPanel } from "./Trophies";
 import { ARRIVAL, dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
 
-const SWITCH_CLASSES = { root: "sq-switch", track: "sq-switch-track", thumb: "sq-switch-thumb" };
 const GOAL_OPEN_KEY = "deepdelve-goal-open";
 type Panel = "pouch" | "controls" | "settings" | "trophies" | "character" | "drop";
 const MAX_TOASTS = 3;
@@ -235,13 +234,6 @@ export function PlayView({
   const [torchesUsed, setTorchesUsed] = useState(trip?.torches.length ?? 0);
   const [torchCap, setTorchCap] = useState(state.torchStock + (trip?.torches.length ?? 0));
   const boltRef = useRef<HTMLDivElement>(null);
-  const [sound, setSound] = useState<SoundPrefs>(loadPrefs);
-
-  const toggleSound = (key: keyof SoundPrefs, on: boolean) => {
-    const next = { ...sound, [key]: on };
-    setSound(next);
-    setPrefs(next);
-  };
 
   useEffect(() => {
     if (!asleep) return;
@@ -1072,23 +1064,7 @@ export function PlayView({
             <TrophyPanel list={achievements} read={readAch} unlocked={unlocked} onClose={() => setPanel(null)} />
           )}
 
-          {panel === "settings" && (
-            <section className={styles.hudPanel} aria-label="Settings">
-              <PanelHead title="Settings" onClose={() => setPanel(null)} />
-              <Switch
-                classNames={SWITCH_CLASSES}
-                label="Music"
-                checked={sound.music}
-                onChange={(e) => toggleSound("music", e.currentTarget.checked)}
-              />
-              <Switch
-                classNames={SWITCH_CLASSES}
-                label="Effects"
-                checked={sound.sfx}
-                onChange={(e) => toggleSound("sfx", e.currentTarget.checked)}
-              />
-            </section>
-          )}
+          {panel === "settings" && <SoundSettings onClose={() => setPanel(null)} />}
 
           {panel === "controls" && (
             <section className={styles.hudPanel} aria-label="Controls">
