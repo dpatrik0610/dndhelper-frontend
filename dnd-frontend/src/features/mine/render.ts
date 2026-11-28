@@ -1,5 +1,5 @@
 import { dwarfParts, type GearSlot, item, SETS, sleeper } from "./art/gear";
-import { type Grid, hex, mix, tint } from "./art/pixel";
+import { type Grid, hex, mix, tint, upscale } from "./art/pixel";
 import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
 import { HOUSE_H, HOUSE_LEVELS, houseSprite } from "./art/house";
 import { COIN, DIAMOND_GRID, MERCHANT } from "./art/materials";
@@ -16,6 +16,7 @@ import {
   bombCell,
   BOMB_RADIUS,
   isWyrm,
+  MONSTER_SCALE,
   breathCells,
   BREATH_MS,
   ELEMENTAL_KIND,
@@ -815,7 +816,10 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         continue;
       }
       const ek = `${m.kind}g${m.gen}${m.rare ? "r" : ""}`;
-      const sprite = cached(`e${ek}`, () => (m.gen ? shrink(enemySprite(m.def), 0.7 ** m.gen) : enemySprite(m.def)));
+      const sprite = cached(`e${ek}`, () => {
+        const big = upscale(enemySprite(m.def), MONSTER_SCALE[m.kind] ?? 1);
+        return m.gen ? shrink(big, 0.7 ** m.gen) : big;
+      });
       const flash = g.now < m.flashUntil;
       const body = flash ? cached(`ef${ek}`, () => tint(sprite, "#ffffff")) : sprite;
       const w = body[0].length;

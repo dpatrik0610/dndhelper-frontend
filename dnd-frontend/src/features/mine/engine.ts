@@ -349,8 +349,16 @@ const WYRM_BITE_EVERY = 1500;
 
 export const isWyrm = (m: Monster) => m.kind === WYRM_KIND;
 
+export const MONSTER_SCALE: Partial<Record<number, number>> = { 8: 2, 9: 2, 10: 3 };
+
+export const tallOf = (m: Monster) => {
+  if (isWyrm(m)) return WYRM_H;
+  const k = MONSTER_SCALE[m.kind];
+  return k ? Math.max(1, Math.round(k * 0.7 ** (m.gen || 0))) : 1;
+};
+
 export const cellsOf = (m: Monster, x = m.x, y = m.y): [number, number][] => {
-  if (!isWyrm(m)) return [[x, y]];
+  if (!isWyrm(m)) return Array.from({ length: tallOf(m) }, (_, k) => [x, y - k]);
   const out: [number, number][] = [];
   for (let dy = 0; dy < WYRM_H; dy++) for (let dx = 0; dx < WYRM_W; dx++) out.push([x + dx, y - dy]);
   return out;
@@ -1210,7 +1218,7 @@ function stepBolts(g: Game, dt: number) {
     const foe = liveMonsters(g).find((m) => {
       const mp = drawPos(m);
       if (isWyrm(m)) return b.x >= mp.x && b.x <= mp.x + WYRM_W && b.y >= mp.y + 1 - WYRM_H && b.y <= mp.y + 1;
-      return Math.abs(mp.x + 0.5 - b.x) < 0.7 && Math.abs(mp.y + 0.5 - b.y) < 0.8;
+      return Math.abs(mp.x + 0.5 - b.x) < 0.7 && b.y > mp.y + 0.7 - tallOf(m) && b.y < mp.y + 1.3;
     });
     if (foe || !isOpen(g, cx, cy)) {
       b.life = 0;
@@ -1550,7 +1558,7 @@ function foeToward(g: Game, aim: { x: number; y: number }) {
   const live = liveMonsters(g).filter((m) => strikable(p, m));
   const off = (m: Monster) => {
     const d = drawPos(m);
-    return Math.hypot(d.x + 0.5 - aim.x, d.y + 0.5 - aim.y);
+    return Math.hypot(d.x + 0.5 - aim.x, Math.max(0, Math.abs(d.y + 1 - tallOf(m) / 2 - aim.y) - (tallOf(m) - 1) / 2));
   };
   const closest = live.reduce<Monster | undefined>((a, m) => (!a || off(m) < off(a) ? m : a), undefined);
   if (closest && off(closest) <= 1.2) return closest;
