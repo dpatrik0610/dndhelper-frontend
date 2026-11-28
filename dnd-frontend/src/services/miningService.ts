@@ -117,6 +117,7 @@ export interface MiningTrip {
   trader: number | null;
   motherlode: number | null;
   wyrm?: number | null;
+  w?: number;
   wares: Record<string, number> | null;
   boons?: string[];
   pile?: OreCounts;

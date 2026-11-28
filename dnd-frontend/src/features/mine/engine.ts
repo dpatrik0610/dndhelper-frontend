@@ -674,6 +674,8 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.camp = false;
   g.depth = trip.depth;
   g.info = g.depths[trip.depth - 1];
+  g.W = trip.w ?? g.W;
+  g.H = trip.map.length / g.W;
   g.map = Uint8Array.from(trip.map, (ch) => ch.charCodeAt(0));
   g.ladders = new Set(trip.ladders);
   g.torches = new Set(trip.torches);
@@ -2437,7 +2439,7 @@ export function placeTraps(g: Game, seed: string): Trap[] {
     spots.push(i);
   }
   const out: Trap[] = [];
-  const want = 3 + g.depth;
+  const want = Math.round((3 + g.depth) * Math.max(1, g.map.length / 4000));
   for (let tries = 0; out.length < want && tries < want * 20 && spots.length; tries++) {
     const i = spots[Math.floor(r() * spots.length)];
     const close = out.some(

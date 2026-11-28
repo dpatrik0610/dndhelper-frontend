@@ -747,6 +747,14 @@ assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
   run(hall, 600);
   assert.equal(fire.hp, before, "fire does nothing to it");
 }
+{
+  const wide = newGame(-1);
+  const map = Array.from({ length: 30 }, (_, y) => (y < 4 ? "#" + ".".repeat(18) + "#" : "#".repeat(20))).join("");
+  loadTrip(wide, { depth: 1, map, w: 20, ladders: [], torches: [], satchel: {}, trader: null, motherlode: null, wares: null }, wide.now);
+  assert.equal(wide.W, 20, "a trip brings its own map width");
+  assert.equal(wide.H, 30, "and the height follows from the map");
+  assert.equal(wide.seen.length, 600, "fog of war covers the whole bigger map");
+}
 console.log("mine.check ok");
 
 const cave = ["############", "#...%..A...#", "#..........#", "#0000000000#", "############"];
