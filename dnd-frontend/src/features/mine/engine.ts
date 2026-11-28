@@ -1,7 +1,7 @@
 import type { Break, DepthInfo, MiningStats, MiningTrip } from "@services/miningService";
 import { itemName, SETS, type Tiers } from "./art/gear";
 import { canSolo, type PetArt } from "./art/pets";
-import { ENEMIES, type Enemy, RARE, WYRM } from "./art/world";
+import { ELEMENTAL, ENEMIES, type Enemy, RARE, WYRM } from "./art/world";
 import { boltHit, compact, critHit, dashHit } from "./mine";
 import type { Sfx } from "./sound";
 
@@ -143,6 +143,8 @@ export interface Monster extends Tween {
   grappled: boolean;
   rare: boolean;
   awake: boolean;
+  breathDir: number;
+  breathUntil: number;
 }
 
 export interface Spit {
@@ -314,6 +316,24 @@ export const KINDS: Record<number, Kind> = {
   10: { hp: 2, dmg: 1.6, move: 520, windup: 320, poise: 3 },
   11: { hp: 5, dmg: 1.5, move: 430, windup: 360, poise: 99 },
   12: { hp: 90, dmg: 3, move: 620, windup: 700, poise: 99 },
+  13: { hp: 1, dmg: 1, move: 340, windup: 650, poise: 2 },
+};
+
+export const ELEMENTAL_KIND = 13;
+export const ELEMENTAL_SHARE = 0.4;
+export const BREATH_RANGE = 3;
+export const BREATH_MS = 450;
+const BREATH_EVERY = 2200;
+const BREATH_BURN_MS = 3000;
+const BREATH_EMBER_MS = 1500;
+
+export const breathCells = (g: Game, m: Monster, dir = m.breathDir) => {
+  const out: number[] = [];
+  for (let k = 1; k <= BREATH_RANGE; k++) {
+    if (!isOpen(g, m.x + dir * k, m.y)) break;
+    out.push(m.y * g.W + m.x + dir * k);
+  }
+  return out;
 };
 
 export const WYRM_KIND = 12;
@@ -999,7 +1019,7 @@ export function addMonster(g: Game, kind: number, x: number, y: number, gen = 0)
   const hp = Math.max(1, Math.round(g.info.monsterHp * spec.hp * 0.5 ** gen));
   const m: Monster = {
     id: ++g.seq,
-    def: ENEMIES[kind - 1],
+    def: kind === ELEMENTAL_KIND ? ELEMENTAL : ENEMIES[kind - 1],
     kind,
     x,
     y,
@@ -1033,6 +1053,8 @@ export function addMonster(g: Game, kind: number, x: number, y: number, gen = 0)
     grappled: false,
     rare: false,
     awake: false,
+    breathDir: 1,
+    breathUntil: 0,
   };
   g.monsters.push(m);
   return m;
@@ -1097,7 +1119,7 @@ function explode(g: Game, at: number) {
   markSeen(g, cx, cy, BOMB_RADIUS + 1);
   for (const m of liveMonsters(g))
     if (cellsOf(m).some(([x, y]) => inBlast(x - cx, y - cy)))
-      damageMonster(g, m, Math.round(g.stats.power * BOMB_HIT), false, null, !isWyrm(m));
+      damageMonster(g, m, Math.round(g.stats.power * BOMB_HIT), false, null, !isWyrm(m) && m.kind !== ELEMENTAL_KIND);
   const p = g.player;
   if (inBlast(p.x - cx, p.y - cy) || inBlast(p.x - cx, p.y - 1 - cy)) hurt(g, BOMB_SELF_DMG, "#ff8a2a");
   const px = (cx + 0.5) * T;
@@ -1313,10 +1335,11 @@ function shove(g: Game, m: Monster) {
 function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: string | null, fire = false) {
   const cx = (m.x + (isWyrm(m) ? WYRM_W / 2 : 0.5)) * T;
   const cy = (m.y - (isWyrm(m) ? WYRM_H - 1 : 0)) * T;
-  if (isWyrm(m) && fire) {
+  if ((isWyrm(m) || m.kind === ELEMENTAL_KIND) && fire) {
     m.burnUntil = 0;
     say(g, cx, cy - 4, "Immune to fire", "#ffb347", 700);
-    sayOnce(g, "wyrmFire", "Fire washes off its scales. Use your pick, or a bomb.", "#ffb347");
+    if (isWyrm(m)) sayOnce(g, "wyrmFire", "Fire washes off its scales. Use your pick, or a bomb.", "#ffb347");
+    else sayOnce(g, "elementalFire", "Fire only feeds a fire elemental. Use your pick, or a bomb.", "#ffb347");
     return;
   }
   m.flashUntil = g.now + 120;
@@ -1713,7 +1736,7 @@ export function dwarfPose(g: Game): DwarfPose {
   };
 }
 
-const FLIERS = new Set([3, 5]);
+const FLIERS = new Set([3, 5, 13]);
 
 const supported = (g: Game, x: number, y: number) => !isOpen(g, x, y + 1) || g.ladders.has(y * g.W + x);
 
@@ -1809,7 +1832,8 @@ function spawn(g: Game, alarm = false) {
   const dark = inTorchlight(g, p.x, p.y - 1) ? 1 : 0.55;
   g.nextSpawn = g.now + Math.max(10_000, 26_000 - g.depth * 1500) * (0.7 + rand() * 0.6) * dark;
   if (liveMonsters(g).length >= cap) return;
-  const kind = g.depth > 1 && rand() < 0.3 ? g.depth - 1 : g.depth;
+  const base = g.depth > 1 && rand() < 0.3 ? g.depth - 1 : g.depth;
+  const kind = base === SALAMANDER_KIND && rand() < ELEMENTAL_SHARE ? ELEMENTAL_KIND : base;
   const spec = KINDS[kind];
   const cells: number[] = [];
   for (let i = 0; i < g.dist.length; i++) {
@@ -1934,7 +1958,10 @@ function stepMonsters(g: Game, dt: number) {
       continue;
     }
     if (g.grab?.m === m) continue;
+    if (m.kind === ELEMENTAL_KIND && rand() < 0.12)
+      g.parts.push({ x: (m.x + 0.2 + rand() * 0.6) * T, y: (m.y + 0.3) * T, vx: (rand() - 0.5) * 0.3, vy: -0.35, life: 420, color: rand() < 0.5 ? "#ff8a2a" : "#ffd23f" });
     if (g.now < m.stunUntil) continue;
+    if (m.kind === ELEMENTAL_KIND && stepElemental(g, m)) continue;
     if (m.windupUntil && g.now >= m.windupUntil) {
       m.windupUntil = 0;
       m.nextHit = g.now + 1100;
@@ -1964,7 +1991,7 @@ function stepMonsters(g: Game, dt: number) {
     }
     if (m.windupUntil) continue;
     if (m.kind === GOLEM_KIND && golemSlam(g, m)) continue;
-    if (inReach(p, m)) {
+    if (m.kind !== ELEMENTAL_KIND && inReach(p, m)) {
       m.lost = 0;
       if (g.now >= m.nextHit) m.windupUntil = g.now + KINDS[m.kind].windup;
       continue;
@@ -1980,7 +2007,7 @@ function stepMonsters(g: Game, dt: number) {
       continue;
     }
     let next = route(g, m, fly);
-    if (next >= 0 && m.kind === SKITTER_KIND && rand() < SKITTER_CHANCE) {
+    if (next >= 0 && (m.kind === SKITTER_KIND || m.kind === ELEMENTAL_KIND) && rand() < SKITTER_CHANCE) {
       const dir = (next % g.W) - m.x || (rand() < 0.5 ? -1 : 1);
       if (isOpen(g, m.x - dir, m.y)) next = m.y * g.W + m.x - dir;
     }
@@ -2002,6 +2029,39 @@ function stepMonsters(g: Game, dt: number) {
       g.map[home] = MIMIC;
     return false;
   });
+}
+
+function stepElemental(g: Game, m: Monster) {
+  const p = g.player;
+  if (m.windupUntil) {
+    if (g.now < m.windupUntil) return true;
+    m.windupUntil = 0;
+    m.nextHit = g.now + BREATH_EVERY;
+    m.breathUntil = g.now + BREATH_MS;
+    g.sfx.push("bolt");
+    const cells = breathCells(g, m);
+    for (const i of cells) if (!isOpen(g, i % g.W, Math.floor(i / g.W) + 1)) g.embers.set(i, g.now + BREATH_EMBER_MS);
+    const hit = cells.some((i) => i % g.W === p.x && [p.y, p.y - 1].includes(Math.floor(i / g.W)));
+    if (!hit) return true;
+    const before = p.hp;
+    hurt(g, m.dmg, "#ff8a2a");
+    if (p.hp >= before) return true;
+    p.burnUntil = Math.max(p.burnUntil, g.now + BREATH_BURN_MS);
+    const d = m.breathDir;
+    if (p.t >= p.dur && isOpen(g, p.x + d, p.y) && isOpen(g, p.x + d, p.y - 1)) tweenTo(p, p.x + d, p.y, 140);
+    say(g, (p.x + 0.5) * T, (p.y - 2) * T, "Scorched!", "#ff8a2a", 700);
+    return true;
+  }
+  if (g.now < m.nextHit) return false;
+  const dir = Math.sign(p.x - m.x) || p.face * -1;
+  const aligned = m.y === p.y || m.y === p.y - 1;
+  if (!aligned || Math.abs(p.x - m.x) > BREATH_RANGE) return false;
+  if (!breathCells(g, m, dir).some((i) => i % g.W === p.x)) return false;
+  m.lost = 0;
+  m.breathDir = dir;
+  m.windupUntil = g.now + KINDS[ELEMENTAL_KIND].windup;
+  sayOnce(g, "elemental", "A fire elemental draws breath. Step out of its line, or above it.", "#ff8a6a");
+  return true;
 }
 
 const wyrmFits = (g: Game, m: Monster, x: number, y: number) =>

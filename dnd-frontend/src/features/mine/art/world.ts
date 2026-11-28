@@ -379,6 +379,32 @@ export const greaterPotionSprite = (): Grid =>
 export const scrollSprite = (big = false): Grid =>
   big ? paper("#f0c8a0", "#b8402a", "#e0301a", "#ff8a2a") : paper("#f4e2b8", "#c9b07a", "#ff8a2a", "#ffe066");
 
+export const ELEMENTAL: Enemy = {
+  name: "Fire Elemental",
+  depth: 7,
+  threat: "Firestorm",
+  does: "A whirlwind of living flame that drifts on the hot drafts. It breathes a jet of fire three tiles long that burns you and blows you back, and leaves embers where it lands. Fire only feeds it.",
+  pal: { x: "#2a0804", r: "#b8301a", o: "#f26b2a", y: "#ffb347", w: "#fff3a0", e: "#3a0a04", s: "#c8a890", S: "#8a6a5a" },
+  rows: [
+    ".......y........",
+    "....y..oy...y...",
+    "...yo.yooy.yo...",
+    "...oryowoor.or..",
+    "..yorowwwoory...",
+    "..oroewwweoro...",
+    "..rooowwwooor...",
+    "...rroowoorr....",
+    "....rroooorr....",
+    "..s..xrorrx..s..",
+    ".sSs..xrrx..sS..",
+    "...SssSrrSssS...",
+    ".....SsrsSs.....",
+    "...sSsSrSs......",
+    "......SsS.......",
+    ".......s........",
+  ],
+};
+
 export const WYRM: Enemy = {
   name: "Ashen Wyrm",
   depth: 9,
@@ -615,7 +641,7 @@ export const STRATA: { name: string; stone: string }[] = [
   { name: "Cold Halls", stone: "#56697b" },
   { name: "Fever Vents", stone: "#6a3c33" },
   { name: "Darkfall Shafts", stone: "#36363f" },
-  { name: "The Flamewell", stone: "#55261f" },
+  { name: "The Flamewell", stone: "#5e2418" },
   { name: "Bonewhite Reach", stone: "#a49c8c" },
   { name: "Underdark Verge", stone: "#30263c" },
   { name: "Where the Star Fell", stone: "#1f2448" },
@@ -651,6 +677,15 @@ export const stoneTile = (depth: number, seed = 1, wall = false): Grid => {
     g[y][x] = tones[3];
     g[y + 1][x] = tones[0];
     if (r() < 0.5) g[y][x + 1] = tones[0];
+  }
+  if (depth === 7 && r() < 0.55) {
+    let x = Math.floor(r() * 14) + 1;
+    let y = Math.floor(r() * 14) + 1;
+    for (let k = 0; k < 5; k++) {
+      g[y][x] = k % 3 === 1 ? "#ffb347" : "#e0501a";
+      if (r() < 0.6) x = Math.max(0, Math.min(14, x + (r() < 0.5 ? 1 : -1)));
+      else y = Math.max(0, Math.min(14, y + 1));
+    }
   }
   for (let x = 0; x < 16; x++) g[15][x] = mix(g[15][x] as string, "#000000", 0.25);
   for (let y = 0; y < 16; y++) g[y][15] = mix(g[y][15] as string, "#000000", 0.2);

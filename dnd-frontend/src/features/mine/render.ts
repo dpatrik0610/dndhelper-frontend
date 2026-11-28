@@ -16,6 +16,9 @@ import {
   bombCell,
   BOMB_RADIUS,
   isWyrm,
+  breathCells,
+  BREATH_MS,
+  ELEMENTAL_KIND,
   WYRM_W,
   WYRM_H,
   WYRM_SPIT_WINDUP,
@@ -818,13 +821,47 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       const w = body[0].length;
       const h = body.length;
       const lunge = g.now < m.lungeUntil ? (p.x < m.x ? -3 : 3) : 0;
-      const bob = m.kind === 5 ? -4 + Math.round(Math.sin(g.now / 160) * 2) : Math.floor(g.now / 200) % 2 ? 0 : -1;
+      const bob =
+        m.kind === 5 || m.kind === ELEMENTAL_KIND
+          ? -4 + Math.round(Math.sin(g.now / (m.kind === 5 ? 160 : 110)) * 2)
+          : Math.floor(g.now / 200) % 2
+            ? 0
+            : -1;
       const hidden = m.kind === 6 && Math.abs(m.x - p.x) > 2 ? 0.14 : 1;
       const winding = m.windupUntil > g.now;
       const fade = m.leaving ? Math.max(0, 1 - (g.now - m.leaving) / 900) : 1;
       const coil = winding ? (p.x < m.x ? 2 : -2) : 0;
       const shownBody = winding && Math.floor(g.now / 70) % 2 ? cached(`ew${ek}`, () => tint(sprite, "#ff8a6a")) : body;
       draw(shownBody, mp.x * T + (T - w) / 2 + ox + lunge + coil, (mp.y + 1) * T - h + oy + bob, p.x > m.x, hidden * fade);
+      if (m.kind === ELEMENTAL_KIND && (winding || m.breathUntil > g.now)) {
+        const cells = breathCells(g, m);
+        const left = 1 - Math.max(0, m.breathUntil - g.now) / BREATH_MS;
+        cells.forEach((i, k) => {
+          const X = (i % g.W) * T + ox;
+          const Y = Math.floor(i / g.W) * T + oy;
+          if (winding) {
+            ctx.globalAlpha = 0.25 + 0.25 * (Math.floor(g.now / 90) % 2);
+            ctx.strokeStyle = "#ff6a2a";
+            ctx.setLineDash([2, 2]);
+            ctx.strokeRect(X + 0.5, Y + 0.5, T - 1, T - 1);
+            ctx.setLineDash([]);
+            ctx.globalAlpha = 1;
+            return;
+          }
+          const fl = (g.now / 40 + k * 3) | 0;
+          const hgt = 10 - k * 2 + (fl % 3);
+          ctx.globalAlpha = 0.9 * (1 - left * 0.6);
+          ctx.fillStyle = "#c22a1a";
+          ctx.fillRect(X, Y + (T - hgt) / 2, T, hgt);
+          ctx.fillStyle = "#ff8a2a";
+          ctx.fillRect(X, Y + (T - hgt) / 2 + 2, T, Math.max(2, hgt - 4));
+          ctx.fillStyle = "#fff3a0";
+          ctx.fillRect(X, Y + T / 2 - 1, T - k * 4, 2);
+          ctx.fillStyle = "rgba(230,220,210,0.55)";
+          for (let s = 0; s < 3; s++) ctx.fillRect(X + ((fl * 5 + s * 6) % T), Y + 3 + s * 5, 4, 1);
+          ctx.globalAlpha = 1;
+        });
+      }
       if (m.ward > 0) {
         const cx = mp.x * T + T / 2 + ox;
         const cy = (mp.y + 1) * T - h / 2 + oy + bob;
@@ -1133,7 +1170,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     if (!g.camp) {
       dctx.globalCompositeOperation = "source-over";
       dctx.clearRect(0, 0, VW, VH);
-      dctx.fillStyle = "rgb(3,2,6)";
+      dctx.fillStyle = g.depth === 7 ? "rgb(18,5,2)" : "rgb(3,2,6)";
       dctx.fillRect(0, 0, VW, VH);
       dctx.globalCompositeOperation = "destination-out";
       dctx.fillStyle = "rgba(0,0,0,0.13)";
@@ -1163,11 +1200,26 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       const petLight = pet && PET_LIGHT[pet.key];
       if (pet && petLight) glow(dctx, pet.px * T + ox + 8, (pet.py + 0.5) * T + oy, petLight * T, black, 0.9);
       for (const m of g.monsters)
-        if (m.kind === 5 || m.kind === 7 || m.kind === 10) {
+        if (m.kind === 5 || m.kind === 7 || m.kind === 10 || m.kind === ELEMENTAL_KIND) {
           const mp = drawPos(m);
           glow(dctx, (mp.x + 0.5) * T + ox, (mp.y + 0.5) * T + oy, T * 1.2, black, 0.6);
         }
       ctx.drawImage(dark, 0, 0);
+      if (g.depth === 7) {
+        ctx.fillStyle = `rgba(255,90,30,${0.035 + 0.015 * Math.sin(g.now / 700)})`;
+        ctx.fillRect(0, 0, VW, VH);
+        for (let k = 0; k < 46; k++) {
+          const sx = ((k * 7919) % 997) / 997;
+          const sp = 0.012 + ((k * 31) % 17) / 1000;
+          const ey = VH - ((g.now * sp + ((k * 4271) % 1009) / 1009 * (VH + 40)) % (VH + 40)) + 20;
+          const ex = sx * VW + Math.sin(g.now / 600 + k) * 6;
+          const hot = (k + Math.floor(g.now / 140)) % 5 === 0;
+          ctx.globalAlpha = 0.35 + 0.5 * Math.min(1, ey / VH);
+          ctx.fillStyle = hot ? "#ffd23f" : k % 3 ? "#ff6a1a" : "#ff9a3a";
+          ctx.fillRect(Math.round(ex), Math.round(ey), k % 4 ? 1 : 2, k % 4 ? 1 : 2);
+        }
+        ctx.globalAlpha = 1;
+      }
       const sight = g.stats.oreSight;
       if (sight > 0) {
         const lit = lightRadius(g);

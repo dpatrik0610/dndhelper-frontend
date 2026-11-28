@@ -17,6 +17,7 @@ import {
   BOMB_SELF_DMG,
   occupies,
   WYRM_KIND,
+  ELEMENTAL_KIND,
   revive,
   setBlessings,
   SHIELD_CUT,
@@ -720,6 +721,27 @@ assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
   step(lair, 16, { ...none, attack: true }, { x: 6.5, y: 4.5 });
   run(lair, 300);
   assert.ok(!lair.monsters.includes(w) && lair.pending.wyrm, "slaying the wyrm tells the server");
+}
+{
+  const hall = newGame(-1, ["############", ...Array.from({ length: 4 }, () => "#..........#"), "############"]);
+  hall.monsters = [];
+  hall.nextSpawn = 1e12;
+  hall.seen.fill(1);
+  hall.lastInput = 1e15;
+  hall.player.x = hall.player.fromX = 4;
+  hall.player.y = hall.player.fromY = 4;
+  const fire = addMonster(hall, ELEMENTAL_KIND, 7, 4);
+  fire.nextMove = 1e15;
+  const hp = hall.player.hp;
+  run(hall, 1200);
+  assert.ok(hall.player.hp < hp && hall.player.burnUntil > hall.now, "a fire elemental's breath burns you from 3 tiles off");
+  assert.equal(hall.player.x, 3, "and its gust blows you back a tile");
+  const before = fire.hp;
+  hall.firebolt = true;
+  hall.nextBolt = 0;
+  assert.ok(castBolt(hall, { x: fire.x + 0.5, y: fire.y + 0.5 }), "the test bolt flies");
+  run(hall, 600);
+  assert.equal(fire.hp, before, "fire does nothing to it");
 }
 console.log("mine.check ok");
 
