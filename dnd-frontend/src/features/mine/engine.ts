@@ -68,8 +68,8 @@ export type Keys = {
 };
 export type Aim = { x: number; y: number } | null;
 
-export const CAMP = { W: 78, H: 10, ground: 8, lift: 5, forge: 19, smith: 25, market: 31, shop: 42, house: 54, church: 67 };
-export type Station = "lift" | "forge" | "smith" | "market" | "shop" | "house" | "church" | "trader";
+export const CAMP = { W: 112, H: 10, ground: 8, lift: 5, forge: 19, smith: 25, market: 31, shop: 42, house: 54, church: 67, ship: 91 };
+export type Station = "lift" | "forge" | "smith" | "market" | "shop" | "house" | "church" | "ship" | "trader";
 export type Drink = "potion" | "greater";
 export const GREATER_HEAL = 1;
 export type Blessing = "shield" | "regen" | "glow";
@@ -738,6 +738,7 @@ export const stationAt = (g: Game): Station | null => {
   if (Math.abs(x - CAMP.shop) <= 2) return "shop";
   if (Math.abs(x - CAMP.house) <= 3) return "house";
   if (Math.abs(x - CAMP.church) <= 2) return "church";
+  if (Math.abs(x - CAMP.ship) <= 2) return "ship";
   return null;
 };
 

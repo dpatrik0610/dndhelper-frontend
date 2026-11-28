@@ -110,42 +110,6 @@ export const COIN = raster(
   { x: "#5a3a10", o: "#b8862a", y: "#f2c14e", Y: "#fff0a0" },
 );
 
-export const MERCHANT = raster(
-  [
-    "....xxxxxx....",
-    "...xhhhhhhx...",
-    "..xhhHHHHhhx..",
-    "xxxxxxxxxxxxxx",
-    "xbbbbbbbbbbbbx",
-    "..xssssssssx..",
-    "..xsxsssxssx..",
-    "..xsssssssSx..",
-    "..xRRssssRRx..",
-    ".xRRRRRRRRRRx.",
-    "xccRRRRRRRRccx",
-    "xcxwwwwwwwwxcx",
-    "xcxwwwwwwwwxcx",
-    "xsxwwwyywwwxsx",
-    ".x.wwwyywww.x.",
-    "...wwwwwwww...",
-    "...kkk..kkk...",
-    "..xkkx..xkkx..",
-  ],
-  {
-    x: "#1c1410",
-    h: "#3a2a5a",
-    H: "#5a4a8a",
-    b: "#e8c060",
-    s: "#e2aa7c",
-    S: "#b97a52",
-    R: "#8a4a2a",
-    c: "#2e5e7a",
-    w: "#e8dcc0",
-    y: "#f2c14e",
-    k: "#4a3020",
-  },
-);
-
 type Box = { x0: number; yt: number; yb: number; L: number; H: number; D: number };
 type Face = "top" | "front" | "side";
 type Put = (x: number, y: number, c: string) => void;

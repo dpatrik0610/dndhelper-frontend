@@ -21,7 +21,8 @@ import {
 import { FORGE_LEVELS, forgeSprite } from "./art/forge";
 import { HOUSE_LEVELS, houseIcon } from "./art/house";
 import type { Grid } from "./art/pixel";
-import { alloyIcon, COIN, DIAMOND, MAGMA_CORE, MATERIALS, MERCHANT } from "./art/materials";
+import { alloyIcon, COIN, DIAMOND, MAGMA_CORE, MATERIALS } from "./art/materials";
+import { merchantSprite, priestSprite, smithSprite, wickSprite } from "./art/npcs";
 import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import {
@@ -31,11 +32,9 @@ import {
   greaterPotionSprite,
   oilSprite,
   potionSprite,
-  priestSprite,
   recallScroll,
   reviveScroll,
   scrollSprite,
-  smithSprite,
 } from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
 import { canAfford, compact, discounted, forgedOf, HOLDING_TIER, ownsHolding, statRows } from "./mine";
@@ -43,19 +42,11 @@ import { oreIcon, TORCH } from "./render";
 import { play, type Sfx } from "./sound";
 import { EFFECT_ART } from "./Effects";
 import { Sprite } from "./Sprite";
-import { BLESSINGS, FOREMAN, MOSS_LINES, PAGES, WARES, wickLines, wickSprite } from "./story";
+import { BLESSINGS, FOREMAN, MOSS_LINES, PAGES, WARES, wickLines } from "./story";
+import { resourceOf } from "./resources";
 import styles from "./Mine.module.css";
 
 type MenuProps = { config: MiningConfig; state: MiningState; onState: (s: MiningState) => void };
-
-const resourceOf = (config: MiningConfig, key: string) => {
-  const i = config.ores.findIndex((o) => o.key === key);
-  if (i >= 0) return { name: config.ores[i].name, grid: oreIcon(i), special: false };
-  const a = config.alloys?.find((x) => x.key === key);
-  if (a) return { name: a.name, grid: alloyIcon(a.tier, a.color), special: true };
-  const m = MATERIALS[key];
-  return { name: m?.name ?? key, grid: m?.grid ?? oreIcon(0), special: true };
-};
 
 function Cost({ cost, ores, config }: { cost: OreCounts; ores: OreCounts; config: MiningConfig }) {
   return (
@@ -297,7 +288,7 @@ function Wick({ state }: { state: MiningState }) {
   const found = new Set(state.pages);
   return (
     <div className={styles.wick}>
-      <Sprite grid={wickSprite()} scale={3} label="Old Wick" />
+      <Sprite grid={wickSprite()} scale={2} label="Old Wick" />
       <div className={styles.wickBody}>
         <p className={styles.wickLine}>
           <b className={styles.pixel}>Old Wick:</b> "{line}"
@@ -512,7 +503,7 @@ export function SmithMenu({ config, state, onState }: MenuProps) {
   return (
     <>
       <div className={styles.forgeHead}>
-        <Sprite grid={smithSprite()} scale={3} label="Thora Anvilsong" />
+        <Sprite grid={smithSprite()} scale={2} label="Thora Anvilsong" />
         <div className={styles.forgeInfo}>
           <b className={styles.pixel}>Thora Anvilsong</b>
           <span className={styles.dim}>
@@ -841,7 +832,7 @@ export function MarketMenu({ config, state, onState }: MenuProps) {
   return (
     <>
       <div className={styles.marketHead}>
-        <Sprite grid={MERCHANT} scale={3} label="Hesk Saltpenny" />
+        <Sprite grid={merchantSprite()} scale={2} label="Hesk Saltpenny" />
         <p className={styles.quote}>"Copper's copper and starmetal's a fortune. I pay fair either way. Fair-ish."</p>
         <Purse coins={state.coins} />
       </div>
@@ -1018,7 +1009,7 @@ export function ChurchMenu({ config, state, onState }: MenuProps) {
   return (
     <>
       <div className={styles.marketHead}>
-        <Sprite grid={priestSprite()} scale={3} label="Sister Maren" />
+        <Sprite grid={priestSprite()} scale={2} label="Sister Maren" />
         <p className={styles.quote}>"The tide gives back what the deep takes. Usually. A blessing helps it remember."</p>
         <Purse coins={state.coins} />
       </div>

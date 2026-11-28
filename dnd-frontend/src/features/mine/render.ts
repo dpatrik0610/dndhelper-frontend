@@ -2,9 +2,10 @@ import { dwarfParts, type GearSlot, item, SETS, sleeper } from "./art/gear";
 import { type Grid, hex, mix, tint, upscale } from "./art/pixel";
 import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
 import { HOUSE_H, HOUSE_LEVELS, houseSprite } from "./art/house";
-import { COIN, DIAMOND_GRID, MERCHANT } from "./art/materials";
-import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
-import { bombSprite, chestSprite, cracks, enemySprite, oreTile, priestSprite, smithSprite, stoneTile, traderSprite, wyrmSprite } from "./art/world";
+import { COIN, DIAMOND_GRID } from "./art/materials";
+import { captainSprite, gnomeSprite, merchantSprite, priestSprite, smithSprite, traderSprite, wickSprite } from "./art/npcs";
+import { petSprite, zGlyph } from "./art/pets";
+import { bombSprite, chestSprite, cracks, enemySprite, oreTile, stoneTile, wyrmSprite } from "./art/world";
 import {
   BEDROCK,
   BOLT_MS,
@@ -66,8 +67,7 @@ import {
   T,
 } from "./engine";
 import { compact, hpColor } from "./mine";
-import { islandBack, islandGround, islandLights, islandNear, islandSky, LANDMARKS } from "./scenery";
-import { wickSprite } from "./story";
+import { HARBOR_LIGHTS, harbor, islandBack, islandGround, islandLights, islandNear, islandSky, LANDMARKS } from "./scenery";
 
 const CRACK_ALL = cracks(4);
 const CRACK = CRACK_ALL.map((_, n) => CRACK_ALL[(n % 4) * 7 + Math.floor(n / 4)]);
@@ -172,6 +172,8 @@ const cached = (key: string, make: () => Grid) => {
 };
 
 export const oreIcon = (i: number) => cached(`icon${i}`, () => oreTile(i, Math.floor(i / 2) + 1));
+
+export const FINE = 2;
 
 export const toCanvas = (grid: Grid) => {
   let c = canvasCache.get(grid);
@@ -403,7 +405,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     words.push({ text, x, y, color, alpha, size });
   const flushWords = () => {
     const out = octx ?? ctx;
-    const k = octx && overlay ? overlay.width / canvas.width : 1;
+    const k = octx && overlay ? (overlay.width * FINE) / canvas.width : 1;
     if (octx && overlay) octx.clearRect(0, 0, overlay.width, overlay.height);
     out.textAlign = "center";
     for (const w of words) {
@@ -432,6 +434,22 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       ctx.restore();
     }
     ctx.globalAlpha = 1;
+  };
+
+  const drawFine = (grid: Grid, x: number, y: number, flip = false) => {
+    const c = toCanvas(grid);
+    const w = c.width / FINE;
+    const h = c.height / FINE;
+    const X = Math.round(x * FINE) / FINE;
+    const Y = Math.round(y * FINE) / FINE;
+    if (!flip) ctx.drawImage(c, X, Y, w, h);
+    else {
+      ctx.save();
+      ctx.translate(X + w, Y);
+      ctx.scale(-1, 1);
+      ctx.drawImage(c, 0, 0, w, h);
+      ctx.restore();
+    }
   };
 
   const label = (text: string, x: number, y: number, on: boolean) => write(text, x, y, on ? "#ffb347" : "#a59c8e");
@@ -537,7 +555,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     ctx.fillStyle = struck || Math.floor(now / 200) % 3 ? "#ff8a2a" : "#ffd23f";
     ctx.fillRect(ax + 4, ay - 1, 4, 1);
 
-    draw(cached("smith", smithSprite), cx - 11, gy - 15);
+    drawFine(cached("smith", smithSprite), cx - 11, gy - 15);
     const hx = cx - 2;
     ctx.fillStyle = "#6b4423";
     if (struck) {
@@ -567,6 +585,11 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     islandBack(ctx, g.now, ox, gy, VW);
     islandGround(ctx, g.now, ox, gy, VW, VH);
     islandNear(ctx, g.now, ox, gy, VW);
+    harbor(ctx, g.now, ox, gy, VW, VH);
+    const mx0 = CAMP.ship * T + 8 + ox;
+    const morg = cached("captain", captainSprite);
+    drawFine(morg, mx0 - 9, gy - morg.length / FINE - (Math.floor(g.now / 1500) % 6 === 0 ? 1 : 0), g.player.x > CAMP.ship);
+    label("Captain Morg", mx0, gy - 26, near === "ship");
     const px = (g.player.x + 0.5) * T;
     for (const l of LANDMARKS) if (Math.abs(px - l.x) < 26) label(l.name, l.x + ox, gy - l.y, false);
 
@@ -588,8 +611,8 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     ctx.fillRect(hx + 3, gy - 1, 24, 2);
     label("Lift", hx + 15, gy - 66, near === "lift");
     const wick = cached("wick", wickSprite);
-    draw(wick, hx - 16, gy - wick.length - (Math.floor(g.now / 900) % 5 === 0 ? 1 : 0));
-    if (near === "lift") write("Old Wick", hx - 10, gy - wick.length - 4, "#ffb347", 1, 6);
+    drawFine(wick, hx - 16, gy - wick.length / FINE - (Math.floor(g.now / 900) % 5 === 0 ? 1 : 0));
+    if (near === "lift") write("Old Wick", hx - 10, gy - wick.length / FINE - 4, "#ffb347", 1, 6);
 
     const lv = g.forgeLevel;
     const ft = lv >= 7 ? Math.floor(g.now / 150) % 20 : 0;
@@ -612,7 +635,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     }
     ctx.fillStyle = "#5a3a22";
     ctx.fillRect(sx, gy - 10, 32, 3);
-    draw(cached("gnome", gnomeSprite), sx + 10, gy - 16 - (Math.floor(g.now / 160) % 6 === 0 ? 1 : 0));
+    drawFine(cached("gnome", gnomeSprite), sx + 10, gy - 15 - (Math.floor(g.now / 160) % 6 === 0 ? 1 : 0));
     label("Pip's Menagerie", sx + 16, gy - 38, near === "shop");
 
     const mx = CAMP.market * T + 8 + ox - 20;
@@ -624,7 +647,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       ctx.fillRect(mx - 3 + k * 6, gy - 38, 6, 5);
       ctx.fillRect(mx - 3 + k * 6 + 1, gy - 33, 4, 1 + (k % 2));
     }
-    draw(cached("merchant", () => MERCHANT), mx + 13, gy - 26 - (Math.floor(g.now / 1300) % 5 === 0 ? 1 : 0));
+    drawFine(cached("merchant", merchantSprite), mx + 13, gy - 26 - (Math.floor(g.now / 1300) % 5 === 0 ? 1 : 0));
     ctx.fillStyle = "#6b4423";
     ctx.fillRect(mx, gy - 12, 40, 3);
     ctx.fillStyle = "#4a3020";
@@ -706,13 +729,14 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     ctx.fillRect(cx + 2, gy - 10, 5, 10);
     ctx.fillStyle = "#c9a04a";
     ctx.fillRect(cx + 5, gy - 6, 1, 1);
-    draw(cached("priest", priestSprite), cx + 30, gy - 15 - (Math.floor(g.now / 1100) % 6 === 0 ? 1 : 0));
+    drawFine(cached("priest", priestSprite), cx + 30, gy - 15 - (Math.floor(g.now / 1100) % 6 === 0 ? 1 : 0));
     label("Saltbell Chapel", cx + 4, gy - 80, near === "church");
   };
 
   return (g: Game) => {
-    const VW = canvas.width;
-    const VH = canvas.height;
+    const VW = canvas.width / FINE;
+    const VH = canvas.height / FINE;
+    ctx.setTransform(FINE, 0, 0, FINE, 0, 0);
     if (dark.width !== VW || dark.height !== VH) {
       dark.width = VW;
       dark.height = VH;
@@ -868,10 +892,10 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       drawHazards(ctx, g, ox, oy);
       if (g.trader >= 0) {
         const moss = cached("moss", traderSprite);
-        const X = (g.trader % g.W) * T + ox + 8 - Math.floor(moss[0].length / 2);
-        const Y = (Math.floor(g.trader / g.W) + 1) * T + oy - moss.length;
-        draw(moss, X, Y - (Math.floor(g.now / 700) % 4 === 0 ? 1 : 0));
-        if (stationAt(g) === "trader") write("Moss", X + moss[0].length / 2, Y - 4, "#ffb347", 1, 6);
+        const X = (g.trader % g.W) * T + ox + 8 - Math.floor(moss[0].length / FINE / 2);
+        const Y = (Math.floor(g.trader / g.W) + 1) * T + oy - moss.length / FINE;
+        drawFine(moss, X, Y - (Math.floor(g.now / 700) % 4 === 0 ? 1 : 0));
+        if (stationAt(g) === "trader") write("Moss", X + moss[0].length / FINE / 2, Y - 4, "#ffb347", 1, 6);
       }
 
       ctx.fillStyle = "#4a3020";
@@ -1437,6 +1461,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       glow(ctx, CAMP.market * T + ox + 8, CAMP.ground * T + oy - 20, 20, [255, 200, 110], 0.1);
       glow(ctx, CAMP.smith * T + ox + 14, CAMP.ground * T + oy - 10, 14, [255, 140, 50], g.now % 1300 < 160 ? 0.28 : 0.14);
       glow(ctx, CAMP.church * T + ox + 12, CAMP.ground * T + oy - 21, 16, [255, 210, 150], flick ? 0.2 : 0.16);
+      for (const [x, y] of HARBOR_LIGHTS) glow(ctx, x + ox, CAMP.ground * T + oy + y, 14, [255, 200, 110], flick ? 0.24 : 0.2);
     }
     else {
       glow(ctx, lx + 23, ly - 20, (LIFT_LIGHT - 1) * T, [255, 160, 70], flick ? 0.28 : 0.24);

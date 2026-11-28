@@ -271,6 +271,7 @@ export const LANDMARKS = [
   { x: WARDEN + 20, y: 34, name: "Reeve's Post" },
   { x: TAVERN + 29, y: 50, name: "The Bent Nail" },
   { x: LIGHTHOUSE + 1, y: 90, name: "Saltbell Light" },
+  { x: 1600, y: 70, name: "The Obsidian Gale" },
 ];
 
 export function islandBack(ctx: Ctx, now: number, ox: number, gy: number, VW: number) {
@@ -526,3 +527,278 @@ export function islandLights(ctx: Ctx, glow: Glow, now: number, ox: number, gy: 
   ctx.closePath();
   ctx.fill();
 }
+
+const SHORE = LIGHTHOUSE + 20;
+const DOCK = { from: SHORE + 12, to: CAMP.W * T + 8 };
+const SHIP = { from: 1372, to: 1752 };
+const WATER = 6;
+const GANGWAY = { foot: CAMP.ship * T + 22, top: CAMP.ship * T + 62 };
+
+const bedAt = (wx: number, gy: number) => {
+  const d = Math.max(0, wx - SHORE);
+  return gy + Math.min(118, Math.round((d * d) / 170 + d * 0.06));
+};
+
+const line = (ctx: Ctx, x0: number, y0: number, x1: number, y1: number) => {
+  const n = Math.max(1, Math.abs(x1 - x0), Math.abs(y1 - y0));
+  for (let k = 0; k <= n; k++) ctx.fillRect(Math.round(x0 + ((x1 - x0) * k) / n), Math.round(y0 + ((y1 - y0) * k) / n), 1, 1);
+};
+
+const deckAt = (u: number, gy: number) => (u < 0.16 ? gy - 60 : u > 0.86 ? gy - 48 : gy - 38);
+
+const keelAt = (u: number, gy: number) =>
+  gy + 30 - Math.round(36 * (u < 0.5 ? ((0.5 - u) / 0.5) ** 5 : ((u - 0.5) / 0.5) ** 2.4));
+
+const MASTS = [
+  { u: 0.27, h: 115, sails: [64, 52, 38] },
+  { u: 0.52, h: 132, sails: [76, 62, 46] },
+  { u: 0.77, h: 105, sails: [60, 48, 34] },
+];
+
+const sail = (ctx: Ctx, cx: number, top: number, w: number, h: number, now: number, k: number, stripe: boolean) => {
+  for (let j = 0; j < h; j++) {
+    const belly = Math.round(Math.sin((j / h) * Math.PI) * (3 + Math.sin(now / 900 + k) * 0.8));
+    const half = Math.round(w / 2 - (j / h) * 2);
+    ctx.fillStyle = stripe && Math.abs(j - h / 2) < 3 ? "#7a1f22" : j % 7 === 0 ? "#a89c80" : "#cfc3a4";
+    ctx.fillRect(cx - half + belly, top + j, half * 2, 1);
+    ctx.fillStyle = "#8a7e66";
+    ctx.fillRect(cx + half + belly - 2, top + j, 2, 1);
+  }
+  ctx.fillStyle = "#3a2618";
+  ctx.fillRect(cx - Math.round(w / 2) - 3, top - 2, w + 6, 2);
+};
+
+const ship = (ctx: Ctx, now: number, ox: number, gy: number) => {
+  const L = SHIP.to - SHIP.from;
+  const bob = Math.round(Math.sin(now / 1400));
+  const sx = (u: number) => SHIP.from + ox + Math.round(u * L);
+  const mastTop = (m: (typeof MASTS)[number]) => gy - 38 - m.h + bob;
+
+  ctx.fillStyle = "#2a1e16";
+  for (const m of MASTS) {
+    line(ctx, sx(m.u), mastTop(m) + 4, sx(0) + 4, deckAt(0, gy) + bob);
+    line(ctx, sx(m.u), mastTop(m) + 4, sx(1) + 46, gy - 66 + bob);
+  }
+  line(ctx, sx(MASTS[0].u), mastTop(MASTS[0]), sx(MASTS[1].u), mastTop(MASTS[1]) + 30);
+  line(ctx, sx(MASTS[1].u), mastTop(MASTS[1]), sx(MASTS[2].u), mastTop(MASTS[2]) + 30);
+
+  const fore = MASTS[2];
+  const jibTop = mastTop(fore) + 20;
+  const jibBot = gy - 66 + bob;
+  for (let y = jibTop; y < jibBot; y++) {
+    const t = (y - jibTop) / (jibBot - jibTop);
+    const xa = sx(fore.u) + 6 + Math.round(t * 30);
+    const xb = sx(fore.u) + 6 + Math.round(t * (sx(1) + 40 - sx(fore.u)));
+    ctx.fillStyle = (y - jibTop) % 9 === 0 ? "#a89c80" : "#cfc3a4";
+    ctx.fillRect(xa, y, Math.max(1, xb - xa), 1);
+  }
+
+  for (let wx = SHIP.from; wx <= SHIP.to; wx++) {
+    const u = (wx - SHIP.from) / L;
+    const top = deckAt(u, gy) + bob;
+    const keel = keelAt(u, gy) + bob;
+    const x = wx + ox;
+    for (let y = top; y < keel; y++) {
+      const r = y - top;
+      ctx.fillStyle =
+        r < 2
+          ? "#0e0c12"
+          : r === 5 || r === 6
+            ? "#c9a04a"
+            : y >= gy + WATER - 2 + bob
+              ? (wx + y) % 9 === 0
+                ? "#243a38"
+                : "#2c4440"
+              : Math.floor(r / 4) % 2
+                ? "#1c1a22"
+                : "#25222c";
+      ctx.fillRect(x, y, 1, 1);
+    }
+    ctx.fillStyle = "#2a2230";
+    if (wx % 6 === 0) ctx.fillRect(x, top - 4, 1, 4);
+    ctx.fillRect(x, top - 5, 1, 1);
+  }
+  for (let wx = SHIP.from + 70; wx < SHIP.to - 60; wx += 26) {
+    const x = wx + ox;
+    const y = gy - 26 + bob;
+    ctx.fillStyle = "#7a1f22";
+    ctx.fillRect(x - 1, y - 2, 8, 2);
+    ctx.fillStyle = "#0a080c";
+    ctx.fillRect(x, y, 6, 5);
+    ctx.fillStyle = "#3a3a48";
+    ctx.fillRect(x + 2, y + 2, 3, 2);
+  }
+  for (let k = 0; k < 3; k++) {
+    const x = sx(0) + 10 + k * 14;
+    ctx.fillStyle = "#0a080c";
+    ctx.fillRect(x - 1, gy - 51 + bob, 8, 8);
+    ctx.fillStyle = Math.floor(now / 5000 + k) % 5 ? "#ffcf6a" : "#c88a3a";
+    ctx.fillRect(x, gy - 50 + bob, 6, 6);
+    ctx.fillStyle = "#0a080c";
+    ctx.fillRect(x + 3, gy - 50 + bob, 1, 6);
+  }
+  ctx.fillStyle = "#3a2618";
+  ctx.fillRect(sx(0) - 2, gy - 70 + bob, 2, 12);
+  ctx.fillStyle = "#ffd77a";
+  ctx.fillRect(sx(0) - 4, gy - 72 + bob, 5, 5);
+
+  ctx.fillStyle = "#3a2618";
+  line(ctx, sx(1) - 4, gy - 46 + bob, sx(1) + 46, gy - 66 + bob);
+  line(ctx, sx(1) - 4, gy - 45 + bob, sx(1) + 46, gy - 65 + bob);
+  const fx = sx(1);
+  ctx.fillStyle = "#1c1a22";
+  ctx.fillRect(fx - 2, gy - 52 + bob, 8, 6);
+  ctx.fillRect(fx + 4, gy - 50 + bob, 6, 3);
+  ctx.fillStyle = "#c9a04a";
+  ctx.fillRect(fx + 1, gy - 56 + bob, 2, 4);
+  ctx.fillStyle = "#ff5a3a";
+  ctx.fillRect(fx + 4, gy - 51 + bob, 1, 1);
+
+  MASTS.forEach((m, k) => {
+    const x = sx(m.u);
+    const top = mastTop(m);
+    ctx.fillStyle = "#4a3020";
+    ctx.fillRect(x - 1, top, 4, m.h);
+    ctx.fillStyle = "#6b4423";
+    ctx.fillRect(x - 1, top, 1, m.h);
+    let y = gy - 50 + bob;
+    m.sails.forEach((w, j) => {
+      const h = Math.round(w * 0.42);
+      y -= h + 4;
+      sail(ctx, x + 1, y, w, h, now, k * 3 + j, k === 1 && j === 1);
+    });
+    if (k !== 1) return;
+    ctx.fillStyle = "#3a2618";
+    ctx.fillRect(x - 6, top + 18, 14, 4);
+    ctx.fillStyle = "#4a3020";
+    ctx.fillRect(x - 5, top + 14, 1, 4);
+    ctx.fillRect(x + 6, top + 14, 1, 4);
+    const wave = Math.floor(now / 260) % 3;
+    ctx.fillStyle = "#0c0a10";
+    ctx.fillRect(x + 3, top - 1, 16 + (wave === 1 ? 1 : 0), 10);
+    ctx.fillRect(x + 19, top + (wave === 2 ? 1 : 0), 2, 8);
+    ctx.fillStyle = "#c0392b";
+    ctx.fillRect(x + 8, top + 2, 6, 3);
+    ctx.fillRect(x + 7, top + 3, 1, 1);
+    ctx.fillRect(x + 14, top + 1, 2, 1);
+    ctx.fillRect(x + 9, top + 6, 4, 1);
+    ctx.fillStyle = "#ffd23f";
+    ctx.fillRect(x + 9, top + 3, 1, 1);
+  });
+};
+
+export function harbor(ctx: Ctx, now: number, ox: number, gy: number, VW: number, VH: number) {
+  const x0 = Math.max(0, SHORE + ox);
+  if (x0 >= VW) return;
+  const surf = gy + WATER;
+  const far = ctx.createLinearGradient(0, gy - 30, 0, surf);
+  far.addColorStop(0, "#252c5a");
+  far.addColorStop(1, "#0c1030");
+  const deep = ctx.createLinearGradient(0, surf, 0, gy + 120);
+  deep.addColorStop(0, "#1a2a5a");
+  deep.addColorStop(1, "#070c20");
+  for (let x = x0; x < VW; x++) {
+    const wx = x - ox;
+    const bed = bedAt(wx, gy);
+    const dry = bed <= surf;
+    ctx.fillStyle = far;
+    ctx.fillRect(x, gy - 9, 1, Math.min(bed, surf) - (gy - 9));
+    if (!dry) {
+      ctx.fillStyle = deep;
+      ctx.fillRect(x, surf, 1, bed - surf);
+    }
+    const n = hash(wx, 7);
+    ctx.fillStyle = dry ? (n < 0.3 ? "#b09a72" : "#9a8462") : n < 0.2 ? "#5a5070" : "#4a4460";
+    ctx.fillRect(x, bed, 1, 4);
+    ctx.fillStyle = dry ? "#6a5a44" : "#2e2a3c";
+    ctx.fillRect(x, bed + 4, 1, 13);
+    ctx.fillStyle = "#1d1612";
+    ctx.fillRect(x, bed + 17, 1, Math.max(0, VH - bed - 17));
+    if (hash(wx, 8) < 0.06) {
+      ctx.fillStyle = dry ? "#c8b8a0" : "#5a4a6a";
+      ctx.fillRect(x, bed + 1, 2, 1);
+    }
+  }
+
+  if (SHIP.from + ox < VW && SHIP.to + 60 + ox > 0) ship(ctx, now, ox, gy);
+
+  for (let x = x0; x < VW; x++) {
+    const wx = x - ox;
+    const bed = bedAt(wx, gy);
+    if (bed <= surf) continue;
+    ctx.fillStyle = "rgba(16, 32, 78, 0.5)";
+    ctx.fillRect(x, surf + 1, 1, bed - surf - 1);
+    ctx.fillStyle = hash(Math.floor(wx / 3), Math.floor(now / 700)) < 0.1 || bed - surf < 4 ? "#c8d0f0" : "#4a5a9a";
+    ctx.fillRect(x, surf + Math.round(Math.sin(wx / 9 + now / 600)), 1, 1);
+  }
+
+  ctx.fillStyle = "#6b4423";
+  line(ctx, GANGWAY.foot + ox, gy - 1, GANGWAY.top + ox, gy - 38);
+  line(ctx, GANGWAY.foot + ox + 1, gy - 1, GANGWAY.top + ox + 1, gy - 38);
+  ctx.fillStyle = "#3a2618";
+  line(ctx, GANGWAY.foot + ox, gy - 8, GANGWAY.top + ox, gy - 45);
+  for (let k = 1; k < 6; k++) {
+    const t = k / 6;
+    ctx.fillRect(Math.round(GANGWAY.foot + ox + t * (GANGWAY.top - GANGWAY.foot)), Math.round(gy - 8 - t * 37), 1, 7);
+  }
+
+  const d1 = Math.min(VW, DOCK.to + ox);
+  if (d1 <= 0) return;
+  for (let wx = DOCK.from; wx <= DOCK.to; wx += 40) {
+    const x = wx + ox;
+    if (x < -6 || x > VW) continue;
+    const bed = bedAt(wx, gy);
+    ctx.fillStyle = "#3a2a1c";
+    ctx.fillRect(x, gy + 2, 4, bed - gy);
+    ctx.fillStyle = "#2a1e14";
+    ctx.fillRect(x + 3, gy + 2, 1, bed - gy);
+    ctx.fillStyle = "#2f4a2a";
+    ctx.fillRect(x, surf - 1, 4, 3);
+  }
+  for (let x = Math.max(0, DOCK.from + ox); x < d1; x++) {
+    const wx = x - ox;
+    ctx.fillStyle = "#8a6a44";
+    ctx.fillRect(x, gy, 1, 1);
+    ctx.fillStyle = wx % 9 === 0 ? "#2a1e14" : "#5a3e26";
+    ctx.fillRect(x, gy + 1, 1, 3);
+    ctx.fillStyle = "#3a2a1c";
+    ctx.fillRect(x, gy + 4, 1, 1);
+  }
+  for (const wx of [DOCK.from + 2, CAMP.ship * T - 60, CAMP.ship * T + 120, CAMP.ship * T + 240]) {
+    const x = wx + ox;
+    ctx.fillStyle = "#2a2230";
+    ctx.fillRect(x, gy - 4, 5, 4);
+    ctx.fillStyle = "#4a4458";
+    ctx.fillRect(x, gy - 5, 5, 1);
+  }
+  const cx = CAMP.ship * T + ox;
+  for (const [bx, by, w] of [
+    [cx - 28, gy - 10, 10],
+    [cx - 24, gy - 19, 9],
+  ]) {
+    ctx.fillStyle = "#5a3e26";
+    ctx.fillRect(bx, by, w, w);
+    ctx.fillStyle = "#3a2a1c";
+    ctx.fillRect(bx, by, w, 1);
+    ctx.fillRect(bx, by, 1, w);
+    ctx.fillRect(bx + w - 1, by, 1, w);
+    line(ctx, bx, by + w - 1, bx + w - 1, by);
+  }
+  ctx.fillStyle = "#4a3020";
+  ctx.fillRect(cx - 40, gy - 9, 8, 9);
+  ctx.fillStyle = "#2a1e14";
+  ctx.fillRect(cx - 40, gy - 7, 8, 1);
+  ctx.fillRect(cx - 40, gy - 3, 8, 1);
+  const lp = DOCK.from + 18 + ox;
+  ctx.fillStyle = "#3a2a1c";
+  ctx.fillRect(lp, gy - 30, 2, 30);
+  ctx.fillRect(lp, gy - 30, 6, 1);
+  ctx.fillStyle = Math.floor(now / 160) % 9 ? "#ffd77a" : "#ffb347";
+  ctx.fillRect(lp + 4, gy - 28, 3, 4);
+}
+
+export const HARBOR_LIGHTS = [
+  [DOCK.from + 23, -26],
+  [SHIP.from - 2, -70 + 2],
+  [SHIP.from + 24, -47],
+] as const;

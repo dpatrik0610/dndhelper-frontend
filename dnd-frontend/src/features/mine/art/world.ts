@@ -274,81 +274,6 @@ const CHEST_TIERS = [
 
 export const chestSprite = (tier = 0): Grid => raster([...CHEST_LID, ...CHEST_BOX], CHEST_TIERS[tier]);
 
-const PACK = [
-  "....",
-  "....",
-  "....",
-  ".xx.",
-  "xbbx",
-  "xbBx",
-  "xbbx",
-  "xbBx",
-  "xbbx",
-  "xbbx",
-  "xBbx",
-  "xbbx",
-  ".xx.",
-  "....",
-  "....",
-  "....",
-];
-const LAMP = [
-  "...",
-  "...",
-  "...",
-  "...",
-  "...",
-  "...",
-  "...",
-  "...",
-  "...",
-  ".x.",
-  "xyx",
-  "xYx",
-  "xyx",
-  ".x.",
-  "...",
-  "...",
-];
-const MOSS = [
-  ".....xx.....",
-  "....xhhx....",
-  "....xhHx....",
-  "...xhhHHx...",
-  "..xhhhhHhx..",
-  "..xhssssxx..",
-  "..xsxssxsx..",
-  "..xsssSssx..",
-  ".xwwwwwwwwx.",
-  ".xwWwwwwWwx.",
-  "xcxwwwwwwxcx",
-  "xcccwwwwcccx",
-  ".xccccccccx.",
-  ".xccccccccx.",
-  "..xkkxxkkx..",
-  "..xxx..xxx..",
-];
-
-export const traderSprite = (): Grid =>
-  raster(
-    MOSS.map((row, i) => PACK[i] + row + LAMP[i]),
-    {
-      x: "#1c1410",
-      h: "#5a4a32",
-      H: "#7a6a48",
-      s: "#e2aa7c",
-      S: "#b97a52",
-      w: "#c8c0b0",
-      W: "#a8a090",
-      c: "#3a5a4a",
-      k: "#3a2a1a",
-      b: "#7a5a3a",
-      B: "#5a3a22",
-      y: "#ffd23f",
-      Y: "#fff3a0",
-    },
-  );
-
 export const potionSprite = (): Grid =>
   raster(["..xxxx..", "...xx...", "..xccx..", ".xrrrrx.", "xrRrrrrx", "xrrrrrrx", ".xrrrrx.", "..xxxx.."], {
     x: "#1c1410",
@@ -506,50 +431,6 @@ export const bombSprite = (): Grid =>
 export const reviveScroll = (): Grid => paper("#fbf4dc", "#c9a04a", "#ffe066", "#ffffff");
 
 export const recallScroll = (): Grid => paper("#dfe8f4", "#5a7ab0", "#4aa8ff", "#c8f0ff");
-
-export const priestSprite = (): Grid =>
-  raster(
-    [
-      "....xxxx....",
-      "...xhhhhx...",
-      "..xhhhhhhx..",
-      "..xhssssHx..",
-      "..xhsxsxHx..",
-      "..xhssssHx..",
-      "..xhhSShhx..",
-      ".xrrrrrrrrx.",
-      ".xrrrggrrrx.",
-      "xrrrgggggrrx",
-      ".xrrrggrrrx.",
-      ".xrrrrrrrrx.",
-      ".xrrrrrrrrx.",
-      ".xrrrrrrrrx.",
-      "..xkkxxkkx..",
-    ],
-    { x: "#1c1410", h: "#e8e4f0", H: "#b8b4c8", s: "#e2aa7c", S: "#b97a52", r: "#3a4a7a", g: "#e8c060", k: "#2a2030" },
-  );
-
-export const smithSprite = (): Grid =>
-  raster(
-    [
-      "....xxxx....",
-      "...xRRRRx...",
-      "..xRRRRRRx..",
-      "..xRssssRx..",
-      "..xRsxsxRx..",
-      "..xRssssRx..",
-      "..xRsSSsRx..",
-      ".xRRxccxRRx.",
-      "xsRxaaaaxRsx",
-      "xsxaaaaaaxsx",
-      "xsxaaAAaaxsx",
-      ".xSaaaaaaSx.",
-      "..xaaaaaax..",
-      "..xaaaaaax..",
-      "..xkkxxkkx..",
-    ],
-    { x: "#1c1410", R: "#b8502a", s: "#e2aa7c", S: "#b97a52", c: "#5a4a3a", a: "#6e4428", A: "#a86a3a", k: "#2a2030" },
-  );
 
 export const chartSprite = (): Grid =>
   raster(["xxxxxxx.", "xpPppPpx", "xpppxppx", "xpPpppPx", "xppxpppx", "xPppprPx", "xppppppx", ".xxxxxxx"], {

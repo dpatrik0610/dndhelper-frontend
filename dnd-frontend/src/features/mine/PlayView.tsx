@@ -69,19 +69,22 @@ import {
 import { achievementsFor, mergeFeats, unlockedNow } from "./achievements";
 import { goalsFor, newlyAffordable } from "./goals";
 import { compact, tiersOf, total, viewOf } from "./mine";
-import { createRenderer, oreIcon } from "./render";
+import { createRenderer, FINE, oreIcon } from "./render";
 import { CharacterPanel } from "./CharacterPanel";
 import { Effects } from "./Effects";
 import { Hotbar } from "./Hotbar";
 import { DropOre, LootPile } from "./LootPile";
 import { Sprite } from "./Sprite";
 import { NoteLog } from "./NoteLog";
+import { QuestTracker, ShipMenu } from "./Quests";
+import { isActive, lapsed, newlyDone } from "./jobs";
 import { pushNote } from "./notes";
 import { TrophyPanel } from "./Trophies";
 import { ARRIVAL, dreamsFor, engraving } from "./story";
 import styles from "./Mine.module.css";
 
 const GOAL_OPEN_KEY = "deepdelve-goal-open";
+const JOBS_OPEN_KEY = "deepdelve-jobs-open";
 type Panel = "pouch" | "controls" | "settings" | "trophies" | "character" | "drop";
 const MAX_TOASTS = 3;
 const LOW_HP = 0.3;
@@ -133,6 +136,7 @@ const MENU_TITLES: Record<Station, [string, string]> = {
   shop: ["Pip Tinkerwhistle's Menagerie", "One friend follows you down at a time."],
   house: ["Home", "Your own four walls on Saltbell Isle. Coin makes them grander."],
   church: ["Saltbell Chapel", "Sister Maren keeps a candle lit for every delver below. Coin buys blessings, scrolls and draughts."],
+  ship: ["The Obsidian Gale", "Captain Morg pays well for ore, alloy bars and monster hunts, as long as you beat the clock."],
   trader: ["Moss, the wandering peddler", "He'll be gone by the next trip."],
 };
 
@@ -144,6 +148,7 @@ const TALK: Record<Station, string> = {
   shop: "Visit Pip",
   house: "Go inside",
   church: "Talk to Sister Maren",
+  ship: "Talk to Captain Morg",
   trader: "Talk to Moss",
 };
 
@@ -226,6 +231,12 @@ export function PlayView({
     play("lift");
   }).current;
   const [goalOpen, setGoalOpen] = useState(() => localStorage.getItem(GOAL_OPEN_KEY) !== "0");
+  const [jobsOpen, setJobsOpen] = useState(() => localStorage.getItem(JOBS_OPEN_KEY) !== "0");
+  const showJobs = (open: boolean) => {
+    setJobsOpen(open);
+    localStorage.setItem(JOBS_OPEN_KEY, open ? "1" : "0");
+  };
+  const hasJobs = (state.quests ?? []).some(isActive);
   const togglePanel = (p: Panel) => setPanel((cur) => (cur === p ? null : p));
   const showGoal = (open: boolean) => {
     setGoalOpen(open);
@@ -347,6 +358,8 @@ export function PlayView({
     const run = (async () => {
       try {
         const res = await dig(req);
+        const before = stateRef.current;
+        const next = { ...before, deepestDepth: res.deepestDepth };
         setSatchel(res.satchel);
         g.carried = total(res.satchel);
         if (res.pile) notePile(res.pile);
@@ -363,8 +376,7 @@ export function PlayView({
             });
         }
         if (res.cores) {
-          const now = stateRef.current;
-          onState({ ...now, ores: { ...now.ores, [MAGMA_CORE]: (now.ores[MAGMA_CORE] ?? 0) + res.cores } });
+          next.ores = { ...next.ores, [MAGMA_CORE]: (next.ores[MAGMA_CORE] ?? 0) + res.cores };
           play("jackpot");
           pushNote({
             title: res.cores > 1 ? `${res.cores} Magma Cores` : "Magma Core",
@@ -373,26 +385,18 @@ export function PlayView({
           });
         }
         if (res.diamonds) {
-          const now = stateRef.current;
           const n = res.diamonds;
-          onState({
-            ...now,
-            ores: { ...now.ores, [DIAMOND]: (now.ores[DIAMOND] ?? 0) + n },
-            mined: { ...now.mined, [DIAMOND]: (now.mined[DIAMOND] ?? 0) + n },
-          });
+          next.ores = { ...next.ores, [DIAMOND]: (next.ores[DIAMOND] ?? 0) + n };
+          next.mined = { ...next.mined, [DIAMOND]: (next.mined[DIAMOND] ?? 0) + n };
           pushNote({
             title: n > 1 ? `${n} diamonds!` : "A diamond!",
-            text: `It's safe in your stores already. Hesk pays ${compact(now.prices[DIAMOND] ?? 0)} coins apiece, or keep it for your collection.`,
+            text: `It's safe in your stores already. Hesk pays ${compact(next.prices[DIAMOND] ?? 0)} coins apiece, or keep it for your collection.`,
             color: "#c4f4ff",
           });
         }
         if (res.wyrmCoins) {
-          const now = stateRef.current;
-          onState({
-            ...now,
-            coins: now.coins + res.wyrmCoins,
-            ores: res.bag ? { ...now.ores, bagOfHolding: 1 } : now.ores,
-          });
+          next.coins += res.wyrmCoins;
+          if (res.bag) next.ores = { ...next.ores, bagOfHolding: 1 };
           play("jackpot");
           pushNote({
             title: "The Ashen Wyrm is slain!",
@@ -409,8 +413,18 @@ export function PlayView({
                 .map(([key, n]) => ({ index: config.ores.findIndex((o) => o.key === key), n }))
                 .filter((o) => o.index >= 0 && o.n > 0),
             );
-        if (res.deepestDepth !== stateRef.current.deepestDepth)
-          onState({ ...stateRef.current, deepestDepth: res.deepestDepth });
+        if (res.quests) {
+          const finished = newlyDone(before.quests, res.quests);
+          for (const q of lapsed(before.quests, res.quests))
+            pushNote({ title: `Time's up: ${q.title}`, text: "Captain Morg gave the job to someone else.", color: "#ff8a6a" });
+          next.quests = res.quests;
+          for (const q of finished) {
+            play("jackpot");
+            pushNote({ title: `Job done: ${q.title}`, text: "Bank your haul and hand it in to Captain Morg at the docks.", color: "#9fe09a" });
+          }
+        }
+        if (res.quests || res.cores || res.diamonds || res.wyrmCoins || next.deepestDepth !== before.deepestDepth)
+          onState(next);
         if (res.trip) {
           const broke = res.trip.depth !== g.depth;
           loadTrip(g, res.trip, g.now);
@@ -433,7 +447,7 @@ export function PlayView({
     })();
     inflight.current = run;
     return run;
-  }, [config, onState, resync]);
+  }, [config, notePile, onState, resync]);
 
   const finish = useCallback(
     async (fainted: boolean, next = 0, recall = false) => {
@@ -578,14 +592,14 @@ export function PlayView({
       const h = stage.clientHeight;
       const scale =
         Math.max(2, Math.min(4, Math.round(Math.min(w / 420, h / 220)))) / viewOf(stateRef.current.stats.setBonus);
-      canvas.width = Math.ceil(w / scale);
-      canvas.height = Math.ceil(h / scale);
-      canvas.style.width = `${canvas.width * scale}px`;
-      canvas.style.height = `${canvas.height * scale}px`;
+      canvas.width = Math.ceil(w / scale) * FINE;
+      canvas.height = Math.ceil(h / scale) * FINE;
+      canvas.style.width = `${(canvas.width / FINE) * scale}px`;
+      canvas.style.height = `${(canvas.height / FINE) * scale}px`;
       const dpr =
         (window.devicePixelRatio || 1) * ((stage as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom ?? 1);
-      text.width = Math.round(canvas.width * scale * dpr);
-      text.height = Math.round(canvas.height * scale * dpr);
+      text.width = Math.round((canvas.width / FINE) * scale * dpr);
+      text.height = Math.round((canvas.height / FINE) * scale * dpr);
       text.style.width = canvas.style.width;
       text.style.height = canvas.style.height;
     };
@@ -784,8 +798,8 @@ export function PlayView({
     const c = e.currentTarget;
     const r = c.getBoundingClientRect();
     return {
-      x: (((e.clientX - r.left) / r.width) * c.width + cam.current.camX) / T,
-      y: (((e.clientY - r.top) / r.height) * c.height + cam.current.camY) / T,
+      x: (((e.clientX - r.left) / r.width) * (c.width / FINE) + cam.current.camX) / T,
+      y: (((e.clientY - r.top) / r.height) * (c.height / FINE) + cam.current.camY) / T,
     };
   };
 
@@ -846,6 +860,7 @@ export function PlayView({
 
   const onDrop = async (drop: OreCounts) => {
     await inflight.current;
+      onState({ ...s, trip: stateRef.current.trip });
     await flush();
     let s: MiningState | null = null;
     try {
@@ -1004,6 +1019,11 @@ export function PlayView({
                 {panel === "pouch" ? "Hide ore pouch" : "Ore pouch"}
               </button>
             )}
+            {hasJobs && !jobsOpen && (
+              <button type="button" className={`glass-btn-secondary ${styles.hudBtn}`} onClick={() => showJobs(true)}>
+                Show jobs
+              </button>
+            )}
             {!goalOpen && (
               <button type="button" className={`glass-btn-secondary ${styles.hudBtn}`} onClick={() => showGoal(true)}>
                 Show goal
@@ -1132,6 +1152,8 @@ export function PlayView({
           {goalOpen && (
             <NextGoal config={config} state={state} satchel={trip ? satchel : {}} onClose={() => showGoal(false)} />
           )}
+
+          {hasJobs && jobsOpen && <QuestTracker config={config} state={state} onClose={() => showJobs(false)} />}
         </div>
 
         {near && !(report && !trip) && !(trip && near === "lift") && opened !== near && (
@@ -1187,6 +1209,7 @@ export function PlayView({
                 {near === "shop" && <PetMenu {...props} />}
                 {near === "house" && <HouseMenu {...props} />}
                 {near === "church" && <ChurchMenu {...props} />}
+                {near === "ship" && <ShipMenu {...props} />}
               </>
             )}
           </section>

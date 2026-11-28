@@ -382,38 +382,6 @@ export const PET_ART: PetArt[] = (
   ] as PetArt[]
 ).map((p) => ({ ...p, rows: pad(p.rows, p.rows[0].length) }));
 
-const GNOME = {
-  pal: {
-    x: "#1c1410",
-    h: "#3d7a4a",
-    H: "#5aa86a",
-    s: "#e2aa7c",
-    S: "#b97a52",
-    w: "#efeadf",
-    W: "#c8c0b0",
-    c: "#7a3a6a",
-    k: "#5a3a22",
-  },
-  rows: [
-    ".....xx.....",
-    "....xhhx....",
-    "....xhHx....",
-    "...xhhHHx...",
-    "...xhhhHx...",
-    "..xxxxxxxx..",
-    "..xssssssx..",
-    "..xsxssxsx..",
-    "..xsssSssx..",
-    ".xwwwwwwwwx.",
-    ".xwWwwwwWwx.",
-    "xcxwwwwwwxcx",
-    "xcccwwwwcccx",
-    ".xccccccccx.",
-    "..xkkxxkkx..",
-    "..xxx..xxx..",
-  ],
-};
-
 const Z = {
   small: ["xxx", "..x", ".x.", "x..", "xxx"].map((r) => r.replace(/x/g, "z")),
   big: ["xxxx", "...x", "..x.", ".x..", "xxxx"].map((r) => r.replace(/x/g, "z")),
@@ -422,6 +390,5 @@ const Z = {
 export const petSprite = (p: PetArt): Grid => raster(p.rows, p.pal);
 export const petSilhouette = (p: PetArt): Grid =>
   raster(p.rows, Object.fromEntries(Object.keys(p.pal).map((k) => [k, k === "x" ? "#0c0a1e" : "#24224a"])));
-export const gnomeSprite = (): Grid => raster(GNOME.rows, GNOME.pal);
 export const zGlyph = (big: boolean, color: string): Grid => raster(big ? Z.big : Z.small, { z: color });
 export const canSolo = (petTier: number, depth: number) => petTier >= depth + 3;

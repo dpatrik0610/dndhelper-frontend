@@ -1,5 +1,4 @@
 import type { MiningState } from "@services/miningService";
-import { type Grid, raster } from "./art/pixel";
 
 export const FOREMAN = "Foreman Ottilie Brasshand";
 
@@ -85,40 +84,6 @@ export const wickLines = (state: MiningState) => {
   lines.push("My candle? Never burnt down. Stopped asking why around year forty.");
   return lines;
 };
-
-export const wickSprite = (): Grid =>
-  raster(
-    [
-      ".....yY.....",
-      ".....oy.....",
-      "....xwwx....",
-      "...xhhhhx...",
-      "..xxxxxxxx..",
-      "..xssssssx..",
-      "..xsxssxsx..",
-      ".xbbsSssbbx.",
-      ".xbbbbbbbbx.",
-      "xcxbbbbbbxcx",
-      "xcccbbbbcccx",
-      ".xccccccccx.",
-      ".xccccccccx.",
-      "..xkkxxkkx..",
-      "..xxx..xxx..",
-    ],
-    {
-      x: "#1c1410",
-      y: "#fff3a0",
-      Y: "#ffd23f",
-      o: "#ff8a2a",
-      w: "#efeadf",
-      h: "#5a4a3a",
-      s: "#e2aa7c",
-      S: "#b97a52",
-      b: "#d8d4cc",
-      c: "#4a3a5a",
-      k: "#3a2a1a",
-    },
-  );
 
 const DREAMS: [number, string][] = [
   [1, "You dream of a bell ringing under a lake. Every ring, the water gets warmer."],

@@ -135,6 +135,29 @@ export interface MiningTrip {
   pos?: number | null;
 }
 
+export type QuestRank = "easy" | "medium" | "hard";
+
+export interface QuestNeed {
+  kind: "ore" | "alloy" | "kill";
+  key: string;
+  count: number;
+  done: number;
+}
+
+export interface MiningQuest {
+  id: string;
+  rank: QuestRank;
+  title: string;
+  line: string;
+  depth: number;
+  needs: QuestNeed[];
+  coins: number;
+  reward: OreCounts;
+  minutes: number;
+  due: string | null;
+  opens?: string | null;
+}
+
 export interface MiningState {
   ores: OreCounts;
   mined: OreCounts;
@@ -169,6 +192,8 @@ export interface MiningState {
   torchStock: number;
   belt: number;
   prices: OreCounts;
+  quests?: MiningQuest[];
+  questsDone?: number;
 }
 
 export interface Break {
@@ -205,6 +230,7 @@ export interface DigResult {
   pile?: OreCounts;
   wyrmCoins?: number;
   bag?: boolean;
+  quests?: MiningQuest[];
 }
 
 export interface MiningScore {
@@ -246,4 +272,7 @@ export const upgradeHouse = () => post<MiningState>("/house");
 export const recordFeats = (req: { feats?: Record<string, number>; unlocked?: string[] }) => post<MiningState>("/feats", req);
 export const equipGear = (slot: SlotKey, tier: number) => post<MiningState>(`/equip/${slot}/${tier}`);
 export const followPet = (key: string | null) => post<MiningState>(`/follow/${key ?? "none"}`);
+export const acceptQuest = (id: string) => post<MiningState>(`/quests/${id}/accept`);
+export const abandonQuest = (id: string) => post<MiningState>(`/quests/${id}/abandon`);
+export const turnInQuest = (id: string) => post<MiningState>(`/quests/${id}/turnin`);
 export const getMiningScoreboard = () => apiClient<MiningScore[]>("/mining/scoreboard");
