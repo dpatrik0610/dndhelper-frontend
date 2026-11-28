@@ -1,3 +1,4 @@
+import { holdingSprite } from "./materials";
 import { blank, blit, type Grid, mix, raster, ramp, rotateCW } from "./pixel";
 
 export type GearSlot = "pickaxe" | "gauntlets" | "helm" | "charm" | "satchel" | "boots";
@@ -798,7 +799,9 @@ const detailed = (slot: GearSlot, tier: number) => {
 };
 
 export const itemName = (slot: GearSlot, tier: number) =>
-  tier === 0 ? ITEM_NAMES[slot][0] : `${SETS[tier].name}${tier === 7 ? " Iron" : ""} ${ITEM_NAMES[slot][1]}`;
+  tier > 10
+    ? "Bag of Holding"
+    : tier === 0 ? ITEM_NAMES[slot][0] : `${SETS[tier].name}${tier === 7 ? " Iron" : ""} ${ITEM_NAMES[slot][1]}`;
 
 const paletteFor = (slot: GearSlot, tier: number) => {
   const set = SETS[tier];
@@ -807,7 +810,8 @@ const paletteFor = (slot: GearSlot, tier: number) => {
   return { ...BASE, ...r, g: set.gem ?? r.m, G: set.gem ? mix(set.gem, "#ffffff", 0.6) : r.l, a: accent, A: mix(accent, "#ffffff", 0.55) };
 };
 
-export const item = (slot: GearSlot, tier: number) => raster(detailed(slot, tier), paletteFor(slot, tier));
+export const item = (slot: GearSlot, tier: number) =>
+  tier > 10 ? holdingSprite() : raster(detailed(slot, tier), paletteFor(slot, tier));
 
 const overlay = (spec: (string | number)[], pal: Record<string, string>) =>
   typeof spec[0] === "number"

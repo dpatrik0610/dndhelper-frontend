@@ -116,6 +116,7 @@ export interface MiningTrip {
   satchel: OreCounts;
   trader: number | null;
   motherlode: number | null;
+  wyrm?: number | null;
   wares: Record<string, number> | null;
   boons?: string[];
   pile?: OreCounts;
@@ -174,6 +175,7 @@ export interface DigRequest {
   drank: number;
   bombs?: { i: number; after: number }[];
   drankGreater?: number;
+  wyrm?: boolean;
   salamanders?: number;
   feats?: Record<string, number>;
   unlocked?: string[];
@@ -190,6 +192,8 @@ export interface DigResult {
   loot?: { i: number; ores: OreCounts }[];
   diamonds?: number;
   pile?: OreCounts;
+  wyrmCoins?: number;
+  bag?: boolean;
 }
 
 export interface MiningScore {

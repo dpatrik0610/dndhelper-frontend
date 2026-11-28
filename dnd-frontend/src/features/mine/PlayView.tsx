@@ -395,6 +395,21 @@ export function PlayView({
             autoClose: 6000,
           });
         }
+        if (res.wyrmCoins) {
+          const now = stateRef.current;
+          onState({
+            ...now,
+            coins: now.coins + res.wyrmCoins,
+            ores: res.bag ? { ...now.ores, bagOfHolding: 1 } : now.ores,
+          });
+          play("jackpot");
+          showNotification({
+            title: "The Ashen Wyrm is slain!",
+            message: `Its hoard is yours: ${compact(res.wyrmCoins)} coins, banked already.${res.bag ? ` You found a Bag of Holding too. ${MATERIALS.bagOfHolding.lore}` : ""}`,
+            color: "orange",
+            autoClose: 10000,
+          });
+        }
         if (!res.trip || res.trip.depth === g.depth)
           for (const find of res.loot ?? [])
             showLoot(

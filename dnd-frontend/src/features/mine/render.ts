@@ -4,7 +4,7 @@ import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
 import { HOUSE_H, HOUSE_LEVELS, houseSprite } from "./art/house";
 import { COIN, DIAMOND_GRID, MERCHANT } from "./art/materials";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
-import { bombSprite, chestSprite, cracks, enemySprite, oreTile, priestSprite, stoneTile, traderSprite } from "./art/world";
+import { bombSprite, chestSprite, cracks, enemySprite, oreTile, priestSprite, stoneTile, traderSprite, wyrmSprite } from "./art/world";
 import {
   BEDROCK,
   BOLT_MS,
@@ -15,6 +15,10 @@ import {
   GRAB_NEED,
   bombCell,
   BOMB_RADIUS,
+  isWyrm,
+  WYRM_W,
+  WYRM_H,
+  WYRM_SPIT_WINDUP,
   playerPos,
   stretch,
   isZombie,
@@ -767,6 +771,46 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
 
     for (const m of g.monsters) {
       const mp = drawPos(m);
+      if (isWyrm(m)) {
+        const flap = m.awake && Math.floor(g.now / 260) % 2 === 0;
+        const base = cached(`wyrm${flap ? 1 : 0}`, () => wyrmSprite(flap));
+        const flash = g.now < m.flashUntil;
+        const winding = m.windupUntil > g.now;
+        const spitting = m.slamAt > g.now;
+        const shown = flash
+          ? cached(`wyrmf${flap ? 1 : 0}`, () => tint(base, "#ffffff"))
+          : winding && Math.floor(g.now / 70) % 2
+            ? cached(`wyrmw${flap ? 1 : 0}`, () => tint(base, "#ff8a6a"))
+            : base;
+        const left = p.x + 0.5 < mp.x + WYRM_W / 2;
+        const w = shown[0].length;
+        const h = shown.length;
+        const bx = mp.x * T + ox + (WYRM_W * T - w) / 2 + (g.now < m.lungeUntil ? (left ? -4 : 4) : 0);
+        const bob = m.awake ? Math.round(Math.sin(g.now / 300) * 2) : 0;
+        const by = (mp.y + 1) * T - h + oy + bob;
+        draw(shown, bx, by, left);
+        if (spitting) {
+          const charge = 1 - (m.slamAt - g.now) / WYRM_SPIT_WINDUP;
+          const mx = left ? bx + 3 : bx + w - 3;
+          ctx.globalAlpha = 0.4 + 0.5 * charge;
+          ctx.fillStyle = Math.floor(g.now / 80) % 2 ? "#ffb347" : "#ff5a2a";
+          const r = 2 + Math.round(charge * 4);
+          ctx.fillRect(Math.round(mx - r), Math.round(by + 17 - r), r * 2, r * 2);
+          ctx.globalAlpha = 1;
+        }
+        if (winding || spitting) write("!", bx + w / 2, by - 6, "#ff5a4a", 1, 11);
+        if (m.awake) {
+          const barW = WYRM_W * T;
+          const barX = mp.x * T + ox;
+          const barY = by - 14;
+          write("Ashen Wyrm", barX + barW / 2, barY - 4, "#ffd77a", 1, 8);
+          ctx.fillStyle = "#1a0a0a";
+          ctx.fillRect(barX, barY, barW, 3);
+          ctx.fillStyle = "#e0503a";
+          ctx.fillRect(barX, barY, Math.max(1, Math.round((barW * m.hp) / m.maxHp)), 3);
+        }
+        continue;
+      }
       const ek = `${m.kind}g${m.gen}${m.rare ? "r" : ""}`;
       const sprite = cached(`e${ek}`, () => (m.gen ? shrink(enemySprite(m.def), 0.7 ** m.gen) : enemySprite(m.def)));
       const flash = g.now < m.flashUntil;
@@ -866,6 +910,17 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       ctx.fillRect(bx - 1, by - 2, 3, 5);
       ctx.fillStyle = "#fff3a0";
       ctx.fillRect(bx - 1, by - 1, 3, 3);
+    }
+    for (const s of g.spits) {
+      const sx = Math.round(s.x * T + ox);
+      const sy = Math.round(s.y * T + oy);
+      ctx.fillStyle = "#8a1a10";
+      ctx.fillRect(sx - 5, sy - 3, 11, 7);
+      ctx.fillRect(sx - 3, sy - 5, 7, 11);
+      ctx.fillStyle = "#ff5a2a";
+      ctx.fillRect(sx - 3, sy - 3, 7, 7);
+      ctx.fillStyle = "#fff3a0";
+      ctx.fillRect(sx - 1, sy - 1, 3, 3);
     }
 
     const tiers = g.tiers;
@@ -1094,6 +1149,12 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         glow(dctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, TORCH_LIGHT * T + fl, black, 0.95);
       for (const b of g.bolts) glow(dctx, b.x * T + ox, b.y * T + oy, (b.big ? 2.6 : 1.8) * T, black, 0.95);
       for (const f of g.fuses) glow(dctx, (f.i % g.W) * T + ox + 8, Math.floor(f.i / g.W) * T + oy + 8, 1.6 * T, black, 0.8);
+      for (const s of g.spits) glow(dctx, s.x * T + ox, s.y * T + oy, 3 * T, black, 0.95);
+      for (const m of g.monsters)
+        if (isWyrm(m) && m.awake) {
+          const mp = drawPos(m);
+          glow(dctx, (mp.x + WYRM_W / 2) * T + ox, (mp.y + 1 - WYRM_H / 2) * T + oy, 3.5 * T, black, 0.7);
+        }
       if (g.trader >= 0) {
         const tx = (g.trader % g.W) * T + ox + 15;
         const ty = Math.floor(g.trader / g.W) * T + oy + 12;

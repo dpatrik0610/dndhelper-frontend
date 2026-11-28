@@ -6,7 +6,7 @@ import { PET_ART, petSprite } from "./art/pets";
 import { type Grid, tint } from "./art/pixel";
 import { bombSprite, greaterPotionSprite, potionSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
 import type { Drink } from "./engine";
-import { DASH_PERKS, forgedOf, SET_BONUSES, statLine, tiersOf } from "./mine";
+import { DASH_PERKS, forgedOf, HOLDING_TIER, ownsHolding, SET_BONUSES, statLine, tiersOf, wearsHolding } from "./mine";
 import { TORCH } from "./render";
 import { Sprite } from "./Sprite";
 import styles from "./Mine.module.css";
@@ -96,6 +96,7 @@ export function Hotbar({
 }) {
   const tiers = tiersOf(state);
   const forged = forgedOf(state);
+  const holding = wearsHolding(state);
   const set = state.stats.setBonus;
   const petIdx = state.pet ? config.pets.findIndex((p) => p.key === state.pet) : -1;
   const [picking, setPicking] = useState<GearSlot | "pet" | "potion" | null>(null);
@@ -148,13 +149,16 @@ export function Hotbar({
       {pick && pick !== "pet" && pick !== "potion" && (
         <div className={styles.hotPicker}>
           <span className={styles.hotPickLabel}>Wear</span>
-          {(config.slots.find((x) => x.key === pick)?.tiers ?? []).slice(0, forged[pick] + 1).map(({ tier: t }) => (
+          {[
+            ...(config.slots.find((x) => x.key === pick)?.tiers ?? []).slice(0, forged[pick] + 1).map((x) => x.tier),
+            ...(pick === "satchel" && ownsHolding(state) ? [HOLDING_TIER] : []),
+          ].map((t) => (
             <button
               key={t}
               type="button"
               className={styles.hotSlot}
-              data-on={t === tiers[pick] || undefined}
-              aria-pressed={t === tiers[pick]}
+              data-on={t === (pick === "satchel" && holding ? HOLDING_TIER : tiers[pick]) || undefined}
+              aria-pressed={t === (pick === "satchel" && holding ? HOLDING_TIER : tiers[pick])}
               title={`${itemName(pick, t)}, tier ${t}`}
               disabled={busy}
               onClick={() => void choose(() => onEquip(pick, t))}
@@ -200,23 +204,25 @@ export function Hotbar({
           {GEAR_SLOTS.map((slot) => {
             const info = config.slots.find((x) => x.key === slot);
             const t = tiers[slot];
+            const bag = slot === "satchel" && holding;
+            const shown = bag ? HOLDING_TIER : t;
             return (
               <Square
                 key={slot}
-                grid={item(slot, t)}
-                label={`${itemName(slot, t)}, tier ${t}`}
+                grid={item(slot, shown)}
+                label={`${itemName(slot, shown)}, tier ${shown}`}
                 className={set > 0 ? styles.hotSet : t >= 6 ? styles.hotGlow : ""}
                 glow={t >= 6 ? (SETS[t].accent ?? SETS[t].base) : undefined}
                 active={pick === slot}
                 onClick={inMine ? undefined : () => toggle(slot)}
                 tip={
                   <>
-                    <b>{itemName(slot, t)}</b> · tier {t} / 10
+                    <b>{itemName(slot, shown)}</b> · tier {shown} / 10
                     {forged[slot] > t && ` (forged up to ${forged[slot]})`}
                     <br />
                     {info?.stat}
                     <br />
-                    {info && statLine(slot, info.tiers[t].stats)}
+                    {bag ? `Carries ${state.stats.capacity}, twice a Starmetal satchel.` : info && statLine(slot, info.tiers[t].stats)}
                     <br />
                     {set > 0 ? (
                       <>

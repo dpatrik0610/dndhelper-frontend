@@ -47,11 +47,39 @@ export const DIAMOND_GRID = raster(
   { x: "#1f4a66", W: "#ffffff", w: "#c4f4ff", b: "#6cc6ea" },
 );
 
+export const holdingSprite = (): Grid =>
+  raster(
+    [
+      "................",
+      "......xxxx......",
+      ".....xYYYYx.....",
+      "......xYYx......",
+      "....xxppppxx....",
+      "...xpPppppppx...",
+      "..xpPpppspppPx..",
+      "..xpPppsSspppx..",
+      ".xpPpppspppppPx.",
+      ".xpPppppppspppx.",
+      ".xpppppppsSsppx.",
+      ".xppppppppsppPx.",
+      ".xpppppppppppPx.",
+      "..xpppppppppPx..",
+      "...xxppppppxx...",
+      ".....xxxxxx.....",
+    ],
+    { x: "#1a1024", p: "#4a2a7a", P: "#7a5ab8", Y: "#e8c060", s: "#c8b8ff", S: "#ffffff" },
+  );
+
 export const MATERIALS: Record<string, { name: string; lore: string; grid: Grid }> = {
   [MAGMA_CORE]: {
     name: "Magma Core",
     lore: "The still-burning heart of a salamander. Only Flametouched Iron will take an edge with one in the quench.",
     grid: CORE,
+  },
+  bagOfHolding: {
+    name: "Bag of Holding",
+    lore: "Taken from the Ashen Wyrm's hoard. Bound to a Starmetal satchel at the forge, it becomes a secret tier 11 bag that carries twice as much.",
+    grid: holdingSprite(),
   },
   [DIAMOND]: {
     name: "Diamond",

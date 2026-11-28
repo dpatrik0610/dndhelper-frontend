@@ -379,6 +379,95 @@ export const greaterPotionSprite = (): Grid =>
 export const scrollSprite = (big = false): Grid =>
   big ? paper("#f0c8a0", "#b8402a", "#e0301a", "#ff8a2a") : paper("#f4e2b8", "#c9b07a", "#ff8a2a", "#ffe066");
 
+export const WYRM: Enemy = {
+  name: "Ashen Wyrm",
+  depth: 9,
+  threat: "Mini-boss",
+  does: "A rare dragon laired in a great cavern of the Deep Forge and below. Bites hard, spits fire, can't be knocked back and shrugs off fire.",
+};
+
+export const wyrmSprite = (flap: boolean): Grid => {
+  const W = 72;
+  const H = 56;
+  const k = Array.from({ length: H }, () => Array<string>(W).fill("."));
+  const put = (x: number, y: number, c: string) => {
+    const px = Math.round(x);
+    const py = Math.round(y);
+    if (px >= 0 && py >= 0 && px < W && py < H) k[py][px] = c;
+  };
+  const oval = (cx: number, cy: number, rx: number, ry: number, c: string) => {
+    for (let y = Math.floor(cy - ry); y <= cy + ry; y++)
+      for (let x = Math.floor(cx - rx); x <= cx + rx; x++)
+        if (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1) put(x, y, c);
+  };
+  const line = (x0: number, y0: number, x1: number, y1: number, w: number, c: string) => {
+    const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0)) * 2 + 1;
+    for (let i = 0; i <= n; i++) oval(x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n, w / 2, w / 2, c);
+  };
+  const tri = (ax: number, ay: number, bx: number, by: number, cx: number, cy: number, c: string) => {
+    const area = (bx - ax) * (cy - ay) - (cx - ax) * (by - ay);
+    for (let y = Math.min(ay, by, cy); y <= Math.max(ay, by, cy); y++)
+      for (let x = Math.min(ax, bx, cx); x <= Math.max(ax, bx, cx); x++) {
+        const u = ((bx - x) * (cy - y) - (cx - x) * (by - y)) / area;
+        const v = ((cx - x) * (ay - y) - (ax - x) * (cy - y)) / area;
+        if (u >= 0 && v >= 0 && u + v <= 1) put(x, y, c);
+      }
+  };
+  const box = (x: number, y: number, w: number, h: number, c: string) => {
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) put(x + i, y + j, c);
+  };
+  const tip = flap ? 16 : 3;
+  tri(34, 32, 12, tip, 48, tip + 6, "m");
+  tri(34, 32, 4, tip + 14, 12, tip, "m");
+  line(34, 32, 12, tip, 2, "w");
+  line(34, 32, 4, tip + 14, 2, "w");
+  line(34, 32, 48, tip + 6, 2, "w");
+  box(22, 44, 6, 10, "d");
+  box(40, 44, 6, 10, "d");
+  line(18, 40, 8, 47, 6, "b");
+  line(8, 47, 2, 42, 3, "b");
+  tri(0, 36, 5, 40, 1, 43, "h");
+  oval(32, 38, 18, 10, "b");
+  oval(33, 43, 13, 4, "y");
+  for (let x = 18; x <= 44; x += 5) line(x, 29, x - 2, 24, 1, "h");
+  line(44, 34, 56, 21, 9, "b");
+  line(47, 39, 58, 25, 3, "y");
+  oval(59, 17, 8, 6, "b");
+  box(60, 15, 11, 6, "b");
+  line(58, 22, 70, 21, 1, "d");
+  line(55, 12, 49, 3, 2, "h");
+  line(59, 11, 56, 2, 2, "h");
+  put(61, 14, "e");
+  put(62, 14, "e");
+  put(62, 13, "e");
+  put(70, 16, "f");
+  box(26, 46, 5, 9, "b");
+  box(44, 46, 5, 9, "b");
+  for (const x of [26, 28, 30, 44, 46, 48]) put(x, 55, "h");
+  const rows = k.map((row, y) =>
+    row
+      .map((c, x) =>
+        c !== "."
+          ? c
+          : [k[y - 1]?.[x], k[y + 1]?.[x], row[x - 1], row[x + 1]].some((n) => n && n !== "." && n !== "x")
+            ? "x"
+            : ".",
+      )
+      .join(""),
+  );
+  return raster(rows, {
+    x: "#140808",
+    b: "#4a2226",
+    d: "#2e1416",
+    y: "#c8783a",
+    m: "#6a2228",
+    w: "#2a1012",
+    e: "#ffe066",
+    h: "#d8ccb8",
+    f: "#ff8a2a",
+  });
+};
+
 export const bombSprite = (): Grid =>
   raster(["......y.", ".....o..", "....x...", "..xxxx..", ".xkKkkx.", ".xKkkkx.", ".xkkkkx.", "..xxxx.."], {
     y: "#fff3a0",

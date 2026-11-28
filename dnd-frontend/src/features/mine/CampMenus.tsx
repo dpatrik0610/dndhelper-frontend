@@ -36,7 +36,7 @@ import {
   scrollSprite,
 } from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
-import { canAfford, compact, discounted, forgedOf, statRows } from "./mine";
+import { canAfford, compact, discounted, forgedOf, HOLDING_TIER, ownsHolding, statRows } from "./mine";
 import { oreIcon, TORCH } from "./render";
 import { play, type Sfx } from "./sound";
 import { EFFECT_ART } from "./Effects";
@@ -445,10 +445,41 @@ export function ForgeMenu({ config, state, onState }: MenuProps) {
                       <span className={styles.tier}>Tier {tier + 1}</span>
                     </div>
                   </>
+                ) : key === "satchel" && (ownsHolding(state) || (state.ores.bagOfHolding ?? 0) > 0) ? (
+                  <>
+                    <IconArrowRight size={22} className={styles.compareArrow} aria-hidden />
+                    <div className={`${styles.gearCard} ${styles.gearNext}`} style={{ "--glow": "#c8b8ff" } as CSSProperties}>
+                      <span className={styles.gearTag}>{ownsHolding(state) ? "Bound" : "Secret"}</span>
+                      <Sprite grid={item(key, HOLDING_TIER)} scale={3} label={itemName(key, HOLDING_TIER)} />
+                      <b className={styles.gearName}>{itemName(key, HOLDING_TIER)}</b>
+                      <span className={styles.tier}>Tier {HOLDING_TIER}</span>
+                    </div>
+                  </>
                 ) : (
                   <span className={styles.dim}>Masterwork. Nothing left to forge.</span>
                 )}
               </div>
+              {key === "satchel" && !next && !ownsHolding(state) && (state.ores.bagOfHolding ?? 0) > 0 && (
+                <>
+                  <span className={styles.dim}>
+                    Sew the Wyrm's Bag of Holding into your Starmetal satchel. It carries twice as much, and keeps the
+                    Starmetal set bonus.
+                  </span>
+                  <div className={styles.btnRow}>
+                    <button
+                      type="button"
+                      className={`glass-btn-primary ${styles.actBtn}`}
+                      disabled={busy}
+                      onClick={() => void run(() => craftGear(key), () => "Bound: Bag of Holding")}
+                    >
+                      Bind the Bag of Holding
+                    </button>
+                  </div>
+                </>
+              )}
+              {key === "satchel" && ownsHolding(state) && (
+                <span className={styles.dim}>The Bag of Holding is bound. Swap to it from the bottom bar.</span>
+              )}
               {change && (
                 <table className={styles.deltaTable}>
                   <tbody>

@@ -1,7 +1,7 @@
 import type { Break, DepthInfo, MiningStats, MiningTrip } from "@services/miningService";
 import { itemName, SETS, type Tiers } from "./art/gear";
 import { canSolo, type PetArt } from "./art/pets";
-import { ENEMIES, type Enemy, RARE } from "./art/world";
+import { ENEMIES, type Enemy, RARE, WYRM } from "./art/world";
 import { boltHit, compact, critHit, dashHit } from "./mine";
 import type { Sfx } from "./sound";
 
@@ -142,6 +142,16 @@ export interface Monster extends Tween {
   nextSlam: number;
   grappled: boolean;
   rare: boolean;
+  awake: boolean;
+}
+
+export interface Spit {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  dmg: number;
 }
 
 export interface Grab {
@@ -200,6 +210,7 @@ export interface Pending {
   drank: number;
   drankGreater: number;
   bombs: { i: number; after: number }[];
+  wyrm: boolean;
   feats: Record<string, number>;
   unlocked: string[];
   hp?: number;
@@ -281,6 +292,7 @@ export interface Game extends GameSetup {
   embers: Map<number, number>;
   bombArmed: boolean;
   fuses: { i: number; at: number }[];
+  spits: Spit[];
   grab: Grab | null;
   shakeUntil: number;
   shakeMag: number;
@@ -301,7 +313,30 @@ export const KINDS: Record<number, Kind> = {
   9: { hp: 1.3, dmg: 1.2, move: 560, windup: 300, poise: 2, tunnel: true },
   10: { hp: 2, dmg: 1.6, move: 520, windup: 320, poise: 3 },
   11: { hp: 5, dmg: 1.5, move: 430, windup: 360, poise: 99 },
+  12: { hp: 90, dmg: 3, move: 620, windup: 700, poise: 99 },
 };
+
+export const WYRM_KIND = 12;
+export const WYRM_W = 4;
+export const WYRM_H = 3;
+const WYRM_WAKE = 14;
+const WYRM_SPIT_RANGE = 16;
+const WYRM_SPIT_EVERY = 3200;
+export const WYRM_SPIT_WINDUP = 800;
+const WYRM_SPIT_SPEED = 0.009;
+const WYRM_SPIT_SHARE = 0.6;
+const WYRM_BITE_EVERY = 1500;
+
+export const isWyrm = (m: Monster) => m.kind === WYRM_KIND;
+
+export const cellsOf = (m: Monster, x = m.x, y = m.y): [number, number][] => {
+  if (!isWyrm(m)) return [[x, y]];
+  const out: [number, number][] = [];
+  for (let dy = 0; dy < WYRM_H; dy++) for (let dx = 0; dx < WYRM_W; dx++) out.push([x + dx, y - dy]);
+  return out;
+};
+
+export const occupies = (m: Monster, x: number, y: number) => cellsOf(m).some(([cx, cy]) => cx === x && cy === y);
 
 export const SKITTER_KIND = 1;
 export const KOBOLD_KIND = 2;
@@ -489,6 +524,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     embers: new Map(),
     bombArmed: false,
     fuses: [],
+    spits: [],
     grab: null,
     sfx: [],
     shakeUntil: 0,
@@ -541,6 +577,7 @@ function loadCamp(g: Game, now: number, home: boolean) {
   g.embers = new Map();
   g.fuses = [];
   g.bombArmed = false;
+  g.spits = [];
   g.grab = null;
   g.motherlode = -1;
   g.startedAt = now;
@@ -625,8 +662,14 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.embers = new Map();
   g.fuses = [];
   g.bombArmed = false;
+  g.spits = [];
   g.grab = null;
   g.motherlode = trip.motherlode ?? -1;
+  if (trip.wyrm != null) {
+    const w = addMonster(g, WYRM_KIND, trip.wyrm % g.W, Math.floor(trip.wyrm / g.W));
+    w.def = WYRM;
+    w.cell = trip.wyrm;
+  }
   g.richFound = false;
   g.startedAt = now;
   g.nextSpawn = now + SPAWN_GRACE_MS;
@@ -654,6 +697,7 @@ export const emptyPending = (): Pending => ({
   drank: 0,
   drankGreater: 0,
   bombs: [],
+  wyrm: false,
   feats: {},
   unlocked: [],
 });
@@ -665,7 +709,7 @@ export function takePending(g: Game): Pending | null {
   const now = vitals(g);
   const still = now.hp === g.sent.hp && now.pos === g.sent.pos;
   const quiet = !Object.keys(p.feats).length && !p.unlocked.length;
-  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank && !p.drankGreater && !p.bombs.length && quiet && still)
+  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank && !p.drankGreater && !p.bombs.length && !p.wyrm && quiet && still)
     return null;
   g.pending = emptyPending();
   g.sent = now;
@@ -988,6 +1032,7 @@ export function addMonster(g: Game, kind: number, x: number, y: number, gen = 0)
     nextSlam: g.now + 2000,
     grappled: false,
     rare: false,
+    awake: false,
   };
   g.monsters.push(m);
   return m;
@@ -1051,7 +1096,8 @@ function explode(g: Game, at: number) {
     }
   markSeen(g, cx, cy, BOMB_RADIUS + 1);
   for (const m of liveMonsters(g))
-    if (inBlast(m.x - cx, m.y - cy)) damageMonster(g, m, Math.round(g.stats.power * BOMB_HIT), false, null, true);
+    if (cellsOf(m).some(([x, y]) => inBlast(x - cx, y - cy)))
+      damageMonster(g, m, Math.round(g.stats.power * BOMB_HIT), false, null, !isWyrm(m));
   const p = g.player;
   if (inBlast(p.x - cx, p.y - cy) || inBlast(p.x - cx, p.y - 1 - cy)) hurt(g, BOMB_SELF_DMG, "#ff8a2a");
   const px = (cx + 0.5) * T;
@@ -1141,6 +1187,7 @@ function stepBolts(g: Game, dt: number) {
     markSeen(g, cx, cy, 1.6);
     const foe = liveMonsters(g).find((m) => {
       const mp = drawPos(m);
+      if (isWyrm(m)) return b.x >= mp.x && b.x <= mp.x + WYRM_W && b.y >= mp.y + 1 - WYRM_H && b.y <= mp.y + 1;
       return Math.abs(mp.x + 0.5 - b.x) < 0.7 && Math.abs(mp.y + 0.5 - b.y) < 0.8;
     });
     if (foe || !isOpen(g, cx, cy)) {
@@ -1187,10 +1234,7 @@ const liveMonsters = (g: Game) => g.monsters.filter((m) => !m.leaving && m.hp > 
 
 const strikeSpots = (m: Monster) => {
   const d = drawPos(m);
-  return [
-    [m.x, m.y],
-    [Math.round(d.x), Math.round(d.y)],
-  ];
+  return [...cellsOf(m), ...cellsOf(m, Math.round(d.x), Math.round(d.y))];
 };
 
 export const strikable = (p: Player, m: Monster, dir?: number) =>
@@ -1204,6 +1248,17 @@ function killMonster(g: Game, m: Monster, by: string | null) {
   m.hp = 0;
   g.monsters = g.monsters.filter((x) => x !== m);
   g.sfx.push("kill");
+  if (isWyrm(m)) {
+    g.pending.wyrm = true;
+    const cx = (m.x + WYRM_W / 2) * T;
+    const cy = (m.y - 1) * T;
+    for (const color of ["#ffe066", "#ff8a2a", "#c22a1a", "#fff3a0"]) burst(g, cx, cy, color, 40, 3.6);
+    say(g, cx, cy - 30, "THE ASHEN WYRM FALLS!", "#ffd77a", 3200);
+    shake(g, 8, 700);
+    g.sfx.push("jackpot");
+    feat(g, "wyrmSlain");
+    return;
+  }
   if (m.kind === MIMIC_KIND) {
     g.pending.mimics.push(m.cell);
     burst(g, (m.x + 0.5) * T, (m.y + 0.5) * T, "#ffd77a", 30, 3);
@@ -1256,8 +1311,14 @@ function shove(g: Game, m: Monster) {
 }
 
 function damageMonster(g: Game, m: Monster, dmg: number, crit: boolean, byPet: string | null, fire = false) {
-  const cx = (m.x + 0.5) * T;
-  const cy = m.y * T;
+  const cx = (m.x + (isWyrm(m) ? WYRM_W / 2 : 0.5)) * T;
+  const cy = (m.y - (isWyrm(m) ? WYRM_H - 1 : 0)) * T;
+  if (isWyrm(m) && fire) {
+    m.burnUntil = 0;
+    say(g, cx, cy - 4, "Immune to fire", "#ffb347", 700);
+    sayOnce(g, "wyrmFire", "Fire washes off its scales. Use your pick, or a bomb.", "#ffb347");
+    return;
+  }
   m.flashUntil = g.now + 120;
   if (m.kind === MIMIC_KIND && !fire) {
     if (!byPet) feat(g, "clang");
@@ -1362,7 +1423,7 @@ function attack(g: Game, m: Monster) {
   if (m.hp <= 0 && heavy) feat(g, "smashKill");
   if (m.hp <= 0 && airborne) feat(g, "jumpKill");
   if (crit || heavy || airborne) shake(g, heavy ? 3 : 2, heavy ? 180 : 120);
-  if (m.hp <= 0 || m.kind === MIMIC_KIND || m.ward > 0) return;
+  if (m.hp <= 0 || m.kind === MIMIC_KIND || isWyrm(m) || m.ward > 0) return;
   const poise = KINDS[m.kind].poise;
   m.poise = (m.poise || poise) - 1;
   if (crit || heavy || m.poise <= 0) {
@@ -1563,7 +1624,7 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
     const over =
       d !== 0 &&
       Array.from({ length: h + 1 }, (_, i) => y - 1 - i).every((r) => isOpen(g, x + d, r)) &&
-      !liveMonsters(g).some((mm) => mm.x === x + d && mm.y <= y - 1 && mm.y >= y - 1 - h && mm.dmg > 0);
+      !liveMonsters(g).some((mm) => mm.dmg > 0 && Array.from({ length: h + 1 }, (_, i) => y - 1 - i).some((r) => occupies(mm, x + d, r)));
     if (d && !aim) p.face = d;
     p.hangUntil = g.now + JUMP_MS * (high ? 1.6 : 1) + HANG_MS;
     p.jumpAt = g.now;
@@ -1581,7 +1642,7 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
     if (foe && ready && !aim) return attack(g, foe);
     const nx = x + d;
     const blocked = liveMonsters(g).some(
-      (mm) => mm.x === nx && (mm.y === y || mm.y === y - 1) && g.now >= mm.stunUntil && mm.dmg > 0,
+      (mm) => (occupies(mm, nx, y) || occupies(mm, nx, y - 1)) && g.now >= mm.stunUntil && mm.dmg > 0,
     );
     if (blocked) return;
     if (isOpen(g, nx, y) && isOpen(g, nx, y - 1)) {
@@ -1857,6 +1918,10 @@ function stepMonsters(g: Game, dt: number) {
       damageMonster(g, m, Math.max(1, Math.round(g.stats.power * 0.4)), false, null, true);
     }
     if (m.hp <= 0) continue;
+    if (isWyrm(m)) {
+      stepWyrm(g, m);
+      continue;
+    }
     if (g.asleep) {
       m.leaving = g.now;
       continue;
@@ -1907,7 +1972,7 @@ function stepMonsters(g: Game, dt: number) {
     if (g.now < m.nextMove) continue;
     m.nextMove = g.now + m.moveMs * (g.now < m.slowUntil ? 2 : 1);
     if (spec.tunnel) {
-      const occupied = (x: number, y: number) => g.monsters.some((o) => o !== m && o.x === x && o.y === y);
+      const occupied = (x: number, y: number) => g.monsters.some((o) => o !== m && occupies(o, x, y));
       const dx = Math.sign(p.x - m.x);
       const dy = Math.sign(p.y - 1 - m.y);
       const [nx, ny] = Math.abs(p.x - m.x) >= Math.abs(p.y - m.y) && dx ? [m.x + dx, m.y] : [m.x, m.y + (dy || dx)];
@@ -1937,6 +2002,117 @@ function stepMonsters(g: Game, dt: number) {
       g.map[home] = MIMIC;
     return false;
   });
+}
+
+const wyrmFits = (g: Game, m: Monster, x: number, y: number) =>
+  cellsOf(m, x, y).every(
+    ([cx, cy]) => isOpen(g, cx, cy) && !(cx === g.player.x && (cy === g.player.y || cy === g.player.y - 1)),
+  );
+
+export const wyrmBites = (p: Player, m: Monster) =>
+  [p.y, p.y - 1].some((py) => p.x >= m.x - 1 && p.x <= m.x + WYRM_W && py >= m.y - WYRM_H && py <= m.y + 1);
+
+function stepWyrm(g: Game, m: Monster) {
+  const p = g.player;
+  const cx = m.x + WYRM_W / 2;
+  const cy = m.y - 1;
+  const dist = Math.hypot(p.x + 0.5 - cx, p.y - 0.5 - cy);
+  if (!m.awake) {
+    if ((dist > WYRM_WAKE && m.hp >= m.maxHp) || g.asleep) return;
+    m.awake = true;
+    m.nextSlam = g.now + 1600;
+    m.nextHit = g.now + 1200;
+    say(g, cx * T, (m.y - 4) * T, "The Ashen Wyrm wakes!", "#ff6a3a", 2400);
+    sayOnce(g, "wyrm", "A dragon! It bites hard, spits fire and shrugs off fire. Only steel and bombs hurt it.", "#ff8a6a", 5000);
+    shake(g, 6, 600);
+    g.sfx.push("seal");
+    feat(g, "wyrmWake");
+    return;
+  }
+  if (m.windupUntil) {
+    if (g.now < m.windupUntil) return;
+    m.windupUntil = 0;
+    m.nextHit = g.now + WYRM_BITE_EVERY;
+    m.lungeUntil = g.now + 200;
+    if (wyrmBites(p, m)) hurt(g, m.dmg);
+    else {
+      say(g, (p.x + 0.5) * T, (p.y - 2) * T, "miss", "#a59c8e", 500);
+      feat(g, "sidestep");
+    }
+    return;
+  }
+  if (m.slamAt) {
+    if (g.now < m.slamAt) return;
+    m.slamAt = 0;
+    m.nextSlam = g.now + WYRM_SPIT_EVERY;
+    const face = p.x + 0.5 < cx ? -1 : 1;
+    const ox = face > 0 ? m.x + WYRM_W - 0.1 : m.x + 0.1;
+    const oy = m.y - 1.9;
+    const tx = p.x + 0.5 - ox;
+    const ty = p.y - 0.5 - oy;
+    const len = Math.hypot(tx, ty) || 1;
+    g.spits.push({
+      x: ox,
+      y: oy,
+      vx: (tx / len) * WYRM_SPIT_SPEED,
+      vy: (ty / len) * WYRM_SPIT_SPEED,
+      life: 2600,
+      dmg: Math.round(m.dmg * WYRM_SPIT_SHARE),
+    });
+    g.sfx.push("bolt");
+    return;
+  }
+  const near = wyrmBites(p, m);
+  if (near && g.now >= m.nextHit) {
+    m.windupUntil = g.now + KINDS[WYRM_KIND].windup;
+    return;
+  }
+  if (!near && dist <= WYRM_SPIT_RANGE && g.now >= m.nextSlam) {
+    m.slamAt = g.now + WYRM_SPIT_WINDUP;
+    return;
+  }
+  if (m.t < m.dur || g.now < m.nextMove) return;
+  m.nextMove = g.now + m.moveMs * (g.now < m.slowUntil ? 2 : 1);
+  if (near) return;
+  const tx = p.x + 0.5 < cx ? p.x + 1 : p.x - WYRM_W;
+  const ty = p.y;
+  let best: [number, number] | null = null;
+  let bestD = (m.x - tx) ** 2 + (m.y - ty) ** 2;
+  for (let dy = -1; dy <= 1; dy++)
+    for (let dx = -1; dx <= 1; dx++) {
+      if ((!dx && !dy) || !wyrmFits(g, m, m.x + dx, m.y + dy)) continue;
+      const d = (m.x + dx - tx) ** 2 + (m.y + dy - ty) ** 2;
+      if (d < bestD) {
+        bestD = d;
+        best = [m.x + dx, m.y + dy];
+      }
+    }
+  if (best) tweenTo(m, best[0], best[1], m.moveMs * 0.9);
+}
+
+function stepSpits(g: Game, dt: number) {
+  if (!g.spits.length) return;
+  const p = g.player;
+  for (const s of g.spits) {
+    s.life -= dt;
+    s.x += s.vx * dt;
+    s.y += s.vy * dt;
+    if (rand() < 0.7) g.parts.push({ x: s.x * T, y: s.y * T, vx: 0, vy: -0.25, life: 260, color: rand() < 0.5 ? "#ff5a2a" : "#ffb347" });
+    markSeen(g, Math.floor(s.x), Math.floor(s.y), 1.8);
+    if (Math.abs(s.x - (p.x + 0.5)) < 0.55 && s.y > p.y - 1.9 && s.y < p.y + 1) {
+      s.life = 0;
+      const before = p.hp;
+      hurt(g, s.dmg, "#ff8a2a");
+      if (p.hp < before) p.burnUntil = g.now + 3000;
+      burst(g, s.x * T, s.y * T, "#ff8a2a", 16, 2.2);
+      continue;
+    }
+    if (!isOpen(g, Math.floor(s.x), Math.floor(s.y))) {
+      s.life = 0;
+      burst(g, s.x * T, s.y * T, "#ff8a2a", 12, 1.8);
+    }
+  }
+  g.spits = g.spits.filter((s) => s.life > 0);
 }
 
 function stepPet(g: Game, dt: number) {
@@ -2350,6 +2526,7 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
   if (!g.camp && g.now - g.startedAt > 4000 && !inTorchlight(g, p.x, p.y - 1))
     sayOnce(g, "dark", "Dark out here. Wounds only mend in torchlight, and monsters stir faster (T plants a torch).", "#ffc98a", 4200);
   stepBolts(g, dt);
+  stepSpits(g, dt);
   stepFuses(g);
   stepMonsters(g, dt);
   stepEmbers(g);

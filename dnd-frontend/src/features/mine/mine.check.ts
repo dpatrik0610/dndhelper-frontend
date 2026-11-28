@@ -15,6 +15,8 @@ import {
   effects,
   bombKey,
   BOMB_SELF_DMG,
+  occupies,
+  WYRM_KIND,
   revive,
   setBlessings,
   SHIELD_CUT,
@@ -698,6 +700,26 @@ assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
   bombKey(close);
   run(close, 2100);
   assert.equal(1000 - close.player.hp, BOMB_SELF_DMG * 0.75, "your own bomb hits you for 200, less armor");
+}
+{
+  const lair = newGame(-1, ["############", ...Array.from({ length: 5 }, () => "#..........#"), "############"]);
+  lair.monsters = [];
+  lair.nextSpawn = 1e12;
+  lair.seen.fill(1);
+  const w = addMonster(lair, WYRM_KIND, 6, 5);
+  assert.ok(occupies(w, 9, 3) && !occupies(w, 10, 5) && !occupies(w, 6, 2), "the wyrm fills a 4x3 footprint");
+  lair.player.x = lair.player.fromX = 5;
+  lair.player.y = lair.player.fromY = 5;
+  lair.lastInput = 1e15;
+  w.hp = 1e6;
+  step(lair, 16, { ...none, attack: true }, { x: 6.5, y: 4.5 });
+  run(lair, 300);
+  assert.ok(w.hp < 1e6 && w.x === 6, "the wyrm takes a pick hit but can't be knocked back");
+  w.hp = 1;
+  lair.player.nextSwing = 0;
+  step(lair, 16, { ...none, attack: true }, { x: 6.5, y: 4.5 });
+  run(lair, 300);
+  assert.ok(!lair.monsters.includes(w) && lair.pending.wyrm, "slaying the wyrm tells the server");
 }
 console.log("mine.check ok");
 

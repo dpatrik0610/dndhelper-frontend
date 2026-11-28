@@ -192,7 +192,11 @@ export const DASH_PERKS = [
 ];
 
 export const tiersOf = (state: MiningState): Tiers =>
-  Object.fromEntries(GEAR_SLOTS.map((s) => [s, state.gear[s] ?? 0])) as Tiers;
+  Object.fromEntries(GEAR_SLOTS.map((s) => [s, Math.min(10, state.gear[s] ?? 0)])) as Tiers;
 
 export const forgedOf = (state: MiningState): Tiers =>
-  Object.fromEntries(GEAR_SLOTS.map((s) => [s, Math.max(state.forged?.[s] ?? 0, state.gear[s] ?? 0)])) as Tiers;
+  Object.fromEntries(GEAR_SLOTS.map((s) => [s, Math.min(10, Math.max(state.forged?.[s] ?? 0, state.gear[s] ?? 0))])) as Tiers;
+
+export const HOLDING_TIER = 11;
+export const wearsHolding = (state: MiningState) => (state.gear.satchel ?? 0) >= HOLDING_TIER;
+export const ownsHolding = (state: MiningState) => wearsHolding(state) || (state.forged?.satchel ?? 0) >= HOLDING_TIER;

@@ -152,7 +152,7 @@ export function MiningBoard() {
                         const tier = s.gear[slot] ?? 0;
                         return (
                           <Tooltip key={slot} label={`${itemName(slot, tier)} · tier ${tier} / 10`} withArrow>
-                            <div className={`${styles.catch} ${tier === 10 ? styles.catchGolden : ""}`}>
+                            <div className={`${styles.catch} ${tier >= 10 ? styles.catchGolden : ""}`}>
                               <Sprite grid={item(slot, tier)} scale={1} />
                               <span className={styles.count}>{tier}</span>
                             </div>
