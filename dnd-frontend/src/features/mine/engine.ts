@@ -1,7 +1,7 @@
 import type { Break, DepthInfo, MiningStats, MiningTrip } from "@services/miningService";
 import { itemName, SETS, type Tiers } from "./art/gear";
 import { canSolo, type PetArt } from "./art/pets";
-import { ENEMIES, type Enemy } from "./art/world";
+import { ENEMIES, type Enemy, RARE } from "./art/world";
 import { boltHit, compact, critHit, dashHit } from "./mine";
 import type { Sfx } from "./sound";
 
@@ -81,6 +81,8 @@ export interface Player extends Tween {
   slowUntil: number;
   burnUntil: number;
   nextBurn: number;
+  poisonUntil: number;
+  nextPoison: number;
   lastHurt: number;
   hurtUntil: number;
   hangUntil: number;
@@ -126,6 +128,7 @@ export interface Monster extends Tween {
   slamAt: number;
   nextSlam: number;
   grappled: boolean;
+  rare: boolean;
 }
 
 export interface Grab {
@@ -290,6 +293,11 @@ export const SLAM_RANGE = 3;
 export const SLAM_WINDUP_MS = 900;
 const SLAM_EVERY_MS = 5000;
 const SKITTER_CHANCE = 0.35;
+export const RARE_CHANCE = 0.12;
+export const ROT_RANGE = 2;
+export const POISON_MS = 5000;
+const POISON_TICK_MS = 800;
+export const isZombie = (m: Monster) => m.rare && m.kind === 4;
 
 export const PET_LIGHT: Record<string, number> = { moth: 3.5, wisp: 5, fox: 10 };
 
@@ -483,6 +491,8 @@ function place(g: Game, x: number) {
     slowUntil: 0,
     burnUntil: 0,
     nextBurn: 0,
+    poisonUntil: 0,
+    nextPoison: 0,
     lastHurt: 0,
     hurtUntil: 0,
     hangUntil: 0,
@@ -889,6 +899,7 @@ export function addMonster(g: Game, kind: number, x: number, y: number, gen = 0)
     slamAt: 0,
     nextSlam: g.now + 2000,
     grappled: false,
+    rare: false,
   };
   g.monsters.push(m);
   return m;
@@ -1564,16 +1575,39 @@ function spawn(g: Game, alarm = false) {
   if (!cells.length) return;
   const at = cells[Math.floor(rand() * cells.length)];
   const x = at % g.W;
-  addMonster(g, kind, x, Math.floor(at / g.W));
+  rarify(g, addMonster(g, kind, x, Math.floor(at / g.W)));
   const pack = (rand() < 0.2 + g.depth * 0.04 ? 1 : 0) + (g.depth >= 5 && rand() < 0.15 ? 1 : 0);
   const near = cells
     .filter((i) => i !== at && Math.abs((i % g.W) - x) + Math.abs(Math.floor(i / g.W) - Math.floor(at / g.W)) <= 4)
     .sort(() => rand() - 0.5);
   for (const i of near.slice(0, Math.min(pack, cap - liveMonsters(g).length)))
-    addMonster(g, kind, i % g.W, Math.floor(i / g.W));
+    rarify(g, addMonster(g, kind, i % g.W, Math.floor(i / g.W)));
   const pet = g.petActor;
   if (pet?.key === "bat")
     say(g, (pet.px + 0.5) * T, (pet.py - 1) * T, x < p.x ? "← Squeak!" : "Squeak! →", "#d07a8c", 1600);
+}
+
+export function rarify(g: Game, m: Monster, force = false) {
+  const def = RARE[m.kind];
+  if (!def || (!force && rand() >= RARE_CHANCE)) return m;
+  m.rare = true;
+  m.def = def;
+  m.hp = m.maxHp = Math.round(m.maxHp * 1.4);
+  burst(g, (m.x + 0.5) * T, m.y * T + 8, m.kind === 3 ? "#9ae05a" : "#c86aff", 10, 1.6);
+  return m;
+}
+
+const inReach = (p: Player, m: Monster) =>
+  isZombie(m) ? Math.abs(m.x - p.x) <= ROT_RANGE && Math.abs(m.y - (p.y - 0.5)) <= ROT_RANGE + 0.5 : reaches(p, m);
+
+function rot(g: Game, m: Monster) {
+  const cx = (m.x + 0.5) * T;
+  const cy = (m.y + 0.5) * T;
+  for (let k = 0; k < 24; k++) {
+    const a = (k / 24) * Math.PI * 2;
+    g.parts.push({ x: cx, y: cy, vx: Math.cos(a) * 1.4, vy: Math.sin(a) * 1.4, life: 420, color: k % 2 ? "#c86aff" : "#7ee05a" });
+  }
+  say(g, cx, m.y * T - 10, "Necrotic burst!", "#c86aff", 800);
 }
 
 function hopBack(g: Game, m: Monster) {
@@ -1649,11 +1683,16 @@ function stepMonsters(g: Game, dt: number) {
       m.windupUntil = 0;
       m.nextHit = g.now + 1100;
       m.lungeUntil = g.now + 180;
+      if (isZombie(m)) rot(g, m);
       if (reaches(p, m) && !m.dmg) shove(g, m);
-      else if (reaches(p, m)) {
+      else if (inReach(p, m)) {
         const before = p.hp;
-        hurt(g, m.dmg);
-        if (p.hp < before && m.kind === 3) p.slowUntil = g.now + 3000;
+        hurt(g, m.dmg, isZombie(m) ? "#c86aff" : undefined);
+        if (p.hp < before && m.kind === 3 && m.rare) {
+          if (g.now >= p.poisonUntil) say(g, (p.x + 0.5) * T, (p.y - 2) * T, "Poisoned!", "#9ae05a", 900);
+          p.poisonUntil = g.now + POISON_MS;
+          p.nextPoison = Math.max(p.nextPoison, g.now + POISON_TICK_MS);
+        } else if (p.hp < before && m.kind === 3) p.slowUntil = g.now + 3000;
         if (p.hp < before && m.kind === 7) p.burnUntil = g.now + 3000;
         if (p.hp < before && m.kind === CUBE_KIND && g.now > p.rootUntil + ENGULF_GRACE_MS) {
           p.rootUntil = g.now + ENGULF_MS;
@@ -1669,7 +1708,7 @@ function stepMonsters(g: Game, dt: number) {
     }
     if (m.windupUntil) continue;
     if (m.kind === GOLEM_KIND && golemSlam(g, m)) continue;
-    if (reaches(p, m)) {
+    if (inReach(p, m)) {
       m.lost = 0;
       if (g.now >= m.nextHit) m.windupUntil = g.now + KINDS[m.kind].windup;
       continue;
@@ -1770,11 +1809,16 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
   const max = g.stats.maxHp;
   const resting = g.now - p.lastHurt > REST_MS && inTorchlight(g, p.x, p.y - 1);
   const rest = resting ? (byLiftTorch(g, p.x, p.y - 1) ? 0.06 : 0.03) : 0;
-  const regen = (g.pet?.key === "wisp" ? 0.03 : 0) + rest;
+  const poisoned = g.now < p.poisonUntil;
+  const regen = poisoned ? 0 : (g.pet?.key === "wisp" ? 0.03 : 0) + rest;
   p.hp = Math.min(max, p.hp + max * regen * (dt / 1000));
   if (g.now < p.burnUntil && g.now >= p.nextBurn) {
     p.nextBurn = g.now + 1000;
     hurt(g, g.info.monsterDamage * 0.2, "#ff8a2a");
+  }
+  if (poisoned && g.now >= p.nextPoison) {
+    p.nextPoison = g.now + POISON_TICK_MS;
+    hurt(g, g.info.monsterDamage * 0.15, "#7ee05a");
   }
   if (p.t < p.dur) {
     p.t += p.fell || !encumbered(g) ? dt : dt / scaled(ENCUMBERED_SLOW, burden(g));

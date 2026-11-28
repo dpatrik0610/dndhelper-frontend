@@ -424,6 +424,25 @@ const DUERGAR_PAL = {
   h: "#9a9aae",
 };
 
+export const RARE: Record<number, Enemy> = {
+  3: {
+    name: "Venom Spider",
+    depth: 3,
+    threat: "Rare · Poisoner",
+    does: "A rare green cousin of the cave spider. Its bite poisons you: you keep losing health for 5 s and your wounds won't mend until it wears off.",
+    pal: { x: "#0c160c", b: "#2f5a2a", B: "#4f8a3a", h: "#9ae05a", e: "#e8ff4a" },
+    rows: ENEMIES[2].rows,
+  },
+  4: {
+    name: "Zombie Miner",
+    depth: 4,
+    threat: "Rare · Necrotic",
+    does: "A rare rotting miner. Its blow is a burst of necrotic rot that reaches you anywhere within 2 tiles, so stepping back won't save you. Like a skeleton, only a crit keeps it down.",
+    pal: { x: "#141a10", b: "#8aa86a", B: "#5e7a48", k: "#4a3a2a", y: "#9a8a5a", r: "#c86aff" },
+    rows: ENEMIES[3].rows,
+  },
+};
+
 export const enemySprite = (e: Enemy): Grid =>
   e.duergar ? raster(DUERGAR, DUERGAR_PAL) : raster(e.rows ?? [], e.pal ?? {});
 

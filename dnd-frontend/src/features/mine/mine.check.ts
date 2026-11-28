@@ -11,6 +11,9 @@ import {
   type Game,
   type Keys,
   GRAB_MS,
+  isZombie,
+  rarify,
+  ROT_RANGE,
   GRAB_NEED,
   MIMIC_KIND,
   minSwings,
@@ -306,6 +309,28 @@ const reachedYou = (gm: Game, m: { x: number; y: number }) =>
   const hp = late.player.hp;
   run(late, GRAB_MS + 100);
   assert.ok(late.grab === null && late.player.hp < hp, "a slow escape costs health, then it spits you out");
+}
+
+{
+  const ven = newGame(-1);
+  ven.monsters = [];
+  const spider = rarify(ven, foe(ven, 3, ven.player.x + 1, ven.player.y), true);
+  assert.equal(spider.def.name, "Venom Spider", "a rare spider is a venom spider");
+  for (let t = 0; t < 4000 && ven.now >= ven.player.poisonUntil; t += 1000 / 60) step(ven, 1000 / 60, none, null);
+  assert.ok(ven.now < ven.player.poisonUntil, "its bite poisons you");
+  ven.monsters = [];
+  const hp = ven.player.hp;
+  run(ven, 2000);
+  assert.ok(ven.player.hp < hp, "poison keeps hurting after the bite");
+
+  const zom = newGame(-1, ["############", "#..........#", "#..........#", "############"]);
+  zom.monsters = [];
+  const z = rarify(zom, foe(zom, 4, zom.player.x + ROT_RANGE, zom.player.y), true);
+  z.moveMs = 1e9;
+  z.nextMove = 1e12;
+  const full = zom.player.hp;
+  run(zom, 3000);
+  assert.ok(isZombie(z) && zom.player.hp < full, "a zombie's necrotic burst reaches you from two tiles away");
 }
 
 let gm = newGame(-1);

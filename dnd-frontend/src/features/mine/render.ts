@@ -12,6 +12,9 @@ import {
   CHESTS,
   GRAB_MS,
   GRAB_NEED,
+  isZombie,
+  KINDS,
+  ROT_RANGE,
   GEODE,
   DIAMOND_CELL,
   GILDED_CHEST,
@@ -710,7 +713,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
 
     for (const m of g.monsters) {
       const mp = drawPos(m);
-      const ek = `${m.kind}g${m.gen}`;
+      const ek = `${m.kind}g${m.gen}${m.rare ? "r" : ""}`;
       const sprite = cached(`e${ek}`, () => (m.gen ? shrink(enemySprite(m.def), 0.7 ** m.gen) : enemySprite(m.def)));
       const flash = g.now < m.flashUntil;
       const body = flash ? cached(`ef${ek}`, () => tint(sprite, "#ffffff")) : sprite;
@@ -739,7 +742,16 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         ctx.setLineDash([]);
         ctx.globalAlpha = 1;
       }
-      if (winding) write("!", (mp.x + 0.5) * T + ox, (mp.y + 1) * T - h + oy - 6, "#ff5a4a", 1, 11);
+      if (winding && isZombie(m)) {
+        const left = Math.max(0, (m.windupUntil - g.now) / KINDS[m.kind].windup);
+        ctx.beginPath();
+        ctx.arc((mp.x + 0.5) * T + ox, (mp.y + 0.5) * T + oy, (ROT_RANGE + 0.5) * T * (1 - left * 0.6), 0, Math.PI * 2);
+        ctx.globalAlpha = 0.25 + 0.5 * (1 - left);
+        ctx.strokeStyle = "#c86aff";
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      if (winding) write("!", (mp.x + 0.5) * T + ox, (mp.y + 1) * T - h + oy - 6, isZombie(m) ? "#c86aff" : "#ff5a4a", 1, 11);
       if (m.hp < m.maxHp && hidden === 1) {
         const bx = mp.x * T + ox;
         const by = (mp.y + 1) * T - h + oy - 4;
