@@ -6,6 +6,7 @@ import {
   type MiningConfig,
   type MiningQuest,
   type MiningState,
+  type OreCounts,
   type QuestNeed,
   turnInQuest,
 } from "@services/miningService";
@@ -15,7 +16,8 @@ import { captainSprite } from "./art/npcs";
 import { compact } from "./mine";
 import { pushNote } from "./notes";
 import { PanelHead } from "./CampMenus";
-import { clock, isActive, limitText, MAX_ACTIVE, msLeft, needDone, opensIn, questDone, shortOf } from "./jobs";
+import { withSatchel } from "./goals";
+import { clock, isActive, limitText, MAX_ACTIVE, msLeft, needProgress, opensIn, questDone, requirementsMet, shortOf } from "./jobs";
 import { resourceOf } from "./resources";
 import { play } from "./sound";
 import { Sprite } from "./Sprite";
@@ -54,18 +56,25 @@ function NeedIcon({ config, need }: { config: MiningConfig; need: QuestNeed }) {
   return <Sprite grid={grid} scale={1} />;
 }
 
-function NeedRow({ config, quest, need, live }: { config: MiningConfig; quest: MiningQuest; need: QuestNeed; live: boolean }) {
-  const done = needDone(need);
+function NeedRow({ config, quest, need, ores, live }: {
+  config: MiningConfig;
+  quest: MiningQuest;
+  need: QuestNeed;
+  ores: OreCounts;
+  live: boolean;
+}) {
+  const progress = needProgress(need, ores);
+  const done = live && progress >= need.count;
   return (
     <li className={`${styles.need} ${done ? styles.needDone : ""}`}>
       <NeedIcon config={config} need={need} />
       <span className={styles.needText}>{needText(config, quest, need)}</span>
-      <span className={styles.needCount}>{live ? `${compact(need.done)} / ${compact(need.count)}` : compact(need.count)}</span>
+      <span className={styles.needCount}>{live ? `${compact(progress)} / ${compact(need.count)}` : compact(need.count)}</span>
       {live && (
         <div className={`${styles.bar} ${styles.needBar}`}>
           <div
             className={styles.needFill}
-            style={{ width: `${Math.min(1, need.done / need.count) * 100}%`, "--fill": done ? "#9fe09a" : KIND_COLOR[need.kind] } as CSSProperties}
+            style={{ width: `${(progress / need.count) * 100}%`, "--fill": done ? "#9fe09a" : KIND_COLOR[need.kind] } as CSSProperties}
           />
         </div>
       )}
@@ -132,7 +141,7 @@ function Contract({
       </article>
     );
   const left = msLeft(quest, now);
-  const finished = live && questDone(quest);
+  const finished = live && requirementsMet(quest);
   const short = finished ? shortOf(quest, state.ores) : [];
   return (
     <article
@@ -152,7 +161,7 @@ function Contract({
       <p className={styles.contractLine}>"{quest.line}"</p>
       <ul className={styles.needs}>
         {quest.needs.map((n) => (
-          <NeedRow key={`${n.kind}:${n.key}`} config={config} quest={quest} need={n} live={live} />
+          <NeedRow key={`${n.kind}:${n.key}`} config={config} quest={quest} need={n} ores={state.ores} live={live} />
         ))}
       </ul>
       <Pay config={config} quest={quest} />
@@ -272,20 +281,24 @@ export function ShipMenu({ config, state, onState }: { config: MiningConfig; sta
 export function QuestTracker({
   config,
   state,
+  satchel,
   onClose,
 }: {
   config: MiningConfig;
   state: MiningState;
+  satchel?: OreCounts;
   onClose: () => void;
 }) {
   const now = useNow();
   const active = (state.quests ?? []).filter(isActive);
+  const ores = satchel ? withSatchel(state.ores, satchel) : state.ores;
   return (
     <section className={`${styles.hudPanel} ${styles.tracker}`} aria-label="Captain Morg's jobs">
       <PanelHead title="Morg's jobs" onClose={onClose} />
       {active.map((q) => {
         const left = msLeft(q, now);
-        const finished = questDone(q);
+        const finished = questDone(q, ores);
+        const bankFirst = satchel && !questDone(q, state.ores);
         return (
           <div key={q.id} className={styles.trackQuest} style={{ "--rank": RANKS[q.rank].color } as CSSProperties}>
             <div className={styles.barHead}>
@@ -296,10 +309,14 @@ export function QuestTracker({
             </div>
             <ul className={styles.needs}>
               {q.needs.map((n) => (
-                <NeedRow key={`${n.kind}:${n.key}`} config={config} quest={q} need={n} live />
+                <NeedRow key={`${n.kind}:${n.key}`} config={config} quest={q} need={n} ores={ores} live />
               ))}
             </ul>
-            {finished && left > 0 && <span className={styles.goalNote}>Done! Hand it in to Captain Morg at the docks.</span>}
+            {finished && left > 0 && (
+              <span className={styles.goalNote}>
+                {bankFirst ? "Bank your haul, then hand it in to Captain Morg." : "Ready to hand in to Captain Morg."}
+              </span>
+            )}
           </div>
         );
       })}

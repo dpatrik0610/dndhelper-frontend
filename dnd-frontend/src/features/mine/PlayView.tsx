@@ -67,7 +67,7 @@ import {
   feat,
 } from "./engine";
 import { achievementsFor, mergeFeats, unlockedNow } from "./achievements";
-import { goalsFor, newlyAffordable } from "./goals";
+import { goalsFor, newlyAffordable, withSatchel } from "./goals";
 import { compact, tiersOf, total, viewOf } from "./mine";
 import { createRenderer, FINE, oreIcon } from "./render";
 import { CharacterPanel } from "./CharacterPanel";
@@ -414,7 +414,7 @@ export function PlayView({
                 .filter((o) => o.index >= 0 && o.n > 0),
             );
         if (res.quests) {
-          const finished = newlyDone(before.quests, res.quests);
+          const finished = newlyDone(before.quests, res.quests, withSatchel(next.ores, res.satchel));
           for (const q of lapsed(before.quests, res.quests))
             pushNote({ title: `Time's up: ${q.title}`, text: "Captain Morg gave the job to someone else.", color: "#ff8a6a" });
           next.quests = res.quests;
@@ -833,6 +833,7 @@ export function PlayView({
     await flush();
     try {
       const s = await takePile(take);
+      onState({ ...s, trip: stateRef.current.trip });
       play("buy");
       const now = s.trip?.satchel ?? {};
       setSatchel(now);
@@ -860,7 +861,6 @@ export function PlayView({
 
   const onDrop = async (drop: OreCounts) => {
     await inflight.current;
-      onState({ ...s, trip: stateRef.current.trip });
     await flush();
     let s: MiningState | null = null;
     try {
@@ -1153,7 +1153,9 @@ export function PlayView({
             <NextGoal config={config} state={state} satchel={trip ? satchel : {}} onClose={() => showGoal(false)} />
           )}
 
-          {hasJobs && jobsOpen && <QuestTracker config={config} state={state} onClose={() => showJobs(false)} />}
+          {hasJobs && jobsOpen && (
+            <QuestTracker config={config} state={state} satchel={trip ? satchel : undefined} onClose={() => showJobs(false)} />
+          )}
         </div>
 
         {near && !(report && !trip) && !(trip && near === "lift") && opened !== near && (
