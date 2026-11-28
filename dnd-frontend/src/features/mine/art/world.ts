@@ -366,6 +366,16 @@ const paper = (p: string, P: string, o: string, O: string): Grid =>
     O,
   });
 
+export const greaterPotionSprite = (): Grid =>
+  raster(["..xyyx..", "...xx...", "..xccx..", ".xrrrrx.", "xrRrrrrx", "xrrrSrrx", ".xrrrrx.", "..xxxx.."], {
+    x: "#1c1410",
+    y: "#e8c060",
+    c: "#e8c060",
+    r: "#9a1a5a",
+    R: "#ff9ad5",
+    S: "#ffe066",
+  });
+
 export const scrollSprite = (big = false): Grid =>
   big ? paper("#f0c8a0", "#b8402a", "#e0301a", "#ff8a2a") : paper("#f4e2b8", "#c9b07a", "#ff8a2a", "#ffe066");
 

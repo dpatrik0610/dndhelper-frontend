@@ -4,7 +4,8 @@ import type { MiningConfig, MiningState, SlotKey } from "@services/miningService
 import { GEAR_SLOTS, type GearSlot, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { type Grid, tint } from "./art/pixel";
-import { bombSprite, potionSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
+import { bombSprite, greaterPotionSprite, potionSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
+import type { Drink } from "./engine";
 import { DASH_PERKS, forgedOf, SET_BONUSES, statLine, tiersOf } from "./mine";
 import { TORCH } from "./render";
 import { Sprite } from "./Sprite";
@@ -66,6 +67,9 @@ export function Hotbar({
   config,
   state,
   potions,
+  greater,
+  drink,
+  onDrink,
   bombs,
   torchesLeft,
   inMine,
@@ -78,6 +82,9 @@ export function Hotbar({
   config: MiningConfig;
   state: MiningState;
   potions: number;
+  greater: number;
+  drink: Drink;
+  onDrink: (d: Drink) => void;
   bombs: number;
   torchesLeft: number | null;
   inMine: boolean;
@@ -91,10 +98,10 @@ export function Hotbar({
   const forged = forgedOf(state);
   const set = state.stats.setBonus;
   const petIdx = state.pet ? config.pets.findIndex((p) => p.key === state.pet) : -1;
-  const [picking, setPicking] = useState<GearSlot | "pet" | null>(null);
+  const [picking, setPicking] = useState<GearSlot | "pet" | "potion" | null>(null);
   const [busy, setBusy] = useState(false);
-  const pick = inMine ? null : picking;
-  const toggle = (p: GearSlot | "pet") => setPicking((cur) => (cur === p ? null : p));
+  const pick = inMine && picking !== "potion" ? null : picking;
+  const toggle = (p: GearSlot | "pet" | "potion") => setPicking((cur) => (cur === p ? null : p));
   const choose = async (work: () => Promise<void>) => {
     setBusy(true);
     try {
@@ -110,7 +117,35 @@ export function Hotbar({
   return (
     <div className={styles.hotbar}>
       {top}
-      {pick && pick !== "pet" && (
+      {pick === "potion" && (
+        <div className={styles.hotPicker}>
+          <span className={styles.hotPickLabel}>Q drinks</span>
+          {(
+            [
+              ["potion", potionSprite(), "Healing draught", potions],
+              ["greater", greaterPotionSprite(), "Greater Healing Potion", greater],
+            ] as const
+          ).map(([key, grid, name, n]) => (
+            <button
+              key={key}
+              type="button"
+              className={`${styles.hotSlot} ${n <= 0 ? styles.hotEmpty : ""}`}
+              data-on={drink === key || undefined}
+              aria-pressed={drink === key}
+              title={`${name}, ${n} on your belt`}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                onDrink(key);
+                setPicking(null);
+              }}
+            >
+              <Sprite grid={grid} scale={2} label={name} />
+              <span className={styles.hotCount}>{n}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      {pick && pick !== "pet" && pick !== "potion" && (
         <div className={styles.hotPicker}>
           <span className={styles.hotPickLabel}>Wear</span>
           {(config.slots.find((x) => x.key === pick)?.tiers ?? []).slice(0, forged[pick] + 1).map(({ tier: t }) => (
@@ -239,21 +274,28 @@ export function Hotbar({
             {state.firebolt && <div ref={boltRef} className={styles.hotCooldown} />}
           </Square>
           <Square
-            grid={potionSprite()}
+            grid={drink === "greater" ? greaterPotionSprite() : potionSprite()}
             hotkey="Q"
-            empty={potions <= 0}
-            count={potions > 0 ? `×${potions}` : undefined}
-            label={`Healing draughts, ${potions}`}
+            empty={(drink === "greater" ? greater : potions) <= 0}
+            count={(drink === "greater" ? greater : potions) > 0 ? `×${drink === "greater" ? greater : potions}` : undefined}
+            label={drink === "greater" ? `Greater Healing Potions, ${greater}` : `Healing draughts, ${potions}`}
+            active={pick === "potion"}
+            onClick={() => toggle("potion")}
             tip={
-              potions > 0 ? (
-                <>
-                  <b>Healing draught</b> × {potions} · Q heals 60% of your health.
-                </>
-              ) : (
-                <>
-                  <b>Healing draught</b> · none on your belt. Moss sells them down in the mine.
-                </>
-              )
+              <>
+                {drink === "greater" ? (
+                  <>
+                    <b>Greater Healing Potion</b> × {greater} · Q heals you completely.
+                  </>
+                ) : (
+                  <>
+                    <b>Healing draught</b> × {potions} · Q heals 60% of your health.
+                  </>
+                )}
+                <br />
+                Click to pick which potion Q drinks. If that one runs out, Q drinks the other.
+                {potions + greater <= 0 && " Hesk and Moss sell draughts; Sister Maren sells the greater kind."}
+              </>
             }
           />
         </div>

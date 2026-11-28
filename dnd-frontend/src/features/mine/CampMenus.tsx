@@ -23,7 +23,18 @@ import type { Grid } from "./art/pixel";
 import { COIN, DIAMOND, MAGMA_CORE, MATERIALS, MERCHANT } from "./art/materials";
 import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
-import { bombSprite, chartSprite, ENEMIES, oilSprite, potionSprite, priestSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
+import {
+  bombSprite,
+  chartSprite,
+  ENEMIES,
+  greaterPotionSprite,
+  oilSprite,
+  potionSprite,
+  priestSprite,
+  recallScroll,
+  reviveScroll,
+  scrollSprite,
+} from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
 import { canAfford, compact, discounted, forgedOf, statRows } from "./mine";
 import { oreIcon, TORCH } from "./render";
@@ -657,8 +668,8 @@ export function MarketMenu({ config, state, onState }: MenuProps) {
       blurb: WARES.potion.blurb,
       grid: potionSprite(),
       price: config.potionPrice,
-      have: `ON YOUR BELT · ${state.potions} / ${state.belt}`,
-      room: state.belt - state.potions,
+      have: `ON YOUR BELT · ${state.potions + (state.greaterPotions ?? 0)} / ${state.belt}`,
+      room: state.belt - state.potions - (state.greaterPotions ?? 0),
       counts: [1],
     },
     ...(state.firebolt
@@ -829,12 +840,12 @@ export function ChurchMenu({ config, state, onState }: MenuProps) {
   const maxMin = config.maxBlessingMinutes ?? 30;
   const scrolls = [
     {
-      key: "potion",
-      name: WARES.potion.name,
-      blurb: WARES.potion.blurb,
-      grid: potionSprite(),
-      have: `ON YOUR BELT · ${state.potions} / ${state.belt}`,
-      room: state.belt - state.potions,
+      key: "greater",
+      name: WARES.greater.name,
+      blurb: WARES.greater.blurb,
+      grid: greaterPotionSprite(),
+      have: `ON YOUR BELT · ${state.potions + (state.greaterPotions ?? 0)} / ${state.belt}`,
+      room: state.belt - state.potions - (state.greaterPotions ?? 0),
     },
     {
       key: "revive",
@@ -1015,7 +1026,7 @@ export function TraderMenu({
       <div className={styles.pets}>
         {wares.map(([key, price]) => {
           const full =
-            (key === "potion" && state.potions >= state.belt) || (key === "torch" && state.torchStock >= config.maxTorchStock);
+            (key === "potion" && state.potions + (state.greaterPotions ?? 0) >= state.belt) || (key === "torch" && state.torchStock >= config.maxTorchStock);
           const ware = WARES[key];
           return (
             <div key={key} className={`${styles.pet} ${SPELLS.has(key) || MOSS_ONLY.has(key) ? styles.petActive : ""}`}>
@@ -1025,7 +1036,7 @@ export function TraderMenu({
                 <span className={styles.dim}>{ware?.blurb}</span>
                 {key === "potion" && (
                   <span className={styles.petMeta}>
-                    ON YOUR BELT · {state.potions} / {state.belt}
+                    ON YOUR BELT · {state.potions + (state.greaterPotions ?? 0)} / {state.belt}
                   </span>
                 )}
                 {MOSS_ONLY.has(key) && <span className={styles.petMeta}>ONLY FROM MOSS · ONE PER VISIT</span>}

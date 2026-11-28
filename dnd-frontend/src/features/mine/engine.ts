@@ -70,6 +70,8 @@ export type Aim = { x: number; y: number } | null;
 
 export const CAMP = { W: 78, H: 10, ground: 8, lift: 5, forge: 19, market: 31, shop: 42, house: 54, church: 67 };
 export type Station = "lift" | "forge" | "market" | "shop" | "house" | "church" | "trader";
+export type Drink = "potion" | "greater";
+export const GREATER_HEAL = 1;
 export type Blessing = "shield" | "regen" | "glow";
 export const SHIELD_CUT = 0.3;
 export const BOMB_RADIUS = 7;
@@ -196,6 +198,7 @@ export interface Pending {
   salamanders: number;
   mimics: number[];
   drank: number;
+  drankGreater: number;
   bombs: { i: number; after: number }[];
   feats: Record<string, number>;
   unlocked: string[];
@@ -222,6 +225,8 @@ export interface GameSetup {
   fireball?: boolean;
   blessings?: Partial<Record<Blessing, number>>;
   bombs?: number;
+  greater?: number;
+  drink?: Drink;
   potions: number;
   maxTorches: number;
   overload: number;
@@ -647,6 +652,7 @@ export const emptyPending = (): Pending => ({
   salamanders: 0,
   mimics: [],
   drank: 0,
+  drankGreater: 0,
   bombs: [],
   feats: {},
   unlocked: [],
@@ -659,7 +665,7 @@ export function takePending(g: Game): Pending | null {
   const now = vitals(g);
   const still = now.hp === g.sent.hp && now.pos === g.sent.pos;
   const quiet = !Object.keys(p.feats).length && !p.unlocked.length;
-  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank && !p.bombs.length && quiet && still)
+  if (!p.breaks.length && !p.ladders.length && !p.torches.length && !p.kills && !p.mimics.length && !p.drank && !p.drankGreater && !p.bombs.length && quiet && still)
     return null;
   g.pending = emptyPending();
   g.sent = now;
@@ -1104,16 +1110,23 @@ export function revive(g: Game) {
 
 export function drinkPotion(g: Game) {
   const p = g.player;
-  if (g.camp || g.potions <= 0 || g.now < g.nextPotion || p.hp >= g.stats.maxHp) return false;
-  g.potions--;
-  g.pending.drank++;
+  const greater = g.drink === "greater" ? (g.greater ?? 0) > 0 : g.potions <= 0;
+  const have = greater ? (g.greater ?? 0) : g.potions;
+  if (g.camp || have <= 0 || g.now < g.nextPotion || p.hp >= g.stats.maxHp) return false;
+  if (greater) {
+    g.greater = have - 1;
+    g.pending.drankGreater++;
+  } else {
+    g.potions--;
+    g.pending.drank++;
+  }
   g.nextPotion = g.now + 1000;
-  const heal = Math.round(g.stats.maxHp * 0.6);
+  const heal = Math.round(g.stats.maxHp * (greater ? GREATER_HEAL : 0.6));
   p.hp = Math.min(g.stats.maxHp, p.hp + heal);
   g.sfx.push("potion");
   feat(g, "potion");
   say(g, (p.x + 0.5) * T, (p.y - 1.5) * T, `+${heal}`, "#7ee08a", 900);
-  burst(g, (p.x + 0.5) * T, p.y * T, "#ff6a8a", 10, 1.4);
+  burst(g, (p.x + 0.5) * T, p.y * T, greater ? "#ff9ad5" : "#ff6a8a", greater ? 18 : 10, greater ? 2 : 1.4);
   return true;
 }
 

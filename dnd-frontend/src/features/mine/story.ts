@@ -165,6 +165,10 @@ export const BLESSINGS: Record<"shield" | "regen" | "glow", { name: string; blur
 };
 
 export const WARES: Record<string, { name: string; blurb: string }> = {
+  greater: {
+    name: "Greater Healing Potion",
+    blurb: "Sister Maren's own brew: heals you completely. It shares your belt with Hesk's draughts. Click the potion slot on your hotbar to pick which one Q drinks.",
+  },
   bomb: {
     name: "Blasting Bomb",
     blurb: "B readies one, aim at an open spot and press B again to light it. Two seconds later it levels everything within 7 tiles, ore and treasure included. Stand clear: it hits you for 200, less your armor. You carry 3, or 5 with a tier 7 satchel.",

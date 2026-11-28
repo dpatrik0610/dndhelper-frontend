@@ -52,6 +52,7 @@ import {
   OVERLOADED,
   noteInput,
   bombKey,
+  type Drink,
   placeTorch,
   revive,
   setBlessings,
@@ -96,6 +97,7 @@ const TRADE_NOTES: Record<string, [string, string]> = {
   oil: ["Lamp Oil", "Your lantern burns half again as far until you leave this level."],
   magmaCore: ["Magma Core", "Still warm. It's safe in your stores."],
 };
+const DRINK_KEY = "deepdelve.drink";
 const NO_KEYS: Keys = { left: false, right: false, up: false, down: false, jump: false, attack: false, dash: false };
 
 const KEYMAP: Record<string, keyof Keys> = {
@@ -194,6 +196,13 @@ export function PlayView({
   const [potions, setPotions] = useState(state.potions);
   const [downed, setDowned] = useState(false);
   const [bombs, setBombs] = useState(state.bombs ?? 0);
+  const [greater, setGreater] = useState(state.greaterPotions ?? 0);
+  const [drink, setDrink] = useState<Drink>(() => (localStorage.getItem(DRINK_KEY) === "greater" ? "greater" : "potion"));
+  const pickDrink = (d: Drink) => {
+    setDrink(d);
+    localStorage.setItem(DRINK_KEY, d);
+    if (gameRef.current) gameRef.current.drink = d;
+  };
   const downedRef = useRef(false);
   const [mossWares, setMossWares] = useState<Record<string, number> | null>(null);
   const [dream, setDream] = useState("");
@@ -311,6 +320,7 @@ export function PlayView({
     g.fireball = !!state.fireball;
     g.potions = state.potions;
     g.bombs = state.bombs ?? 0;
+    g.greater = state.greaterPotions ?? 0;
     g.player.hp = state.stats.maxHp;
     if ((g.pet?.key ?? null) !== state.pet) {
       g.pet = petSetup(config, state.pet);
@@ -328,6 +338,7 @@ export function PlayView({
       loadTrip(g, s.trip, g.now);
       resetPending(g);
       g.bombs = s.bombs ?? 0;
+      g.greater = s.greaterPotions ?? 0;
       setSatchel(s.trip.satchel);
       notePile(s.trip.pile ?? {});
       setDepth(s.trip.depth);
@@ -539,6 +550,8 @@ export function PlayView({
         fireball: !!s.fireball,
         potions: s.potions,
         bombs: s.bombs ?? 0,
+        greater: s.greaterPotions ?? 0,
+        drink: localStorage.getItem(DRINK_KEY) === "greater" ? "greater" : "potion",
         maxTorches: s.torchStock + (trip?.torches.length ?? 0),
         overload: config.overload,
       },
@@ -581,6 +594,7 @@ export function PlayView({
     let wasSeal = false;
     let wasPotions = g.potions;
     let wasBombs = -1;
+    let wasGreater = -1;
     let wasTorches = -1;
     let seenHurt = g.player.lastHurt;
     let wasLow = false;
@@ -642,6 +656,10 @@ export function PlayView({
       if (g.potions !== wasPotions) {
         wasPotions = g.potions;
         setPotions(g.potions);
+      }
+      if ((g.greater ?? 0) !== wasGreater) {
+        wasGreater = g.greater ?? 0;
+        setGreater(wasGreater);
       }
       if ((g.bombs ?? 0) !== wasBombs) {
         wasBombs = g.bombs ?? 0;
@@ -770,6 +788,7 @@ export function PlayView({
       g.fireball = !!s.fireball;
       g.potions = s.potions;
       g.bombs = s.bombs ?? 0;
+      g.greater = s.greaterPotions ?? 0;
       g.boons = new Set(s.trip?.boons ?? []);
       if (item === "torch") {
         g.maxTorches++;
@@ -1205,6 +1224,9 @@ export function PlayView({
           config={config}
           state={state}
           potions={potions}
+          greater={greater}
+          drink={drink}
+          onDrink={pickDrink}
           bombs={bombs}
           torchesLeft={trip ? torchCap - torchesUsed : state.torchStock}
           inMine={!!trip}

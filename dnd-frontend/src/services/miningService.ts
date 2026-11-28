@@ -139,6 +139,7 @@ export interface MiningState {
   recalls?: number;
   bombs?: number;
   bombCap?: number;
+  greaterPotions?: number;
   blessings?: Record<string, number>;
   foxRevealed: boolean;
   deepestDepth: number;
@@ -172,6 +173,7 @@ export interface DigRequest {
   mimics: number[];
   drank: number;
   bombs?: { i: number; after: number }[];
+  drankGreater?: number;
   salamanders?: number;
   feats?: Record<string, number>;
   unlocked?: string[];

@@ -438,6 +438,16 @@ sip.player.hp = 2;
 assert.equal(drinkPotion(sip), false, "no potion, no sip");
 sip.potions = 1;
 assert.ok(drinkPotion(sip) && sip.player.hp === 14 && sip.potions === 0 && sip.pending.drank === 1);
+sip.player.hp = 2;
+sip.greater = 1;
+sip.nextPotion = 0;
+assert.ok(drinkPotion(sip) && sip.player.hp === sip.stats.maxHp && sip.greater === 0 && sip.pending.drankGreater === 1, "with no draughts left, Q falls back to a greater potion, which heals fully");
+const pick = newGame(-1);
+pick.player.hp = 2;
+pick.potions = 1;
+pick.greater = 1;
+pick.drink = "greater";
+assert.ok(drinkPotion(pick) && pick.greater === 0 && pick.potions === 1, "Q drinks the potion picked on the hotbar");
 
 const chest = newGame(-1, den);
 chest.monsters = [];
