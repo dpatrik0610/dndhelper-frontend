@@ -1110,6 +1110,17 @@
   pointer-events: none;
 }
 
+.hudLeftAct {
+  align-self: flex-start;
+  max-width: 100%;
+  pointer-events: auto;
+  text-shadow: none;
+}
+
+.hudLeftPanel {
+  align-self: stretch;
+}
+
 .hudTitle {
   font-family: var(--pixel);
   font-weight: 600;

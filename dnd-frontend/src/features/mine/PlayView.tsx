@@ -950,6 +950,27 @@ export function PlayView({
                     );
                   })}
               </div>
+              {carried > 0 && (
+                <button
+                  type="button"
+                  className={`glass-btn-secondary ${styles.hudBtn} ${styles.hudLeftAct}`}
+                  aria-pressed={panel === "drop"}
+                  onClick={() => togglePanel("drop")}
+                >
+                  {panel === "drop" ? "Hide drop ore" : "Drop ore"}
+                </button>
+              )}
+              {panel === "drop" && carried > 0 && (
+                <div className={`${styles.hudLeftAct} ${styles.hudLeftPanel}`}>
+                  <DropOre
+                    config={config}
+                    satchel={satchel}
+                    capacity={state.stats.capacity}
+                    onDrop={onDrop}
+                    onClose={() => setPanel(null)}
+                  />
+                </div>
+              )}
             </>
           )}
         </div>
@@ -957,15 +978,6 @@ export function PlayView({
         <AchievementToasts toasts={toasts} />
         <div className={styles.hudRight}>
           <div className={styles.btnRow}>
-            {trip && carried > 0 && (
-              <button
-                type="button"
-                className={`glass-btn-secondary ${styles.hudBtn}`}
-                onClick={() => togglePanel("drop")}
-              >
-                {panel === "drop" ? "Hide drop ore" : "Drop ore"}
-              </button>
-            )}
             {trip && total(pile) > 0 && !pileOpen && (
               <button type="button" className={`glass-btn-primary ${styles.hudBtn}`} onClick={() => setPileOpen(true)}>
                 Loot pile · {compact(total(pile))}
@@ -1031,16 +1043,6 @@ export function PlayView({
               maxCarry={maxCarry}
               onTake={onTakePile}
               onClose={() => setPileOpen(false)}
-            />
-          )}
-
-          {panel === "drop" && trip && carried > 0 && (
-            <DropOre
-              config={config}
-              satchel={satchel}
-              capacity={state.stats.capacity}
-              onDrop={onDrop}
-              onClose={() => setPanel(null)}
             />
           )}
 
