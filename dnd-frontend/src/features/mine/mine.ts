@@ -177,6 +177,12 @@ export const SET_BONUSES: [string, string][] = [
   ["Fallen Star", "Half again as much ore from every block, and a full block more light."],
 ];
 
+export const WIDE_VIEW_SET = 5;
+export const WIDE_VIEW = 1.2;
+export const viewOf = (setBonus: number) => (setBonus >= WIDE_VIEW_SET ? WIDE_VIEW : 1);
+export const setDoes = (set: number) =>
+  `${SET_BONUSES[set][1]}${set >= WIDE_VIEW_SET ? " You also see 20% more of the mine around you." : ""}`;
+
 export const DASH_PERKS = [
   "",
   "Dash leaves a trail of warm sparks.",

@@ -1,7 +1,7 @@
 import type { MiningConfig, MiningState } from "@services/miningService";
 import { item, itemName, SETS } from "./art/gear";
 import { PanelHead } from "./CampMenus";
-import { boltHit, characterSheet, compact, critHit, DASH_PERKS, dashHit, SET_BONUSES, tiersOf } from "./mine";
+import { boltHit, characterSheet, compact, critHit, DASH_PERKS, dashHit, SET_BONUSES, setDoes, tiersOf } from "./mine";
 import { Sprite } from "./Sprite";
 import styles from "./Mine.module.css";
 
@@ -72,7 +72,7 @@ export function CharacterPanel({
               <span className={styles.dim}>
                 {SETS[set].name} · tier {set}
               </span>
-              <span className={styles.setDoes}>{SET_BONUSES[set][1]}</span>
+              <span className={styles.setDoes}>{setDoes(set)}</span>
               <span className={styles.setDoes}>{DASH_PERKS[set]}</span>
             </div>
           </div>

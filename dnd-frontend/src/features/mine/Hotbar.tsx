@@ -6,7 +6,7 @@ import { PET_ART, petSprite } from "./art/pets";
 import { type Grid, tint } from "./art/pixel";
 import { bombSprite, greaterPotionSprite, potionSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
 import type { Drink } from "./engine";
-import { DASH_PERKS, forgedOf, HOLDING_TIER, ownsHolding, SET_BONUSES, statLine, tiersOf, wearsHolding } from "./mine";
+import { DASH_PERKS, forgedOf, HOLDING_TIER, ownsHolding, SET_BONUSES, setDoes, statLine, tiersOf, wearsHolding } from "./mine";
 import { TORCH } from "./render";
 import { Sprite } from "./Sprite";
 import styles from "./Mine.module.css";
@@ -226,7 +226,7 @@ export function Hotbar({
                     <br />
                     {set > 0 ? (
                       <>
-                        Set bonus <b>{SET_BONUSES[set][0]}</b>: {SET_BONUSES[set][1]} {DASH_PERKS[set]}
+                        Set bonus <b>{SET_BONUSES[set][0]}</b>: {setDoes(set)} {DASH_PERKS[set]}
                       </>
                     ) : (
                       "Wear all six pieces of one metal, boots included, for a set bonus."

@@ -67,7 +67,7 @@ import {
 } from "./engine";
 import { achievementsFor, mergeFeats, unlockedNow } from "./achievements";
 import { goalsFor, newlyAffordable } from "./goals";
-import { compact, tiersOf, total } from "./mine";
+import { compact, tiersOf, total, viewOf } from "./mine";
 import { createRenderer, oreIcon } from "./render";
 import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
 import { CharacterPanel } from "./CharacterPanel";
@@ -169,6 +169,11 @@ export function PlayView({
   const hpBar = useRef<HTMLDivElement>(null);
   const flashRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Game | null>(null);
+  const resizeRef = useRef<(() => void) | null>(null);
+  const setBonus = state.stats.setBonus;
+  useEffect(() => {
+    if (setBonus >= 0) resizeRef.current?.();
+  }, [setBonus]);
   const keys = useRef<Keys>({ ...NO_KEYS });
   const aim = useRef<Aim>(null);
   const cam = useRef({ camX: 0, camY: 0 });
@@ -584,7 +589,8 @@ export function PlayView({
     const resize = () => {
       const w = stage.clientWidth;
       const h = stage.clientHeight;
-      const scale = Math.max(2, Math.min(4, Math.round(Math.min(w / 420, h / 220))));
+      const scale =
+        Math.max(2, Math.min(4, Math.round(Math.min(w / 420, h / 220)))) / viewOf(stateRef.current.stats.setBonus);
       canvas.width = Math.ceil(w / scale);
       canvas.height = Math.ceil(h / scale);
       canvas.style.width = `${canvas.width * scale}px`;
@@ -597,6 +603,7 @@ export function PlayView({
       text.style.height = canvas.style.height;
     };
     resize();
+    resizeRef.current = resize;
     const ro = new ResizeObserver(resize);
     ro.observe(stage);
 
@@ -770,6 +777,7 @@ export function PlayView({
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      resizeRef.current = null;
       clearInterval(id);
       window.removeEventListener("keydown", kd);
       window.removeEventListener("keyup", ku);
