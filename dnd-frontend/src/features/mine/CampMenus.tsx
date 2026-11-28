@@ -76,7 +76,8 @@ function PinButton({ id }: { id: string }) {
 }
 
 const WARE_ART: Record<string, () => Grid> = {
-  firebolt: scrollSprite,
+  firebolt: () => scrollSprite(),
+  fireball: () => scrollSprite(true),
   potion: potionSprite,
   torch: () => TORCH[1],
   chart: chartSprite,
@@ -84,6 +85,7 @@ const WARE_ART: Record<string, () => Grid> = {
   [MAGMA_CORE]: () => MATERIALS[MAGMA_CORE].grid,
 };
 const MOSS_ONLY = new Set(["chart", "oil", MAGMA_CORE]);
+const SPELLS = new Set(["firebolt", "fireball"]);
 
 const GOAL_PLACE: Record<Goal["kind"], string> = { gear: "the forge", forge: "the forge", pet: "Pip's stall" };
 
@@ -831,7 +833,9 @@ export function TraderMenu({
 }) {
   const [busy, setBusy] = useState(false);
   const [line] = useState(() => MOSS_LINES[Math.floor(Math.random() * MOSS_LINES.length)]);
-  const wares = Object.entries(state.trip?.wares ?? {}).filter(([k]) => k !== "firebolt" || !state.firebolt);
+  const wares = Object.entries(state.trip?.wares ?? {}).filter(
+    ([k]) => (k !== "firebolt" || !state.firebolt) && (k !== "fireball" || (state.firebolt && !state.fireball)),
+  );
   const carried = config.ores.filter((o) => (satchel[o.key] ?? 0) > 0);
   const sell = (key: string, n: number) => attempt(() => onSell(key, n));
   const buy = (item: string) => attempt(() => onTrade(item));
@@ -903,7 +907,7 @@ export function TraderMenu({
             (key === "potion" && state.potions >= state.belt) || (key === "torch" && state.torchStock >= config.maxTorchStock);
           const ware = WARES[key];
           return (
-            <div key={key} className={`${styles.pet} ${key === "firebolt" || MOSS_ONLY.has(key) ? styles.petActive : ""}`}>
+            <div key={key} className={`${styles.pet} ${SPELLS.has(key) || MOSS_ONLY.has(key) ? styles.petActive : ""}`}>
               <Sprite grid={WARE_ART[key]?.() ?? potionSprite()} scale={key === "torch" || key === MAGMA_CORE ? 4 : 6} label={ware?.name ?? key} />
               <div className={styles.petBody}>
                 <b className={styles.pixel}>{ware?.name ?? key}</b>
@@ -914,6 +918,7 @@ export function TraderMenu({
                   </span>
                 )}
                 {MOSS_ONLY.has(key) && <span className={styles.petMeta}>ONLY FROM MOSS · ONE PER VISIT</span>}
+                {key === "fireball" && <span className={styles.petMeta}>ONLY IN THE FLAMEWELL · LEARNED FOR GOOD</span>}
                 <Coins n={price} have={state.coins} />
                 <button
                   type="button"
@@ -921,7 +926,7 @@ export function TraderMenu({
                   disabled={busy || full || state.coins < price}
                   onClick={() => void buy(key)}
                 >
-                  {key === "firebolt" ? "Learn it" : full ? "Belt full" : "Buy one"}
+                  {SPELLS.has(key) ? "Learn it" : full ? "Belt full" : "Buy one"}
                 </button>
               </div>
             </div>

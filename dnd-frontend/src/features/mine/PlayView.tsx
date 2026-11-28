@@ -81,6 +81,7 @@ const STEP_MS = 1000 / 60;
 const FLUSH_MS = 1000;
 const TRADE_NOTES: Record<string, [string, string]> = {
   firebolt: ["You learned Firebolt", "F or right-click to cast it at the cursor."],
+  fireball: ["Your Firebolt is a Fireball now", "5× damage, and it bursts on every monster within 2 tiles."],
   torch: ["A torch, a little damp", "T to plant it."],
   potion: ["A healing draught, corked and warm", "Q to drink it."],
   chart: ["Prospector's Chart", "Every treasure on this level is marked with an X."],
@@ -284,6 +285,7 @@ export function PlayView({
     g.forgeLevel = state.forgeLevel;
     g.houseLevel = state.houseLevel;
     g.firebolt = state.firebolt;
+    g.fireball = !!state.fireball;
     g.potions = state.potions;
     g.player.hp = state.stats.maxHp;
     if ((g.pet?.key ?? null) !== state.pet) {
@@ -489,6 +491,7 @@ export function PlayView({
         forgeLevel: s.forgeLevel,
         houseLevel: s.houseLevel,
         firebolt: s.firebolt,
+        fireball: !!s.fireball,
         potions: s.potions,
         maxTorches: s.torchStock + (trip?.torches.length ?? 0),
         overload: config.overload,
@@ -700,6 +703,7 @@ export function PlayView({
     const g = gameRef.current;
     if (g) {
       g.firebolt = s.firebolt;
+      g.fireball = !!s.fireball;
       g.potions = s.potions;
       g.boons = new Set(s.trip?.boons ?? []);
       if (item === "torch") {

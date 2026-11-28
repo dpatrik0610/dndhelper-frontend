@@ -3,6 +3,9 @@ import { GEAR_SLOTS, type Tiers } from "./art/gear";
 
 export const critHit = (s: MiningStats) => Math.round(s.power * s.critMult);
 
+export const boltHit = (s: MiningStats, big = false, crit = false) =>
+  Math.round(s.power * (big ? 5 : 3) * (s.setBonus === 7 ? 1.5 : 1) * (crit ? s.critMult : 1));
+
 export const discounted = (cost: OreCounts, discount: number): OreCounts =>
   Object.fromEntries(Object.entries(cost).map(([k, n]) => [k, Math.ceil(n * (1 - discount))]));
 

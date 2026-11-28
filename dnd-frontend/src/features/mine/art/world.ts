@@ -357,13 +357,13 @@ export const potionSprite = (): Grid =>
     R: "#ff8a8a",
   });
 
-export const scrollSprite = (): Grid =>
+export const scrollSprite = (big = false): Grid =>
   raster([".xxxxxx.", "xPppppPx", ".xpoopx.", ".xpOopx.", ".xpoopx.", ".xppppx.", "xPppppPx", ".xxxxxx."], {
     x: "#1c1410",
-    p: "#f4e2b8",
-    P: "#c9b07a",
-    o: "#ff8a2a",
-    O: "#ffe066",
+    p: big ? "#f0c8a0" : "#f4e2b8",
+    P: big ? "#b8402a" : "#c9b07a",
+    o: big ? "#e0301a" : "#ff8a2a",
+    O: big ? "#ff8a2a" : "#ffe066",
   });
 
 export const chartSprite = (): Grid =>

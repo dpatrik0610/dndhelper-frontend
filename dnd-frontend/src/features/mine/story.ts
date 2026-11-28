@@ -155,6 +155,11 @@ export const WARES: Record<string, { name: string; blurb: string }> = {
     blurb:
       "Learn it once, keep it forever. F or right-click hurls a bolt at the cursor for 3× your pick's damage. It lights the dark as it flies, leaves rock alone, and it's the only thing that hurts a mimic.",
   },
+  fireball: {
+    name: "Scroll of Fireball",
+    blurb:
+      "Moss's rarest page, only offered in the Flamewell. Turns your Firebolt into a Fireball for good: 5× your pick's damage, and it bursts on whatever it hits, burning every monster within 2 tiles.",
+  },
   potion: {
     name: "Healing draught",
     blurb: "Q drinks one and heals 60% of your health. A grander home makes room for more on your belt.",

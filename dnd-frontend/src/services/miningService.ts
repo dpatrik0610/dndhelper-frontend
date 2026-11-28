@@ -129,6 +129,7 @@ export interface MiningState {
   pet: string | null;
   pages: number[];
   firebolt: boolean;
+  fireball?: boolean;
   potions: number;
   foxRevealed: boolean;
   deepestDepth: number;

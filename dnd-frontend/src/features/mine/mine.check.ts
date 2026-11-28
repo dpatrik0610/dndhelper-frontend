@@ -31,7 +31,7 @@ import {
   takePending,
   loadTrip,
 } from "./engine";
-import { canAfford, characterSheet, discounted, fillUpTo, hpColor, renownBreakdown, statRows } from "./mine";
+import { boltHit, canAfford, characterSheet, discounted, fillUpTo, hpColor, renownBreakdown, statRows } from "./mine";
 import { pickSwing } from "./render";
 import { dreamsFor, engraving, PAGES, SEALS, wickLines } from "./story";
 
@@ -361,6 +361,7 @@ run(lair, 3000, {}, { x: 4.5, y: 2.5 });
 assert.equal(mimic.hp, mimic.maxHp, "a pickaxe only staggers a mimic");
 assert.equal(castBolt(lair, { x: 4.5, y: 2.5 }), false, "no firebolt until you learn it");
 lair.firebolt = true;
+lair.stats = { ...stats, critZone: 0 };
 assert.ok(castBolt(lair, { x: 4.5, y: 2.5 }));
 run(lair, 300);
 assert.equal(mimic.hp, mimic.maxHp - stats.power * 3, "fire burns it for 3x pick damage");
@@ -371,6 +372,26 @@ castBolt(lair, { x: mimic.x + 0.5, y: mimic.y + 0.5 });
 run(lair, 300);
 assert.deepEqual(lair.pending.mimics, [2 * W + 4], "a slain mimic is reported for its loot");
 assert.equal(lair.pending.kills, 0);
+
+{
+  const fb = newGame(-1, ["############", "#..........#", "#..........#", "############"]);
+  fb.monsters = [];
+  fb.firebolt = true;
+  fb.fireball = true;
+  fb.stats = { ...stats, critZone: 0 };
+  const hit = [foe(fb, 1, 6, 2), foe(fb, 1, 7, 2), foe(fb, 1, 10, 2)];
+  for (const m of hit) {
+    m.hp = m.maxHp = 1e6;
+    m.nextMove = m.nextHit = 1e12;
+  }
+  castBolt(fb, { x: 6.5, y: 2.5 });
+  run(fb, 500);
+  assert.equal(hit[0].hp, 1e6 - stats.power * 5, "a fireball hits for 5x pick damage");
+  assert.equal(hit[1].hp, 1e6 - stats.power * 5, "and bursts on its neighbours");
+  assert.equal(hit[2].hp, 1e6, "but not on monsters out of range");
+  assert.equal(boltHit({ ...stats, setBonus: 7 }), Math.round(stats.power * 3 * 1.5), "the fire set stokes the bolt");
+  assert.equal(boltHit(stats, false, true), Math.round(stats.power * 3 * stats.critMult), "bolts can crit");
+}
 
 const bolt = newGame(-1);
 bolt.firebolt = true;

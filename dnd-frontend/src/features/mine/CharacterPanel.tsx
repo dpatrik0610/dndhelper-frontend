@@ -1,7 +1,7 @@
 import type { MiningConfig, MiningState } from "@services/miningService";
 import { item, itemName, SETS } from "./art/gear";
 import { PanelHead } from "./CampMenus";
-import { characterSheet, compact, critHit, DASH_PERKS, dashHit, SET_BONUSES, tiersOf } from "./mine";
+import { boltHit, characterSheet, compact, critHit, DASH_PERKS, dashHit, SET_BONUSES, tiersOf } from "./mine";
 import { Sprite } from "./Sprite";
 import styles from "./Mine.module.css";
 
@@ -21,6 +21,7 @@ export function CharacterPanel({
     ["Hit", compact(s.power)],
     ["Crit hit", compact(critHit(s))],
     ["Dash strike", compact(dashHit(s))],
+    ...(state.firebolt ? [[state.fireball ? "Fireball" : "Firebolt", compact(boltHit(s, !!state.fireball))]] : []),
     ["Damage taken", s.armor ? `${Math.round((1 - s.armor) * 100)}%` : "100%"],
     ["Most you can haul", `${compact(Math.floor(s.capacity * config.overload))} (slow past ${compact(s.capacity)})`],
   ];

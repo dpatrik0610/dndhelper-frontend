@@ -212,12 +212,16 @@ export function Hotbar({
             }
           />
           <Square
-            grid={scrollSprite()}
+            grid={scrollSprite(!!state.fireball)}
             hotkey="F"
             empty={!state.firebolt}
-            label={state.firebolt ? "Firebolt" : "Firebolt, not learned"}
+            label={state.fireball ? "Fireball" : state.firebolt ? "Firebolt" : "Firebolt, not learned"}
             tip={
-              state.firebolt ? (
+              state.fireball ? (
+                <>
+                  <b>Fireball</b> · F or right-click to throw it at the cursor. 5× your Hit, burning every monster within 2 tiles of where it lands.
+                </>
+              ) : state.firebolt ? (
                 <>
                   <b>Firebolt</b> · F or right-click to throw it at the cursor. The only thing that hurts a mimic.
                 </>

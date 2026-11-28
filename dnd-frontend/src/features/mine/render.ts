@@ -753,6 +753,17 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
     for (const b of g.bolts) {
       const bx = Math.round(b.x * T + ox);
       const by = Math.round(b.y * T + oy);
+      if (b.big) {
+        ctx.fillStyle = "#c22a1a";
+        ctx.fillRect(bx - 4, by - 2, 9, 5);
+        ctx.fillRect(bx - 2, by - 4, 5, 9);
+        ctx.fillRect(bx - 3, by - 3, 7, 7);
+        ctx.fillStyle = "#ff6a2a";
+        ctx.fillRect(bx - 2, by - 2, 5, 5);
+        ctx.fillStyle = "#fff3a0";
+        ctx.fillRect(bx - 1, by - 1, 3, 3);
+        continue;
+      }
       ctx.fillStyle = "#ff8a2a";
       ctx.fillRect(bx - 2, by - 1, 5, 3);
       ctx.fillRect(bx - 1, by - 2, 3, 5);
@@ -952,7 +963,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       glow(dctx, lx + 23, ly - 20, LIFT_LIGHT * T + fl, black, 1);
       for (const i of g.torches)
         glow(dctx, (i % g.W) * T + ox + 8, Math.floor(i / g.W) * T + oy + 6, TORCH_LIGHT * T + fl, black, 0.95);
-      for (const b of g.bolts) glow(dctx, b.x * T + ox, b.y * T + oy, 1.8 * T, black, 0.95);
+      for (const b of g.bolts) glow(dctx, b.x * T + ox, b.y * T + oy, (b.big ? 2.6 : 1.8) * T, black, 0.95);
       if (g.trader >= 0) {
         const tx = (g.trader % g.W) * T + ox + 15;
         const ty = Math.floor(g.trader / g.W) * T + oy + 12;
@@ -1047,7 +1058,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       glow(ctx, lx + 23, ly - 24, 18, [255, 220, 140], 0.3);
     }
     glow(ctx, headX, headY - 4, 22, [255, 215, 130], 0.1);
-    for (const b of g.bolts) glow(ctx, b.x * T + ox, b.y * T + oy, 14, [255, 140, 50], 0.45);
+    for (const b of g.bolts) glow(ctx, b.x * T + ox, b.y * T + oy, b.big ? 22 : 14, b.big ? [255, 90, 40] : [255, 140, 50], b.big ? 0.6 : 0.45);
     if (pet?.art.light) glow(ctx, pet.px * T + ox + 8, (pet.py + 0.5) * T + oy, 14, hex(pet.art.light), 0.3);
     if (pet?.key === "dragon") glow(ctx, pet.px * T + ox + 9, (pet.py + 0.5) * T + oy, 12, [255, 120, 40], 0.18);
     for (const a of auras) gearAura(ctx, a.x, a.y, a.tier, g.now, a.seed);

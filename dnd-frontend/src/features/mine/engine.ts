@@ -2,7 +2,7 @@ import type { Break, DepthInfo, MiningStats, MiningTrip } from "@services/mining
 import { itemName, SETS, type Tiers } from "./art/gear";
 import { canSolo, type PetArt } from "./art/pets";
 import { ENEMIES, type Enemy } from "./art/world";
-import { compact, critHit, dashHit } from "./mine";
+import { boltHit, compact, critHit, dashHit } from "./mine";
 import type { Sfx } from "./sound";
 
 export const T = 16;
@@ -30,6 +30,7 @@ export const CUBE_KIND = 8;
 export const SALAMANDER_KIND = 7;
 const CUBE_GENS = 2;
 export const BOLT_MS = 2500;
+export const FIREBALL_RADIUS = 2;
 
 const WALK_MS = 170;
 const CLIMB_MS = 200;
@@ -162,6 +163,7 @@ export interface Bolt {
   vx: number;
   vy: number;
   life: number;
+  big: boolean;
 }
 
 export interface FloatText {
@@ -202,6 +204,7 @@ export interface GameSetup {
   forgeLevel: number;
   houseLevel: number;
   firebolt: boolean;
+  fireball?: boolean;
   potions: number;
   maxTorches: number;
   overload: number;
@@ -919,7 +922,7 @@ export function castBolt(g: Game, aim: Aim) {
   if (Math.abs(tx - ox) >= 0.3) p.face = tx < ox ? -1 : 1;
   g.sfx.push("bolt");
   feat(g, "bolt");
-  g.bolts.push({ x: ox, y: oy, vx: ((tx - ox) / len) * v, vy: ((ty - oy) / len) * v, life: 1400 });
+  g.bolts.push({ x: ox, y: oy, vx: ((tx - ox) / len) * v, vy: ((ty - oy) / len) * v, life: 1400, big: !!g.fireball });
   return true;
 }
 
@@ -951,16 +954,35 @@ function stepBolts(g: Game, dt: number) {
       const mp = drawPos(m);
       return Math.abs(mp.x + 0.5 - b.x) < 0.7 && Math.abs(mp.y + 0.5 - b.y) < 0.8;
     });
-    if (foe) {
+    if (foe || !isOpen(g, cx, cy)) {
       b.life = 0;
-      burst(g, b.x * T, b.y * T, "#ffb347", 16, 2.2);
-      damageMonster(g, foe, Math.round(g.stats.power * 3), false, null, true);
-    } else if (!isOpen(g, cx, cy)) {
-      b.life = 0;
-      burst(g, b.x * T, b.y * T, "#ff8a2a", 10, 1.6);
+      boltImpact(g, b, foe ?? null);
     }
   }
   g.bolts = g.bolts.filter((b) => b.life > 0);
+}
+
+function boltImpact(g: Game, b: Bolt, foe: Monster | null) {
+  const near = (m: Monster) => {
+    const mp = drawPos(m);
+    return Math.hypot(mp.x + 0.5 - b.x, mp.y + 0.5 - b.y) <= FIREBALL_RADIUS;
+  };
+  const targets = b.big ? liveMonsters(g).filter(near) : foe ? [foe] : [];
+  if (b.big) {
+    burst(g, b.x * T, b.y * T, "#ff5a2a", 36, 4);
+    burst(g, b.x * T, b.y * T, "#ffe066", 18, 2.4);
+    shake(g, 3, 200);
+    g.sfx.push("smash");
+    if (targets.length >= 3) feat(g, "fireballTrio");
+  } else burst(g, b.x * T, b.y * T, foe ? "#ffb347" : "#ff8a2a", foe ? 16 : 10, foe ? 2.2 : 1.6);
+  for (const m of targets) {
+    const crit = rand() < g.stats.critZone;
+    damageMonster(g, m, boltHit(g.stats, b.big, crit), crit, null, true);
+    if (g.stats.setBonus === 7 && m.hp > 0) {
+      m.burnUntil = g.now + 3000;
+      m.nextBurn = g.now + 600;
+    }
+  }
 }
 
 const touches = (p: Player, x: number, y: number) =>
