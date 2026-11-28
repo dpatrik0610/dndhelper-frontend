@@ -12,6 +12,7 @@ import {
   type Keys,
   GRAB_MS,
   playerPos,
+  effects,
   isZombie,
   rarify,
   ROT_RANGE,
@@ -602,6 +603,15 @@ dull.nextSpawn = 1e12;
 dull.stats = { ...stats, critZone: 1 };
 run(dull, 100, { down: true });
 assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
+{
+  const sick = newGame(-1);
+  assert.deepEqual(effects(sick), [], "no effects on a fresh trip");
+  sick.player.poisonUntil = sick.now + 3000;
+  sick.dimUntil = sick.now + 1000;
+  assert.deepEqual(effects(sick).map((e) => [e.key, e.left]), [["poison", 3000], ["dim", 1000]], "active effects list with time left");
+  sick.now += 1500;
+  assert.deepEqual(effects(sick).map((e) => e.key), ["poison"], "expired effects drop off");
+}
 console.log("mine.check ok");
 
 const cave = ["############", "#...%..A...#", "#..........#", "#0000000000#", "############"];

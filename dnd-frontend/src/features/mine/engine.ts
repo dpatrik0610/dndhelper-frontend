@@ -368,6 +368,21 @@ export function playerPos(g: Game) {
   return pos;
 }
 
+export type EffectKey = "poison" | "burn" | "slow" | "root" | "dim";
+
+export function effects(g: Game): { key: EffectKey; left: number }[] {
+  if (g.camp) return [];
+  const p = g.player;
+  const all: [EffectKey, number][] = [
+    ["poison", p.poisonUntil],
+    ["burn", p.burnUntil],
+    ["slow", p.slowUntil],
+    ["root", p.rootUntil],
+    ["dim", g.dimUntil],
+  ];
+  return all.filter(([, until]) => g.now < until).map(([key, until]) => ({ key, left: until - g.now }));
+}
+
 export function stretch(g: Game): [number, number] {
   const p = g.player;
   const land = (g.now - p.landAt) / 140;

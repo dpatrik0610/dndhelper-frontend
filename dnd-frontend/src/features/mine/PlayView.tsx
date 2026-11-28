@@ -64,6 +64,7 @@ import { compact, tiersOf, total } from "./mine";
 import { createRenderer, oreIcon } from "./render";
 import { loadPrefs, play, preloadSounds, setPrefs, type SoundPrefs, startMusic, stopMusic } from "./sound";
 import { CharacterPanel } from "./CharacterPanel";
+import { Effects } from "./Effects";
 import { Hotbar } from "./Hotbar";
 import { DropOre, LootPile } from "./LootPile";
 import { Sprite } from "./Sprite";
@@ -113,7 +114,10 @@ const ignoreKeys = (e: KeyboardEvent) => {
 };
 
 const MENU_TITLES: Record<Station, [string, string]> = {
-  lift: ["The lift", "Old Wick works the bell. Pick a depth, or press its number key; every trip down is a fresh shaft."],
+  lift: [
+    "The lift",
+    "Old Wick works the bell. Pick a depth, or press its number key; every trip down is a fresh shaft.",
+  ],
   forge: ["The forge", "Turn ore into better gear, or rebuild the forge to work harder metals."],
   market: ["Hesk Saltpenny's Market", "Ore for coin, coin for torches and tonics. Hesk weighs everything twice."],
   shop: ["Pip Tinkerwhistle's Menagerie", "One friend follows you down at a time."],
@@ -256,7 +260,9 @@ export function PlayView({
       else g.pending.unlocked.push(...ids);
       play("achievement");
       const now = Date.now();
-      const shown: AchToast[] = fresh.slice(0, MAX_TOASTS).map((a, k) => ({ key: now + k, icon: a.icon, name: a.name }));
+      const shown: AchToast[] = fresh
+        .slice(0, MAX_TOASTS)
+        .map((a, k) => ({ key: now + k, icon: a.icon, name: a.name }));
       if (fresh.length > MAX_TOASTS)
         shown.push({ key: now + MAX_TOASTS, icon: "🏆", name: `and ${fresh.length - MAX_TOASTS} more` });
       setToasts((cur) => [...cur, ...shown]);
@@ -514,7 +520,8 @@ export function PlayView({
       canvas.height = Math.ceil(h / scale);
       canvas.style.width = `${canvas.width * scale}px`;
       canvas.style.height = `${canvas.height * scale}px`;
-      const dpr = (window.devicePixelRatio || 1) * ((stage as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom ?? 1);
+      const dpr =
+        (window.devicePixelRatio || 1) * ((stage as HTMLElement & { currentCSSZoom?: number }).currentCSSZoom ?? 1);
       text.width = Math.round(canvas.width * scale * dpr);
       text.height = Math.round(canvas.height * scale * dpr);
       text.style.width = canvas.style.width;
@@ -993,8 +1000,8 @@ export function PlayView({
                   : "Walk to the lift, the forge or Pip's stall."}
               </span>
               <span className={styles.dim}>
-                Monsters flash a red ! before they bite: step back or dash away. Every third hit in a row smashes,
-                and hits from a jump land harder.
+                Monsters flash a red ! before they bite: step back or dash away. Every third hit in a row smashes, and
+                hits from a jump land harder.
               </span>
               <div className={styles.keys}>
                 <span>
@@ -1079,8 +1086,8 @@ export function PlayView({
                 <div>
                   <h2 className={styles.h2}>The lift</h2>
                   <p className={styles.dim}>
-                    {carried ? `Ride up and bank ${compact(carried)} ore.` : "Ride up to camp. Your satchel is empty."} Or
-                    press a depth's number key to bank and ride straight down there.
+                    {carried ? `Ride up and bank ${compact(carried)} ore.` : "Ride up to camp. Your satchel is empty."}{" "}
+                    Or press a depth's number key to bank and ride straight down there.
                   </p>
                 </div>
                 <button
@@ -1127,20 +1134,21 @@ export function PlayView({
           onEquip={(slot, tier) => swap(() => equipGear(slot, tier))}
           onPet={(key) => swap(() => followPet(key))}
           top={
-            <div className={styles.hpDock}>
-              <span className={styles.hudLabel}>Health</span>
-              <div ref={hpBar} className={`${styles.bar} ${styles.hpBar}`}>
-                <div ref={hpLag} className={styles.hpLag} />
-                <div ref={hpRef} className={styles.hpFill} />
+            <>
+              <Effects gameRef={gameRef} />
+              <div className={styles.hpDock}>
+                <span className={styles.hudLabel}>Health</span>
+                <div ref={hpBar} className={`${styles.bar} ${styles.hpBar}`}>
+                  <div ref={hpLag} className={styles.hpLag} />
+                  <div ref={hpRef} className={styles.hpFill} />
+                </div>
+                <span ref={hpText} className={styles.barText} />
               </div>
-              <span ref={hpText} className={styles.barText} />
-            </div>
+            </>
           }
         />
 
-        {report && !trip && (
-          <TripSummary {...props} report={report} onClose={() => setReport(null)} />
-        )}
+        {report && !trip && <TripSummary {...props} report={report} onClose={() => setReport(null)} />}
 
         {sealNear && trip && (
           <div className={styles.sealNote}>
