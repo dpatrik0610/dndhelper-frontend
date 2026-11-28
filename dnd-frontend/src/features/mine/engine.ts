@@ -1408,13 +1408,20 @@ function act(g: Game, keys: Keys, aim: Aim, grounded: boolean) {
 
   if (keys.jump && grounded && !heavy && isOpen(g, x, y - 2)) {
     const high = g.stats.setBonus === 8 && isOpen(g, x, y - 3);
+    const h = high ? 2 : 1;
+    const d = keys.left ? -1 : keys.right ? 1 : 0;
+    const over =
+      d !== 0 &&
+      Array.from({ length: h + 1 }, (_, i) => y - 1 - i).every((r) => isOpen(g, x + d, r)) &&
+      !liveMonsters(g).some((mm) => mm.x === x + d && mm.y <= y - 1 && mm.y >= y - 1 - h && mm.dmg > 0);
+    if (d && !aim) p.face = d;
     p.hangUntil = g.now + JUMP_MS * (high ? 1.6 : 1) + HANG_MS;
     p.jumpAt = g.now;
-    p.jumpH = high ? 2 : 1;
-    p.jumpTop = y - p.jumpH;
+    p.jumpH = h;
+    p.jumpTop = y - h;
     g.sfx.push("jump");
     dust(g, x + 0.5, y + 1, 3);
-    return tweenTo(p, x, y - (high ? 2 : 1), JUMP_MS * (high ? 1.6 : 1));
+    return tweenTo(p, over ? x + d : x, y - h, JUMP_MS * (high ? 1.6 : 1) * (over ? 1.15 : 1));
   }
 
   if (keys.left || keys.right) {
@@ -1861,7 +1868,10 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
   const grounded = !isOpen(g, p.x, p.y + 1) || g.ladders.has(p.y * g.W + p.x);
   if (!grounded && g.now >= p.hangUntil) {
     p.fell++;
-    return tweenTo(p, p.x, p.y + 1, p.fell === 1 ? FALL_MS * 2 : FALL_MS);
+    const d = g.asleep || g.grab || g.now < p.rootUntil ? 0 : keys.left ? -1 : keys.right ? 1 : 0;
+    const drift = d !== 0 && isOpen(g, p.x + d, p.y) && isOpen(g, p.x + d, p.y + 1);
+    if (d && !aim) p.face = d;
+    return tweenTo(p, drift ? p.x + d : p.x, p.y + 1, (p.fell === 1 ? FALL_MS * 2 : FALL_MS) * (drift ? 1.3 : 1));
   }
   if (grounded && p.fell > 0) {
     p.landAt = g.now;

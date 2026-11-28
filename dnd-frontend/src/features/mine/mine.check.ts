@@ -570,6 +570,26 @@ assert.equal(minY, 3, "everyone else jumps one");
   assert.ok(Math.max(...jumps) < 0.2, `the jump arc moves smoothly frame to frame (${Math.max(...jumps).toFixed(2)})`);
   assert.ok(ys.slice(0, top).every((y, i) => i === 0 || y <= ys[i - 1]) && ys.slice(top).every((y, i, a) => i === 0 || y >= a[i - 1]), "it rises, then falls, without wobbling");
 }
+{
+  const leap = newGame(-1, ["############", "#..........#", "#..........#", "#..........#", "#000.000000#", "############"], 3);
+  leap.monsters = [];
+  leap.nextSpawn = 1e12;
+  const x0 = leap.player.x;
+  const y0 = leap.player.y;
+  step(leap, 1000 / 60, { ...none, jump: true, right: true }, null);
+  assert.equal(leap.player.x, x0 + 1, "jumping while holding a direction leaps diagonally");
+  assert.equal(leap.player.y, y0 - 1, "and still rises a block");
+  let last = playerPos(leap);
+  let worst = 0;
+  for (let t = 0; t < 1200; t += 1000 / 60) {
+    step(leap, 1000 / 60, { ...none, right: true }, null);
+    const now = playerPos(leap);
+    worst = Math.max(worst, Math.hypot(now.x - last.x, now.y - last.y));
+    last = now;
+  }
+  assert.ok(worst < 0.25, `a running leap moves smoothly (${worst.toFixed(2)})`);
+  assert.ok(leap.player.x >= x0 + 3 && leap.player.y === y0, "a running leap clears a one-block gap and keeps going");
+}
 const sparky = newGame(-1);
 sparky.monsters = [];
 sparky.nextSpawn = 1e12;

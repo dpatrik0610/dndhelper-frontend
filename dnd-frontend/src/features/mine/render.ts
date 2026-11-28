@@ -833,7 +833,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         ctx.fillRect(bx0, by0, Math.round(12 * (1 - Math.max(0, recharge))), 2);
         ctx.globalAlpha = 1;
       }
-      if (g.firebolt && !g.camp) {
+      if (g.firebolt && !g.camp && g.now - g.nextBolt < 350) {
         const charge = Math.min(1, Math.max(0, 1 - (g.nextBolt - g.now) / BOLT_MS));
         const ready = charge >= 1;
         const since = g.now - g.nextBolt;
@@ -845,8 +845,8 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
           ? { a: hot ? "#d8301a" : "#ff6a2a", b: hot ? "#ff7a2a" : "#ffb347", c: "#fff3a0" }
           : { a: "#7a3a22", b: "#a8582a", c: "#c88a4a" };
         const sway = ready ? Math.round(Math.sin(g.now / 90)) : 0;
-        if (ready) glow(ctx, fx + 0.5, fy - 3, since < 250 ? 14 - since / 30 : 7, hot ? [255, 80, 40] : [255, 150, 60], 0.35);
-        ctx.globalAlpha = ready ? 1 : 0.85;
+        if (ready && since < 250) glow(ctx, fx + 0.5, fy - 3, 14 - since / 30, hot ? [255, 80, 40] : [255, 150, 60], 0.35);
+        ctx.globalAlpha = ready ? Math.max(0, 1 - since / 350) : 0.85;
         for (let r = 0; r < rows; r++) {
           const line = FLAME[FLAME.length - 1 - r];
           const dx = r >= 4 ? sway : 0;
