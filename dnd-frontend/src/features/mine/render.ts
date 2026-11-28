@@ -7,6 +7,7 @@ import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
 import { chestSprite, cracks, enemySprite, oreTile, stoneTile, traderSprite } from "./art/world";
 import {
   BEDROCK,
+  BOLT_MS,
   CAMP,
   CHEST,
   CHESTS,
@@ -262,6 +263,8 @@ const diamondTile = (depth: number): Grid => {
     for (const [x, c] of row.entries()) if (c) g[y][x] = c;
   return g;
 };
+
+const FLAME = [".a.", ".a.", "aba", "aba", "abcba", "abcba", ".aba."];
 
 const glow = (ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rgb: number[], a: number) => {
   const g = ctx.createRadialGradient(x, y, 0, x, y, r);
@@ -826,6 +829,32 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         ctx.fillRect(bx0 - 1, by0 - 1, 14, 4);
         ctx.fillStyle = recharge > 0 ? "#4a7f96" : "#e8fbff";
         ctx.fillRect(bx0, by0, Math.round(12 * (1 - Math.max(0, recharge))), 2);
+        ctx.globalAlpha = 1;
+      }
+      if (g.firebolt && !g.camp) {
+        const charge = Math.min(1, Math.max(0, 1 - (g.nextBolt - g.now) / BOLT_MS));
+        const ready = charge >= 1;
+        const since = g.now - g.nextBolt;
+        const rows = Math.max(1, Math.ceil(FLAME.length * charge));
+        const fx = Math.round(face < 0 ? px + 17 : px - 4);
+        const fy = feet - 3;
+        const hot = g.fireball;
+        const pal: Record<string, string> = ready
+          ? { a: hot ? "#d8301a" : "#ff6a2a", b: hot ? "#ff7a2a" : "#ffb347", c: "#fff3a0" }
+          : { a: "#7a3a22", b: "#a8582a", c: "#c88a4a" };
+        const sway = ready ? Math.round(Math.sin(g.now / 90)) : 0;
+        if (ready) glow(ctx, fx + 0.5, fy - 3, since < 250 ? 14 - since / 30 : 7, hot ? [255, 80, 40] : [255, 150, 60], 0.35);
+        ctx.globalAlpha = ready ? 1 : 0.85;
+        for (let r = 0; r < rows; r++) {
+          const line = FLAME[FLAME.length - 1 - r];
+          const dx = r >= 4 ? sway : 0;
+          for (let i = 0; i < line.length; i++) {
+            const c = pal[line[i]];
+            if (!c) continue;
+            ctx.fillStyle = c;
+            ctx.fillRect(fx - Math.floor(line.length / 2) + i + dx, fy - r, 1, 1);
+          }
+        }
         ctx.globalAlpha = 1;
       }
       if (g.grab) {
