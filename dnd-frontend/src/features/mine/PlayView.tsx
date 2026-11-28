@@ -117,6 +117,7 @@ const KEYMAP: Record<string, keyof Keys> = {
   NumpadEnter: "attack",
   ShiftLeft: "dash",
   ShiftRight: "dash",
+  KeyX: "dash",
 };
 
 const ignoreKeys = (e: KeyboardEvent) => {
@@ -902,6 +903,7 @@ export function PlayView({
           aria-label="The game. A and D walk and dig, Space jumps, S digs down, W climbs, click or Enter attacks."
           onPointerDown={(e) => {
             if (e.button === 2) {
+              e.preventDefault();
               if (gameRef.current) castBolt(gameRef.current, aimAt(e));
               return;
             }
@@ -1116,7 +1118,7 @@ export function PlayView({
                   <kbd>Click</kbd> or <kbd>Enter</kbd> attack and mine
                 </span>
                 <span>
-                  <kbd>Shift</kbd> dash, dodges hits and strikes anything you pass through
+                  <kbd>X</kbd> or <kbd>Shift</kbd> dash, dodges hits and strikes anything you pass through
                 </span>
                 <span>
                   <kbd>T</kbd> torch
