@@ -23,6 +23,9 @@ export const isChest = (c: number) => c === MIMIC || CHESTS.includes(c);
 const MOTHERLODE_RADIUS = 4.5;
 const HUM_RADIUS = 12;
 export const MIMIC_KIND = 11;
+export const GRAB_NEED = 10;
+export const GRAB_MS = 6000;
+const GRAB_BITE_MS = 1000;
 export const CUBE_KIND = 8;
 export const SALAMANDER_KIND = 7;
 const CUBE_GENS = 2;
@@ -121,6 +124,17 @@ export interface Monster extends Tween {
   gen: number;
   slamAt: number;
   nextSlam: number;
+  grappled: boolean;
+}
+
+export interface Grab {
+  m: Monster;
+  until: number;
+  got: number;
+  next: -1 | 1;
+  nextBite: number;
+  left: boolean;
+  right: boolean;
 }
 
 export interface PetActor {
@@ -240,6 +254,7 @@ export interface Game extends GameSetup {
   traps: Trap[];
   dimUntil: number;
   embers: Map<number, number>;
+  grab: Grab | null;
   shakeUntil: number;
   shakeMag: number;
   feats: Record<string, number>;
@@ -393,6 +408,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     traps: [],
     dimUntil: 0,
     embers: new Map(),
+    grab: null,
     sfx: [],
     shakeUntil: 0,
     shakeMag: 0,
@@ -442,6 +458,7 @@ function loadCamp(g: Game, now: number, home: boolean) {
   g.boons = new Set();
   g.traps = [];
   g.embers = new Map();
+  g.grab = null;
   g.motherlode = -1;
   g.startedAt = now;
   g.nextSpawn = Number.POSITIVE_INFINITY;
@@ -517,6 +534,7 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.traps = placeTraps(g, trip.map);
   g.dimUntil = 0;
   g.embers = new Map();
+  g.grab = null;
   g.motherlode = trip.motherlode ?? -1;
   g.richFound = false;
   g.startedAt = now;
@@ -867,6 +885,7 @@ export function addMonster(g: Game, kind: number, x: number, y: number, gen = 0)
     gen,
     slamAt: 0,
     nextSlam: g.now + 2000,
+    grappled: false,
   };
   g.monsters.push(m);
   return m;
@@ -1602,6 +1621,7 @@ function stepMonsters(g: Game, dt: number) {
       tweenTo(m, m.x, m.y + 1, FALL_MS);
       continue;
     }
+    if (g.grab?.m === m) continue;
     if (g.now < m.stunUntil) continue;
     if (m.windupUntil && g.now >= m.windupUntil) {
       m.windupUntil = 0;
@@ -1618,6 +1638,7 @@ function stepMonsters(g: Game, dt: number) {
           say(g, (p.x + 0.5) * T, (p.y - 2) * T, "Engulfed!", "#9be07a", ENGULF_MS);
         }
         if (m.kind === KOBOLD_KIND) hopBack(g, m);
+        if (p.hp > 0 && m.kind === MIMIC_KIND && !m.grappled && !g.grab) startGrab(g, m);
       } else {
         say(g, (m.x + 0.5) * T, m.y * T, "miss", "#a59c8e", 500);
         feat(g, "sidestep");
@@ -1767,7 +1788,79 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
       color: "#8fd3ff",
     });
   }
-  if (!g.asleep) act(g, keys, aim, grounded);
+  if (!g.asleep && !stepGrab(g, keys)) act(g, keys, aim, grounded);
+}
+
+function startGrab(g: Game, m: Monster) {
+  m.grappled = true;
+  g.grab = {
+    m,
+    until: g.now + GRAB_MS,
+    got: 0,
+    next: -1,
+    nextBite: g.now + GRAB_BITE_MS,
+    left: false,
+    right: false,
+  };
+  m.windupUntil = 0;
+  const p = g.player;
+  say(g, (p.x + 0.5) * T, (p.y - 3) * T, "GRABBED!", "#ff6a5a", 1200);
+  sayOnce(g, "grab", "The mimic has you! Press A, D, A, D... as fast as you can to break free.", "#ff6a5a", 5000);
+  shake(g, 3, 200);
+  g.sfx.push("mimic");
+}
+
+function endGrab(g: Game, free: boolean) {
+  const grab = g.grab;
+  if (!grab) return;
+  g.grab = null;
+  const p = g.player;
+  const m = grab.m;
+  p.invulnUntil = Math.max(p.invulnUntil, g.now + 600);
+  m.nextHit = g.now + 1200;
+  if (!free) {
+    say(g, (p.x + 0.5) * T, (p.y - 3) * T, "Spat out!", "#c9a04a", 900);
+    return;
+  }
+  m.stunUntil = Math.max(m.stunUntil, g.now + 900);
+  knockback(g, m, 1);
+  burst(g, (p.x + 0.5) * T, (p.y - 0.5) * T, "#ffe066", 12, 2);
+  say(g, (p.x + 0.5) * T, (p.y - 3) * T, "Broke free!", "#ffe066", 1000);
+  g.sfx.push("smash");
+  feat(g, "mimicEscape");
+}
+
+function stepGrab(g: Game, keys: Keys) {
+  const grab = g.grab;
+  if (!grab) return false;
+  const m = grab.m;
+  if (m.hp <= 0 || m.leaving || g.fainted) {
+    g.grab = null;
+    return false;
+  }
+  if (g.now >= grab.until) {
+    endGrab(g, false);
+    return true;
+  }
+  const pressed = keys.left && !grab.left ? -1 : keys.right && !grab.right ? 1 : 0;
+  grab.left = keys.left;
+  grab.right = keys.right;
+  if (pressed && pressed === grab.next) {
+    grab.got++;
+    grab.next = grab.next === -1 ? 1 : -1;
+    g.player.face = pressed;
+    shake(g, 1, 60);
+    if (grab.got >= GRAB_NEED) {
+      endGrab(g, true);
+      return true;
+    }
+  }
+  if (g.now >= grab.nextBite) {
+    grab.nextBite = g.now + GRAB_BITE_MS;
+    hurt(g, Math.max(1, m.dmg * 0.3));
+    m.lungeUntil = g.now + 160;
+  }
+  return true;
 }
 
 function stepBeetle(g: Game) {

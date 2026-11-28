@@ -10,6 +10,8 @@ import {
   drinkPotion,
   type Game,
   type Keys,
+  GRAB_MS,
+  GRAB_NEED,
   MIMIC_KIND,
   minSwings,
   ORE0,
@@ -272,6 +274,39 @@ const foe = (gm: Game, kind: number, x: number, y: number) => {
 };
 const reachedYou = (gm: Game, m: { x: number; y: number }) =>
   Math.abs(m.x - gm.player.x) <= 1 && (m.y === gm.player.y || m.y === gm.player.y - 1);
+
+{
+  const gr = newGame(-1);
+  gr.monsters = [];
+  const chest = foe(gr, MIMIC_KIND, gr.player.x + 1, gr.player.y);
+  for (let t = 0; t < 4000 && !gr.grab; t += 1000 / 60) step(gr, 1000 / 60, none, null);
+  assert.ok(gr.grab?.m === chest, "a mimic grapples you when it bites");
+  const x0 = gr.player.x;
+  run(gr, 300, { left: true });
+  assert.equal(gr.player.x, x0, "you can't walk away while grappled");
+  run(gr, 50);
+  for (let i = 0; i < 4; i++) {
+    run(gr, 50, { left: true });
+    run(gr, 50);
+  }
+  assert.equal(gr.grab?.got, 1, "only the A, D, A, D order counts");
+  for (let i = 0; i < GRAB_NEED; i++) {
+    run(gr, 40, i % 2 ? { left: true } : { right: true });
+    run(gr, 40);
+  }
+  assert.equal(gr.grab, null, "mashing A, D breaks you free");
+  assert.ok(gr.now < chest.stunUntil && chest.grappled, "and staggers the mimic");
+  run(gr, 6000);
+  assert.equal(gr.grab, null, "a mimic only grapples you once");
+
+  const late = newGame(-1);
+  late.monsters = [];
+  foe(late, MIMIC_KIND, late.player.x + 1, late.player.y);
+  for (let t = 0; t < 4000 && !late.grab; t += 1000 / 60) step(late, 1000 / 60, none, null);
+  const hp = late.player.hp;
+  run(late, GRAB_MS + 100);
+  assert.ok(late.grab === null && late.player.hp < hp, "a slow escape costs health, then it spits you out");
+}
 
 let gm = newGame(-1);
 gm.monsters = [];

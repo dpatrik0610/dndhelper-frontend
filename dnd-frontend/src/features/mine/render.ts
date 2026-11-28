@@ -10,6 +10,8 @@ import {
   CAMP,
   CHEST,
   CHESTS,
+  GRAB_MS,
+  GRAB_NEED,
   GEODE,
   DIAMOND_CELL,
   GILDED_CHEST,
@@ -802,6 +804,35 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
         ctx.fillStyle = recharge > 0 ? "#4a7f96" : "#e8fbff";
         ctx.fillRect(bx0, by0, Math.round(12 * (1 - Math.max(0, recharge))), 2);
         ctx.globalAlpha = 1;
+      }
+      if (g.grab) {
+        const grab = g.grab;
+        const cx = Math.round(px + 7);
+        const cy = top - 26;
+        for (let i = 0; i < 5; i++) {
+          const cap = (i % 2 === 0) === (grab.next === -1) ? "A" : "D";
+          const now = i === 0;
+          const bob = now ? Math.round(Math.abs(Math.sin(g.now / 90)) * -2) : 0;
+          const kx = cx - 27 + i * 11;
+          const ky = cy + bob;
+          ctx.globalAlpha = now ? 1 : 0.55 - i * 0.08;
+          ctx.fillStyle = "#1c1410";
+          ctx.fillRect(kx - 1, ky - 1, 11, 11);
+          ctx.fillStyle = now ? "#ffe066" : "#6b5a48";
+          ctx.fillRect(kx, ky, 9, 9);
+          ctx.fillStyle = now ? "#b8860b" : "#4a3d30";
+          ctx.fillRect(kx, ky + 7, 9, 2);
+          write(cap, kx + 4.5, ky + 6.5, now ? "#1c1410" : "#d9cbb5", ctx.globalAlpha, 7);
+        }
+        ctx.globalAlpha = 1;
+        const by = cy + 13;
+        ctx.fillStyle = "#1c1410";
+        ctx.fillRect(cx - 28, by - 1, 56, 6);
+        ctx.fillStyle = "#ffe066";
+        ctx.fillRect(cx - 27, by, Math.round(54 * (grab.got / GRAB_NEED)), 2);
+        ctx.fillStyle = "#ff5a4a";
+        ctx.fillRect(cx - 27, by + 3, Math.round(54 * Math.max(0, (grab.until - g.now) / GRAB_MS)), 1);
+        write("BREAK FREE!", cx, cy - 4, "#ff6a5a", 0.8 + 0.2 * Math.sin(g.now / 120), 7);
       }
       if (pose.dashing) {
         const trail = dashColor(g.stats.setBonus);
