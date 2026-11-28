@@ -1570,44 +1570,50 @@
 }
 
 .effects {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
   display: flex;
-  justify-content: center;
+  flex-direction: row-reverse;
+  flex-wrap: wrap-reverse;
   gap: 6px;
-  min-height: 0;
+  max-width: 100%;
 }
 
 .effect {
   position: relative;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 2px solid var(--fx);
-  background: rgba(10, 8, 14, 0.85);
-  box-shadow: 0 0 8px -2px var(--fx);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px 0 5px;
+  border: 1px solid var(--fx);
+  border-radius: 999px;
+  background: var(--hud);
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.55),
+    0 0 8px -3px var(--fx);
   overflow: hidden;
   animation: effectIn 180ms ease-out;
 }
 
-.effect canvas {
+.effect canvas,
+.effectTime {
   position: relative;
 }
 
 .effectLeft {
   position: absolute;
-  left: 0;
-  right: 0;
   top: 0;
-  background: rgba(3, 2, 6, 0.6);
+  right: 0;
+  bottom: 0;
+  background: rgba(3, 2, 6, 0.55);
   pointer-events: none;
 }
 
 .effectTime {
-  position: absolute;
-  right: 1px;
-  bottom: 0;
   font-family: var(--pixel);
-  font-size: 0.625rem;
+  font-size: 0.6875rem;
   line-height: 1;
   color: #f1e6cf;
   text-shadow: 1px 1px 0 #000;

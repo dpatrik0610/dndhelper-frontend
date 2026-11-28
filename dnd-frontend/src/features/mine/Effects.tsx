@@ -137,7 +137,7 @@ export function Effects({ gameRef }: { gameRef: RefObject<Game | null> }) {
               style={{ "--fx": a.color } as CSSProperties}
               aria-label={`${a.name}, ${clock(left)}${left >= 60_000 ? "" : "s"} left`}
             >
-              <div className={styles.effectLeft} style={{ height: `${(1 - left / total) * 100}%` }} />
+              <div className={styles.effectLeft} style={{ width: `${(1 - left / total) * 100}%` }} />
               <Sprite grid={a.grid} scale={2} />
               <span className={styles.effectTime}>{clock(left)}</span>
             </div>
