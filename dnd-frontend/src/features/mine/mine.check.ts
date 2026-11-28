@@ -16,6 +16,7 @@ import {
   bombKey,
   BOMB_SELF_DMG,
   occupies,
+  SKELETON_KIND,
   WYRM_KIND,
   ELEMENTAL_KIND,
   revive,
@@ -754,6 +755,25 @@ assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
   assert.equal(wide.W, 20, "a trip brings its own map width");
   assert.equal(wide.H, 30, "and the height follows from the map");
   assert.equal(wide.seen.length, 600, "fog of war covers the whole bigger map");
+}
+{
+  const yard = newGame(-1, ["############", "#..........#", "#..........#", "#..........#", "#0000000000#", "############"]);
+  yard.monsters = [];
+  yard.nextSpawn = 1e12;
+  yard.seen.fill(1);
+  yard.lastInput = 1e15;
+  yard.player.x = yard.player.fromX = 2;
+  yard.player.y = yard.player.fromY = 3;
+  const bones = addMonster(yard, SKELETON_KIND, 7, 3);
+  bones.rare = false;
+  bones.nextMove = 1e15;
+  bones.nextThrow = 0;
+  const hp = yard.player.hp;
+  run(yard, 3000);
+  assert.ok(yard.player.hp < hp, "a skeleton miner lobs a bomb at you when it can see you");
+  const chipped = [...yard.dmg.entries()].filter(([, e]) => e.d > 0);
+  assert.ok(chipped.length > 0 && chipped.every(([i]) => yard.map[i] !== OPEN), "its bomb chips the rock where it lands without breaking any");
+  assert.ok(bones.nextThrow - yard.now > 3000, "and it waits a long while before the next one");
 }
 console.log("mine.check ok");
 

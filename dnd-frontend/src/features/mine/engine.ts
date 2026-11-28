@@ -145,6 +145,17 @@ export interface Monster extends Tween {
   awake: boolean;
   breathDir: number;
   breathUntil: number;
+  throwAt: number;
+  nextThrow: number;
+}
+
+export interface Lob {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  dmg: number;
 }
 
 export interface Spit {
@@ -295,6 +306,7 @@ export interface Game extends GameSetup {
   bombArmed: boolean;
   fuses: { i: number; at: number }[];
   spits: Spit[];
+  lobs: Lob[];
   grab: Grab | null;
   shakeUntil: number;
   shakeMag: number;
@@ -382,6 +394,28 @@ export const ROT_RANGE = 2;
 export const POISON_MS = 5000;
 const POISON_TICK_MS = 800;
 export const isZombie = (m: Monster) => m.rare && m.kind === 4;
+
+export const SKELETON_KIND = 4;
+export const LOB_WINDUP_MS = 650;
+const LOB_FIRST_MS = 2500;
+const LOB_EVERY_MS = 9000;
+const LOB_MIN = 2;
+const LOB_RANGE = 8;
+const LOB_GRAVITY = 0.000016;
+const LOB_SHARE = 0.7;
+export const LOB_RADIUS = 1.4;
+const LOB_CHIP = 0.5;
+
+export const throws = (m: Monster) => m.kind === SKELETON_KIND && !isZombie(m);
+
+const sees = (g: Game, ax: number, ay: number, bx: number, by: number) => {
+  const n = Math.ceil(Math.hypot(bx - ax, by - ay) * 4);
+  for (let k = 1; k < n; k++) {
+    const t = k / n;
+    if (!isOpen(g, Math.floor(ax + (bx - ax) * t), Math.floor(ay + (by - ay) * t))) return false;
+  }
+  return true;
+};
 
 export const PET_LIGHT: Record<string, number> = { moth: 3.5, wisp: 5, fox: 10 };
 
@@ -553,6 +587,7 @@ export function createGame(setup: GameSetup, trip: MiningTrip | null, now: numbe
     bombArmed: false,
     fuses: [],
     spits: [],
+    lobs: [],
     grab: null,
     sfx: [],
     shakeUntil: 0,
@@ -606,6 +641,7 @@ function loadCamp(g: Game, now: number, home: boolean) {
   g.fuses = [];
   g.bombArmed = false;
   g.spits = [];
+  g.lobs = [];
   g.grab = null;
   g.motherlode = -1;
   g.startedAt = now;
@@ -693,6 +729,7 @@ export function loadTrip(g: Game, trip: MiningTrip, now: number) {
   g.fuses = [];
   g.bombArmed = false;
   g.spits = [];
+  g.lobs = [];
   g.grab = null;
   g.motherlode = trip.motherlode ?? -1;
   if (trip.wyrm != null) {
@@ -1065,6 +1102,8 @@ export function addMonster(g: Game, kind: number, x: number, y: number, gen = 0)
     awake: false,
     breathDir: 1,
     breathUntil: 0,
+    throwAt: 0,
+    nextThrow: g.now + LOB_FIRST_MS,
   };
   g.monsters.push(m);
   return m;
@@ -1462,6 +1501,10 @@ function attack(g: Game, m: Monster) {
   if (crit || heavy || m.poise <= 0) {
     m.poise = poise;
     m.windupUntil = 0;
+    if (m.throwAt) {
+      m.throwAt = 0;
+      m.nextThrow = g.now + LOB_EVERY_MS / 2;
+    }
     if (m.slamAt) {
       m.slamAt = 0;
       say(g, (m.x + 0.5) * T, m.y * T - 6, "Slam broken!", "#9db6ff", 900);
@@ -2000,6 +2043,7 @@ function stepMonsters(g: Game, dt: number) {
       continue;
     }
     if (m.windupUntil) continue;
+    if (throws(m) && skeletonThrow(g, m)) continue;
     if (m.kind === GOLEM_KIND && golemSlam(g, m)) continue;
     if (m.kind !== ELEMENTAL_KIND && inReach(p, m)) {
       m.lost = 0;
@@ -2039,6 +2083,80 @@ function stepMonsters(g: Game, dt: number) {
       g.map[home] = MIMIC;
     return false;
   });
+}
+
+function skeletonThrow(g: Game, m: Monster) {
+  const p = g.player;
+  if (m.throwAt) {
+    if (g.now < m.throwAt) return true;
+    m.throwAt = 0;
+    m.lungeUntil = g.now + 160;
+    const ox = m.x + 0.5 + (p.x < m.x ? -0.3 : 0.3);
+    const oy = m.y - 0.6;
+    const tx = p.x + 0.5;
+    const ty = p.y + 0.9;
+    const t = 450 + Math.hypot(tx - ox, ty - oy) * 70;
+    g.lobs.push({
+      x: ox,
+      y: oy,
+      vx: (tx - ox) / t,
+      vy: (ty - oy - 0.5 * LOB_GRAVITY * t * t) / t,
+      life: 3000,
+      dmg: Math.round(m.dmg * LOB_SHARE),
+    });
+    g.sfx.push("dash");
+    return true;
+  }
+  if (g.now < m.nextThrow || g.asleep) return false;
+  const d = Math.hypot(p.x - m.x, p.y - m.y);
+  if (d < LOB_MIN || d > LOB_RANGE || !sees(g, m.x + 0.5, m.y + 0.3, p.x + 0.5, p.y - 0.5)) return false;
+  m.lost = 0;
+  m.throwAt = g.now + LOB_WINDUP_MS;
+  m.nextThrow = g.now + LOB_EVERY_MS * (0.85 + rand() * 0.3);
+  sayOnce(g, "lob", "Skeleton miners carry blasting powder. Watch for the bomb in its hand and get clear of where it lands.", "#ffb347");
+  return true;
+}
+
+function chipAround(g: Game, bx: number, by: number) {
+  for (let y = Math.floor(by - LOB_RADIUS); y <= Math.floor(by + LOB_RADIUS); y++)
+    for (let x = Math.floor(bx - LOB_RADIUS); x <= Math.floor(bx + LOB_RADIUS); x++) {
+      if (Math.hypot(x + 0.5 - bx, y + 0.5 - by) > LOB_RADIUS) continue;
+      const c = cellAt(g, x, y);
+      if (c !== STONE && oreOf(c) < 0) continue;
+      const i = y * g.W + x;
+      const hp = hpOf(g, c);
+      const e = g.dmg.get(i) ?? { d: 0, s: 0, c: 0, t: 0 };
+      const cap = Math.ceil(hp / minSwings(c, g.tiers.pickaxe, g.depth));
+      e.d = Math.min(hp - 1, e.d + Math.min(g.stats.power, cap) * LOB_CHIP);
+      e.s++;
+      e.t = g.now;
+      g.dmg.set(i, e);
+      burst(g, (x + 0.5) * T, (y + 0.5) * T, "#d6d0c4", 3);
+    }
+}
+
+function stepLobs(g: Game, dt: number) {
+  if (!g.lobs.length) return;
+  const p = g.player;
+  for (const b of g.lobs) {
+    b.life -= dt;
+    b.vy += LOB_GRAVITY * dt;
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+    if (rand() < 0.4) g.parts.push({ x: b.x * T, y: (b.y - 0.25) * T, vx: 0, vy: -0.15, life: 200, color: rand() < 0.5 ? "#ffd23f" : "#ff8a2a" });
+    markSeen(g, Math.floor(b.x), Math.floor(b.y), 1.2);
+    if (isOpen(g, Math.floor(b.x), Math.floor(b.y)) && b.life > 0) continue;
+    b.life = 0;
+    const bx = b.x * T;
+    const by = b.y * T;
+    for (const color of ["#fff3a0", "#ff8a2a", "#5a5060"]) burst(g, bx, by, color, 14, 2);
+    shake(g, 3, 200);
+    g.sfx.push("smash");
+    chipAround(g, b.x, b.y);
+    if (Math.hypot(p.x + 0.5 - b.x, p.y - 0.5 - b.y) <= LOB_RADIUS + 0.5) hurt(g, b.dmg, "#ffb347");
+    else feat(g, "sidestep");
+  }
+  g.lobs = g.lobs.filter((b) => b.life > 0);
 }
 
 function stepElemental(g: Game, m: Monster) {
@@ -2597,6 +2715,7 @@ export function step(g: Game, dt: number, keys: Keys, aim: Aim) {
     sayOnce(g, "dark", "Dark out here. Wounds only mend in torchlight, and monsters stir faster (T plants a torch).", "#ffc98a", 4200);
   stepBolts(g, dt);
   stepSpits(g, dt);
+  stepLobs(g, dt);
   stepFuses(g);
   stepMonsters(g, dt);
   stepEmbers(g);

@@ -17,6 +17,8 @@ import {
   BOMB_RADIUS,
   isWyrm,
   MONSTER_SCALE,
+  LOB_WINDUP_MS,
+  throws,
   breathCells,
   BREATH_MS,
   ELEMENTAL_KIND,
@@ -837,6 +839,20 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       const coil = winding ? (p.x < m.x ? 2 : -2) : 0;
       const shownBody = winding && Math.floor(g.now / 70) % 2 ? cached(`ew${ek}`, () => tint(sprite, "#ff8a6a")) : body;
       draw(shownBody, mp.x * T + (T - w) / 2 + ox + lunge + coil, (mp.y + 1) * T - h + oy + bob, p.x > m.x, hidden * fade);
+      if (throws(m) && m.throwAt > g.now && hidden * fade > 0.5) {
+        const k = 1 - (m.throwAt - g.now) / LOB_WINDUP_MS;
+        const side = p.x > m.x ? -1 : 1;
+        const hx = Math.round(mp.x * T + ox + 8 + side * (5 - k * 2) + lunge + coil);
+        const hy = Math.round((mp.y + 1) * T + oy + bob - 7 - k * 12);
+        ctx.fillStyle = "#e8e0d0";
+        ctx.fillRect(hx - side * 2, hy + 3, 2, Math.max(1, Math.round(4 + k * 6)));
+        ctx.fillStyle = "#1a1418";
+        ctx.fillRect(hx - 2, hy - 2, 5, 5);
+        ctx.fillStyle = "#4a4250";
+        ctx.fillRect(hx - 1, hy - 1, 2, 2);
+        ctx.fillStyle = Math.floor(g.now / 70) % 2 ? "#ffd23f" : "#ff6a2a";
+        ctx.fillRect(hx + 1, hy - 4, 1, 2);
+      }
       if (m.kind === ELEMENTAL_KIND && (winding || m.breathUntil > g.now)) {
         const cells = breathCells(g, m);
         const left = 1 - Math.max(0, m.breathUntil - g.now) / BREATH_MS;
@@ -951,6 +967,17 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       ctx.fillRect(bx - 1, by - 2, 3, 5);
       ctx.fillStyle = "#fff3a0";
       ctx.fillRect(bx - 1, by - 1, 3, 3);
+    }
+    for (const b of g.lobs) {
+      const bx = Math.round(b.x * T + ox);
+      const by = Math.round(b.y * T + oy);
+      const spin = Math.floor(g.now / 60) % 4;
+      ctx.fillStyle = "#1a1418";
+      ctx.fillRect(bx - 2, by - 2, 5, 5);
+      ctx.fillStyle = "#4a4250";
+      ctx.fillRect(bx - 1, by - 1, 2, 2);
+      ctx.fillStyle = spin % 2 ? "#ffd23f" : "#ff6a2a";
+      ctx.fillRect(bx + [0, 2, 0, -3][spin], by + [-4, 0, 3, 0][spin], 1, 1);
     }
     for (const s of g.spits) {
       const sx = Math.round(s.x * T + ox);

@@ -78,7 +78,7 @@ export const ENEMIES: Enemy[] = [
     name: "Skeleton Miner",
     depth: 4,
     threat: "Stubborn",
-    does: "Falls apart, then pulls itself back together. Finish it with a critical strike to keep it down.",
+    does: "Falls apart, then pulls itself back together. Finish it with a critical strike to keep it down. When it can see you from a few tiles off, it lobs a small bomb at your feet every so often: it hurts a little and chips the rock around it.",
     pal: { x: "#1c1410", b: "#e8e0cc", B: "#b8ac90", k: "#6a4a2c", y: "#ffd77a", r: "#ff5a3c" },
     rows: pad([
       "......xxxx......",
