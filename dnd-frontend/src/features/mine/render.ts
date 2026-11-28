@@ -4,7 +4,7 @@ import { FORGE_H, FORGE_LEVELS, FORGE_SPOTS, forgeSprite } from "./art/forge";
 import { HOUSE_H, HOUSE_LEVELS, houseSprite } from "./art/house";
 import { COIN, DIAMOND_GRID, MERCHANT } from "./art/materials";
 import { gnomeSprite, petSprite, zGlyph } from "./art/pets";
-import { chestSprite, cracks, enemySprite, oreTile, stoneTile, traderSprite } from "./art/world";
+import { chestSprite, cracks, enemySprite, oreTile, priestSprite, stoneTile, traderSprite } from "./art/world";
 import {
   BEDROCK,
   BOLT_MS,
@@ -540,6 +540,53 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       }
     ctx.globalAlpha = 1;
     label("Home", hx0 + spots.door, gy - HOUSE_H + spots.top - 6, near === "house");
+
+    const cx = CAMP.church * T + 8 + ox;
+    const bx = cx - 18;
+    ctx.fillStyle = "#4a4458";
+    ctx.fillRect(bx, gy - 30, 44, 30);
+    ctx.fillStyle = "#3a3448";
+    for (let r = 5; r < 30; r += 5) ctx.fillRect(bx, gy - 30 + r, 44, 1);
+    for (let r = 0; r < 6; r++)
+      for (let k = (r % 2) * 4; k < 44; k += 8) ctx.fillRect(bx + k, gy - 30 + r * 5, 1, 5);
+    for (let k = 0; k < 12; k++) {
+      ctx.fillStyle = k === 0 ? "#5a3a4a" : "#2e2030";
+      ctx.fillRect(bx - 3 + 2 * k, gy - 31 - k, 50 - 4 * k, 1);
+    }
+    ctx.fillStyle = "#544e64";
+    ctx.fillRect(bx - 6, gy - 60, 14, 60);
+    ctx.fillStyle = "#3a3448";
+    for (let r = 4; r < 60; r += 5) ctx.fillRect(bx - 6, gy - 60 + r, 14, 1);
+    ctx.fillStyle = "#16121e";
+    ctx.fillRect(bx - 3, gy - 55, 8, 9);
+    const ring = Math.round(Math.sin(g.now / 500) * (near === "church" ? 1 : 0.4));
+    ctx.fillStyle = "#c9a04a";
+    ctx.fillRect(bx - 1 + ring, gy - 53, 4, 4);
+    ctx.fillRect(bx - 2 + ring, gy - 50, 6, 1);
+    for (let k = 0; k < 9; k++) {
+      ctx.fillStyle = "#2e2030";
+      ctx.fillRect(bx - 7 + k, gy - 61 - k, 16 - 2 * k, 1);
+    }
+    ctx.fillStyle = "#e8c060";
+    ctx.fillRect(bx, gy - 75, 2, 7);
+    ctx.fillRect(bx - 2, gy - 73, 6, 2);
+    const rose = ["#c84a6a", "#4a8ac8", "#e8c060", "#6ac86a"];
+    for (let dy = -4; dy <= 4; dy++)
+      for (let dx = -4; dx <= 4; dx++) {
+        const d = dx * dx + dy * dy;
+        if (d > 18) continue;
+        ctx.fillStyle = d > 12 ? "#2a2234" : d < 2 ? "#fff3a0" : rose[(dx + 4 + (dy + 4) * 2) % 4];
+        ctx.fillRect(cx + 4 + dx, gy - 21 + dy, 1, 1);
+      }
+    ctx.fillStyle = "#16121e";
+    ctx.fillRect(cx + 1, gy - 11, 7, 11);
+    ctx.fillRect(cx + 2, gy - 12, 5, 1);
+    ctx.fillStyle = "#6b4423";
+    ctx.fillRect(cx + 2, gy - 10, 5, 10);
+    ctx.fillStyle = "#c9a04a";
+    ctx.fillRect(cx + 5, gy - 6, 1, 1);
+    draw(cached("priest", priestSprite), cx + 30, gy - 15 - (Math.floor(g.now / 1100) % 6 === 0 ? 1 : 0));
+    label("Saltbell Chapel", cx + 4, gy - 80, near === "church");
   };
 
   return (g: Game) => {
@@ -1101,6 +1148,7 @@ export function createRenderer(canvas: HTMLCanvasElement, overlay?: HTMLCanvasEl
       const hy0 = CAMP.ground * T + oy - HOUSE_H;
       for (const [x, y, r] of spots.lights) glow(ctx, hx0 + x, hy0 + y, r, [255, 200, 110], flick ? 0.2 : 0.16);
       glow(ctx, CAMP.market * T + ox + 8, CAMP.ground * T + oy - 20, 20, [255, 200, 110], 0.1);
+      glow(ctx, CAMP.church * T + ox + 12, CAMP.ground * T + oy - 21, 16, [255, 210, 150], flick ? 0.2 : 0.16);
     }
     else {
       glow(ctx, lx + 23, ly - 20, (LIFT_LIGHT - 1) * T, [255, 160, 70], flick ? 0.28 : 0.24);

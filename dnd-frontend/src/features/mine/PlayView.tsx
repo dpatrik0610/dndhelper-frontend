@@ -12,7 +12,9 @@ import {
   faint,
   getMiningState,
   mossSell,
+  recallHome,
   recordFeats,
+  reviveDelver,
   takePile,
   trade,
   type MiningConfig,
@@ -22,6 +24,7 @@ import {
 import { DIAMOND, MAGMA_CORE, MATERIALS } from "./art/materials";
 import { PET_ART } from "./art/pets";
 import {
+  ChurchMenu,
   ForgeMenu,
   LedgerPage,
   LiftMenu,
@@ -49,6 +52,8 @@ import {
   OVERLOADED,
   noteInput,
   placeTorch,
+  revive,
+  setBlessings,
   type Station,
   stationAt,
   sayOnce,
@@ -122,6 +127,7 @@ const MENU_TITLES: Record<Station, [string, string]> = {
   market: ["Hesk Saltpenny's Market", "Ore for coin, coin for torches and tonics. Hesk weighs everything twice."],
   shop: ["Pip Tinkerwhistle's Menagerie", "One friend follows you down at a time."],
   house: ["Home", "Your own four walls on Saltbell Isle. Coin makes them grander."],
+  church: ["Saltbell Chapel", "Sister Maren keeps a candle lit for every delver below. Coin buys blessings, scrolls and draughts."],
   trader: ["Moss, the wandering peddler", "He'll be gone by the next trip."],
 };
 
@@ -131,6 +137,7 @@ const TALK: Record<Station, string> = {
   market: "Talk to Hesk",
   shop: "Visit Pip",
   house: "Go inside",
+  church: "Talk to Sister Maren",
   trader: "Talk to Moss",
 };
 
@@ -183,6 +190,8 @@ export function PlayView({
   const [reading, setReading] = useState(0);
   const [sealNear, setSealNear] = useState(false);
   const [potions, setPotions] = useState(state.potions);
+  const [downed, setDowned] = useState(false);
+  const downedRef = useRef(false);
   const [mossWares, setMossWares] = useState<Record<string, number> | null>(null);
   const [dream, setDream] = useState("");
   const [report, setReport] = useState<TripReport | null>(null);
@@ -282,6 +291,11 @@ export function PlayView({
     if (trip) setReport(null);
     leaving.current = false;
   }, [trip]);
+
+  useEffect(() => {
+    const g = gameRef.current;
+    if (g) setBlessings(g, state.blessings);
+  }, [state.blessings]);
 
   useEffect(() => {
     const g = gameRef.current;
@@ -401,14 +415,14 @@ export function PlayView({
   }, [config, onState, resync]);
 
   const finish = useCallback(
-    async (fainted: boolean, next = 0) => {
+    async (fainted: boolean, next = 0, recall = false) => {
       if (leaving.current) return;
       leaving.current = true;
       setBusy(true);
       const g = gameRef.current;
       if (g && !fainted) {
         g.riding = true;
-        play("lift");
+        play(recall ? "potion" : "lift");
       }
       try {
         await inflight.current;
@@ -418,7 +432,7 @@ export function PlayView({
         }
         await flush();
         const before = stateRef.current;
-        const s = await (fainted ? faint() : ascend());
+        const s = await (fainted ? faint() : recall ? recallHome() : ascend());
         if (fainted) play("faint");
         const haul = Object.fromEntries(
           Object.entries(s.ores).map(([k, n]) => [k, n - (before.ores[k] ?? 0)] as const),
@@ -445,6 +459,26 @@ export function PlayView({
 
   const finishRef = useRef(finish);
   finishRef.current = finish;
+
+  const standUp = async (use: boolean) => {
+    if (!downedRef.current) return;
+    downedRef.current = false;
+    setDowned(false);
+    const g = gameRef.current;
+    if (!use || !g) return void finish(true);
+    try {
+      await inflight.current;
+      await flush();
+      const s = await reviveDelver();
+      revive(g);
+      onState({ ...s, trip: stateRef.current.trip });
+    } catch (e) {
+      showNotification({ title: "The scroll crumbles", message: (e as Error).message, color: "red" });
+      void finish(true);
+    }
+  };
+  const standRef = useRef(standUp);
+  standRef.current = standUp;
 
   const rideTo = async (n: number) => {
     const g = gameRef.current;
@@ -507,6 +541,7 @@ export function PlayView({
       !trip && firstLoad.current,
     );
     firstLoad.current = false;
+    setBlessings(g, s.blessings);
     if (!trip && s.nodesBroken === 0) sayOnce(g, "arrival", ARRIVAL, "#e8dcc0", 3000);
     setTorchCap(g.maxTorches);
     gameRef.current = g;
@@ -614,8 +649,11 @@ export function PlayView({
       }
       if (g.fainted && !fainted) {
         fainted = true;
-        void finishRef.current(true);
-      }
+        if (!g.camp && (stateRef.current.revives ?? 0) > 0) {
+          downedRef.current = true;
+          setDowned(true);
+        } else void finishRef.current(true);
+      } else if (!g.fainted && fainted) fainted = false;
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
@@ -633,6 +671,11 @@ export function PlayView({
         startMusic();
       }
       if (ignoreKeys(e)) return;
+      if (downedRef.current) {
+        if (down && !e.repeat && e.code === "KeyR") void standRef.current(true);
+        if (down && !e.repeat && (e.code === "KeyE" || e.code === "Escape")) void standRef.current(false);
+        return;
+      }
       const k = KEYMAP[e.code];
       if (k) {
         e.preventDefault();
@@ -648,6 +691,7 @@ export function PlayView({
       if (e.code === "KeyT" && !g.camp) placeTorch(g);
       if (e.code === "KeyF") castBolt(g, g.hover);
       if (e.code === "KeyQ") drinkPotion(g);
+      if (e.code === "KeyR" && !g.camp && !g.fainted && (stateRef.current.recalls ?? 0) > 0) void finishRef.current(false, 0, true);
       const floor = /^Digit\d$/.test(e.code) ? Number(e.code.slice(5)) || 10 : 0;
       if (floor && stationAt(g) === "lift") void rideRef.current(floor);
       const station = e.code === "KeyE" ? stationAt(g) : null;
@@ -1110,8 +1154,27 @@ export function PlayView({
                 {near === "market" && <MarketMenu {...props} />}
                 {near === "shop" && <PetMenu {...props} />}
                 {near === "house" && <HouseMenu {...props} />}
+                {near === "church" && <ChurchMenu {...props} />}
               </>
             )}
+          </section>
+        )}
+
+        {downed && trip && (
+          <section className={styles.found} aria-label="You're going down">
+            <span className={styles.eyebrow}>You're going down</span>
+            <span>
+              The dark closes in. A Scroll of Second Breath would put you back on your feet at full health, right here, satchel and all.
+              You carry {state.revives ?? 0}.
+            </span>
+            <div className={styles.btnRow}>
+              <button type="button" className={`glass-btn-primary ${styles.actBtn}`} onClick={() => void standUp(true)}>
+                Read the scroll (R)
+              </button>
+              <button type="button" className={`glass-btn-secondary ${styles.actBtn}`} onClick={() => void standUp(false)}>
+                Let go and faint (E)
+              </button>
+            </div>
           </section>
         )}
 
@@ -1133,6 +1196,7 @@ export function PlayView({
           boltRef={boltRef}
           onEquip={(slot, tier) => swap(() => equipGear(slot, tier))}
           onPet={(key) => swap(() => followPet(key))}
+          onRecall={() => void finish(false, 0, true)}
           top={
             <>
               <Effects gameRef={gameRef} />

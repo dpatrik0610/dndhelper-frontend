@@ -5,6 +5,7 @@ import { showNotification } from "@components/Notification/Notification";
 import {
   buyPet,
   buyWare,
+  churchBuy,
   craftGear,
   descend,
   followPet,
@@ -22,13 +23,14 @@ import type { Grid } from "./art/pixel";
 import { COIN, DIAMOND, MAGMA_CORE, MATERIALS, MERCHANT } from "./art/materials";
 import { GEAR_SLOTS, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
-import { chartSprite, ENEMIES, oilSprite, potionSprite, scrollSprite } from "./art/world";
+import { chartSprite, ENEMIES, oilSprite, potionSprite, priestSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
 import { type Goal, goalsFor, pickGoal, progress, setPinnedGoal, usePinnedGoal, withSatchel } from "./goals";
 import { canAfford, compact, discounted, forgedOf, statRows } from "./mine";
 import { oreIcon, TORCH } from "./render";
 import { play, type Sfx } from "./sound";
+import { EFFECT_ART } from "./Effects";
 import { Sprite } from "./Sprite";
-import { FOREMAN, MOSS_LINES, PAGES, WARES, wickLines, wickSprite } from "./story";
+import { BLESSINGS, FOREMAN, MOSS_LINES, PAGES, WARES, wickLines, wickSprite } from "./story";
 import styles from "./Mine.module.css";
 
 type MenuProps = { config: MiningConfig; state: MiningState; onState: (s: MiningState) => void };
@@ -814,6 +816,114 @@ export function HouseMenu({ config, state, onState }: MenuProps) {
           </button>
         </>
       )}
+    </>
+  );
+}
+
+const minutesLeft = (ms: number) => (ms >= 60_000 ? `${Math.floor(ms / 60_000)}m ${Math.floor((ms % 60_000) / 1000)}s` : `${Math.ceil(ms / 1000)}s`);
+
+export function ChurchMenu({ config, state, onState }: MenuProps) {
+  const { busy, run } = useRun(onState);
+  const prices = config.church ?? {};
+  const maxMin = config.maxBlessingMinutes ?? 30;
+  const scrolls = [
+    {
+      key: "potion",
+      name: WARES.potion.name,
+      blurb: WARES.potion.blurb,
+      grid: potionSprite(),
+      have: `ON YOUR BELT · ${state.potions} / ${state.belt}`,
+      room: state.belt - state.potions,
+    },
+    {
+      key: "revive",
+      name: WARES.revive.name,
+      blurb: WARES.revive.blurb,
+      grid: reviveScroll(),
+      have: `IN YOUR SCROLL CASE · ${state.revives ?? 0} / ${config.maxRevives ?? 3}`,
+      room: (config.maxRevives ?? 3) - (state.revives ?? 0),
+    },
+    {
+      key: "recall",
+      name: WARES.recall.name,
+      blurb: WARES.recall.blurb,
+      grid: recallScroll(),
+      have: `IN YOUR SCROLL CASE · ${state.recalls ?? 0} / ${config.maxRecalls ?? 5}`,
+      room: (config.maxRecalls ?? 5) - (state.recalls ?? 0),
+    },
+  ];
+  return (
+    <>
+      <div className={styles.marketHead}>
+        <Sprite grid={priestSprite()} scale={3} label="Sister Maren" />
+        <p className={styles.quote}>"The tide gives back what the deep takes. Usually. A blessing helps it remember."</p>
+        <Purse coins={state.coins} />
+      </div>
+      <span className={styles.eyebrow}>Blessings</span>
+      <span className={styles.dim}>
+        Each runs on the real clock from the moment it's given, in the mine or out. Buy more to add time, up to {maxMin} minutes.
+      </span>
+      <div className={styles.pets}>
+        {(Object.keys(BLESSINGS) as (keyof typeof BLESSINGS)[]).map((key) => {
+          const b = BLESSINGS[key];
+          const left = state.blessings?.[key] ?? 0;
+          return (
+            <div key={key} className={styles.pet}>
+              <Sprite grid={EFFECT_ART[key].grid} scale={5} label={b.name} />
+              <div className={styles.petBody}>
+                <b className={styles.pixel}>{b.name}</b>
+                <span className={styles.dim}>{b.blurb}</span>
+                <span className={styles.petMeta}>{left > 0 ? `ACTIVE · ${minutesLeft(left)} LEFT` : "NOT ACTIVE"}</span>
+                <div className={styles.btnRow}>
+                  {[1, 5, 10].map((m) => {
+                    const price = prices[`${key}-${m}`] ?? 0;
+                    const over = left + m * 60_000 > maxMin * 60_000;
+                    return (
+                      <button
+                        key={m}
+                        type="button"
+                        className={`${m === 1 ? "glass-btn-primary" : "glass-btn-secondary"} ${styles.actBtn}`}
+                        disabled={busy || over || state.coins < price}
+                        title={over ? `A blessing can't hold more than ${maxMin} minutes.` : undefined}
+                        onClick={() => void run(() => churchBuy(`${key}-${m}`), () => `${b.name}: +${m} min`)}
+                      >
+                        {m} min · {compact(price)}c
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <span className={styles.eyebrow}>Scrolls and draughts</span>
+      <div className={styles.pets}>
+        {scrolls.map((w) => {
+          const price = prices[w.key] ?? 0;
+          return (
+            <div key={w.key} className={styles.pet}>
+              <Sprite grid={w.grid} scale={6} label={w.name} />
+              <div className={styles.petBody}>
+                <b className={styles.pixel}>{w.name}</b>
+                <span className={styles.dim}>{w.blurb}</span>
+                <span className={styles.petMeta}>{w.have}</span>
+                <Coins n={price} have={state.coins} />
+                <div className={styles.btnRow}>
+                  <button
+                    type="button"
+                    className={`glass-btn-primary ${styles.actBtn}`}
+                    disabled={busy || w.room < 1 || state.coins < price}
+                    onClick={() => void run(() => churchBuy(w.key), () => `Bought ${w.name}`)}
+                  >
+                    {w.room < 1 ? "Full" : "Buy 1"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 }

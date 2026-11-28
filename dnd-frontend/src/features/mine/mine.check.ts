@@ -13,6 +13,10 @@ import {
   GRAB_MS,
   playerPos,
   effects,
+  revive,
+  setBlessings,
+  SHIELD_CUT,
+  GLOW_BOOST,
   isZombie,
   rarify,
   ROT_RANGE,
@@ -611,6 +615,44 @@ assert.equal(dull.dmg.size, 1, "a plain crit stays on its block");
   assert.deepEqual(effects(sick).map((e) => [e.key, e.left]), [["poison", 3000], ["dim", 1000]], "active effects list with time left");
   sick.now += 1500;
   assert.deepEqual(effects(sick).map((e) => e.key), ["poison"], "expired effects drop off");
+}
+{
+  const bare = newGame(-1);
+  const warded = newGame(-1);
+  for (const g of [bare, warded]) {
+    g.monsters = [];
+    g.nextSpawn = 1e12;
+    g.player.poisonUntil = g.now + 5000;
+    g.info = { ...g.info, monsterDamage: 100 };
+    g.stats = { ...g.stats, maxHp: 1000 };
+    g.player.hp = 1000;
+  }
+  setBlessings(warded, { shield: 60_000 });
+  run(bare, 900);
+  run(warded, 900);
+  const lost = (g: Game) => g.stats.maxHp - g.player.hp;
+  assert.ok(lost(warded) < lost(bare) && lost(warded) >= lost(bare) * (1 - SHIELD_CUT) - 1, "the ward blessing softens every hit");
+  assert.ok(effects(warded).some((e) => e.key === "shield"), "an active blessing shows as an effect");
+  const lit = newGame(-1);
+  const r = lightRadius(lit);
+  setBlessings(lit, { glow: 60_000 });
+  assert.equal(lightRadius(lit), r * GLOW_BOOST, "the glow blessing widens your light");
+  const mend = newGame(-1);
+  mend.monsters = [];
+  mend.nextSpawn = 1e12;
+  mend.player.hp = mend.stats.maxHp / 2;
+  mend.player.lastHurt = mend.now;
+  const unblessed = mend.player.hp;
+  setBlessings(mend, { regen: 60_000 });
+  run(mend, 1000);
+  assert.ok(mend.player.hp > unblessed, "the mending blessing heals you outside torchlight");
+  setBlessings(mend, {});
+  assert.ok(!effects(mend).some((e) => e.key === "regen"), "an expired blessing drops off");
+  const fallen = newGame(-1);
+  fallen.player.hp = 0;
+  fallen.fainted = true;
+  revive(fallen);
+  assert.ok(!fallen.fainted && fallen.player.hp === fallen.stats.maxHp, "a revive scroll stands you back up at full health");
 }
 console.log("mine.check ok");
 

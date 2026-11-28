@@ -102,6 +102,10 @@ export interface MiningConfig {
   fireboltPrice: number;
   overload: number;
   mossBuys: number;
+  church?: Record<string, number>;
+  maxRevives?: number;
+  maxRecalls?: number;
+  maxBlessingMinutes?: number;
 }
 
 export interface MiningTrip {
@@ -131,6 +135,9 @@ export interface MiningState {
   firebolt: boolean;
   fireball?: boolean;
   potions: number;
+  revives?: number;
+  recalls?: number;
+  blessings?: Record<string, number>;
   foxRevealed: boolean;
   deepestDepth: number;
   stats: MiningStats;
@@ -207,6 +214,9 @@ export const upgradeForge = () => post<MiningState>("/forge");
 export const buyPet = (key: string) => post<MiningState>(`/pets/${key}`);
 export const trade = (item: string) => post<MiningState>(`/trade/${item}`);
 export const buyWare = (item: string, count: number) => post<MiningState>(`/buy/${item}/${count}`);
+export const churchBuy = (item: string) => post<MiningState>(`/church/${item}`);
+export const reviveDelver = () => post<MiningState>("/revive");
+export const recallHome = () => post<MiningState>("/recall");
 export const sellOre = (key: string, amount: number) => post<MiningState>(`/sell/${key}/${amount}`);
 export const takePile = (take: OreCounts) => post<MiningState>("/pile/take", take);
 export const dropOre = (key: string, amount: number) => post<MiningState>(`/drop/${key}/${amount}`);

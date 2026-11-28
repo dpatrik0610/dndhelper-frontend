@@ -357,14 +357,43 @@ export const potionSprite = (): Grid =>
     R: "#ff8a8a",
   });
 
-export const scrollSprite = (big = false): Grid =>
+const paper = (p: string, P: string, o: string, O: string): Grid =>
   raster([".xxxxxx.", "xPppppPx", ".xpoopx.", ".xpOopx.", ".xpoopx.", ".xppppx.", "xPppppPx", ".xxxxxx."], {
     x: "#1c1410",
-    p: big ? "#f0c8a0" : "#f4e2b8",
-    P: big ? "#b8402a" : "#c9b07a",
-    o: big ? "#e0301a" : "#ff8a2a",
-    O: big ? "#ff8a2a" : "#ffe066",
+    p,
+    P,
+    o,
+    O,
   });
+
+export const scrollSprite = (big = false): Grid =>
+  big ? paper("#f0c8a0", "#b8402a", "#e0301a", "#ff8a2a") : paper("#f4e2b8", "#c9b07a", "#ff8a2a", "#ffe066");
+
+export const reviveScroll = (): Grid => paper("#fbf4dc", "#c9a04a", "#ffe066", "#ffffff");
+
+export const recallScroll = (): Grid => paper("#dfe8f4", "#5a7ab0", "#4aa8ff", "#c8f0ff");
+
+export const priestSprite = (): Grid =>
+  raster(
+    [
+      "....xxxx....",
+      "...xhhhhx...",
+      "..xhhhhhhx..",
+      "..xhssssHx..",
+      "..xhsxsxHx..",
+      "..xhssssHx..",
+      "..xhhSShhx..",
+      ".xrrrrrrrrx.",
+      ".xrrrggrrrx.",
+      "xrrrgggggrrx",
+      ".xrrrggrrrx.",
+      ".xrrrrrrrrx.",
+      ".xrrrrrrrrx.",
+      ".xrrrrrrrrx.",
+      "..xkkxxkkx..",
+    ],
+    { x: "#1c1410", h: "#e8e4f0", H: "#b8b4c8", s: "#e2aa7c", S: "#b97a52", r: "#3a4a7a", g: "#e8c060", k: "#2a2030" },
+  );
 
 export const chartSprite = (): Grid =>
   raster(["xxxxxxx.", "xpPppPpx", "xpppxppx", "xpPpppPx", "xppxpppx", "xPppprPx", "xppppppx", ".xxxxxxx"], {

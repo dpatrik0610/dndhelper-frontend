@@ -4,7 +4,7 @@ import type { MiningConfig, MiningState, SlotKey } from "@services/miningService
 import { GEAR_SLOTS, type GearSlot, item, itemName, SETS } from "./art/gear";
 import { PET_ART, petSprite } from "./art/pets";
 import { type Grid, tint } from "./art/pixel";
-import { potionSprite, scrollSprite } from "./art/world";
+import { potionSprite, recallScroll, reviveScroll, scrollSprite } from "./art/world";
 import { DASH_PERKS, forgedOf, SET_BONUSES, statLine, tiersOf } from "./mine";
 import { TORCH } from "./render";
 import { Sprite } from "./Sprite";
@@ -72,6 +72,7 @@ export function Hotbar({
   top,
   onEquip,
   onPet,
+  onRecall,
 }: {
   config: MiningConfig;
   state: MiningState;
@@ -82,6 +83,7 @@ export function Hotbar({
   top?: ReactNode;
   onEquip: (slot: SlotKey, tier: number) => Promise<void>;
   onPet: (key: string | null) => Promise<void>;
+  onRecall?: () => void;
 }) {
   const tiers = tiersOf(state);
   const forged = forgedOf(state);
@@ -250,6 +252,35 @@ export function Hotbar({
                   <b>Healing draught</b> · none on your belt. Moss sells them down in the mine.
                 </>
               )
+            }
+          />
+        </div>
+
+        <div className={styles.hotGroup}>
+          <Square
+            grid={recallScroll()}
+            hotkey="R"
+            empty={!state.recalls}
+            count={state.recalls ? `×${state.recalls}` : undefined}
+            label={`Scrolls of the Tide, ${state.recalls ?? 0}`}
+            onClick={inMine && state.recalls ? onRecall : undefined}
+            tip={
+              <>
+                <b>Scroll of the Tide</b> × {state.recalls ?? 0} ·{" "}
+                {inMine ? "R reads one and carries you home to camp at once, with everything you carry." : "Read one in the mine to get home instantly. Sister Maren sells them at the chapel."}
+              </>
+            }
+          />
+          <Square
+            grid={reviveScroll()}
+            empty={!state.revives}
+            count={state.revives ? `×${state.revives}` : undefined}
+            label={`Scrolls of Second Breath, ${state.revives ?? 0}`}
+            tip={
+              <>
+                <b>Scroll of Second Breath</b> × {state.revives ?? 0} · If you fall in the mine, you'll be offered one before you faint: back up at full health, satchel and all.
+                {!state.revives && " Sister Maren sells them at the chapel."}
+              </>
             }
           />
         </div>

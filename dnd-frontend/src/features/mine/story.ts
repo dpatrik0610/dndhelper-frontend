@@ -149,7 +149,30 @@ export const MOSS_LINES = [
   '"I don\'t go down. I just never seem to come up."',
 ];
 
+export const BLESSINGS: Record<"shield" | "regen" | "glow", { name: string; blurb: string }> = {
+  shield: {
+    name: "Blessing of the Ward",
+    blurb: "A pale shield hums around you and every hit lands 30% softer.",
+  },
+  regen: {
+    name: "Blessing of Mending",
+    blurb: "Wounds close on their own, 2% of your health every second, torch or no torch. Poison still stops it.",
+  },
+  glow: {
+    name: "Blessing of the Glow",
+    blurb: "Your lantern burns half again as wide.",
+  },
+};
+
 export const WARES: Record<string, { name: string; blurb: string }> = {
+  revive: {
+    name: "Scroll of Second Breath",
+    blurb: "When you fall in the mine, read it instead of fainting: you're back on your feet at full health, right where you dropped, satchel and all.",
+  },
+  recall: {
+    name: "Scroll of the Tide",
+    blurb: "R reads it anywhere in the mine and the tide carries you home to camp at once, with everything you carry.",
+  },
   firebolt: {
     name: "Scroll of Firebolt",
     blurb:

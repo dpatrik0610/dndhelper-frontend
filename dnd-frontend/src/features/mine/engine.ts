@@ -68,8 +68,12 @@ export type Keys = {
 };
 export type Aim = { x: number; y: number } | null;
 
-export const CAMP = { W: 64, H: 10, ground: 8, lift: 5, forge: 19, market: 31, shop: 42, house: 54 };
-export type Station = "lift" | "forge" | "market" | "shop" | "house" | "trader";
+export const CAMP = { W: 78, H: 10, ground: 8, lift: 5, forge: 19, market: 31, shop: 42, house: 54, church: 67 };
+export type Station = "lift" | "forge" | "market" | "shop" | "house" | "church" | "trader";
+export type Blessing = "shield" | "regen" | "glow";
+export const SHIELD_CUT = 0.3;
+export const BLESSED_REGEN = 0.02;
+export const GLOW_BOOST = 1.5;
 
 type Tween = { x: number; y: number; fromX: number; fromY: number; t: number; dur: number };
 
@@ -211,6 +215,7 @@ export interface GameSetup {
   houseLevel: number;
   firebolt: boolean;
   fireball?: boolean;
+  blessings?: Partial<Record<Blessing, number>>;
   potions: number;
   maxTorches: number;
   overload: number;
@@ -368,17 +373,24 @@ export function playerPos(g: Game) {
   return pos;
 }
 
-export type EffectKey = "poison" | "burn" | "slow" | "root" | "dim";
+export type EffectKey = "poison" | "burn" | "slow" | "root" | "dim" | Blessing;
 
 export function effects(g: Game): { key: EffectKey; left: number }[] {
-  if (g.camp) return [];
   const p = g.player;
+  const b = g.blessings ?? {};
   const all: [EffectKey, number][] = [
-    ["poison", p.poisonUntil],
-    ["burn", p.burnUntil],
-    ["slow", p.slowUntil],
-    ["root", p.rootUntil],
-    ["dim", g.dimUntil],
+    ["shield", b.shield ?? 0],
+    ["regen", b.regen ?? 0],
+    ["glow", b.glow ?? 0],
+    ...(g.camp
+      ? []
+      : ([
+          ["poison", p.poisonUntil],
+          ["burn", p.burnUntil],
+          ["slow", p.slowUntil],
+          ["root", p.rootUntil],
+          ["dim", g.dimUntil],
+        ] as [EffectKey, number][])),
   ];
   return all.filter(([, until]) => g.now < until).map(([key, until]) => ({ key, left: until - g.now }));
 }
@@ -572,6 +584,7 @@ export const stationAt = (g: Game): Station | null => {
   if (Math.abs(x - CAMP.market) <= 2) return "market";
   if (Math.abs(x - CAMP.shop) <= 2) return "shop";
   if (Math.abs(x - CAMP.house) <= 3) return "house";
+  if (Math.abs(x - CAMP.church) <= 2) return "church";
   return null;
 };
 
@@ -656,7 +669,14 @@ export const lightRadius = (g: Game) =>
     : g.stats.light *
       Math.max(0.6, 1 - 0.045 * (g.depth - 1)) *
       (g.boons.has("oil") ? 1.5 : 1) *
-      (g.now < g.dimUntil ? 0.5 : 1);
+      (g.now < g.dimUntil ? 0.5 : 1) *
+      (blessed(g, "glow") ? GLOW_BOOST : 1);
+
+export const blessed = (g: Game, b: Blessing) => g.now < (g.blessings?.[b] ?? 0);
+
+export const setBlessings = (g: Game, left: Partial<Record<Blessing, number>> | undefined) => {
+  g.blessings = Object.fromEntries(Object.entries(left ?? {}).map(([k, ms]) => [k, g.now + (ms ?? 0)]));
+};
 
 export const CHARTED = [CHEST, IRON_CHEST, GILDED_CHEST, MIMIC, GEODE, DIAMOND_CELL, LEDGER];
 
@@ -981,6 +1001,21 @@ export function castBolt(g: Game, aim: Aim) {
   feat(g, "bolt");
   g.bolts.push({ x: ox, y: oy, vx: ((tx - ox) / len) * v, vy: ((ty - oy) / len) * v, life: 1400, big: !!g.fireball });
   return true;
+}
+
+export function revive(g: Game) {
+  const p = g.player;
+  g.fainted = false;
+  p.hp = g.stats.maxHp;
+  p.invulnUntil = g.now + 2500;
+  p.poisonUntil = p.burnUntil = p.slowUntil = p.rootUntil = 0;
+  g.grab = null;
+  feat(g, "revive");
+  shake(g, 3, 220);
+  burst(g, (p.x + 0.5) * T, (p.y - 0.5) * T, "#ffe066", 24, 2.4);
+  burst(g, (p.x + 0.5) * T, (p.y - 0.5) * T, "#ffffff", 12, 1.6);
+  say(g, (p.x + 0.5) * T, (p.y - 2.5) * T, "Revived!", "#ffe066", 1400);
+  g.sfx.push("potion");
 }
 
 export function drinkPotion(g: Game) {
@@ -1309,7 +1344,10 @@ function hurt(g: Game, amount: number, color = "#ff5a4a") {
     if (p.hp < g.stats.maxHp * LOW_HP) feat(g, "notToday");
     return;
   }
-  const dmg = Math.max(1, Math.round(amount * (g.pet?.key === "owlbear" ? 0.7 : 1) * (1 - g.stats.armor)));
+  const dmg = Math.max(
+    1,
+    Math.round(amount * (g.pet?.key === "owlbear" ? 0.7 : 1) * (1 - g.stats.armor) * (blessed(g, "shield") ? 1 - SHIELD_CUT : 1)),
+  );
   p.hp -= dmg;
   p.lastHurt = g.now;
   p.hurtUntil = g.now + 160;
@@ -1866,7 +1904,7 @@ function stepPlayer(g: Game, dt: number, keys: Keys, aim: Aim) {
   const resting = g.now - p.lastHurt > REST_MS && inTorchlight(g, p.x, p.y - 1);
   const rest = resting ? (byLiftTorch(g, p.x, p.y - 1) ? 0.06 : 0.03) : 0;
   const poisoned = g.now < p.poisonUntil;
-  const regen = poisoned ? 0 : (g.pet?.key === "wisp" ? 0.03 : 0) + rest;
+  const regen = poisoned ? 0 : (g.pet?.key === "wisp" ? 0.03 : 0) + rest + (blessed(g, "regen") ? BLESSED_REGEN : 0);
   p.hp = Math.min(max, p.hp + max * regen * (dt / 1000));
   if (g.now < p.burnUntil && g.now >= p.nextBurn) {
     p.nextBurn = g.now + 1000;

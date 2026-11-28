@@ -3,9 +3,40 @@ import { Tooltip } from "@mantine/core";
 import { type Grid, raster } from "./art/pixel";
 import { type EffectKey, effects, type Game } from "./engine";
 import { Sprite } from "./Sprite";
+import { BLESSINGS } from "./story";
 import styles from "./Mine.module.css";
 
-const ART: Record<EffectKey, { name: string; does: string; color: string; grid: Grid }> = {
+export const EFFECT_ART: Record<EffectKey, { name: string; does: string; color: string; grid: Grid }> = {
+  shield: {
+    name: BLESSINGS.shield.name,
+    does: BLESSINGS.shield.blurb,
+    color: "#8ab0ff",
+    grid: raster(["..xxxx..", ".xbbbbx.", "xbBbbbbx", "xbBbbbbx", "xbbbbbbx", ".xbbbbx.", "..xbbx..", "...xx..."], {
+      x: "#2a3050",
+      b: "#6a8ad8",
+      B: "#c8e0ff",
+    }),
+  },
+  regen: {
+    name: BLESSINGS.regen.name,
+    does: BLESSINGS.regen.blurb,
+    color: "#ff8aa8",
+    grid: raster([".xx..xx.", "xrRxxrrx", "xRrrrrrx", "xrrrrrrx", ".xrrrrx.", "..xrrx..", "...xx...", "........"], {
+      x: "#3a1018",
+      r: "#e04a6a",
+      R: "#ffb0c0",
+    }),
+  },
+  glow: {
+    name: BLESSINGS.glow.name,
+    does: BLESSINGS.glow.blurb,
+    color: "#ffe066",
+    grid: raster(["...y....", ".y.y.y..", "..YYY...", "yYWWWYy.", "..YYY...", ".y.y.y..", "...y....", "........"], {
+      y: "#c9a04a",
+      Y: "#ffe066",
+      W: "#ffffff",
+    }),
+  },
   poison: {
     name: "Poisoned",
     does: "Venom in your blood. You lose health and nothing heals you until it wears off.",
@@ -60,6 +91,8 @@ const ART: Record<EffectKey, { name: string; does: string; color: string; grid: 
 
 type Shown = { key: EffectKey; left: number; total: number };
 
+const clock = (ms: number) => (ms >= 60_000 ? `${Math.ceil(ms / 60_000)}m` : `${Math.ceil(ms / 1000)}`);
+
 export function Effects({ gameRef }: { gameRef: RefObject<Game | null> }) {
   const [shown, setShown] = useState<Shown[]>([]);
   const totals = useRef(new Map<EffectKey, number>());
@@ -85,7 +118,7 @@ export function Effects({ gameRef }: { gameRef: RefObject<Game | null> }) {
   return (
     <div className={styles.effects}>
       {shown.map(({ key, left, total }) => {
-        const a = ART[key];
+        const a = EFFECT_ART[key];
         return (
           <Tooltip
             key={key}
@@ -102,11 +135,11 @@ export function Effects({ gameRef }: { gameRef: RefObject<Game | null> }) {
             <div
               className={styles.effect}
               style={{ "--fx": a.color } as CSSProperties}
-              aria-label={`${a.name}, ${Math.ceil(left / 1000)} seconds left`}
+              aria-label={`${a.name}, ${clock(left)}${left >= 60_000 ? "" : "s"} left`}
             >
               <div className={styles.effectLeft} style={{ height: `${(1 - left / total) * 100}%` }} />
               <Sprite grid={a.grid} scale={2} />
-              <span className={styles.effectTime}>{Math.ceil(left / 1000)}</span>
+              <span className={styles.effectTime}>{clock(left)}</span>
             </div>
           </Tooltip>
         );
